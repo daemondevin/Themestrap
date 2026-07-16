@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PluginRating — Themestrap Demo</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+
+<style>
+.rating-wrap { display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem 0; }
+.demo-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem 1.5rem; }
+.demo-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: .06em; text-transform: uppercase; margin: 0 0 .75rem; }
+.stars { display: inline-flex; gap: 6px; align-items: center; }
+.stars .icon { font-style: normal; cursor: pointer; font-size: 24px; line-height: 1; color: var(--color-border-secondary); transition: color .12s, transform .1s; user-select: none; }
+.stars .icon::before { content: '★'; }
+.stars .icon.active { color: #E9A820; }
+.stars .icon.selected { color: #F0C050; transform: scale(1.15); }
+.stars .icon.partial { position: relative; overflow: hidden; }
+.stars.disabled .icon { cursor: default; }
+.stars.disabled .icon.selected { transform: none; }
+.feedback { font-size: 14px; color: var(--color-text-secondary); margin: .75rem 0 0; min-height: 1.4em; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: .75rem; }
+.btn-row button { font-size: 13px; }
+.api-output { font-size: 13px; font-family: var(--font-mono); color: var(--color-text-info); margin-top: .75rem; min-height: 1.4em; }
+.section-title { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 .35rem; }
+.row-inline { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="rating-wrap">
+
+  <div class="demo-card">
+    <p class="section-title">Interactive rating</p>
+    <p class="demo-label">Click or hover to rate</p>
+    <div id="r-basic" class="stars"></div>
+    <p class="feedback" id="r-basic-fb">No rating yet — click a star.</p>
+  </div>
+
+  <div class="demo-card">
+    <p class="section-title">Read-only display</p>
+    <p class="demo-label">Non-interactive, pre-set to 3.5</p>
+    <div id="r-readonly" class="stars"></div>
+  </div>
+
+  <div class="demo-card">
+    <p class="section-title">Ten-star scale</p>
+    <p class="demo-label">maxRating: 10, initialRating: 7</p>
+    <div id="r-ten" class="stars"></div>
+    <p class="feedback" id="r-ten-fb">Rated 7 / 10</p>
+  </div>
+
+  <div class="demo-card">
+    <p class="section-title">API controls</p>
+    <p class="demo-label">Calling public methods on the instance</p>
+    <div id="r-api" class="stars"></div>
+    <div class="btn-row">
+      <button id="btn-set2">setRating(2)</button>
+      <button id="btn-set4">setRating(4)</button>
+      <button id="btn-clear">clearRating()</button>
+      <button id="btn-get">getRating()</button>
+      <button id="btn-disable">disable()</button>
+      <button id="btn-enable">enable()</button>
+    </div>
+    <p class="api-output" id="api-out"></p>
+  </div>
+
+</div>
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.rating.js"></script>
+<script>
+$(function() {
+  $('#r-basic').themestrapPluginRating({
+    maxRating: 5,
+    onRate: function(r) {
+      $('#r-basic-fb').text(r === 0 ? 'Cleared — pick a star.' : `You rated ${r} out of 5.`);
+    }
+  });
+
+  $('#r-readonly').themestrapPluginRating({
+    maxRating: 5,
+    initialRating: 3.5,
+    interactive: false
+  });
+
+  $('#r-ten').themestrapPluginRating({
+    maxRating: 10,
+    initialRating: 7,
+    onRate: function(r) {
+      $('#r-ten-fb').text(r === 0 ? 'Cleared.' : `Rated ${r} / 10`);
+    }
+  });
+
+  $('#r-api').themestrapPluginRating({ maxRating: 5, initialRating: 3 });
+
+  const log = (msg) => $('#api-out').text('→ ' + msg);
+
+  $('#btn-set2').on('click', () => { $('#r-api').themestrapPluginRating('setRating', 2); log('setRating(2) called'); });
+  $('#btn-set4').on('click', () => { $('#r-api').themestrapPluginRating('setRating', 4); log('setRating(4) called'); });
+  $('#btn-clear').on('click', () => { $('#r-api').themestrapPluginRating('clearRating'); log('clearRating() called'); });
+  $('#btn-get').on('click', () => { const v = $('#r-api').themestrapPluginRating('getRating'); log(`getRating() returned ${v}`); });
+  $('#btn-disable').on('click', () => { $('#r-api').themestrapPluginRating('disable'); log('disable() called — events unbound'); });
+  $('#btn-enable').on('click', () => { $('#r-api').themestrapPluginRating('enable'); log('enable() called — events restored'); });
+});
+</script>
+
+</body>
+</html>

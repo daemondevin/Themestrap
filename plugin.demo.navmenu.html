@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginNavMenu — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+<style>
+/* Themestrap design tokens */
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+}
+code {
+    background: rgba(10,25,41,.06);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+a { color: var(--ts-teal); }
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 680px; margin: 0; line-height: 1.6; }
+.badge-orange {
+    background: var(--ts-orange); color: #fff; font-weight: 600;
+    letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase;
+    font-size: 11px; border-radius: 4px;
+}
+.demo-hero code { background: rgba(255,255,255,.12); color: #ffd9c7; padding: 2px 7px; border-radius: 4px; }
+
+/* Cards */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+    overflow: visible;
+}
+.demo-card .card-body { padding: 24px 28px 28px; }
+.demo-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ts-teal); margin: 0 0 6px;
+}
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 4px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 20px; line-height: 1.5; }
+
+/* Demo stage */
+.demo-stage {
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    padding: 28px 24px 40px;   /* extra bottom padding for panels to drop into */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+    min-height: 90px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: visible;
+}
+.demo-stage.center { justify-content: center; align-items: center; }
+.demo-stage.dark {
+    background: var(--ts-navy);
+    border-color: rgba(255,255,255,.08);
+}
+
+/* Snippet */
+pre.snip {
+    background: #0e2238; color: #e1eaf3;
+    padding: 14px 18px; border-radius: 8px;
+    margin: 0; font-size: 12.5px; line-height: 1.65;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    overflow-x: auto;
+}
+pre.snip .c1  { color: #6c8bab; font-style: italic; }
+pre.snip .tag { color: #ff9d6c; }
+pre.snip .att { color: #f9c98c; }
+pre.snip .val { color: #a8e1ff; }
+pre.snip .kw  { color: #c084fc; }
+
+/* Controls row */
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.controls-row label { font-size: 12px; font-weight: 600; color: #54657a; margin: 0; text-transform: uppercase; letter-spacing: .04em; }
+
+/* Tip */
+.tip {
+    background: #e8f7f9;
+    border-left: 4px solid var(--ts-teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px; font-size: 13px; color: #1f4348; margin-bottom: 24px;
+}
+
+/* Event log */
+.event-log {
+    height: 130px; overflow-y: auto;
+    background: #0e2238; color: #a8c8e8;
+    font-family: monospace; font-size: 12px; line-height: 1.7;
+    border-radius: 8px; padding: 10px 14px;
+}
+.event-log .ev-open  { color: #6ee7b7; }
+.event-log .ev-close { color: #fca5a5; }
+.event-log .ev-empty { color: #4c6a85; font-style: italic; }
+
+/* Status badge */
+.status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 600;
+}
+.status-badge.open   { background: #d1fae5; color: #065f46; }
+.status-badge.closed { background: #f3f4f6; color: #6b7280; }
+
+/* Two-col grid */
+.demo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 767px) { .demo-grid-2 { grid-template-columns: 1fr; } }
+
+/* Nav demo chrome — shared across demo instances */
+.nav-wrap {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 52px;
+    box-shadow: 0 1px 4px rgba(10,25,41,.06);
+    position: relative;
+}
+.nav-logo {
+    font-weight: 700; font-size: 15px; color: var(--ts-navy);
+    display: flex; align-items: center; gap: 6px;
+    text-decoration: none;
+}
+.nav-logo span { color: var(--ts-orange); }
+
+/* Panel content helpers */
+.panel-featured {
+    display: block; padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(232,103,42,.08), rgba(42,184,200,.08));
+    border: 1px solid rgba(232,103,42,.15);
+    border-radius: 6px; margin-bottom: 6px;
+    text-decoration: none; color: inherit;
+    transition: background .12s;
+}
+.panel-featured:hover { background: linear-gradient(135deg, rgba(232,103,42,.14), rgba(42,184,200,.14)); }
+.panel-featured-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ts-orange); margin-bottom: 3px; }
+.panel-featured-title { font-size: 14px; font-weight: 600; color: var(--ts-navy); margin-bottom: 2px; }
+.panel-featured-desc  { font-size: 12px; color: var(--ts-muted); line-height: 1.4; margin: 0; }
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.panel-footer {
+    border-top: 1px solid var(--ts-border);
+    margin-top: 8px; padding-top: 8px;
+    display: flex; gap: 8px;
+}
+.panel-footer a { font-size: 12.5px; color: var(--ts-orange); text-decoration: none; padding: 3px 6px; border-radius: 4px; }
+.panel-footer a:hover { background: rgba(232,103,42,.08); }
+.simple-link {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 10px; border-radius: 5px; font-size: 13px;
+    color: var(--ts-text); text-decoration: none;
+    transition: background .12s;
+}
+.simple-link:hover { background: var(--ts-bg); }
+.simple-link-icon { font-size: 12px; color: var(--ts-muted); width: 16px; text-align: center; }
+.panel-sep { height: 1px; background: var(--ts-border); margin: 4px 0; }
+
+/* Dark nav variant */
+.nav-wrap.dark-nav {
+    background: var(--ts-navy);
+    border-color: rgba(255,255,255,.08);
+    --ts-nav-content-bg: #0e2238;
+    --ts-nav-content-border: rgba(255,255,255,.1);
+    --ts-nav-muted: rgba(255,255,255,.5);
+}
+.nav-wrap.dark-nav .nav-logo { color: #fff; }
+
+/* Vertical sidebar frame */
+.sidebar-frame {
+    width: 200px;
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(10,25,41,.05);
+    flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <h1 class="mt-3">PluginNavmenu — Live Demo</h1>
+    <p class="lead mt-2">
+      shadcn/ui-style navigation menus — hover or click, animated mega panels, keyboard
+      arrow navigation, edge-flip, viewport portal mode, mutual exclusion, and full ARIA.
+      Zero build step.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-xl-10">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        Every nav below is a live <code>PluginNavmenu</code> instance — hover or click triggers to open panels.
+        All keyboard interactions are active: <kbd>←</kbd><kbd>→</kbd> to move between triggers,
+        <kbd>↓</kbd> to dive into a panel, <kbd>Esc</kbd> to close.
+      </div>
+
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">openOn: hover · orientation: horizontal · mega panel</p>
+          <h3>Standard site header nav</h3>
+          <p class="lead-sm">
+            Drop-in for a typical top navigation. Hover (200 ms debounce) opens the panel;
+            moving into the panel before the close timer fires keeps it open.
+            The Products panel uses a featured card + 2-column list grid.
+          </p>
+
+          <div class="demo-stage" style="padding-bottom:200px">
+            <div class="nav-wrap w-100">
+              <a href="#" class="nav-logo">Theme<span>strap</span></a>
+
+              <nav data-plugin-navmenu id="nav-header"
+                   data-plugin-options='{"openOn":"hover","delay":200,"closeDelay":120}'>
+
+                <div data-navmenu-item>
+                  <a href="#" data-navmenu-link>Home</a>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">Products</button>
+                  <div data-navmenu-content style="min-width:460px">
+                    <a href="#" class="panel-featured">
+                      <div class="panel-featured-label">New ✦</div>
+                      <div class="panel-featured-title">Themestrap Studio</div>
+                      <p class="panel-featured-desc">Visual drag-and-drop editor for MODX page templates.</p>
+                    </a>
+                    <div class="panel-grid">
+                      <a href="#" data-navmenu-list-item>
+                        <span data-navmenu-list-item-icon>🧩</span>
+                        <div>
+                          <div data-navmenu-list-item-title>Components</div>
+                          <p data-navmenu-list-item-desc>Reusable UI blocks</p>
+                        </div>
+                      </a>
+                      <a href="#" data-navmenu-list-item>
+                        <span data-navmenu-list-item-icon>🎨</span>
+                        <div>
+                          <div data-navmenu-list-item-title>Themes</div>
+                          <p data-navmenu-list-item-desc>Design system presets</p>
+                        </div>
+                      </a>
+                      <a href="#" data-navmenu-list-item>
+                        <span data-navmenu-list-item-icon>⚡</span>
+                        <div>
+                          <div data-navmenu-list-item-title>Plugins</div>
+                          <p data-navmenu-list-item-desc>jQuery enhancements</p>
+                        </div>
+                      </a>
+                      <a href="#" data-navmenu-list-item>
+                        <span data-navmenu-list-item-icon>📦</span>
+                        <div>
+                          <div data-navmenu-list-item-title>Packages</div>
+                          <p data-navmenu-list-item-desc>MODX extras</p>
+                        </div>
+                      </a>
+                    </div>
+                    <div class="panel-footer">
+                      <a href="#">View all products →</a>
+                      <a href="#">Changelog</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">Docs</button>
+                  <div data-navmenu-content style="min-width:200px">
+                    <a href="#" class="simple-link"><span class="simple-link-icon">📖</span> Getting started</a>
+                    <a href="#" class="simple-link"><span class="simple-link-icon">🔌</span> Plugin API</a>
+                    <a href="#" class="simple-link"><span class="simple-link-icon">🧱</span> Chunk library</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link"><span class="simple-link-icon">🛠</span> Snippets</a>
+                    <a href="#" class="simple-link"><span class="simple-link-icon">📐</span> Properties reference</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">Resources</button>
+                  <div data-navmenu-content>
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>🗺</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Tutorials</div>
+                        <p data-navmenu-list-item-desc>Step-by-step guides</p>
+                      </div>
+                    </a>
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>🎬</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Videos</div>
+                        <p data-navmenu-list-item-desc>Screencasts &amp; walkthroughs</p>
+                      </div>
+                    </a>
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>💬</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Community</div>
+                        <p data-navmenu-list-item-desc>Forum &amp; Discord</p>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <a href="#" data-navmenu-link>Pricing</a>
+                </div>
+
+              </nav>
+
+              <a href="#" class="btn btn-sm" style="background:var(--ts-orange);color:#fff;border:none;font-size:13px;padding:6px 14px;border-radius:6px">
+                Sign up
+              </a>
+            </div>
+          </div>
+
+<pre class="snip">&lt;<span class="tag">nav</span> <span class="att">data-plugin-navmenu</span>
+     <span class="att">data-plugin-options</span>=<span class="val">'{"openOn":"hover","delay":200}'</span>&gt;
+
+  &lt;<span class="tag">div</span> <span class="att">data-navmenu-item</span>&gt;
+    &lt;<span class="tag">a</span> <span class="att">href</span>=<span class="val">"/"</span> <span class="att">data-navmenu-link</span>&gt;Home&lt;/<span class="tag">a</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+
+  &lt;<span class="tag">div</span> <span class="att">data-navmenu-item</span>&gt;
+    &lt;<span class="tag">button</span> <span class="att">data-navmenu-trigger</span> <span class="att">type</span>=<span class="val">"button"</span>&gt;Products&lt;/<span class="tag">button</span>&gt;
+    &lt;<span class="tag">div</span> <span class="att">data-navmenu-content</span> <span class="att">style</span>=<span class="val">"min-width:460px"</span>&gt;
+      <span class="c1">&lt;!-- featured card + list grid + footer --&gt;</span>
+    &lt;/<span class="tag">div</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+
+&lt;/<span class="tag">nav</span>&gt;</pre>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">openOn: click · dark header · CSS custom properties</p>
+          <h3>Click-to-open, dark header</h3>
+          <p class="lead-sm">
+            Setting <code>openOn: "click"</code> makes every panel toggle on click — better for
+            touch devices or keyboard-first users. Panels pick up dark colours via
+            <code>--ts-nav-content-bg</code> and <code>--ts-nav-content-border</code> set on the
+            parent element.
+          </p>
+
+          <div class="demo-stage dark" style="padding-bottom:200px">
+            <div class="nav-wrap dark-nav w-100">
+              <a href="#" class="nav-logo" style="color:#fff">Theme<span>strap</span></a>
+
+              <nav data-plugin-navmenu id="nav-click"
+                   data-plugin-options='{"openOn":"click"}'>
+
+                <div data-navmenu-item>
+                  <a href="#" data-navmenu-link style="color:rgba(255,255,255,.8)">Overview</a>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button" style="color:rgba(255,255,255,.8)">Platform</button>
+                  <div data-navmenu-content style="min-width:280px">
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>🖥</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Studio</div>
+                        <p data-navmenu-list-item-desc>Visual page builder</p>
+                      </div>
+                    </a>
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>🔒</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Auth Kit</div>
+                        <p data-navmenu-list-item-desc>Login, register, profile</p>
+                      </div>
+                    </a>
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>📊</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Analytics</div>
+                        <p data-navmenu-list-item-desc>Traffic &amp; event tracking</p>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button" style="color:rgba(255,255,255,.8)">Developers</button>
+                  <div data-navmenu-content style="min-width:220px">
+                    <a href="#" class="simple-link"><span class="simple-link-icon">📄</span> API reference</a>
+                    <a href="#" class="simple-link"><span class="simple-link-icon">⚙️</span> CLI tools</a>
+                    <a href="#" class="simple-link"><span class="simple-link-icon">🐙</span> GitHub</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link"><span class="simple-link-icon">💡</span> Changelog</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <a href="#" data-navmenu-link style="color:rgba(255,255,255,.8)">Pricing</a>
+                </div>
+
+              </nav>
+
+              <div class="d-flex gap-2">
+                <a href="#" style="font-size:13px;color:rgba(255,255,255,.7);text-decoration:none;padding:6px 10px">Log in</a>
+                <a href="#" class="btn btn-sm" style="background:var(--ts-orange);color:#fff;border:none;font-size:13px;padding:6px 14px;border-radius:6px">
+                  Get started
+                </a>
+              </div>
+            </div>
+          </div>
+
+<pre class="snip"><span class="c1">&lt;!-- Dark colours via CSS custom properties on a parent --&gt;</span>
+&lt;<span class="tag">div</span> <span class="att">style</span>=<span class="val">"--ts-nav-content-bg:#0e2238;--ts-nav-content-border:rgba(255,255,255,.1)"</span>&gt;
+  &lt;<span class="tag">nav</span> <span class="att">data-plugin-navmenu</span>
+       <span class="att">data-plugin-options</span>=<span class="val">'{"openOn":"click"}'</span>&gt;
+    …
+  &lt;/<span class="tag">nav</span>&gt;
+&lt;/<span class="tag">div</span>&gt;</pre>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">orientation: vertical · openOn: click · sidebar pattern</p>
+          <h3>Vertical sidebar nav</h3>
+          <p class="lead-sm">
+            Setting <code>orientation: "vertical"</code> switches to a flex-column layout.
+            Panels slide out to the right of the trigger. Arrow keys
+            <kbd>↑</kbd><kbd>↓</kbd> move between triggers; <kbd>→</kbd> dives into an open panel.
+          </p>
+
+          <div class="demo-stage center" style="min-height:240px; padding-bottom:20px; align-items:flex-start; justify-content:center">
+            <div class="sidebar-frame">
+              <div style="padding:8px 10px 10px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ts-muted)">Navigation</div>
+
+              <nav data-plugin-navmenu id="nav-vertical"
+                   data-plugin-options='{"orientation":"vertical","openOn":"click"}'>
+
+                <div data-navmenu-item>
+                  <a href="#" data-navmenu-link style="padding:6px 10px;font-size:13.5px">
+                    <i class="fas fa-house me-2 opacity-50" style="font-size:11px"></i> Dashboard
+                  </a>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button" style="font-size:13.5px;padding:6px 10px;width:100%;text-align:left">
+                    <i class="fas fa-box me-2 opacity-50" style="font-size:11px"></i> Products
+                  </button>
+                  <div data-navmenu-content style="min-width:180px">
+                    <a href="#" class="simple-link" style="font-size:13px">All products</a>
+                    <a href="#" class="simple-link" style="font-size:13px">Add new</a>
+                    <a href="#" class="simple-link" style="font-size:13px">Categories</a>
+                    <a href="#" class="simple-link" style="font-size:13px">Inventory</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button" style="font-size:13.5px;padding:6px 10px;width:100%;text-align:left">
+                    <i class="fas fa-users me-2 opacity-50" style="font-size:11px"></i> Customers
+                  </button>
+                  <div data-navmenu-content style="min-width:180px">
+                    <a href="#" class="simple-link" style="font-size:13px">All customers</a>
+                    <a href="#" class="simple-link" style="font-size:13px">Segments</a>
+                    <a href="#" class="simple-link" style="font-size:13px">Reviews</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button" style="font-size:13.5px;padding:6px 10px;width:100%;text-align:left">
+                    <i class="fas fa-gear me-2 opacity-50" style="font-size:11px"></i> Settings
+                  </button>
+                  <div data-navmenu-content style="min-width:180px">
+                    <a href="#" class="simple-link" style="font-size:13px">General</a>
+                    <a href="#" class="simple-link" style="font-size:13px">Billing</a>
+                    <a href="#" class="simple-link" style="font-size:13px">Team members</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link" style="font-size:13px">API keys</a>
+                  </div>
+                </div>
+
+              </nav>
+            </div>
+          </div>
+
+<pre class="snip">&lt;<span class="tag">nav</span> <span class="att">data-plugin-navmenu</span>
+     <span class="att">data-plugin-options</span>=<span class="val">'{"orientation":"vertical","openOn":"click"}'</span>&gt;
+  …
+&lt;/<span class="tag">nav</span>&gt;</pre>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Mutual exclusion · one panel open at a time</p>
+          <h3>One panel at a time</h3>
+          <p class="lead-sm">
+            Opening a new panel always closes the previously open one — no two panels stack.
+            Try clicking each trigger in sequence. Switching between items with
+            <kbd>←</kbd><kbd>→</kbd> is instant (no exit animation between siblings).
+          </p>
+
+          <div class="demo-stage" style="padding-bottom:160px">
+            <div class="nav-wrap w-100">
+              <nav data-plugin-navmenu id="nav-mutex"
+                   data-plugin-options='{"openOn":"click"}'>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">File</button>
+                  <div data-navmenu-content style="min-width:160px">
+                    <a href="#" class="simple-link">New…</a>
+                    <a href="#" class="simple-link">Open recent</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link">Save</a>
+                    <a href="#" class="simple-link">Save as…</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link" style="color:#dc3545">Exit</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">Edit</button>
+                  <div data-navmenu-content style="min-width:160px">
+                    <a href="#" class="simple-link">Undo <small class="text-muted ms-auto">⌘Z</small></a>
+                    <a href="#" class="simple-link">Redo <small class="text-muted ms-auto">⌘⇧Z</small></a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link">Cut</a>
+                    <a href="#" class="simple-link">Copy</a>
+                    <a href="#" class="simple-link">Paste</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link">Find &amp; Replace…</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">View</button>
+                  <div data-navmenu-content style="min-width:160px">
+                    <a href="#" class="simple-link">Zoom in <small class="text-muted ms-auto">⌘+</small></a>
+                    <a href="#" class="simple-link">Zoom out <small class="text-muted ms-auto">⌘−</small></a>
+                    <a href="#" class="simple-link">Reset zoom</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link">Full screen</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">Help</button>
+                  <div data-navmenu-content style="min-width:160px">
+                    <a href="#" class="simple-link">Documentation</a>
+                    <a href="#" class="simple-link">Keyboard shortcuts</a>
+                    <div class="panel-sep"></div>
+                    <a href="#" class="simple-link">Report a bug</a>
+                  </div>
+                </div>
+
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Interactive · live option switching</p>
+          <h3>Option playground</h3>
+          <p class="lead-sm">
+            Change <code>openOn</code> and <code>orientation</code> live. The instance is
+            destroyed and re-initialised on each change so defaults reset cleanly.
+          </p>
+
+          <div class="controls-row mb-3">
+            <label class="me-1">openOn:</label>
+            <div class="btn-group btn-group-sm" id="pg-openon-group">
+              <button class="btn btn-outline-secondary active" data-openon="hover">hover</button>
+              <button class="btn btn-outline-secondary" data-openon="click">click</button>
+            </div>
+            <label class="ms-3 me-1">orientation:</label>
+            <div class="btn-group btn-group-sm" id="pg-orient-group">
+              <button class="btn btn-outline-secondary active" data-orient="horizontal">horizontal</button>
+              <button class="btn btn-outline-secondary" data-orient="vertical">vertical</button>
+            </div>
+          </div>
+
+          <div class="demo-stage" style="min-height:200px;padding-bottom:180px" id="pg-stage">
+            <div class="nav-wrap w-100" id="pg-nav-wrap">
+              <nav data-plugin-navmenu id="nav-playground">
+
+                <div data-navmenu-item>
+                  <a href="#" data-navmenu-link>Home</a>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">Products</button>
+                  <div data-navmenu-content style="min-width:260px">
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>🧩</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Components</div>
+                        <p data-navmenu-list-item-desc>Reusable UI blocks</p>
+                      </div>
+                    </a>
+                    <a href="#" data-navmenu-list-item>
+                      <span data-navmenu-list-item-icon>⚡</span>
+                      <div>
+                        <div data-navmenu-list-item-title>Plugins</div>
+                        <p data-navmenu-list-item-desc>jQuery enhancements</p>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <button data-navmenu-trigger type="button">Docs</button>
+                  <div data-navmenu-content style="min-width:180px">
+                    <a href="#" class="simple-link">Getting started</a>
+                    <a href="#" class="simple-link">Plugin API</a>
+                    <a href="#" class="simple-link">Snippets</a>
+                  </div>
+                </div>
+
+                <div data-navmenu-item>
+                  <a href="#" data-navmenu-link>Pricing</a>
+                </div>
+
+              </nav>
+            </div>
+          </div>
+
+          <p class="text-muted" style="font-size:12px;margin:0">
+            Current: <code>openOn="<span id="pg-openon-label">hover</span>"</code>
+            <code>orientation="<span id="pg-orient-label">horizontal</span>"</code>
+          </p>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Events · navmenu-opened / navmenu-closed · ARIA</p>
+          <h3>Event log &amp; ARIA</h3>
+          <p class="lead-sm">
+            Both <code>navmenu-opened</code> and <code>navmenu-closed</code> are
+            <code>CustomEvent</code>s that bubble from the root <code>[data-plugin-navmenu]</code>.
+            The <code>detail</code> carries <code>index</code>, <code>$item</code>, and
+            <code>instance</code>. ARIA attributes update live — inspect the trigger in DevTools.
+          </p>
+
+          <div class="demo-grid-2 align-items-start">
+            <div>
+              <div class="demo-stage" style="padding-bottom:180px; min-height:80px">
+                <nav data-plugin-navmenu id="nav-events"
+                     data-plugin-options='{"openOn":"click"}'>
+                  <div data-navmenu-item>
+                    <button data-navmenu-trigger type="button">Alpha</button>
+                    <div data-navmenu-content style="min-width:160px">
+                      <a href="#" class="simple-link">Alpha item 1</a>
+                      <a href="#" class="simple-link">Alpha item 2</a>
+                    </div>
+                  </div>
+                  <div data-navmenu-item>
+                    <button data-navmenu-trigger type="button">Beta</button>
+                    <div data-navmenu-content style="min-width:160px">
+                      <a href="#" class="simple-link">Beta item 1</a>
+                      <a href="#" class="simple-link">Beta item 2</a>
+                    </div>
+                  </div>
+                  <div data-navmenu-item>
+                    <button data-navmenu-trigger type="button">Gamma</button>
+                    <div data-navmenu-content style="min-width:160px">
+                      <a href="#" class="simple-link">Gamma item 1</a>
+                      <a href="#" class="simple-link">Gamma item 2</a>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+            </div>
+
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span style="font-size:12px;font-weight:600;color:#54657a">Event log</span>
+                <button class="btn btn-sm btn-outline-secondary py-0" id="clear-log" style="font-size:11px">Clear</button>
+              </div>
+              <div class="event-log" id="event-log">
+                <span class="ev-empty">No events yet — open a panel.</span>
+              </div>
+              <div class="mt-2" style="font-size:12px;color:var(--ts-muted)">
+                Active index: <code id="active-index">−1</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Public API · open() / close() / toggle() / getActive() / destroy()</p>
+          <h3>Programmatic control</h3>
+          <p class="lead-sm">
+            Every instance exposes five methods. <code>open(index)</code> and
+            <code>toggle(index)</code> accept a zero-based index. After <code>destroy()</code>
+            re-init brings the instance back cleanly.
+          </p>
+
+          <div class="demo-stage" style="padding-bottom:160px; flex-direction:column; gap:16px">
+            <nav data-plugin-navmenu id="nav-api"
+                 data-plugin-options='{"openOn":"click"}'>
+              <div data-navmenu-item>
+                <button data-navmenu-trigger type="button">Panel 0</button>
+                <div data-navmenu-content style="min-width:160px">
+                  <a href="#" class="simple-link">Item A</a>
+                  <a href="#" class="simple-link">Item B</a>
+                </div>
+              </div>
+              <div data-navmenu-item>
+                <button data-navmenu-trigger type="button">Panel 1</button>
+                <div data-navmenu-content style="min-width:160px">
+                  <a href="#" class="simple-link">Item C</a>
+                  <a href="#" class="simple-link">Item D</a>
+                </div>
+              </div>
+              <div data-navmenu-item>
+                <button data-navmenu-trigger type="button">Panel 2</button>
+                <div data-navmenu-content style="min-width:160px">
+                  <a href="#" class="simple-link">Item E</a>
+                  <a href="#" class="simple-link">Item F</a>
+                </div>
+              </div>
+            </nav>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <button class="btn btn-sm btn-outline-primary" id="api-open0">open(0)</button>
+              <button class="btn btn-sm btn-outline-primary" id="api-open1">open(1)</button>
+              <button class="btn btn-sm btn-outline-primary" id="api-open2">open(2)</button>
+              <button class="btn btn-sm btn-outline-secondary" id="api-close">close()</button>
+              <button class="btn btn-sm btn-outline-secondary" id="api-toggle1">toggle(1)</button>
+              <button class="btn btn-sm btn-outline-danger" id="api-destroy">destroy()</button>
+              <button class="btn btn-sm btn-outline-success d-none" id="api-reinit">re-init</button>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+              <div>
+                <span style="font-size:12px;color:#54657a">State: </span>
+                <span class="status-badge closed" id="api-status">
+                  <i class="fas fa-circle" style="font-size:7px"></i> closed
+                </span>
+              </div>
+              <div style="font-size:12px;color:#54657a">
+                getActive(): <code id="api-active">−1</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <p class="text-center mt-2 mb-5" style="color:var(--ts-muted);font-size:12.5px">
+        Themestrap MODX 3 · PluginNavmenu demo · plugin runs live in your browser
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.navmenu.js"></script>
+
+<!-- ── Demo wiring ── -->
+<script>
+$(function () {
+
+    // Auto-init every [data-plugin-navmenu] 
+    $('[data-plugin-navmenu]').each(function () {
+        const $el = $(this);
+        let opts = {};
+        try { opts = JSON.parse($el.attr('data-plugin-options') || '{}'); } catch (e) {}
+        $el.themestrapPluginNavmenu(opts);
+    });
+
+
+    // 5. Playground 
+    let pgOpenOn = 'hover';
+    let pgOrient = 'horizontal';
+
+    function reinitPlayground() {
+        const $nav = $('#nav-playground');
+        const inst = $nav.data('__pluginNavmenu');
+        if (inst) inst.destroy();
+        $nav.themestrapPluginNavmenu({ openOn: pgOpenOn, orientation: pgOrient });
+
+        // Adjust the nav wrapper layout for vertical orientation
+        const $wrap = $('#pg-nav-wrap');
+        if (pgOrient === 'vertical') {
+            $wrap.css({ flexDirection: 'column', alignItems: 'flex-start', padding: '12px' });
+        } else {
+            $wrap.css({ flexDirection: '', alignItems: '', padding: '' });
+        }
+
+        $('#pg-openon-label').text(pgOpenOn);
+        $('#pg-orient-label').text(pgOrient);
+    }
+
+    $('#pg-openon-group [data-openon]').on('click', function () {
+        pgOpenOn = $(this).data('openon');
+        $('#pg-openon-group .btn').removeClass('active');
+        $(this).addClass('active');
+        reinitPlayground();
+    });
+
+    $('#pg-orient-group [data-orient]').on('click', function () {
+        pgOrient = $(this).data('orient');
+        $('#pg-orient-group .btn').removeClass('active');
+        $(this).addClass('active');
+        reinitPlayground();
+    });
+
+
+    // 6. Event log 
+    let logEmpty = true;
+
+    function logEvent(msg, cls) {
+        const $log = $('#event-log');
+        if (logEmpty) { $log.empty(); logEmpty = false; }
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $log.append($('<div>').addClass(cls).text('[' + time + '] ' + msg));
+        $log[0].scrollTop = $log[0].scrollHeight;
+    }
+
+    const $evNav = $('#nav-events')[0];
+    if ($evNav) {
+        $evNav.addEventListener('navmenu-opened', function (e) {
+            logEvent('navmenu-opened  index=' + e.detail.index, 'ev-open');
+            $('#active-index').text(e.detail.index);
+        });
+        $evNav.addEventListener('navmenu-closed', function (e) {
+            logEvent('navmenu-closed  index=' + e.detail.index, 'ev-close');
+            $('#active-index').text('−1');
+        });
+    }
+
+    $('#clear-log').on('click', function () {
+        $('#event-log').html('<span class="ev-empty">Log cleared.</span>');
+        logEmpty = false;
+        $('#active-index').text('−1');
+    });
+
+
+    // 7. Programmatic API 
+    function getApiInst() { return $('#nav-api').data('__pluginNavmenu'); }
+
+    function updateApiStatus() {
+        const inst = getApiInst();
+        if (!inst) return;
+        const active = inst.getActive();
+        const isOpen = active > -1;
+        $('#api-status')
+            .removeClass('open closed')
+            .addClass(isOpen ? 'open' : 'closed')
+            .html('<i class="fas fa-circle" style="font-size:7px"></i> ' + (isOpen ? 'open' : 'closed'));
+        $('#api-active').text(active > -1 ? active : '−1');
+    }
+
+    const $apiNav = $('#nav-api')[0];
+    if ($apiNav) {
+        $apiNav.addEventListener('navmenu-opened', updateApiStatus);
+        $apiNav.addEventListener('navmenu-closed', updateApiStatus);
+    }
+
+    $('#api-open0').on('click',   function () { getApiInst()?.open(0);   updateApiStatus(); });
+    $('#api-open1').on('click',   function () { getApiInst()?.open(1);   updateApiStatus(); });
+    $('#api-open2').on('click',   function () { getApiInst()?.open(2);   updateApiStatus(); });
+    $('#api-close').on('click',   function () { getApiInst()?.close();   updateApiStatus(); });
+    $('#api-toggle1').on('click', function () { getApiInst()?.toggle(1); updateApiStatus(); });
+
+    $('#api-destroy').on('click', function () {
+        getApiInst()?.destroy();
+        $('#api-destroy').addClass('d-none');
+        $('#api-reinit').removeClass('d-none');
+        $('#api-status').removeClass('open closed').addClass('closed')
+            .html('<i class="fas fa-circle" style="font-size:7px"></i> destroyed');
+        $('#api-active').text('−1');
+    });
+
+    $('#api-reinit').on('click', function () {
+        $('#nav-api').themestrapPluginNavmenu({ openOn: 'click' });
+        $('#api-destroy').removeClass('d-none');
+        $('#api-reinit').addClass('d-none');
+        updateApiStatus();
+    });
+
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginVerticalNav — Themestrap Demo</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* Demo shell */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0f1923;
+    color: #e8edf2;
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* Section headings */
+.demo-label {
+    font-size: .65rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #49afd9;
+    margin: 0 0 .5rem;
+}
+
+.demo-section {
+    padding: 2rem;
+}
+
+.demo-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 .375rem;
+}
+
+.demo-subtitle {
+    font-size: .875rem;
+    color: rgba(255,255,255,.5);
+    margin: 0 0 2.5rem;
+}
+
+.divider {
+    height: 1px;
+    background: rgba(255,255,255,.07);
+    margin: 2.5rem 0;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #162130;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.demo-card-label {
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.35);
+    padding: .625rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    background: rgba(0,0,0,.2);
+}
+
+/* App shell preview wrappers */
+.app-shell {
+    display:        flex;
+    height:         460px;
+    overflow:       hidden;
+    position:       relative;
+}
+
+.app-content {
+    flex:       1 1 auto;
+    padding:    1.5rem;
+    overflow-y: auto;
+    background: #111d2b;
+}
+
+.app-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 .5rem;
+}
+
+.app-content p {
+    font-size: .8125rem;
+    color: rgba(255,255,255,.45);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.content-block {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: .75rem;
+}
+
+/* Code block */
+pre {
+    font-family: 'DM Mono', monospace;
+    font-size: .73rem;
+    line-height: 1.65;
+    background: #0d1822;
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    color: #a8d8f0;
+    margin: 0;
+    overflow-x: auto;
+}
+
+.token-key     { color: #79c0ff; }
+.token-string  { color: #a5d6ff; }
+.token-comment { color: #6e7f8d; font-style: italic; }
+.token-fn      { color: #d2a8ff; }
+.token-class   { color: #ffa657; }
+.token-bool    { color: #ff7b72; }
+
+/* API table */
+table.api-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .8125rem;
+}
+
+table.api-table th {
+    text-align: left;
+    padding: .5rem .75rem;
+    color: rgba(255,255,255,.45);
+    font-weight: 600;
+    font-size: .7rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+table.api-table td {
+    padding: .6rem .75rem;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    color: rgba(255,255,255,.75);
+    vertical-align: top;
+}
+
+table.api-table tr:last-child td { border-bottom: none; }
+
+.badge-type {
+    display: inline-block;
+    padding: .1rem .5rem;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: .65rem;
+    font-weight: 500;
+    background: rgba(73,175,217,.15);
+    color: #49afd9;
+    white-space: nowrap;
+}
+
+/* Interactive controls */
+.controls {
+    padding: 1rem 1.25rem;
+    background: rgba(0,0,0,.2);
+    border-top: 1px solid rgba(255,255,255,.06);
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.ctrl-btn {
+    font-size: .75rem;
+    font-weight: 500;
+    padding: .3rem .85rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.75);
+    cursor: pointer;
+    transition: all .2s;
+}
+.ctrl-btn:hover { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.25); }
+.ctrl-btn.accent { background: rgba(73,175,217,.15); border-color: rgba(73,175,217,.4); color: #49afd9; }
+.ctrl-btn.accent:hover { background: rgba(73,175,217,.25); }
+
+.ctrl-label {
+    font-size: .7rem;
+    color: rgba(255,255,255,.3);
+    margin-left: auto;
+}
+
+/* Adjust nav widths inside demo cards */
+.app-shell .clr-vertical-nav { min-height: 100%; }
+</style>
+</head>
+<body>
+
+<div class="demo-section">
+
+    <!-- Header -->
+    <p class="demo-label">Themestrap Plugin</p>
+    <h1 class="demo-title">PluginVerticalNav</h1>
+    <p class="demo-subtitle">
+        Clarity Design System's Vertical Navigation — adapted to Themestrap's plugin architecture
+        with Bootstrap 5 tokens, full ARIA support, and a clean public API.
+    </p>
+
+    <div class="demo-card">
+        <div class="demo-card-label">Example 1 — Dark nav · with groups · icon mode</div>
+        <div class="app-shell">
+
+            <!-- The nav element — plugin auto-inits on this attribute -->
+            <nav id="nav1"
+                 data-plugin-vertical-nav
+                 data-plugin-options='{"collapsed": false, "activeTracking": false}'>
+
+                <div class="ts-vn-header">
+                    <span class="ts-vn-brand">Acme&nbsp;Cloud</span>
+                    <!-- toggle btn injected by plugin -->
+                </div>
+
+                <div class="ts-vn-body">
+
+                    <a href="#" class="ts-vn-link active" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-house-fill"></i></span>
+                        <span class="ts-vn-text">Dashboard</span>
+                    </a>
+
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-bar-chart-fill"></i></span>
+                        <span class="ts-vn-text">Analytics</span>
+                    </a>
+
+                    <div class="ts-vn-divider"></div>
+
+                    <span class="ts-vn-section-label">Management</span>
+
+                    <!-- Nav group 1 -->
+                    <div class="ts-vn-group">
+                        <button class="ts-vn-group-trigger">
+                            <span class="ts-vn-icon"><i class="bi bi-people-fill"></i></span>
+                            <span class="ts-vn-text">Users</span>
+                        </button>
+                        <div class="ts-vn-group-children">
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">All Users</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Roles &amp; Permissions</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Invitations</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Nav group 2 -->
+                    <div class="ts-vn-group">
+                        <button class="ts-vn-group-trigger">
+                            <span class="ts-vn-icon"><i class="bi bi-hdd-stack-fill"></i></span>
+                            <span class="ts-vn-text">Infrastructure</span>
+                        </button>
+                        <div class="ts-vn-group-children">
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Clusters</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Nodes</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Storage</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-shield-lock-fill"></i></span>
+                        <span class="ts-vn-text">Security</span>
+                    </a>
+
+                    <div class="ts-vn-divider"></div>
+
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-gear-fill"></i></span>
+                        <span class="ts-vn-text">Settings</span>
+                    </a>
+
+                </div>
+
+            </nav>
+
+            <!-- Content area -->
+            <div class="app-content">
+                <div class="content-block">
+                    <h4>Dashboard</h4>
+                    <p>Toggle the nav with the hamburger button, or use the buttons below to call the public API.</p>
+                </div>
+                <div class="content-block">
+                    <h4>Active state</h4>
+                    <p>The active link carries Clarity's teal left-border accent. Click any link to move it.</p>
+                </div>
+                <div class="content-block">
+                    <h4>Icon mode</h4>
+                    <p>In collapsed state Bootstrap Tooltips show the nav-text label on hover. Try it →</p>
+                </div>
+            </div>
+
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn accent" onclick="$('#nav1').data('__verticalNav').toggle()">
+                Toggle
+            </button>
+            <button class="ctrl-btn" onclick="$('#nav1').data('__verticalNav').expand()">
+                Expand
+            </button>
+            <button class="ctrl-btn" onclick="$('#nav1').data('__verticalNav').collapse()">
+                Collapse
+            </button>
+            <button class="ctrl-btn" onclick="
+                const g = $('#nav1 .ts-vn-group').eq(0);
+                $('#nav1').data('__verticalNav').openGroup(g);
+            ">Open Group 1</button>
+            <button class="ctrl-btn" onclick="
+                const g = $('#nav1 .ts-vn-group').eq(0);
+                $('#nav1').data('__verticalNav').closeGroup(g);
+            ">Close Group 1</button>
+            <span class="ctrl-label">Public API demo</span>
+        </div>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-card-label">Example 2 — Light theme · text-only links</div>
+        <div class="app-shell">
+
+            <nav id="nav2"
+                 data-plugin-vertical-nav
+                 data-plugin-options='{"collapsed": false, "activeTracking": false, "animDuration": 180}'
+                 class="ts-vn-light"
+                 style="--ts-vn-width: 200px">
+
+                <div class="ts-vn-header">
+                    <span class="ts-vn-brand">Docs</span>
+                </div>
+
+                <div class="ts-vn-body">
+
+                    <a href="#" class="ts-vn-link active" onclick="return false">
+                        <span class="ts-vn-text">Getting Started</span>
+                    </a>
+
+                    <div class="ts-vn-group">
+                        <button class="ts-vn-group-trigger">
+                            <span class="ts-vn-text">Components</span>
+                        </button>
+                        <div class="ts-vn-group-children">
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Alerts</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Buttons</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Cards</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Modals</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="ts-vn-group">
+                        <button class="ts-vn-group-trigger">
+                            <span class="ts-vn-text">Utilities</span>
+                        </button>
+                        <div class="ts-vn-group-children">
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Spacing</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Typography</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="ts-vn-divider"></div>
+
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-text">Changelog</span>
+                    </a>
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-text">Contributing</span>
+                    </a>
+
+                </div>
+            </nav>
+
+            <div class="app-content">
+                <div class="content-block"><h4>Light Theme</h4><p>Pass <code>class="ts-vn-light"</code> on the nav element to flip to the light palette using CSS custom properties.</p></div>
+                <div class="content-block"><h4>Text-only links</h4><p>Icons are fully optional. Omit the <code>.ts-vn-icon</code> span and the layout adjusts automatically.</p></div>
+            </div>
+
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn accent" onclick="$('#nav2').data('__verticalNav').toggle()">Toggle</button>
+            <span class="ctrl-label">Light theme variant</span>
+        </div>
+    </div>
+
+    <div class="demo-card">
+        <div class="demo-card-label">Example 3 — Starts in collapsed / mini mode</div>
+        <div class="app-shell">
+
+            <nav id="nav3"
+                 data-plugin-vertical-nav
+                 data-plugin-options='{"collapsed": true, "activeTracking": false}'>
+
+                <div class="ts-vn-header">
+                    <span class="ts-vn-brand">Portal</span>
+                </div>
+
+                <div class="ts-vn-body">
+                    <a href="#" class="ts-vn-link active" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-house-fill"></i></span>
+                        <span class="ts-vn-text">Home</span>
+                    </a>
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-envelope-fill"></i></span>
+                        <span class="ts-vn-text">Messages</span>
+                    </a>
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-calendar-fill"></i></span>
+                        <span class="ts-vn-text">Calendar</span>
+                    </a>
+                    <div class="ts-vn-group">
+                        <button class="ts-vn-group-trigger">
+                            <span class="ts-vn-icon"><i class="bi bi-folder-fill"></i></span>
+                            <span class="ts-vn-text">Projects</span>
+                        </button>
+                        <div class="ts-vn-group-children">
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Active</span>
+                            </a>
+                            <a href="#" class="ts-vn-link" onclick="return false">
+                                <span class="ts-vn-text">Archived</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="ts-vn-divider"></div>
+                    <a href="#" class="ts-vn-link" onclick="return false">
+                        <span class="ts-vn-icon"><i class="bi bi-person-circle"></i></span>
+                        <span class="ts-vn-text">Profile</span>
+                    </a>
+                </div>
+
+            </nav>
+
+            <div class="app-content">
+                <div class="content-block"><h4>Starts collapsed</h4><p>Pass <code>"collapsed": true</code> in options to boot in icon-only mode.</p></div>
+                <div class="content-block"><h4>Tooltips</h4><p>When collapsed, Bootstrap 5 Tooltips appear on hover to reveal each link's label (requires Bootstrap JS).</p></div>
+                <div class="content-block"><h4>Custom width</h4><p>Override <code>--ts-vn-width</code> and <code>--ts-vn-width-collapsed</code> on the element to adjust dimensions.</p></div>
+            </div>
+
+        </div>
+        <div class="controls">
+            <button class="ctrl-btn accent" onclick="$('#nav3').data('__verticalNav').toggle()">Toggle</button>
+            <span class="ctrl-label">collapsed: true on init</span>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+    <p class="demo-label">Options reference</p>
+
+    <div class="demo-card">
+        <div class="demo-card-label">data-plugin-options / JS constructor options</div>
+        <table class="api-table">
+            <thead>
+                <tr>
+                    <th>Option</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>collapsed</code></td>
+                    <td><span class="badge-type">Boolean</span></td>
+                    <td><code>false</code></td>
+                    <td>Start in icon-only mini mode</td>
+                </tr>
+                <tr>
+                    <td><code>activeTracking</code></td>
+                    <td><span class="badge-type">Boolean</span></td>
+                    <td><code>true</code></td>
+                    <td>Auto-detect active link from <code>window.location.pathname</code></td>
+                </tr>
+                <tr>
+                    <td><code>hashTracking</code></td>
+                    <td><span class="badge-type">Boolean</span></td>
+                    <td><code>false</code></td>
+                    <td>Also match <code>location.hash</code> when detecting active links</td>
+                </tr>
+                <tr>
+                    <td><code>expandActive</code></td>
+                    <td><span class="badge-type">Boolean</span></td>
+                    <td><code>true</code></td>
+                    <td>Auto-open the group containing the active link on init</td>
+                </tr>
+                <tr>
+                    <td><code>toggleBtn</code></td>
+                    <td><span class="badge-type">Boolean</span></td>
+                    <td><code>true</code></td>
+                    <td>Inject the hamburger/arrow toggle button</td>
+                </tr>
+                <tr>
+                    <td><code>toggleTarget</code></td>
+                    <td><span class="badge-type">String</span></td>
+                    <td><code>null</code></td>
+                    <td>Selector for an additional element to receive <code>.ts-vn-collapsed</code> (e.g. the main content wrapper for a "push" layout)</td>
+                </tr>
+                <tr>
+                    <td><code>animDuration</code></td>
+                    <td><span class="badge-type">Number</span></td>
+                    <td><code>260</code></td>
+                    <td>Group open/close slide animation in milliseconds</td>
+                </tr>
+                <tr>
+                    <td><code>tooltips</code></td>
+                    <td><span class="badge-type">Boolean</span></td>
+                    <td><code>true</code></td>
+                    <td>Show Bootstrap 5 Tooltips on nav items when collapsed</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Public API table -->
+    <div class="demo-card" style="margin-top:1rem">
+        <div class="demo-card-label">Public API methods</div>
+        <table class="api-table">
+            <thead>
+                <tr><th>Method</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>collapse()</code></td><td>Switch to icon-only mini mode; fires <code>verticalNav.collapsed</code> event</td></tr>
+                <tr><td><code>expand()</code></td><td>Switch to full-width mode; fires <code>verticalNav.expanded</code> event</td></tr>
+                <tr><td><code>toggle()</code></td><td>Toggle between collapsed and expanded states</td></tr>
+                <tr><td><code>openGroup($group)</code></td><td>Expand a <code>.ts-vn-group</code> jQuery element with slide animation</td></tr>
+                <tr><td><code>closeGroup($group)</code></td><td>Collapse a <code>.ts-vn-group</code> jQuery element with slide animation</td></tr>
+                <tr><td><code>setActive(href)</code></td><td>Programmatically move the active state to the link matching <code>href</code></td></tr>
+                <tr><td><code>destroy()</code></td><td>Tear down plugin, restore original markup, remove data key</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- themestrap.init.js wiring snippet -->
+    <div class="divider"></div>
+    <p class="demo-label">themestrap.init.js wiring</p>
+
+    <pre><code><span class="token-comment">// Vertical Navigation</span>
+<span class="token-key">if</span> ($.isFunction($.fn[<span class="token-string">'themestrapPluginVerticalNav'</span>]) &amp;&amp; $(<span class="token-string">'[data-plugin-vertical-nav]'</span>).length) {
+    themestrap.fn.intObsInit(<span class="token-string">'[data-plugin-vertical-nav]:not(.manual)'</span>, <span class="token-string">'themestrapPluginVerticalNav'</span>);
+}</code></pre>
+
+    <!-- HTML usage snippet -->
+    <div style="margin-top:1rem">
+    <pre><code><span class="token-comment">&lt;!-- Minimal dark nav --&gt;</span>
+&lt;nav <span class="token-key">data-plugin-vertical-nav</span>
+     <span class="token-key">data-plugin-options</span>=<span class="token-string">'{"collapsed": false}'</span>&gt;
+
+  &lt;div class=<span class="token-string">"ts-vn-header"</span>&gt;
+    &lt;span class=<span class="token-string">"ts-vn-brand"</span>&gt;My App&lt;/span&gt;
+  &lt;/div&gt;
+
+  &lt;div class=<span class="token-string">"ts-vn-body"</span>&gt;
+
+    <span class="token-comment">&lt;!-- Direct link --&gt;</span>
+    &lt;a href=<span class="token-string">"/dashboard"</span> class=<span class="token-string">"ts-vn-link active"</span>&gt;
+      &lt;span class=<span class="token-string">"ts-vn-icon"</span>&gt;&lt;i class=<span class="token-string">"bi bi-house-fill"</span>&gt;&lt;/i&gt;&lt;/span&gt;
+      &lt;span class=<span class="token-string">"ts-vn-text"</span>&gt;Dashboard&lt;/span&gt;
+    &lt;/a&gt;
+
+    <span class="token-comment">&lt;!-- Expandable group --&gt;</span>
+    &lt;div class=<span class="token-string">"ts-vn-group"</span>&gt;
+      &lt;button class=<span class="token-string">"ts-vn-group-trigger"</span>&gt;
+        &lt;span class=<span class="token-string">"ts-vn-icon"</span>&gt;&lt;i class=<span class="token-string">"bi bi-gear-fill"</span>&gt;&lt;/i&gt;&lt;/span&gt;
+        &lt;span class=<span class="token-string">"ts-vn-text"</span>&gt;Settings&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;div class=<span class="token-string">"ts-vn-group-children"</span>&gt;
+        &lt;a href=<span class="token-string">"/settings/profile"</span> class=<span class="token-string">"ts-vn-link"</span>&gt;
+          &lt;span class=<span class="token-string">"ts-vn-text"</span>&gt;Profile&lt;/span&gt;
+        &lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+  &lt;/div&gt;
+&lt;/nav&gt;
+
+<span class="token-comment">&lt;!-- Access instance via data key --&gt;</span>
+&lt;script&gt;
+  const nav = $(<span class="token-string">'[data-plugin-vertical-nav]'</span>).data(<span class="token-string">'__verticalNav'</span>);
+  nav.collapse();
+&lt;/script&gt;</code></pre>
+    </div>
+
+</div>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.verticalnav.js"></script>
+
+<!-- Init wiring (in production: lives in themestrap.init.js) -->
+<script>
+$(function() {
+    // Vertical Navigation
+    if ($.isFunction($.fn['themestrapPluginVerticalNav']) && $('[data-plugin-vertical-nav]').length) {
+        themestrap.fn.intObsInit('[data-plugin-vertical-nav]:not(.manual)', 'themestrapPluginVerticalNav');
+    }
+});
+</script>
+
+</body>
+</html>

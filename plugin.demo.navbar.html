@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginNavbar — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<style>
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--ts-teal); }
+code {
+    background: rgba(10,25,41,.05);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 760px; margin: 0; }
+.demo-hero .badge-orange {
+    background: var(--ts-orange); color: #fff; font-weight: 600;
+    letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase;
+    font-size: 11px; border-radius: 4px;
+}
+.demo-hero code { background: rgba(255,255,255,.12); color: #ffd9c7; padding: 2px 7px; border-radius: 4px; }
+
+/* Cards */
+.demo-card {
+    background: #fff; border: 1px solid var(--ts-border); border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05); margin-bottom: 28px; overflow: hidden;
+}
+.demo-card .card-body { padding: 20px 24px 24px; }
+.demo-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--ts-teal); margin: 0 0 8px;
+}
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 6px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 14px; }
+
+.tip {
+    background: #e8f7f9; border-left: 4px solid var(--ts-teal); border-radius: 0 8px 8px 0;
+    padding: 12px 16px; font-size: 13px; color: #1f4348; margin-bottom: 24px;
+}
+.tip i { color: var(--ts-teal); }
+.note { font-size: 12.5px; color: var(--ts-muted); }
+
+/* Code snippet */
+pre.snip {
+    background: #0e2238; color: #e1eaf3; padding: 14px 18px; border-radius: 8px;
+    margin: 14px 0 0; font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-size: 12.5px; line-height: 1.6; overflow-x: auto;
+}
+pre.snip .tag { color: #ff9d6c; }
+pre.snip .attr { color: #f9c98c; }
+pre.snip .str { color: #d6f8a3; }
+pre.snip .c1 { color: #6c8bab; font-style: italic; }
+
+/* Demo nav frame — gives the sticky behavior a scroll context */
+.nav-frame {
+    border: 1px solid var(--ts-border); border-radius: 12px; background: #fff;
+    overflow: hidden; margin-bottom: 14px;
+}
+.nav-frame--scroll { height: 320px; overflow-y: auto; }
+.nav-frame__filler { padding: 22px 24px; color: #54657a; font-size: 14px; line-height: 1.7; }
+.nav-frame__filler h5 { color: var(--ts-navy); margin-top: 0; }
+
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 14px 18px; background: #f8fafc; border: 1px solid var(--ts-border);
+    border-radius: 8px; margin-bottom: 14px;
+}
+.controls-row label {
+    font-size: 12px; font-weight: 600; color: #54657a; margin: 0 4px 0 0;
+    text-transform: uppercase; letter-spacing: .04em;
+}
+.btn-ts {
+    background: var(--ts-orange); border: none; color: #fff; font-size: 13px;
+    font-weight: 600; padding: 6px 14px; border-radius: 6px; cursor: pointer;
+}
+.btn-ts:hover { background: var(--ts-orange-2); }
+.evt-log {
+    font-family: monospace; font-size: 11.5px; color: #54657a;
+    background: #f1f3f5; border: 1px solid var(--ts-border); border-radius: 6px;
+    padding: 8px 12px; height: 90px; overflow-y: auto; margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <h1 class="mt-3">PluginNavbar Live Demo</h1>
+    <p class="lead">A secondary navigation that connects a series of related pages — modelled on Red Hat's Design System "Navigation (secondary)" element, rebuilt in the Themestrap color scheme. The current page carries a warm-orange accent border, dropdowns reveal sub-pages, external links open in a new tab, and the bar pins to the top on scroll. Everything below runs live.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        The accent border under <strong>Documentation</strong> marks the current page. Open the dropdowns, resize your window below 992px to see the mobile collapse, and scroll inside the framed example to watch the sticky "stuck" shadow appear.
+      </div>
+
+      <!-- 1. Light, basic -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">palette: light · the default</p>
+          <h3>Light secondary navigation</h3>
+          <p class="lead-sm">Logo/title on the left, up to five links, and a call-to-action on the right. "Documentation" is the current page.</p>
+        </div>
+        <nav class="ts-navbar manual" data-demo-navbar data-plugin-options='{"palette":"light","sticky":false}' aria-label="Product secondary">
+          <div class="ts-navbar__container">
+            <a href="#overview" class="ts-navbar__logo">OpenWidget</a>
+            <button class="ts-navbar__toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="ts-navbar__toggle-icon" aria-hidden="true"><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span></span>
+            </button>
+            <div class="ts-navbar__collapse">
+              <ul class="ts-navbar__nav">
+                <li class="ts-navbar__item"><a class="ts-navbar__link" href="#overview">Overview</a></li>
+                <li class="ts-navbar__item ts-navbar__item--dropdown">
+                  <button class="ts-navbar__dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">Use cases <span class="ts-navbar__caret" aria-hidden="true"></span></button>
+                  <div class="ts-navbar__menu"><ul class="ts-navbar__menu-list">
+                    <li><a class="ts-navbar__menu-link" href="#edge">Edge computing</a></li>
+                    <li><a class="ts-navbar__menu-link" href="#ml">Machine learning</a></li>
+                    <li><a class="ts-navbar__menu-link" href="#ci">CI/CD pipelines</a></li>
+                  </ul></div>
+                </li>
+                <li class="ts-navbar__item"><a class="ts-navbar__link" href="#pricing">Pricing</a></li>
+                <li class="ts-navbar__item"><a class="ts-navbar__link ts-navbar__link--current" href="#docs" aria-current="page">Documentation</a></li>
+                <li class="ts-navbar__item"><a class="ts-navbar__link" href="https://example.com/community">Community</a></li>
+              </ul>
+              <div class="ts-navbar__cta">
+                <a href="#start" class="ts-navbar__btn ts-navbar__btn--primary">Get started</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+<pre class="snip"><span class="tag">&lt;nav</span> <span class="attr">class</span>=<span class="str">"ts-navbar"</span> <span class="attr">data-plugin-navbar</span>
+     <span class="attr">data-plugin-options</span>=<span class="str">'{"palette":"light"}'</span> <span class="attr">aria-label</span>=<span class="str">"Secondary"</span><span class="tag">&gt;</span>
+  ...
+<span class="tag">&lt;/nav&gt;</span></pre>
+        </div>
+      </div>
+
+      <!-- 2. Dark -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">palette: dark</p>
+          <h3>Dark secondary navigation</h3>
+          <p class="lead-sm">The navy surface variant for dark page themes or hero sections. The accent border and CTA keep the warm-orange Themestrap accent.</p>
+        </div>
+        <nav class="ts-navbar manual" data-demo-navbar data-plugin-options='{"palette":"dark","sticky":false}' aria-label="Platform secondary">
+          <div class="ts-navbar__container">
+            <a href="#platform" class="ts-navbar__logo">Atlas Platform</a>
+            <button class="ts-navbar__toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="ts-navbar__toggle-icon" aria-hidden="true"><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span></span>
+            </button>
+            <div class="ts-navbar__collapse">
+              <ul class="ts-navbar__nav">
+                <li class="ts-navbar__item"><a class="ts-navbar__link ts-navbar__link--current" href="#platform" aria-current="page">Overview</a></li>
+                <li class="ts-navbar__item ts-navbar__item--dropdown">
+                  <button class="ts-navbar__dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">Products <span class="ts-navbar__caret" aria-hidden="true"></span></button>
+                  <div class="ts-navbar__menu ts-navbar__menu--sections">
+                    <div class="ts-navbar__menu-section">
+                      <p class="ts-navbar__menu-heading">Compute</p>
+                      <ul class="ts-navbar__menu-list">
+                        <li><a class="ts-navbar__menu-link" href="#containers">Containers</a></li>
+                        <li><a class="ts-navbar__menu-link" href="#functions">Functions</a></li>
+                        <li><a class="ts-navbar__menu-link" href="#vms">Virtual machines</a></li>
+                      </ul>
+                      <a class="ts-navbar__menu-cta" href="#compute">All compute</a>
+                    </div>
+                    <div class="ts-navbar__menu-section">
+                      <p class="ts-navbar__menu-heading">Data</p>
+                      <ul class="ts-navbar__menu-list">
+                        <li><a class="ts-navbar__menu-link" href="#db">Databases</a></li>
+                        <li><a class="ts-navbar__menu-link" href="#streams">Streaming</a></li>
+                        <li><a class="ts-navbar__menu-link" href="#cache">Cache</a></li>
+                      </ul>
+                      <a class="ts-navbar__menu-cta" href="#data">All data</a>
+                    </div>
+                  </div>
+                </li>
+                <li class="ts-navbar__item"><a class="ts-navbar__link" href="#docs">Docs</a></li>
+                <li class="ts-navbar__item"><a class="ts-navbar__link" href="#support">Support</a></li>
+              </ul>
+              <div class="ts-navbar__cta">
+                <a href="#console" class="ts-navbar__btn ts-navbar__btn--ghost">Sign in</a>
+                <a href="#trial" class="ts-navbar__btn ts-navbar__btn--primary">Start free trial</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+<pre class="snip"><span class="c1">// Sectioned dropdown with headings + section CTA (Red Hat menu-section pattern)</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"ts-navbar__menu ts-navbar__menu--sections"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"ts-navbar__menu-section"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+      <!-- 3. Sticky -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">sticky: true · the "stuck" state</p>
+          <h3>Sticky on scroll</h3>
+          <p class="lead-sm">When the bar pins to the top of its scroll container it gains an elevated shadow. Scroll inside the frame below.</p>
+          <div class="nav-frame nav-frame--scroll" id="sticky-frame">
+            <nav class="ts-navbar manual" data-demo-navbar data-plugin-options='{"palette":"light","sticky":true}' aria-label="Docs secondary">
+              <div class="ts-navbar__container">
+                <a href="#g" class="ts-navbar__logo">Guide</a>
+                <button class="ts-navbar__toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="ts-navbar__toggle-icon" aria-hidden="true"><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span></span>
+                </button>
+                <div class="ts-navbar__collapse">
+                  <ul class="ts-navbar__nav">
+                    <li class="ts-navbar__item"><a class="ts-navbar__link ts-navbar__link--current" href="#g" aria-current="page">Getting started</a></li>
+                    <li class="ts-navbar__item"><a class="ts-navbar__link" href="#concepts">Concepts</a></li>
+                    <li class="ts-navbar__item"><a class="ts-navbar__link" href="#api">API reference</a></li>
+                    <li class="ts-navbar__item"><a class="ts-navbar__link" href="#examples">Examples</a></li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+            <div class="nav-frame__filler">
+              <h5>Getting started</h5>
+              <p>The secondary navigation stays at the top of this frame as you scroll. Notice the shadow that appears once it becomes "stuck" — that is the <code>.ts-navbar--stuck</code> class, toggled by an IntersectionObserver watching a zero-height sentinel placed just before the bar.</p>
+              <p>Keep scrolling to confirm the bar remains pinned and the shadow persists. Scroll back to the top and the shadow disappears as the bar returns to its resting position flush with the content.</p>
+              <p>In a real MODX page you would set <code>&amp;sticky_offset</code> to the height of your primary navigation so the secondary bar pins neatly below it instead of at the very top of the viewport.</p>
+              <p>The sticky behavior is opt-out: pass <code>{"sticky": false}</code> in the plugin options, or set <code>&amp;sticky=`0`</code> on the snippet, to disable it entirely.</p>
+              <p>This filler text exists only to create enough scroll height inside the frame to demonstrate the effect. Almost there…</p>
+              <p>And that's the stuck state. The same mechanism works against the real viewport when the navbar is placed directly in a page rather than inside a scrolling frame.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Interactive -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">runtime API · events</p>
+          <h3>Public methods &amp; events</h3>
+          <p class="lead-sm">The instance exposes <code>setCurrent()</code>, <code>openDropdown()</code>, <code>closeDropdowns()</code>, and emits namespaced events. Try the controls.</p>
+          <div class="controls-row">
+            <label>Set current:</label>
+            <button class="btn-ts" data-set="#i-over">Overview</button>
+            <button class="btn-ts" data-set="#i-guides">Guides</button>
+            <button class="btn-ts" data-set="#i-ref">Reference</button>
+            <button class="btn-ts" data-close style="margin-left:auto;background:#54657a;">Close dropdowns</button>
+          </div>
+          <nav class="ts-navbar manual" id="api-navbar" data-plugin-options='{"palette":"light","sticky":false}' aria-label="Interactive secondary">
+            <div class="ts-navbar__container">
+              <a href="#i-over" class="ts-navbar__logo">DevKit</a>
+              <button class="ts-navbar__toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="ts-navbar__toggle-icon" aria-hidden="true"><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span></span>
+              </button>
+              <div class="ts-navbar__collapse">
+                <ul class="ts-navbar__nav">
+                  <li class="ts-navbar__item"><a class="ts-navbar__link" id="i-over" href="#i-over">Overview</a></li>
+                  <li class="ts-navbar__item"><a class="ts-navbar__link" id="i-guides" href="#i-guides">Guides</a></li>
+                  <li class="ts-navbar__item ts-navbar__item--dropdown">
+                    <button class="ts-navbar__dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">Reference <span class="ts-navbar__caret" aria-hidden="true"></span></button>
+                    <div class="ts-navbar__menu"><ul class="ts-navbar__menu-list">
+                      <li><a class="ts-navbar__menu-link" id="i-ref" href="#i-ref">REST API</a></li>
+                      <li><a class="ts-navbar__menu-link" href="#i-cli">CLI</a></li>
+                      <li><a class="ts-navbar__menu-link" href="#i-sdk">SDKs</a></li>
+                    </ul></div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+          <div class="evt-log" id="evt-log"></div>
+        </div>
+      </div>
+
+      <p class="text-center note mt-5 pt-3">
+        Themestrap — PluginNavbar demo · plugin runs live in your browser.
+      </p>
+    </div>
+  </div>
+</div>
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.navbar.js"></script>
+<!-- Demo wiring -->
+<script>
+$(function () {
+    // highlightCurrent is off here because the demo uses #hash links, not real pages.
+    $('[data-demo-navbar]').each(function () {
+        let opts = {};
+        try { opts = JSON.parse($(this).attr('data-plugin-options') || '{}'); } catch (e) {}
+        opts.highlightCurrent = false; // preserve the hand-set current link
+        $(this).themestrapPluginNavbar(opts);
+    });
+
+    // Interactive card
+    const $api = $('#api-navbar');
+    $api.themestrapPluginNavbar({ sticky: false, highlightCurrent: false });
+    const inst = $api.data('__navbar');
+
+    const log = (msg) => {
+        const el = document.getElementById('evt-log');
+        el.innerHTML += '<div>' + new Date().toLocaleTimeString() + ' — ' + msg + '</div>';
+        el.scrollTop = el.scrollHeight;
+    };
+
+    $('[data-set]').on('click', function () {
+        const sel = $(this).attr('data-set');
+        inst.setCurrent(sel);
+        log('setCurrent("' + sel + '")');
+    });
+    $('[data-close]').on('click', function () { inst.closeDropdowns(); });
+
+    $api.on('open.tsnavbar', () => log('event: open.tsnavbar'));
+    $api.on('close.tsnavbar', () => log('event: close.tsnavbar'));
+    log('Interactive navbar ready.');
+});
+</script>
+
+</body>
+</html>

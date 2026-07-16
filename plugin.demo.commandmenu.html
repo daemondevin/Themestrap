@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginCommandMenu — Live Demo | Themestrap</title>
+<meta name="description" content="Live demo of the Themestrap Command Menu plugin — keyboard-driven command palette inspired by Intent UI and Shadcn.">
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system — demo page chrome */
+:root {
+    --brand-navy:        #0a1929;
+    --brand-navy-2:      #0e2238;
+    --brand-orange:      #e8672a;
+    --brand-orange-2:    #ff7d3d;
+    --brand-teal:        #2ab8c8;
+    --brand-cream:       #f5f1ea;
+    --serif:             'Fraunces', Georgia, serif;
+    --sans:              'Syne', system-ui, -apple-system, sans-serif;
+    --body:              'DM Sans', system-ui, sans-serif;
+    --mono:              'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--body);
+    background: var(--brand-navy);
+    color: var(--brand-cream);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Hero */
+.demo-hero {
+    padding: 80px 24px 60px;
+    background:
+        radial-gradient(ellipse at top, rgba(232,103,42,0.15) 0%, transparent 50%),
+        linear-gradient(180deg, var(--brand-navy) 0%, var(--brand-navy-2) 100%);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.demo-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(42,184,200,0.08) 0%, transparent 30%),
+        radial-gradient(circle at 80% 70%, rgba(232,103,42,0.06) 0%, transparent 30%);
+    pointer-events: none;
+}
+
+.demo-hero-inner {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.demo-eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brand-orange);
+    margin-bottom: 20px;
+}
+
+.demo-eyebrow .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--brand-orange);
+    border-radius: 50%;
+    margin: 0 12px;
+    vertical-align: middle;
+}
+
+.demo-hero h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(40px, 7vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 24px;
+    color: var(--brand-cream);
+}
+
+.demo-hero h1 em {
+    font-style: italic;
+    color: var(--brand-orange);
+    font-weight: 500;
+}
+
+.demo-hero .lead {
+    font-size: 18px;
+    max-width: 640px;
+    margin: 0 auto 36px;
+    color: rgba(245,241,234,0.7);
+    line-height: 1.6;
+}
+
+.try-button-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Override the .command-trigger preset to fit the dark hero */
+.demo-hero .command-trigger {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.12);
+    color: rgba(245,241,234,0.6);
+    font-family: var(--body);
+    padding: 12px 14px 12px 18px;
+    min-width: 320px;
+    font-size: 14px;
+}
+.demo-hero .command-trigger:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(232,103,42,0.5);
+    color: var(--brand-cream);
+}
+.demo-hero .command-trigger kbd {
+    background: rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.15);
+    color: rgba(245,241,234,0.7);
+}
+
+.shortcut-hint {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(245,241,234,0.4);
+    margin-top: 24px;
+}
+
+.shortcut-hint kbd {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--brand-cream);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+}
+
+/* Section chrome */
+.demo-section {
+    padding: 64px 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.demo-section-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+}
+
+.demo-section h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 36px;
+    margin: 0 0 12px;
+    color: var(--brand-cream);
+    letter-spacing: -0.01em;
+}
+
+.demo-section h2 em {
+    font-style: italic;
+    color: var(--brand-orange);
+    font-weight: 500;
+}
+
+.demo-section .sec-lead {
+    color: rgba(245,241,234,0.6);
+    margin: 0 0 36px;
+    max-width: 680px;
+    font-size: 15px;
+}
+
+/* Example cards grid */
+.example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.example-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 22px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.example-card:hover {
+    border-color: rgba(232,103,42,0.3);
+}
+
+.example-card .ex-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.example-card .ex-tag {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(232,103,42,0.15);
+    color: var(--brand-orange);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.example-card h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 500;
+    margin: 0;
+    color: var(--brand-cream);
+}
+
+.example-card p {
+    font-size: 13.5px;
+    color: rgba(245,241,234,0.6);
+    margin: 0;
+    line-height: 1.55;
+    flex: 1;
+}
+
+.example-card .ex-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--brand-cream);
+    font-family: var(--body);
+    font-size: 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: all 0.15s;
+}
+.example-card .ex-trigger:hover {
+    background: rgba(232,103,42,0.1);
+    border-color: var(--brand-orange);
+    color: #fff;
+}
+.example-card .ex-trigger i {
+    color: var(--brand-orange);
+}
+.example-card .ex-trigger kbd {
+    margin-left: auto;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(245,241,234,0.6);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+}
+
+/* Event log panel */
+.event-log-wrap {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.event-log-head {
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.event-log-head h3 {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--brand-cream);
+}
+
+.event-log-clear {
+    appearance: none;
+    background: transparent;
+    color: rgba(245,241,234,0.5);
+    border: 0;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: var(--body);
+    transition: all 0.15s;
+}
+.event-log-clear:hover {
+    color: var(--brand-orange);
+    background: rgba(232,103,42,0.1);
+}
+
+.event-log {
+    padding: 12px 20px;
+    height: 240px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: rgba(245,241,234,0.6);
+}
+
+.event-log .empty {
+    color: rgba(245,241,234,0.3);
+    font-style: italic;
+}
+
+.event-log .log-line {
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.event-log .log-line:last-child { border-bottom: 0; }
+
+.event-log .log-time { color: rgba(245,241,234,0.3); margin-right: 8px; }
+.event-log .log-event-open    { color: #5dd982; }
+.event-log .log-event-close   { color: #f88; }
+.event-log .log-event-filter  { color: #c684ff; }
+.event-log .log-event-select  { color: var(--brand-orange); font-weight: 500; }
+.event-log .log-detail { color: rgba(245,241,234,0.5); }
+
+/* Toolbar (for action menu demo) */
+.demo-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.demo-toolbar .tb-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    color: var(--brand-cream);
+    flex: 1;
+    font-size: 15px;
+}
+
+.demo-toolbar .tb-meta {
+    color: rgba(245,241,234,0.4);
+    font-size: 12px;
+    font-family: var(--mono);
+}
+
+/* Theme status row */
+.theme-status-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.theme-status-row .status {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(245,241,234,0.5);
+}
+
+.theme-status-row .status strong {
+    color: var(--brand-orange);
+}
+
+/* Footer */
+.demo-footer {
+    padding: 40px 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+    color: rgba(245,241,234,0.4);
+    font-size: 13px;
+}
+.demo-footer a {
+    color: var(--brand-orange);
+    text-decoration: none;
+}
+.demo-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Override plugin colors to harmonise with demo dark theme */
+/* The plugin's CSS uses CSS vars — we override per-instance to keep dark cohesion */
+.command-menu {
+    --command-bg:            #15263b;
+    --command-fg:            #f5f1ea;
+    --command-muted:         rgba(245,241,234,0.55);
+    --command-border:        rgba(255,255,255,0.08);
+    --command-border-strong: rgba(255,255,255,0.16);
+    --command-hover:         rgba(255,255,255,0.05);
+    --command-active-bg:     rgba(232,103,42,0.15);
+    --command-active-fg:     #ffffff;
+    --command-accent:        #e8672a;
+    --command-backdrop:      rgba(10,25,41,0.75);
+    --command-shadow:        0 30px 80px -10px rgba(0,0,0,0.6),
+                             0 8px 20px -4px rgba(0,0,0,0.4);
+}
+
+/* Brand-orange icon on the active item */
+.command-menu [data-command-item][aria-selected="true"] [data-command-icon] {
+    color: var(--brand-orange);
+}
+</style>
+</head>
+<body>
+
+<section class="demo-hero">
+    <div class="demo-hero-inner">
+
+        <div class="demo-eyebrow">
+            Themestrap <span class="dot"></span> PluginCommandMenu <span class="dot"></span> Live Demo
+        </div>
+
+        <h1>A <em>command palette</em><br>for the Themestrap way.</h1>
+
+        <p class="lead">
+            Press <kbd>⌘K</kbd> (or <kbd>Ctrl K</kbd>) anywhere on this page to summon the menu.
+            Type to filter, navigate with arrow keys, hit <kbd>↵</kbd> to execute. Built as a vanilla
+            jQuery plugin — no React, no headless wrappers, no build step.
+        </p>
+
+        <div class="try-button-row">
+            <button class="command-trigger" data-command-open="main-cmd">
+                <i class="fas fa-search"></i>
+                <span class="command-trigger-label">Search commands…</span>
+                <span class="command-trigger-shortcut"><kbd>⌘</kbd><kbd>K</kbd></span>
+            </button>
+        </div>
+
+        <p class="shortcut-hint">
+            Also try <kbd>↑</kbd> <kbd>↓</kbd> to navigate, <kbd>↵</kbd> to select, <kbd>esc</kbd> to close.
+        </p>
+    </div>
+</section>
+
+<section class="demo-section">
+    <div class="demo-section-inner">
+
+        <h2>Four different <em>shapes</em>, one plugin.</h2>
+        <p class="sec-lead">
+            The same <code>PluginCommandMenu</code> drives all four examples below. Each just feeds it
+            different items and different options. Click any trigger to see it in action.
+        </p>
+
+        <div class="example-grid">
+
+            <!-- 1. Main navigation palette (re-uses the hero menu) -->
+            <div class="example-card">
+                <div class="ex-head">
+                    <span class="ex-tag">Nav</span>
+                </div>
+                <h3>Site navigation palette</h3>
+                <p>
+                    Three groups — Navigation, Actions, Help — searchable across labels and keywords.
+                    Recently-selected items pin themselves to the top via localStorage. Same menu the
+                    hero ⌘K trigger summons.
+                </p>
+                <button class="ex-trigger" data-command-open="main-cmd">
+                    <i class="fas fa-compass"></i>
+                    Open navigation palette
+                    <kbd>⌘ K</kbd>
+                </button>
+            </div>
+
+            <!-- 2. Action palette with JS callbacks -->
+            <div class="example-card">
+                <div class="ex-head">
+                    <span class="ex-tag">Actions</span>
+                </div>
+                <h3>Document actions menu</h3>
+                <p>
+                    Action items dispatch real JS callbacks via <code>registerAction()</code> — no URL
+                    navigation. The toolbar below reflects state changes; selecting "Toggle starred"
+                    or "Archive" updates the document panel live.
+                </p>
+                <button class="ex-trigger" data-command-open="actions-cmd">
+                    <i class="fas fa-bolt"></i>
+                    Open action menu
+                    <kbd>click</kbd>
+                </button>
+
+                <div class="demo-toolbar">
+                    <i class="fas fa-file-lines" style="color: rgba(245,241,234,0.5);"></i>
+                    <span class="tb-title" id="doc-title">Q4 Strategy Memo</span>
+                    <span class="tb-meta" id="doc-status">draft · not starred</span>
+                </div>
+            </div>
+
+            <!-- 3. Slash launcher (GitHub style) -->
+            <div class="example-card">
+                <div class="ex-head">
+                    <span class="ex-tag">Search</span>
+                </div>
+                <h3>Slash-key launcher</h3>
+                <p>
+                    Press <kbd>/</kbd> anywhere outside a text field to open a focused search palette.
+                    Same plugin, different shortcut grammar, different placeholder. GitHub-style.
+                </p>
+                <button class="ex-trigger" data-command-open="search-cmd">
+                    <i class="fas fa-magnifying-glass"></i>
+                    Open search palette
+                    <kbd>/</kbd>
+                </button>
+            </div>
+
+            <!-- 4. Theme switcher -->
+            <div class="example-card">
+                <div class="ex-head">
+                    <span class="ex-tag">Theme</span>
+                </div>
+                <h3>Theme switcher palette</h3>
+                <p>
+                    A tiny palette with four accent options. The active accent updates on selection
+                    via a JS callback that swaps CSS variables on the document root — watch the
+                    orange highlights change color everywhere.
+                </p>
+                <button class="ex-trigger" data-command-open="theme-cmd">
+                    <i class="fas fa-palette"></i>
+                    Open theme switcher
+                    <kbd>⌘ T</kbd>
+                </button>
+
+                <div class="theme-status-row">
+                    <span class="status">Active accent: <strong id="theme-status">orange</strong></span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<section class="demo-section">
+    <div class="demo-section-inner">
+
+        <h2>Event <em>visibility</em>.</h2>
+        <p class="sec-lead">
+            Every plugin event from every menu on this page is logged here. Open a palette, type
+            anything, select an item — and watch the lifecycle play out in real time.
+        </p>
+
+        <div class="event-log-wrap">
+            <div class="event-log-head">
+                <h3>Event log</h3>
+                <button class="event-log-clear" id="clear-log">Clear</button>
+            </div>
+            <div class="event-log" id="event-log">
+                <div class="empty">No events yet. Press ⌘K (or click any trigger above) to start.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div data-plugin-command-menu id="main-cmd" aria-label="Main command palette">
+
+    <div data-command-backdrop></div>
+
+    <div data-command-panel>
+
+        <div data-command-search>
+            <i class="fas fa-search"></i>
+            <input data-command-input type="text" placeholder="Type a command or search…">
+            <kbd>esc</kbd>
+        </div>
+
+        <div data-command-list>
+
+            <div data-command-empty>
+                <strong>No results.</strong>
+                Try a different search term, or try one of: dashboard, settings, help, invite.
+            </div>
+
+            <!-- Recents auto-populated -->
+            <div data-command-group data-command-recent data-command-heading="Recently used"></div>
+
+            <div data-command-group data-command-heading="Navigation">
+                <button data-command-item
+                        data-command-keywords="dashboard home overview stats"
+                        data-command-action="demo-nav-home">
+                    <i class="fas fa-house" data-command-icon></i>
+                    <span data-command-label>Go to dashboard</span>
+                    <kbd data-command-shortcut>G D</kbd>
+                </button>
+                <button data-command-item
+                        data-command-keywords="projects work folders"
+                        data-command-action="demo-nav-projects">
+                    <i class="fas fa-folder" data-command-icon></i>
+                    <span data-command-label>Browse projects</span>
+                    <kbd data-command-shortcut>G P</kbd>
+                </button>
+                <button data-command-item
+                        data-command-keywords="settings preferences config gear"
+                        data-command-action="demo-nav-settings">
+                    <i class="fas fa-gear" data-command-icon></i>
+                    <span data-command-label>Open settings</span>
+                    <kbd data-command-shortcut>G S</kbd>
+                </button>
+            </div>
+
+            <div data-command-group data-command-heading="Actions">
+                <button data-command-item
+                        data-command-keywords="create add new"
+                        data-command-action="demo-action-new">
+                    <i class="fas fa-plus" data-command-icon></i>
+                    <span data-command-label>New project…</span>
+                    <span data-command-badge>New</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="invite collaborate team user"
+                        data-command-action="demo-action-invite">
+                    <i class="fas fa-user-plus" data-command-icon></i>
+                    <span data-command-label>Invite teammate</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="upload import file"
+                        data-command-action="demo-action-upload">
+                    <i class="fas fa-upload" data-command-icon></i>
+                    <span data-command-label>Upload file</span>
+                </button>
+            </div>
+
+            <div data-command-group data-command-heading="Help">
+                <button data-command-item
+                        data-command-keywords="docs documentation guides reference"
+                        data-command-action="demo-help-docs">
+                    <i class="fas fa-book" data-command-icon></i>
+                    <span data-command-label>Read the docs</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="support contact email"
+                        data-command-action="demo-help-support">
+                    <i class="fas fa-life-ring" data-command-icon></i>
+                    <span data-command-label>Contact support</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="shortcut keyboard hotkey cheatsheet"
+                        data-command-action="demo-help-shortcuts">
+                    <i class="fas fa-keyboard" data-command-icon></i>
+                    <span data-command-label>Keyboard shortcuts</span>
+                    <kbd data-command-shortcut>?</kbd>
+                </button>
+            </div>
+        </div>
+
+        <div data-command-footer>
+            <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+            <span><kbd>↵</kbd> select</span>
+            <span><kbd>esc</kbd> close</span>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-command-menu id="actions-cmd"
+     data-plugin-options='{"shortcut": null}'
+     aria-label="Document actions">
+
+    <div data-command-backdrop></div>
+
+    <div data-command-panel class="command-sm">
+
+        <div data-command-search>
+            <i class="fas fa-bolt"></i>
+            <input data-command-input type="text" placeholder="Type an action…">
+        </div>
+
+        <div data-command-list>
+
+            <div data-command-empty>No actions match.</div>
+
+            <div data-command-group data-command-heading="Document">
+                <button data-command-item
+                        data-command-keywords="star favourite favorite bookmark"
+                        data-command-action="toggle-star">
+                    <i class="fas fa-star" data-command-icon></i>
+                    <span data-command-label>Toggle starred</span>
+                    <kbd data-command-shortcut>S</kbd>
+                </button>
+                <button data-command-item
+                        data-command-keywords="publish go live"
+                        data-command-action="publish">
+                    <i class="fas fa-paper-plane" data-command-icon></i>
+                    <span data-command-label>Publish document</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="archive box hide"
+                        data-command-action="archive">
+                    <i class="fas fa-box-archive" data-command-icon></i>
+                    <span data-command-label>Archive document</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="rename title change name"
+                        data-command-action="rename">
+                    <i class="fas fa-pen" data-command-icon></i>
+                    <span data-command-label>Rename document…</span>
+                </button>
+            </div>
+
+            <div data-command-group data-command-heading="Danger zone">
+                <button data-command-item
+                        data-command-keywords="delete trash remove"
+                        data-command-action="delete"
+                        class="text-danger">
+                    <i class="fas fa-trash" data-command-icon></i>
+                    <span data-command-label>Delete document</span>
+                </button>
+            </div>
+        </div>
+
+        <div data-command-footer>
+            <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+            <span><kbd>↵</kbd> select</span>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-command-menu id="search-cmd"
+     data-plugin-options='{"shortcut": "/"}'
+     aria-label="Search">
+
+    <div data-command-backdrop></div>
+
+    <div data-command-panel>
+
+        <div data-command-search>
+            <i class="fas fa-magnifying-glass"></i>
+            <input data-command-input type="text" placeholder="Search docs, issues, pages…">
+        </div>
+
+        <div data-command-list>
+            <div data-command-empty>No matches.</div>
+
+            <div data-command-group data-command-heading="Suggested">
+                <button data-command-item
+                        data-command-keywords="installation setup getting started"
+                        data-command-action="search-docs">
+                    <i class="fas fa-book" data-command-icon></i>
+                    <span data-command-label>Installation guide</span>
+                    <span data-command-description>How to install Themestrap in your MODX project</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="api reference methods events"
+                        data-command-action="search-api">
+                    <i class="fas fa-code" data-command-icon></i>
+                    <span data-command-label>Plugin API reference</span>
+                    <span data-command-description>Methods, events, and instance properties</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="snippet modx php tpl"
+                        data-command-action="search-snippet">
+                    <i class="fas fa-puzzle-piece" data-command-icon></i>
+                    <span data-command-label>tsCommandMenu snippet</span>
+                    <span data-command-description>The MODX snippet wrapper</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="recipe example cookbook patterns"
+                        data-command-action="search-recipes">
+                    <i class="fas fa-utensils" data-command-icon></i>
+                    <span data-command-label>Recipe cookbook</span>
+                    <span data-command-description>Copy-paste patterns for common use cases</span>
+                </button>
+            </div>
+        </div>
+
+        <div data-command-footer>
+            <span><kbd>/</kbd> open</span>
+            <span><kbd>↵</kbd> select</span>
+            <span><kbd>esc</kbd> close</span>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-command-menu id="theme-cmd"
+     data-plugin-options='{"shortcut": "mod+t"}'
+     aria-label="Theme switcher">
+
+    <div data-command-backdrop></div>
+
+    <div data-command-panel class="command-sm">
+
+        <div data-command-search>
+            <i class="fas fa-palette"></i>
+            <input data-command-input type="text" placeholder="Pick an accent color…">
+        </div>
+
+        <div data-command-list>
+            <div data-command-empty>No theme matches.</div>
+
+            <div data-command-group data-command-heading="Accent color">
+                <button data-command-item
+                        data-command-keywords="orange warm sunset"
+                        data-command-action="theme-orange">
+                    <i class="fas fa-circle" data-command-icon style="color:#e8672a"></i>
+                    <span data-command-label>Sunset orange</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="teal cool ocean"
+                        data-command-action="theme-teal">
+                    <i class="fas fa-circle" data-command-icon style="color:#2ab8c8"></i>
+                    <span data-command-label>Ocean teal</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="violet purple plum"
+                        data-command-action="theme-violet">
+                    <i class="fas fa-circle" data-command-icon style="color:#a472ff"></i>
+                    <span data-command-label>Violet</span>
+                </button>
+                <button data-command-item
+                        data-command-keywords="lime green fresh"
+                        data-command-action="theme-lime">
+                    <i class="fas fa-circle" data-command-icon style="color:#5dd982"></i>
+                    <span data-command-label>Lime</span>
+                </button>
+            </div>
+        </div>
+
+        <div data-command-footer>
+            <span><kbd>⌘</kbd><kbd>T</kbd> open</span>
+            <span><kbd>↵</kbd> apply</span>
+        </div>
+    </div>
+</div>
+
+<footer class="demo-footer">
+    <p>
+        Themestrap · <code>PluginCommandMenu</code> · part of the Themestrap component library
+    </p>
+</footer>
+
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.commandmenu.js"></script>
+$(function () {
+
+    /* Initialise the menus that carry their options in data-plugin-options.
+       The main-cmd has none, so we init it separately below with recents. */
+    $('[data-plugin-command-menu]:not(.manual)').not('#main-cmd').each(function () {
+        const $this = $(this);
+        const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+        $this.themestrapPluginCommandMenu(opts);
+    });
+
+    /* The main menu uses recents — pass that option explicitly */
+    $('#main-cmd').themestrapPluginCommandMenu({
+        recent: true,
+        recentLimit: 4,
+    });
+    const main = $('#main-cmd').data('__pluginCommandMenu');
+
+    /* Event log ─────────────────────────────────────────────*/
+    const $log = $('#event-log');
+    let logCount = 0;
+
+    function fmtTime() {
+        const d = new Date();
+        return d.toTimeString().slice(0, 8);
+    }
+
+    function logEvent(menuId, evtName, detail) {
+        if (logCount === 0) $log.empty();
+        const $line = $('<div>').addClass('log-line');
+        $line.append($('<span>').addClass('log-time').text(fmtTime()));
+        $line.append($('<span>').addClass('log-event-' + evtName).text('[' + menuId + ']'));
+        $line.append(' ');
+        $line.append($('<strong>').addClass('log-event-' + evtName).text('command:' + evtName));
+        if (detail) {
+            $line.append(' ');
+            $line.append($('<span>').addClass('log-detail').text(detail));
+        }
+        $log.prepend($line);
+        logCount++;
+        if (logCount > 50) {
+            $log.children().slice(50).remove();
+        }
+    }
+
+    /* Subscribe to every menu — same handler, parametised by id */
+    $('[data-plugin-command-menu]').each(function () {
+        const id = $(this).attr('id');
+        $(this)
+            .on('command:open',   () => logEvent(id, 'open'))
+            .on('command:close',  () => logEvent(id, 'close'))
+            .on('command:filter', (e, inst, q, n) => {
+                if (q !== '') logEvent(id, 'filter', '"' + q + '" → ' + n + ' match' + (n === 1 ? '' : 'es'));
+            })
+            .on('command:select', (e, inst, $item, payload) => {
+                logEvent(id, 'select', payload.label + (payload.action ? '  (action: ' + payload.action + ')' : ''));
+            });
+    });
+
+    $('#clear-log').on('click', () => {
+        $log.empty().append($('<div class="empty">').text('Cleared. Open a palette to start logging again.'));
+        logCount = 0;
+    });
+
+    /* Action callbacks ──────────────────────────────────────*/
+
+    /* Main menu — nav + action + help. The select event is already logged
+       by the global handler above, so these callbacks can be no-ops in the
+       demo. Registering them demonstrates that the plugin invokes them
+       even when there's no href. */
+    [
+        'demo-nav-home', 'demo-nav-projects', 'demo-nav-settings',
+        'demo-action-new', 'demo-action-invite', 'demo-action-upload',
+        'demo-help-docs', 'demo-help-support', 'demo-help-shortcuts',
+    ].forEach(key => {
+        main.registerAction(key, () => { /* logged by global handler */ });
+    });
+
+    /* Document actions menu — these have visible side effects */
+    const actions = $('#actions-cmd').data('__pluginCommandMenu');
+    let starred = false;
+    let docStatus = 'draft · not starred';
+
+    function refreshDocStatus() {
+        $('#doc-status').text(docStatus + (starred ? ' · ★ starred' : ''));
+    }
+
+    actions.registerAction('toggle-star', () => {
+        starred = !starred;
+        refreshDocStatus();
+    });
+    actions.registerAction('publish', () => {
+        docStatus = 'published';
+        refreshDocStatus();
+    });
+    actions.registerAction('archive', () => {
+        docStatus = 'archived';
+        refreshDocStatus();
+    });
+    actions.registerAction('rename', () => {
+        const next = prompt('New document name:', $('#doc-title').text());
+        if (next) $('#doc-title').text(next);
+    });
+    actions.registerAction('delete', () => {
+        if (confirm('Delete the document? This is just a demo — nothing is actually deleted.')) {
+            $('#doc-title').text('(deleted)');
+            docStatus = 'deleted';
+            starred = false;
+            refreshDocStatus();
+        }
+    });
+
+    /* Theme switcher */
+    const theme = $('#theme-cmd').data('__pluginCommandMenu');
+    const themeColors = {
+        orange: '#e8672a',
+        teal:   '#2ab8c8',
+        violet: '#a472ff',
+        lime:   '#5dd982',
+    };
+
+    function applyTheme(name) {
+        const c = themeColors[name];
+        if (!c) return;
+        document.documentElement.style.setProperty('--brand-orange', c);
+        document.documentElement.style.setProperty('--brand-orange-2', c);
+        $('#theme-status').text(name);
+    }
+
+    theme.registerAction('theme-orange', () => applyTheme('orange'));
+    theme.registerAction('theme-teal',   () => applyTheme('teal'));
+    theme.registerAction('theme-violet', () => applyTheme('violet'));
+    theme.registerAction('theme-lime',   () => applyTheme('lime'));
+
+    /* Search menu — all actions just log via global handler */
+    const search = $('#search-cmd').data('__pluginCommandMenu');
+    ['search-docs', 'search-api', 'search-snippet', 'search-recipes'].forEach(key => {
+        search.registerAction(key, () => { /* logged by global handler */ });
+    });
+
+});
+</script>
+
+</body>
+</html>

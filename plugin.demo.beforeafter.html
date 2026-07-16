@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginBeforeAfter — Live Demo | Themestrap</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--ts-teal); }
+code {
+    background: rgba(10,25,41,.05);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+.btn-primary {
+    background: var(--ts-orange);
+    border-color: var(--ts-orange);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background: var(--ts-orange-2) !important;
+    border-color: var(--ts-orange-2) !important;
+}
+.btn-outline-primary {
+    color: var(--ts-orange);
+    border-color: var(--ts-orange);
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active,
+.btn-check:checked + .btn-outline-primary {
+    background: var(--ts-orange) !important;
+    border-color: var(--ts-orange) !important;
+    color: #fff !important;
+}
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 {
+    font-weight: 700;
+    letter-spacing: -.5px;
+    margin: 0 0 8px;
+}
+.demo-hero .lead {
+    color: #b9c6d6;
+    max-width: 720px;
+    margin: 0;
+}
+.demo-hero .badge-orange {
+    background: var(--ts-orange);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: 6px 12px;
+    text-transform: uppercase;
+    font-size: 11px;
+    border-radius: 4px;
+}
+.demo-hero code {
+    background: rgba(255,255,255,.12);
+    color: #ffd9c7;
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+/* Cards */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+}
+.demo-card .card-head {
+    padding: 18px 24px 0;
+}
+.demo-card .card-body {
+    padding: 20px 24px 24px;
+}
+.demo-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ts-teal);
+    margin: 0 0 8px;
+}
+.demo-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ts-navy);
+    margin: 0 0 6px;
+}
+.demo-card p.lead-sm {
+    color: #54657a;
+    font-size: 14px;
+    margin: 0 0 14px;
+}
+
+.tip {
+    background: #e8f7f9;
+    border-left: 4px solid var(--ts-teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #1f4348;
+    margin-bottom: 24px;
+}
+.tip i { color: var(--ts-teal); }
+
+.note {
+    font-size: 12.5px;
+    color: var(--ts-muted);
+}
+
+/* Code snippet */
+pre.snip {
+    background: #0e2238;
+    color: #e1eaf3;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 12px 0 0;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+pre.snip .c1 { color: #6c8bab; font-style: italic; }
+pre.snip .tag { color: #ff9d6c; }
+pre.snip .attr { color: #f9c98c; }
+pre.snip .val { color: #a8e1ff; }
+pre.snip .str { color: #d6f8a3; }
+
+/* Per-card layout helpers */
+.demo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 767px) { .demo-grid-2 { grid-template-columns: 1fr; } }
+
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 14px 18px;
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.controls-row label {
+    font-size: 12px; font-weight: 600; color: #54657a;
+    margin: 0 4px 0 0; text-transform: uppercase; letter-spacing: .04em;
+}
+
+
+.ba-shell {
+    border-radius: 14px; overflow: hidden;
+    box-shadow: 0 12px 36px rgba(10,25,41,.18);
+    margin-bottom: 14px;
+}
+
+/* Mark the second image as the "after" — picsum returns the same image at the
+   same seed, so we apply a grayscale filter to the BEFORE image purely for
+   visual contrast in the demo. */
+.ba-demo > img:first-of-type { filter: grayscale(1) brightness(.95); }
+
+.options-list {
+    list-style: none; padding: 0; margin: 0;
+    font-size: 13.5px; color: #54657a;
+}
+.options-list li {
+    padding: 8px 0; border-bottom: 1px solid var(--ts-border);
+    display: flex; gap: 10px;
+}
+.options-list li:last-child { border-bottom: 0; }
+.options-list code { color: var(--ts-orange); background: transparent; padding: 0; }
+
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <h1 class="mt-3">PluginBeforeAfter Live Demo</h1>
+    <p class="lead">A draggable image-comparison slider — the classic before/after reveal. Stack two same-size images inside a wrapper, attach the plugin, and a handle lets visitors wipe between them. Horizontal or vertical, with custom labels and interaction modes.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        In production the plugin wraps the TwentyTwenty library shipped inside <code>plugins.min.js</code>. This demo bundles a minimal vanilla implementation so the page works standalone — the public API is identical.
+      </div>
+
+
+      <!-- 1. Horizontal default -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">orientation: horizontal · default</p>
+          <h3>Drag the handle</h3>
+          <p class="lead-sm">The canonical pattern: a horizontal handle wipes between two stacked images.</p>
+          <div class="ba-shell">
+            <div class="ba-demo" data-plugin-before-after style="max-width:920px;">
+              <img src="https://picsum.photos/seed/landscape42/1200/675" alt="Before">
+              <img src="https://picsum.photos/seed/landscape42/1200/675" alt="After">
+            </div>
+          </div>
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">data-plugin-before-after</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="str">"before.jpg"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="str">"after.jpg"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+      <!-- 2. Vertical -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">orientation: vertical</p>
+          <h3>Top / bottom wipe</h3>
+          <p class="lead-sm">Useful when the difference between images is concentrated vertically — exteriors vs interiors, day vs night skies.</p>
+          <div class="ba-shell">
+            <div class="ba-demo" data-plugin-before-after
+                 data-plugin-options='{"orientation":"vertical"}'
+                 style="max-width:920px;">
+              <img src="https://picsum.photos/seed/cityNight/1200/675" alt="Before">
+              <img src="https://picsum.photos/seed/cityNight/1200/675" alt="After">
+            </div>
+          </div>
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">data-plugin-before-after</span>
+     <span class="attr">data-plugin-options</span>=<span class="str">'{"orientation":"vertical"}'</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+      <!-- 3. Hover follow + no overlay -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">move_slider_on_hover · no_overlay</p>
+          <h3>Hover-driven, label-free</h3>
+          <p class="lead-sm">No drag required — the handle follows the cursor. The overlay labels are hidden via <code>no_overlay</code>.</p>
+          <div class="ba-shell">
+            <div class="ba-demo" data-plugin-before-after
+                 data-plugin-options='{"move_slider_on_hover":true, "no_overlay":true, "move_with_handle_only":false}'
+                 style="max-width:920px;">
+              <img src="https://picsum.photos/seed/portrait7/1200/675" alt="Before">
+              <img src="https://picsum.photos/seed/portrait7/1200/675" alt="After">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Custom labels + initial offset -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">before_label · after_label · default_offset_pct</p>
+          <h3>Custom labels, off-center handle</h3>
+          <p class="lead-sm">Initial position is shifted to 25% with <code>default_offset_pct: 0.25</code>. Hover anywhere on the image to see the captions.</p>
+          <div class="ba-shell">
+            <div class="ba-demo" data-plugin-before-after
+                 data-plugin-options='{"default_offset_pct":0.25, "before_label":"Original", "after_label":"Retouched"}'
+                 style="max-width:920px;">
+              <img src="https://picsum.photos/seed/coffeebar/1200/675" alt="Before">
+              <img src="https://picsum.photos/seed/coffeebar/1200/675" alt="After">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Click-to-move -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">click_to_move</p>
+          <h3>Tap anywhere to set the divider</h3>
+          <p class="lead-sm">A precision mode for compact viewports. Each click jumps the handle to that exact horizontal position.</p>
+          <div class="ba-shell">
+            <div class="ba-demo" data-plugin-before-after
+                 data-plugin-options='{"click_to_move":true, "move_with_handle_only":false}'
+                 style="max-width:920px;">
+              <img src="https://picsum.photos/seed/forestpath/1200/675" alt="Before">
+              <img src="https://picsum.photos/seed/forestpath/1200/675" alt="After">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reference -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Options reference</p>
+          <h3>What each flag does</h3>
+          <ul class="options-list">
+            <li><code>orientation</code> — <span><strong>horizontal</strong> (left/right wipe) or <strong>vertical</strong> (top/bottom).</span></li>
+            <li><code>default_offset_pct</code> — <span>Starting handle position as a fraction 0–1.</span></li>
+            <li><code>before_label</code> · <code>after_label</code> — <span>Captions shown on hover.</span></li>
+            <li><code>no_overlay</code> — <span>Hide hover labels entirely.</span></li>
+            <li><code>move_slider_on_hover</code> — <span>Divider follows the cursor without dragging.</span></li>
+            <li><code>move_with_handle_only</code> — <span>Restrict drag to the round handle.</span></li>
+            <li><code>click_to_move</code> — <span>Tap anywhere to jump the handle.</span></li>
+          </ul>
+        </div>
+      </div>
+
+
+      <p class="text-center note mt-5 pt-3">
+        Themestrap — PluginBeforeAfter demo · plugin runs live in your browser.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<!-- PluginBeforeAfter plugin (verbatim Themestrap source) -->
+<script>
+
+/* ─── Minimal TwentyTwenty replacement (subset used by PluginBeforeAfter) ─── */
+(function ($) {
+    if ($.fn.twentytwenty) return;
+
+    // Inject minimal stylesheet
+    if (!document.getElementById('mini-tt-styles')) {
+        const css = document.createElement('style');
+        css.id = 'mini-tt-styles';
+        css.textContent = `
+.twentytwenty-container { position: relative; overflow: hidden; user-select: none;
+    -webkit-user-drag: none; line-height: 0; touch-action: none; }
+.twentytwenty-container img { display: block; max-width: 100%; height: auto;
+    -webkit-user-drag: none; pointer-events: none; }
+.twentytwenty-before-wrap, .twentytwenty-after-wrap {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden; }
+.twentytwenty-before-wrap img,
+.twentytwenty-after-wrap  img {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover; }
+.twentytwenty-horizontal .twentytwenty-before-wrap {
+    clip-path: polygon(0 0, var(--tt-x, 50%) 0, var(--tt-x, 50%) 100%, 0 100%); }
+.twentytwenty-vertical   .twentytwenty-before-wrap {
+    clip-path: polygon(0 0, 100% 0, 100% var(--tt-y, 50%), 0 var(--tt-y, 50%)); }
+
+.twentytwenty-handle {
+    position: absolute;
+    z-index: 30;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,.25), 0 6px 18px rgba(0,0,0,.45);
+    border-radius: 50%;
+    width: 46px; height: 46px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1f2d3d; font-size: 14px; cursor: ew-resize;
+    transform: translate(-50%, -50%);
+    transition: box-shadow .15s, transform .12s;
+}
+.twentytwenty-horizontal .twentytwenty-handle {
+    top: 50%; left: var(--tt-x, 50%); cursor: ew-resize; }
+.twentytwenty-vertical .twentytwenty-handle {
+    left: 50%; top: var(--tt-y, 50%); cursor: ns-resize; }
+.twentytwenty-handle:hover, .twentytwenty-container.dragging .twentytwenty-handle {
+    box-shadow: 0 0 0 6px rgba(255,255,255,.3), 0 8px 22px rgba(0,0,0,.6); }
+.twentytwenty-handle::before {
+    content: "\u2194"; font-weight: 700;
+}
+.twentytwenty-vertical .twentytwenty-handle::before { content: "\u2195"; }
+
+.twentytwenty-divider {
+    position: absolute; z-index: 20; background: #fff;
+    pointer-events: none;
+}
+.twentytwenty-horizontal .twentytwenty-divider {
+    top: 0; bottom: 0; width: 3px; left: var(--tt-x, 50%);
+    transform: translateX(-50%); }
+.twentytwenty-vertical .twentytwenty-divider {
+    left: 0; right: 0; height: 3px; top: var(--tt-y, 50%);
+    transform: translateY(-50%); }
+
+.twentytwenty-label {
+    position: absolute; z-index: 25;
+    color: #fff; background: rgba(15,28,42,.78);
+    padding: 6px 14px; border-radius: 24px;
+    font-size: 12px; font-weight: 600; letter-spacing: .03em;
+    text-transform: uppercase;
+    opacity: 0; transition: opacity .25s;
+    pointer-events: none; backdrop-filter: blur(4px);
+}
+.twentytwenty-container:hover .twentytwenty-label { opacity: 1; }
+.twentytwenty-horizontal .twentytwenty-before-label { top: 50%; left: 18px;  transform: translateY(-50%); }
+.twentytwenty-horizontal .twentytwenty-after-label  { top: 50%; right: 18px; transform: translateY(-50%); }
+.twentytwenty-vertical   .twentytwenty-before-label { left: 50%; top: 18px;    transform: translateX(-50%); }
+.twentytwenty-vertical   .twentytwenty-after-label  { left: 50%; bottom: 18px; transform: translateX(-50%); }
+
+.twentytwenty-no-overlay .twentytwenty-label { display: none; }
+`;
+        document.head.appendChild(css);
+    }
+
+    $.fn.waitForImages = function (cb) {
+        const imgs = this.find('img').toArray();
+        if (imgs.length === 0) { cb && cb(); return this; }
+        let pending = imgs.length;
+        const done = () => { if (--pending <= 0) cb && cb(); };
+        imgs.forEach(img => {
+            if (img.complete && img.naturalWidth) { done(); }
+            else {
+                img.addEventListener('load',  done, { once: true });
+                img.addEventListener('error', done, { once: true });
+            }
+        });
+        return this;
+    };
+
+    $.fn.twentytwenty = function (opts) {
+        const o = $.extend({
+            default_offset_pct:    0.5,
+            orientation:           'horizontal',
+            before_label:          'Before',
+            after_label:           'After',
+            no_overlay:            false,
+            move_slider_on_hover:  false,
+            move_with_handle_only: true,
+            click_to_move:         false
+        }, opts || {});
+
+        return this.each(function () {
+            const $wrap = $(this);
+            if ($wrap.data('__tt-init')) return;
+            $wrap.data('__tt-init', true);
+
+            const $imgs = $wrap.find('> img');
+            if ($imgs.length < 2) return;
+            const $imgBefore = $imgs.eq(0);
+            const $imgAfter  = $imgs.eq(1);
+
+            // Determine aspect ratio from first loaded image
+            const w = $imgBefore[0].naturalWidth  || 1200;
+            const h = $imgBefore[0].naturalHeight || 600;
+            $wrap.css({
+                position: 'relative',
+                width: '100%',
+                paddingBottom: (h / w * 100) + '%'
+            });
+
+            const $afterWrap  = $('<div class="twentytwenty-after-wrap"/>');
+            const $beforeWrap = $('<div class="twentytwenty-before-wrap"/>');
+            $afterWrap.append($imgAfter.detach());
+            $beforeWrap.append($imgBefore.detach());
+
+            const $divider = $('<div class="twentytwenty-divider"/>');
+            const $handle  = $('<div class="twentytwenty-handle"/>');
+            const $lBefore = $('<div class="twentytwenty-label twentytwenty-before-label"/>').text(o.before_label);
+            const $lAfter  = $('<div class="twentytwenty-label twentytwenty-after-label"/>').text(o.after_label);
+
+            $wrap
+                .addClass('twentytwenty-container twentytwenty-' + o.orientation)
+                .toggleClass('twentytwenty-no-overlay', !!o.no_overlay)
+                .empty()
+                .append($afterWrap, $beforeWrap, $divider, $handle, $lBefore, $lAfter);
+
+            const setPos = (pct) => {
+                pct = Math.max(0, Math.min(1, pct));
+                if (o.orientation === 'vertical') {
+                    $wrap[0].style.setProperty('--tt-y', (pct * 100) + '%');
+                } else {
+                    $wrap[0].style.setProperty('--tt-x', (pct * 100) + '%');
+                }
+                $wrap.trigger('twentytwenty:move', [pct]);
+            };
+            setPos(o.default_offset_pct);
+
+            const eventTo = (ev) => {
+                const r = $wrap[0].getBoundingClientRect();
+                const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+                const y = (ev.touches ? ev.touches[0].clientY : ev.clientY) - r.top;
+                return o.orientation === 'vertical' ? (y / r.height) : (x / r.width);
+            };
+
+            let dragging = false;
+            const startDrag = (e) => {
+                dragging = true;
+                $wrap.addClass('dragging');
+                setPos(eventTo(e));
+                e.preventDefault();
+            };
+            const onMove = (e) => {
+                if (!dragging) return;
+                setPos(eventTo(e));
+                e.preventDefault();
+            };
+            const endDrag = () => { dragging = false; $wrap.removeClass('dragging'); };
+
+            // Mouse / touch
+            const $dragSource = o.move_with_handle_only ? $handle : $wrap;
+            $dragSource.on('mousedown touchstart', startDrag);
+            $(document).on('mousemove touchmove', onMove);
+            $(document).on('mouseup touchend touchcancel', endDrag);
+
+            // Hover follow
+            if (o.move_slider_on_hover) {
+                $wrap.on('mousemove', (e) => setPos(eventTo(e)));
+            }
+
+            // Click to move
+            if (o.click_to_move && !o.move_with_handle_only) {
+                $wrap.on('click', (e) => { if (!dragging) setPos(eventTo(e)); });
+            }
+
+            // Recalc aspect ratio once images load fully
+            $wrap.waitForImages(() => {
+                const nw = $imgBefore[0].naturalWidth, nh = $imgBefore[0].naturalHeight;
+                if (nw && nh) $wrap.css('paddingBottom', (nh / nw * 100) + '%');
+            });
+        });
+    };
+
+    $.fn.twentytwenty.errorShown = false;
+})(jQuery);
+
+
+/* ─── PluginBeforeAfter (verbatim Themestrap source) ─── */
+(((themestrap = {}, $) => {
+    const instanceName = '__beforeafter';
+
+    class PluginBeforeAfter {
+        constructor($el, opts) { return this.initialize($el, opts); }
+        initialize($el, opts) {
+            this.$el = $el;
+            this.setData().setOptions(opts).build();
+            return this;
+        }
+        setData() { this.$el.data(instanceName, this); return this; }
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginBeforeAfter.defaults, opts, { wrapper: this.$el });
+            return this;
+        }
+        build() {
+            if ($.isFunction($.fn.twentytwenty)) {
+                const self = this;
+                self.options.wrapper.waitForImages(() => {
+                    self.options.wrapper.twentytwenty(self.options);
+                });
+            } else {
+                console.warn('PluginBeforeAfter: twentytwenty not loaded');
+            }
+            return this;
+        }
+    }
+    PluginBeforeAfter.defaults = {
+        forceInit: true,
+        default_offset_pct: 0.5,
+        orientation: 'horizontal',
+        before_label: 'Before',
+        after_label: 'After',
+        no_overlay: false,
+        move_slider_on_hover: false,
+        move_with_handle_only: true,
+        click_to_move: false
+    };
+    $.extend(themestrap, { PluginBeforeAfter });
+    $.fn.themestrapPluginBeforeAfter = function(opts) {
+        return this.map(function() {
+            const $this = $(this);
+            if ($this.data(instanceName)) return $this.data(instanceName);
+            return new PluginBeforeAfter($this, opts);
+        });
+    }
+})).apply(this, [window.themestrap = window.themestrap || {}, jQuery]);
+
+</script>
+
+<!-- Demo wiring -->
+<script>
+
+$(function () {
+    $('[data-plugin-before-after]').each(function () {
+        const $this = $(this);
+        let opts = {};
+        try { opts = JSON.parse($this.attr('data-plugin-options') || '{}'); }
+        catch (e) { opts = {}; }
+        $this.themestrapPluginBeforeAfter(opts);
+    });
+});
+
+</script>
+
+</body>
+</html>

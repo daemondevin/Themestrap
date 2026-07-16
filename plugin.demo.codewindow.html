@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginCodeWindow — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+<style>
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--ts-bg); color: var(--ts-text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+a { color: var(--ts-teal); }
+code { background: rgba(10,25,41,.05); color: #c83a8c; padding: 1px 6px; border-radius: 3px; font-size: .87em; }
+.btn-primary { background: var(--ts-orange); border-color: var(--ts-orange); }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background: var(--ts-orange-2) !important; border-color: var(--ts-orange-2) !important; }
+.btn-outline-primary { color: var(--ts-orange); border-color: var(--ts-orange); }
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active { background: var(--ts-orange) !important; border-color: var(--ts-orange) !important; color: #fff !important; }
+
+/* Hero */
+.demo-hero { background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%); color: #fff; padding: 56px 0 48px; }
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 760px; margin: 0; }
+.demo-hero .badge-orange { background: var(--ts-orange); color: #fff; font-weight: 600; letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase; font-size: 11px; border-radius: 4px; }
+.demo-hero code { background: rgba(255,255,255,.12); color: #ffd9c7; padding: 2px 7px; border-radius: 4px; }
+
+/* Cards */
+.demo-card { background: #fff; border: 1px solid var(--ts-border); border-radius: 14px; box-shadow: 0 6px 24px rgba(10,25,41,.05); margin-bottom: 28px; }
+.demo-card .card-head { padding: 18px 24px 0; }
+.demo-card .card-body { padding: 20px 24px 24px; }
+.demo-section-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ts-teal); margin: 0 0 8px; }
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 6px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 4px; }
+
+/* Event log */
+.event-log { background: #0b1220; color: #cbd5e1; border-radius: 8px; padding: 12px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.7; height: 168px; overflow-y: auto; }
+.event-log .log-empty { color: #64748b; font-style: italic; }
+.event-log .ev { display: block; }
+.event-log .ev .t { color: #2ab8c8; }
+.event-log .ev .v { color: #ffd9c7; }
+
+/* Inline markup sample */
+pre.markup { background: #0b1220; color: #c7d2e0; border-radius: 8px; padding: 14px 16px; font-size: 12px; line-height: 1.6; overflow-x: auto; margin: 0; }
+.controls .btn { margin: 0 6px 8px 0; }
+.muted-note { font-size: 12.5px; color: var(--ts-muted); }
+footer.demo-foot { padding: 32px 0 48px; text-align: center; color: var(--ts-muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange">JS Plugin</span>
+    <h1 class="mt-3">PluginCodeWindow</h1>
+    <p class="lead">A macOS-style window around your <code>&lt;pre&gt;</code> code blocks — traffic-light chrome, a filename tab strip, an ambient glow, and a real ARIA tab pattern. Highlighting is delegated to PluginHighlight. Full reference on the <a href="plugin-codewindow.html">documentation page</a>.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+
+  <!-- 1 — Signature window -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">The default Windows chrome signature</p>
+      <h3>A multi-tab window</h3>
+      <p class="lead-sm">Each <code>&lt;pre&gt;</code> becomes a tab. Click them, or focus one and use the arrow keys.</p>
+    </div>
+    <div class="card-body">
+      <div data-plugin-code-window id="cwHero" data-plugin-options='{"glow": true}'>
+<pre data-code-window-tab="theme.config.js" data-plugin-highlight="javascript" data-plugin-highlight-lines="3,6-8"><code>// themestrap.config.js
+export default {
+  theme: 'dark',
+  plugins: {
+    commandMenu: { shortcut: 'mod+k' },
+    highlight:   { lineNumbers: true },
+    darkMode:    { storageKey: 'themestrap-theme' },
+  },
+}</code></pre>
+<pre data-code-window-tab="init.js" data-plugin-highlight="javascript"><code>import themestrap from './themestrap.js';
+
+themestrap.boot();
+console.log('themestrap ready');</code></pre>
+<pre data-code-window-tab="package.json" data-plugin-highlight="json"><code>{
+  "name": "themestrap-modx",
+  "version": "3.0.0",
+  "peerDependencies": { "jquery": "^3.7.1" }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1 — Signature window 2 -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">The Mac chrome signature</p>
+      <h3>A multi-tab window</h3>
+      <p class="lead-sm">Each <code>&lt;pre&gt;</code> becomes a tab. Click them, or focus one and use the arrow keys.</p>
+    </div>
+    <div class="card-body">
+      <div data-plugin-code-window id="cwHero2" data-plugin-options='{"glow": true, "chrome": "mac"}'>
+<pre data-code-window-tab="theme.config.js" data-plugin-highlight="javascript" data-plugin-highlight-lines="3,6-8"><code>// themestrap.config.js
+export default {
+  theme: 'dark',
+  plugins: {
+    commandMenu: { shortcut: 'mod+k' },
+    highlight:   { lineNumbers: true },
+    darkMode:    { storageKey: 'themestrap-theme' },
+  },
+}</code></pre>
+<pre data-code-window-tab="init.js" data-plugin-highlight="javascript"><code>import themestrap from './themestrap.js';
+
+themestrap.boot();
+console.log('themestrap ready');</code></pre>
+<pre data-code-window-tab="package.json" data-plugin-highlight="json"><code>{
+  "name": "themestrap-modx",
+  "version": "3.0.0",
+  "peerDependencies": { "jquery": "^3.7.1" }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 — Single pane + 3 — custom accent -->
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="demo-card h-100">
+        <div class="card-head">
+          <p class="demo-section-label">Single file</p>
+          <h3>One pane, glow off</h3>
+          <p class="lead-sm">One <code>&lt;pre&gt;</code> adds the <code>--single</code> modifier; the tab underline is hidden.</p>
+        </div>
+        <div class="card-body">
+          <div data-plugin-code-window id="cwSingle" data-plugin-options='{"glow": false}'>
+<pre data-code-window-tab="snippet.php" data-plugin-highlight="php"><code>&lt;?php
+return function (array $config): string {
+    return $config['theme'] ?? 'light';
+};</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="demo-card h-100">
+        <div class="card-head">
+          <p class="demo-section-label">Theming</p>
+          <h3>Teal accent, starts on tab 2</h3>
+          <p class="lead-sm"><code>accent</code> sets <code>--ts-cw-accent</code>; <code>activeTab</code> picks the initial pane.</p>
+        </div>
+        <div class="card-body">
+          <div data-plugin-code-window id="cwAccent" data-plugin-options='{"accent": "#2ab8c8", "activeTab": 1}'>
+<pre data-code-window-tab="before.css" data-plugin-highlight="css"><code>.btn {
+  background: #ccc;
+  border: 0;
+}</code></pre>
+<pre data-code-window-tab="after.css" data-plugin-highlight="css"><code>.btn {
+  background: var(--ts-orange);
+  border-radius: 10px;
+  transition: transform .15s;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 — Instance API + events -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">Instance API &amp; events</p>
+      <h3>Drive it from code</h3>
+      <p class="lead-sm">Grab the instance with <code>$('#cwApi').data('__codeWindow')</code>. Every change fires <code>codewindow:tab</code>.</p>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div data-plugin-code-window id="cwApi">
+<pre data-code-window-tab="a.js" data-plugin-highlight="javascript"><code>export const a = () =&gt; 'first pane';</code></pre>
+<pre data-code-window-tab="b.ts" data-plugin-highlight="typescript"><code>export const b = (): string =&gt; 'second pane';</code></pre>
+<pre data-code-window-tab="c.json" data-plugin-highlight="json"><code>{ "pane": "third" }</code></pre>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="controls mb-3">
+            <button class="btn btn-sm btn-outline-primary" id="btnPrev"><i class="bi bi-chevron-left"></i> prev()</button>
+            <button class="btn btn-sm btn-outline-primary" id="btnNext">next() <i class="bi bi-chevron-right"></i></button>
+            <button class="btn btn-sm btn-primary" id="btnGo0">activate(0)</button>
+            <button class="btn btn-sm btn-primary" id="btnGo1">activate(1)</button>
+            <button class="btn btn-sm btn-primary" id="btnGo2">activate(2)</button>
+            <button class="btn btn-sm btn-outline-secondary" id="btnDestroy">destroy()</button>
+            <button class="btn btn-sm btn-outline-secondary" id="btnRebuild">re-init</button>
+          </div>
+          <p class="demo-section-label">Event log</p>
+          <div class="event-log" id="log"><span class="log-empty">Interact with the window — events appear here…</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 — Plain mode -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">No highlighting</p>
+      <h3>Plain styled code</h3>
+      <p class="lead-sm">Set <code>highlight:false</code> to keep the window chrome but skip PluginHighlight — handy for logs or plain output.</p>
+    </div>
+    <div class="card-body">
+      <div data-plugin-code-window id="cwPlain" data-plugin-options='{"highlight": false, "lineNumbers": false}'>
+<pre data-code-window-tab="build.log"><code>▲ themestrap build
+  ✓ compiled 31 plugins
+  ✓ injected stylesheets
+  build complete in 1.24s</code></pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="demo-foot">
+  Themestrap — PluginCodeWindow live demo · loads the real plugin sources from <code>../js/components/</code>
+</footer>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Real plugin sources — Highlight first so CodeWindow can delegate to it -->
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script src="../js/components/themestrap.plugin.codewindow.js"></script>
+
+<script>
+$(function () {
+    // Init every code window from its data-plugin-options
+    $('[data-plugin-code-window]').each(function () {
+        const $this = $(this);
+        const opts  = themestrap.fn.getOptions($this.data('plugin-options'));
+        $this.themestrapPluginCodeWindow(opts);
+    });
+
+    // ----- Instance API wiring (#cwApi) -----
+    const log = document.getElementById('log');
+    function logEvent(type, detail) {
+        if (log.querySelector('.log-empty')) log.innerHTML = '';
+        const line = document.createElement('span');
+        line.className = 'ev';
+        line.innerHTML = '<span class="t">' + type + '</span> ' +
+                         '<span class="v">' + detail + '</span>';
+        log.appendChild(line);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    const $api = $('#cwApi');
+    $api.on('codewindow:ready', function (e, inst) {
+        logEvent('codewindow:ready', inst.$panes.length + ' tabs');
+    });
+    $api.on('codewindow:tab', function (e, inst, index, $pane) {
+        const label = $pane.find('pre').attr('data-code-window-tab') || ('#' + index);
+        logEvent('codewindow:tab', 'index ' + index + ' (' + label + ')');
+    });
+
+    function api() { return $api.data('__codeWindow'); }
+
+    $('#btnPrev').on('click',  function () { const w = api(); if (w) w.prev(); });
+    $('#btnNext').on('click',  function () { const w = api(); if (w) w.next(); });
+    $('#btnGo0').on('click',   function () { const w = api(); if (w) w.activate(0); });
+    $('#btnGo1').on('click',   function () { const w = api(); if (w) w.activate(1); });
+    $('#btnGo2').on('click',   function () { const w = api(); if (w) w.activate(2); });
+    $('#btnDestroy').on('click', function () {
+        const w = api(); if (w) { w.destroy(); logEvent('destroy()', 'markup restored'); }
+    });
+    $('#btnRebuild').on('click', function () {
+        if ($api.data('__codeWindow')) return;        // already built
+        $api.themestrapPluginCodeWindow();
+        logEvent('re-init', 'window rebuilt');
+    });
+});
+</script>
+
+</body>
+</html>

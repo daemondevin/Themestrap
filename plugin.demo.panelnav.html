@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginPanelNav — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+<style>
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--ts-teal); }
+code {
+    background: rgba(10,25,41,.05);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+.btn-primary { background: var(--ts-orange); border-color: var(--ts-orange); }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background: var(--ts-orange-2) !important; border-color: var(--ts-orange-2) !important;
+}
+.btn-outline-primary { color: var(--ts-orange); border-color: var(--ts-orange); }
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active,
+.btn-check:checked + .btn-outline-primary {
+    background: var(--ts-orange) !important; border-color: var(--ts-orange) !important; color: #fff !important;
+}
+
+/* Hero */
+.demo-hero { background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%); color: #fff; padding: 56px 0 48px; }
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 760px; margin: 0; }
+.demo-hero .badge-orange { background: var(--ts-orange); color: #fff; font-weight: 600; letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase; font-size: 11px; border-radius: 4px; }
+.demo-hero code { background: rgba(255,255,255,.12); color: #ffd9c7; padding: 2px 7px; border-radius: 4px; }
+
+/* Cards */
+.demo-card { background: #fff; border: 1px solid var(--ts-border); border-radius: 14px; box-shadow: 0 6px 24px rgba(10,25,41,.05); margin-bottom: 28px; }
+.demo-card .card-head { padding: 18px 24px 0; }
+.demo-card .card-body { padding: 20px 24px 24px; }
+.demo-section-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ts-teal); margin: 0 0 8px; }
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 6px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 4px; }
+
+/* Stage that hosts a panel sample */
+.panel-stage { background: #eef1f6; border: 1px solid var(--ts-border); border-radius: 12px; padding: 22px; display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start; }
+.panel-stage.dark-stage { background: #060c14; border-color: #1a2433; }
+
+/* Control log */
+.event-log { background: var(--ts-navy); color: #cfe3ff; border-radius: 10px; padding: 14px 16px; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; line-height: 1.7; height: 220px; overflow-y: auto; }
+.event-log .log-empty { color: #5e7088; }
+.event-log .l-item { color: #9cffd0; }
+.event-log .l-drawer { color: #ffd082; }
+.event-log .l-api { color: #93c5ff; }
+.event-log .l-time { color: #5a6b82; margin-right: 8px; }
+
+.controls .btn { margin: 0 6px 8px 0; }
+.opt-pill { font-size: 12.5px; }
+pre.code-peek { background: #11151c; color: #cdd6e4; padding: 14px 16px; border-radius: 10px; font-size: 12px; line-height: 1.6; overflow-x: auto; margin: 0; }
+.feature-tag { display:inline-block; font-size: 11px; font-weight: 600; color: var(--ts-teal); background: rgba(42,184,200,.1); border-radius: 20px; padding: 3px 10px; margin: 0 4px 4px 0; }
+footer.demo-foot { padding: 40px 0 60px; text-align: center; color: var(--ts-muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange">Themestrap JS Plugin</span>
+    <h1 class="mt-3">PluginPanelNav</h1>
+    <p class="lead">A Morningstar-style vertical navigation panel. A caret-right indicator marks the active row, parent rows expand into animated drawers, and the active branch opens on load. Drive it with <code>data-plugin-options</code> or the instance API. This page inlines the plugin source &mdash; no build step.</p>
+    <div class="mt-3">
+      <span class="feature-tag">caret / bar / both indicators</span>
+      <span class="feature-tag">nested drawers</span>
+      <span class="feature-tag">icons + metadata</span>
+      <span class="feature-tag">dark variant</span>
+      <span class="feature-tag">accordion mode</span>
+      <span class="feature-tag">live API</span>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <!-- 1. Indicators -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">Active indicators</p>
+      <h3>caret &middot; bar &middot; both</h3>
+      <p class="lead-sm">The same markup with three <code>activeIndicator</code> values. Click any leaf to move the active state and watch the indicator.</p>
+    </div>
+    <div class="card-body">
+      <div class="panel-stage">
+        <nav id="panelCaret" data-plugin-panelnav data-plugin-options='{"activeIndicator":"caret","activeOnLoad":false,"bordered":true}'>
+          <div data-panelnav-actions><span data-panelnav-actions-title>caret</span></div>
+          <div data-panelnav-body>
+            <ul data-panelnav-list>
+              <li data-panelnav-item data-panelnav-active><a href="#caret-1" data-panelnav-link><i class="bi bi-house" data-panelnav-icon></i><span data-panelnav-label>Dashboard</span><span data-panelnav-metadata>24</span></a></li>
+              <li data-panelnav-item><a href="#caret-2" data-panelnav-link><i class="bi bi-graph-up" data-panelnav-icon></i><span data-panelnav-label>Markets</span></a></li>
+              <li data-panelnav-item><a href="#caret-3" data-panelnav-link><i class="bi bi-briefcase" data-panelnav-icon></i><span data-panelnav-label>Portfolio</span><span data-panelnav-metadata>8</span></a></li>
+            </ul>
+          </div>
+        </nav>
+
+        <nav id="panelBar" data-plugin-panelnav data-plugin-options='{"activeIndicator":"bar","activeOnLoad":false,"bordered":true}'>
+          <div data-panelnav-actions><span data-panelnav-actions-title>bar</span></div>
+          <div data-panelnav-body>
+            <ul data-panelnav-list>
+              <li data-panelnav-item><a href="#bar-1" data-panelnav-link><i class="bi bi-house" data-panelnav-icon></i><span data-panelnav-label>Dashboard</span></a></li>
+              <li data-panelnav-item data-panelnav-active><a href="#bar-2" data-panelnav-link><i class="bi bi-graph-up" data-panelnav-icon></i><span data-panelnav-label>Markets</span><span data-panelnav-metadata>3</span></a></li>
+              <li data-panelnav-item><a href="#bar-3" data-panelnav-link><i class="bi bi-briefcase" data-panelnav-icon></i><span data-panelnav-label>Portfolio</span></a></li>
+            </ul>
+          </div>
+        </nav>
+
+        <nav id="panelBoth" data-plugin-panelnav data-plugin-options='{"activeIndicator":"both","activeOnLoad":false,"bordered":true}'>
+          <div data-panelnav-actions><span data-panelnav-actions-title>both</span></div>
+          <div data-panelnav-body>
+            <ul data-panelnav-list>
+              <li data-panelnav-item><a href="#both-1" data-panelnav-link><i class="bi bi-house" data-panelnav-icon></i><span data-panelnav-label>Dashboard</span></a></li>
+              <li data-panelnav-item><a href="#both-2" data-panelnav-link><i class="bi bi-graph-up" data-panelnav-icon></i><span data-panelnav-label>Markets</span></a></li>
+              <li data-panelnav-item data-panelnav-active><a href="#both-3" data-panelnav-link><i class="bi bi-briefcase" data-panelnav-icon></i><span data-panelnav-label>Portfolio</span><span data-panelnav-metadata>8</span></a></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Sections + nested drawers + API -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">Sections, drawers &amp; the instance API</p>
+      <h3>A full panel with live controls</h3>
+      <p class="lead-sm">Section headings, nested drawer-toggle parents, icons and metadata counts. The buttons below call the public API on this panel; the log records every event the panel emits.</p>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="panel-stage" style="display:block;">
+            <nav id="panelMain" data-plugin-panelnav data-plugin-options='{"activeOnLoad":false,"bordered":true}'>
+              <div data-panelnav-actions><span data-panelnav-actions-title>Console</span></div>
+              <div data-panelnav-body>
+                <div data-panelnav-section data-panelnav-section-title="Overview">
+                  <ul data-panelnav-list>
+                    <li id="nav-today" data-panelnav-item data-panelnav-active><a href="#today" data-panelnav-link><i class="bi bi-house" data-panelnav-icon></i><span data-panelnav-label>Today</span><span data-panelnav-metadata>24</span></a></li>
+                    <li data-panelnav-item><a href="#markets" data-panelnav-link><i class="bi bi-graph-up" data-panelnav-icon></i><span data-panelnav-label>Markets</span></a></li>
+                  </ul>
+                </div>
+                <div data-panelnav-section data-panelnav-section-title="Research">
+                  <ul data-panelnav-list>
+                    <li id="nav-screeners" data-panelnav-item>
+                      <a href="#" data-panelnav-link><i class="bi bi-funnel" data-panelnav-icon></i><span data-panelnav-label>Screeners</span></a>
+                      <ul data-panelnav-child-items>
+                        <li data-panelnav-item><a href="#scr-stocks" data-panelnav-link><span data-panelnav-label>Stock Screener</span></a></li>
+                        <li id="nav-funds" data-panelnav-item><a href="#scr-funds" data-panelnav-link><span data-panelnav-label>Fund Screener</span></a></li>
+                      </ul>
+                    </li>
+                    <li id="nav-reports" data-panelnav-item>
+                      <a href="#" data-panelnav-link><i class="bi bi-file-earmark-text" data-panelnav-icon></i><span data-panelnav-label>Reports</span><span data-panelnav-metadata>3</span></a>
+                      <ul data-panelnav-child-items>
+                        <li data-panelnav-item><a href="#rep-q1" data-panelnav-link><span data-panelnav-label>Q1 Summary</span></a></li>
+                        <li data-panelnav-item><a href="#rep-q2" data-panelnav-link><span data-panelnav-label>Q2 Summary</span></a></li>
+                        <li data-panelnav-item data-panelnav-disabled><a href="#rep-q3" data-panelnav-link><span data-panelnav-label>Q3 (locked)</span></a></li>
+                      </ul>
+                    </li>
+                    <li data-panelnav-item><a href="#watchlist" data-panelnav-link><i class="bi bi-star" data-panelnav-icon></i><span data-panelnav-label>Watchlist</span><span data-panelnav-metadata>12</span></a></li>
+                  </ul>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="controls mb-3">
+            <button class="btn btn-sm btn-outline-primary" data-api="expandAll"><i class="bi bi-arrows-expand"></i> expandAll()</button>
+            <button class="btn btn-sm btn-outline-primary" data-api="collapseAll"><i class="bi bi-arrows-collapse"></i> collapseAll()</button>
+            <button class="btn btn-sm btn-outline-primary" data-api="open" data-target="nav-screeners">open(Screeners)</button>
+            <button class="btn btn-sm btn-outline-primary" data-api="close" data-target="nav-screeners">close(Screeners)</button>
+            <button class="btn btn-sm btn-outline-primary" data-api="setActive" data-target="nav-funds">setActive(Fund Screener)</button>
+            <button class="btn btn-sm btn-outline-primary" data-api="toggle" data-target="nav-reports">toggle(Reports)</button>
+            <button class="btn btn-sm btn-outline-primary" data-api="getActive">getActive()</button>
+          </div>
+          <p class="demo-section-label mt-2">Event log</p>
+          <div class="event-log" id="eventLog"><span class="log-empty">Interact with the panel &mdash; events appear here&hellip;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Dark + accordion -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">Dark variant &amp; accordion mode</p>
+      <h3>Dark rail, teal accent, one drawer at a time</h3>
+      <p class="lead-sm">This panel sets <code>dark</code>, a custom <code>accent</code>, and <code>accordion: true</code> &mdash; opening one drawer closes the others.</p>
+    </div>
+    <div class="card-body">
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-5">
+          <div class="panel-stage dark-stage" style="display:block;">
+            <nav id="panelDark" data-plugin-panelnav data-plugin-options='{"dark":true,"accordion":true,"activeOnLoad":false,"collapsible":true}'>
+              <div data-panelnav-actions><span data-panelnav-actions-title>Workspace</span></div>
+              <div data-panelnav-body>
+                <ul data-panelnav-list>
+                  <li data-panelnav-item data-panelnav-active><a href="#dk-home" data-panelnav-link><i class="bi bi-grid" data-panelnav-icon></i><span data-panelnav-label>Home</span></a></li>
+                  <li data-panelnav-item>
+                    <a href="#" data-panelnav-link><i class="bi bi-folder" data-panelnav-icon></i><span data-panelnav-label>Projects</span><span data-panelnav-metadata>5</span></a>
+                    <ul data-panelnav-child-items>
+                      <li data-panelnav-item><a href="#dk-p1" data-panelnav-link><span data-panelnav-label>Apollo</span></a></li>
+                      <li data-panelnav-item><a href="#dk-p2" data-panelnav-link><span data-panelnav-label>Borealis</span></a></li>
+                    </ul>
+                  </li>
+                  <li data-panelnav-item>
+                    <a href="#" data-panelnav-link><i class="bi bi-people" data-panelnav-icon></i><span data-panelnav-label>Team</span></a>
+                    <ul data-panelnav-child-items>
+                      <li data-panelnav-item><a href="#dk-t1" data-panelnav-link><span data-panelnav-label>Members</span></a></li>
+                      <li data-panelnav-item><a href="#dk-t2" data-panelnav-link><span data-panelnav-label>Roles</span></a></li>
+                    </ul>
+                  </li>
+                  <li data-panelnav-item>
+                    <a href="#" data-panelnav-link><i class="bi bi-gear" data-panelnav-icon></i><span data-panelnav-label>Settings</span></a>
+                    <ul data-panelnav-child-items>
+                      <li data-panelnav-item><a href="#dk-s1" data-panelnav-link><span data-panelnav-label>General</span></a></li>
+                      <li data-panelnav-item><a href="#dk-s2" data-panelnav-link><span data-panelnav-label>Billing</span></a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <p class="demo-section-label">Markup for this panel</p>
+          <pre class="code-peek">&lt;nav data-plugin-panelnav
+     data-plugin-options='{"dark":true,
+       "accordion":true,"accent":"#2ab8c8","collapsible":true}'&gt;
+  &lt;div data-panelnav-actions&gt;
+    &lt;span data-panelnav-actions-title&gt;Workspace&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div data-panelnav-body&gt;
+    &lt;ul data-panelnav-list&gt;
+      &lt;li data-panelnav-item&gt;
+        &lt;a href="#" data-panelnav-link&gt;
+          &lt;i class="bi bi-folder" data-panelnav-icon&gt;&lt;/i&gt;
+          &lt;span data-panelnav-label&gt;Projects&lt;/span&gt;
+          &lt;span data-panelnav-metadata&gt;5&lt;/span&gt;
+        &lt;/a&gt;
+        &lt;ul data-panelnav-child-items&gt;
+          &lt;li data-panelnav-item&gt;&lt;a href="#" data-panelnav-link&gt;
+            &lt;span data-panelnav-label&gt;Apollo&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="demo-foot">
+  Themestrap &middot; PluginPanelNav live demo &middot; part of the Themestrap component library
+</footer>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.panelnav.js"></script>
+
+<!-- Demo wiring -->
+<script>
+jQuery(function ($) {
+    // Auto-init every panel on the page
+    $('[data-plugin-panelnav]').each(function () {
+        var opts = themestrap.fn.getOptions($(this).attr('data-plugin-options'));
+        $(this).themestrapPluginPanelNav(opts);
+    });
+
+    // Event log for the main panel
+    var $log = $('#eventLog');
+    var logged = false;
+    function stamp() {
+        var d = new Date();
+        return d.toLocaleTimeString([], { hour12: false });
+    }
+    function log(cls, msg) {
+        if (!logged) { $log.empty(); logged = true; }
+        $('<div>')
+            .html('<span class="l-time">' + stamp() + '</span><span class="' + cls + '">' + msg + '</span>')
+            .appendTo($log);
+        $log.scrollTop($log[0].scrollHeight);
+    }
+
+    var $main = $('#panelMain');
+    var main  = $main.data('__pluginPanelNav');
+
+    $main.on('item.ts.panelnav', function (e, d) {
+        log('l-item', 'item.ts.panelnav &rarr; ' + (d.href || '(no href)'));
+    });
+    $main.on('drawer-toggle.ts.panelnav', function (e, d) {
+        var label = d.$item.children('.ts-panelnav-link').find('.ts-panelnav-text').text() || '(item)';
+        log('l-drawer', 'drawer-toggle.ts.panelnav &rarr; ' + label + ' ' + (d.open ? 'opened' : 'closed'));
+    });
+
+    // Wire the API control buttons
+    $('.controls').on('click', '.btn', function () {
+        var api    = $(this).data('api');
+        var target = $(this).data('target');
+        if (!main) return;
+
+        if (api === 'expandAll')   { main.expandAll();   log('l-api', 'API expandAll()'); }
+        else if (api === 'collapseAll') { main.collapseAll(); log('l-api', 'API collapseAll()'); }
+        else if (api === 'getActive')   {
+            var $a = main.getActive();
+            var label = $a.length ? ($a.children('.ts-panelnav-link').find('.ts-panelnav-text').text() || '(item)') : '(none)';
+            log('l-api', 'API getActive() &rarr; ' + label);
+        }
+        else if (target) {
+            var $t = $('#' + target);
+            if (api === 'open')      { main.open($t);    log('l-api', 'API open(#' + target + ')'); }
+            else if (api === 'close'){ main.close($t);   log('l-api', 'API close(#' + target + ')'); }
+            else if (api === 'toggle'){ main.toggle($t); log('l-api', 'API toggle(#' + target + ')'); }
+            else if (api === 'setActive'){ main.setActive($t); log('l-api', 'API setActive(#' + target + ')'); }
+        }
+    });
+});
+</script>
+</body>
+</html>

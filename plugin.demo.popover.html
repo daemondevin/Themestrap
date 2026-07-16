@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginPopover — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+<style>
+/* ── Themestrap design tokens ── */
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+}
+code {
+    background: rgba(10,25,41,.06);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+a { color: var(--ts-teal); }
+
+/* ── Hero ── */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 680px; margin: 0; line-height: 1.6; }
+.badge-orange {
+    background: var(--ts-orange); color: #fff; font-weight: 600;
+    letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase;
+    font-size: 11px; border-radius: 4px;
+}
+.demo-hero code { background: rgba(255,255,255,.12); color: #ffd9c7; padding: 2px 7px; border-radius: 4px; }
+
+/* ── Cards ── */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+    overflow: visible;
+}
+.demo-card .card-body { padding: 24px 28px 28px; }
+.demo-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ts-teal); margin: 0 0 6px;
+}
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 4px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 20px; line-height: 1.5; }
+
+/* ── Demo stage — where the live component lives ── */
+.demo-stage {
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    padding: 32px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    min-height: 120px;
+    margin-bottom: 16px;
+    overflow: visible;
+}
+.demo-stage.center { justify-content: center; align-items: center; }
+.demo-stage.space-between { justify-content: space-between; align-items: center; }
+
+/* ── Code snippet ── */
+pre.snip {
+    background: #0e2238; color: #e1eaf3;
+    padding: 14px 18px; border-radius: 8px;
+    margin: 0; font-size: 12.5px; line-height: 1.65;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    overflow-x: auto;
+}
+pre.snip .c1 { color: #6c8bab; font-style: italic; }
+pre.snip .tag { color: #ff9d6c; }
+pre.snip .attr { color: #f9c98c; }
+pre.snip .val { color: #a8e1ff; }
+pre.snip .kw  { color: #c084fc; }
+pre.snip .fn  { color: #67e8f9; }
+
+/* ── Controls row ── */
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.controls-row label {
+    font-size: 12px; font-weight: 600; color: #54657a;
+    margin: 0; text-transform: uppercase; letter-spacing: .04em;
+}
+
+/* ── Tip ── */
+.tip {
+    background: #e8f7f9;
+    border-left: 4px solid var(--ts-teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px; font-size: 13px; color: #1f4348; margin-bottom: 24px;
+}
+.tip i { color: var(--ts-teal); }
+
+/* ── Overflow demo ── */
+.overflow-box {
+    width: 200px; height: 60px;
+    overflow: hidden;
+    border: 2px dashed #f97316;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: #fff7ed;
+    position: relative;
+}
+.overflow-label {
+    font-size: 11px; color: #f97316; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 4px;
+}
+
+/* ── Table demo ── */
+.table-overflow-wrap { overflow-x: auto; max-width: 100%; }
+.table-overflow-wrap table { min-width: 600px; }
+
+/* ── Event log ── */
+.event-log {
+    height: 120px; overflow-y: auto;
+    background: #0e2238; color: #a8c8e8;
+    font-family: monospace; font-size: 12px; line-height: 1.6;
+    border-radius: 8px; padding: 10px 14px;
+}
+.event-log .ev-open  { color: #6ee7b7; }
+.event-log .ev-close { color: #fca5a5; }
+.event-log .ev-empty { color: #4c6a85; font-style: italic; }
+
+/* ── Status badge ── */
+.status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 600;
+}
+.status-badge.open  { background: #d1fae5; color: #065f46; }
+.status-badge.closed { background: #f3f4f6; color: #6b7280; }
+
+/* ── Two-col grid ── */
+.demo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+@media (max-width: 767px) { .demo-grid-2 { grid-template-columns: 1fr; } }
+
+/* ── Popover content styling (demo-local, not plugin styles) ── */
+.pop-profile { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.pop-avatar  {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--ts-teal), var(--ts-navy));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 14px; flex: 0 0 36px;
+}
+.pop-meta { font-size: 12px; color: var(--ts-muted); }
+.pop-actions { display: flex; gap: 6px; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <h1 class="mt-3">PluginPopover — Live Demo</h1>
+    <p class="lead mt-2">
+      Accessible, anchor-positioned popovers — four sides, three alignment modes,
+      viewport flip, portaling, CSS arrows, side-aware animations,
+      and mutual exclusion. Zero build step.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-xl-10">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        Every popover below is a live instance of <code>PluginPopover</code> running directly in your browser. Click triggers to open them, then explore side / align variants with the buttons in Card 5.
+      </div>
+
+
+      <!-- 1. Basic -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Side: bottom · Align: start · default</p>
+          <h3>Basic popover</h3>
+          <p class="lead-sm">The minimal markup: a wrapper, a trigger, and a content panel. Arrow, Escape, and click-outside are all on by default.</p>
+
+          <div class="demo-stage center">
+            <div data-plugin-popover id="pop-basic">
+              <button data-popover-trigger class="btn btn-primary">
+                Open settings <i class="fas fa-chevron-down ms-1" style="font-size:11px"></i>
+              </button>
+              <div data-popover-content>
+                <h4 data-popover-title>Display settings</h4>
+                <div class="mb-2">
+                  <label class="form-check mb-1">
+                    <input type="checkbox" class="form-check-input" checked> Compact view
+                  </label>
+                  <label class="form-check mb-1">
+                    <input type="checkbox" class="form-check-input"> Show avatars
+                  </label>
+                  <label class="form-check">
+                    <input type="checkbox" class="form-check-input" checked> Sticky header
+                  </label>
+                </div>
+                <button class="btn btn-sm btn-primary w-100 mt-1"
+                        onclick="$('#pop-basic').data('__pluginPopover').close()">
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">data-plugin-popover</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">data-popover-trigger</span><span class="tag">&gt;</span>Open settings<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">data-popover-content</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h4</span> <span class="attr">data-popover-title</span><span class="tag">&gt;</span>Display settings<span class="tag">&lt;/h4&gt;</span>
+    <span class="c1">&lt;!-- your content --&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 2. Profile card -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Side: top · Align: center · arrow: true</p>
+          <h3>Profile card popover</h3>
+          <p class="lead-sm">Opens above the trigger, centred. Common pattern for user avatars, tag chips, or inline mentions.</p>
+
+          <div class="demo-stage center" style="padding-top:80px; padding-bottom:32px">
+            <div data-plugin-popover data-plugin-options='{"side":"top","align":"center"}'>
+              <button data-popover-trigger class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                <div class="pop-avatar" style="width:24px;height:24px;font-size:11px">AM</div>
+                Alex Mercer
+              </button>
+              <div data-popover-content style="min-width:220px">
+                <div class="pop-profile">
+                  <div class="pop-avatar">AM</div>
+                  <div>
+                    <strong>Alex Mercer</strong>
+                    <div class="pop-meta">Senior Engineer · Platform</div>
+                  </div>
+                </div>
+                <div style="font-size:13px;color:#54657a;line-height:1.5">
+                  Joined March 2021 &nbsp;·&nbsp; 142 commits
+                </div>
+                <div class="pop-actions">
+                  <a href="#" class="btn btn-sm btn-primary">Message</a>
+                  <a href="#" class="btn btn-sm btn-outline-secondary">Profile</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">data-plugin-popover</span>
+     <span class="attr">data-plugin-options</span>=<span class="val">'{"side":"top","align":"center"}'</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">data-popover-trigger</span><span class="tag">&gt;</span>Alex Mercer<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">data-popover-content</span><span class="tag">&gt;</span>…<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 3. Mutual exclusion -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Mutual exclusion · broadcast event</p>
+          <h3>One open at a time</h3>
+          <p class="lead-sm">Opening any popover fires <code>ts-popover-opened</code> on <code>document</code>. Every other open popover hears it and closes. Click multiple triggers in sequence.</p>
+
+          <div class="demo-stage space-between">
+            <div data-plugin-popover data-plugin-options='{"side":"bottom","align":"start"}'>
+              <button data-popover-trigger class="btn btn-outline-primary">File</button>
+              <div data-popover-content style="min-width:160px">
+                <h4 data-popover-title>File</h4>
+                <ul class="list-unstyled mb-0" style="font-size:13px">
+                  <li class="py-1 border-bottom">New…</li>
+                  <li class="py-1 border-bottom">Open…</li>
+                  <li class="py-1">Save</li>
+                </ul>
+              </div>
+            </div>
+
+            <div data-plugin-popover data-plugin-options='{"side":"bottom","align":"start"}'>
+              <button data-popover-trigger class="btn btn-outline-primary">Edit</button>
+              <div data-popover-content style="min-width:160px">
+                <h4 data-popover-title>Edit</h4>
+                <ul class="list-unstyled mb-0" style="font-size:13px">
+                  <li class="py-1 border-bottom">Undo</li>
+                  <li class="py-1 border-bottom">Redo</li>
+                  <li class="py-1">Find &amp; Replace…</li>
+                </ul>
+              </div>
+            </div>
+
+            <div data-plugin-popover data-plugin-options='{"side":"bottom","align":"start"}'>
+              <button data-popover-trigger class="btn btn-outline-primary">View</button>
+              <div data-popover-content style="min-width:160px">
+                <h4 data-popover-title>View</h4>
+                <ul class="list-unstyled mb-0" style="font-size:13px">
+                  <li class="py-1 border-bottom">Zoom in</li>
+                  <li class="py-1 border-bottom">Zoom out</li>
+                  <li class="py-1">Full screen</li>
+                </ul>
+              </div>
+            </div>
+
+            <div data-plugin-popover data-plugin-options='{"side":"bottom","align":"end"}'>
+              <button data-popover-trigger class="btn btn-outline-primary">Help</button>
+              <div data-popover-content style="min-width:160px">
+                <h4 data-popover-title>Help</h4>
+                <ul class="list-unstyled mb-0" style="font-size:13px">
+                  <li class="py-1 border-bottom">Documentation</li>
+                  <li class="py-1">Report a bug</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- 4. Portaling -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">portaling: true · escapes overflow:hidden</p>
+          <h3>Portaled popover</h3>
+          <p class="lead-sm">The orange dashed box has <code>overflow: hidden</code>. Without portaling the popover would be clipped. With <code>portaling: true</code> the content moves to <code>&lt;body&gt;</code> and positions absolutely against the viewport.</p>
+
+          <div class="demo-stage center gap-5">
+            <div>
+              <p class="overflow-label text-center">overflow: hidden</p>
+              <div class="overflow-box">
+                <div data-plugin-popover data-plugin-options='{"portaling":true,"side":"bottom","align":"center"}'>
+                  <button data-popover-trigger class="btn btn-sm btn-warning">
+                    <i class="fas fa-arrow-up-right-from-square me-1"></i> Portal open
+                  </button>
+                  <div data-popover-content>
+                    <h4 data-popover-title>Escaped!</h4>
+                    <p style="font-size:13px;margin:0">This panel lives in <code>&lt;body&gt;</code>, not inside the clipping box.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p class="overflow-label text-center">no portaling (clipped)</p>
+              <div class="overflow-box">
+                <div data-plugin-popover data-plugin-options='{"side":"bottom","align":"center"}'>
+                  <button data-popover-trigger class="btn btn-sm btn-secondary">
+                    No portal
+                  </button>
+                  <div data-popover-content>
+                    <h4 data-popover-title>Clipped</h4>
+                    <p style="font-size:13px;margin:0">Panel clipped by parent overflow.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">data-plugin-popover</span>
+     <span class="attr">data-plugin-options</span>=<span class="val">'{"portaling":true,"side":"bottom"}'</span><span class="tag">&gt;</span>
+  …
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 5. Side & align playground -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">All sides · All alignments · interactive</p>
+          <h3>Side &amp; align playground</h3>
+          <p class="lead-sm">Change the <code>side</code> and <code>align</code> options live. The popover is re-initialised on each change.</p>
+
+          <div class="controls-row mb-3">
+            <label class="me-1">Side:</label>
+            <div class="btn-group btn-group-sm" id="side-group">
+              <button class="btn btn-outline-secondary active" data-side="bottom">bottom</button>
+              <button class="btn btn-outline-secondary" data-side="top">top</button>
+              <button class="btn btn-outline-secondary" data-side="left">left</button>
+              <button class="btn btn-outline-secondary" data-side="right">right</button>
+            </div>
+            <label class="ms-3 me-1">Align:</label>
+            <div class="btn-group btn-group-sm" id="align-group">
+              <button class="btn btn-outline-secondary active" data-align="start">start</button>
+              <button class="btn btn-outline-secondary" data-align="center">center</button>
+              <button class="btn btn-outline-secondary" data-align="end">end</button>
+            </div>
+            <label class="ms-3 me-1">Arrow:</label>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="arrow-toggle" checked>
+            </div>
+          </div>
+
+          <div class="demo-stage center" style="min-height:160px" id="playground-stage">
+            <div data-plugin-popover id="pop-playground">
+              <button data-popover-trigger class="btn btn-primary">
+                <i class="fas fa-sliders me-1"></i> Try it
+              </button>
+              <div data-popover-content style="min-width:200px">
+                <h4 data-popover-title>Playground</h4>
+                <p style="font-size:13px;margin:0">
+                  Side: <strong id="pg-side-display">bottom</strong><br>
+                  Align: <strong id="pg-align-display">start</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-muted" style="font-size:12px;margin:0">
+            Current: <code>side="<span id="pg-side-label">bottom</span>"</code>
+            <code>align="<span id="pg-align-label">start</span>"</code>
+            <code>arrow=<span id="pg-arrow-label">true</span></code>
+          </p>
+        </div>
+      </div>
+
+
+      <!-- 6. Modal (focus trap) -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">modal: true · focus trap · closeOnOutside: false</p>
+          <h3>Modal popover (focus trap)</h3>
+          <p class="lead-sm">With <code>modal: true</code> Tab key cycles only inside the panel. <code>closeOnOutside: false</code> keeps it open while the user interacts with the form. Only Escape or the Cancel button closes it.</p>
+
+          <div class="demo-stage center" style="min-height: 80px">
+            <div data-plugin-popover id="pop-modal"
+                 data-plugin-options='{"side":"bottom","modal":true,"closeOnOutside":false}'>
+              <button data-popover-trigger class="btn btn-primary">
+                <i class="fas fa-tag me-1"></i> Add tag
+              </button>
+              <div data-popover-content style="min-width:260px">
+                <h4 data-popover-title>New tag</h4>
+                <label class="form-label" style="font-size:13px" for="tag-name-input">Tag name</label>
+                <input id="tag-name-input" type="text" class="form-control form-control-sm mb-3"
+                       placeholder="e.g. design, backend…">
+                <label class="form-label" style="font-size:13px">Colour</label>
+                <div class="d-flex gap-2 mb-3" id="colour-swatches">
+                  <button class="btn btn-sm px-3" style="background:#e8672a;border:none;border-radius:4px;width:28px;height:28px" data-colour="#e8672a"></button>
+                  <button class="btn btn-sm px-3" style="background:#2ab8c8;border:none;border-radius:4px;width:28px;height:28px" data-colour="#2ab8c8"></button>
+                  <button class="btn btn-sm px-3" style="background:#6366f1;border:none;border-radius:4px;width:28px;height:28px" data-colour="#6366f1"></button>
+                  <button class="btn btn-sm px-3" style="background:#22c55e;border:none;border-radius:4px;width:28px;height:28px" data-colour="#22c55e"></button>
+                  <button class="btn btn-sm px-3" style="background:#f59e0b;border:none;border-radius:4px;width:28px;height:28px" data-colour="#f59e0b"></button>
+                </div>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-primary" id="tag-create-btn">Create</button>
+                  <button class="btn btn-sm btn-outline-secondary"
+                          onclick="$('#pop-modal').data('__pluginPopover').close()">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="tag-result" class="d-flex flex-wrap gap-2 mt-2"></div>
+        </div>
+      </div>
+
+
+      <!-- 7. Remote trigger -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Remote trigger · Trigger outside the wrapper</p>
+          <h3>Table row action</h3>
+          <p class="lead-sm">The trigger lives inside a table cell; the popover wrapper is elsewhere in the DOM. Connected by matching the trigger's attribute value to the wrapper's <code>id</code>.</p>
+
+          <div class="demo-stage" style="flex-direction:column;align-items:stretch">
+            <div class="table-overflow-wrap">
+              <table class="table table-sm table-hover mb-0" style="font-size:13px">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th><th>Customer</th><th>Status</th><th>Total</th><th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>2401</td><td>Acme Corp.</td>
+                    <td><span class="badge text-bg-success">Fulfilled</span></td>
+                    <td>$167.84</td>
+                    <td><button class="btn btn-xs btn-sm btn-outline-secondary py-0"
+                               data-popover-trigger="row-2401-pop">Details</button></td>
+                  </tr>
+                  <tr>
+                    <td>2402</td><td>Globex Ltd.</td>
+                    <td><span class="badge text-bg-warning">Pending</span></td>
+                    <td>$68.72</td>
+                    <td><button class="btn btn-xs btn-sm btn-outline-secondary py-0"
+                               data-popover-trigger="row-2402-pop">Details</button></td>
+                  </tr>
+                  <tr>
+                    <td>2403</td><td>Initech Inc.</td>
+                    <td><span class="badge text-bg-success">Fulfilled</span></td>
+                    <td>$328.86</td>
+                    <td><button class="btn btn-xs btn-sm btn-outline-secondary py-0"
+                               data-popover-trigger="row-2403-pop">Details</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Remote popover wrappers — parked outside the card -->
+          <div data-plugin-popover id="row-2401-pop" data-plugin-options='{"portaling":true,"side":"left","align":"start"}'>
+            <div data-popover-content style="min-width:220px">
+              <h4 data-popover-title>Order #2401</h4>
+              <dl class="row mb-0" style="font-size:12px">
+                <dt class="col-5">Customer</dt><dd class="col-7">Acme Corp.</dd>
+                <dt class="col-5">Items</dt><dd class="col-7">3</dd>
+                <dt class="col-5">Shipping</dt><dd class="col-7">$8.00</dd>
+                <dt class="col-5">Region</dt><dd class="col-7">EU-DE</dd>
+                <dt class="col-5">Note</dt><dd class="col-7">Repeat customer</dd>
+              </dl>
+            </div>
+          </div>
+
+          <div data-plugin-popover id="row-2402-pop" data-plugin-options='{"portaling":true,"side":"left","align":"start"}'>
+            <div data-popover-content style="min-width:220px">
+              <h4 data-popover-title>Order #2402</h4>
+              <dl class="row mb-0" style="font-size:12px">
+                <dt class="col-5">Customer</dt><dd class="col-7">Globex Ltd.</dd>
+                <dt class="col-5">Items</dt><dd class="col-7">1</dd>
+                <dt class="col-5">Shipping</dt><dd class="col-7">$5.00</dd>
+                <dt class="col-5">Region</dt><dd class="col-7">UK</dd>
+                <dt class="col-5">Note</dt><dd class="col-7">Express</dd>
+              </dl>
+            </div>
+          </div>
+
+          <div data-plugin-popover id="row-2403-pop" data-plugin-options='{"portaling":true,"side":"left","align":"start"}'>
+            <div data-popover-content style="min-width:220px">
+              <h4 data-popover-title>Order #2403</h4>
+              <dl class="row mb-0" style="font-size:12px">
+                <dt class="col-5">Customer</dt><dd class="col-7">Initech Inc.</dd>
+                <dt class="col-5">Items</dt><dd class="col-7">7</dd>
+                <dt class="col-5">Shipping</dt><dd class="col-7">$0.00</dd>
+                <dt class="col-5">Region</dt><dd class="col-7">US-CA</dd>
+                <dt class="col-5">Note</dt><dd class="col-7">Free shipping</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- 8. Event log -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Events · popover:open / popover:close</p>
+          <h3>Event log</h3>
+          <p class="lead-sm">Both jQuery events bubble from <code>[data-plugin-popover]</code>. The log below shows every open/close from all popovers on this page via the global broadcast.</p>
+
+          <div class="demo-grid-2 align-items-start">
+            <div>
+              <div class="demo-stage center">
+                <div data-plugin-popover id="pop-events"
+                     data-plugin-options='{"side":"right","align":"center"}'>
+                  <button data-popover-trigger class="btn btn-primary">
+                    Logged popover
+                  </button>
+                  <div data-popover-content style="min-width:190px">
+                    <h4 data-popover-title>Logged</h4>
+                    <p style="font-size:13px;margin:0">Open and close me to see events in the log.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span style="font-size:12px;font-weight:600;color:#54657a">Event log</span>
+                <button class="btn btn-sm btn-outline-secondary py-0" id="clear-log" style="font-size:11px">Clear</button>
+              </div>
+              <div class="event-log" id="event-log">
+                <span class="ev-empty">No events yet — open a popover.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- 9. API controls -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Public API · open() / close() / toggle() / update() / destroy()</p>
+          <h3>Programmatic control</h3>
+          <p class="lead-sm">Every instance exposes <code>open()</code>, <code>close()</code>, <code>toggle()</code>, <code>update()</code>, and <code>destroy()</code>. After destroy, re-init brings it back.</p>
+
+          <div class="demo-stage center" style="flex-direction:column;gap:20px">
+            <div data-plugin-popover id="pop-api"
+                 data-plugin-options='{"side":"top","align":"center"}'>
+              <button data-popover-trigger class="btn btn-dark">Target popover</button>
+              <div data-popover-content style="min-width:180px">
+                <h4 data-popover-title>Controlled</h4>
+                <p style="font-size:13px;margin:0">Opened programmatically.</p>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <button class="btn btn-sm btn-outline-primary" id="api-open">open()</button>
+              <button class="btn btn-sm btn-outline-primary" id="api-close">close()</button>
+              <button class="btn btn-sm btn-outline-primary" id="api-toggle">toggle()</button>
+              <button class="btn btn-sm btn-outline-secondary" id="api-destroy">destroy()</button>
+              <button class="btn btn-sm btn-outline-success d-none" id="api-reinit">re-init</button>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <span style="font-size:12px;color:#54657a">State:</span>
+              <span class="status-badge closed" id="api-status">
+                <i class="fas fa-circle" style="font-size:7px"></i> closed
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <p class="text-center mt-4 mb-5" style="color:var(--ts-muted);font-size:12.5px">
+        Themestrap · PluginPopover demo · plugin runs live in your browser
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.popover.js"></script>
+
+<!-- Demo wiring -->
+<script>
+$(function () {
+
+    // Auto-init every [data-plugin-popover] on the page 
+    $('[data-plugin-popover]').each(function () {
+        const $el  = $(this);
+        let opts   = {};
+        try { opts = JSON.parse($el.attr('data-plugin-options') || '{}'); } catch (e) {}
+        $el.themestrapPluginPopover(opts);
+    });
+
+
+    // 5. Playground: live side/align switching 
+    let pgSide  = 'bottom';
+    let pgAlign = 'start';
+    let pgArrow = true;
+
+    function reinitPlayground() {
+        const $el = $('#pop-playground');
+        const inst = $el.data('__pluginPopover');
+        if (inst) inst.destroy();
+        $el.themestrapPluginPopover({ side: pgSide, align: pgAlign, arrow: pgArrow });
+        $('#pg-side-display').text(pgSide);
+        $('#pg-align-display').text(pgAlign);
+        $('#pg-side-label').text(pgSide);
+        $('#pg-align-label').text(pgAlign);
+        $('#pg-arrow-label').text(pgArrow);
+    }
+
+    $('#side-group [data-side]').on('click', function () {
+        pgSide = $(this).data('side');
+        $('#side-group .btn').removeClass('active');
+        $(this).addClass('active');
+        reinitPlayground();
+    });
+
+    $('#align-group [data-align]').on('click', function () {
+        pgAlign = $(this).data('align');
+        $('#align-group .btn').removeClass('active');
+        $(this).addClass('active');
+        reinitPlayground();
+    });
+
+    $('#arrow-toggle').on('change', function () {
+        pgArrow = this.checked;
+        reinitPlayground();
+    });
+
+
+    // 6. Modal: colour swatches + create tag 
+    let selectedColour = '#e8672a';
+
+    $('#colour-swatches').on('click', '[data-colour]', function () {
+        selectedColour = $(this).data('colour');
+        $('#colour-swatches [data-colour]').css('outline', 'none');
+        $(this).css('outline', '2px solid #1f2d3d');
+    });
+
+    $('#tag-create-btn').on('click', function () {
+        const name = $('#tag-name-input').val().trim();
+        if (!name) { $('#tag-name-input').focus(); return; }
+
+        const $tag = $('<span>')
+            .addClass('badge')
+            .css({ background: selectedColour, color: '#fff', fontSize: '13px', padding: '5px 10px' })
+            .text(name);
+
+        $('#tag-result').append($tag);
+        $('#tag-name-input').val('');
+        $('#pop-modal').data('__pluginPopover').close();
+    });
+
+
+    // 8. Event log 
+    let logEmpty = true;
+
+    function logEvent(msg, cls) {
+        const $log = $('#event-log');
+        if (logEmpty) { $log.empty(); logEmpty = false; }
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $log.append($('<div>').addClass(cls).text(`[${time}] ${msg}`));
+        $log.scrollTop($log[0].scrollHeight);
+    }
+
+    $(document).on('ts-popover-opened', function (e, uid) {
+        logEvent(`popover opened (uid: ${uid.slice(0, 16)}…)`, 'ev-open');
+    });
+
+    // Log close events from all [data-plugin-popover] elements
+    $(document).on('popover:close', '[data-plugin-popover]', function (e, inst) {
+        logEvent('popover:close fired', 'ev-close');
+    });
+
+    $('#clear-log').on('click', function () {
+        $('#event-log').html('<span class="ev-empty">Log cleared.</span>');
+        logEmpty = false;
+    });
+
+
+    // 9. API controls
+    function getApiInst() { return $('#pop-api').data('__pluginPopover'); }
+
+    function updateStatus() {
+        const inst = getApiInst();
+        if (!inst) return;
+        const open = inst.isOpen;
+        $('#api-status')
+            .removeClass('open closed')
+            .addClass(open ? 'open' : 'closed')
+            .html(`<i class="fas fa-circle" style="font-size:7px"></i> ${open ? 'open' : 'closed'}`);
+    }
+
+    $('#pop-api').on('popover:open popover:close', updateStatus);
+
+    $('#api-open').on('click',   () => { getApiInst()?.open();   updateStatus(); });
+    $('#api-close').on('click',  () => { getApiInst()?.close();  updateStatus(); });
+    $('#api-toggle').on('click', () => { getApiInst()?.toggle(); updateStatus(); });
+
+    $('#api-destroy').on('click', function () {
+        getApiInst()?.destroy();
+        $('#api-destroy').addClass('d-none');
+        $('#api-reinit').removeClass('d-none');
+        $('#api-status').removeClass('open closed').addClass('closed')
+            .html('<i class="fas fa-circle" style="font-size:7px"></i> destroyed');
+    });
+
+    $('#api-reinit').on('click', function () {
+        $('#pop-api').themestrapPluginPopover({ side: 'top', align: 'center' });
+        $('#api-destroy').removeClass('d-none');
+        $('#api-reinit').addClass('d-none');
+        updateStatus();
+    });
+
+});
+</script>
+
+</body>
+</html>

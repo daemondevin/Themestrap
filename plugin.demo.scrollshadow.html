@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginScrollShadow — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+
+<style>
+
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--ts-teal); }
+code {
+    background: rgba(10,25,41,.05);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+.btn-primary {
+    background: var(--ts-orange);
+    border-color: var(--ts-orange);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background: var(--ts-orange-2) !important;
+    border-color: var(--ts-orange-2) !important;
+}
+.btn-outline-primary {
+    color: var(--ts-orange);
+    border-color: var(--ts-orange);
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active,
+.btn-check:checked + .btn-outline-primary {
+    background: var(--ts-orange) !important;
+    border-color: var(--ts-orange) !important;
+    color: #fff !important;
+}
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 {
+    font-weight: 700;
+    letter-spacing: -.5px;
+    margin: 0 0 8px;
+}
+.demo-hero .lead {
+    color: #b9c6d6;
+    max-width: 720px;
+    margin: 0;
+}
+.demo-hero .badge-orange {
+    background: var(--ts-orange);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: 6px 12px;
+    text-transform: uppercase;
+    font-size: 11px;
+    border-radius: 4px;
+}
+.demo-hero code {
+    background: rgba(255,255,255,.12);
+    color: #ffd9c7;
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+/* Cards */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+}
+.demo-card .card-head {
+    padding: 18px 24px 0;
+}
+.demo-card .card-body {
+    padding: 20px 24px 24px;
+}
+.demo-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ts-teal);
+    margin: 0 0 8px;
+}
+.demo-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ts-navy);
+    margin: 0 0 6px;
+}
+.demo-card p.lead-sm {
+    color: #54657a;
+    font-size: 14px;
+    margin: 0 0 14px;
+}
+
+.tip {
+    background: #e8f7f9;
+    border-left: 4px solid var(--ts-teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #1f4348;
+    margin-bottom: 24px;
+}
+.tip i { color: var(--ts-teal); }
+
+.note {
+    font-size: 12.5px;
+    color: var(--ts-muted);
+}
+
+/* Code snippet */
+pre.snip {
+    background: #0e2238;
+    color: #e1eaf3;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 12px 0 0;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+pre.snip .c1 { color: #6c8bab; font-style: italic; }
+pre.snip .tag { color: #ff9d6c; }
+pre.snip .attr { color: #f9c98c; }
+pre.snip .val { color: #a8e1ff; }
+pre.snip .str { color: #d6f8a3; }
+
+/* Per-card layout helpers */
+.demo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 767px) { .demo-grid-2 { grid-template-columns: 1fr; } }
+
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 14px 18px;
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.controls-row label {
+    font-size: 12px; font-weight: 600; color: #54657a;
+    margin: 0 4px 0 0; text-transform: uppercase; letter-spacing: .04em;
+}
+
+
+.chat {
+    height: 380px;
+    border: 1px solid var(--ts-border);
+    border-radius: 12px;
+    background: #fafbfd;
+    padding: 16px 18px;
+}
+.msg {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    font-size: 14px; line-height: 1.55;
+    box-shadow: 0 1px 3px rgba(10,25,41,.04);
+}
+.msg.me {
+    background: #fff3eb;
+    border-color: #ffd9c7;
+    margin-left: 32px;
+}
+.msg .who { font-weight: 700; font-size: 12px; color: var(--ts-orange); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .04em; }
+
+.wide-table-wrap {
+    border: 1px solid var(--ts-border);
+    border-radius: 12px;
+    overflow-x: auto;
+    background: #fff;
+}
+.wide-table-wrap table { margin: 0; white-space: nowrap; min-width: 1100px; }
+.wide-table-wrap th, .wide-table-wrap td { padding: 12px 16px; font-size: 13px; }
+.wide-table-wrap thead th { background: #f6f8fb; border-bottom: 1px solid var(--ts-border); color: var(--ts-navy); }
+
+.card-rail {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 8px;
+    border: 1px solid var(--ts-border);
+    border-radius: 12px;
+    background: #fafbfd;
+}
+.card-rail .card-rail-item {
+    flex: 0 0 230px;
+    height: 180px;
+    background: linear-gradient(135deg, var(--ts-navy), var(--ts-navy-2));
+    color: #fff; padding: 18px;
+    border-radius: 10px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+}
+.card-rail .card-rail-item:nth-child(2n) { background: linear-gradient(135deg, var(--ts-orange), #c44512); }
+.card-rail .card-rail-item:nth-child(3n) { background: linear-gradient(135deg, var(--ts-teal), #1e8f9d); }
+.card-rail .card-rail-item h5 { margin: 0; font-size: 15px; }
+.card-rail .card-rail-item small { opacity: .8; font-size: 11px; }
+
+.grid-2d-wrap {
+    width: 100%;
+    height: 320px;
+    border: 1px solid var(--ts-border);
+    border-radius: 12px;
+    background: #fafbfd;
+}
+.grid-2d {
+    display: grid;
+    grid-template-columns: repeat(8, 130px);
+    gap: 10px;
+    padding: 16px;
+    width: max-content;
+}
+.grid-2d > div {
+    height: 80px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #fff, #e9eef5);
+    border: 1px solid var(--ts-border);
+    padding: 10px 12px;
+    font-size: 12px; color: #54657a;
+}
+
+.dark-panel {
+    background: var(--ts-navy);
+    color: #d8e2ee;
+    border-radius: 12px;
+    padding: 16px 18px;
+    height: 320px;
+    line-height: 1.65;
+    font-size: 14px;
+}
+.dark-panel p { margin-bottom: 12px; }
+
+.size-slider { width: 220px; }
+
+.ss-status {
+    display: inline-flex; gap: 6px; flex-wrap: wrap;
+    font-family: monospace; font-size: 11.5px;
+}
+.ss-status .edge {
+    padding: 2px 8px;
+    border-radius: 11px;
+    background: #e9eef5;
+    color: var(--ts-muted);
+}
+.ss-status .edge.on {
+    background: var(--ts-orange);
+    color: #fff;
+}
+
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <h1 class="mt-3">PluginScrollShadow Live Demo</h1>
+    <p class="lead">A subtle UX cue for scrollable containers — gradient masks on the edges that only appear when there's content beyond the current scroll position. Built on CSS <code>mask-image</code>, so it works cleanly on any background.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        Scroll inside each container to watch shadows appear and disappear. The last card has live controls — toggle the plugin on/off and resize the feather.
+      </div>
+
+
+      <!-- 1. Vertical -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">orientation: vertical · default</p>
+          <h3>Vertical scroll · chat thread</h3>
+          <p class="lead-sm">Top and bottom edges show shadow only when content extends beyond the visible area. Scroll inside the box.</p>
+          <div class="chat" data-plugin-scroll-shadow>
+            <div class="msg"><div class="who">Sarah</div>Have you finished the API spec for the new endpoints?</div>
+            <div class="msg me"><div class="who">You</div>Almost — just need to add the rate-limit section. Working on it now.</div>
+            <div class="msg"><div class="who">Sarah</div>Cool, can you send a draft today?</div>
+            <div class="msg me"><div class="who">You</div>Yep, before 5pm.</div>
+            <div class="msg"><div class="who">Sarah</div>Perfect, thanks.</div>
+            <div class="msg"><div class="who">Marcus</div>Quick question on the auth flow — are we still using JWT for service-to-service?</div>
+            <div class="msg me"><div class="who">You</div>Yes, with rotating refresh tokens. The spec covers it.</div>
+            <div class="msg"><div class="who">Marcus</div>Got it. Will review.</div>
+            <div class="msg"><div class="who">Sarah</div>One more thing — the rate limit numbers should account for the new burst allowance.</div>
+            <div class="msg me"><div class="who">You</div>Will check with infra. Probably 200 req/min steady, 500/min burst for 30s.</div>
+            <div class="msg"><div class="who">Sarah</div>That works. Document the burst window in the spec.</div>
+            <div class="msg me"><div class="who">You</div>Done.</div>
+          </div>
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"chat"</span> <span class="attr">data-plugin-scroll-shadow</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+      <!-- 2. Horizontal -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">orientation: horizontal</p>
+          <h3>Horizontal scroll · data table</h3>
+          <p class="lead-sm">Left and right shadows indicate columns hidden off-screen.</p>
+          <div class="wide-table-wrap" data-plugin-scroll-shadow data-plugin-options='{"orientation":"horizontal","size":"50px"}'>
+            <table class="table">
+              <thead><tr>
+                <th>Order</th><th>Customer</th><th>Date</th><th>Status</th><th>Items</th>
+                <th>Subtotal</th><th>Tax</th><th>Shipping</th><th>Total</th><th>Region</th><th>Notes</th>
+              </tr></thead>
+              <tbody>
+                <tr><td>#2401</td><td>Acme Corp.</td><td>2026-04-12</td><td>Fulfilled</td><td>3</td><td>$148.00</td><td>$11.84</td><td>$8.00</td><td>$167.84</td><td>EU-DE</td><td>Repeat customer</td></tr>
+                <tr><td>#2402</td><td>Globex Ltd.</td><td>2026-04-13</td><td>Pending</td><td>1</td><td>$59.00</td><td>$4.72</td><td>$5.00</td><td>$68.72</td><td>UK</td><td>Express</td></tr>
+                <tr><td>#2403</td><td>Initech Inc.</td><td>2026-04-14</td><td>Fulfilled</td><td>7</td><td>$304.50</td><td>$24.36</td><td>$0.00</td><td>$328.86</td><td>US-CA</td><td>Free shipping</td></tr>
+                <tr><td>#2404</td><td>Stark Industries</td><td>2026-04-14</td><td>Refund</td><td>2</td><td>$96.00</td><td>$7.68</td><td>$6.00</td><td>$109.68</td><td>US-NY</td><td>Damage in transit</td></tr>
+                <tr><td>#2405</td><td>Wayne Enterprises</td><td>2026-04-15</td><td>Fulfilled</td><td>4</td><td>$220.00</td><td>$17.60</td><td>$10.00</td><td>$247.60</td><td>US-NJ</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">data-plugin-scroll-shadow</span>
+     <span class="attr">data-plugin-options</span>=<span class="str">'{"orientation":"horizontal","size":"50px"}'</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;table</span><span class="tag">&gt;</span>...<span class="tag">&lt;/table&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+      <!-- 3. Both -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">orientation: both · all four edges</p>
+          <h3>Two-axis scroll</h3>
+          <p class="lead-sm">Used when content scrolls in both directions. The plugin composites two mask gradients with <code>mask-composite: intersect</code>.</p>
+          <div class="grid-2d-wrap" data-plugin-scroll-shadow data-plugin-options='{"orientation":"both","size":"60px"}'>
+            <div class="grid-2d">
+              <!-- 5 rows × 8 columns = 40 cells -->
+              <div>Project · Atlas</div><div>Owner · Sarah</div><div>Stage · Design</div><div>Due · May 2</div><div>Budget · $42k</div><div>Risk · Low</div><div>QA · pending</div><div>Region · EU</div>
+              <div>Project · Boreal</div><div>Owner · Marcus</div><div>Stage · Build</div><div>Due · May 9</div><div>Budget · $80k</div><div>Risk · Med</div><div>QA · pass</div><div>Region · NA</div>
+              <div>Project · Cinder</div><div>Owner · Jin</div><div>Stage · QA</div><div>Due · May 14</div><div>Budget · $18k</div><div>Risk · Low</div><div>QA · pass</div><div>Region · APAC</div>
+              <div>Project · Delta</div><div>Owner · Priya</div><div>Stage · Design</div><div>Due · Jun 1</div><div>Budget · $52k</div><div>Risk · High</div><div>QA · n/a</div><div>Region · NA</div>
+              <div>Project · Echo</div><div>Owner · Tom</div><div>Stage · Build</div><div>Due · Jun 12</div><div>Budget · $96k</div><div>Risk · Med</div><div>QA · pending</div><div>Region · EU</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Color variant -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">color · matched to background</p>
+          <h3>Dark panel, dark mask</h3>
+          <p class="lead-sm">The mask color must match the container's background — pass it through <code>color</code> or set <code>--ts-ss-color</code> in CSS.</p>
+          <div class="dark-panel" data-plugin-scroll-shadow data-plugin-options='{"orientation":"vertical","size":"50px","color":"#0a1929"}'>
+            <p>Themestrap was started as a way to stop rewriting the same handful of MODX snippets for every Bootstrap-based site I built. It started small — a tsCard, a tsAccordion — and grew into a full library of porting between Porto's HTML and MODX-native chunks.</p>
+            <p>The trick was getting the property metadata, chunk templates, and JavaScript plugin auto-init pipeline to all play nicely together. Once that landed, building new components became almost mechanical.</p>
+            <p>The hardest pieces were the bits where MODX's templating overlaps with Bootstrap's data-attribute conventions, like nav. pdoMenu turned out to be the right primitive once we threaded through unique instance IDs.</p>
+            <p>If you're considering using Themestrap on your own project, start with the snippets you'd rewrite anyway: alerts, cards, modals. Add plugins as you need them.</p>
+            <p>The next major release will add a server-side rendering pipeline for the JS plugins, so the initial HTML matches the post-init DOM. That should solve the FOUC issues some users have reported.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Interactive controls -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">runtime · setEnabled() / update()</p>
+          <h3>Live controls</h3>
+          <p class="lead-sm">The plugin exposes <code>setEnabled(bool)</code> and <code>update()</code>. Toggle below to see how state classes are added or removed.</p>
+          <div class="controls-row">
+            <label>Enabled:</label>
+            <button class="btn btn-sm btn-primary" id="ss-toggle">Disable shadows</button>
+            <label class="ms-3">Size:</label>
+            <input type="range" class="size-slider" id="ss-size" min="10" max="100" value="40">
+            <span id="ss-size-val" class="note" style="font-family:monospace;">40px</span>
+            <span class="ms-auto note">State:</span>
+            <span class="ss-status">
+              <span class="edge" id="state-top">top</span>
+              <span class="edge" id="state-bottom">bottom</span>
+            </span>
+          </div>
+          <div class="chat" id="ss-live" data-plugin-scroll-shadow>
+            <div class="msg"><div class="who">Logs</div>App starting on port 3000.</div>
+            <div class="msg"><div class="who">Logs</div>Connecting to database.</div>
+            <div class="msg"><div class="who">Logs</div>DB ready in 412ms.</div>
+            <div class="msg"><div class="who">Logs</div>Warming caches.</div>
+            <div class="msg"><div class="who">Logs</div>Cache ready.</div>
+            <div class="msg"><div class="who">Logs</div>Auth provider verified.</div>
+            <div class="msg"><div class="who">Logs</div>Request: GET /api/items</div>
+            <div class="msg"><div class="who">Logs</div>Response: 200 OK in 24ms.</div>
+            <div class="msg"><div class="who">Logs</div>Request: POST /api/orders</div>
+            <div class="msg"><div class="who">Logs</div>Response: 201 Created in 88ms.</div>
+            <div class="msg"><div class="who">Logs</div>Request: GET /api/orders/142</div>
+            <div class="msg"><div class="who">Logs</div>Response: 200 OK in 13ms.</div>
+            <div class="msg"><div class="who">Logs</div>Connection pool idle: 8/10.</div>
+            <div class="msg"><div class="who">Logs</div>Tick — health check.</div>
+          </div>
+        </div>
+      </div>
+
+
+      <p class="text-center note mt-5 pt-3">
+        Themestrap MODX 3 — PluginScrollShadow demo · plugin runs live in your browser.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.scrollshadow.js"></script>
+
+<!-- Demo wiring -->
+<script>
+
+$(function () {
+    // Auto-init every container with data-plugin-scroll-shadow.
+    $('[data-plugin-scroll-shadow]').each(function () {
+        const $this = $(this);
+        let opts = {};
+        try { opts = JSON.parse($this.attr('data-plugin-options') || '{}'); }
+        catch (e) { opts = {}; }
+        $this.themestrapPluginScrollShadow(opts);
+    });
+
+    // Live controls
+    const $live = $('#ss-live');
+    const inst  = $live.data('__pluginScrollShadow');
+    let enabled = true;
+
+    $('#ss-toggle').on('click', function () {
+        enabled = !enabled;
+        inst.setEnabled(enabled);
+        $(this).text(enabled ? 'Disable shadows' : 'Enable shadows');
+    });
+
+    $('#ss-size').on('input', function () {
+        const v = this.value + 'px';
+        $live.css('--ts-ss-size', v);
+        $('#ss-size-val').text(v);
+    });
+
+    // Live state badges reflecting the .ts-ss--* classes
+    const reflect = () => {
+        $('#state-top').toggleClass('on', $live.hasClass('ts-ss--top'));
+        $('#state-bottom').toggleClass('on', $live.hasClass('ts-ss--bottom'));
+    };
+    new MutationObserver(reflect).observe($live[0], { attributes: true, attributeFilter: ['class'] });
+    reflect();
+});
+
+</script>
+
+</body>
+</html>

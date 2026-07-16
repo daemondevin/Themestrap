@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginScroller — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<style>
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--ts-teal); }
+code {
+    background: rgba(10,25,41,.05);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+.btn-primary { background: var(--ts-orange); border-color: var(--ts-orange); }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background: var(--ts-orange-2) !important; border-color: var(--ts-orange-2) !important;
+}
+.btn-outline-primary { color: var(--ts-orange); border-color: var(--ts-orange); }
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+    background: var(--ts-orange) !important; border-color: var(--ts-orange) !important; color:#fff !important;
+}
+
+/* Hero */
+.demo-hero { background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%); color:#fff; padding:56px 0 48px; }
+.demo-hero h1 { font-weight:700; letter-spacing:-.5px; margin:0 0 8px; }
+.demo-hero .lead { color:#b9c6d6; max-width:760px; margin:0; }
+.demo-hero .badge-orange { background:var(--ts-orange); color:#fff; font-weight:600; letter-spacing:.04em; padding:6px 12px; text-transform:uppercase; font-size:11px; border-radius:4px; }
+.demo-hero code { background:rgba(255,255,255,.12); color:#ffd9c7; padding:2px 7px; border-radius:4px; }
+
+/* Cards */
+.demo-card { background:#fff; border:1px solid var(--ts-border); border-radius:14px; box-shadow:0 6px 24px rgba(10,25,41,.05); margin-bottom:28px; }
+.demo-card .card-body { padding:20px 24px 24px; }
+.demo-section-label { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ts-teal); margin:0 0 8px; }
+.demo-card h3 { font-size:19px; font-weight:700; color:var(--ts-navy); margin:0 0 6px; }
+.demo-card p.lead-sm { color:#54657a; font-size:14px; margin:0 0 14px; }
+
+.tip { background:#e8f7f9; border-left:4px solid var(--ts-teal); border-radius:0 8px 8px 0; padding:12px 16px; font-size:13px; color:#1f4348; margin-bottom:24px; }
+.tip i { color:var(--ts-teal); }
+.note { font-size:12.5px; color:var(--ts-muted); }
+
+pre.snip { background:#0e2238; color:#e1eaf3; padding:14px 18px; border-radius:8px; margin:12px 0 0; font-family:"SFMono-Regular",Consolas,Menlo,monospace; font-size:12.5px; line-height:1.6; overflow-x:auto; }
+pre.snip .c1 { color:#6c8bab; font-style:italic; }
+pre.snip .tag { color:#ff9d6c; }
+pre.snip .attr { color:#f9c98c; }
+pre.snip .val { color:#a8e1ff; }
+pre.snip .str { color:#d6f8a3; }
+
+.controls-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:14px 18px; background:#f8fafc; border:1px solid var(--ts-border); border-radius:8px; margin-bottom:14px; }
+.controls-row label { font-size:12px; font-weight:600; color:#54657a; margin:0 4px 0 0; text-transform:uppercase; letter-spacing:.04em; }
+
+/* Content surfaces being scrolled */
+.panel { border:1px solid var(--ts-border); border-radius:12px; background:#fafbfd; padding:16px 18px; }
+.prose p { margin-bottom:12px; line-height:1.7; font-size:14px; }
+.prose h5 { color:var(--ts-navy); margin:18px 0 8px; font-size:15px; }
+
+.feed .item { background:#fff; border:1px solid var(--ts-border); border-radius:10px; padding:10px 14px; margin-bottom:10px; font-size:14px; line-height:1.55; box-shadow:0 1px 3px rgba(10,25,41,.04); }
+.feed .item .who { font-weight:700; font-size:12px; color:var(--ts-orange); margin-bottom:2px; text-transform:uppercase; letter-spacing:.04em; }
+
+.logbox { background:var(--ts-navy); color:#cfe0f0; border-radius:12px; padding:14px 16px; font-family:"SFMono-Regular",Consolas,Menlo,monospace; font-size:12.5px; line-height:1.7; }
+.logbox .line { white-space:pre-wrap; }
+.logbox .ok { color:#7ee3b8; }
+.logbox .warn { color:#ffd27a; }
+
+/* Branded thumb on the code rail (per-instance CSS custom props) */
+.code-rail { --ts-scroller-thumb: rgba(232,103,42,.5); --ts-scroller-thumb-hover: rgba(232,103,42,.8); --ts-scroller-size:10px; }
+.code-rail pre { background:#0e2238; color:#e1eaf3; padding:14px 16px; border-radius:0; margin:0; font-size:12.5px; line-height:1.6; }
+
+.size-slider { width:200px; }
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <h1 class="mt-3">PluginScroller Live Demo</h1>
+    <p class="lead">A native, dependency-free custom scrollbar — a from-scratch alternative to nanoScroller. The platform scrollbar is hidden and a themable, draggable bar is drawn on top. Drag the thumb, click the track to page, or scroll normally. No third-party JavaScript.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        Each container below is a live <code>PluginScroller</code> instance. The bar auto-hides unless <code>alwaysVisible</code> is set — hover or scroll to reveal it. The last card has runtime controls.
+      </div>
+
+      <!-- 1. Fixed height -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">height: 320 · auto-hide</p>
+          <h3>Fixed-height panel</h3>
+          <p class="lead-sm">A constrained host with overflowing prose. The bar fades in on scroll or hover, then auto-hides after a moment.</p>
+          <div class="panel prose" data-plugin-scroller data-plugin-options='{"height":320}'>
+            <h5>Why a custom scrollbar?</h5>
+            <p>Native scrollbars are inconsistent across platforms and nearly impossible to style to a brand. PluginScroller hides the native bar and renders its own, so the look is identical everywhere and themed through a handful of CSS custom properties.</p>
+            <p>The content keeps scrolling natively — wheel, trackpad, keyboard and touch all work as usual — because the plugin never intercepts the scroll itself. It simply mirrors the native scroll position onto a thumb, and mirrors thumb drags back onto the native scroll. One source of truth, no jank.</p>
+            <h5>How the thumb is sized</h5>
+            <p>The thumb height is proportional to the visible-to-total ratio: a viewport showing a third of its content gets a thumb roughly a third of the track tall, clamped to a sensible minimum so it stays grabbable on very long pages.</p>
+            <p>When the container or its content changes size, a ResizeObserver and MutationObserver recalculate the geometry automatically. You rarely need to call <code>update()</code> yourself.</p>
+            <h5>Theming</h5>
+            <p>Every visual aspect — width, colour, hover colour, corner radius, inset — is a CSS variable on the host, so you can restyle one container or every scroller on the site from a stylesheet without touching JavaScript.</p>
+            <p>That is the whole idea: behaviour in options, looks in CSS.</p>
+          </div>
+<pre class="snip"><span class="tag">&lt;div</span> <span class="attr">data-plugin-scroller</span> <span class="attr">data-plugin-options</span>=<span class="str">'{"height":320}'</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></pre>
+        </div>
+      </div>
+
+      <!-- 2. maxHeight grow -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">maxHeight: 300 · grow then cap</p>
+          <h3>Grow-to-content, then scroll</h3>
+          <p class="lead-sm">With <code>maxHeight</code>, the host grows with its content up to the cap, then starts scrolling. Useful for lists whose length you don't know in advance.</p>
+          <div class="feed" data-plugin-scroller data-plugin-options='{"maxHeight":300}'>
+            <div class="item"><div class="who">Sarah</div>Pushed the rate-limit section to the spec — take a look when you can.</div>
+            <div class="item"><div class="who">Marcus</div>Reviewed. One nit on the burst window wording, otherwise LGTM.</div>
+            <div class="item"><div class="who">You</div>Fixed the wording. Merging.</div>
+            <div class="item"><div class="who">Jin</div>Can we add an example response for the 429 case?</div>
+            <div class="item"><div class="who">You</div>Good call — added with Retry-After header.</div>
+            <div class="item"><div class="who">Sarah</div>Nice. Shipping the docs update now.</div>
+            <div class="item"><div class="who">Priya</div>Heads up: staging is on the new build, watch for cache warnings.</div>
+            <div class="item"><div class="who">You</div>Seen one warning, harmless. Tracking in #infra.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Always-visible branded -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">alwaysVisible · branded thumb via CSS vars</p>
+          <h3>Always-on, orange thumb</h3>
+          <p class="lead-sm">Set <code>alwaysVisible</code> and override <code>--ts-scroller-thumb</code> / <code>--ts-scroller-size</code> in CSS for a permanent, brand-coloured bar — handy for code rails.</p>
+          <div class="code-rail" data-plugin-scroller data-plugin-options='{"height":300,"alwaysVisible":true,"sliderMinHeight":44}'>
+<pre>// themestrap.plugin.scroller.js (excerpt)
+update() {
+    const viewportH = content.clientHeight;
+    const contentH  = content.scrollHeight;
+    const barH      = this.$bar[0].clientHeight;
+
+    const hasOverflow = contentH > viewportH + 1;
+    this.$el.toggleClass('ts-scroller--has-overflow', hasOverflow);
+    if (!hasOverflow) return this;
+
+    let thumbH = Math.round(barH * (viewportH / contentH));
+    thumbH = Math.max(this.options.sliderMinHeight, thumbH);
+    thumbH = Math.min(thumbH, barH);
+
+    this._maxScroll      = contentH - viewportH;
+    this._maxThumbTravel = Math.max(0, barH - thumbH);
+    this.$thumb.css('height', thumbH + 'px');
+    this._positionThumb();
+    return this;
+}
+
+_positionThumb() {
+    const ratio = this._maxScroll > 0
+        ? this.$content[0].scrollTop / this._maxScroll : 0;
+    const y = ratio * this._maxThumbTravel;
+    this.$thumb.css('transform', 'translateY(' + y + 'px)');
+}
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Interactive controls -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">runtime · setEnabled() / scrollTo() / update()</p>
+          <h3>Live controls</h3>
+          <p class="lead-sm">The instance (read from <code>$el.data('__pluginScroller')</code>) exposes <code>setEnabled()</code>, <code>scrollTop()</code>, <code>scrollBottom()</code> and <code>update()</code>. The Append button adds lines so you can watch geometry recalc on its own.</p>
+          <div class="controls-row">
+            <button class="btn btn-sm btn-primary" id="sc-toggle">Disable bar</button>
+            <button class="btn btn-sm btn-outline-primary" id="sc-top">Scroll top</button>
+            <button class="btn btn-sm btn-outline-primary" id="sc-bottom">Scroll bottom</button>
+            <button class="btn btn-sm btn-outline-primary" id="sc-append">Append lines</button>
+            <label class="ms-3">Min thumb:</label>
+            <input type="range" class="size-slider" id="sc-min" min="20" max="120" value="30">
+            <span id="sc-min-val" class="note" style="font-family:monospace;">30px</span>
+          </div>
+          <div class="logbox" id="sc-live" data-plugin-scroller data-plugin-options='{"height":300}'>
+            <div class="line"><span class="ok">[ok]</span> App starting on port 3000.</div>
+            <div class="line"><span class="ok">[ok]</span> Connected to database in 412ms.</div>
+            <div class="line"><span class="ok">[ok]</span> Cache warm — 1,204 keys.</div>
+            <div class="line"><span class="ok">[ok]</span> Auth provider verified.</div>
+            <div class="line">GET /api/items → 200 in 24ms</div>
+            <div class="line">POST /api/orders → 201 in 88ms</div>
+            <div class="line">GET /api/orders/142 → 200 in 13ms</div>
+            <div class="line"><span class="warn">[warn]</span> Connection pool at 8/10.</div>
+            <div class="line">GET /api/items?page=2 → 200 in 19ms</div>
+            <div class="line">Tick — health check passed.</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-center note mt-5 pt-3">
+        Themestrap — PluginScroller demo · the plugin runs live in your browser, no build step.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.scroller.js"></script>
+
+<!-- Demo wiring -->
+<script>
+$(function () {
+    // Auto-init every container with data-plugin-scroller.
+    $('[data-plugin-scroller]').each(function () {
+        const $this = $(this);
+        let opts = {};
+        try { opts = JSON.parse($this.attr('data-plugin-options') || '{}'); }
+        catch (e) { opts = {}; }
+        $this.themestrapPluginScroller(opts);
+    });
+
+    // Live controls (card 4)
+    const $live = $('#sc-live');
+    const inst  = $live.data('__pluginScroller');
+    let enabled = true;
+    let counter = 1;
+
+    $('#sc-toggle').on('click', function () {
+        enabled = !enabled;
+        inst.setEnabled(enabled);
+        $(this).text(enabled ? 'Disable bar' : 'Enable bar');
+    });
+    $('#sc-top').on('click', () => inst.scrollTop(true));
+    $('#sc-bottom').on('click', () => inst.scrollBottom(true));
+    $('#sc-append').on('click', function () {
+        const $content = $live.children('.ts-scroller__content');
+        for (let i = 0; i < 4; i++) {
+            $content.append('<div class="line">GET /api/extra/' + (counter++) + ' \u2192 200 in ' + (10 + (counter % 40)) + 'ms</div>');
+        }
+        // MutationObserver recalcs geometry on its own; pin to the end:
+        inst.scrollBottom(true);
+    });
+    $('#sc-min').on('input', function () {
+        const v = parseInt(this.value, 10);
+        $('#sc-min-val').text(v + 'px');
+        inst.options.sliderMinHeight = v;
+        inst.update();
+    });
+});
+</script>
+
+</body>
+</html>

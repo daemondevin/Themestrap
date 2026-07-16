@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="disable-local-warning">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Themestrap Module Loader — Demo</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --line:#272b35; --ink:#e8eaf0;
+    --muted:#9aa3b2; --accent:#6ea8fe; --good:#5ad19a; --warn:#f0b86e;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    padding:28px 20px 120px;
+  }
+  .wrap{max-width:860px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px}
+  .lede{color:var(--muted);margin:0 0 22px;max-width:62ch}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:26px 0 10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .row{display:flex;flex-wrap:wrap;gap:10px}
+  button{
+    background:#222734;color:var(--ink);border:1px solid var(--line);
+    padding:9px 14px;border-radius:9px;font:inherit;font-size:14px;cursor:pointer;
+    transition:border-color .15s,background .15s;
+  }
+  button:hover{border-color:var(--accent);background:#262c3b}
+  button .k{color:var(--muted);font:12px var(--mono)}
+  .graph{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font:13px var(--mono);color:var(--muted)}
+  .node{padding:3px 9px;border:1px solid var(--line);border-radius:7px;color:var(--ink);background:#1c2129}
+  .node.on{border-color:var(--good);color:var(--good)}
+  .arrow{color:var(--line)}
+  #log{
+    font:12.5px/1.5 var(--mono);background:#0b0d11;border:1px solid var(--line);
+    border-radius:10px;padding:12px 14px;height:230px;overflow:auto;margin-top:12px;white-space:pre-wrap;
+  }
+  #log .t{color:#5b6472}
+  #log .ev{color:var(--accent)}
+  #log .ok{color:var(--good)}
+  #log .er{color:#ff7a7a}
+  #log .mod{color:var(--warn)}
+  #stage{margin-top:12px;min-height:64px}
+  .demo-card{background:#1c2129;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:10px}
+  #animBox{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#a07bff);margin-top:12px}
+  /* The loader's built-in debug panel */
+  .ts-debug-panel{
+    position:fixed;right:16px;bottom:16px;z-index:50;
+    background:#0b0d11ee;border:1px solid var(--accent);border-radius:10px;
+    padding:12px 14px;font:12px/1.6 var(--mono);color:var(--ink);max-width:280px;
+    backdrop-filter:blur(4px);
+  }
+  .ts-debug-panel strong{color:var(--accent)}
+  code{font:13px var(--mono);color:var(--warn);background:#1c2129;padding:1px 6px;border-radius:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Themestrap Module Loader</h1>
+  <p class="lede">
+    A tiny client-side orchestrator: you <code>define()</code> modules (each a JS file,
+    a CSS file, dependencies, and an <code>init</code> hook), then <code>require()</code> them.
+    It resolves the dependency graph, fetches each asset <em>once</em>, runs inits in order,
+    and only settles after the DOM is ready. Below, everything is loaded lazily on click —
+    nothing in the graph touches the network until you ask for it.
+  </p>
+
+  <h2>Dependency graph</h2>
+  <div class="card">
+    <div class="graph" id="graph">
+      <span class="node" data-n="config">config</span><span class="arrow">←</span>
+      <span class="node" data-n="utils">utils</span><span class="arrow">←</span>
+      <span class="node" data-n="ui">ui</span><span class="arrow">←</span>
+      <span class="node" data-n="confetti">confetti <small>(CDN js)</small></span>
+      <span class="arrow" style="margin-left:18px">·</span>
+      <span class="node" data-n="theme">theme <small>(CDN css)</small></span><span class="arrow">←</span>
+      <span class="node" data-n="config">config</span>
+    </div>
+  </div>
+
+  <h2>Try it</h2>
+  <div class="card">
+    <div class="row">
+      <button id="b-confetti">require(['confetti']) <span class="k">→ loads config→utils→ui→confetti</span></button>
+      <button id="b-theme">require(['theme']) <span class="k">→ loads animate.css</span></button>
+      <button id="b-scan">scan() <span class="k">→ picks up [data-module]</span></button>
+      <button id="b-routes">runRoutes() <span class="k">→ path-based load</span></button>
+      <button id="b-reset">reset</button>
+    </div>
+    <div id="stage">
+      <!-- scan() will discover this and load the "ui" module -->
+      <div data-module="ui" id="scanTarget" style="color:var(--muted);font-size:13px">
+        This element declares <code>data-module="ui"</code> — click <b>scan()</b> to auto-load it.
+      </div>
+    </div>
+    <div id="log"></div>
+  </div>
+
+  <h2>What each button proves</h2>
+  <div class="card" style="color:var(--muted);font-size:14px">
+    <p style="margin:.2em 0"><b style="color:var(--ink)">require(['confetti'])</b> — walks the chain <code>config → utils → ui → confetti</code> in order, fetches a real library from cdnjs via <code>$.getScript</code>, then its <code>init</code> fires confetti. Click again: instant, because the module is in the <code>loaded</code> set.</p>
+    <p style="margin:.2em 0"><b style="color:var(--ink)">require(['theme'])</b> — lazy-loads <code>animate.css</code> and animates the box. The loader skips re-inserting a <code>&lt;link&gt;</code> that's already present.</p>
+    <p style="margin:.2em 0"><b style="color:var(--ink)">scan()</b> — reads <code>[data-module]</code> off the DOM and requires whatever it finds (no manual wiring).</p>
+    <p style="margin:.2em 0"><b style="color:var(--ink)">runRoutes()</b> — matches the current URL path against registered routes and loads the matching set.</p>
+    <p style="margin:.4em 0 0">The live panel bottom-right is the loader's own <code>debugPanel()</code> — it now updates on every load because the <code>'*'</code> wildcard event fix is in.</p>
+  </div>
+</div>
+
+<!-- 1) jQuery (Themestrap dependency) -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+<!-- Plugin -->
+<script src="../js/themestrap.loader.js"></script>
+
+<!-- 3) Demo wiring -->
+<script>
+(function($){
+  const logEl = document.getElementById('log');
+  const stamp = () => new Date().toLocaleTimeString('en-GB');
+  function line(html, cls){
+    const div = document.createElement('div');
+    div.innerHTML = `<span class="t">${stamp()}</span>  <span class="${cls||''}">${html}</span>`;
+    logEl.appendChild(div); logEl.scrollTop = logEl.scrollHeight;
+  }
+  function markGraph(){
+    document.querySelectorAll('#graph .node').forEach(n => {
+      n.classList.toggle('on', loader.loaded.has(n.dataset.n));
+    });
+  }
+
+  // Singleton. mode:'dev' keeps src URLs as-is (prod would swap .js → .min.js).
+  const loader = themestrap.loader({ mode:'dev', debug:true, waitForDOM:true });
+
+  // Mirror loader.log into the on-page console + repaint the graph on every event.
+  const origLog = loader.log.bind(loader);
+  loader.log = (...a) => {
+    origLog(...a);
+    line(a.map(x => typeof x === 'object' ? JSON.stringify(x) : x).join(' '), 'ev');
+  };
+  loader.on('*', (data, evt) => { line(`event → ${evt}`, 'ok'); markGraph(); });
+
+  // ---- Define the module graph (init-only modules need no files) ----
+  loader
+    .define('config', { init: () => line('init: config — defaults set', 'mod') })
+    .define('utils',  { deps:['config'], init: () => line('init: utils — helpers ready', 'mod') })
+    .define('ui', {
+      deps:['utils'],
+      init: () => {
+        line('init: ui — rendering card', 'mod');
+        if (!document.getElementById('uiCard')) {
+          const c = document.createElement('div');
+          c.id = 'uiCard'; c.className = 'demo-card';
+          c.innerHTML = '<b>UI module mounted.</b> Rendered by the <code>ui</code> init hook after its deps resolved.';
+          document.getElementById('stage').appendChild(c);
+        }
+      }
+    })
+    // Real on-demand JS from a CDN. After load, window.confetti exists.
+    .define('confetti', {
+      deps:['ui'],
+      src:'https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js',
+      init: () => line('init: confetti — library available on window.confetti', 'mod')
+    })
+    // Real on-demand CSS from a CDN.
+    .define('theme', {
+      deps:['config'],
+      css:'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
+      init: () => {
+        line('init: theme — animate.css loaded', 'mod');
+        if (!document.getElementById('animBox')) {
+          const b = document.createElement('div'); b.id = 'animBox';
+          document.getElementById('stage').appendChild(b);
+        }
+      }
+    })
+    // A route: when the path contains '/', load config (always true here for demo).
+    .route('/', ['config']);
+
+  // Built-in debug panel (bottom-right). Now live-updates thanks to the '*' fix.
+  loader.debugPanel();
+
+  // ---- Buttons ----
+  document.getElementById('b-confetti').onclick = () => {
+    line('▶ require(["confetti"])', 'ev');
+    loader.require(['confetti']).then(() => {
+      const t = loader.debugData.timings['confetti'];
+      line(`✓ chain resolved in ${t}ms — firing confetti`, 'ok');
+      if (window.confetti) confetti({ particleCount: 130, spread: 75, origin: { y: 0.7 } });
+    });
+  };
+
+  document.getElementById('b-theme').onclick = () => {
+    line('▶ require(["theme"])', 'ev');
+    loader.require(['theme']).then(() => {
+      const box = document.getElementById('animBox');
+      if (box) {
+        box.classList.remove('animate__animated','animate__rubberBand');
+        void box.offsetWidth; // restart animation
+        box.classList.add('animate__animated','animate__rubberBand');
+      }
+    });
+  };
+
+  document.getElementById('b-scan').onclick = () => {
+    line('▶ scan(document)', 'ev');
+    loader.scan();
+  };
+
+  document.getElementById('b-routes').onclick = () => {
+    line(`▶ runRoutes() — current path: ${location.pathname}`, 'ev');
+    loader.runRoutes();
+  };
+
+  document.getElementById('b-reset').onclick = () => location.reload();
+
+  line('Loader ready. Nothing loaded yet — click a button.', 'ok');
+  markGraph();
+})(jQuery);
+</script>
+</body>
+</html>

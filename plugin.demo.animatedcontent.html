@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginAnimatedContent — Live Demo | Themestrap</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<style>
+
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--ts-teal); }
+code {
+    background: rgba(10,25,41,.05);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+.btn-primary {
+    background: var(--ts-orange);
+    border-color: var(--ts-orange);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background: var(--ts-orange-2) !important;
+    border-color: var(--ts-orange-2) !important;
+}
+.btn-outline-primary {
+    color: var(--ts-orange);
+    border-color: var(--ts-orange);
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active,
+.btn-check:checked + .btn-outline-primary {
+    background: var(--ts-orange) !important;
+    border-color: var(--ts-orange) !important;
+    color: #fff !important;
+}
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 {
+    font-weight: 700;
+    letter-spacing: -.5px;
+    margin: 0 0 8px;
+}
+.demo-hero .lead {
+    color: #b9c6d6;
+    max-width: 720px;
+    margin: 0;
+}
+.demo-hero .badge-orange {
+    background: var(--ts-orange);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: .04em;
+    padding: 6px 12px;
+    text-transform: uppercase;
+    font-size: 11px;
+    border-radius: 4px;
+}
+.demo-hero code {
+    background: rgba(255,255,255,.12);
+    color: #ffd9c7;
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+/* Cards */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+}
+.demo-card .card-head {
+    padding: 18px 24px 0;
+}
+.demo-card .card-body {
+    padding: 20px 24px 24px;
+}
+.demo-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ts-teal);
+    margin: 0 0 8px;
+}
+.demo-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--ts-navy);
+    margin: 0 0 6px;
+}
+.demo-card p.lead-sm {
+    color: #54657a;
+    font-size: 14px;
+    margin: 0 0 14px;
+}
+
+.tip {
+    background: #e8f7f9;
+    border-left: 4px solid var(--ts-teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #1f4348;
+    margin-bottom: 24px;
+}
+.tip i { color: var(--ts-teal); }
+
+.note {
+    font-size: 12.5px;
+    color: var(--ts-muted);
+}
+
+/* Code snippet */
+pre.snip {
+    background: #0e2238;
+    color: #e1eaf3;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 12px 0 0;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    overflow-x: auto;
+}
+pre.snip .c1 { color: #6c8bab; font-style: italic; }
+pre.snip .tag { color: #ff9d6c; }
+pre.snip .attr { color: #f9c98c; }
+pre.snip .val { color: #a8e1ff; }
+pre.snip .str { color: #d6f8a3; }
+
+/* Per-card layout helpers */
+.demo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 767px) { .demo-grid-2 { grid-template-columns: 1fr; } }
+
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 14px 18px;
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.controls-row label {
+    font-size: 12px; font-weight: 600; color: #54657a;
+    margin: 0 4px 0 0; text-transform: uppercase; letter-spacing: .04em;
+}
+
+
+.kinetic {
+    margin: 0;
+    font-weight: 800;
+    color: var(--ts-navy);
+    letter-spacing: -.6px;
+    line-height: 1.15;
+}
+.kinetic.lg { font-size: 56px; }
+.kinetic.md { font-size: 36px; }
+.kinetic.sm { font-size: 24px; font-weight: 600; color: #54657a; }
+.kinetic.gradient {
+    background: linear-gradient(120deg, var(--ts-orange), var(--ts-teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.demo-card .replay {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .05em;
+}
+
+.metric-row {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin-top: 16px;
+    font-family: monospace; font-size: 13px;
+    color: var(--ts-muted);
+}
+.metric-row span code { color: var(--ts-orange); }
+
+/* Each .animated-letters-item starts invisible until its animation runs */
+.animate__animated.animate__fadeIn,
+.animate__animated.animate__fadeInUp,
+.animate__animated.animate__fadeInDown,
+.animate__animated.animate__zoomIn,
+.animate__animated.animate__bounceIn,
+.animate__animated.animate__lightSpeedInLeft,
+.animate__animated.animate__rotateIn {
+    animation-fill-mode: both;
+}
+
+/* Wrappers must not collapse to zero width while empty */
+.animated-letters-wrapper, .animated-words-wrapper { display: inline-block; }
+
+/* Loaded state */
+.kinetic.initialized .animated-letters-item,
+.kinetic.initialized .animated-words-item { display: inline-block; }
+
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <h1 class="mt-3">PluginAnimatedContent Live Demo</h1>
+    <p class="lead">Splits a heading into individual letters (or words), wraps each fragment in a <code>&lt;span&gt;</code>, and plays an animate.css animation across them in sequence with a configurable stagger. Great for hero titles and section headings — the kind of motion that makes a page feel alive without being noisy.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        Each example below uses the real plugin. The replay buttons call <code>destroy()</code> on the instance then re-initialize it. The bottom card swaps the <code>animationName</code> live.
+      </div>
+
+
+      <!-- 1. Letter · default fadeIn -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">letter · animationName: fadeIn (default)</p>
+          <h3>Each character animates independently</h3>
+          <p class="lead-sm">The default split granularity is <code>letter</code>. The plugin wraps each character in a span and applies an animation with a per-letter delay equal to <code>animationSpeed</code> ms × index.</p>
+          <h2 class="kinetic md mb-3 js-anim"
+              data-plugin-animated-letters
+              data-plugin-options='{"animationName":"fadeIn"}'>Welcome to Themestrap</h2>
+          <button class="btn btn-outline-primary btn-sm replay" data-replay=".js-anim:eq(0)">Replay</button>
+          <div class="metric-row">
+            <span>contentType: <code>letter</code></span>
+            <span>animationName: <code>fadeIn</code></span>
+            <span>animationSpeed: <code>50ms</code></span>
+            <span>startDelay: <code>500ms</code></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. fadeInUp + gradient -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">letter · fadeInUp · gradient text</p>
+          <h3>Per-letter slide-up</h3>
+          <p class="lead-sm">Drop-shadow-style entry from below. Pairs naturally with hero text on landing pages.</p>
+          <h1 class="kinetic lg gradient mb-3 js-anim"
+              data-plugin-animated-letters
+              data-plugin-options='{"animationName":"fadeInUp","animationSpeed":40}'>Make it kinetic</h1>
+          <button class="btn btn-outline-primary btn-sm replay" data-replay=".js-anim:eq(1)">Replay</button>
+        </div>
+      </div>
+
+      <!-- 3. Word -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">word · animationName: fadeInUp</p>
+          <h3>Word-by-word</h3>
+          <p class="lead-sm">Switch <code>contentType</code> to <code>word</code> for longer lines where letter-by-letter would feel too busy.</p>
+          <p class="kinetic md mb-3 js-anim"
+             data-plugin-animated-letters
+             data-plugin-options='{"contentType":"word","animationName":"fadeInUp","animationSpeed":150,"startDelay":300}'>
+             Less is often more on a longer line of body text.
+          </p>
+          <button class="btn btn-outline-primary btn-sm replay" data-replay=".js-anim:eq(2)">Replay</button>
+        </div>
+      </div>
+
+      <!-- 4. Speed comparison -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">stagger speed · animationSpeed</p>
+          <h3>Slow vs fast stagger</h3>
+          <p class="lead-sm">Same animation, different stagger interval. Higher values are theatrical; lower values feel punchy.</p>
+          <div class="demo-grid-2">
+            <div>
+              <p class="note mb-2">animationSpeed: 30</p>
+              <h2 class="kinetic md js-anim"
+                  data-plugin-animated-letters
+                  data-plugin-options='{"animationName":"fadeInDown","animationSpeed":30}'>Fast and snappy</h2>
+              <button class="btn btn-outline-primary btn-sm replay mt-3" data-replay=".js-anim:eq(3)">Replay</button>
+            </div>
+            <div>
+              <p class="note mb-2">animationSpeed: 120</p>
+              <h2 class="kinetic md js-anim"
+                  data-plugin-animated-letters
+                  data-plugin-options='{"animationName":"fadeInDown","animationSpeed":120}'>Slow and dramatic</h2>
+              <button class="btn btn-outline-primary btn-sm replay mt-3" data-replay=".js-anim:eq(4)">Replay</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Animation picker -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">animationName · cycle through animate.css presets</p>
+          <h3>Try different animations</h3>
+          <p class="lead-sm">Any animate.css class name works. Click below to swap.</p>
+
+          <div class="controls-row">
+            <label class="me-2">Animation:</label>
+            <div class="btn-group" role="group">
+              <input type="radio" class="btn-check" name="anim-pick" id="a-fade"   value="fadeIn"        autocomplete="off" checked>
+              <label class="btn btn-outline-primary btn-sm" for="a-fade">fadeIn</label>
+
+              <input type="radio" class="btn-check" name="anim-pick" id="a-up"     value="fadeInUp"      autocomplete="off">
+              <label class="btn btn-outline-primary btn-sm" for="a-up">fadeInUp</label>
+
+              <input type="radio" class="btn-check" name="anim-pick" id="a-zoom"   value="zoomIn"        autocomplete="off">
+              <label class="btn btn-outline-primary btn-sm" for="a-zoom">zoomIn</label>
+
+              <input type="radio" class="btn-check" name="anim-pick" id="a-bounce" value="bounceIn"      autocomplete="off">
+              <label class="btn btn-outline-primary btn-sm" for="a-bounce">bounceIn</label>
+
+              <input type="radio" class="btn-check" name="anim-pick" id="a-light"  value="lightSpeedInLeft" autocomplete="off">
+              <label class="btn btn-outline-primary btn-sm" for="a-light">lightSpeedIn</label>
+
+              <input type="radio" class="btn-check" name="anim-pick" id="a-rot"    value="rotateIn"      autocomplete="off">
+              <label class="btn btn-outline-primary btn-sm" for="a-rot">rotateIn</label>
+            </div>
+          </div>
+
+          <h2 id="anim-target" class="kinetic md text-center py-3 mb-0"
+              data-plugin-animated-letters
+              data-plugin-options='{"animationName":"fadeIn","animationSpeed":50}'>
+              Click an animation
+          </h2>
+        </div>
+      </div>
+
+
+      <p class="text-center note mt-5 pt-3">
+        Themestrap MODX 3 — PluginAnimatedContent demo · plugin runs live in your browser.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<!-- PluginAnimatedContent plugin (verbatim Themestrap source) -->
+<script>
+
+(((themestrap = {}, $) => {
+    const instanceName = '__animatedContent';
+
+    class PluginAnimatedContent {
+        constructor($el, opts) { return this.initialize($el, opts); }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) return this;
+            this.$el = $el;
+            this.initialText = $el.text();
+            this.setData().setOptions(opts).build().events();
+            return this;
+        }
+        setData() { this.$el.data(instanceName, this); return this; }
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginAnimatedContent.defaults, opts, { wrapper: this.$el });
+            return this;
+        }
+        build() {
+            const self = this;
+            if ($(window).width() < self.options.minWindowWidth) return this;
+            self.setMinHeight();
+
+            // LETTER MODE
+            if (self.options.contentType === 'letter') {
+                self.$el.addClass('initialized');
+                const letters = self.$el.text().split('');
+                self.$el.text('');
+                setTimeout(() => {
+                    for (let i = 0; i < letters.length; i++) {
+                        const letter = letters[i];
+                        self.$el.append(
+                            '<span class="animated-letters-wrapper ' + self.options.wrapperClass + '">' +
+                              '<span class="animated-letters-item letter ' +
+                                (self.options.letterClass ? self.options.letterClass + ' ' : '') +
+                                'animate__animated animate__' + self.options.animationName +
+                              '" style="animation-delay:' + (i * self.options.animationSpeed) + 'ms;">' +
+                                (letter === ' ' ? '&nbsp;' : letter) +
+                              '</span>' +
+                            '</span>'
+                        );
+                    }
+                }, self.options.startDelay);
+
+            // WORD MODE — standalone demo variant: same delayed animate.css class
+            // application as letter mode (real plugin delegates to PluginAnimate).
+            } else if (self.options.contentType === 'word') {
+                const words = self.$el.text().split(' ');
+                let delay = self.options.startDelay;
+                self.$el.empty();
+                $.each(words, (i, v) => {
+                    self.$el.append(
+                        '<span class="animated-words-wrapper ' + self.options.wrapperClass + '">' +
+                          '<span class="animated-words-item ' + self.options.wordClass +
+                          ' animate__animated animate__' + self.options.animationName +
+                          '" style="animation-delay:' + delay + 'ms;">' + v + '&nbsp;</span>' +
+                        '</span>'
+                    );
+                    delay += self.options.animationSpeed;
+                });
+                self.$el.addClass('initialized');
+            }
+            return this;
+        }
+        setMinHeight() {
+            this.$el.css('min-height', this.$el.height());
+            return this;
+        }
+        destroy() {
+            this.$el
+                .html(this.initialText)
+                .removeClass('initialized')
+                .css('min-height', '');
+            this.$el.removeData(instanceName);
+            return this;
+        }
+        events() {
+            const self = this;
+            self.$el.on('animated.letters.destroy', () => self.destroy());
+            self.$el.on('animated.letters.initialize', () => self.build());
+            return this;
+        }
+    }
+    PluginAnimatedContent.defaults = {
+        contentType: 'letter',
+        animationName: 'fadeIn',
+        animationSpeed: 50,
+        startDelay: 500,
+        minWindowWidth: 768,
+        letterClass: '',
+        wordClass: '',
+        wrapperClass: ''
+    };
+    $.extend(themestrap, { PluginAnimatedContent });
+    $.fn.themestrapPluginAnimatedContent = function(opts) {
+        return this.map(function() {
+            const $this = $(this);
+            if ($this.data(instanceName)) return $this.data(instanceName);
+            return new PluginAnimatedContent($this, opts);
+        });
+    };
+})).apply(this, [window.themestrap = window.themestrap || {}, jQuery]);
+
+</script>
+
+<!-- Demo wiring -->
+<script>
+
+$(function () {
+    function initAll() {
+        $('[data-plugin-animated-letters]').each(function () {
+            const $this = $(this);
+            if ($this.data('__animatedContent')) return;
+            let opts = {};
+            try { opts = JSON.parse($this.attr('data-plugin-options') || '{}'); }
+            catch (e) { opts = {}; }
+            $this.themestrapPluginAnimatedContent(opts);
+        });
+    }
+
+    initAll();
+
+    // Replay buttons — destroy & re-init the targeted element
+    $(document).on('click', '[data-replay]', function () {
+        const sel = $(this).attr('data-replay');
+        const $t = $(sel);
+        const inst = $t.data('__animatedContent');
+        if (inst) inst.destroy();
+        // Re-parse options & rebuild
+        let opts = {};
+        try { opts = JSON.parse($t.attr('data-plugin-options') || '{}'); }
+        catch (e) { opts = {}; }
+        setTimeout(() => $t.themestrapPluginAnimatedContent(opts), 50);
+    });
+
+    // Animation picker
+    $('input[name="anim-pick"]').on('change', function () {
+        const name = $(this).val();
+        const $t = $('#anim-target');
+        const inst = $t.data('__animatedContent');
+        if (inst) inst.destroy();
+        const opts = { animationName: name, animationSpeed: 50, contentType: 'letter' };
+        $t.attr('data-plugin-options', JSON.stringify(opts));
+        setTimeout(() => $t.themestrapPluginAnimatedContent(opts), 50);
+    });
+});
+
+</script>
+
+</body>
+</html>

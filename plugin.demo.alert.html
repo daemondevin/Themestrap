@@ -1,0 +1,301 @@
+
+<h2 class="sr-only">Interactive demo of the themestrap Bootstrap alert plugin with Tailwind UI styling</h2>
+
+<style>
+  /* ── Tailwind UI-style alert tokens ─────────────────────────────────────── */
+  .alert-ts-info    { --ab: #eff6ff; --al: #3b82f6; --ai: #3b82f6; --at: #1e40af; --ax: #1d4ed8; --ah: #1e40af; --ac: #93c5fd; --ach: #1d4ed8; }
+  .alert-ts-success { --ab: #f0fdf4; --al: #22c55e; --ai: #22c55e; --at: #14532d; --ax: #15803d; --ah: #14532d; --ac: #86efac; --ach: #15803d; }
+  .alert-ts-warning { --ab: #fffbeb; --al: #f59e0b; --ai: #f59e0b; --at: #78350f; --ax: #92400e; --ah: #78350f; --ac: #fcd34d; --ach: #92400e; }
+  .alert-ts-danger  { --ab: #fef2f2; --al: #ef4444; --ai: #ef4444; --at: #7f1d1d; --ax: #991b1b; --ah: #7f1d1d; --ac: #fca5a5; --ach: #991b1b; }
+  .alert-ts-neutral { --ab: #f9fafb; --al: #6b7280; --ai: #6b7280; --at: #111827; --ax: #374151; --ah: #111827; --ac: #d1d5db; --ach: #374151; }
+
+  @media (prefers-color-scheme: dark) {
+    .alert-ts-info    { --ab: #172554; --al: #3b82f6; --ai: #60a5fa; --at: #bfdbfe; --ax: #93c5fd; --ah: #bfdbfe; --ac: #3b82f6; --ach: #bfdbfe; }
+    .alert-ts-success { --ab: #052e16; --al: #22c55e; --ai: #4ade80; --at: #bbf7d0; --ax: #86efac; --ah: #bbf7d0; --ac: #22c55e; --ach: #bbf7d0; }
+    .alert-ts-warning { --ab: #27170a; --al: #f59e0b; --ai: #fbbf24; --at: #fde68a; --ax: #fcd34d; --ah: #fde68a; --ac: #f59e0b; --ach: #fde68a; }
+    .alert-ts-danger  { --ab: #2d0a0a; --al: #ef4444; --ai: #f87171; --at: #fecaca; --ax: #fca5a5; --ah: #fecaca; --ac: #ef4444; --ach: #fecaca; }
+    .alert-ts-neutral { --ab: #111827; --al: #6b7280; --ai: #9ca3af; --at: #f9fafb; --ax: #d1d5db; --ah: #f9fafb; --ac: #6b7280; --ach: #f9fafb; }
+  }
+
+  /* ── Base layout ──────────────────────────────────────────────────────── */
+  .a { display:flex; align-items:flex-start; gap:12px; padding:16px 16px 16px 20px; border-radius:8px; border:0; border-left:4px solid var(--al); background:var(--ab); position:relative; overflow:hidden; margin-bottom:12px; }
+  .a-icon { flex-shrink:0; width:20px; height:20px; color:var(--ai); margin-top:1px; }
+  .a-icon svg { display:block; width:100%; height:100%; }
+  .a-body { flex:1 1 auto; min-width:0; }
+  .a-title { font-size:14px; font-weight:600; line-height:1.4; color:var(--at); margin:0 0 4px; }
+  .a-text  { font-size:14px; line-height:1.5; color:var(--ax); margin:0; }
+  .a-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .a-btn { display:inline-flex; align-items:center; padding:6px 12px; font-size:13px; font-weight:500; border-radius:6px; border:1.5px solid transparent; cursor:pointer; transition:background .15s,border-color .15s,color .15s; white-space:nowrap; }
+  .a-btn-p { background:var(--ax); border-color:var(--ax); color:#fff; }
+  .a-btn-p:hover { background:var(--ah); border-color:var(--ah); }
+  .a-btn-s { background:transparent; border-color:var(--ax); color:var(--ax); }
+  .a-btn-s:hover { background:var(--ax); color:#fff; }
+  .a-btn-l { background:none; border-color:transparent; color:var(--ax); padding-left:0; padding-right:0; }
+  .a-btn-l:hover { color:var(--ah); text-decoration:underline; }
+  .a-close { flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; padding:0; margin-left:auto; background:none; border:none; border-radius:6px; color:var(--ac); cursor:pointer; transition:color .15s,background .15s; }
+  .a-close svg { display:block; width:20px; height:20px; }
+  .a-close:hover { color:var(--ach); background:color-mix(in srgb, var(--al) 14%, transparent); }
+  .a-bar { position:absolute; bottom:0; left:0; width:100%; height:3px; background:var(--al); opacity:.4; transform:scaleX(1); transform-origin:left center; transition:transform linear; }
+
+  /* ── Demo chrome ──────────────────────────────────────────────────────── */
+  .section-label { font-size:11px; font-weight:500; color:var(--color-text-secondary); letter-spacing:.07em; text-transform:uppercase; margin:20px 0 8px; }
+  .section-label:first-child { margin-top:0; }
+  .divider { border:none; border-top:.5px solid var(--color-border-tertiary); margin:20px 0; }
+  .spawn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:0; }
+  .spawn-btn { font-size:13px; padding:6px 14px; border-radius:6px; border:.5px solid var(--color-border-secondary); background:var(--color-background-primary); color:var(--color-text-primary); cursor:pointer; transition:background .12s; }
+  .spawn-btn:hover { background:var(--color-background-secondary); }
+  .toast-area { border:.5px dashed var(--color-border-secondary); border-radius:8px; padding:12px; min-height:60px; display:flex; flex-direction:column; gap:8px; }
+  .toast-empty { font-size:13px; color:var(--color-text-secondary); text-align:center; padding:8px 0; }
+</style>
+
+<!-- ── STATIC VARIANTS ────────────────────────────────────────────────────── -->
+<p class="section-label">Alert types</p>
+
+<div class="a alert-ts-info" id="s-info">
+  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg></span>
+  <div class="a-body"><p class="a-title">A new software update is available</p><p class="a-text">Version 3.1.4 is ready to install. Review the changelog before updating.</p></div>
+  <button class="a-close" onclick="dismiss('s-info')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
+</div>
+
+<div class="a alert-ts-success" id="s-success">
+  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg></span>
+  <div class="a-body"><p class="a-title">Payment successful</p><p class="a-text">Your order #2048 has been confirmed. A receipt has been sent to your email.</p></div>
+  <button class="a-close" onclick="dismiss('s-success')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
+</div>
+
+<div class="a alert-ts-warning" id="s-warning">
+  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg></span>
+  <div class="a-body">
+    <p class="a-title">Your storage is almost full</p>
+    <p class="a-text">You're using 4.8 GB of 5 GB. Delete files or upgrade your plan to continue.</p>
+    <div class="a-actions">
+      <button class="a-btn a-btn-p">Upgrade plan</button>
+      <button class="a-btn a-btn-s" onclick="dismiss('s-warning')">Dismiss</button>
+    </div>
+  </div>
+  <button class="a-close" onclick="dismiss('s-warning')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
+</div>
+
+<div class="a alert-ts-danger" id="s-danger">
+  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg></span>
+  <div class="a-body">
+    <p class="a-title">There were 3 errors with your submission</p>
+    <p class="a-text">First name is required · Email is invalid · Password must be 8+ characters</p>
+  </div>
+  <button class="a-close" onclick="dismiss('s-danger')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
+</div>
+
+<div class="a alert-ts-neutral" id="s-neutral">
+  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg></span>
+  <div class="a-body">
+    <p class="a-text">Scheduled maintenance on Saturday 3 AM – 5 AM UTC. Service may be briefly interrupted.</p>
+    <div class="a-actions">
+      <button class="a-btn a-btn-l">View status page</button>
+    </div>
+  </div>
+  <button class="a-close" onclick="dismiss('s-neutral')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
+</div>
+
+<hr class="divider">
+
+<!-- ── AUTO-DISMISS WITH COUNTDOWN ───────────────────────────────────────── -->
+<p class="section-label">Auto-dismiss with countdown bar (6 s, hover to pause)</p>
+<div id="countdown-slot"></div>
+<button class="spawn-btn" id="cd-btn" onclick="spawnCountdown()">Spawn auto-dismiss alert</button>
+
+<hr class="divider">
+
+<!-- ── TOAST FACTORY ──────────────────────────────────────────────────────── -->
+<p class="section-label">Toast factory — <code style="font-size:12px;">PluginAlert.create()</code></p>
+<div class="spawn-row">
+  <button class="spawn-btn" onclick="spawnToast('info')">Info toast</button>
+  <button class="spawn-btn" onclick="spawnToast('success')">Success toast</button>
+  <button class="spawn-btn" onclick="spawnToast('warning')">Warning toast</button>
+  <button class="spawn-btn" onclick="spawnToast('danger')">Danger toast</button>
+</div>
+<div style="margin-top:10px;">
+  <div class="toast-area" id="toast-area">
+    <p class="toast-empty" id="toast-empty">Toasts appear here</p>
+  </div>
+</div>
+
+<script>
+const ICONS = {
+  info:    `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg>`,
+  success: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>`,
+  warning: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>`,
+  danger:  `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>`,
+};
+const CLOSE = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>`;
+
+function dismiss(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const h = el.offsetHeight;
+  el.style.cssText += `overflow:hidden;transition:max-height .35s ease,opacity .35s ease,margin .35s ease,padding .35s ease;max-height:${h}px`;
+  setTimeout(() => {
+    el.style.maxHeight = '0';
+    el.style.opacity   = '0';
+    el.style.marginBottom = '0';
+    el.style.paddingTop   = '0';
+    el.style.paddingBottom= '0';
+    setTimeout(() => el.remove(), 360);
+  }, 20);
+}
+
+/* ── countdown ────────────────────────────────────────────────── */
+let cdActive = false;
+
+function spawnCountdown() {
+  if (cdActive) return;
+  cdActive = true;
+  const btn  = document.getElementById('cd-btn');
+  const slot = document.getElementById('countdown-slot');
+  const delay = 6000;
+  const uid   = 'cd-' + Date.now();
+
+  const el = document.createElement('div');
+  el.className = 'a alert-ts-info';
+  el.id = uid;
+  el.innerHTML = `
+    <span class="a-icon">${ICONS.info}</span>
+    <div class="a-body">
+      <p class="a-title">Session expiring soon</p>
+      <p class="a-text">Your session will expire in 6 seconds. Hover over this alert to pause.</p>
+    </div>
+    <button class="a-close" onclick="clearCountdown('${uid}')"><svg viewBox="0 0 20 20" fill="currentColor">${CLOSE}</svg></button>
+    <div class="a-bar" id="bar-${uid}"></div>`;
+  slot.appendChild(el);
+  btn.disabled = true;
+  btn.style.opacity = '.45';
+
+  const bar  = document.getElementById(`bar-${uid}`);
+  let remaining = delay;
+  let startTime = null;
+  let rafId  = null;
+  let timer  = null;
+  let paused = false;
+
+  function startBar() {
+    bar.style.transitionDuration = `${remaining}ms`;
+    requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timer = setTimeout(() => { clearCountdown(uid, true); }, remaining);
+  }
+
+  el.addEventListener('mouseenter', () => {
+    if (paused || !timer) return;
+    paused = true;
+    clearTimeout(timer);
+    timer = null;
+    remaining -= Date.now() - startTime;
+    const ratio = Math.max(0, remaining / delay);
+    bar.style.transitionDuration = '0ms';
+    bar.style.transform = `scaleX(${ratio})`;
+  });
+
+  el.addEventListener('mouseleave', () => {
+    if (!paused) return;
+    paused = false;
+    startTimer();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      bar.style.transitionDuration = `${remaining}ms`;
+      bar.style.transform = 'scaleX(0)';
+    }));
+  });
+
+  startBar();
+  startTimer();
+}
+
+function clearCountdown(uid, auto) {
+  const el  = document.getElementById(uid);
+  const btn = document.getElementById('cd-btn');
+  if (!el) return;
+  dismiss(uid);
+  setTimeout(() => {
+    cdActive = false;
+    btn.disabled = false;
+    btn.style.opacity = '';
+  }, 400);
+}
+
+/* ── toast factory ────────────────────────────────────────────── */
+const TOAST_DATA = {
+  info    : { title: 'New message', text: 'You have an unread message from the team.' },
+  success : { title: 'Changes saved', text: 'Your profile has been updated successfully.' },
+  warning : { title: 'Unsaved changes', text: 'Leave without saving? Your edits will be lost.', actions: [{l:'Save',p:true},{l:'Discard',p:false}] },
+  danger  : { title: 'Delete failed', text: 'The file could not be deleted. You may not have permission.' },
+};
+
+function spawnToast(type) {
+  const area  = document.getElementById('toast-area');
+  const empty = document.getElementById('toast-empty');
+  if (empty) empty.remove();
+
+  const d   = TOAST_DATA[type];
+  const uid = 'toast-' + Date.now();
+  const el  = document.createElement('div');
+  el.className = `a alert-ts-${type}`;
+  el.id = uid;
+  el.style.cssText = 'opacity:0;transform:translateX(1.5rem);transition:opacity .28s,transform .28s;margin-bottom:0';
+
+  let actHTML = '';
+  if (d.actions) {
+    actHTML = `<div class="a-actions">${d.actions.map(a =>
+      `<button class="a-btn ${a.p ? 'a-btn-p' : 'a-btn-s'}" onclick="dismissToast('${uid}')">${a.l}</button>`
+    ).join('')}</div>`;
+  }
+
+  el.innerHTML = `
+    <span class="a-icon">${ICONS[type]}</span>
+    <div class="a-body">
+      <p class="a-title">${d.title}</p>
+      <p class="a-text">${d.text}</p>
+      ${actHTML}
+    </div>
+    <button class="a-close" onclick="dismissToast('${uid}')">${CLOSE}</button>
+    <div class="a-bar" id="tbar-${uid}"></div>`;
+  area.appendChild(el);
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.style.opacity   = '1';
+    el.style.transform = 'translateX(0)';
+  }));
+
+  const bar   = document.getElementById(`tbar-${uid}`);
+  const delay = 5000;
+  bar.style.transitionDuration = `${delay}ms`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
+  setTimeout(() => dismissToast(uid), delay);
+}
+
+function dismissToast(uid) {
+  const el = document.getElementById(uid);
+  if (!el) return;
+  el.style.transition = 'opacity .25s,max-height .3s ease,margin .3s ease,padding .3s ease';
+  el.style.overflow   = 'hidden';
+  el.style.maxHeight  = el.offsetHeight + 'px';
+  setTimeout(() => {
+    el.style.opacity      = '0';
+    el.style.maxHeight    = '0';
+    el.style.marginBottom = '0';
+    el.style.paddingTop   = '0';
+    el.style.paddingBottom= '0';
+    setTimeout(() => {
+      el.remove();
+      const area = document.getElementById('toast-area');
+      if (area && !area.querySelector('.a')) {
+        const emp = document.createElement('p');
+        emp.className = 'toast-empty';
+        emp.id = 'toast-empty';
+        emp.textContent = 'Toasts appear here';
+        area.appendChild(emp);
+      }
+    }, 320);
+  }, 20);
+}
+</script>
