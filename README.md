@@ -275,7 +275,7 @@ Requires the plugin to implement `destroy()`.
 - Full `destroy()` / re-init support on all plugins
 
 ### On the Horizon
-
+- Integration with [**MODX Revolution**](https://modx.com/). Will include dedicated snippets and chunks for almost every component. 
 - **jQuery 4 compatibility** — A `themestrap.component.js` base class with auto-tracked teardown, reactive `setState()`, and a `defineComponent()` factory was designed and prototyped. A few plugins have been migrated as a proof of concept; broader rollout is pending.
 
 ---
