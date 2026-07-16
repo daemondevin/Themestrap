@@ -1,6 +1,9 @@
 # Themestrap Plugin Documentation
 
-Reference for all plugins in `js/components/`. Each section covers the plugin's purpose, HTML markup, available options, events, and public API.
+Reference for all plugins in `js/components/`. Each section covers the plugin's purpose, HTML markup, available options, events, and public API. 
+
+> [!NOTE]
+> Refer to the `docs/` directory for a more exhastive guide to each individual plugin.
 
 ---
 
