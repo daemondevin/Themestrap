@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginAuth — Live Demo | Themestrap</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root { --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-teal:#2ab8c8; }
+body { background:#f4f6f9; color:#1f2d3d; }
+.demo-hero { background:linear-gradient(135deg,var(--ts-navy) 0%,var(--ts-navy-2) 100%); color:#fff; padding:48px 0 40px; }
+.demo-hero h1 { font-weight:700; letter-spacing:-.5px; }
+.demo-hero .badge-orange { background:var(--ts-orange); }
+.demo-hero code { background:rgba(255,255,255,.12); color:#ffd9c7; padding:2px 7px; border-radius:4px; }
+.demo-card { background:#fff; border:1px solid #e4e9f0; border-radius:14px; box-shadow:0 6px 24px rgba(10,25,41,.05); }
+.demo-card .card-body { padding:28px 30px; }
+.nav-pills .nav-link { color:#54657a; font-weight:600; font-size:14px; border-radius:8px; }
+.nav-pills .nav-link.active { background:var(--ts-orange); color:#fff; }
+.btn-primary { background:var(--ts-orange); border-color:var(--ts-orange); }
+.btn-primary:hover, .btn-primary:focus { background:#d2541b; border-color:#d2541b; }
+a { color:var(--ts-teal); }
+.demo-note { font-size:12.5px; color:#8190a3; }
+.demo-section-label { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ts-teal); }
+.tip { background:#e8f7f9; border-left:4px solid var(--ts-teal); border-radius:0 8px 8px 0; padding:12px 16px; font-size:13px; }
+
+.auth-strength { display:flex; align-items:center; gap:4px; margin-top:6px; height:22px; }
+.auth-strength .auth-strength-bar { flex:1; height:4px; border-radius:2px; background:#e9ecef; transition:background-color .2s ease; }
+.auth-strength .auth-strength-label { margin-left:8px; font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#6c757d; min-width:64px; }
+.auth-capslock { display:inline-block; margin-top:6px; padding:2px 8px; border-radius:10px; background:#fff3cd; color:#664d03; font-size:11px; font-weight:600; letter-spacing:.03em; }
+.auth-capslock::before { content:"\21EA "; margin-right:4px; }
+.auth-profile-card { display:flex; align-items:center; gap:16px; padding:18px 20px; border:1px solid #dee2e6; border-radius:10px; background:#fff; }
+.auth-profile-card .auth-profile-avatar { flex:0 0 64px; width:64px; height:64px; border-radius:50%; background:#e9ecef center/cover no-repeat; color:#6c757d; font-size:26px; font-weight:700; display:flex; align-items:center; justify-content:center; text-transform:uppercase; }
+.auth-profile-card .auth-profile-name { margin:0; font-size:16px; font-weight:700; }
+.auth-profile-card .auth-profile-meta { margin:0; font-size:13px; color:#6c757d; }
+.auth-profile-card .auth-profile-actions { margin-left:auto; display:flex; gap:8px; }
+.auth-form [data-auth-submit] { display:inline-flex; align-items:center; gap:8px; }
+.auth-form [data-auth-submit][disabled] { cursor:progress; opacity:.75; }
+
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge badge-orange mb-3">Themestrap &middot; MODX 3</span>
+    <h1 class="mb-2">PluginAuth Live Demo</h1>
+    <p class="lead mb-0" style="max-width:680px;color:#b9c6d6">
+      Every form below is enhanced by the real <code>PluginAuth</code> plugin running in your browser &mdash;
+      inline validation, password show/hide, a strength meter, Caps&nbsp;Lock warning, busy state, and toast feedback.
+      Submissions are intercepted here for the demo (no server), so try triggering the validation.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+
+      <div class="tip mb-4">
+        <i class="fas fa-circle-info me-1"></i>
+        In production these forms are rendered by the <code>tsLogin</code>, <code>tsRegister</code>,
+        <code>tsForgotPassword</code>, and <code>tsProfile</code> snippets and POST to the MODX Login extra.
+        This page hard-codes the markup so you can preview the front-end behavior standalone.
+      </div>
+
+      <ul class="nav nav-pills gap-2 mb-4 flex-wrap" id="authTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-login" type="button">Login</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-register" type="button">Register</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-forgot" type="button">Forgot</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-reset" type="button">Reset</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-change" type="button">Change Password</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-profile" type="button">Profile</button></li>
+      </ul>
+
+      <div class="tab-content">
+
+        <!-- LOGIN -->
+        <div class="tab-pane fade show active" id="tab-login">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="demo-card"><div class="card-body">
+                <p class="demo-section-label mb-3">tsLogin</p>
+                <form data-plugin-auth data-auth-action="login" method="post" action="" class="auth-form" data-demo>
+                  <h4 class="mb-1">Welcome back</h4>
+                  <p class="text-muted small mb-4">Sign in to access your dashboard.</p>
+                  <div class="mb-3" data-auth-field="username">
+                    <label for="l-username" class="form-label">Username</label>
+                    <input type="text" id="l-username" name="username" required data-auth-error class="form-control" autocomplete="username">
+                    <div data-auth-feedback class="invalid-feedback"></div>
+                  </div>
+                  <div class="mb-3" data-auth-field="password">
+                    <label for="l-password" class="form-label d-flex justify-content-between">
+                      <span>Password</span><a href="#" class="small text-decoration-none">Forgot?</a>
+                    </label>
+                    <div class="input-group">
+                      <input type="password" id="l-password" name="password" required data-auth-error class="form-control" autocomplete="current-password">
+                      <button type="button" class="btn btn-outline-secondary" data-auth-toggle-password>Show</button>
+                    </div>
+                    <span data-auth-capslock class="auth-capslock d-none">Caps Lock is on</span>
+                    <div data-auth-feedback class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-check mb-3">
+                    <input type="checkbox" id="l-remember" name="rememberme" value="1" class="form-check-input">
+                    <label for="l-remember" class="form-check-label">Remember me on this device</label>
+                  </div>
+                  <button type="submit" name="service" value="login" data-auth-submit class="btn btn-primary w-100">
+                    <span data-auth-submit-label>Sign In</span>
+                    <span data-auth-spinner class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  </button>
+                  <p class="text-center small text-muted mt-4 mb-0">Don't have an account? <a href="#">Create one</a></p>
+                </form>
+              </div></div>
+            </div>
+            <div class="col-md-6">
+              <p class="demo-section-label mb-3">Try it</p>
+              <ul class="small text-muted lh-lg">
+                <li>Submit empty &mdash; both fields flag <code>required</code> and a toast fires.</li>
+                <li>Type in a field then clear it &mdash; the error reappears on blur.</li>
+                <li>Hit <strong>Show</strong> to toggle password visibility.</li>
+                <li>Turn on Caps&nbsp;Lock while focused in the password box.</li>
+                <li>Fill both fields and submit &mdash; the button enters its busy state.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- REGISTER -->
+        <div class="tab-pane fade" id="tab-register">
+          <div class="demo-card"><div class="card-body">
+            <p class="demo-section-label mb-3">tsRegister</p>
+            <form data-plugin-auth data-auth-action="register" method="post" action="" class="auth-form" data-demo>
+              <h4 class="mb-1">Create an account</h4>
+              <p class="text-muted small mb-4">Free to join. Cancel any time.</p>
+              <div class="row g-3">
+                <div class="col-md-6" data-auth-field="fullname">
+                  <label for="r-fullname" class="form-label">Full name</label>
+                  <input type="text" id="r-fullname" name="fullname" required data-auth-error class="form-control">
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6" data-auth-field="email">
+                  <label for="r-email" class="form-label">Email address</label>
+                  <input type="email" id="r-email" name="email" required data-auth-error class="form-control">
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+              </div>
+              <div class="mb-3 mt-3" data-auth-field="username">
+                <label for="r-username" class="form-label">Choose a username</label>
+                <input type="text" id="r-username" name="username" required minlength="3" pattern="[A-Za-z0-9_\-\.]+" data-auth-error class="form-control">
+                <div class="form-text">Letters, numbers, dot, dash, underscore. Three characters or more.</div>
+                <div data-auth-feedback class="invalid-feedback"></div>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6" data-auth-field="password">
+                  <label for="r-password" class="form-label">Password</label>
+                  <div class="input-group">
+                    <input type="password" id="r-password" name="password" required minlength="8" data-auth-strength data-auth-error class="form-control" autocomplete="new-password">
+                    <button type="button" class="btn btn-outline-secondary" data-auth-toggle-password>Show</button>
+                  </div>
+                  <div data-auth-strength-meter class="auth-strength"></div>
+                  <span data-auth-capslock class="auth-capslock d-none">Caps Lock is on</span>
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <div class="col-md-6" data-auth-field="password_confirm">
+                  <label for="r-password-confirm" class="form-label">Confirm password</label>
+                  <input type="password" id="r-password-confirm" name="password_confirm" required data-auth-match="#r-password" data-auth-error class="form-control" autocomplete="new-password">
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+              </div>
+              <div class="form-check mb-3" data-auth-field="terms">
+                <input type="checkbox" id="r-terms" name="terms" value="1" required data-auth-error class="form-check-input">
+                <label for="r-terms" class="form-check-label small">I agree to the <a href="#">Terms of Use</a>.</label>
+                <div data-auth-feedback class="invalid-feedback d-block"></div>
+              </div>
+              <button type="submit" name="register-submit" value="1" data-auth-submit class="btn btn-primary w-100">
+                <span data-auth-submit-label>Create Account</span>
+                <span data-auth-spinner class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              </button>
+              <p class="text-center small text-muted mt-4 mb-0">Already have an account? <a href="#">Sign in</a></p>
+            </form>
+            <p class="demo-note mt-3 mb-0"><i class="fas fa-lightbulb me-1"></i> Type a password to watch the five-segment strength meter, then mismatch the confirm field to see the match rule fire.</p>
+          </div></div>
+        </div>
+
+        <!-- FORGOT -->
+        <div class="tab-pane fade" id="tab-forgot">
+          <div class="row justify-content-center"><div class="col-md-7">
+            <div class="demo-card"><div class="card-body">
+              <p class="demo-section-label mb-3">tsForgotPassword &middot; mode=forgot</p>
+              <form data-plugin-auth data-auth-action="forgot" method="post" action="" class="auth-form" data-demo>
+                <h4 class="mb-1">Forgot your password?</h4>
+                <p class="text-muted small mb-4">We'll email you a reset link.</p>
+                <div class="mb-3" data-auth-field="username">
+                  <label for="f-username" class="form-label">Email or username</label>
+                  <input type="text" id="f-username" name="username" required data-auth-error class="form-control">
+                  <div class="form-text">We'll send a password reset link to your registered email address.</div>
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <button type="submit" name="forgotpassword-submit" value="1" data-auth-submit class="btn btn-primary w-100">
+                  <span data-auth-submit-label>Send Reset Link</span>
+                  <span data-auth-spinner class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+                <p class="text-center small text-muted mt-4 mb-0">Remembered it? <a href="#">Back to sign in</a></p>
+              </form>
+            </div></div>
+          </div></div>
+        </div>
+
+        <!-- RESET -->
+        <div class="tab-pane fade" id="tab-reset">
+          <div class="row justify-content-center"><div class="col-md-7">
+            <div class="demo-card"><div class="card-body">
+              <p class="demo-section-label mb-3">tsForgotPassword &middot; mode=reset</p>
+              <form data-plugin-auth data-auth-action="reset" method="post" action="" class="auth-form" data-demo>
+                <h4 class="mb-1">Choose a new password</h4>
+                <p class="text-muted small mb-4">Use at least 8 characters with a mix of types.</p>
+                <div class="mb-3" data-auth-field="password">
+                  <label for="rs-password" class="form-label">New password</label>
+                  <div class="input-group">
+                    <input type="password" id="rs-password" name="password_new" required minlength="8" data-auth-strength data-auth-error class="form-control" autocomplete="new-password">
+                    <button type="button" class="btn btn-outline-secondary" data-auth-toggle-password>Show</button>
+                  </div>
+                  <div data-auth-strength-meter class="auth-strength"></div>
+                  <span data-auth-capslock class="auth-capslock d-none">Caps Lock is on</span>
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <div class="mb-3" data-auth-field="password_confirm">
+                  <label for="rs-password-confirm" class="form-label">Confirm new password</label>
+                  <input type="password" id="rs-password-confirm" name="password_new_confirm" required data-auth-match="#rs-password" data-auth-error class="form-control" autocomplete="new-password">
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <button type="submit" name="resetpassword-submit" value="1" data-auth-submit class="btn btn-primary w-100">
+                  <span data-auth-submit-label>Update Password</span>
+                  <span data-auth-spinner class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+              </form>
+            </div></div>
+          </div></div>
+        </div>
+
+        <!-- CHANGE PASSWORD -->
+        <div class="tab-pane fade" id="tab-change">
+          <div class="row justify-content-center"><div class="col-md-7">
+            <div class="demo-card"><div class="card-body">
+              <p class="demo-section-label mb-3">tsProfile &middot; mode=password</p>
+              <form data-plugin-auth data-auth-action="change" method="post" action="" class="auth-form" data-demo>
+                <h4 class="mb-1">Change password</h4>
+                <p class="text-muted small mb-4">Enter your current password, then choose a new one.</p>
+                <div class="mb-3" data-auth-field="password_old">
+                  <label for="c-old" class="form-label">Current password</label>
+                  <div class="input-group">
+                    <input type="password" id="c-old" name="password_old" required data-auth-error class="form-control" autocomplete="current-password">
+                    <button type="button" class="btn btn-outline-secondary" data-auth-toggle-password>Show</button>
+                  </div>
+                  <span data-auth-capslock class="auth-capslock d-none">Caps Lock is on</span>
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <div class="mb-3" data-auth-field="password_new">
+                  <label for="c-new" class="form-label">New password</label>
+                  <div class="input-group">
+                    <input type="password" id="c-new" name="password_new" required minlength="8" data-auth-strength data-auth-error class="form-control" autocomplete="new-password">
+                    <button type="button" class="btn btn-outline-secondary" data-auth-toggle-password>Show</button>
+                  </div>
+                  <div data-auth-strength-meter class="auth-strength"></div>
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <div class="mb-3" data-auth-field="password_new_confirm">
+                  <label for="c-confirm" class="form-label">Confirm new password</label>
+                  <input type="password" id="c-confirm" name="password_new_confirm" required data-auth-match="#c-new" data-auth-error class="form-control" autocomplete="new-password">
+                  <div data-auth-feedback class="invalid-feedback"></div>
+                </div>
+                <button type="submit" name="changepassword-submit" value="1" data-auth-submit class="btn btn-primary">
+                  <span data-auth-submit-label>Update Password</span>
+                  <span data-auth-spinner class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+              </form>
+            </div></div>
+          </div></div>
+        </div>
+
+        <!-- PROFILE CARD -->
+        <div class="tab-pane fade" id="tab-profile">
+          <div class="row justify-content-center"><div class="col-md-8">
+            <p class="demo-section-label mb-3">tsProfile &middot; mode=card</p>
+            <div class="auth-profile-card mb-4">
+              <div class="auth-profile-avatar">AP</div>
+              <div class="auth-profile-body flex-grow-1">
+                <p class="auth-profile-name">Alex Patel</p>
+                <p class="auth-profile-meta">
+                  <a href="mailto:alex@example.com" class="text-muted text-decoration-none">alex@example.com</a>
+                  &middot; Brighton, UK
+                </p>
+              </div>
+              <div class="auth-profile-actions">
+                <a href="#" class="btn btn-sm btn-outline-secondary"><i class="fas fa-pencil-alt me-1"></i> Edit</a>
+                <a href="#" class="btn btn-sm btn-outline-danger"><i class="fas fa-sign-out-alt me-1"></i> Sign out</a>
+              </div>
+            </div>
+            <p class="demo-note"><i class="fas fa-lightbulb me-1"></i> The avatar shows the user's photo when available, falling back to their initials &mdash; here, &ldquo;AP&rdquo;. The Edit and Sign out actions are configurable and auto-hide based on snippet properties.</p>
+          </div></div>
+        </div>
+
+      </div>
+
+      <p class="text-center demo-note mt-5">
+        Themestrap MODX 3 &mdash; PluginAuth demo. Forms are intercepted client-side; no data leaves this page.
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- PluginToast stub (real plugin replaces this in production) -->
+<script>
+
+(function ($) {
+  if (window.themestrap && window.themestrap.PluginToast) return;
+  function ensureContainer() {
+    var id = 'demoToastContainer';
+    var el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = id;
+      el.className = 'toast-container position-fixed top-0 end-0 p-3';
+      el.style.zIndex = 1090;
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  var COLORS = { success:'text-success', danger:'text-danger', warning:'text-warning', info:'text-info' };
+  window.themestrap = window.themestrap || {};
+  window.themestrap.PluginToast = {
+    show: function (opts) {
+      opts = opts || {};
+      var c = ensureContainer();
+      var node = document.createElement('div');
+      node.className = 'toast align-items-stretch border-0 shadow show';
+      node.setAttribute('role', 'alert');
+      var head = COLORS[opts.type] || 'text-info';
+      node.innerHTML =
+        '<div class="toast-header ' + head + '">' +
+          '<strong class="me-auto">' + (opts.title || 'Notice') + '</strong>' +
+          '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast"></button>' +
+        '</div>' +
+        '<div class="toast-body">' + (opts.body || '') + '</div>';
+      c.appendChild(node);
+      node.querySelector('.btn-close').addEventListener('click', function () { node.remove(); });
+      setTimeout(function () { node.remove(); }, 4000);
+      return this;
+    }
+  };
+})(jQuery);
+
+</script>
+
+<!-- The real PluginAuth plugin -->
+<script>
+/**
+ * Themestrap Auth Plugin
+ * Progressive-enhancement layer for MODX Login extra forms (and any auth form).
+ * Part of the Themestrap component library for MODX 3
+ *
+ * Adds inline validation, password show/hide, password-strength meter, loading
+ * button state, toast feedback, and optional AJAX submission to login,
+ * register, forgot-password, reset-password, change-password, and
+ * update-profile forms.
+ *
+ * Markup anatomy:
+ *
+ *   <form data-plugin-auth
+ *         data-auth-action="login"
+ *         data-plugin-options='{"ajax": false, "toasts": true, "redirect": "/dashboard"}'
+ *         method="post"
+ *         action="">
+ *
+ *     <div data-auth-field="username">
+ *       <label for="auth-username">Username</label>
+ *       <input id="auth-username" name="username" type="text"
+ *              required data-auth-error class="form-control">
+ *       <div data-auth-feedback class="invalid-feedback"></div>
+ *     </div>
+ *
+ *     <div data-auth-field="password">
+ *       <label for="auth-password">Password</label>
+ *       <div class="input-group">
+ *         <input id="auth-password" name="password" type="password"
+ *                required minlength="8" data-auth-strength
+ *                data-auth-error class="form-control">
+ *         <button type="button" class="btn btn-outline-secondary"
+ *                 data-auth-toggle-password>Show</button>
+ *       </div>
+ *       <div data-auth-strength-meter class="auth-strength"></div>
+ *       <div data-auth-feedback class="invalid-feedback"></div>
+ *     </div>
+ *
+ *     <button type="submit" data-auth-submit class="btn btn-primary">
+ *       <span data-auth-submit-label>Sign In</span>
+ *       <span data-auth-spinner class="spinner-border spinner-border-sm d-none"
+ *             role="status" aria-hidden="true"></span>
+ *     </button>
+ *   </form>
+ *
+ * Public API (via stored instance):
+ *   const auth = $('#myForm').data('__pluginAuth');
+ *   auth.validate();           // returns true | false
+ *   auth.setBusy(true|false);  // toggle loading state
+ *   auth.reset();              // clear all field error states
+ *   auth.destroy();
+ *
+ * Events fired on the form element:
+ *   auth:validate   (instance, isValid)
+ *   auth:submit     (instance, formData)
+ *   auth:success    (instance, response)
+ *   auth:error      (instance, error)
+ *
+ * Init.js wiring (DOMReady-immediate — auth forms must work without scrolling):
+ *   if ($.isFunction($.fn['themestrapPluginAuth']) && $('[data-plugin-auth]').length) {
+ *       $(() => {
+ *           $('[data-plugin-auth]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginAuth(opts);
+ *           });
+ *       });
+ *   }
+ */
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginAuth';
+
+    // Password strength scoring (0-4, no zxcvbn dependency).
+    function scorePassword(pw) {
+        if (!pw) return 0;
+        let score = 0;
+        if (pw.length >= 8)  score++;
+        if (pw.length >= 12) score++;
+        if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+        if (/\d/.test(pw))   score++;
+        if (/[^A-Za-z0-9]/.test(pw)) score++;
+        return Math.min(score, 4);
+    }
+
+    const STRENGTH_LABELS  = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+    const STRENGTH_CLASSES = ['bg-danger', 'bg-danger', 'bg-warning', 'bg-info', 'bg-success'];
+    const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    class PluginAuth {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el    = $el;
+            this.action = ($el.data('auth-action') || 'login').toString().toLowerCase();
+            this.busy   = false;
+            this._uid   = 'auth-' + Math.random().toString(36).slice(2, 8);
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginAuth.defaults, opts, {
+                wrapper: this.$el,
+            });
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const $el  = self.$el;
+
+            self.$fields  = $el.find('[data-auth-field]');
+            self.$inputs  = $el.find('[data-auth-error]');
+            self.$submit  = $el.find('[data-auth-submit]').first();
+            self.$label   = self.$submit.find('[data-auth-submit-label]').first();
+            self.$spinner = self.$submit.find('[data-auth-spinner]').first();
+
+            if (self.$label.length) {
+                self.originalLabel = self.$label.text();
+            }
+
+            $el.addClass('auth-form auth-form-' + self.action);
+            $el.attr('novalidate', 'novalidate');
+
+            return this;
+        }
+
+        events() {
+            const self = this;
+            const $el  = self.$el;
+            const ns   = '.' + self._uid;
+
+            // Form submit
+            $el.on('submit' + ns, function (e) {
+                if (!self.validate()) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    self._toastError(self.options.errorMessage ||
+                        $el.data('auth-error-msg') ||
+                        'Please correct the highlighted fields.');
+                    return false;
+                }
+
+                $el.trigger('auth:submit', [self, self._collect()]);
+
+                if (self.options.ajax) {
+                    e.preventDefault();
+                    self._submitAjax();
+                    return false;
+                }
+
+                self.setBusy(true);
+            });
+
+            // Live validation on blur / change
+            self.$inputs.on('blur' + ns + ' change' + ns, function () {
+                self._validateField($(this));
+            });
+
+            // Re-validate on input once a field has been marked invalid
+            self.$inputs.on('input' + ns, function () {
+                const $i = $(this);
+                if ($i.hasClass('is-invalid')) {
+                    self._validateField($i);
+                }
+            });
+
+            // Password strength meter — live update
+            $el.find('[data-auth-strength]').on('input' + ns, function () {
+                self._updateStrength($(this));
+            });
+
+            // Password toggle (Show / Hide)
+            $el.on('click' + ns, '[data-auth-toggle-password]', function (e) {
+                e.preventDefault();
+                self._togglePassword($(this));
+            });
+
+            // Caps Lock warning on password inputs
+            $el.find('input[type="password"]').on('keyup' + ns, function (e) {
+                const caps = e.originalEvent && typeof e.originalEvent.getModifierState === 'function'
+                    ? e.originalEvent.getModifierState('CapsLock')
+                    : false;
+                const $field = $(this).closest('[data-auth-field]');
+                $field.find('[data-auth-capslock]').toggleClass('d-none', !caps);
+            });
+
+            return this;
+        }
+
+        // Public API ───────────────────────────────────────────────────
+
+        validate() {
+            const self = this;
+            let valid = true;
+
+            self.$inputs.each(function () {
+                if (!self._validateField($(this))) {
+                    valid = false;
+                }
+            });
+
+            self.$el.trigger('auth:validate', [self, valid]);
+            return valid;
+        }
+
+        reset() {
+            const self = this;
+            self.$inputs
+                .removeClass('is-invalid is-valid')
+                .closest('[data-auth-field]')
+                .find('[data-auth-feedback]').text('');
+            return self;
+        }
+
+        setBusy(busy) {
+            const self = this;
+            self.busy = !!busy;
+
+            if (!self.$submit.length) return self;
+
+            self.$submit.prop('disabled', self.busy);
+
+            if (self.$spinner.length) {
+                self.$spinner.toggleClass('d-none', !self.busy);
+            }
+
+            if (self.$label.length) {
+                self.$label.text(self.busy
+                    ? (self.options.busyLabel || 'Working...')
+                    : self.originalLabel
+                );
+            }
+
+            return self;
+        }
+
+        destroy() {
+            const self = this;
+            const ns   = '.' + self._uid;
+
+            self.$el.off(ns);
+            self.$inputs.off(ns);
+            self.$el.find('[data-auth-strength]').off(ns);
+            self.$el.find('input[type="password"]').off(ns);
+            self.$el.removeClass('auth-form auth-form-' + self.action);
+            self.$el.removeData(instanceName);
+
+            return self;
+        }
+
+        // Internals ────────────────────────────────────────────────────
+
+        _validateField($input) {
+            const self     = this;
+            const $field   = $input.closest('[data-auth-field]');
+            const $fb      = $field.find('[data-auth-feedback]').first();
+            const val      = ($input.val() || '').toString();
+            const type     = ($input.attr('type') || 'text').toLowerCase();
+            const required = $input.prop('required');
+
+            let error = '';
+
+            if (required && !val.trim()) {
+                error = self.options.messages.required;
+            }
+            else if (val && type === 'email' && !EMAIL_RX.test(val)) {
+                error = self.options.messages.email;
+            }
+            else if (val && $input.attr('minlength')) {
+                const min = parseInt($input.attr('minlength'), 10);
+                if (val.length < min) {
+                    error = self.options.messages.minlength.replace('%s', min);
+                }
+            }
+            else if (val && $input.attr('pattern')) {
+                try {
+                    if (!new RegExp('^(?:' + $input.attr('pattern') + ')$').test(val)) {
+                        error = self.options.messages.pattern;
+                    }
+                } catch (e) { /* malformed pattern — skip */ }
+            }
+            else if (val && $input.data('auth-match')) {
+                const target = $input.data('auth-match');
+                const $other = self.$el.find(target);
+                if ($other.length && val !== ($other.val() || '').toString()) {
+                    error = self.options.messages.match;
+                }
+            }
+
+            if (error) {
+                $input.removeClass('is-valid').addClass('is-invalid');
+                if ($fb.length) $fb.text(error);
+                return false;
+            }
+
+            $input.removeClass('is-invalid');
+            if (val.trim()) $input.addClass('is-valid');
+            if ($fb.length) $fb.text('');
+            return true;
+        }
+
+        _updateStrength($input) {
+            const val   = ($input.val() || '').toString();
+            const score = scorePassword(val);
+            const $field = $input.closest('[data-auth-field]');
+            const $meter = $field.find('[data-auth-strength-meter]').first();
+
+            if (!$meter.length) return;
+
+            // Lazy-construct the 5 bar segments
+            if (!$meter.children().length) {
+                const bars = [0, 1, 2, 3, 4]
+                    .map(() => '<span class="auth-strength-bar"></span>')
+                    .join('');
+                $meter
+                    .addClass('auth-strength')
+                    .html(bars + '<span class="auth-strength-label"></span>');
+            }
+
+            const $bars  = $meter.children('.auth-strength-bar');
+            const $label = $meter.children('.auth-strength-label');
+
+            $bars.each(function (i) {
+                $(this)
+                    .removeClass('bg-danger bg-warning bg-info bg-success')
+                    .toggleClass(STRENGTH_CLASSES[score], i <= score && val.length > 0);
+            });
+
+            $label.text(val.length ? STRENGTH_LABELS[score] : '');
+        }
+
+        _togglePassword($btn) {
+            const $field = $btn.closest('[data-auth-field]');
+            const $pw    = $field.find('input').filter(function () {
+                const t = ($(this).attr('type') || '').toLowerCase();
+                return t === 'password' || t === 'text';
+            }).filter('[data-auth-strength], [name*="password"]').first();
+
+            if (!$pw.length) return;
+
+            const isHidden = $pw.attr('type') === 'password';
+            $pw.attr('type', isHidden ? 'text' : 'password');
+            $btn.text(isHidden
+                ? (this.options.hidePasswordLabel || 'Hide')
+                : (this.options.showPasswordLabel || 'Show')
+            );
+            $btn.attr('aria-pressed', isHidden ? 'true' : 'false');
+        }
+
+        _collect() {
+            const data = {};
+            this.$el.find('input, select, textarea').each(function () {
+                const $i = $(this);
+                const name = $i.attr('name');
+                if (!name) return;
+                const type = ($i.attr('type') || '').toLowerCase();
+                if ((type === 'checkbox' || type === 'radio') && !$i.prop('checked')) return;
+                data[name] = $i.val();
+            });
+            return data;
+        }
+
+        _submitAjax() {
+            const self = this;
+            const $el  = self.$el;
+            const url  = $el.attr('action') || window.location.href;
+
+            self.setBusy(true);
+
+            $.ajax({
+                url:      url,
+                method:   ($el.attr('method') || 'POST').toUpperCase(),
+                data:     $el.serialize(),
+                dataType: 'json',
+                headers:  { 'X-Requested-With': 'XMLHttpRequest' },
+            })
+            .done(function (resp) {
+                const ok = resp && (resp.success === true || resp.success === 'true');
+
+                if (ok) {
+                    self._toastSuccess(resp.message || $el.data('auth-success-msg') || self.options.successMessage);
+                    $el.trigger('auth:success', [self, resp]);
+
+                    const redirect = resp.redirect || $el.data('auth-redirect') || self.options.redirect;
+                    if (redirect) {
+                        setTimeout(() => { window.location.href = redirect; }, 600);
+                    } else {
+                        self.setBusy(false);
+                    }
+                    return;
+                }
+
+                // Server reported failure — paint field errors if provided
+                if (resp && resp.errors && typeof resp.errors === 'object') {
+                    Object.keys(resp.errors).forEach(name => {
+                        const $i = $el.find('[name="' + name + '"]').first();
+                        if (!$i.length) return;
+                        $i.removeClass('is-valid').addClass('is-invalid');
+                        const $fb = $i.closest('[data-auth-field]').find('[data-auth-feedback]').first();
+                        if ($fb.length) $fb.text(resp.errors[name]);
+                    });
+                }
+
+                self._toastError((resp && resp.message) || self.options.errorMessage);
+                $el.trigger('auth:error', [self, resp]);
+                self.setBusy(false);
+            })
+            .fail(function (xhr) {
+                const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message)
+                    || self.options.networkErrorMessage;
+                self._toastError(msg);
+                $el.trigger('auth:error', [self, { network: true, status: xhr.status }]);
+                self.setBusy(false);
+            });
+        }
+
+        _toastSuccess(body) {
+            if (!this.options.toasts || !body) return;
+            if (themestrap && themestrap.PluginToast) {
+                themestrap.PluginToast.show({
+                    title: this.options.toastSuccessTitle,
+                    body:  body,
+                    type:  'success',
+                });
+            }
+        }
+
+        _toastError(body) {
+            if (!this.options.toasts || !body) return;
+            if (themestrap && themestrap.PluginToast) {
+                themestrap.PluginToast.show({
+                    title: this.options.toastErrorTitle,
+                    body:  body,
+                    type:  'danger',
+                });
+            }
+        }
+    }
+
+    PluginAuth.defaults = {
+        // Submission
+        ajax:                false,    // when true, posts via XHR and expects JSON
+        redirect:            '',       // URL to redirect to after AJAX success
+
+        // Feedback
+        toasts:              true,     // emit PluginToast on success / error
+        toastSuccessTitle:   'Success',
+        toastErrorTitle:     'Sorry',
+        successMessage:      '',
+        errorMessage:        'Please check the form for errors.',
+        networkErrorMessage: 'Could not reach the server. Please try again.',
+
+        // UI labels
+        busyLabel:           'Working...',
+        showPasswordLabel:   'Show',
+        hidePasswordLabel:   'Hide',
+
+        // Validation messages
+        messages: {
+            required:  'This field is required.',
+            email:     'Please enter a valid email address.',
+            minlength: 'Must be at least %s characters.',
+            pattern:   'Invalid format.',
+            match:     'Values do not match.',
+        },
+    };
+
+    $.extend(themestrap, { PluginAuth });
+
+    $.fn.themestrapPluginAuth = function (opts) {
+        return this.map(function () {
+            const $this = $(this);
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            }
+            return new PluginAuth($this, opts);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+</script>
+
+<!-- Demo wiring: enhance every form, intercept demo submits -->
+<script>
+(function ($) {
+  $(function () {
+    $('[data-plugin-auth]').each(function () {
+      $(this).themestrapPluginAuth({ toasts: true, successMessage: 'Looks good! (demo — not submitted)' });
+    });
+
+    // Intercept the demo POST so the page doesn't navigate; show a success toast instead.
+    $('form[data-demo]').on('submit', function (e) {
+      var inst = $(this).data('__pluginAuth');
+      if (inst && inst.validate()) {
+        e.preventDefault();
+        inst.setBusy(true);
+        setTimeout(function () {
+          inst.setBusy(false);
+          themestrap.PluginToast.show({
+            title: 'Success',
+            body:  'Validation passed — in production this would POST to the Login extra.',
+            type:  'success'
+          });
+        }, 900);
+      }
+    });
+  });
+})(jQuery);
+</script>
+</body>
+</html>
