@@ -46,7 +46,7 @@ Every keystroke runs the same five-step pipeline:
 
 > The active index is reset to the first visible item (so Enter always does something), `aria-activedescendant` is updated, and a `command:filter` event fires with the query and match count.
 
-> [!NOTE]
+> [!NOTE]  
 > The haystack is a flat concatenation of *label · description · text content · keywords*. That means typing `dash settings` matches an item labelled *Dashboard Settings* AND an item labelled *Dashboard* with `data-command-keywords="settings preferences"`. Use keywords to surface items that *should* match but don't share visible words with the query.
 
 ## [Quick **Start**](#quick-start)
@@ -110,7 +110,7 @@ $('[data-plugin-command-menu]:not(.manual)').each(function () {
 });
 ```
 
-> [!NOTE]
+> [!NOTE]  
 > **Add the init.js wiring once and forget about it.**  
 > Because the global `mod+k` listener is attached during `events()`, the menu must be initialized before any trigger can fire. Use the DOMReady-immediate pattern (not `intObsInit`) — the menu is already off-screen, so there's no rendering cost.
 
@@ -148,7 +148,7 @@ The shortcut parser accepts a `+`-separated list of tokens. Order doesn't matter
 | `shift` | modifier | —       | Shift.                                                                                                             |
 | `<key>` | key      | —       | The actual non-modifier key — letter, digit, or symbol. Single character match against the lowercased `event.key`. |
 
-> [!WARNING]
+> [!WARNING]  
 > Without a modifier, the shortcut is only matched when the user is NOT typing in any input/textarea/select/contenteditable. With a modifier (`mod` or `ctrl`), the shortcut works everywhere — even mid-typing.
 
 ## [Item **Attributes**](#item-attributes)
@@ -204,7 +204,7 @@ $('#main-cmd')
   .on('command:open',   (e, instance) => console.log('opened'))
   .on('command:close',  (e, instance) => console.log('closed'))
   .on('command:filter', (e, instance, query, matchCount) => {
-      console.log(`"${query}" → ${matchCount} matches`);
+      console.log(`"${query}" -> ${matchCount} matches`);
   })
   .on('command:select', (e, instance, $item, payload) => {
       // payload = {id, action, href, target, label}
@@ -215,7 +215,7 @@ $('#main-cmd')
   });
 ```
 
-> [!NOTE]
+> [!NOTE]  
 > Call `e.preventDefault()` on the event (or return `false` from `onSelect`) and the plugin will skip both the navigation AND the auto-close. This is the right place for confirmation modals, async API calls, or anything else that needs to interject before activation.
 
 #### Action callbacks
@@ -254,7 +254,7 @@ Full keyboard surface so every key is intercepted on the search input and routed
 | `Enter`                 | in-menu | —       | Activate the currently highlighted item.                                                                           |
 | `Type any character`    | in-menu | —       | Appends to the search query and re-filters. First visible item becomes active.                                     |
 
-> [!NOTE]
+> [!NOTE]  
 > When arrow navigation moves the active item past the visible edge of the list, the plugin updates `scrollTop` to keep it in view. Mouse hover updates the active item without scrolling.
 
 ## [Recipe **Cookbook**](#recipes)
@@ -299,27 +299,27 @@ Five things that have tripped real integrations. Read first.
 
 #### The menu needs to init before its trigger can fire
 
-> [!CAUTION]
+> [!CAUTION]  
 > Unlike most Themestrap plugins, the command menu cannot use `intObsInit` (lazy-on-viewport) because the menu is OFF-screen on every page — IntersectionObserver would never fire. Use the DOMReady-immediate pattern shown in the Quick Start. Otherwise pressing ⌘K does nothing until the user happens to scroll the menu into view, which never happens.
 
 #### No `id` = no triggers, no recents
 
-> [!WARNING]
+> [!WARNING]  
 > Triggers find their menu via `data-command-open="<menu-id>"`, and the recents stack is keyed by id in localStorage. Without an `id` on the menu root, triggers won't open it (the plugin still works programmatically) and recents have nowhere to persist. If you author markup by hand, set one explicitly.
 
 #### Injecting items at runtime requires a rebuild
 
-> [!NOTE]
+> [!NOTE]  
 > The plugin caches the item pool in `_allItems` at build time and only refreshes it when recents change. If you inject new `[data-command-item]` elements via Ajax or runtime code, call `instance.build()` after insertion so the filter sees them. (The plugin's `build()` is idempotent for the parts that matter — it re-queries the DOM and re-assigns IDs to anything missing one.)
 
 #### Shortcut collisions with the browser
 
-> [!WARNING]
+> [!WARNING]  
 > `mod+k` is canonical for command palettes but it clashes with Firefox's search bar and some Chrome extensions. The plugin's `e.preventDefault()` suppresses the browser default on its handled keys, but extensions that listen at a higher priority can still win. If you're getting partial behavior, try `mod+shift+k` or `mod+/` as alternatives.
 
 #### Body stuck scroll-locked after a hard close
 
-> [!WARNING]
+> [!WARNING]  
 > If you remove the menu element from the DOM while it's open (route change in an SPA, jQuery `.remove()` without calling `destroy()`), the `dialog-scroll-lock` class on `<body>` stays applied. Always call `instance.destroy()` before removing the root element. The plugin's `destroy()` calls `close()` first, which handles cleanup correctly.
 
 ### **Quick diagnostic checklist**

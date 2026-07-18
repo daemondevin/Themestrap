@@ -232,9 +232,9 @@
         <div class="demo-card">
             <h2>Controls</h2>
             <div class="demo-controls">
-                <button onclick="$('#mySideNav').data('__pluginAppSideNav').toggle()">Toggle Sidebar</button>
-                <button onclick="$('#mySideNav').data('__pluginAppSideNav').collapse()">Collapse</button>
-                <button onclick="$('#mySideNav').data('__pluginAppSideNav').expand()">Expand</button>
+                <button onclick="$('#mySideNav').data('__pluginSideNav').toggle()">Toggle Sidebar</button>
+                <button onclick="$('#mySideNav').data('__pluginSideNav').collapse()">Collapse</button>
+                <button onclick="$('#mySideNav').data('__pluginSideNav').expand()">Expand</button>
                 <button onclick="toggleDark()" class="btn-primary">Toggle Dark Mode</button>
             </div>
         </div>
@@ -291,7 +291,7 @@
         <div class="demo-card">
             <h2>JS API</h2>
             <pre style="font-size:0.8125rem;background:#f3f4f6;padding:1rem;border-radius:0.5rem;overflow:auto;">// Access instance
-const nav = $('#mySideNav').data('__pluginAppSideNav');
+const nav = $('#mySideNav').data('__pluginSideNav');
 
 // Or via jQuery method (also inits if not yet inited)
 const nav = $('#mySideNav').themestrapPluginAppSideNav({ dark: true });
@@ -429,7 +429,7 @@ jQuery(function($) {
 function toggleDark() {
     const $shell = $('#demo-light');
     $shell.toggleClass('app-shell--dark');
-    const nav = $('#mySideNav').data('__pluginAppSideNav');
+    const nav = $('#mySideNav').data('__pluginSideNav');
     if (nav) {
         $('#mySideNav').toggleClass('ts-asn--dark');
     }
