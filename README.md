@@ -95,7 +95,7 @@ On DOM ready the manifest calls `loader.scan()`, which:
 
 ```js
 const loader = themestrap.loader({
-  basePath: '/assets/components/themestrap/js/',
+  basePath: '/js/components/',
   mode: document.documentElement.dataset.env === 'prod' ? 'prod' : 'dev'
 });
 
@@ -105,7 +105,7 @@ loader
     css: 'vendor/owl.carousel/css/owl.carousel.min.css'
   })
   .definePlugin('carousel', {
-    src:      'components/themestrap.plugin.carousel.js',
+    src:      'themestrap.plugin.carousel.js',
     deps:     ['owl'],
     selector: '[data-plugin-carousel]',
     method:   'themestrapPluginCarousel',
