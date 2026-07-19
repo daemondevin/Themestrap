@@ -1,12 +1,10 @@
-# Toast Guide
+# PluginToast Guide
 
 Themestrap's Bootstrap 5 toast notification plugin — programmatic and element-driven toasts, 9 positions, 6 types, autohide with progress bar, hover-to-pause.
 
 Bootstrap 5 toast notifications, the Themestrap way. Fire one with a single static call (`PluginToast.show({title, body, type})`), or attach the plugin to any element to render its data attributes as a toast. Containers are created lazily per position — nine positions are supported, from `top-end` to `middle-center` to `bottom-start`. Each toast comes with a typed icon, header color, optional timestamp, dismiss button, and an animated countdown bar that pauses on hover.
 
----
-
-## [How It **Works**](#how-it-works)
+## How It **Works**
 
 A toast is built in two coordinated phases. The plugin keeps a private registry of position containers and reuses them across instances so multiple toasts at the same position stack naturally.
 
@@ -36,11 +34,12 @@ Positions are written as `"y-x"` where _y_ is one of `top`, `middle`, `bottom` a
 | **middle** | `middle-start` | `middle-center` | `middle-end` |
 | **bottom** | `bottom-start` | `bottom-center` | `bottom-end` |
 
+> [!NOTE]  
 > **Default position is `top-end`.** Override per-call or globally via `PluginToast.defaults.position`.
 
 ---
 
-## [Quick **Start**](#quick-start)
+## Quick **Start**
 
 ### 1. Include the scripts
 
@@ -81,11 +80,12 @@ $('#welcomeToast').themestrapPluginToast();
 </script>
 ```
 
-> **Tip:** Static `show()` is preferred for most cases. Use the element form when the toast's content is rendered server-side and you don't want to re-marshal it through JS.
+> [!Tip]  
+> Static `show()` is preferred for most cases. Use the element form when the toast's content is rendered server-side and you don't want to re-marshal it through JS.
 
 ---
 
-## [Configuration **Options**](#options)
+## Configuration **Options**
 
 Options merge in this order (later wins): `PluginToast.defaults → opts arg → data-plugin-toast-options → individual data-plugin-toast-* attrs`
 
@@ -119,7 +119,7 @@ Options merge in this order (later wins): `PluginToast.defaults → opts arg →
 
 ---
 
-## [Static **API**](#static-api)
+## Static **API**
 
 ### `PluginToast.show(opts)`
 
@@ -149,8 +149,7 @@ themestrap.PluginToast.defaults.progress = true;
 
 ---
 
-## [Instance **API**](#instance-api)
-
+## Instance **API**
 ### Accessing the instance
 
 ```js
@@ -187,7 +186,7 @@ themestrap.PluginToast.show({
 
 ---
 
-## [Hover Pause & Container Behaviour](#behavior)
+## Hover Pause & Container Behavior
 
 ### Hover pause & progress bar
 
@@ -218,7 +217,7 @@ Position containers are created lazily on first use and removed when the last to
 
 ---
 
-## [Recipe **Cookbook**](#recipes)
+## Recipe **Cookbook**
 
 #### Save success
 
@@ -308,9 +307,9 @@ themestrap.PluginToast.show({
 
 ### Diagnostic checklist
 
-- Does `typeof bootstrap.Toast` return `'function'`?
-- Is `themestrap.PluginToast` defined?
-- Does the toast container appear in the DOM (search for `.toast-container`)?
-- Is the toast inside the container but not visible? Check `z-index` conflicts.
-- Is the position string one of the nine documented values?
-- Is `progress` true but the bar invisible? Add the CSS block above.
+> - Does `typeof bootstrap.Toast` return `'function'`?
+> - Is `themestrap.PluginToast` defined?
+> - Does the toast container appear in the DOM (search for `.toast-container`)?
+> - Is the toast inside the container but not visible? Check `z-index` conflicts.
+> - Is the position string one of the nine documented values?
+> - Is `progress` true but the bar invisible? Add the CSS block above.

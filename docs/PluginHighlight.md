@@ -1,6 +1,15 @@
-# Highlight Guide
+# PluginHighlight Guide
 
-Themestrap's syntax-highlighting plugin — wraps highlight.js with lazy ESM imports, line numbers, line range pre-highlighting, drag-to-select-lines, a copy button, and a custom MODX language grammar.
+**File:** `js/components/themestrap.plugin.highlight.js`  
+**jQuery method:** `$.fn.themestrapPluginHighlight`  
+**Instance key:** `__highlight`  
+**Init strategy:** `intObsInit` via `themestrap.init.js`
+
+PluginHighlight wraps [highlight.js](https://highlightjs.org/) with lazy ESM loading, per-language coalescing, line numbers, pre-highlighted line ranges, line selection with copy-on-release, a copy button, and hash-based line anchors.
+
+The `highlight.js` core and language grammars are loaded on-demand from the jsDelivr CDN — only the languages actually used on a page are fetched. Multiple blocks using the same language share a single import. A custom `modx` grammar is loaded from jsDelivr via a personal CDN found on GitHub repository that is located [here](https://github.com/daemondevin/cdn).
+
+Styles are injected lazily into `<style id="ts-syntax-highlight-styles">` on first use and include both light and dark mode rules.
 
 ## [How It **Works**](#how-it-works)
 
@@ -12,26 +21,60 @@ When five `javascript` blocks are on the same page, only one `import('highlight.
 
 ### Line range pre-highlighting
 
+When `lineNumbers: true`, the plugin wraps code in a two-column flex layout:
+
+- Left column (`.hljs-ln-numbers`): clickable line-number badges
+- Right column (`.hljs-ln-code`): highlighted code lines with id anchors
+
 The `data-plugin-highlight-lines` attribute accepts a comma-separated list of line numbers and ranges (e.g. `"3,7-9,12"`). Those lines receive a `ts-hl-emphasized` class and a subtle left border accent on render.
+
+`data-plugin-highlight-lines="1,3,5-8"` applies:
+
+- `.hljs-ln-highlight-line` to matching code lines (amber left border + background)
+- `.hljs-ln-highlight-num` to the corresponding line number badges
+
+These are purely presentational and have no effect on copy content.
 
 ### Drag-to-select lines
 
-Mousedown on the line-number gutter starts a line selection. Dragging extends it. The selection is written back to the OS clipboard automatically and a visual `ts-hl-selected` class is toggled on the selected lines.
+On `mousedown` on the line-number gutter and dragging to select a range starts a line selection. On `mouseup`, the selected lines are joined with newlines then automatically written to the clipboard and a visual class is toggled on the selected lines. A success toast fires if `PluginToast` is available and loaded.
+
+### Hash Navigation
+
+On `hashchange` the plugin scrolls to `#blockId-L{n}` and applies `.hljs-ln-highlight` to the target line. This enables deep-linking to specific lines, e.g. `#ex1-L7`.
+
+### Copy button behavior
+
+The copy button calls `navigator.clipboard.writeText()` with the raw (un-highlighted) text of the entire block. A `textarea`-based fallback is used for older browsers or non-HTTPS contexts.
+
+### DarkMode
+
+The injected CSS includes a full dark theme ruleset that switches the palette from a light Base16 theme to a dark Base16 theme. This behavior is automatic when using `PluginDarkMode` to switch between `light` and `dark` mode.
+
+### Lazy CDN Loading
+
+    Core: https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11-stable/build/es/core.js  
+    Languages: https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/es/languages/{lang}.min.js  
+    MODX: https://cdn.jsdelivr.net/gh/daemondevin/cdn@main/highlighjs/languages/modx.js
+
+> [!NOTE]  
+> Imports are coalesced: if two blocks on the same page use `javascript`, only one `import()` fires regardless of initialization order.
 
 ### Language aliases
 
-- `js` → `javascript`
-- `ts` → `typescript`
-- `py` → `python`
-- `rb` → `ruby`
-- `cs` → `csharp`
-- `sh`/`shell` → `bash`
-- `yml` → `yaml`
-- `md` → `markdown`
-- `htm`/`html` → `xml`
-- `c++` → `cpp`.
+- `js` -> `javascript`
+- `ts` -> `typescript`
+- `py` -> `python`
+- `rb` -> `ruby`
+- `cs` -> `csharp`
+- `sh`/`shell` -> `bash`
+- `yml` -> `yaml`
+- `md` -> `markdown`
+- `htm`/`html` -> `xml`
+- `c++` -> `cpp`.
 
-The custom `modx` grammar is loaded from the Themestrap CDN when the language `modx` is requested.
+> [!TIP]  
+> The custom `modx` grammar is loaded from jsDelivr via a personal CDN found on GitHub repository that is located [here](https://github.com/daemondevin/cdn).
 
 ---
 
@@ -76,5 +119,3 @@ if ($.isFunction($.fn['themestrapPluginHighlight'])
 **Always use `:not(.manual)` in the init selector.** PluginCodeWindow adds `.manual` to inner `<pre>` panes before calling Highlight on them manually. Without the `:not(.manual)` guard, init.js will double-highlight those panes.
 
 **Escape angle brackets in code examples.** Content inside `<code>` is parsed as HTML. Use `&lt;` / `&gt;` for any angle brackets in the code you display.
-
-**MODX tag nesting.** Never nest `[[` inside `[[tsHighlight]]` snippet arguments. Literal MODX-tag examples belong inside `<pre data-plugin-highlight="modx">` blocks with bracket entities (`&lsqb;&lsqb;`).

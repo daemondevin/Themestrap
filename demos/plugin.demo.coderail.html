@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" class="side-header-hamburguer-sidebar side-header-above side-header-hamburguer-sidebar-narrow-bar side-header-hide">
+<head>
+	<title>PluginCodeRail | Themestrap</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+<style>
+:root { --demo-bg: #f4f6fa; }
+html.dark { --demo-bg: #0e1720; }
+body { background: var(--demo-bg); }
+.demo-page-header { padding: 48px 0 32px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 40px; }
+.demo-page-header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+.demo-page-header p.lead { opacity: .75; max-width: 680px; }
+.demo-section { margin-bottom: 52px; }
+.demo-section h2 { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #e8672a; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e8672a; }
+.demo-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 28px; margin-bottom: 20px; }
+html:not(.dark) .demo-card { background: #fff; border-color: #e4e9f0; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.demo-stage { padding: 32px 24px; border-radius: 8px; background: rgba(255,255,255,.03); border: 1px dashed rgba(255,255,255,.12); margin-bottom: 16px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; min-height: 80px; }
+html:not(.dark) .demo-stage { background: #f8fafc; border-color: #cdd5df; }
+.demo-section-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8190a3; margin-bottom: 6px; }
+pre.snip { background: #1e2432; color: #abb2bf; border-radius: 6px; padding: 14px 18px; font-size: 12px; line-height: 1.7; overflow-x: auto; margin: 0; }
+pre.snip .kw { color: #c678dd; } pre.snip .fn { color: #61afef; } pre.snip .str { color: #98c379; } pre.snip .cm { color: #5c6370; font-style: italic; } pre.snip .attr { color: #d19a66; }
+.log-box { font-size: 11.5px; font-family: monospace; color: #7dd3a8; background: #0f1621; border-radius: 6px; padding: 10px 14px; min-height: 36px; border: 1px solid rgba(125,211,168,.15); }
+.tag-js { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; background: #fff3cd; color: #664d03; margin-left: 8px; vertical-align: middle; position: relative; top: -2px; }
+</style>
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.coderail.js"></script>
+<script>
+  if ($.isFunction($.fn['themestrapPluginCodeRail']) && $('[data-plugin-code-rail]').length) {
+    themestrap.fn.intObsInit('[data-plugin-code-rail]:not(.manual)', 'themestrapPluginCodeRail');
+}
+</script>
+</head>
+<body>
+
+<style>
+.ts-code-rail { --ts-cr-top: 80px; }
+.ts-code-rail [data-code-rail-section] { padding: 20px 0; }
+.ts-code-rail [data-code-rail-section] p { color: var(--muted,#888); font-size:14px; }
+</style>
+
+<div class="demo-section">
+  <h2>Live Code Rail</h2>
+  <p class="text-muted mb-4">Scroll this section — the right panel cross-fades to match the section you are reading. On mobile the panels collapse inline.</p>
+
+  <div data-plugin-code-rail data-plugin-options='{"top":80,"fade":true}'>
+
+    <div data-code-rail-main>
+      <section data-code-rail-section="create" id="cr-create">
+        <h3>Create a resource</h3>
+        <p>POST a JSON body to the resources endpoint to create a new item. The response includes the new resource ID and a confirmation timestamp.</p>
+        <p>Required fields: <code>title</code> (string), <code>type</code> (string). Optional: <code>parent</code> (integer), <code>template</code> (integer).</p>
+      </section>
+      <section data-code-rail-section="list" id="cr-list">
+        <h3>List resources</h3>
+        <p>GET the resources collection. Supports query parameters: <code>limit</code>, <code>offset</code>, <code>parent</code>, and <code>template</code>.</p>
+        <p>Returns an array of resource objects with pagination metadata in the <code>_meta</code> key.</p>
+      </section>
+      <section data-code-rail-section="update" id="cr-update">
+        <h3>Update a resource</h3>
+        <p>PATCH a resource by its ID. Only the provided fields are updated; omitted fields retain their current values.</p>
+        <p>A 404 is returned if the resource does not exist or the caller lacks edit permission.</p>
+      </section>
+      <section data-code-rail-section="delete" id="cr-delete">
+        <h3>Delete a resource</h3>
+        <p>DELETE removes the resource permanently. Pass <code>force=true</code> to bypass the recycle bin.</p>
+        <p>A 204 No Content response is returned on success.</p>
+      </section>
+    </div>
+
+    <div data-code-rail-aside>
+      <div data-code-rail-panel="create">
+        <pre style="margin:0;border-radius:8px;background:#1e2432;color:#abb2bf;padding:18px 20px;font-size:12.5px;line-height:1.65;overflow-x:auto"><code>curl -X POST https://api.example.com/resources \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN" \
+  -d '{
+    "title": "Getting Started",
+    "type":  "document",
+    "parent": 0
+  }'
+
+# Response
+{
+  "id": 42,
+  "title": "Getting Started",
+  "createdAt": "2026-07-18T14:00:00Z"
+}</code></pre>
+      </div>
+      <div data-code-rail-panel="list">
+        <pre style="margin:0;border-radius:8px;background:#1e2432;color:#abb2bf;padding:18px 20px;font-size:12.5px;line-height:1.65;overflow-x:auto"><code>curl "https://api.example.com/resources?limit=10&parent=0" \
+  -H "Authorization: Bearer TOKEN"
+
+# Response
+{
+  "_meta": {{ "total": 42, "limit": 10, "offset": 0 }},
+  "results": [
+    {{ "id": 1, "title": "Home" }},
+    {{ "id": 2, "title": "About" }}
+  ]
+}</code></pre>
+      </div>
+      <div data-code-rail-panel="update">
+        <pre style="margin:0;border-radius:8px;background:#1e2432;color:#abb2bf;padding:18px 20px;font-size:12.5px;line-height:1.65;overflow-x:auto"><code>curl -X PATCH https://api.example.com/resources/42 \
+  -H "Authorization: Bearer TOKEN" \
+  -d '{{"title": "Getting Started v2"}}'
+
+# Response
+{{
+  "id": 42,
+  "title": "Getting Started v2",
+  "updatedAt": "2026-07-18T15:00:00Z"
+}}</code></pre>
+      </div>
+      <div data-code-rail-panel="delete">
+        <pre style="margin:0;border-radius:8px;background:#1e2432;color:#abb2bf;padding:18px 20px;font-size:12.5px;line-height:1.65;overflow-x:auto"><code>curl -X DELETE "https://api.example.com/resources/42?force=true" \
+  -H "Authorization: Bearer TOKEN"
+
+# Response: 204 No Content</code></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="log-box mt-4" id="cr-log">Active section will show here as you scroll…</div>
+
+  <div class="mt-3 d-flex gap-2 flex-wrap">
+    <button class="btn btn-xs btn-outline-secondary" id="cr-create-btn">activate('create')</button>
+    <button class="btn btn-xs btn-outline-secondary" id="cr-list-btn">activate('list')</button>
+    <button class="btn btn-xs btn-outline-secondary" id="cr-update-btn">activate('update')</button>
+    <button class="btn btn-xs btn-outline-secondary" id="cr-delete-btn">activate('delete')</button>
+  </div>
+</div>
+
+<div class="demo-section mt-5">
+  <h2>Markup</h2>
+  <pre class="snip">&lt;div <span class="attr">data-plugin-code-rail</span> <span class="attr">data-plugin-options</span>='{"top":96,"fade":true}'&gt;
+  &lt;div <span class="attr">data-code-rail-main</span>&gt;
+    &lt;section <span class="attr">data-code-rail-section</span>=<span class="str">"create"</span>&gt;…prose…&lt;/section&gt;
+    &lt;section <span class="attr">data-code-rail-section</span>=<span class="str">"list"</span>&gt;…prose…&lt;/section&gt;
+  &lt;/div&gt;
+  &lt;div <span class="attr">data-code-rail-aside</span>&gt;
+    &lt;div <span class="attr">data-code-rail-panel</span>=<span class="str">"create"</span>&gt;…code…&lt;/div&gt;
+    &lt;div <span class="attr">data-code-rail-panel</span>=<span class="str">"list"</span>&gt;…code…&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+</div>
+
+<script>
+$(function () {
+    $("[data-plugin-code-rail]").themestrapPluginCodeRail();
+
+    const cr = $("[data-plugin-code-rail]").data("__codeRail");
+    $("[data-plugin-code-rail]").on("coderail:change", (e, inst, id) => {
+        $("#cr-log").text("Active section: " + id);
+    });
+
+    $("#cr-create-btn").on("click", () => cr.activate("create"));
+    $("#cr-list-btn").on("click",   () => cr.activate("list"));
+    $("#cr-update-btn").on("click", () => cr.activate("update"));
+    $("#cr-delete-btn").on("click", () => cr.activate("delete"));
+});
+</script>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
