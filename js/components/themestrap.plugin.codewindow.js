@@ -54,6 +54,7 @@
  *       themestrap.fn.intObsInit('[data-plugin-code-window]:not(.manual)', 'themestrapPluginCodeWindow');
  *   }
  */
+// Code Window
 (((themestrap = {}, $) => {
     const instanceName = '__codeWindow';
 
@@ -61,16 +62,15 @@
     // CSS to pages that don't use the plugin (styles land on first build()).
     const STYLE_ID = 'ts-code-window-styles';
 
-    const CSS_TEXT = `
-/* Themestrap — PluginCodeWindow */
+    const CSS_TEXT = `/* Themestrap — PluginCodeWindow */
 .ts-code-window {
     --ts-cw-radius:        4px;
-    --ts-cw-bg:            #0b1220;
-    --ts-cw-chrome-bg:     #0e1726;
+    --ts-cw-bg:            #212529;
+    --ts-cw-chrome-bg:     #16181b;
     --ts-cw-border:        rgba(255,255,255,0.08);
     --ts-cw-tab-fg:        rgba(245,241,234,0.50);
     --ts-cw-tab-fg-active: #f5f1ea;
-    --ts-cw-accent:        #e8672a;
+    --ts-cw-accent:        var(--primary);
     --ts-cw-glow-1:        rgba(42,184,200,0.30);
     --ts-cw-glow-2:        rgba(232,103,42,0.28);
     --ts-cw-shadow:        0 30px 60px -20px rgba(0,0,0,0.55),
@@ -83,6 +83,7 @@
     box-shadow: var(--ts-cw-shadow);
     overflow: hidden;
     isolation: isolate;
+    margin-bottom: 2em;
 }
 
 /* Light theme tuning (page default). Dark theme keeps the dark editor look. */

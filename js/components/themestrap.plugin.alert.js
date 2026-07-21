@@ -1,3 +1,4 @@
+// Alert
 (((themestrap = {}, $) => {
     const instanceName = '__pluginAlert';
 
@@ -163,7 +164,7 @@
     font-size: 1.2em;
 }
 
-/* Remove Bootstrap's default colored border/bg — our tokens take over */
+/* Remove Bootstrap's default coloured border/bg — our tokens take over */
 .alert.alert-ts[class*="alert-primary"],
 .alert.alert-ts[class*="alert-secondary"],
 .alert.alert-ts[class*="alert-success"],
@@ -380,6 +381,70 @@
     }
 }
 
+/* Dark-mode palette */
+html.dark .alert-ts-info {
+    --alert-ts-bg           : #172554;
+    --alert-ts-border       : #3b82f6;
+    --alert-ts-icon         : #60a5fa;
+    --alert-ts-title        : #bfdbfe;
+    --alert-ts-text         : #93c5fd;
+    --alert-ts-action       : #93c5fd;
+    --alert-ts-action-hover : #bfdbfe;
+    --alert-ts-close        : #3b82f6;
+    --alert-ts-close-hover  : #bfdbfe;
+}
+
+html.dark .alert-ts-success {
+    --alert-ts-bg           : #052e16;
+    --alert-ts-border       : #22c55e;
+    --alert-ts-icon         : #4ade80;
+    --alert-ts-title        : #bbf7d0;
+    --alert-ts-text         : #86efac;
+    --alert-ts-action       : #86efac;
+    --alert-ts-action-hover : #bbf7d0;
+    --alert-ts-close        : #22c55e;
+    --alert-ts-close-hover  : #bbf7d0;
+}
+
+html.dark .alert-ts-warning {
+    --alert-ts-bg           : #27170a;
+    --alert-ts-border       : #f59e0b;
+    --alert-ts-icon         : #fbbf24;
+    --alert-ts-title        : #fde68a;
+    --alert-ts-text         : #fcd34d;
+    --alert-ts-action       : #fcd34d;
+    --alert-ts-action-hover : #fde68a;
+    --alert-ts-close        : #f59e0b;
+    --alert-ts-close-hover  : #fde68a;
+}
+
+html.dark .alert-ts-danger {
+    --alert-ts-bg           : #2d0a0a;
+    --alert-ts-border       : #ef4444;
+    --alert-ts-icon         : #f87171;
+    --alert-ts-title        : #fecaca;
+    --alert-ts-text         : #fca5a5;
+    --alert-ts-action       : #fca5a5;
+    --alert-ts-action-hover : #fecaca;
+    --alert-ts-close        : #ef4444;
+    --alert-ts-close-hover  : #fecaca;
+}
+
+html.dark .alert-ts-neutral {
+    --alert-ts-bg           : #111827;
+    --alert-ts-border       : #6b7280;
+    --alert-ts-icon         : #9ca3af;
+    --alert-ts-title        : #f9fafb;
+    --alert-ts-text         : #d1d5db;
+    --alert-ts-action       : #d1d5db;
+    --alert-ts-action-hover : #f9fafb;
+    --alert-ts-close        : #6b7280;
+    --alert-ts-close-hover  : #f9fafb;
+}
+
+.alert.alert-ts {
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+}
 
 /* Reduced-motion overrides */
 @media (prefers-reduced-motion: reduce) {

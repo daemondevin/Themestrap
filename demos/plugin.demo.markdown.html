@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>PluginMarkdown Demo | Themestrap</title>
+
+<meta name="keywords" content="">
+<meta name="description" content="Interactive demo for PluginMarkdown — Themestrap's zero-dependency GFM Markdown parser plugin.">
+<meta name="author" content="daemon.devin">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+
+<link rel="icon" type="image/png" href="../img/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
+<link rel="shortcut icon" href="../img/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="../img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Themestrap">
+
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../css/skins/default.css">
+
+<style>
+/* Design tokens */
+:root {
+  --navy:   #0a1929; --navy2: #0e2238; --blue: #3b82f6; --blue2: #2563eb;
+  --teal:   #2ab8c8; --orange: #e8672a; --cream: #fdf9f4;
+  --slate:  #64748b; --border: #e2e8f0; --bg: #f8fafc;
+  --radius: 10px; --trans: 200ms ease;
+  --ff-display: 'Fraunces', Georgia, serif;
+  --ff-ui:      'Syne', system-ui, sans-serif;
+  --ff-body:    'DM Sans', system-ui, sans-serif;
+  --ff-mono:    'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { font-family: var(--ff-body); background: var(--bg); color: var(--navy); line-height: 1.65; }
+h2 a, h2 a:hover { text-decoration: none; color: var(--dark); }
+a:not(.btn):hover { text-decoration: none; }
+/* Layout */
+.demo-page { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
+.demo-page-title {
+  font-family: var(--ff-display); font-size: 2rem; font-weight: 700; color: var(--navy);
+  margin-bottom: 6px; letter-spacing: -.02em;
+}
+.demo-page-sub { font-size: 1.0625rem; color: var(--slate); margin-bottom: 48px; }
+.demo-tag {
+  display: inline-block; font-family: var(--ff-ui); font-size: .7rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--blue);
+  background: rgba(59,130,246,.09); border: 1px solid rgba(59,130,246,.2);
+  border-radius: 20px; padding: 3px 12px; margin-bottom: 16px;
+}
+/* ── Demo page layout ── */
+.demo-section-label {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted, #999);
+    display: block;
+    margin-bottom: 10px;
+}
+.demo-card {
+    border: 1px solid var(--border, #333);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    background: var(--grey-100);
+}
+.demo-card-header {
+    background: rgba(255,255,255,.04);
+    border-bottom: 1px solid var(--border, #333);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.demo-card-header h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--default, #f0f0f0);
+    flex: 1;
+}
+.demo-card-header .demo-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    background: rgba(42,184,200,.15);
+    color: #2ab8c8;
+    border: 1px solid rgba(42,184,200,.3);
+    border-radius: 4px;
+    padding: 2px 8px;
+}
+.demo-stage {
+    padding: 24px;
+    min-height: 80px;
+}
+.demo-stage + .demo-controls {
+    border-top: 1px solid var(--border, #333);
+}
+.demo-controls {
+    padding: 14px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    background: rgba(0,0,0,.15);
+}
+.demo-controls label {
+    font-size: 12px;
+    color: var(--muted, #999);
+    margin: 0;
+}
+.demo-snip {
+    border-top: 1px solid var(--border, #333);
+}
+.demo-snip pre.snip {
+    margin: 0;
+    border-radius: 0;
+    background: var(--light-200);
+    padding: 16px 20px;
+    font-size: 11.5px;
+    overflow-x: auto;
+}
+.demo-snip pre.snip code { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+
+/* ── Syntax highlight tokens ── */
+.sh-tag   { color: #e06c75; }
+.sh-attr  { color: #d19a66; }
+.sh-val   { color: #98c379; }
+.sh-str   { color: #98c379; }
+.sh-num   { color: #d19a66; }
+.sh-kw    { color: #c678dd; }
+.sh-cm    { color: #5c6370; font-style: italic; }
+.sh-fn    { color: #61afef; }
+
+/* ── Event log ── */
+.event-log {
+    border-top: 1px solid var(--border, #333);
+    background: rgba(0,0,0,.2);
+    padding: 10px 20px;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 11.5px;
+    min-height: 38px;
+    max-height: 100px;
+    overflow-y: auto;
+    color: var(--muted, #999);
+}
+.event-log .ev { margin-bottom: 2px; }
+.event-log .ev-name { color: #2ab8c8; font-weight: 700; }
+.event-log .ev-detail { color: var(--default, #c1c1c1); }
+
+/* ── Live editor split ── */
+.editor-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 360px;
+}
+.editor-split .editor-pane {
+    border-right: 1px solid var(--border, #333);
+    display: flex;
+    flex-direction: column;
+}
+.editor-split .editor-pane:last-child { border-right: none; }
+.editor-pane-label {
+    background: rgba(255,255,255,.04);
+    border-bottom: 1px solid var(--border, #333);
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted, #999);
+}
+.editor-pane textarea {
+    flex: 1;
+    background: #141720;
+    border: none;
+    outline: none;
+    resize: none;
+    color: #abb2bf;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    padding: 16px;
+    min-height: 320px;
+}
+.editor-pane .preview-pane {
+    flex: 1;
+    padding: 20px 24px;
+    overflow-y: auto;
+    min-height: 320px;
+    color: var(--default, #c1c1c1);
+}
+@media (max-width: 768px) {
+    .editor-split { grid-template-columns: 1fr; }
+    .editor-split .editor-pane { border-right: none; border-bottom: 1px solid var(--border, #333); }
+}
+
+/* ── Option toggles ── */
+.opt-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border, #444);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--default, #c1c1c1);
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    user-select: none;
+}
+.opt-toggle:hover { background: rgba(255,255,255,.09); }
+.opt-toggle.active {
+    background: rgba(42,184,200,.12);
+    border-color: rgba(42,184,200,.4);
+    color: #2ab8c8;
+}
+.opt-toggle .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .5;
+    transition: opacity .15s;
+}
+.opt-toggle.active .dot { opacity: 1; }
+
+/* ── Theme selector pills ── */
+.theme-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.theme-pill {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color .15s, transform .1s;
+}
+.theme-pill:hover { transform: scale(1.04); }
+.theme-pill.active { border-color: #fff; }
+
+/* ── guide-table styles (reused in static info areas) ── */
+.guide-table td, .guide-table th { vertical-align: middle; font-size: 13px; }
+.guide-table .td-prop code { font-size: 12.5px; }
+.section { scroll-margin-top: 90px; }
+</style>
+</head>
+<body>
+<div class="demo-page">
+
+  <div class="demo-tag">Plugin</div>
+  <h1 class="demo-page-title">PluginMarkdown</h1>
+  <p class="demo-page-sub">
+    Interactive demos for Themestrap's zero-dependency GFM Markdown parser. Add <code>data-plugin-markdown</code> 
+    to any element to render its text content — or point <code>data-plugin-markdown-src</code> at a <code>.md</code> 
+    file URL. All demos are live — edit, toggle, and re-render in the browser.
+  </p>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 1 — Inline GFM: basic block-level elements
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">Block elements</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>Headings, Paragraphs &amp; Horizontal Rules</h3>
+        <span class="demo-badge">inline</span>
+    </div>
+    <div class="demo-stage">
+        <div id="demo-blocks" data-plugin-markdown class="manual">
+# Heading h1
+
+## Heading h2
+
+### Heading h3
+
+Paragraph with **bold**, *italic*, ***bold-italic***, ~~strikethrough~~, and `inline code`.
+
+---
+
+Another paragraph after a horizontal rule. Links work too: [Themestrap](https://nskiag6l.modx.dev/ "Open docs").
+        </div>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">&lt;!-- Render inline text content as GFM --&gt;</span>
+<span class="sh-tag">&lt;div</span> <span class="sh-attr">data-plugin-markdown</span><span class="sh-tag">&gt;</span>
+# Heading h1
+## Heading h2
+
+Paragraph with **bold** and *italic*.
+
+---
+
+[Link](https://example.com)
+<span class="sh-tag">&lt;/div&gt;</span></code></pre>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 2 — Code blocks
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">Code</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>Fenced &amp; Indented Code Blocks</h3>
+        <span class="demo-badge">inline</span>
+    </div>
+    <div class="demo-stage">
+        <div id="demo-code" data-plugin-markdown class="manual">
+Inline code: `const greeting = 'hello';`
+
+```javascript
+// Fenced code block — language class added as language-javascript
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+console.log(greet('World'));
+```
+
+    // Indented code block (4 spaces)
+    SELECT * FROM users WHERE active = 1;
+        </div>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">&lt;!-- Fenced code block with language annotation --&gt;</span>
+<span class="sh-tag">&lt;div</span> <span class="sh-attr">data-plugin-markdown</span><span class="sh-tag">&gt;</span>
+```javascript
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+```
+<span class="sh-tag">&lt;/div&gt;</span>
+
+<span class="sh-cm">&lt;!-- Language class rendered as: class="language-javascript" --&gt;</span></code></pre>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 3 — Lists and task lists
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">Lists</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>Ordered, Unordered &amp; Task Lists</h3>
+        <span class="demo-badge">inline</span>
+    </div>
+    <div class="demo-stage">
+        <div id="demo-lists" data-plugin-markdown class="manual">
+**Unordered list**
+
+- First item
+- Second item
+  - Nested item A
+  - Nested item B
+- Third item
+
+**Ordered list**
+
+1. Install MODX
+2. Extract Themestrap
+3. Add snippets to templates
+4. Add `data-plugin-markdown` and enjoy
+
+**Task list**
+
+- [x] Write the plugin
+- [x] Write the tests (19/19 passing)
+- [x] Write the demo page
+- [ ] Add to MODX package builder
+- [ ] Submit to MODX Extras
+        </div>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">&lt;!-- Task list syntax --&gt;</span>
+<span class="sh-tag">&lt;div</span> <span class="sh-attr">data-plugin-markdown</span><span class="sh-tag">&gt;</span>
+- [x] Completed task
+- [ ] Pending task
+<span class="sh-tag">&lt;/div&gt;</span>
+
+<span class="sh-cm">&lt;!-- Renders as: --&gt;</span>
+<span class="sh-tag">&lt;ul</span> <span class="sh-attr">class</span>=<span class="sh-val">"ts-md-task-list"</span><span class="sh-tag">&gt;</span>
+  <span class="sh-tag">&lt;li&gt;&lt;input</span> <span class="sh-attr">type</span>=<span class="sh-val">"checkbox"</span> <span class="sh-attr">checked</span> <span class="sh-attr">disabled</span><span class="sh-tag">&gt;</span> Completed task<span class="sh-tag">&lt;/li&gt;</span>
+  <span class="sh-tag">&lt;li&gt;&lt;input</span> <span class="sh-attr">type</span>=<span class="sh-val">"checkbox"</span> <span class="sh-attr">disabled</span><span class="sh-tag">&gt;</span> Pending task<span class="sh-tag">&lt;/li&gt;</span>
+<span class="sh-tag">&lt;/ul&gt;</span></code></pre>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 4 — GFM Tables
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">Tables</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>GFM Pipe Tables with Column Alignment</h3>
+        <span class="demo-badge">inline</span>
+    </div>
+    <div class="demo-stage">
+        <div id="demo-tables" data-plugin-markdown class="manual">
+| Plugin | Type | Auto-init | Lazy CSS |
+|:-------|:----:|----------:|---------:|
+| PluginMarkdown | Renderer | `intObsInit` | ✓ |
+| PluginPopover | UI / Overlay | `each()` | ✓ |
+| PluginScrollFx | Scroll | `dynIntObsInit` | ✓ |
+| PluginDarkMode | Theme | Manual | ✓ |
+| PluginNavbar | Navigation | `intObsInit` | ✓ |
+
+Column 1 is left-aligned (`:----`), Column 2 centered (`:---:`), Columns 3-4 right-aligned (`---:`).
+        </div>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">&lt;!-- GFM table with alignment markers --&gt;</span>
+<span class="sh-tag">&lt;div</span> <span class="sh-attr">data-plugin-markdown</span><span class="sh-tag">&gt;</span>
+| Left   | Center | Right |
+|:-------|:------:|------:|
+| alpha  |  beta  | gamma |
+| delta  | epsilon|  zeta |
+<span class="sh-tag">&lt;/div&gt;</span>
+
+<span class="sh-cm">&lt;!-- :---- left  :----: center  ----: right --&gt;</span></code></pre>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 5 — Block quotes and reference links
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">Quotes &amp; Links</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>Block Quotes, Reference Links &amp; Auto-links</h3>
+        <span class="demo-badge">inline</span>
+    </div>
+    <div class="demo-stage">
+        <div id="demo-quotes" data-plugin-markdown class="manual">
+> **Block quote** — arbitrary GFM can go inside, including *italic*, `code`,
+> and even nested quotes.
+>
+> > Nested block quote inside the outer one.
+> > Works because the parser is recursive.
+
+Reference-style links keep Markdown readable:
+[Themestrap docs][ts] · [MODX][modx] · [Bootstrap][bs]
+
+[ts]:   https://nskiag6l.modx.dev/ "Themestrap Documentation"
+[modx]: https://modx.com/ "MODX CMS"
+[bs]:   https://getbootstrap.com/ "Bootstrap 5"
+
+Auto-link: <https://nskiag6l.modx.dev/>
+        </div>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">&lt;!-- Reference links: definition lines are stripped from output --&gt;</span>
+<span class="sh-tag">&lt;div</span> <span class="sh-attr">data-plugin-markdown</span><span class="sh-tag">&gt;</span>
+Visit [the docs][ts] for more.
+
+[ts]: https://nskiag6l.modx.dev/ "Themestrap Documentation"
+
+Auto-link: &lt;https://nskiag6l.modx.dev/&gt;
+<span class="sh-tag">&lt;/div&gt;</span></code></pre>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 6 — Live editor
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">Live editor</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>Live GFM Editor</h3>
+        <span class="demo-badge">interactive</span>
+    </div>
+    <div class="demo-controls">
+        <span class="demo-section-label mb-0" style="font-size:10px">Parser options:</span>
+        <button class="opt-toggle" id="toggle-breaks" title="Convert single newlines to &lt;br&gt;">
+            <span class="dot"></span> breaks
+        </button>
+        <button class="opt-toggle active" id="toggle-sanitize" title="Strip script tags and on* attributes">
+            <span class="dot"></span> sanitize
+        </button>
+        <button class="opt-toggle active" id="toggle-tasklists" title="Render - [x] as checkboxes">
+            <span class="dot"></span> taskLists
+        </button>
+    </div>
+    <div class="editor-split">
+        <div class="editor-pane">
+            <div class="editor-pane-label">Markdown input</div>
+            <textarea id="live-input" spellcheck="false" aria-label="Markdown input">## Live editor
+
+Type **Markdown** here and see the rendered output on the right — instantly.
+
+### Features to try
+
+- *Italic* and **bold** and ***both***
+- ~~Strikethrough~~ and `inline code`
+- [Links](https://example.com) and ![images](../img/favicon.ico)
+- [x] Checked task
+- [ ] Unchecked task
+
+### Table
+
+| Name   | Value |
+|--------|------:|
+| alpha  |   100 |
+| beta   |   200 |
+
+```js
+// Fenced code block
+const msg = 'hello world';
+console.log(msg);
+```
+
+> Block quote with **bold** inside.
+</textarea>
+        </div>
+        <div class="editor-pane">
+            <div class="editor-pane-label">Rendered output</div>
+            <div class="preview-pane" id="live-preview"></div>
+        </div>
+    </div>
+    <div class="event-log" id="live-log">
+        <span class="text-muted" style="font-size:11px">Events will appear here…</span>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 7 — Custom theming
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">Theming</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>CSS Custom Property Theming</h3>
+        <span class="demo-badge">options</span>
+    </div>
+    <div class="demo-controls">
+        <span class="demo-section-label mb-0" style="font-size:10px">Theme:</span>
+        <div class="theme-pills">
+            <span class="theme-pill active" data-theme-target="default"
+                  style="background:#0a1929;color:#2ab8c8;border-color:rgba(42,184,200,.4)">Default</span>
+            <span class="theme-pill" data-theme-target="warm"
+                  style="background:#1a0a00;color:#e8672a">Warm</span>
+            <span class="theme-pill" data-theme-target="forest"
+                  style="background:#0a1a0a;color:#4caf50">Forest</span>
+            <span class="theme-pill" data-theme-target="paper"
+                  style="background:#f5f0e8;color:#333;border:2px solid #ccc">Paper</span>
+        </div>
+    </div>
+    <div class="demo-stage" id="theme-demo-stage">
+        <div id="demo-themed" data-plugin-markdown class="manual">
+## Themed Markdown
+
+Paragraph with **bold**, *italic*, and [a link](https://example.com).
+
+> Block quote styled with the theme's accent colour.
+
+| Column A | Column B |
+|:---------|:---------|
+| Value 1  | Value 2  |
+
+```css
+/* Code block inherits the theme font */
+.ts-markdown { --ts-md-link: var(--accent); }
+```
+        </div>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">&lt;!-- Override CSS custom properties per-element --&gt;</span>
+<span class="sh-tag">&lt;div</span> <span class="sh-attr">data-plugin-markdown</span>
+     <span class="sh-attr">data-plugin-options</span>=<span class="sh-val">'{"linkColor":"#e8672a"}'</span>
+     <span class="sh-attr">style</span>=<span class="sh-val">"--ts-md-quote-border:#e8672a;--ts-md-code-bg:rgba(232,103,42,.1)"</span><span class="sh-tag">&gt;</span>
+…
+<span class="sh-tag">&lt;/div&gt;</span></code></pre>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     CARD 8 — Programmatic API
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<span class="demo-section-label">API</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>Programmatic API</h3>
+        <span class="demo-badge">methods</span>
+    </div>
+    <div class="demo-stage">
+        <div id="demo-api-output" style="min-height:80px; padding: 4px 0;">
+            <p class="text-muted" style="font-size:13px">Use the controls below to call instance methods…</p>
+        </div>
+    </div>
+    <div class="demo-controls" style="flex-wrap:wrap;gap:10px">
+        <button class="btn btn-sm btn-outline-primary" id="api-render-h1">render() — h1</button>
+        <button class="btn btn-sm btn-outline-primary" id="api-render-table">render() — table</button>
+        <button class="btn btn-sm btn-outline-primary" id="api-render-tasks">render() — tasks</button>
+        <button class="btn btn-sm btn-outline-secondary" id="api-get-html">getHtml() → log</button>
+        <button class="btn btn-sm btn-outline-danger"  id="api-destroy">destroy()</button>
+        <button class="btn btn-sm btn-outline-success" id="api-reinit">re-init</button>
+    </div>
+    <div class="event-log" id="api-log">
+        <span class="text-muted" style="font-size:11px">Click a button to run a method call…</span>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">// Init</span>
+<span class="sh-kw">const</span> md = $(<span class="sh-str">'#demo-api-output'</span>).<span class="sh-fn">themestrapPluginMarkdown</span>()
+              .data(<span class="sh-str">'__pluginMarkdown'</span>);
+
+<span class="sh-cm">// Render a Markdown string</span>
+md.<span class="sh-fn">render</span>(<span class="sh-str">'# Hello World\n\nSome **bold** text.'</span>);
+
+<span class="sh-cm">// Get the last rendered HTML</span>
+<span class="sh-kw">const</span> html = md.<span class="sh-fn">getHtml</span>();
+
+<span class="sh-cm">// Destroy and restore original content</span>
+md.<span class="sh-fn">destroy</span>();</code></pre>
+    </div>
+</div>
+</div>
+<!--END PAGE CONTENT-->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../js/themestrap.js"></script>
+    <script src="../js/components/themestrap.plugin.markdown.js"></script>
+    <script src="../js/themestrap.init.js"></script>
+    <script>
+    (function ($) {
+        'use strict';
+
+        // Manual init for all .manual elements (skipped by auto-init)
+        $('[data-plugin-markdown].manual').each(function () {
+            $(this).themestrapPluginMarkdown({ sanitize: false, breaks: false });
+        });
+
+        // Card 6 — Live editor
+        var liveOpts = { breaks: false, sanitize: true, taskLists: true };
+        var $livePreview = $('#live-preview');
+        var $liveLog = $('#live-log');
+        var $liveInput = $('#live-input');
+
+        function logEvent(name, detail) {
+            var time = new Date().toLocaleTimeString('en', { hour12: false });
+            var line = $('<div class="ev"></div>').html(
+                '<span class="ev-name">' + name + '</span>' +
+                ' <span class="ev-detail">' + detail + '</span>' +
+                ' <span style="color:#555;float:right">' + time + '</span>'
+            );
+            $liveLog.find('.text-muted').remove();
+            $liveLog.prepend(line);
+        }
+
+        function updateLivePreview() {
+            var md = $liveInput.val();
+            // Use bundled GFM parser directly — no DOM element needed
+            var PluginMarkdown = window.themestrap && window.themestrap.PluginMarkdown;
+            var html = '';
+            if (PluginMarkdown) {
+                // Create a temporary element to host the plugin
+                if (!$livePreview.data('__pluginMarkdown')) {
+                    $livePreview.themestrapPluginMarkdown(liveOpts);
+                    $livePreview.on('rendered.ts.markdown', function (e, renderedHtml) {
+                        logEvent('rendered.ts.markdown', renderedHtml.length + ' chars');
+                    });
+                }
+                $livePreview.data('__pluginMarkdown').render(md);
+            } else {
+                $livePreview.html('<p class="text-warning text-3">Plugin not loaded — check script include order.</p>');
+            }
+        }
+
+        // Debounce for smooth typing
+        var liveTimer;
+        $liveInput.on('input', function () {
+            clearTimeout(liveTimer);
+            liveTimer = setTimeout(updateLivePreview, 120);
+        });
+        updateLivePreview(); // initial render
+
+        // Option toggles
+        $('#toggle-breaks').on('click', function () {
+            liveOpts.breaks = !liveOpts.breaks;
+            $(this).toggleClass('active', liveOpts.breaks);
+            // Destroy + re-init with new options so they take effect
+            var inst = $livePreview.data('__pluginMarkdown');
+            if (inst) { inst.destroy(); }
+            $livePreview.themestrapPluginMarkdown(liveOpts);
+            $livePreview.on('rendered.ts.markdown', function (e, renderedHtml) {
+                logEvent('rendered.ts.markdown', renderedHtml.length + ' chars');
+            });
+            updateLivePreview();
+            logEvent('option changed', 'breaks → ' + liveOpts.breaks);
+        });
+
+        $('#toggle-sanitize').on('click', function () {
+            liveOpts.sanitize = !liveOpts.sanitize;
+            $(this).toggleClass('active', liveOpts.sanitize);
+            var inst = $livePreview.data('__pluginMarkdown');
+            if (inst) { inst.destroy(); }
+            $livePreview.themestrapPluginMarkdown(liveOpts);
+            $livePreview.on('rendered.ts.markdown', function (e, renderedHtml) {
+                logEvent('rendered.ts.markdown', renderedHtml.length + ' chars');
+            });
+            updateLivePreview();
+            logEvent('option changed', 'sanitize → ' + liveOpts.sanitize);
+        });
+
+        $('#toggle-tasklists').on('click', function () {
+            liveOpts.taskLists = !liveOpts.taskLists;
+            $(this).toggleClass('active', liveOpts.taskLists);
+            var inst = $livePreview.data('__pluginMarkdown');
+            if (inst) { inst.destroy(); }
+            $livePreview.themestrapPluginMarkdown(liveOpts);
+            $livePreview.on('rendered.ts.markdown', function (e, renderedHtml) {
+                logEvent('rendered.ts.markdown', renderedHtml.length + ' chars');
+            });
+            updateLivePreview();
+            logEvent('option changed', 'taskLists → ' + liveOpts.taskLists);
+        });
+
+        // Card 7 — Theme switcher
+        var THEMES = {
+            default: {
+                '--ts-md-link':         '#2ab8c8',
+                '--ts-md-link-hover':   '#e8672a',
+                '--ts-md-quote-border': '#0a1929',
+                '--ts-md-code-bg':      'rgba(0,0,0,.06)',
+                '--ts-md-border':       'rgba(0,0,0,.15)',
+                'background':           '',
+                'color':                '',
+                'padding':              ''
+            },
+            warm: {
+                '--ts-md-link':         '#e8672a',
+                '--ts-md-link-hover':   '#d2541b',
+                '--ts-md-quote-border': '#e8672a',
+                '--ts-md-code-bg':      'rgba(232,103,42,.08)',
+                '--ts-md-border':       'rgba(232,103,42,.2)',
+                'background':           '',
+                'color':                '',
+                'padding':              ''
+            },
+            forest: {
+                '--ts-md-link':         '#4caf50',
+                '--ts-md-link-hover':   '#2e7d32',
+                '--ts-md-quote-border': '#4caf50',
+                '--ts-md-code-bg':      'rgba(76,175,80,.08)',
+                '--ts-md-border':       'rgba(76,175,80,.2)',
+                'background':           '',
+                'color':                '',
+                'padding':              ''
+            },
+            paper: {
+                '--ts-md-link':         '#1565c0',
+                '--ts-md-link-hover':   '#0d47a1',
+                '--ts-md-quote-border': '#1565c0',
+                '--ts-md-code-bg':      'rgba(0,0,0,.05)',
+                '--ts-md-border':       'rgba(0,0,0,.12)',
+                'background':           '#f5f0e8',
+                'color':                '#212121',
+                'padding':              '24px'
+            }
+        };
+
+        // Init the themed element
+        $('#demo-themed').themestrapPluginMarkdown({ sanitize: false });
+
+        $('[data-theme-target]').on('click', function () {
+            var name = $(this).data('theme-target');
+            var t = THEMES[name];
+            var $el = $('#demo-themed');
+
+            // Apply CSS vars
+            Object.keys(t).forEach(function (k) {
+                if (k.startsWith('--')) {
+                    $el.css(k, t[k]);
+                }
+            });
+            // Apply structural props
+            $el.css({ background: t.background, color: t.color, padding: t.padding });
+
+            // Update pills
+            $('[data-theme-target]').removeClass('active');
+            $(this).addClass('active');
+        });
+
+        // Card 8 — API demo
+        var $apiEl  = $('#demo-api-output');
+        var $apiLog = $('#api-log');
+        var apiInst = null;
+
+        function apiLog(msg) {
+            var time = new Date().toLocaleTimeString('en', { hour12: false });
+            var line = $('<div class="ev"></div>').html(
+                '<span class="ev-detail">' + msg + '</span>' +
+                ' <span style="color:#555;float:right">' + time + '</span>'
+            );
+            $apiLog.find('.text-muted').remove();
+            $apiLog.prepend(line);
+        }
+
+        function ensureApiInst() {
+            if (!$apiEl.data('__pluginMarkdown')) {
+                $apiEl.themestrapPluginMarkdown({ sanitize: false });
+                $apiEl.on('rendered.ts.markdown', function (e, html) {
+                    apiLog('<span class="ev-name">rendered.ts.markdown</span> — ' + html.length + ' chars output');
+                });
+            }
+            return $apiEl.data('__pluginMarkdown');
+        }
+
+        $('#api-render-h1').on('click', function () {
+            ensureApiInst().render('# Hello World\n\nRendered via `md.render("# Hello World")`.');
+            apiLog('<span class="ev-name">render()</span> called with h1 snippet');
+        });
+
+        $('#api-render-table').on('click', function () {
+            var md = '## Feature table\n\n' +
+                     '| Method | Returns | Notes |\n' +
+                     '|--------|---------|-------|\n' +
+                     '| `render(md)` | `this` | Parse + inject |\n' +
+                     '| `getHtml()` | `string` | Last rendered HTML |\n' +
+                     '| `destroy()` | `this` | Restore original |';
+            ensureApiInst().render(md);
+            apiLog('<span class="ev-name">render()</span> called with GFM table');
+        });
+
+        $('#api-render-tasks').on('click', function () {
+            var md = '## Task list\n\n' +
+                     '- [x] Plugin written\n' +
+                     '- [x] Tests passing (19/19)\n' +
+                     '- [x] Demo page written\n' +
+                     '- [ ] Deployed to MODX instance';
+            ensureApiInst().render(md);
+            apiLog('<span class="ev-name">render()</span> called with task list');
+        });
+
+        $('#api-get-html').on('click', function () {
+            var inst = ensureApiInst();
+            var html = inst.getHtml();
+            apiLog('<span class="ev-name">getHtml()</span> → ' + html.length + ' chars: <code>' +
+                   $('<span>').text(html.slice(0, 60)).html() + (html.length > 60 ? '…' : '') + '</code>');
+        });
+
+        $('#api-destroy').on('click', function () {
+            var inst = $apiEl.data('__pluginMarkdown');
+            if (inst) {
+                inst.destroy();
+                apiInst = null;
+                apiLog('<span class="ev-name">destroy()</span> called — original content restored, instance removed');
+            } else {
+                apiLog('No active instance — click re-init first');
+            }
+        });
+
+        $('#api-reinit').on('click', function () {
+            $apiEl.data('__pluginMarkdown', null).removeData('__pluginMarkdown');
+            ensureApiInst();
+            apiLog('<span class="ev-name">re-init</span> — new instance created');
+        });
+
+        // Command menu actions
+        $(document).on('command:go-guide', function () {
+            window.location.href = 'plugin-markdown-guide.html';
+        });
+
+    }(jQuery));
+    </script>
+    </body>
+</html>

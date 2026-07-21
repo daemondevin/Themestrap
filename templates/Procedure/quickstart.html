@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quickstart — Themestrap Procedure</title>
+<meta name="description" content="Make your first Procedure API call in minutes.">
+<script>
+(function(){
+  try {
+    var s = localStorage.getItem('themestrap-theme'),
+        d = matchMedia('(prefers-color-scheme: dark)').matches,
+        t = s || (d ? 'dark' : 'light'),
+        el = document.documentElement;
+    if (t === 'dark') el.classList.add('dark');
+    el.setAttribute('data-theme', t);
+    el.setAttribute('data-bs-theme', t);
+  } catch(e) {}
+})();
+</script>
+<link rel="icon" type="image/png" href="../../img/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg">
+<link rel="shortcut icon" href="../../img/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="../../img/apple-touch-icon.png">
+<link rel="stylesheet" href="../../vendor/fontawesome-free/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+    --brand-navy:    #0a1929;
+    --brand-navy-2:  #0e2238;
+    --brand-orange:  #e8672a;
+    --brand-orange-2:#ff7d3d;
+    --brand-teal:    #2ab8c8;
+    --brand-cream:   #f5f1ea;
+
+    --serif: 'Fraunces', Georgia, serif;
+    --sans:  'Syne', system-ui, -apple-system, sans-serif;
+    --body:  'DM Sans', system-ui, sans-serif;
+    --mono:  'JetBrains Mono', ui-monospace, monospace;
+
+    --bg:          #fbf9f5;
+    --bg-elev:     #ffffff;
+    --bg-sunken:   #f3efe7;
+    --fg:          #1c2733;
+    --fg-muted:    #5b6675;
+    --fg-faint:    #8a93a0;
+    --border:      #e7e1d6;
+    --border-strong:#d8d0c2;
+    --accent:      var(--brand-orange);
+    --accent-soft: rgba(232,103,42,0.10);
+    --teal:        #1aa0b0;
+    --code-bg:     #0b1220;
+    --shadow:      0 1px 2px rgba(10,25,41,0.05), 0 8px 24px -12px rgba(10,25,41,0.12);
+
+    --header-h: 64px;
+    --sidebar-w: 280px;
+}
+html.dark {
+    --bg:          var(--brand-navy);
+    --bg-elev:     #0e2238;
+    --bg-sunken:   #0c1c30;
+    --fg:          var(--brand-cream);
+    --fg-muted:    rgba(245,241,234,0.62);
+    --fg-faint:    rgba(245,241,234,0.40);
+    --border:      rgba(255,255,255,0.08);
+    --border-strong:rgba(255,255,255,0.16);
+    --accent:      var(--brand-orange-2);
+    --accent-soft: rgba(232,103,42,0.16);
+    --teal:        var(--brand-teal);
+    --code-bg:     #0b1220;
+    --shadow:      0 1px 2px rgba(0,0,0,0.3), 0 16px 40px -16px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; scroll-behavior: smooth; }
+body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+::selection { background: var(--accent-soft); }
+
+/* ════════ Header ════════ */
+.gx-header {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 16px;
+    height: var(--header-h); padding: 0 24px;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: saturate(160%) blur(12px);
+    backdrop-filter: saturate(160%) blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+.gx-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--sans); font-weight: 800; font-size: 17px;
+    letter-spacing: -0.01em; color: var(--fg); flex-shrink: 0;
+}
+.gx-brand:hover { text-decoration: none; }
+.gx-brand .mark {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--brand-orange), var(--brand-teal));
+    display: grid; place-items: center; color: #fff; font-size: 15px;
+    box-shadow: 0 4px 12px -4px rgba(232,103,42,0.6);
+}
+.gx-brand .ver {
+    font-family: var(--mono); font-size: 11px; font-weight: 400;
+    color: var(--fg-faint); border: 1px solid var(--border);
+    border-radius: 20px; padding: 1px 8px; margin-left: 2px;
+}
+.gx-search {
+    appearance: none; display: flex; align-items: center; gap: 10px;
+    height: 38px; min-width: 240px; max-width: 360px; flex: 1;
+    margin-left: 8px; padding: 0 10px 0 14px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 9px; color: var(--fg-faint);
+    font-family: var(--body); font-size: 13.5px; cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+.gx-search:hover { border-color: var(--border-strong); background: var(--bg-sunken); }
+.gx-search .ph { flex: 1; text-align: left; }
+.gx-search kbd {
+    font-family: var(--mono); font-size: 11px; color: var(--fg-muted);
+    background: var(--bg-sunken); border: 1px solid var(--border);
+    border-radius: 5px; padding: 2px 6px;
+}
+.gx-header-spacer { flex: 1; }
+.gx-toplinks { display: flex; align-items: center; gap: 4px; }
+.gx-toplinks a {
+    font-family: var(--sans); font-weight: 600; font-size: 13.5px;
+    color: var(--fg-muted); padding: 6px 12px; border-radius: 8px;
+}
+.gx-toplinks a:hover { color: var(--fg); background: var(--bg-sunken); text-decoration: none; }
+.gx-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.icon-btn {
+    appearance: none; width: 38px; height: 38px;
+    display: grid; place-items: center; background: transparent;
+    border: 1px solid transparent; border-radius: 9px;
+    color: var(--fg-muted); cursor: pointer; transition: all .15s;
+}
+.icon-btn:hover { background: var(--bg-sunken); color: var(--fg); border-color: var(--border); text-decoration: none; }
+.icon-btn svg { width: 20px; height: 20px; }
+.gx-burger { display: none; }
+
+/* ════════ Shell ════════ */
+.gx-shell { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+
+/* ════════ Sidebar ════════ */
+.gx-sidebar {
+    position: sticky; top: var(--header-h); align-self: start;
+    height: calc(100vh - var(--header-h));
+    border-right: 1px solid var(--border);
+}
+.gx-sidebar-scroll {
+    height: 100%; overflow-y: auto; padding: 30px 16px 56px 24px;
+}
+.gx-grp { margin-bottom: 26px; }
+.gx-grp > .grp-title {
+    font-family: var(--sans); font-weight: 700; font-size: 11.5px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-faint); margin: 0 0 10px; padding-left: 12px;
+}
+.sb-list { list-style: none; margin: 0; padding: 0; }
+.sb-list li { margin: 0; }
+.sb-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px; border-radius: 8px;
+    font-size: 14px; color: var(--fg-muted);
+    transition: color .12s, background .12s;
+}
+.sb-link i { width: 16px; text-align: center; font-size: 13px; color: var(--fg-faint); }
+.sb-link:hover { color: var(--fg); background: var(--bg-sunken); text-decoration: none; }
+.sb-link.is-current { color: var(--accent); font-weight: 600; background: var(--accent-soft); }
+.sb-link.is-current i { color: var(--accent); }
+
+/* current-page section sub-list — ScrollSpy owns .active here */
+.sb-sub { list-style: none; margin: 4px 0 8px; padding: 0 0 0 12px;
+    border-left: 1px solid var(--border); }
+.sb-sub.nav > li > a {
+    display: block; padding: 5px 12px; margin-left: -1px;
+    border-left: 2px solid transparent; font-size: 13px; color: var(--fg-muted);
+}
+.sb-sub.nav > li > a:hover { color: var(--fg); text-decoration: none; }
+.sb-sub.nav > li > a.active {
+    color: var(--accent); border-left-color: var(--accent); font-weight: 600;
+}
+
+/* ════════ Main ════════ */
+.gx-main { min-width: 0; padding: 0 0 80px; }
+.gx-content { max-width: 860px; margin: 0 auto; padding: 48px 40px 0; }
+.gx-content.is-wide { max-width: 1180px; }
+
+.eyebrow {
+    font-family: var(--sans); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 14px;
+}
+.gx-h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(34px, 5vw, 48px); line-height: 1.06;
+    letter-spacing: -0.02em; margin: 0 0 16px;
+}
+.gx-h1 em { font-style: italic; color: var(--accent); font-weight: 500; }
+.gx-lead { font-size: 18px; color: var(--fg-muted); margin: 0 0 28px; max-width: 680px; }
+
+/* prose */
+.prose h2 {
+    font-family: var(--serif); font-weight: 400; font-size: 28px;
+    letter-spacing: -0.01em; margin: 0 0 10px; padding-top: 6px;
+    scroll-margin-top: calc(var(--header-h) + 24px);
+}
+.prose h3 { font-family: var(--sans); font-weight: 700; font-size: 17px; margin: 30px 0 10px; }
+.prose p { color: var(--fg-muted); margin: 0 0 18px; }
+.prose ul { color: var(--fg-muted); margin: 0 0 18px; padding-left: 22px; }
+.prose li { margin: 4px 0; }
+.prose hr { border: 0; border-top: 1px solid var(--border); margin: 44px 0; }
+.prose code:not(pre code) {
+    font-family: var(--mono); font-size: 0.85em;
+    background: var(--bg-sunken); border: 1px solid var(--border);
+    border-radius: 5px; padding: 1px 6px; color: var(--fg);
+}
+.prose a { font-weight: 500; }
+
+/* standalone code blocks (Highlight) */
+.code-block {
+    margin: 0 0 24px; border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border-strong); box-shadow: var(--shadow);
+}
+.code-block pre {
+    margin: 0; background: var(--code-bg); color: #e7eaf0;
+    font-family: var(--mono); font-size: 13px; line-height: 1.7;
+    padding: 0 0; overflow-x: auto;
+}
+
+/* callouts */
+.callout {
+    display: flex; gap: 14px; padding: 16px 18px; border-radius: 12px;
+    margin: 0 0 24px; font-size: 14px; border: 1px solid;
+}
+.callout .ic { flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center;
+    border-radius: 50%; font-size: 12px; color: #fff; margin-top: 1px; }
+.callout .body { color: var(--fg); }
+.callout .body strong { display: block; font-family: var(--sans); font-weight: 700; margin-bottom: 3px; }
+.callout .body code { background: rgba(0,0,0,0.12); border: 0; }
+.callout-warning { background: rgba(232,103,42,0.08); border-color: rgba(232,103,42,0.30); }
+.callout-warning .ic { background: var(--brand-orange); }
+.callout-note { background: rgba(42,184,200,0.08); border-color: rgba(42,184,200,0.30); }
+.callout-note .ic { background: var(--teal); }
+html.dark .callout .body code { background: rgba(255,255,255,0.10); }
+
+/* method badges + endpoint header */
+.method {
+    display: inline-flex; align-items: center; font-family: var(--mono);
+    font-size: 11px; font-weight: 600; letter-spacing: .04em;
+    padding: 3px 8px; border-radius: 6px; text-transform: uppercase;
+}
+.method-get    { color: #1aa0b0; background: rgba(42,184,200,.14); }
+.method-post   { color: #2f9e44; background: rgba(47,158,68,.14); }
+.method-put    { color: #e8672a; background: rgba(232,103,42,.14); }
+.method-delete { color: #e03131; background: rgba(224,49,49,.14); }
+.endpoint {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin: 6px 0 18px; padding: 9px 12px; border-radius: 10px;
+    background: var(--bg-sunken); border: 1px solid var(--border);
+    font-family: var(--mono); font-size: 13px; color: var(--fg);
+}
+.endpoint .path { color: var(--fg-muted); word-break: break-all; }
+.endpoint .path b { color: var(--fg); font-weight: 600; }
+
+/* attributes table */
+.attrs { margin: 0 0 22px; border-top: 1px solid var(--border); }
+.attr-row { padding: 16px 0; border-bottom: 1px solid var(--border); }
+.attr-row .attr-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.attr-row .attr-name { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--fg); }
+.attr-row .attr-type { font-family: var(--mono); font-size: 12px; color: var(--fg-faint); }
+.attr-row .attr-req  { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--accent); }
+.attr-row .attr-desc { color: var(--fg-muted); font-size: 14px; margin: 6px 0 0; }
+
+/* guide + resource cards */
+.card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 0 0 12px; }
+.gx-card {
+    display: block; padding: 20px; border: 1px solid var(--border);
+    border-radius: 14px; background: var(--bg-elev);
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.gx-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow); text-decoration: none; }
+.gx-card .qc-icon {
+    width: 40px; height: 40px; display: grid; place-items: center;
+    border-radius: 10px; background: var(--accent-soft); color: var(--accent);
+    font-size: 17px; margin-bottom: 14px;
+}
+.gx-card h3 { font-family: var(--serif); font-weight: 500; font-size: 19px; margin: 0 0 6px; color: var(--fg); }
+.gx-card p { font-size: 13.5px; color: var(--fg-muted); margin: 0; }
+.res-row { display: flex; align-items: center; gap: 10px; }
+.res-row .method { margin-left: auto; }
+
+/* prev / next pager + helpful */
+.pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--border); }
+.pager a { display: flex; flex-direction: column; gap: 3px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 12px; min-width: 160px; transition: border-color .15s; }
+.pager a:hover { border-color: var(--accent); text-decoration: none; }
+.pager .dir { font-size: 12px; color: var(--fg-faint); font-family: var(--sans); font-weight: 600; }
+.pager .ttl { font-size: 15px; color: var(--fg); font-weight: 600; }
+.pager .next { text-align: right; align-items: flex-end; margin-left: auto; }
+.gx-foot { border-top: 1px solid var(--border); margin-top: 40px; padding: 24px 0 0; color: var(--fg-faint); font-size: 13px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+/* Command Menu theming (plugin uses .command-menu + --command-* vars) */
+.command-menu {
+    --command-bg: var(--bg-elev); --command-fg: var(--fg); --command-muted: var(--fg-muted);
+    --command-border: var(--border); --command-border-strong: var(--border-strong);
+    --command-hover: var(--bg-sunken); --command-active-bg: var(--accent-soft);
+    --command-active-fg: var(--fg); --command-accent: var(--accent);
+    --command-backdrop: rgba(10,25,41,0.45);
+    --command-shadow: 0 30px 80px -10px rgba(10,25,41,0.30), 0 8px 20px -4px rgba(10,25,41,0.20);
+}
+html.dark .command-menu {
+    --command-backdrop: rgba(4,12,22,0.7);
+    --command-shadow: 0 30px 80px -10px rgba(0,0,0,0.6), 0 8px 20px -4px rgba(0,0,0,0.4);
+}
+.command-menu [data-command-item][aria-selected="true"] [data-command-icon] { color: var(--accent); }
+
+/* mobile */
+.sidebar-scrim { display: none; position: fixed; inset: var(--header-h) 0 0; background: rgba(10,25,41,0.4); z-index: 39; }
+@media (max-width: 1024px) {
+    .gx-shell { grid-template-columns: 1fr; }
+    .gx-burger { display: grid; }
+    .gx-toplinks { display: none; }
+    .gx-sidebar {
+        position: fixed; top: var(--header-h); left: 0; bottom: 0; width: 290px;
+        background: var(--bg); z-index: 40; transform: translateX(-105%);
+        transition: transform .22s ease; height: auto;
+    }
+    body.sidebar-open .gx-sidebar { transform: translateX(0); }
+    body.sidebar-open .sidebar-scrim { display: block; }
+    .gx-search { min-width: 0; }
+    .gx-content { padding-left: 24px; padding-right: 24px; }
+    .card-grid { grid-template-columns: 1fr; }
+}
+</style>
+<link rel="stylesheet" href="../../css/skins/default.css">
+</head>
+<body>
+<header class="gx-header">
+  <button class="icon-btn gx-burger" id="gx-burger" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
+  <a href="index.html" class="gx-brand"><img src="img/logo.svg" style="width: 150px;"><span class="ver">v1</span></a>
+  <button class="gx-search" data-command-open="gx-cmd" aria-label="Search documentation">
+    <i class="fas fa-magnifying-glass"></i><span class="ph">Search the API…</span><kbd>⌘K</kbd>
+  </button>
+  <div class="gx-header-spacer"></div>
+  <nav class="gx-toplinks">
+    <a href="quickstart.html">Documentation</a>
+    <a href="messages.html">API</a>
+    <a href="webhooks.html">Webhooks</a>
+  </nav>
+  <div class="gx-header-actions">
+    <a class="icon-btn" href="https://github.com/daemondevin/Themestrap" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github" style="font-size:20px"></i></a>
+    <button class="icon-btn" data-plugin-darkmode aria-label="Toggle dark mode"></button>
+  </div>
+</header>
+<div class="sidebar-scrim" id="gx-scrim"></div>
+<div class="gx-shell">
+<aside class="gx-sidebar" id="gx-sidebar"><div class="gx-sidebar-scroll" id="gx-sidebar-scroll">
+<nav class="gx-grp"><p class="grp-title">Guides</p><ul class="sb-list">
+<li><a href="index.html" class="sb-link"><i class="fas fa-book-open"></i>Introduction</a>
+</li>
+<li><a href="quickstart.html" class="sb-link is-current"><i class="fas fa-bolt"></i>Quickstart</a>
+<ul class="sb-sub nav">
+<li><a href="#install">Install the SDK</a></li>
+<li><a href="#request">Make a request</a></li>
+<li><a href="#auth">Authenticate</a></li>
+<li><a href="#next">Next steps</a></li>
+</ul>
+</li>
+<li><a href="authentication.html" class="sb-link"><i class="fas fa-key"></i>Authentication</a>
+</li>
+<li><a href="pagination.html" class="sb-link"><i class="fas fa-layer-group"></i>Pagination</a>
+</li>
+<li><a href="errors.html" class="sb-link"><i class="fas fa-triangle-exclamation"></i>Errors</a>
+</li>
+<li><a href="webhooks.html" class="sb-link"><i class="fas fa-bell"></i>Webhooks</a>
+</li>
+</ul></nav>
+<nav class="gx-grp"><p class="grp-title">API reference</p><ul class="sb-list">
+<li><a href="messages.html" class="sb-link"><i class="fas fa-message"></i>Messages</a>
+</li>
+<li><a href="conversations.html" class="sb-link"><i class="fas fa-comments"></i>Conversations</a>
+</li>
+</ul></nav>
+</div></aside>
+<main class="gx-main">
+  <div class="gx-content">
+    <p class="eyebrow">Guide</p>
+    <h1 class="gx-h1">Quickstart</h1>
+    <p class="gx-lead">Install a client library, authenticate, and make your first request.</p>
+    <div class="prose">
+      <h2 id="install">Install the SDK</h2><p>Add the official client to your project. Every SDK wraps the same REST endpoints documented in the API reference.</p><div data-plugin-code-window data-plugin-options='{"chrome": "mac", "glow": true}'><pre data-code-window-tab="npm" data-plugin-highlight="bash"><code>npm install @protocol/sdk</code></pre><pre data-code-window-tab="pip" data-plugin-highlight="bash"><code>pip install protocol</code></pre><pre data-code-window-tab="go" data-plugin-highlight="bash"><code>go get github.com/protocol/protocol-go</code></pre></div><h2 id="request">Make a request</h2><p>Instantiate a client with your secret key and call a resource method:</p><div data-plugin-code-window data-plugin-options='{"chrome": "mac", "glow": true}'><pre data-code-window-tab="client.js" data-plugin-highlight="javascript" data-plugin-highlight-lines="1,4"><code>import Procedure from '@protocol/sdk'
+
+const client = new Procedure({ token: process.env.PROTOCOL_KEY })
+const { data } = await client.messages.list({ limit: 10 })
+
+console.log(data)</code></pre><pre data-code-window-tab="client.py" data-plugin-highlight="python"><code>import os, protocol
+
+client = protocol.Client(token=os.environ['PROTOCOL_KEY'])
+messages = client.messages.list(limit=10)
+
+print(messages.data)</code></pre></div><h2 id="auth">Authenticate</h2><p>All requests must carry a bearer token in the <code>Authorization</code> header. See <a href="authentication.html">Authentication</a> for key rotation and scopes.</p><div class="code-block"><pre data-plugin-highlight="bash" data-plugin-highlight-lines="2"><code>curl https://api.protocol.dev/v1/messages \
+  -H "Authorization: Bearer {token}"</code></pre></div><div class="callout callout-warning"><span class="ic"><i class="fas fa-triangle-exclamation"></i></span><span class="body"><strong>Keep keys server-side</strong>Secret keys grant full account access. Use a publishable key for browser code, and proxy privileged calls through your backend.</span></div><h2 id="next">Next steps</h2><ul><li>Read the <a href="messages.html">Messages</a> reference.</li><li>Set up <a href="webhooks.html">Webhooks</a> for real-time events.</li><li>Learn how we shape <a href="errors.html">Errors</a>.</li></ul>
+    </div>
+    <nav class="pager"><a href="index.html"><span class="dir"><i class="fas fa-arrow-left"></i> Previous</span><span class="ttl">Introduction</span></a><a href="authentication.html" class="next"><span class="dir">Next <i class="fas fa-arrow-right"></i></span><span class="ttl">Authentication</span></a></nav>
+    <footer class="gx-foot">
+      <span>Procedure · Inspired by Tailwind's <a href="https://tailwindcss.com/plus/templates/protocol">Protocol API reference template</a></span>
+      <span>Was this page helpful? <a href="#">Yes</a> · <a href="#">No</a></span>
+    </footer>
+  </div>
+</main>
+</div>
+<div data-plugin-command-menu id="gx-cmd" data-plugin-options='{"shortcut": "mod+k", "recent": true}' aria-label="Search the API documentation">
+  <div data-command-backdrop></div>
+  <div data-command-panel class="command-lg">
+    <div data-command-search>
+      <i class="fas fa-magnifying-glass"></i>
+      <input data-command-input type="text" placeholder="Search guides, endpoints, sections…">
+      <kbd>esc</kbd>
+    </div>
+    <div data-command-list>
+      <div data-command-empty><strong>No matches.</strong>Try: authentication, pagination, messages, errors.</div>
+      <div data-command-group data-command-recent data-command-heading="Recent"></div>
+      <div data-command-group data-command-heading="On this page"><button data-command-item data-command-keywords="install the sdk" data-command-href="#install"><i class="fas fa-hashtag" data-command-icon></i><span data-command-label>Install the SDK</span></button><button data-command-item data-command-keywords="make a request" data-command-href="#request"><i class="fas fa-hashtag" data-command-icon></i><span data-command-label>Make a request</span></button><button data-command-item data-command-keywords="authenticate" data-command-href="#auth"><i class="fas fa-hashtag" data-command-icon></i><span data-command-label>Authenticate</span></button><button data-command-item data-command-keywords="next steps" data-command-href="#next"><i class="fas fa-hashtag" data-command-icon></i><span data-command-label>Next steps</span></button></div>
+      <div data-command-group data-command-heading="Guides"><button data-command-item data-command-keywords="introduction index" data-command-href="index.html"><i class="fas fa-book-open" data-command-icon></i><span data-command-label>Introduction</span></button><button data-command-item data-command-keywords="quickstart quickstart" data-command-href="quickstart.html"><i class="fas fa-bolt" data-command-icon></i><span data-command-label>Quickstart</span></button><button data-command-item data-command-keywords="authentication authentication" data-command-href="authentication.html"><i class="fas fa-key" data-command-icon></i><span data-command-label>Authentication</span></button><button data-command-item data-command-keywords="pagination pagination" data-command-href="pagination.html"><i class="fas fa-layer-group" data-command-icon></i><span data-command-label>Pagination</span></button><button data-command-item data-command-keywords="errors errors" data-command-href="errors.html"><i class="fas fa-triangle-exclamation" data-command-icon></i><span data-command-label>Errors</span></button><button data-command-item data-command-keywords="webhooks webhooks" data-command-href="webhooks.html"><i class="fas fa-bell" data-command-icon></i><span data-command-label>Webhooks</span></button></div>
+      <div data-command-group data-command-heading="API reference"><button data-command-item data-command-keywords="messages messages" data-command-href="messages.html"><i class="fas fa-message" data-command-icon></i><span data-command-label>Messages</span></button><button data-command-item data-command-keywords="conversations conversations" data-command-href="conversations.html"><i class="fas fa-comments" data-command-icon></i><span data-command-label>Conversations</span></button></div>
+      <div data-command-group data-command-heading="Actions">
+        <button data-command-item data-command-keywords="theme dark light toggle appearance" data-command-action="toggle-theme">
+          <i class="fas fa-circle-half-stroke" data-command-icon></i>
+          <span data-command-label>Toggle dark mode</span><kbd data-command-shortcut>T</kbd>
+        </button>
+        <button data-command-item data-command-keywords="github source repository code" data-command-href="https://github.com/daemondevin/Themestrap" data-command-target="_blank">
+          <i class="fab fa-github" data-command-icon></i>
+          <span data-command-label>View on GitHub</span>
+        </button>
+      </div>
+    </div>
+    <div data-command-footer>
+      <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> select</span><span><kbd>esc</kbd> close</span>
+    </div>
+  </div>
+</div>
+
+<script src="../../vendor/jquery/jquery.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/themestrap.init.js"></script>
+<script src="../../js/components/themestrap.plugin.darkmode.js"></script>
+<script src="../../js/components/themestrap.plugin.highlight.js"></script>
+<script src="../../js/components/themestrap.plugin.codewindow.js"></script>
+<script src="../../js/components/themestrap.plugin.coderail.js"></script>
+<script src="../../js/components/themestrap.plugin.commandmenu.js"></script>
+<script src="../../js/components/themestrap.plugin.scrollspy.js"></script>
+<script src="../../js/components/themestrap.plugin.scrollshadow.js"></script>
+<script>
+/* Minimal themestrap.fn shim — the full framework supplies these, but this keeps
+   the page resilient if only the individual plugin files load. */
+window.themestrap = window.themestrap || {};
+themestrap.fn = themestrap.fn || {};
+themestrap.fn.getOptions = themestrap.fn.getOptions || function (raw) {
+    if (!raw) return null;
+    if (typeof raw === 'object') return raw;
+    try { return JSON.parse(raw); } catch (e) { return null; }
+};
+
+$(function () {
+    /* Code Windows first — they tag their <pre> .manual and highlight internally. */
+    $('[data-plugin-code-window]').each(function () {
+        var $t = $(this), o = themestrap.fn.getOptions($t.data('plugin-options')) || undefined;
+        $t.themestrapPluginCodeWindow(o);
+    });
+
+    /* Standalone Highlight blocks (skip code-window panes already marked .manual). */
+    $('[data-plugin-highlight]:not(.manual)').each(function () {
+        $(this).themestrapPluginHighlight();
+    });
+
+    /* Dark Mode toggle */
+    $('[data-plugin-darkmode]').each(function () { $(this).themestrapPluginDarkMode(); });
+
+    /* Command Menu (⌘K) */
+    $('[data-plugin-command-menu]').each(function () {
+        var $t = $(this), o = themestrap.fn.getOptions($t.data('plugin-options')) || undefined;
+        $t.themestrapPluginCommandMenu(o);
+    });
+    var cmd = $('#gx-cmd').data('__pluginCommandMenu');
+    if (cmd) {
+        cmd.registerAction('toggle-theme', function () {
+            if (themestrap.PluginDarkMode) themestrap.PluginDarkMode.toggle();
+        });
+    }
+
+    /* Code Rail — the two-column "prose / sticky synced code" API layout. */
+    $('[data-plugin-code-rail]').each(function () {
+        var $t = $(this), o = themestrap.fn.getOptions($t.data('plugin-options')) || undefined;
+        $t.themestrapPluginCodeRail(o);
+    });
+
+    /* Scroll Spy — highlight the current page's section in the left rail. */
+    if ($.fn.themestrapPluginScrollSpy && document.querySelector('#gx-sidebar .sb-sub.nav')) {
+        $('#gx-sidebar').themestrapPluginScrollSpy({ target: '#gx-sidebar' });
+    }
+
+    /* Scroll Shadow — fade the long sidebar nav as it scrolls. */
+    if ($.fn.themestrapPluginScrollShadow) {
+        $('#gx-sidebar-scroll').themestrapPluginScrollShadow({ orientation: 'vertical', size: '2.25rem' });
+    }
+
+    /* Mobile sidebar */
+    var $b = $('body');
+    $('#gx-burger').on('click', function () { $b.toggleClass('sidebar-open'); });
+    $('#gx-scrim').on('click', function () { $b.removeClass('sidebar-open'); });
+    $('#gx-sidebar').on('click', 'a', function () { if (window.innerWidth <= 1024) $b.removeClass('sidebar-open'); });
+});
+</script>
+
+</body>
+</html>

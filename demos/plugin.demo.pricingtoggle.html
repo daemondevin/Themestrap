@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PluginPricingToggle — Themestrap Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&family=Syne:wght@400;600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+
+
+<style>
+/* Design tokens */
+:root {
+  --navy:   #0a1929; --navy2: #0e2238; --blue: #3b82f6; --blue2: #2563eb;
+  --teal:   #2ab8c8; --orange: #e8672a; --cream: #fdf9f4;
+  --slate:  #64748b; --border: #e2e8f0; --bg: #f8fafc;
+  --radius: 10px; --trans: 200ms ease;
+  --ff-display: 'Fraunces', Georgia, serif;
+  --ff-ui:      'Syne', system-ui, sans-serif;
+  --ff-body:    'DM Sans', system-ui, sans-serif;
+  --ff-mono:    'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { font-family: var(--ff-body); background: var(--bg); color: var(--navy); line-height: 1.65; }
+
+/* Layout */
+.demo-page { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
+.demo-page-title {
+  font-family: var(--ff-display); font-size: 2rem; font-weight: 700; color: var(--navy);
+  margin-bottom: 6px; letter-spacing: -.02em;
+}
+.demo-page-sub { font-size: 1.0625rem; color: var(--slate); margin-bottom: 48px; }
+.demo-tag {
+  display: inline-block; font-family: var(--ff-ui); font-size: .7rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--blue);
+  background: rgba(59,130,246,.09); border: 1px solid rgba(59,130,246,.2);
+  border-radius: 20px; padding: 3px 12px; margin-bottom: 16px;
+}
+
+/* Demo cards */
+.demo-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 28px;
+}
+.demo-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  gap: 12px; flex-wrap: wrap;
+}
+.demo-card-title { font-family: var(--ff-ui); font-weight: 700; font-size: 1rem; color: var(--navy); }
+.demo-card-desc  { font-size: .875rem; color: var(--slate); margin-top: 2px; }
+.demo-stage  { padding: 40px 32px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 24px; background: var(--bg); }
+.demo-stage--pricing { flex-direction: column; align-items: stretch; }
+
+pre.snip {
+  font-family: var(--ff-mono); font-size: .78rem; background: var(--navy);
+  color: #e2e8f0; padding: 20px 24px; overflow-x: auto; line-height: 1.7;
+  border-top: 1px solid var(--border);
+}
+pre.snip .cm { color: #64748b; } /* comment */
+pre.snip .kw { color: #7dd3fc; } /* keyword/attr */
+pre.snip .st { color: #86efac; } /* string */
+pre.snip .va { color: #fde68a; } /* value */
+
+/* Event log */
+.event-log {
+  border-top: 1px solid var(--border); padding: 14px 24px;
+  font-family: var(--ff-mono); font-size: .78rem; color: var(--slate);
+  min-height: 48px; display: flex; flex-direction: column; gap: 4px;
+}
+.event-log__entry { animation: logIn .25s ease both; }
+@keyframes logIn { from { opacity:0; transform: translateX(-6px); } to { opacity:1; } }
+.event-log__entry span { color: var(--teal); }
+
+/* Pricing cards */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;
+  width: 100%; max-width: 740px; margin: 0 auto;
+}
+.p-plan {
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  padding: 28px 22px; display: flex; flex-direction: column;
+  transition: box-shadow var(--trans), transform var(--trans);
+}
+.p-plan:hover { box-shadow: 0 8px 28px rgba(15,23,42,.08); transform: translateY(-2px); }
+.p-plan--pop  { border: 2px solid var(--blue); box-shadow: 0 4px 20px rgba(59,130,246,.12); }
+.p-plan__badge {
+  display: inline-block; background: var(--blue); color: #fff; font-size: .7rem;
+  font-weight: 700; padding: 2px 10px; border-radius: 20px; margin-bottom: 10px;
+  align-self: flex-start; font-family: var(--ff-ui); letter-spacing: .04em; text-transform: uppercase;
+}
+.p-plan__name  { font-family: var(--ff-ui); font-size: .75rem; font-weight: 700; color: var(--slate); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+.p-plan__price { font-family: var(--ff-display); font-size: 2rem; font-weight: 700; color: var(--navy); line-height: 1; margin-bottom: 4px; }
+.p-plan__per   { font-size: .8125rem; color: var(--slate); margin-bottom: 18px; }
+.p-plan__feats { list-style: none; display: flex; flex-direction: column; gap: 8px; flex: 1; margin-bottom: 22px; }
+.p-plan__feats li { font-size: .875rem; color: var(--navy); display: flex; align-items: center; gap: 7px; }
+.p-plan__feats li::before {
+  content: "✓"; width: 17px; height: 17px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(59,130,246,.1); color: var(--blue); font-size: 10px;
+  font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.p-plan__btn {
+  display: block; text-align: center; padding: .6rem 1rem; border-radius: var(--radius);
+  font-size: .9rem; font-weight: 600; cursor: pointer; text-decoration: none;
+  border: 1.5px solid var(--border); color: var(--navy); background: transparent;
+  transition: background var(--trans), color var(--trans), border-color var(--trans), transform var(--trans);
+  font-family: var(--ff-body);
+}
+.p-plan__btn--solid { background: var(--blue); border-color: var(--blue); color: #fff; }
+.p-plan__btn:hover  { border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
+.p-plan__btn--solid:hover { background: var(--blue2); color: #fff; }
+
+/* Custom-color demo */
+.demo-stage--custom {
+  background: var(--navy);
+}
+
+/* Controls row */
+.demo-controls {
+  display: flex; align-items: center; gap: 10px; padding: 14px 24px;
+  border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.demo-controls label { font-size: .8125rem; color: var(--slate); font-weight: 600; }
+.ctrl-btn {
+  display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+  font-size: .8125rem; font-weight: 600; color: var(--navy); cursor: pointer;
+  transition: background var(--trans), border-color var(--trans); font-family: var(--ff-body);
+}
+.ctrl-btn:hover { background: #fff; border-color: var(--blue); color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="demo-page">
+
+  <div class="demo-tag">Plugin</div>
+  <h1 class="demo-page-title">PluginPricingToggle</h1>
+  <p class="demo-page-sub">
+    A billing-period switcher that animates a pill thumb, crossfades price
+    values, shows a savings badge, and fires namespaced jQuery events — all
+    driven by <code>data-</code> attributes with zero configuration required.
+  </p>
+
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">Pricing table</div>
+        <div class="demo-card-desc">Monthly ↔ Annual — prices crossfade, savings badge animates in</div>
+      </div>
+    </div>
+
+    <div class="demo-stage demo-stage--pricing">
+
+      <!-- Toggle -->
+      <div style="display:flex;align-items:center;justify-content:center">
+        <div data-plugin-pricingtoggle id="pt-main"
+             data-plugin-options='{"group":"main","onChange":"window.__ptLog"}'>
+          <span data-pt-label-primary class="is-active">Monthly</span>
+          <button data-pt-track aria-pressed="false" type="button">
+            <span data-pt-thumb></span>
+          </button>
+          <span data-pt-label-secondary>
+            Annual
+            <span data-pt-savings-badge>-20%</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Pricing grid -->
+      <div class="pricing-grid">
+        <div class="p-plan">
+          <div class="p-plan__name">Starter</div>
+          <div class="p-plan__price">
+            <span data-pt-price data-pt-group="main" data-pt-primary="$29" data-pt-secondary="$23">$29</span>
+          </div>
+          <div class="p-plan__per">/month</div>
+          <ul class="p-plan__feats">
+            <li>5 projects</li>
+            <li>2 team members</li>
+            <li>10 GB storage</li>
+            <li>Basic analytics</li>
+          </ul>
+          <button class="p-plan__btn">Get Started</button>
+        </div>
+
+        <div class="p-plan p-plan--pop">
+          <span class="p-plan__badge">Most Popular</span>
+          <div class="p-plan__name">Pro</div>
+          <div class="p-plan__price">
+            <span data-pt-price data-pt-group="main" data-pt-primary="$79" data-pt-secondary="$63">$79</span>
+          </div>
+          <div class="p-plan__per">/month</div>
+          <ul class="p-plan__feats">
+            <li>Unlimited projects</li>
+            <li>10 team members</li>
+            <li>100 GB storage</li>
+            <li>Advanced analytics</li>
+            <li>Priority support</li>
+          </ul>
+          <button class="p-plan__btn p-plan__btn--solid">Get Started</button>
+        </div>
+
+        <div class="p-plan">
+          <div class="p-plan__name">Enterprise</div>
+          <div class="p-plan__price">
+            <span data-pt-price data-pt-group="main" data-pt-primary="$199" data-pt-secondary="$159">$199</span>
+          </div>
+          <div class="p-plan__per">/month</div>
+          <ul class="p-plan__feats">
+            <li>Unlimited everything</li>
+            <li>Dedicated support</li>
+            <li>Custom contracts</li>
+            <li>SSO / SAML</li>
+          </ul>
+          <button class="p-plan__btn">Get Started</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-controls">
+      <label>API:</label>
+      <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').setState('primary')">→ Monthly</button>
+      <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').setState('secondary')">→ Annual</button>
+      <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').toggle()">toggle()</button>
+      <button class="ctrl-btn" onclick="alert('State: ' + $('#pt-main').data('__pricingToggle').getState())">getState()</button>
+    </div>
+
+    <div class="event-log" id="log-main">
+      <div style="color:var(--slate);font-size:.75rem">Events will appear here…</div>
+    </div>
+
+    <pre class="snip"><span class="cm">&lt;!-- Toggle --&gt;</span>
+&lt;<span class="kw">div</span> <span class="va">data-plugin-pricingtoggle</span>
+     <span class="va">data-plugin-options</span>=<span class="st">'{"group":"main"}'</span>&gt;
+  &lt;<span class="kw">span</span> <span class="va">data-pt-label-primary</span>&gt;Monthly&lt;/<span class="kw">span</span>&gt;
+  &lt;<span class="kw">button</span> <span class="va">data-pt-track</span> <span class="va">aria-pressed</span>=<span class="st">"false"</span> <span class="va">type</span>=<span class="st">"button"</span>&gt;
+    &lt;<span class="kw">span</span> <span class="va">data-pt-thumb</span>&gt;&lt;/<span class="kw">span</span>&gt;
+  &lt;/<span class="kw">button</span>&gt;
+  &lt;<span class="kw">span</span> <span class="va">data-pt-label-secondary</span>&gt;
+    Annual
+    &lt;<span class="kw">span</span> <span class="va">data-pt-savings-badge</span>&gt;-20%&lt;/<span class="kw">span</span>&gt;
+  &lt;/<span class="kw">span</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cm">&lt;!-- Price targets (can live anywhere on the page) --&gt;</span>
+&lt;<span class="kw">span</span> <span class="va">data-pt-price</span> <span class="va">data-pt-group</span>=<span class="st">"main"</span>
+      <span class="va">data-pt-primary</span>=<span class="st">"$79"</span> <span class="va">data-pt-secondary</span>=<span class="st">"$63"</span>&gt;$79&lt;/<span class="kw">span</span>&gt;</pre>
+  </div>
+
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">Custom colours (dark surface)</div>
+        <div class="demo-card-desc">Override any token with <code>data-plugin-options</code> — no CSS required</div>
+      </div>
+    </div>
+
+    <div class="demo-stage demo-stage--custom">
+      <div data-plugin-pricingtoggle id="pt-custom"
+           data-plugin-options='{
+             "group":"custom",
+             "trackColor":"#e8672a",
+             "labelMutedColor":"rgba(255,255,255,.45)",
+             "labelActiveColor":"#fff",
+             "badgeBg":"rgba(255,255,255,.12)",
+             "badgeColor":"#fff",
+             "duration":320
+           }'>
+        <span data-pt-label-primary style="color:rgba(255,255,255,.45)">Monthly</span>
+        <button data-pt-track aria-pressed="false" type="button">
+          <span data-pt-thumb></span>
+        </button>
+        <span data-pt-label-secondary style="color:rgba(255,255,255,.45)">
+          Annual
+          <span data-pt-savings-badge>-20%</span>
+        </span>
+      </div>
+
+      <div style="font-family:var(--ff-display);font-size:2.4rem;font-weight:700;color:#fff;text-align:center">
+        <span data-pt-price data-pt-group="custom" data-pt-primary="$79" data-pt-secondary="$63">$79</span>
+        <span style="font-size:1rem;color:rgba(255,255,255,.5)">/mo</span>
+      </div>
+    </div>
+
+    <pre class="snip">&lt;<span class="kw">div</span> <span class="va">data-plugin-pricingtoggle</span>
+     <span class="va">data-plugin-options</span>=<span class="st">'{
+       "group":"custom",
+       "trackColor":"#e8672a",
+       "labelMutedColor":"rgba(255,255,255,.45)",
+       "labelActiveColor":"#fff",
+       "duration":320
+     }'</span>&gt;…&lt;/<span class="kw">div</span>&gt;</pre>
+  </div>
+
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">Pre-selected secondary state</div>
+        <div class="demo-card-desc">Set <code>aria-pressed="true"</code> on the track — plugin reads it at init</div>
+      </div>
+    </div>
+
+    <div class="demo-stage">
+      <div data-plugin-pricingtoggle id="pt-presel">
+        <span data-pt-label-primary>Monthly</span>
+        <button data-pt-track aria-pressed="true" type="button">
+          <span data-pt-thumb></span>
+        </button>
+        <span data-pt-label-secondary>
+          Annual
+          <span data-pt-savings-badge>-20%</span>
+        </span>
+      </div>
+    </div>
+
+    <pre class="snip"><span class="cm">&lt;!-- aria-pressed="true" on the track → plugin starts in secondary --&gt;</span>
+&lt;<span class="kw">button</span> <span class="va">data-pt-track</span> <span class="va">aria-pressed</span>=<span class="st">"true"</span> <span class="va">type</span>=<span class="st">"button"</span>&gt;
+  &lt;<span class="kw">span</span> <span class="va">data-pt-thumb</span>&gt;&lt;/<span class="kw">span</span>&gt;
+&lt;/<span class="kw">button</span>&gt;</pre>
+  </div>
+
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">jQuery event API</div>
+        <div class="demo-card-desc">Listen to <code>ts-pricingtoggle-changed</code> to react to state changes</div>
+      </div>
+    </div>
+
+    <div class="demo-stage">
+      <div data-plugin-pricingtoggle id="pt-events">
+        <span data-pt-label-primary>Free</span>
+        <button data-pt-track aria-pressed="false" type="button">
+          <span data-pt-thumb></span>
+        </button>
+        <span data-pt-label-secondary>
+          Paid
+          <span data-pt-savings-badge>PRO</span>
+        </span>
+      </div>
+
+      <div id="event-display"
+           style="background:var(--bg);border:1px solid var(--border);border-radius:8px;
+                  padding:14px 20px;font-family:var(--ff-mono);font-size:.85rem;
+                  min-width:220px;text-align:center;color:var(--slate)">
+        Current: <strong id="cur-state" style="color:var(--blue)">primary</strong>
+      </div>
+    </div>
+
+    <div class="event-log" id="log-events">
+      <div style="color:var(--slate);font-size:.75rem">Events will appear here…</div>
+    </div>
+
+    <pre class="snip">$(<span class="st">'#pt-events'</span>).on(<span class="st">'ts-pricingtoggle-changed'</span>, (e, detail) =&gt; {
+  console.log(detail.state);       <span class="cm">// 'primary' | 'secondary'</span>
+  console.log(detail.isPrimary);   <span class="cm">// boolean</span>
+  console.log(detail.isSecondary); <span class="cm">// boolean</span>
+  console.log(detail.instance);    <span class="cm">// PluginPricingToggle instance</span>
+});</pre>
+  </div>
+
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">Track only (no labels)</div>
+        <div class="demo-card-desc">Only the <code>[data-pt-track]</code> is required — everything else is optional</div>
+      </div>
+    </div>
+
+    <div class="demo-stage" style="gap:32px">
+      <!-- Small default -->
+      <div data-plugin-pricingtoggle>
+        <button data-pt-track aria-pressed="false" type="button">
+          <span data-pt-thumb></span>
+        </button>
+      </div>
+
+      <!-- Large via CSS vars -->
+      <div data-plugin-pricingtoggle
+           data-plugin-options='{"trackWidth":"64px","trackHeight":"34px","thumbSize":"26px","thumbInset":"4px","trackColor":"#2ab8c8"}'>
+        <button data-pt-track aria-pressed="false" type="button">
+          <span data-pt-thumb></span>
+        </button>
+      </div>
+
+      <!-- Teal, starts on -->
+      <div data-plugin-pricingtoggle
+           data-plugin-options='{"trackColor":"#8b5cf6","initialState":"secondary"}'>
+        <button data-pt-track aria-pressed="false" type="button">
+          <span data-pt-thumb></span>
+        </button>
+      </div>
+    </div>
+
+    <pre class="snip"><span class="cm">&lt;!-- Default size --&gt;</span>
+&lt;<span class="kw">div</span> <span class="va">data-plugin-pricingtoggle</span>&gt;
+  &lt;<span class="kw">button</span> <span class="va">data-pt-track</span> <span class="va">aria-pressed</span>=<span class="st">"false"</span>&gt;&lt;<span class="kw">span</span> <span class="va">data-pt-thumb</span>&gt;&lt;/<span class="kw">span</span>&gt;&lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cm">&lt;!-- Large teal, starts on --&gt;</span>
+&lt;<span class="kw">div</span> <span class="va">data-plugin-pricingtoggle</span>
+     <span class="va">data-plugin-options</span>=<span class="st">'{"trackWidth":"64px","trackHeight":"34px",
+       "thumbSize":"26px","trackColor":"#2ab8c8"}'</span>&gt;
+  &lt;<span class="kw">button</span> <span class="va">data-pt-track</span> <span class="va">aria-pressed</span>=<span class="st">"false"</span>&gt;&lt;<span class="kw">span</span> <span class="va">data-pt-thumb</span>&gt;&lt;/<span class="kw">span</span>&gt;&lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">div</span>&gt;</pre>
+  </div>
+
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">destroy() / re-init</div>
+        <div class="demo-card-desc">Teardown removes all handlers and data; re-init starts fresh</div>
+      </div>
+    </div>
+
+    <div class="demo-stage">
+      <div data-plugin-pricingtoggle id="pt-destroy">
+        <span data-pt-label-primary>Monthly</span>
+        <button data-pt-track aria-pressed="false" type="button">
+          <span data-pt-thumb></span>
+        </button>
+        <span data-pt-label-secondary>Annual <span data-pt-savings-badge>-20%</span></span>
+      </div>
+    </div>
+
+    <div class="demo-controls">
+      <label>Lifecycle:</label>
+      <button class="ctrl-btn" onclick="destroyDemo()">destroy()</button>
+      <button class="ctrl-btn" onclick="reinitDemo()">re-init</button>
+      <span id="destroy-status" style="font-size:.8125rem;color:var(--slate);margin-left:4px"></span>
+    </div>
+
+    <pre class="snip"><span class="cm">// Destroy</span>
+$(<span class="st">'#pt-destroy'</span>).data(<span class="st">'__pricingToggle'</span>).destroy();
+
+<span class="cm">// Re-init with new options</span>
+$(<span class="st">'#pt-destroy'</span>).themestrapPluginPricingToggle({ trackColor: <span class="st">'#e8672a'</span> });</pre>
+  </div>
+
+</div>
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.pricingtoggle.js"></script>
+
+<script>
+$(function () {
+
+  // Auto-init all toggles on the page.
+  $('[data-plugin-pricingtoggle]:not(.manual)').each(function () {
+    const $this = $(this);
+    const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+    $this.themestrapPluginPricingToggle(opts);
+  });
+
+  // Card 1: event log 
+  function addLog(logId, html) {
+    const $log = $('#' + logId);
+    if ($log.find('.placeholder').length || $log.children().first().text().includes('Events')) {
+      $log.empty();
+    }
+    $log.prepend($('<div class="event-log__entry">').html(html));
+    if ($log.children().length > 6) $log.children().last().remove();
+  }
+
+  $('#pt-main').on('ts-pricingtoggle-changed', function (e, d) {
+    addLog('log-main',
+      `<span>ts-pricingtoggle-changed</span> → state: <strong>${d.state}</strong>` +
+      ` | isPrimary: ${d.isPrimary} | isSecondary: ${d.isSecondary}`
+    );
+  });
+
+  // Card 4: event display + log 
+  $('#pt-events').on('ts-pricingtoggle-changed', function (e, d) {
+    $('#cur-state').text(d.state);
+    addLog('log-events',
+      `<span>ts-pricingtoggle-${d.state}</span> fired — isPrimary: ${d.isPrimary}`
+    );
+  });
+  $('#pt-events').on('ts-pricingtoggle-secondary', function () {
+    $('#event-display').css('border-color', '#3b82f6');
+  });
+  $('#pt-events').on('ts-pricingtoggle-primary', function () {
+    $('#event-display').css('border-color', '#e2e8f0');
+  });
+
+  // Card 6: destroy / re-init
+  window.destroyDemo = function () {
+    const inst = $('#pt-destroy').data('__pricingToggle');
+    if (inst) {
+      inst.destroy();
+      $('#destroy-status').text('Destroyed — toggle is now inert.');
+    } else {
+      $('#destroy-status').text('Already destroyed.');
+    }
+  };
+  window.reinitDemo = function () {
+    if (!$('#pt-destroy').data('__pricingToggle')) {
+      $('#pt-destroy').themestrapPluginPricingToggle({ trackColor: '#e8672a', duration: 400 });
+      $('#destroy-status').text('Re-initialised with orange track.');
+    } else {
+      $('#destroy-status').text('Already active — destroy first.');
+    }
+  };
+
+});
+</script>
+</body>
+</html>

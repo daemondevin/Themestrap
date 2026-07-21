@@ -1,3 +1,4 @@
+// Rating
 (((themestrap = {}, $) => {
     const instanceName = '__rating';
 
@@ -46,7 +47,7 @@
 
             if (str.startsWith('<svg')) {
                 if (this.options.currentColor) {
-                    // Inline SVG � sanitize hardcoded fill/stroke colors to currentColor,
+                    // Inline SVG â€” sanitize hardcoded fill/stroke colors to currentColor,
                     // leaving fill="none" and stroke="none" untouched.
                     const sanitized = str
                         .replace(/\bfill\s*=\s*"(?!none")[^"]*"/gi, 'fill="currentColor"')

@@ -10,7 +10,87 @@
     <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+    <!-- =============================================================================
+     SCROLLBAR WIDTH COMPENSATION (recommended — prevents layout shift on open)
+     =============================================================================-->
+<script>
+(function () {
+    const outer = document.createElement('div');
+    outer.style.cssText = 'visibility:hidden;overflow:scroll;position:absolute;width:100px';
+    document.body.appendChild(outer);
+    const width = outer.offsetWidth - outer.clientWidth;
+    document.body.removeChild(outer);
+    document.documentElement.style.setProperty('--dialog-scrollbar-width', width + 'px');
+})();
+</script>
+<style>
+/* Design tokens */
+:root {
+  --navy:   #0a1929; --navy2: #0e2238; --blue: #3b82f6; --blue2: #2563eb;
+  --teal:   #2ab8c8; --orange: #e8672a; --cream: #fdf9f4;
+  --slate:  #64748b; --border: #e2e8f0; --bg: #f8fafc;
+  --radius: 10px; --trans: 200ms ease;
+  --ff-display: 'Fraunces', Georgia, serif;
+  --ff-ui:      'Syne', system-ui, sans-serif;
+  --ff-body:    'DM Sans', system-ui, sans-serif;
+  --ff-mono:    'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body { font-family: var(--ff-body); background: var(--bg); color: var(--navy); line-height: 1.65; }
 
+/* Layout */
+.demo-page { max-width: 960px; margin: 0 auto; padding: 48px 24px 96px; }
+.demo-page-title {
+  font-family: var(--ff-display); font-size: 2rem; font-weight: 700; color: var(--navy);
+  margin-bottom: 6px; letter-spacing: -.02em;
+}
+.demo-page-sub { font-size: 1.0625rem; color: var(--slate); margin-bottom: 48px; }
+.demo-tag {
+  display: inline-block; font-family: var(--ff-ui); font-size: .7rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--blue);
+  background: rgba(59,130,246,.09); border: 1px solid rgba(59,130,246,.2);
+  border-radius: 20px; padding: 3px 12px; margin-bottom: 16px;
+}
+
+/* Demo cards */
+.demo-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 28px;
+}
+.demo-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  gap: 12px; flex-wrap: wrap;
+}
+.demo-card-title { font-family: var(--ff-ui); font-weight: 700; font-size: 1rem; color: var(--navy); }
+.demo-card-desc  { font-size: .875rem; color: var(--slate); margin-top: 2px; }
+.demo-stage  { padding: 40px 32px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 24px; background: var(--bg); }
+
+</style>
+    </head>
+    <body>
+
+<div class="demo-page">
+
+  <div class="demo-tag">Plugin</div>
+  <h1 class="demo-page-title">PluginDialog</h1>
+  <p class="demo-page-sub">
+    PluginDialog provides accessible, focus-trapped modal dialogs with a blurred backdrop, 
+    scroll-lock, and a suite of entrance/exit CSS animations. It wires <code>aria-labelledby</code> / 
+    <code>aria-describedby</code> automatically, handles Escape-to-close and Tab-trapping, and 
+    restores focus to the originating element on close.
+  </p>
+
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">Dialog Buttons</div>
+        <div class="demo-card-desc">Each button is attached to a specific dialog. Review the source code for implementation details.</div>
+      </div>
+    </div>
+
+    <div class="demo-stage">
 <!-- Trigger (anywhere on the page) -->
 <button class="btn btn-primary" data-dialog-open="confirm-dialog">Delete Account</button>
 
@@ -64,9 +144,9 @@
 <div data-plugin-dialog
      id="alert-dialog"
      class="dialog-alert"
-     data-plugin-options='{"closeOnBackdrop": false, "animationIn": "zoomIn", "animationOut": "zoomOut"}'>
+     data-plugin-options='{"closeOnBackdrop": true, "animationIn": "zoomIn", "animationOut": "zoomOut"}'>
     <div data-dialog-backdrop></div>
-    <div data-dialog-panel">
+    <div data-dialog-panel>
         <!-- Icon slot -->
         <div class="mb-3">
             <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
@@ -91,28 +171,6 @@
     </div>
 </div>
 
-<script>
-// Initialize manually (skip auto-init because .manual class is present)
-$('#programmatic-dialog').themestrapPluginDialog({
-    animationIn : 'fadeInUp',
-    animationOut: 'fadeOutDown',
-    onOpen : function($el) { console.log('Dialog opened:', $el.attr('id')); },
-    onClose: function($el) { console.log('Dialog closed:', $el.attr('id')); },
-});
-
-// Open / close / toggle via API
-const dlg = $('#programmatic-dialog').data('__pluginDialog');
-
-$('#my-custom-trigger').on('click', () => dlg.open());
-$('#my-custom-closer').on('click', () => dlg.close());
-
-// Listen to plugin events
-$('#programmatic-dialog')
-    .on('dialog:open',  (e, instance) => console.log('opened', instance))
-    .on('dialog:close', (e, instance) => console.log('closed', instance));
-</script>
-
-
 <button class="btn btn-info" data-dialog-open="outer-dialog">Open Outer</button>
 
 <div data-plugin-dialog id="outer-dialog">
@@ -136,10 +194,13 @@ $('#programmatic-dialog')
         <button class="btn btn-secondary mt-3" data-dialog-close>Close Inner</button>
     </div>
 </div>
-<!-- jQuery + Bootstrap 5 JS -->
-<script src="../vendor/jquery/jquery.min.js"></script>
-<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+    </div>
+
+    </div>
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
 <!-- Themestrap core (must come first; path relative to your install) -->
 <script src="../js/themestrap.js"></script>
 
@@ -158,25 +219,25 @@ if ($.isFunction($.fn['themestrapPluginDialog']) && $('[data-plugin-dialog]').le
     });
 }
 </script>
-
-
-<!-- =============================================================================
-     SCROLLBAR WIDTH COMPENSATION (recommended — prevents layout shift on open)
-     =============================================================================
-
-     Add this snippet once, before themestrap.js loads.
-     It measures the native scrollbar width and stores it as a CSS variable
-     that plugin.dialog.css uses via `padding-right: var(--dialog-scrollbar-width, 0px)`.
-     ============================================================================= -->
-
-
 <script>
-(function () {
-    const outer = document.createElement('div');
-    outer.style.cssText = 'visibility:hidden;overflow:scroll;position:absolute;width:100px';
-    document.body.appendChild(outer);
-    const width = outer.offsetWidth - outer.clientWidth;
-    document.body.removeChild(outer);
-    document.documentElement.style.setProperty('--dialog-scrollbar-width', width + 'px');
-})();
+// Initialize manually (skip auto-init because .manual class is present)
+$('#programmatic-dialog').themestrapPluginDialog({
+    animationIn : 'fadeInUp',
+    animationOut: 'fadeOutDown',
+    onOpen : function($el) { console.log('Dialog opened:', $el.attr('id')); },
+    onClose: function($el) { console.log('Dialog closed:', $el.attr('id')); },
+});
+
+// Open / close / toggle via API
+const dlg = $('#programmatic-dialog').data('__pluginDialog');
+
+$('#my-custom-trigger').on('click', () => dlg.open());
+$('#my-custom-closer').on('click', () => dlg.close());
+
+// Listen to plugin events
+$('#programmatic-dialog')
+    .on('dialog:open',  (e, instance) => console.log('opened', instance))
+    .on('dialog:close', (e, instance) => console.log('closed', instance));
 </script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About — Launchpad</title>
+<meta name="description" content="The story behind Launchpad — who we are, why we built it, and the team making it happen.">
+<script>(function(){try{var s=localStorage.getItem('themestrap-theme'),d=matchMedia('(prefers-color-scheme:dark)').matches,t=s||(d?'dark':'light'),h=document.documentElement;if(t==='dark')h.classList.add('dark');h.setAttribute('data-theme',t);h.setAttribute('data-bs-theme',t);}catch(e){}})();</script>
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../../vendor/fontawesome-free/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,800&family=Syne:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/saas.css">
+<style>
+.value-item {
+  padding: 28px;
+  border-left: 3px solid var(--ts-border);
+  transition: border-color .2s;
+}
+.value-item:hover { border-left-color: var(--ts-orange); }
+.value-item__num {
+  font-family: var(--ts-font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: rgba(232,103,42,.15);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.value-item h3 { font-size: 1.05rem; margin-bottom: 6px; }
+.value-item p { font-size: 14px; color: var(--ts-text-2); line-height: 1.65; margin: 0; }
+
+.timeline-item {
+  display: flex;
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--ts-border);
+}
+.timeline-item:last-child { border-bottom: none; }
+.timeline-year {
+  font-family: var(--ts-font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ts-orange);
+  width: 64px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.timeline-content h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.timeline-content p { font-size: 13.5px; color: var(--ts-text-2); margin: 0; line-height: 1.6; }
+
+.investor-logo {
+  background: var(--ts-surface);
+  border: 1px solid var(--ts-border);
+  border-radius: 10px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ts-font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ts-muted);
+  opacity: .7;
+  transition: opacity .2s;
+}
+.investor-logo:hover { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="saas-nav" role="navigation" aria-label="Main navigation">
+  <div class="container saas-nav__inner">
+    <a href="index.html" class="saas-nav__brand"><img src="img/logo.svg" class="logo" alt="Launchpad" height="32"></a>
+    <ul class="saas-nav__links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="customers.html">Customers</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+    </ul>
+    <div class="saas-nav__actions">
+      <button data-plugin-darkmode aria-label="Toggle dark mode"></button>
+      <a href="#" class="btn-ghost">Log in</a>
+      <a href="pricing.html" class="btn-primary">Start free trial</a>
+      <button class="saas-nav__toggle" aria-expanded="false" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="padding:88px 0 72px">
+  <div class="hero__grid-bg"></div>
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-7">
+        <span class="eyebrow">Our story</span>
+        <h1 class="display-2 mb-4">We built the platform we wished we had</h1>
+        <p class="lead" style="max-width:520px">
+          Launchpad started in a two-bedroom apartment in 2021 because three engineers were tired of spending more time managing infrastructure than building product. Three years later, we help 12,000 companies do the same.
+        </p>
+      </div>
+      <div class="col-lg-4 offset-lg-1 d-none d-lg-flex justify-content-center">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;width:260px">
+          <div style="background:rgba(232,103,42,.15);border:1px solid rgba(232,103,42,.25);border-radius:12px;padding:18px;text-align:center">
+            <div style="font-size:1.8rem;font-weight:800;color:var(--ts-orange);font-family:var(--ts-font-display)">2021</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">Founded</div>
+          </div>
+          <div style="background:rgba(42,184,200,.1);border:1px solid rgba(42,184,200,.2);border-radius:12px;padding:18px;text-align:center">
+            <div style="font-size:1.8rem;font-weight:800;color:var(--ts-teal);font-family:var(--ts-font-display)">47</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">Team members</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;text-align:center">
+            <div style="font-size:1.8rem;font-weight:800;color:#fff;font-family:var(--ts-font-display)">$18M</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">Raised</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px;text-align:center">
+            <div style="font-size:1.8rem;font-weight:800;color:#fff;font-family:var(--ts-font-display)">62</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">Countries</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <span class="eyebrow">Mission</span>
+        <h2 class="display-3 mb-4">Reduce the distance between idea and impact</h2>
+        <p class="lead" style="font-size:1.2rem;line-height:1.75">
+          Every hour an engineering team spends on infrastructure is an hour they're not spending on the thing that matters: building software people love. Launchpad exists to give those hours back.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ORIGIN STORY -->
+<section class="section section--muted">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-5">
+        <span class="eyebrow">Origin</span>
+        <h2 class="display-3 mb-4">It started with a lost weekend</h2>
+        <p style="font-size:15px;color:var(--ts-text-2);line-height:1.8;margin-bottom:16px">
+          In October 2021, co-founders Elena Mora, Priya Suresh, and James Obi spent a three-day weekend trying to deploy their side project to production. By Sunday night they had consumed 14 hours of GitHub Actions logs, three Kubernetes manifests, and one very cold pizza.
+        </p>
+        <p style="font-size:15px;color:var(--ts-text-2);line-height:1.8;margin-bottom:16px">
+          The side project never shipped. But the idea for Launchpad did.
+        </p>
+        <p style="font-size:15px;color:var(--ts-text-2);line-height:1.8;margin-bottom:0">
+          "We weren't bad engineers," says CEO Elena Mora. "The tools were just designed for teams much bigger than us, with problems much more specific than ours. We wanted something that assumed you were smart, ambitious, and incredibly short on time."
+        </p>
+      </div>
+      <div class="col-lg-6 offset-lg-1">
+        <div class="timeline-item">
+          <div class="timeline-year">2021</div>
+          <div class="timeline-content">
+            <h3>Founded in San Francisco</h3>
+            <p>Elena, Priya, and James quit their jobs and incorporated Launchpad. First commit pushed on a Tuesday at 2am.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2022</div>
+          <div class="timeline-content">
+            <h3>Private beta and seed round</h3>
+            <p>Launched private beta with 200 design partners. Raised a $2.4M seed round from Horizon Ventures and a group of angel operators.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2023</div>
+          <div class="timeline-content">
+            <h3>Public launch and Series A</h3>
+            <p>Opened to the public in January. Crossed 5,000 customers in 90 days. Raised a $15.6M Series A led by Northstar Capital in Q3.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2024</div>
+          <div class="timeline-content">
+            <h3>Analytics platform and enterprise tier</h3>
+            <p>Launched built-in product analytics, A/B testing, and workflow automation. Introduced the Enterprise plan and landed our first Fortune 500 customer.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2025</div>
+          <div class="timeline-content">
+            <h3>Launchpad AI and global expansion</h3>
+            <p>Shipped Launchpad AI for anomaly detection and workflow suggestions. Opened EU data residency. Growing to 47 team members across 4 countries.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="section">
+  <div class="container">
+    <div class="section-header section-header--center mb-5">
+      <span class="eyebrow">Values</span>
+      <h2 class="display-3">What we believe</h2>
+      <p class="lead">These aren't wall art. They're the filter we apply to every product decision, hiring call, and customer interaction.</p>
+    </div>
+    <div class="grid-2">
+      <div class="value-item">
+        <div class="value-item__num">01</div>
+        <h3>Builders first</h3>
+        <p>We make decisions by asking: "Does this make a builder's day better?" If the answer isn't obviously yes, we reconsider.</p>
+      </div>
+      <div class="value-item">
+        <div class="value-item__num">02</div>
+        <h3>Honest by default</h3>
+        <p>Transparent pricing, no hidden limits, no dark patterns. If our product isn't right for you, we'll tell you — and point you somewhere better.</p>
+      </div>
+      <div class="value-item">
+        <div class="value-item__num">03</div>
+        <h3>Speed is a feature</h3>
+        <p>Every second of latency in our platform costs our customers time and money. We obsess over performance because we know what it costs when it's slow.</p>
+      </div>
+      <div class="value-item">
+        <div class="value-item__num">04</div>
+        <h3>Ownership, not excuses</h3>
+        <p>When something breaks — and things break — we own it, fix it fast, and write a public post-mortem. No fingerpointing, no spin.</p>
+      </div>
+      <div class="value-item">
+        <div class="value-item__num">05</div>
+        <h3>Long-term thinking</h3>
+        <p>We're building a company to last decades, not an acqui-hire. Every decision is evaluated on what it means for our customers and team in ten years, not next quarter.</p>
+      </div>
+      <div class="value-item">
+        <div class="value-item__num">06</div>
+        <h3>Diverse and distributed</h3>
+        <p>Our team spans four countries and fifteen time zones. Async-first isn't a policy for us — it's how we build the product we'd want to use.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section section--muted">
+  <div class="container">
+    <div class="section-header section-header--center mb-5">
+      <span class="eyebrow">The team</span>
+      <h2 class="display-3">The people behind the platform</h2>
+      <p class="lead">47 builders, designers, and operators who care deeply about making software easier to ship.</p>
+    </div>
+
+    <!-- Leadership -->
+    <h3 style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ts-muted);margin-bottom:20px">Leadership</h3>
+    <div class="grid-3 mb-5">
+
+      <div class="team-card">
+        <div class="team-card__avatar" style="background:linear-gradient(135deg,var(--ts-orange),var(--ts-orange-2))">EM</div>
+        <div class="team-card__name">Elena Mora</div>
+        <div class="team-card__title">CEO &amp; Co-founder</div>
+        <p class="team-card__bio">Previously engineering lead at Stripe and Google. Two-time YC founder. Elena sets product vision and drives Launchpad's go-to-market strategy.</p>
+      </div>
+
+      <div class="team-card">
+        <div class="team-card__avatar" style="background:linear-gradient(135deg,var(--ts-teal),#1a96a8)">PS</div>
+        <div class="team-card__name">Priya Suresh</div>
+        <div class="team-card__title">CTO &amp; Co-founder</div>
+        <p class="team-card__bio">Built infrastructure at scale at AWS and Cloudflare. Priya architects Launchpad's deployment network and holds 3 patents in distributed systems.</p>
+      </div>
+
+      <div class="team-card">
+        <div class="team-card__avatar" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)">JO</div>
+        <div class="team-card__name">James Obi</div>
+        <div class="team-card__title">CPO &amp; Co-founder</div>
+        <p class="team-card__bio">Former Director of Product at Intercom. James runs product design and research, and is responsible for Launchpad's analytics platform.</p>
+      </div>
+
+      <div class="team-card">
+        <div class="team-card__avatar" style="background:linear-gradient(135deg,#059669,#047857)">RK</div>
+        <div class="team-card__name">Ravi Kumar</div>
+        <div class="team-card__title">VP Engineering</div>
+        <p class="team-card__bio">Led platform engineering at Notion and Figma. Ravi scales Launchpad's technical teams and is the keeper of our 99.99% uptime commitment.</p>
+      </div>
+
+      <div class="team-card">
+        <div class="team-card__avatar" style="background:linear-gradient(135deg,#dc2626,#b91c1c)">AL</div>
+        <div class="team-card__name">Amara Levi</div>
+        <div class="team-card__title">VP Marketing</div>
+        <p class="team-card__bio">Built content and growth at HubSpot and Drift. Amara drives Launchpad's demand generation, brand, and community programs.</p>
+      </div>
+
+      <div class="team-card">
+        <div class="team-card__avatar" style="background:linear-gradient(135deg,#d97706,#b45309)">TC</div>
+        <div class="team-card__name">Thomas Chen</div>
+        <div class="team-card__title">VP Sales</div>
+        <p class="team-card__bio">10+ years closing enterprise software deals at Salesforce and Segment. Thomas leads Launchpad's enterprise and mid-market go-to-market motion.</p>
+      </div>
+
+    </div>
+
+    <!-- Remaining team callout -->
+    <div style="text-align:center;background:var(--ts-surface);border:1px solid var(--ts-border);border-radius:14px;padding:40px;box-shadow:var(--ts-shadow-sm)">
+      <div style="font-size:36px;margin-bottom:12px"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+  <g fill="#0088CC">
+    <path stroke="#0088CC" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="#0088CC" d="M15.6 14.4a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 1 0 0-9.6z"></path>
+    <path fill="#777" stroke="#777" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M32.4 7.2a4.8 4.8 0 1 0 0 9.6 4.8 4.8 0 1 0 0-9.6z"></path>
+    <path d="M43.59 29.34a11.88 11.88 0 0 0-11.19-7.74 11.83 11.83 0 0 0-9.12 4.26 16.7 16.7 0 0 1 7.99 8.98c0.14 0.36 0.22 0.73 0.3 1.11 0.27 0.01 0.55 0.04 0.83 0.05 3.12 0 6.23-0.72 9.31-2.16a3.58 3.58 0 0 0 1.86-4.5z" fill="#777" stroke-width="0"></path>
+    <path d="M26.79 36.54c-1.78-4.71-6.18-7.74-11.19-7.74s-9.4 3.04-11.19 7.74a3.58 3.58 0 0 0 1.88 4.5c3.09 1.44 6.2 2.16 9.31 2.16s6.23-0.72 9.31-2.16a3.58 3.58 0 0 0 1.86-4.5z" stroke-width="0" fill="#0088CC"></path>
+  </g>
+</svg></div>
+      <h3 style="font-size:1.15rem;margin-bottom:8px">Plus 41 more extraordinary people</h3>
+      <p style="font-size:14px;color:var(--ts-text-2);max-width:480px;margin:0 auto 20px;line-height:1.65">
+        Engineers, designers, writers, support specialists, and operators across four countries — all working to make Launchpad the best place to ship software.
+      </p>
+      <a href="#" class="btn-primary">See open roles →</a>
+    </div>
+  </div>
+</section>
+
+<!-- INVESTORS -->
+<section class="section">
+  <div class="container">
+    <div class="section-header section-header--center mb-5">
+      <span class="eyebrow">Backed by</span>
+      <h2 class="display-3">Investors who get it</h2>
+      <p class="lead">$18M raised from people who have built, scaled, and shipped software products themselves.</p>
+    </div>
+    <div class="grid-4" style="gap:16px">
+      <div class="investor-logo">Northstar Capital</div>
+      <div class="investor-logo">Horizon Ventures</div>
+      <div class="investor-logo">Pioneer Fund</div>
+      <div class="investor-logo">Ember VC</div>
+    </div>
+    <p class="text-center mt-4" style="font-size:13px;color:var(--ts-muted)">Plus a group of operator angels from Stripe, Shopify, Figma, and Cloudflare.</p>
+  </div>
+</section>
+
+<!-- LOCATION / OFFICE -->
+<section class="section section--dark">
+  <div class="container">
+    <div class="row gy-5 align-items-center">
+      <div class="col-lg-5">
+        <span class="eyebrow">Where we work</span>
+        <h2 class="display-3" style="color:#fff;margin-bottom:16px">Remote-first, with roots in SF</h2>
+        <p style="color:#8da4ba;font-size:15px;line-height:1.8;margin-bottom:20px">
+          Our headquarters is in San Francisco's SoMa district, but the majority of our team works remotely from cities across North America, Europe, and Asia-Pacific.
+        </p>
+        <p style="color:#8da4ba;font-size:15px;line-height:1.8;">
+          We meet in person twice a year for company offsites — one focused on planning, one focused on building. Everything else happens asynchronously.
+        </p>
+      </div>
+      <div class="col-lg-6 offset-lg-1">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
+            <div style="font-size:24px;margin-bottom:8px">🇺🇸</div>
+            <div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:4px">San Francisco</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.4)">HQ · 18 people</div>
+          </div>
+          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
+            <div style="font-size:24px;margin-bottom:8px">🇬🇧</div>
+            <div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:4px">London</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.4)">EMEA hub · 9 people</div>
+          </div>
+          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
+            <div style="font-size:24px;margin-bottom:8px">🇸🇬</div>
+            <div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:4px">Singapore</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.4)">APAC hub · 6 people</div>
+          </div>
+          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px">
+            <div style="font-size:24px;margin-bottom:8px"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+  <g fill="#0088CC">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M1.33 11.97a10.64 10.64 0 1 1 21.28 0 10.64 10.64 0 0 1-21.28 0z" fill="#777" fill-opacity="0.4"></path>
+    <path d="M18 4.78a1 1 0 0 1-0.77 0.2c-1.48-0.23-2.54-0.11-2.9 0.34-0.29 0.36-0.22 1.1-0.17 1.76 0.08 0.9 0.18 2.03-0.75 2.62-0.84 0.53-1.71 0.11-2.34-0.2-0.57-0.28-1.11-0.54-1.66-0.39-0.7 0.19-1.09 0.92-1.16 1.06-0.32 0.66-0.2 1.35-0.03 1.83 1.71-0.34 3.16-0.16 4.34 0.52 0.57 0.34 1.03 0.8 1.45 1.31 0.33 0.4 0.43 0.49 0.64 0.53 0.36 0.07 0.72-0.16 1.27-0.55 0.76-0.53 1.58-1.01 2.55-0.82 1.02 0.19 1.84 1.01 2.48 2.46 0.24 0.46 0.4 0.91 0.5 1.34a10.65 10.65 0 0 1-11.29 5.67c0.16-0.56 0.32-1.11 0.32-1.15 0.1-0.34 0.28-1.19-0.09-1.75-0.13-0.19-0.27-0.27-0.57-0.43-0.55-0.29-1.02-0.64-1.34-1.18-0.36-0.6-0.43-1.24-0.39-1.92 0.02-0.35 0.03-0.63-0.09-0.98-0.17-0.48-0.51-0.8-0.9-1.09-0.21-0.18-0.46-0.33-0.7-0.49-1.45-1.06-2.62-2.65-3.52-4.69a6.11 6.11 0 0 1-0.51-1.4 10.65 10.65 0 0 1 9.6-6.05c2.68 0 5.14 1 7.01 2.65l-0.98 0.8z" fill="#0088CC"></path>
+  </g>
+</svg></div>
+            <div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:4px">Distributed</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.4)">14 people across 11 countries</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN US -->
+<section class="section--sm" style="background:var(--ts-surface);border-top:1px solid var(--ts-border);text-align:center">
+  <div class="container">
+    <h2 class="display-3 mb-3">Come build with us</h2>
+    <p class="lead mb-4">We're hiring engineers, designers, and operators who want to help the next 100,000 startups ship.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="#" class="btn-primary btn-primary--lg">See open roles →</a>
+      <a href="pricing.html" class="btn-ghost">Try Launchpad yourself</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="saas-footer">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4"><a href="index.html" class="saas-footer__brand"><img src="img/logo.svg" class="logo" alt="Launchpad" height="32"></a><p class="saas-footer__desc">The SaaS platform built for founders, product teams, and growth marketers who need to ship and scale fast.</p></div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Product</p><ul class="saas-footer__links"><li><a href="features.html">Features</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="#">Changelog</a></li><li><a href="#">Roadmap</a></li></ul></div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Company</p><ul class="saas-footer__links"><li><a href="about.html">About</a></li><li><a href="customers.html">Customers</a></li><li><a href="#">Blog</a></li><li><a href="#">Careers</a></li></ul></div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Resources</p><ul class="saas-footer__links"><li><a href="#">Documentation</a></li><li><a href="#">API Reference</a></li><li><a href="#">Status</a></li><li><a href="#">Community</a></li></ul></div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Legal</p><ul class="saas-footer__links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Security</a></li><li><a href="#">GDPR</a></li></ul></div>
+    </div>
+    <div class="saas-footer__bottom"><span>© 2025 Launchpad, Inc. All rights reserved.</span><div class="saas-footer__bottom-links"><a href="#">Twitter / X</a><a href="#">LinkedIn</a><a href="https://github.com/daemondevin/Themestrap">GitHub</a></div></div>
+  </div>
+</footer>
+
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.darkmode.js"></script>
+<script src="js/saas.js"></script>
+</body>
+</html>

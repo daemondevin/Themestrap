@@ -6,7 +6,7 @@
  * thumb on top.
  *
  * Unlike `themestrap.plugin.scrollable.js` (which delegates to the external
- * nanoScroller library), this plugin implements all scrollbar geometry,
+ * nanoScroller vendor library), this plugin implements all scrollbar geometry,
  * dragging, track-paging and auto-hide behaviour itself — no third-party JS.
  *
  * Markup (auto-generated from the host element's existing children):

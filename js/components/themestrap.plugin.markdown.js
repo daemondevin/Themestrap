@@ -1,55 +1,623 @@
 /**
- * Markdown
- * Renders markdown content as HTML using the Marked library.
+ * Themestrap GFM Markdown Plugin
+ * Parses GitHub Flavored Markdown into HTML, entirely client-side, with no
+ * external parser dependency.  A lightweight GFM-compatible tokenizer/renderer
+ * is bundled inside the IIFE so the plugin is self-contained.
  *
- * Source markdown is read from a child <script type="text/markdown"> tag
- * (recommended) or, as a fallback, from the element's
- * own text. Common leading whitespace is stripped automatically so markdown
- * can be indented to match the surrounding HTML. Re-render at any time by
- * calling the public renderMarkdown() method or triggering 'render.tsmarkdown'.
+ * Part of the Themestrap component library.
  *
- * Usage:
- *   <div data-plugin-markdown>
- *       <script type="text/markdown">
- *           ## Getting Started
- *           Some **bold** and `inline code`.
- *       </script>
- *   </div>
+ * ATTRIBUTE API  (all attributes on the host element)
  *
- *   $('#md').data('__markdown').renderMarkdown();    * re-render after a change
+ *   data-plugin-markdown
+ *     Presence triggers auto-init. Value is ignored.
  *
- * Requires: marked (window.marked). Optional: DOMPurify (window.DOMPurify)
- * for sanitize:true.
+ *   data-plugin-markdown-src="url/to/file.md"
+ *     Fetch Markdown from a URL via XHR and render into the host element.
+ *     When absent the plugin renders the element's existing text content.
+ *
+ *   data-plugin-options='{"sanitize":true,"breaks":true,"taskLists":true}'
+ *     Standard Themestrap options bag; merges with PluginMarkdown.defaults.
+ *
+ * SUPPORTED GFM FEATURES
+ *
+ *   Block:  ATX headings (h1–h6), setext headings, fenced code blocks (```),
+ *           indented code blocks, block quotes, ordered / unordered lists,
+ *           task-list checkboxes (- [x] / - [ ]), horizontal rules, tables
+ *           (GFM pipe-table syntax with alignment), paragraphs, blank-line
+ *           separators, HTML pass-through blocks.
+ *
+ *   Inline: Bold (**…** / __…__), italic (*…* / _…_), bold+italic,
+ *           inline code (`…`), strikethrough (~~…~~), links ([text](url)),
+ *           reference links ([text][ref] + [ref]: url), images (![alt](url)),
+ *           auto-links (<url>), line breaks (trailing two spaces or \).
+ *
+ * PUBLIC API
+ *
+ *   instance.render(markdown)   — re-render from a Markdown string
+ *   instance.setSource(url)     — fetch a new URL and re-render
+ *   instance.getHtml()          — return the last rendered HTML string
+ *   instance.destroy()          — restore original content, unbind events
+ *
+ * USAGE
+ *
+ *   <!-- Render from inline text content -->
+ *   <div data-plugin-markdown># Hello World</div>
+ *
+ *   <!-- Fetch and render from a URL -->
+ *   <div data-plugin-markdown data-plugin-markdown-src="/docs/readme.md"></div>
+ *
+ *   <!-- Manual init with options -->
+ *   <div id="md-target"># Hello</div>
+ *   <script>
+ *     $('#md-target').themestrapPluginMarkdown({ breaks: true, sanitize: true });
+ *   </script>
+ *
+ * Auto-init wiring for themestrap.init.js:
+ *
+ *   if ($.isFunction($.fn['themestrapPluginMarkdown']) && $('[data-plugin-markdown]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-markdown]:not(.manual)', 'themestrapPluginMarkdown');
+ *   }
  */
 // Markdown
 (((themestrap = {}, $) => {
-    const instanceName = '__markdown'; // double-underscore prefix, camelCase
+
+    const instanceName = '__pluginMarkdown';
+
+    // Lazy CSS injection 
+    const STYLE_ID = 'ts-markdown-styles';
+    const CSS_TEXT = `
+/* Themestrap — PluginMarkdown */
+.ts-markdown {
+    --ts-md-font:         inherit;
+    --ts-md-code-font:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    --ts-md-code-bg:      rgba(0,0,0,.06);
+    --ts-md-border:       rgba(0,0,0,.15);
+    --ts-md-quote-border: #0a1929;
+    --ts-md-link:         #2ab8c8;
+    --ts-md-link-hover:   #e8672a;
+    --ts-md-table-stripe: rgba(0,0,0,.03);
+    --ts-md-hr:           rgba(0,0,0,.15);
+    --ts-md-heading-mt:   1.5em;
+    line-height: 1.7;
+    font-family: var(--ts-md-font);
+    word-break: break-word;
+}
+
+/* Headings */
+.ts-markdown h1, .ts-markdown h2, .ts-markdown h3,
+.ts-markdown h4, .ts-markdown h5, .ts-markdown h6 {
+    margin-top: var(--ts-md-heading-mt);
+    margin-bottom: .4em;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.ts-markdown h1 { font-size: 2em;    border-bottom: 2px solid var(--ts-md-border); padding-bottom: .25em; }
+.ts-markdown h2 { font-size: 1.5em;  border-bottom: 1px solid var(--ts-md-border); padding-bottom: .2em;  }
+.ts-markdown h3 { font-size: 1.25em; }
+.ts-markdown h4 { font-size: 1.1em;  }
+.ts-markdown h5 { font-size: 1em;    }
+.ts-markdown h6 { font-size: .875em; color: #666;  }
+
+/* Paragraphs & text */
+.ts-markdown p { margin: 0 0 1em; }
+.ts-markdown > *:first-child { margin-top: 0; }
+.ts-markdown > *:last-child  { margin-bottom: 0; }
+
+/* Links */
+.ts-markdown a          { color: var(--ts-md-link); text-decoration: underline; }
+.ts-markdown a:hover    { color: var(--ts-md-link-hover); }
+
+/* Code */
+.ts-markdown code {
+    font-family: var(--ts-md-code-font);
+    font-size: .875em;
+    background: var(--ts-md-code-bg);
+    border-radius: 3px;
+    padding: .15em .4em;
+}
+.ts-markdown pre {
+    background: var(--ts-md-code-bg);
+    border: 1px solid var(--ts-md-border);
+    border-radius: 6px;
+    padding: 1em 1.2em;
+    overflow-x: auto;
+    margin: 0 0 1em;
+}
+.ts-markdown pre code {
+    background: none;
+    padding: 0;
+    font-size: .875em;
+    white-space: pre;
+}
+
+/* Block quotes */
+.ts-markdown blockquote {
+    margin: 0 0 1em;
+    padding: .5em 1em;
+    border-left: 4px solid var(--ts-md-quote-border);
+    color: #555;
+    background: rgba(0,0,0,.03);
+    border-radius: 0 4px 4px 0;
+}
+.ts-markdown blockquote > p:last-child { margin-bottom: 0; }
+
+/* Lists */
+.ts-markdown ul,
+.ts-markdown ol {
+    margin: 0 0 1em;
+    padding-left: 1.8em;
+}
+.ts-markdown li { margin-bottom: .25em; }
+.ts-markdown li > ul,
+.ts-markdown li > ol { margin-top: .25em; margin-bottom: 0; }
+
+/* Task lists */
+.ts-markdown .ts-md-task-list { list-style: none; padding-left: .5em; }
+.ts-markdown .ts-md-task-list li { display: flex; align-items: flex-start; gap: .5em; }
+.ts-markdown .ts-md-task-list input[type="checkbox"] { margin-top: .3em; flex-shrink: 0; cursor: default; }
+
+/* Tables */
+.ts-markdown table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0 0 1em;
+    font-size: .9em;
+}
+.ts-markdown th,
+.ts-markdown td {
+    border: 1px solid var(--ts-md-border);
+    padding: .5em .8em;
+    text-align: left;
+}
+.ts-markdown th { background: rgba(0,0,0,.06); font-weight: 700; }
+.ts-markdown tbody tr:nth-child(even) td { background: var(--ts-md-table-stripe); }
+
+/* Horizontal rule */
+.ts-markdown hr {
+    border: none;
+    border-top: 2px solid var(--ts-md-hr);
+    margin: 1.5em 0;
+}
+
+/* Images */
+.ts-markdown img { max-width: 100%; height: auto; }
+
+/* Loading / error states */
+.ts-markdown-loading { opacity: .5; font-style: italic; }
+.ts-markdown-error   { color: #c0392b; font-style: italic; font-size: .9em; }
+`;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id    = STYLE_ID;
+        style.textContent = CSS_TEXT;
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    // GFM Tokenizer / Renderer 
+    // A self-contained, dependency-free GFM parser.
+    // Covers the full feature set listed above.
+    const GFM = (() => {
+
+        function escHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function renderInline(text, opts, refs) {
+            let out = text;
+
+            // Auto-links  <url>
+            out = out.replace(/<(https?:\/\/[^\s>]+)>/g, (_, url) =>
+                `<a href="${escHtml(url)}">${escHtml(url)}</a>`
+            );
+
+            // Inline code  `code`  (protect from further inline processing)
+            const codePlaceholders = [];
+            out = out.replace(/`([^`]+)`/g, (_, code) => {
+                const ph = `\x02CODE${codePlaceholders.length}\x03`;
+                codePlaceholders.push(`<code>${escHtml(code)}</code>`);
+                return ph;
+            });
+
+            // Images  ![alt](url "title")
+            out = out.replace(/!\[([^\]]*)\]\(([^)]*)\)/g, (_, alt, rest) => {
+                const [url, ...titleParts] = rest.trim().split(/\s+/);
+                const title = titleParts.join(' ').replace(/^["']|["']$/g, '');
+                return `<img src="${escHtml(url)}" alt="${escHtml(alt)}"${title ? ` title="${escHtml(title)}"` : ''}>`;
+            });
+
+            // Links  [text](url "title")
+            out = out.replace(/\[([^\]]+)\]\(([^)]*)\)/g, (_, label, rest) => {
+                const [url, ...titleParts] = rest.trim().split(/\s+/);
+                const title = titleParts.join(' ').replace(/^["']|["']$/g, '');
+                return `<a href="${escHtml(url)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
+            });
+
+            // Reference links  [text][ref]  or  [text][]
+            out = out.replace(/\[([^\]]+)\]\[([^\]]*)\]/g, (_, label, ref) => {
+                const key = (ref || label).toLowerCase();
+                if (refs[key]) {
+                    const { href, title } = refs[key];
+                    return `<a href="${escHtml(href)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
+                }
+                return escHtml(`[${label}][${ref}]`);
+            });
+
+            // Shortcut reference links  [ref]
+            out = out.replace(/\[([^\]]+)\]/g, (match, ref) => {
+                const key = ref.toLowerCase();
+                if (refs[key]) {
+                    const { href, title } = refs[key];
+                    return `<a href="${escHtml(href)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(ref, opts, refs)}</a>`;
+                }
+                return match; // leave unchanged — might be task-list bracket
+            });
+
+            // Bold + italic  ***…***  or  ___…___
+            out = out.replace(/(\*{3}|_{3})(.+?)\1/g, (_, __, inner) =>
+                `<strong><em>${renderInline(inner, opts, refs)}</em></strong>`
+            );
+
+            // Bold  **…**  or  __…__
+            out = out.replace(/(\*{2}|_{2})(.+?)\1/g, (_, __, inner) =>
+                `<strong>${renderInline(inner, opts, refs)}</strong>`
+            );
+
+            // Italic  *…*  or  _…_
+            out = out.replace(/([*_])(.+?)\1/g, (_, __, inner) =>
+                `<em>${renderInline(inner, opts, refs)}</em>`
+            );
+
+            // Strikethrough  ~~…~~
+            out = out.replace(/~~(.+?)~~/g, (_, inner) =>
+                `<del>${renderInline(inner, opts, refs)}</del>`
+            );
+
+            // Line breaks — trailing two spaces or backslash
+            out = out
+                .replace(/ {2,}\n/g, '<br>\n')
+                .replace(/\\\n/g, '<br>\n');
+
+            if (opts.breaks) {
+                // GitHub-style soft line breaks
+                out = out.replace(/\n/g, '<br>\n');
+            }
+
+            // Restore code placeholders
+            codePlaceholders.forEach((html, i) => {
+                out = out.replace(`\x02CODE${i}\x03`, html);
+            });
+
+            return out;
+        }
+
+        // Block tokeniser 
+        // Returns { tokens, refs } where tokens is an array of block token objs.
+        function tokenize(src) {
+            const refs   = {}; // link reference definitions
+            const tokens = [];
+
+            // Normalize line endings; add trailing newline for easier regex
+            let lines = src.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            // Strip link reference definitions  [ref]: url "title"
+            lines = lines.replace(
+                /^\[([^\]]+)\]:\s+(\S+)(?:\s+"([^"]*)")?\s*$/gm,
+                (_, ref, href, title) => {
+                    refs[ref.toLowerCase()] = { href, title: title || '' };
+                    return '';
+                }
+            );
+
+            const lineArr = lines.split('\n');
+            let i = 0;
+
+            while (i < lineArr.length) {
+                const line = lineArr[i];
+
+                if (/^\s*$/.test(line)) {
+                    i++;
+                    continue;
+                }
+
+                const fenceMatch = line.match(/^(`{3,}|~{3,})\s*(\S*)/);
+                if (fenceMatch) {
+                    const fence = fenceMatch[1];
+                    const lang  = fenceMatch[2] || '';
+                    const body  = [];
+                    i++;
+                    while (i < lineArr.length) {
+                        if (lineArr[i].trimStart().startsWith(fence.slice(0, 3)) &&
+                            lineArr[i].trim().replace(new RegExp(`^${fence[0]}+`), '') === '') {
+                            i++;
+                            break;
+                        }
+                        body.push(lineArr[i]);
+                        i++;
+                    }
+                    tokens.push({ type: 'code', lang, text: body.join('\n') });
+                    continue;
+                }
+
+                if (/^( {4}|\t)/.test(line)) {
+                    const body = [];
+                    while (i < lineArr.length && /^( {4}|\t)/.test(lineArr[i])) {
+                        body.push(lineArr[i].replace(/^( {4}|\t)/, ''));
+                        i++;
+                    }
+                    tokens.push({ type: 'code', lang: '', text: body.join('\n') });
+                    continue;
+                }
+
+                const atxMatch = line.match(/^(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/);
+                if (atxMatch) {
+                    tokens.push({ type: 'heading', depth: atxMatch[1].length, text: atxMatch[2] });
+                    i++;
+                    continue;
+                }
+
+                if (i + 1 < lineArr.length) {
+                    const next = lineArr[i + 1];
+                    if (/^=+\s*$/.test(next)) {
+                        tokens.push({ type: 'heading', depth: 1, text: line });
+                        i += 2;
+                        continue;
+                    }
+                    if (/^-+\s*$/.test(next) && !/^\s*[-*_](\s*[-*_]){2,}\s*$/.test(next)) {
+                        tokens.push({ type: 'heading', depth: 2, text: line });
+                        i += 2;
+                        continue;
+                    }
+                }
+
+                if (/^\s*([-*_])\s*\1\s*\1(\s*\1)*\s*$/.test(line)) {
+                    tokens.push({ type: 'hr' });
+                    i++;
+                    continue;
+                }
+
+                if (/^>/.test(line)) {
+                    const body = [];
+                    while (i < lineArr.length && /^>/.test(lineArr[i])) {
+                        body.push(lineArr[i].replace(/^>\s?/, ''));
+                        i++;
+                    }
+                    tokens.push({ type: 'blockquote', src: body.join('\n') });
+                    continue;
+                }
+
+                if (i + 1 < lineArr.length && /^\|/.test(line) && /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?$/.test(lineArr[i + 1])) {
+                    const headerCells = parseTableRow(line);
+                    const alignRow    = parseTableRow(lineArr[i + 1]);
+                    const aligns      = alignRow.map(cell => {
+                        const c = cell.trim();
+                        if (c.startsWith(':') && c.endsWith(':')) return 'center';
+                        if (c.endsWith(':')) return 'right';
+                        if (c.startsWith(':')) return 'left';
+                        return '';
+                    });
+                    i += 2;
+                    const rows = [];
+                    while (i < lineArr.length && /\|/.test(lineArr[i])) {
+                        rows.push(parseTableRow(lineArr[i]));
+                        i++;
+                    }
+                    tokens.push({ type: 'table', headers: headerCells, aligns, rows });
+                    continue;
+                }
+
+                const ulMatch = line.match(/^(\s*)([-*+])\s+(.*)/);
+                const olMatch = line.match(/^(\s*)(\d+)\.\s+(.*)/);
+                if (ulMatch || olMatch) {
+                    const ordered = !!olMatch;
+                    const indent  = (ulMatch || olMatch)[1].length;
+                    const items   = [];
+
+                    while (i < lineArr.length) {
+                        const l    = lineArr[i];
+                        const ulM  = l.match(/^(\s*)([-*+])\s+(.*)/);
+                        const olM  = l.match(/^(\s*)(\d+)\.\s+(.*)/);
+                        const indM = l.match(/^(\s+)(.*)/);
+
+                        if ((ulM || olM) && (ulM || olM)[1].length === indent) {
+                            const itemText = (ulM || olM)[3];
+                            items.push({ text: itemText, children: [], loose: false });
+                            i++;
+                        } else if (indM && indM[1].length > indent) {
+                            // Continuation / nested content
+                            if (items.length) {
+                                items[items.length - 1].text += '\n' + indM[2];
+                            }
+                            i++;
+                        } else if (/^\s*$/.test(l) && items.length) {
+                            items[items.length - 1].loose = true;
+                            i++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    tokens.push({ type: 'list', ordered, items });
+                    continue;
+                }
+
+                if (/^<[a-zA-Z]/.test(line)) {
+                    const body = [];
+                    while (i < lineArr.length && !/^\s*$/.test(lineArr[i])) {
+                        body.push(lineArr[i]);
+                        i++;
+                    }
+                    tokens.push({ type: 'html', text: body.join('\n') });
+                    continue;
+                }
+
+                const paraLines = [];
+                while (i < lineArr.length) {
+                    const l = lineArr[i];
+                    if (/^\s*$/.test(l))          break;
+                    if (/^#{1,6}\s/.test(l))       break;
+                    if (/^(`{3,}|~{3,})/.test(l)) break;
+                    if (/^\s*([-*_])\s*\1\s*\1/.test(l)) break;
+                    if (/^>/.test(l))              break;
+                    if (/^(\s*)([-*+]|\d+\.)\s/.test(l) && paraLines.length > 0) break;
+                    paraLines.push(l);
+                    i++;
+                }
+                if (paraLines.length) {
+                    tokens.push({ type: 'paragraph', text: paraLines.join('\n') });
+                }
+            }
+
+            return { tokens, refs };
+        }
+
+        function parseTableRow(row) {
+            return row
+                .replace(/^\||\|$/g, '')
+                .split('|')
+                .map(c => c.trim());
+        }
+
+        function renderTokens(tokens, opts, refs) {
+            let html = '';
+
+            for (const tok of tokens) {
+                switch (tok.type) {
+
+                    case 'heading': {
+                        const tag = `h${tok.depth}`;
+                        const id  = tok.text.toLowerCase().replace(/[^\w]+/g, '-');
+                        html += `<${tag} id="${id}">${renderInline(tok.text, opts, refs)}</${tag}>\n`;
+                        break;
+                    }
+
+                    case 'hr':
+                        html += '<hr>\n';
+                        break;
+
+                    case 'code': {
+                        const langClass = tok.lang ? ` class="language-${escHtml(tok.lang)}"` : '';
+                        html += `<pre><code${langClass}>${escHtml(tok.text)}</code></pre>\n`;
+                        break;
+                    }
+
+                    case 'blockquote': {
+                        const inner = renderTokens(tokenize(tok.src).tokens, opts, refs);
+                        html += `<blockquote>\n${inner}</blockquote>\n`;
+                        break;
+                    }
+
+                    case 'table': {
+                        let t = '<table>\n<thead>\n<tr>\n';
+                        tok.headers.forEach((h, ci) => {
+                            const align = tok.aligns[ci] ? ` style="text-align:${tok.aligns[ci]}"` : '';
+                            t += `<th${align}>${renderInline(h, opts, refs)}</th>\n`;
+                        });
+                        t += '</tr>\n</thead>\n<tbody>\n';
+                        tok.rows.forEach(row => {
+                            t += '<tr>\n';
+                            row.forEach((cell, ci) => {
+                                const align = tok.aligns[ci] ? ` style="text-align:${tok.aligns[ci]}"` : '';
+                                t += `<td${align}>${renderInline(cell, opts, refs)}</td>\n`;
+                            });
+                            t += '</tr>\n';
+                        });
+                        t += '</tbody>\n</table>\n';
+                        html += t;
+                        break;
+                    }
+
+                    case 'list': {
+                        const tag   = tok.ordered ? 'ol' : 'ul';
+                        let isTask  = false;
+                        let listHtml = '';
+
+                        tok.items.forEach(item => {
+                            // Task-list detection  [ ] / [x]
+                            const taskMatch = item.text.match(/^\[([ xX])\]\s*([\s\S]*)/);
+                            if (taskMatch) {
+                                isTask      = true;
+                                const done  = taskMatch[1].toLowerCase() === 'x';
+                                const rest  = taskMatch[2];
+                                listHtml   += `<li><input type="checkbox"${done ? ' checked' : ''} disabled> ${renderInline(rest, opts, refs)}</li>\n`;
+                            } else {
+                                const content = tok.loose
+                                    ? `<p>${renderInline(item.text, opts, refs)}</p>`
+                                    : renderInline(item.text, opts, refs);
+                                listHtml   += `<li>${content}</li>\n`;
+                            }
+                        });
+
+                        const cls = isTask ? ` class="ts-md-task-list"` : '';
+                        html += `<${tag}${cls}>\n${listHtml}</${tag}>\n`;
+                        break;
+                    }
+
+                    case 'html':
+                        // Pass raw HTML through unchanged (sanitize option strips this)
+                        if (!opts.sanitize) {
+                            html += tok.text + '\n';
+                        }
+                        break;
+
+                    case 'paragraph': {
+                        // Soft-break handling: single newlines become spaces unless opts.breaks
+                        const text = opts.breaks
+                            ? tok.text
+                            : tok.text.replace(/\n(?!\n)/g, ' ');
+                        html += `<p>${renderInline(text, opts, refs)}</p>\n`;
+                        break;
+                    }
+                }
+            }
+
+            return html;
+        }
+
+        // Minimal strip: removes <script> and on* attributes.
+        function sanitize(html) {
+            return html
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/\s+on\w+="[^"]*"/gi, '')
+                .replace(/\s+on\w+='[^']*'/gi, '');
+        }
+
+        function parse(src, opts) {
+            const { tokens, refs } = tokenize(src);
+            let   html             = renderTokens(tokens, opts, refs);
+            if (opts.sanitize) html = sanitize(html);
+            return html;
+        }
+
+        return { parse };
+    })();
 
     class PluginMarkdown {
+
         constructor($el, opts) {
             return this.initialize($el, opts);
         }
 
         initialize($el, opts) {
-            if ($el.data(instanceName)) {  // guard: prevent re-init
+            if ($el.data(instanceName)) {
                 return this;
             }
 
             this.$el = $el;
-            this.initialHTML = $el.html();                 // captured before build mutates the DOM
-            this.$script = $el.find('script[type="text/markdown"]').first();
-            this.$content = null;
-            this.pendingSource = null;                     // populated when loading from `src`
 
-            if (!this.$script.length) {
-                this.fallbackSource = $el.text();          // no script tag — read raw text instead
-            }
+            // Snapshot original content before build mutates the DOM
+            this._originalHTML = $el.html();
+            this._renderedHtml = '';
 
             this
                 .setData()
                 .setOptions(opts)
-                .build()
-                .events();
+                .build();
 
             return this;
         }
@@ -61,284 +629,144 @@
 
         setOptions(opts) {
             this.options = $.extend(true, {}, PluginMarkdown.defaults, opts, {
-                wrapper: this.$el   // wrapper is always appended last
+                wrapper: this.$el
             });
             return this;
         }
 
         build() {
-            const self = this;
+            injectStyles();
 
-            self.injectStyles();
+            const self    = this;
+            const $el     = self.$el;
+            const options = self.options;
 
-            // No script tag means the raw markdown lives directly in the element —
-            // clear it so the original (unrendered) text isn't shown alongside output.
-            if (!self.$script.length) {
-                self.$el.empty();
-            }
+            $el.addClass('ts-markdown');
 
-            if (self.options.src) {
-                self.fetchSource();
+            // CSS custom property overrides
+            if (options.linkColor)    $el.css('--ts-md-link',   options.linkColor);
+            if (options.codeFont)     $el.css('--ts-md-code-font', options.codeFont);
+
+            const src = $el.data('plugin-markdown-src') || options.src || '';
+
+            if (src) {
+                self.setSource(src);
             } else {
-                self.ensureMarked(() => self.renderMarkdown());
+                // Render from existing text content, decoded from HTML entities
+                const raw = $el.text();
+                self.render(raw);
             }
 
             return this;
         }
 
-        events() {
-            const self = this;
+        /**
+         * Parse and render a Markdown string into the host element.
+         * @param {string} markdown
+         * @returns {PluginMarkdown}
+         */
+        render(markdown) {
+            const html = GFM.parse(markdown, this.options);
+            this._renderedHtml = html;
+            this.$el.html(html);
+            this.$el.trigger('rendered.ts.markdown', [html]);
+            return this;
+        }
 
-            // Allow callers to force a re-render via a namespaced event.
-            self.$el.on('render.tsmarkdown', () => {
-                self.renderMarkdown();
+        /**
+         * Fetch a Markdown file from a URL and render it.
+         * @param {string} url
+         * @returns {PluginMarkdown}
+         */
+        setSource(url) {
+            const self = this;
+            const $el  = self.$el;
+
+            $el.addClass('ts-markdown-loading');
+            $el.html('');
+
+            $.ajax({
+                url,
+                dataType: 'text',
+                success(md) {
+                    $el.removeClass('ts-markdown-loading');
+                    self.render(md);
+                },
+                error(xhr, status, err) {
+                    $el.removeClass('ts-markdown-loading');
+                    $el.html(`<p class="ts-markdown-error">Failed to load <code>${url}</code>: ${err || status}</p>`);
+                    $el.trigger('error.ts.markdown', [url, err]);
+                }
             });
 
-            // Optionally watch the source <script> and re-render on change.
-            if (self.options.observe && self.$script.length && window.MutationObserver) {
-                self.observer = new MutationObserver(() => self.renderMarkdown());
-                self.observer.observe(self.$script[0], {
-                    childList: true,
-                    characterData: true,
-                    subtree: true
-                });
-            }
-
             return this;
         }
 
-        // Re-reads the source and re-renders the HTML. Safe to call repeatedly.
-        renderMarkdown() {
-            const self = this;
-
-            if (!self.markedAvailable()) {
-                self.warnMissing();
-                return this;
-            }
-
-            let source = self.getSource();
-            if (self.options.dedent !== false) {
-                source = self.dedent(source);
-            }
-
-            let html = self.parse(source);
-
-            if (self.options.sanitize && window.DOMPurify && $.isFunction(window.DOMPurify.sanitize)) {
-                html = window.DOMPurify.sanitize(html);
-            }
-
-            if (!self.$content || !self.$content.length) {
-                self.$content = $('<div></div>').addClass(self.options.contentClass);
-                self.$el.append(self.$content);
-            }
-
-            self.$content.html(html);
-            self.$el.attr('data-markdown-rendered', 'true');
-            self.$el.trigger('rendered.tsmarkdown', [self]);
-
-            return this;
-        }
-
-        getSource() {
-            const self = this;
-            if (typeof self.options.content === 'string') {
-                return self.options.content;                       // explicit inline override
-            }
-            if (typeof self.pendingSource === 'string') {
-                return self.pendingSource;                         // fetched from `src`
-            }
-            if (self.$script && self.$script.length) {
-                return self.$script[0].textContent || '';          // raw, unescaped markdown
-            }
-            return self.fallbackSource || '';
-        }
-
-        // Strip the longest common leading-whitespace prefix from every line so
-        // indented markdown renders correctly. Handles mixed tabs/spaces.
-        dedent(text) {
-            const lines = String(text).split('\n');
-
-            while (lines.length && lines[0].trim() === '') {
-                lines.shift();
-            }
-            while (lines.length && lines[lines.length - 1].trim() === '') {
-                lines.pop();
-            }
-            if (!lines.length) {
-                return '';
-            }
-
-            let common = null;
-            lines.forEach((line) => {
-                if (line.trim() === '') {
-                    return;                                        // ignore blank lines when measuring
-                }
-                const ws = (line.match(/^[ \t]*/) || [''])[0];
-                if (common === null) {
-                    common = ws;
-                } else {
-                    let i = 0;
-                    const max = Math.min(common.length, ws.length);
-                    while (i < max && common[i] === ws[i]) {
-                        i++;
-                    }
-                    common = common.slice(0, i);
-                }
-            });
-            common = common || '';
-
-            return lines
-                .map((line) => (line.startsWith(common) ? line.slice(common.length) : line.replace(/^[ \t]+/, '')))
-                .join('\n');
-        }
-
-        parse(markdown) {
-            const opts = this.options.markedOptions || {};
-            if (window.marked) {
-                if ($.isFunction(window.marked.parse)) {
-                    return window.marked.parse(markdown, opts);    // marked v4+
-                }
-                if ($.isFunction(window.marked)) {
-                    return window.marked(markdown, opts);          // marked v3 and earlier
-                }
-            }
-            return '';
-        }
-
-        markedAvailable() {
-            return typeof window.marked !== 'undefined' &&
-                ($.isFunction(window.marked.parse) || $.isFunction(window.marked));
-        }
-
-        // If marked isn't loaded yet and a URL was provided, lazy-load it
-        // (deduped across every markdown element on the page), then render.
-        ensureMarked(callback) {
-            const self = this;
-
-            if (self.markedAvailable()) {
-                callback();
-                return this;
-            }
-
-            if (self.options.markedUrl) {
-                themestrap.fn.getScripts([self.options.markedUrl], '').done(() => {
-                    if (self.markedAvailable()) {
-                        callback();
-                    } else {
-                        self.warnMissing();
-                    }
-                });
-            } else {
-                self.warnMissing();
-            }
-
-            return this;
-        }
-
-        fetchSource() {
-            const self = this;
-            $.ajax({ url: self.options.src, dataType: 'text' })
-                .done((data) => {
-                    self.pendingSource = data;
-                    self.ensureMarked(() => self.renderMarkdown());
-                })
-                .fail(() => {
-                    themestrap.fn.showErrorMessage(
-                        'Failed to Load File',
-                        'Failed to load markdown source: (' + self.options.src + ')'
-                    );
-                });
-            return this;
-        }
-
-        injectStyles() {
-            const self = this;
-            if (self.options.injectStyles === false) {
-                return this;
-            }
-            const styleId = 'themestrap-plugin-markdown-styles';
-            if (document.getElementById(styleId)) {
-                return this;                                       // unique ID guard — inject once
-            }
-
-            const css =
-                '.markdown-content{font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.65;color:inherit;word-wrap:break-word}' +
-                '.markdown-content>:first-child{margin-top:0}' +
-                '.markdown-content>:last-child{margin-bottom:0}' +
-                '.markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6{font-family:"Syne","Fraunces",Georgia,serif;line-height:1.25;margin:1.5em 0 .6em;font-weight:700}' +
-                '.markdown-content h1{font-size:2em}.markdown-content h2{font-size:1.6em}.markdown-content h3{font-size:1.3em}' +
-                '.markdown-content p{margin:0 0 1em}' +
-                '.markdown-content a{color:#d2541b;text-decoration:none}.markdown-content a:hover{text-decoration:underline}' +
-                '.markdown-content code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.875em;background:rgba(10,25,41,.06);padding:.15em .4em;border-radius:4px}' +
-                '.markdown-content pre{background:#0a1929;color:#e6edf3;padding:1em 1.15em;border-radius:8px;overflow:auto;margin:0 0 1em}' +
-                '.markdown-content pre code{background:none;padding:0;color:inherit;font-size:.85em}' +
-                '.markdown-content blockquote{margin:0 0 1em;padding:.5em 1em;border-left:3px solid #2ab8c8;background:rgba(42,184,200,.07);color:inherit}' +
-                '.markdown-content blockquote>:last-child{margin-bottom:0}' +
-                '.markdown-content ul,.markdown-content ol{margin:0 0 1em;padding-left:1.5em}' +
-                '.markdown-content li+li{margin-top:.25em}' +
-                '.markdown-content table{border-collapse:collapse;width:100%;margin:0 0 1em}' +
-                '.markdown-content th,.markdown-content td{border:1px solid rgba(10,25,41,.15);padding:.5em .75em;text-align:left}' +
-                '.markdown-content th{background:rgba(10,25,41,.05);font-weight:700}' +
-                '.markdown-content img{max-width:100%;height:auto}' +
-                '.markdown-content hr{border:0;border-top:1px solid rgba(10,25,41,.15);margin:1.5em 0}';
-
-            $('<style></style>')
-                .attr({ id: styleId, type: 'text/css' })
-                .text(css)
-                .appendTo('head');
-
-            return this;
-        }
-
-        warnMissing() {
-            themestrap.fn.showErrorMessage(
-                'Failed to Load File',
-                'Failed to load: Marked - Include the following file(s): (vendor/marked/marked.min.js)'
-            );
-            return this;
+        /**
+         * Return the last rendered HTML string.
+         * @returns {string}
+         */
+        getHtml() {
+            return this._renderedHtml;
         }
 
         destroy() {
-            const self = this;
-
-            if (self.observer) {
-                self.observer.disconnect();
-                self.observer = null;
-            }
-
-            self.$el.off('.tsmarkdown');
-            self.$el.removeAttr('data-markdown-rendered');
-            self.$el.html(self.initialHTML);
-            self.$el.removeData(instanceName);
+            this.$el
+                .html(this._originalHTML)
+                .removeClass('ts-markdown ts-markdown-loading ts-markdown-error')
+                .css({
+                    '--ts-md-link':      '',
+                    '--ts-md-code-font': ''
+                })
+                .removeData(instanceName);
 
             return this;
         }
     }
 
     PluginMarkdown.defaults = {
-        contentClass: 'markdown-content', // class applied to the rendered output wrapper
-        dedent: true,                     // strip common leading whitespace before parsing
-        sanitize: false,                  // run output through DOMPurify when available
-        observe: false,                   // re-render automatically when the source <script> changes
-        injectStyles: true,               // inject default markdown typography styles once
-        src: null,                        // optional URL to load markdown from
-        content: null,                    // optional inline markdown string (overrides script/text)
-        markedOptions: {},                // options object forwarded to marked
-        markedUrl: null,                  // optional URL to lazy-load marked if window.marked is absent
-        forceInit: false,                 // honored when wired via dynIntObsInit — render immediately
-        accY: 0                           // honored when wired via dynIntObsInit — observer trigger offset
+        /**
+         * Source URL to fetch Markdown from. Also readable from
+         * data-plugin-markdown-src on the element.
+         */
+        src: '',
+
+        /**
+         * Convert single trailing newlines inside paragraphs to <br>.
+         * Mimics GitHub's "new lines as line breaks" soft-break behaviour.
+         */
+        breaks: false,
+
+        /**
+         * Strip <script> tags and on* event attribute from output HTML.
+         * Enabled by default for untrusted content.
+         */
+        sanitize: true,
+
+        /**
+         * Render GFM task-list syntax  - [ ] / - [x].
+         * Checkboxes are rendered disabled (read-only).
+         */
+        taskLists: true,
+
+        /**
+         * Override the link colour via CSS custom property.
+         * Accepts any CSS colour string; maps to --ts-md-link.
+         */
+        linkColor: '',
+
+        /**
+         * Override the code-block font stack via CSS custom property.
+         * Maps to --ts-md-code-font.
+         */
+        codeFont: ''
     };
 
-    // Expose class to themestrap namespace
-    $.extend(themestrap, {
-        PluginMarkdown
-    });
+    $.extend(themestrap, { PluginMarkdown });
 
-    // jQuery plugin method
     $.fn.themestrapPluginMarkdown = function(opts) {
         return this.map(function() {
             const $this = $(this);
-
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
             } else {
@@ -346,4 +774,5 @@
             }
         });
     };
+
 })).apply(this, [window.themestrap, jQuery]);

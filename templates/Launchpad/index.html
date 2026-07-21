@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Launchpad — The SaaS platform built for scale</title>
+<meta name="description" content="Ship faster, grow smarter. Launchpad gives your team the workflow tools, analytics, and integrations to move from idea to revenue.">
+<link rel="icon" type="image/png" href="../../img/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg">
+<link rel="shortcut icon" href="../../img/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="../../img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Themestrap">
+<!-- FOUC-proof dark mode: apply before CSS -->
+<script>(function(){try{var s=localStorage.getItem('themestrap-theme'),d=matchMedia('(prefers-color-scheme:dark)').matches,t=s||(d?'dark':'light'),h=document.documentElement;if(t==='dark')h.classList.add('dark');h.setAttribute('data-theme',t);h.setAttribute('data-bs-theme',t);}catch(e){}})();</script>
+
+<!-- Vendor -->
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../../vendor/fontawesome-free/css/all.min.css">
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,800&family=Syne:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap">
+<!-- SaaS Starter Styles -->
+<link rel="stylesheet" href="css/saas.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAVIGATION
+══════════════════════════════════════════ -->
+<nav class="saas-nav" role="navigation" aria-label="Main navigation">
+  <div class="container saas-nav__inner">
+    <a href="index.html" class="saas-nav__brand">
+      <img src="img/logo.svg" class="logo" alt="Launchpad" height="32">
+    </a>
+
+    <ul class="saas-nav__links" role="list">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="customers.html">Customers</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+
+    <div class="saas-nav__actions">
+      <button data-plugin-darkmode aria-label="Toggle dark mode"></button>
+      <a href="#" class="btn-ghost">Log in</a>
+      <a href="pricing.html" class="btn-primary">Start free trial</a>
+      <button class="saas-nav__toggle" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero__grid-bg"></div>
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6">
+        <span class="eyebrow">Introducing Launchpad 2.0</span>
+        <h1 class="display-1 mb-4">
+          Build faster.<br>Grow smarter.<br>
+          <span style="color:var(--ts-teal)">Ship with confidence.</span>
+        </h1>
+        <p class="lead mb-5" style="max-width:480px">
+          Launchpad brings your product, marketing, and growth teams onto one platform — with real-time analytics, workflow automation, and the integrations your stack already uses.
+        </p>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+          <a href="pricing.html" class="btn-primary btn-primary--lg">
+            Start free — no card needed
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M6.5 3.5l4.5 4.5-4.5 4.5-1-1L9 8 5.5 4.5z"/></svg>
+          </a>
+          <a href="customers.html" class="btn-outline-light">See customer stories</a>
+        </div>
+        <p style="font-size:13px;color:rgba(255,255,255,.4);margin-top:18px">
+          ✦ Free 14-day trial &nbsp;·&nbsp; No credit card &nbsp;·&nbsp; Cancel anytime
+        </p>
+      </div>
+      <div class="col-lg-6 d-none d-lg-block">
+        <!-- Product preview mockup -->
+        <div class="hero__preview">
+          <div class="hero__preview-bar">
+            <div class="hero__preview-dot" style="background:#ff5f57"></div>
+            <div class="hero__preview-dot" style="background:#febc2e"></div>
+            <div class="hero__preview-dot" style="background:#28c840"></div>
+            <span style="flex:1;background:rgba(255,255,255,.07);border-radius:4px;height:20px;margin-left:12px"></span>
+          </div>
+          <!-- Fake dashboard UI -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+            <div style="background:rgba(232,103,42,.15);border:1px solid rgba(232,103,42,.3);border-radius:8px;padding:14px">
+              <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:6px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">MRR</div>
+              <div style="font-size:1.4rem;font-weight:800;color:#fff">$48,200</div>
+              <div style="font-size:11px;color:var(--ts-teal);margin-top:4px">↑ 18% vs last month</div>
+            </div>
+            <div style="background:rgba(42,184,200,.1);border:1px solid rgba(42,184,200,.2);border-radius:8px;padding:14px">
+              <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:6px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Active Users</div>
+              <div style="font-size:1.4rem;font-weight:800;color:#fff">3,841</div>
+              <div style="font-size:11px;color:var(--ts-teal);margin-top:4px">↑ 9% this week</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:14px">
+              <div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:6px;font-weight:600;letter-spacing:.08em;text-transform:uppercase">Churn</div>
+              <div style="font-size:1.4rem;font-weight:800;color:#fff">1.2%</div>
+              <div style="font-size:11px;color:#22c55e;margin-top:4px">↓ Best ever</div>
+            </div>
+          </div>
+          <!-- Fake chart bar -->
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:14px">
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:12px;font-weight:600">Revenue last 7 days</div>
+            <div style="display:flex;align-items:flex-end;gap:6px;height:60px">
+              <div style="flex:1;background:rgba(232,103,42,.4);border-radius:4px 4px 0 0;height:40%"></div>
+              <div style="flex:1;background:rgba(232,103,42,.5);border-radius:4px 4px 0 0;height:55%"></div>
+              <div style="flex:1;background:rgba(232,103,42,.55);border-radius:4px 4px 0 0;height:48%"></div>
+              <div style="flex:1;background:rgba(232,103,42,.6);border-radius:4px 4px 0 0;height:72%"></div>
+              <div style="flex:1;background:rgba(232,103,42,.65);border-radius:4px 4px 0 0;height:65%"></div>
+              <div style="flex:1;background:rgba(232,103,42,.75);border-radius:4px 4px 0 0;height:85%"></div>
+              <div style="flex:1;background:var(--ts-orange);border-radius:4px 4px 0 0;height:100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SOCIAL PROOF LOGOS
+══════════════════════════════════════════ -->
+<section class="section--sm" style="background:var(--ts-surface);border-bottom:1px solid var(--ts-border)">
+  <div class="container">
+    <p style="text-align:center;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ts-muted);margin-bottom:20px">
+      Trusted by fast-growing teams worldwide
+    </p>
+    <div class="logo-strip">
+      <span class="logo-strip__item">Acme Corp</span>
+      <span class="logo-strip__item">Velocity AI</span>
+      <span class="logo-strip__item">Orion Labs</span>
+      <span class="logo-strip__item">Meridian</span>
+      <span class="logo-strip__item">Stackwise</span>
+      <span class="logo-strip__item">Clearbit</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CORE VALUE PROPS
+══════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header section-header--center mb-5">
+      <span class="eyebrow">Why Launchpad</span>
+      <h2 class="display-3">Everything your team needs to ship and grow</h2>
+      <p class="lead">From first commit to first customer, Launchpad removes the friction between building and selling software.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card card--hover">
+        <div class="feature-icon feature-icon--orange">⚡</div>
+        <h3 style="font-size:1.15rem;margin-bottom:8px">Instant deployment</h3>
+        <p style="font-size:14px;color:var(--ts-text-2);margin:0;line-height:1.65">Push to production in seconds with zero-config deployments. Auto-rollback on failure keeps your uptime SLA intact.</p>
+      </div>
+      <div class="card card--hover">
+        <div class="feature-icon feature-icon--teal">📊</div>
+        <h3 style="font-size:1.15rem;margin-bottom:8px">Real-time analytics</h3>
+        <p style="font-size:14px;color:var(--ts-text-2);margin:0;line-height:1.65">Track activation, retention, and revenue in a single dashboard. No data warehousing setup required.</p>
+      </div>
+      <div class="card card--hover">
+        <div class="feature-icon feature-icon--navy">🔗</div>
+        <h3 style="font-size:1.15rem;margin-bottom:8px">200+ integrations</h3>
+        <p style="font-size:14px;color:var(--ts-text-2);margin:0;line-height:1.65">Connect Slack, Stripe, HubSpot, Salesforce, and your entire data stack with one-click connectors.</p>
+      </div>
+      <div class="card card--hover">
+        <div class="feature-icon feature-icon--orange">🛡️</div>
+        <h3 style="font-size:1.15rem;margin-bottom:8px">Enterprise security</h3>
+        <p style="font-size:14px;color:var(--ts-text-2);margin:0;line-height:1.65">SOC 2 Type II certified, GDPR-compliant, and SSO-ready. Your customer data stays yours.</p>
+      </div>
+      <div class="card card--hover">
+        <div class="feature-icon feature-icon--teal">🤝</div>
+        <h3 style="font-size:1.15rem;margin-bottom:8px">Collaborative workflows</h3>
+        <p style="font-size:14px;color:var(--ts-text-2);margin:0;line-height:1.65">Async-first tooling with live presence, comments, and approval flows so remote teams move fast.</p>
+      </div>
+      <div class="card card--hover">
+        <div class="feature-icon feature-icon--navy">🧠</div>
+        <h3 style="font-size:1.15rem;margin-bottom:8px">AI-powered insights</h3>
+        <p style="font-size:14px;color:var(--ts-text-2);margin:0;line-height:1.65">Launchpad AI surfaces churn risk, revenue opportunities, and product gaps before your team notices them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     STATS
+══════════════════════════════════════════ -->
+<section class="section section--dark">
+  <div class="container">
+    <div class="row gy-4">
+      <div class="col-6 col-lg-3">
+        <div class="stat-block">
+          <div class="stat-block__number" data-plugin-counter data-to="12000" data-append="+" data-plugin-options='{"thousandsSeparator":","}'></div>
+          <div class="stat-block__label">Companies shipped with Launchpad</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-block">
+          <div class="stat-block__number" data-plugin-counter data-to="99.99" data-append="%" data-plugin-options='{"decimals": 2}'></div>
+          <div class="stat-block__label">Uptime over the last 12 months</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-block">
+          <div class="stat-block__number" data-plugin-counter data-to="4.9" data-append="★"></div>
+          <div class="stat-block__label">Average rating on G2 and Capterra</div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-block">
+          <div class="stat-block__number" data-plugin-counter data-to="3" data-append=" min"></div>
+          <div class="stat-block__label">Median time to first deployment</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     HOW IT WORKS
+══════════════════════════════════════════ -->
+<section class="section section--muted">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-5">
+        <span class="eyebrow">How it works</span>
+        <h2 class="display-3 mb-4">From sign-up to production in under an hour</h2>
+        <p class="lead mb-4">We designed Launchpad so you can spend your first hour validating ideas, not configuring infrastructure.</p>
+        <a href="features.html" class="btn-primary">Explore all features →</a>
+      </div>
+      <div class="col-lg-6 offset-lg-1">
+        <div class="step-item">
+          <div class="step-item__num">1</div>
+          <div>
+            <div class="step-item__title">Connect your repository</div>
+            <p class="step-item__body">Link GitHub, GitLab, or Bitbucket in one click. Launchpad detects your framework and pre-fills a sensible build config.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item__num">2</div>
+          <div>
+            <div class="step-item__title">Configure your pipeline</div>
+            <p class="step-item__body">Add environment variables, set branch rules, and wire up your test suite — all from a single YAML file or the visual editor.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item__num">3</div>
+          <div>
+            <div class="step-item__title">Go live &amp; invite your team</div>
+            <p class="step-item__body">Your first deploy is live in seconds. Invite unlimited teammates and assign roles — engineers, marketers, or stakeholders.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-item__num">4</div>
+          <div>
+            <div class="step-item__title">Monitor, iterate, and grow</div>
+            <p class="step-item__body">Built-in analytics alert you to regressions and opportunities so every release is smarter than the last.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     TESTIMONIALS
+══════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header section-header--center mb-5">
+      <span class="eyebrow">Customer stories</span>
+      <h2 class="display-3">Don't take our word for it</h2>
+      <p class="lead">Teams at every stage — from seed-stage startups to public companies — rely on Launchpad to ship and grow.</p>
+    </div>
+    <div class="grid-3">
+      <div class="testimonial">
+        <p class="testimonial__quote">We cut our deployment time from two days to under six minutes. Launchpad is the reason we hit our Q3 goals two weeks early.</p>
+        <div class="d-flex align-items-center gap-3">
+          <div class="testimonial__avatar" style="background:var(--ts-orange)">SR</div>
+          <div>
+            <div class="testimonial__name">Sasha Reeve</div>
+            <div class="testimonial__role">CTO, Velocity AI</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial__quote">The analytics alone are worth the subscription. We finally know which features drive retention and which ones are just noise.</p>
+        <div class="d-flex align-items-center gap-3">
+          <div class="testimonial__avatar" style="background:var(--ts-teal)">MK</div>
+          <div>
+            <div class="testimonial__name">Marcus Keller</div>
+            <div class="testimonial__role">Head of Product, Meridian</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial__quote">We evaluated six platforms. Launchpad was the only one where the security team didn't immediately send it back to us with a list of concerns.</p>
+        <div class="d-flex align-items-center gap-3">
+          <div class="testimonial__avatar" style="background:#7c3aed;">JP</div>
+          <div>
+            <div class="testimonial__name">Jin Park</div>
+            <div class="testimonial__role">VP Engineering, Stackwise</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-5">
+      <a href="customers.html" class="btn-ghost">Read all customer stories →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CTA BANNER
+══════════════════════════════════════════ -->
+<section class="section section--muted">
+  <div class="container">
+    <div class="cta-banner">
+      <h2 class="display-3 mb-3">Ready to launch?</h2>
+      <p class="lead mb-5" style="max-width:480px;margin-left:auto;margin-right:auto">
+        Start your free 14-day trial today. No credit card required. Cancel anytime.
+      </p>
+      <form class="saas-cta-form d-flex flex-wrap justify-content-center gap-3">
+        <input type="email" placeholder="Work email address" required
+               style="padding:12px 18px;border-radius:8px;border:none;font-size:15px;min-width:260px;max-width:320px;width:100%;background:rgba(255,255,255,.15);color:#fff;backdrop-filter:blur(8px);">
+        <button type="submit" class="btn-primary btn-primary--lg" style="background:#fff;color:var(--ts-orange) !important;white-space:nowrap">
+          Start free trial
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer class="saas-footer">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <a href="index.html" class="saas-footer__brand">
+          <img src="img/logo.svg" class="logo" alt="Launchpad" height="32">
+        </a>
+        <p class="saas-footer__desc">The SaaS platform built for founders, product teams, and growth marketers who need to ship and scale fast.</p>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Product</p>
+        <ul class="saas-footer__links">
+          <li><a href="features.html">Features</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Company</p>
+        <ul class="saas-footer__links">
+          <li><a href="about.html">About</a></li>
+          <li><a href="customers.html">Customers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Resources</p>
+        <ul class="saas-footer__links">
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">API Reference</a></li>
+          <li><a href="#">Status</a></li>
+          <li><a href="#">Community</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Legal</p>
+        <ul class="saas-footer__links">
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">GDPR</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="saas-footer__bottom">
+      <span>© 2025 Launchpad, Inc. All rights reserved.</span>
+      <div class="saas-footer__bottom-links">
+        <a href="#">Twitter / X</a>
+        <a href="#">LinkedIn</a>
+        <a href="https://github.com/daemondevin/Themestrap">GitHub</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.counter.js"></script>
+<script src="../../js/components/themestrap.plugin.darkmode.js"></script>
+<script src="../../js/components/themestrap.plugin.scrollfx.js"></script>
+<script src="js/saas.js"></script>
+</body>
+</html>

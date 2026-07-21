@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing — Launchpad</title>
+<meta name="description" content="Simple, transparent pricing. Start free, scale as you grow. No hidden fees.">
+<script>(function(){try{var s=localStorage.getItem('themestrap-theme'),d=matchMedia('(prefers-color-scheme:dark)').matches,t=s||(d?'dark':'light'),h=document.documentElement;if(t==='dark')h.classList.add('dark');h.setAttribute('data-theme',t);h.setAttribute('data-bs-theme',t);}catch(e){}})();</script>
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../../vendor/fontawesome-free/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,800&family=Syne:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/saas.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="saas-nav" role="navigation" aria-label="Main navigation">
+  <div class="container saas-nav__inner">
+    <a href="index.html" class="saas-nav__brand">
+      <img src="img/logo.svg" class="logo" alt="Launchpad" height="32">
+    </a>
+    <ul class="saas-nav__links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="features.html">Features</a></li>
+      <li><a href="pricing.html" class="active">Pricing</a></li>
+      <li><a href="customers.html">Customers</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="saas-nav__actions">
+      <button data-plugin-darkmode aria-label="Toggle dark mode"></button>
+      <a href="#" class="btn-ghost">Log in</a>
+      <a href="#" class="btn-primary">Start free trial</a>
+      <button class="saas-nav__toggle" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="background:var(--ts-surface);padding:72px 0 56px;border-bottom:1px solid var(--ts-border)">
+  <div class="container text-center">
+    <span class="eyebrow">Pricing</span>
+    <h1 class="display-2 mb-3">Simple, transparent pricing</h1>
+    <p class="lead mx-auto mb-5" style="max-width:520px">
+      Start free. Upgrade when your team needs more. No hidden fees, no surprise invoices.
+    </p>
+    <!-- Annual / Monthly toggle -->
+    <div class="d-flex align-items-center justify-content-center gap-3">
+      <span id="pricing-label-monthly" class="fw-bold" style="font-size:14px;color:var(--ts-text)">Monthly</span>
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="pricing-toggle" role="switch" style="width:44px;height:22px;cursor:pointer">
+      </div>
+      <span id="pricing-label-annual" style="font-size:14px;color:var(--ts-text-2)">
+        Annual
+        <span class="badge badge--teal ms-2">Save 20%</span>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING CARDS -->
+<section class="section section--muted">
+  <div class="container">
+    <div class="row justify-content-center gy-4">
+
+      <!-- FREE -->
+      <div class="col-lg-3 col-md-6">
+        <div class="pricing-card">
+          <div class="pricing-card__tier">Free</div>
+          <div class="pricing-card__price"><sup>$</sup><span data-price-monthly="0" data-price-annual="0">0</span></div>
+          <div class="pricing-card__period" data-period>/ month, forever</div>
+          <p class="pricing-card__desc">Perfect for solo builders and side projects. Ship your first product with no upfront cost.</p>
+          <hr class="pricing-card__divider">
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> <span>3 projects</span></li>
+            <li><span class="check">✓</span> <span>5 GB bandwidth / month</span></li>
+            <li><span class="check">✓</span> <span>100K analytics events</span></li>
+            <li><span class="check">✓</span> <span>Community support</span></li>
+            <li><span class="check">✓</span> <span>Automatic SSL</span></li>
+            <li><span class="cross">✗</span> <span style="color:var(--ts-muted)">Custom domains</span></li>
+            <li><span class="cross">✗</span> <span style="color:var(--ts-muted)">Team members</span></li>
+            <li><span class="cross">✗</span> <span style="color:var(--ts-muted)">Workflow automation</span></li>
+          </ul>
+          <a href="#" class="btn-ghost" style="text-align:center;justify-content:center">Get started free</a>
+        </div>
+      </div>
+
+      <!-- STARTER -->
+      <div class="col-lg-3 col-md-6">
+        <div class="pricing-card">
+          <div class="pricing-card__tier">Starter</div>
+          <div class="pricing-card__price"><sup>$</sup><span data-price-monthly="49" data-price-annual="39">49</span></div>
+          <div class="pricing-card__period" data-period>/ month</div>
+          <p class="pricing-card__desc">For early-stage startups ready to move fast and start finding product-market fit.</p>
+          <hr class="pricing-card__divider">
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> <span>Unlimited projects</span></li>
+            <li><span class="check">✓</span> <span>100 GB bandwidth / month</span></li>
+            <li><span class="check">✓</span> <span>5M analytics events</span></li>
+            <li><span class="check">✓</span> <span>Email support (48h SLA)</span></li>
+            <li><span class="check">✓</span> <span>Custom domains + SSL</span></li>
+            <li><span class="check">✓</span> <span><strong>5 team members</strong></span></li>
+            <li><span class="check">✓</span> <span>Workflow automation (10 flows)</span></li>
+            <li><span class="cross">✗</span> <span style="color:var(--ts-muted)">SSO / SAML</span></li>
+          </ul>
+          <a href="#" class="btn-primary" style="text-align:center;justify-content:center">Start free trial</a>
+        </div>
+      </div>
+
+      <!-- GROWTH (featured) -->
+      <div class="col-lg-3 col-md-6">
+        <div class="pricing-card pricing-card--featured" style="position:relative">
+          <div class="pricing-card__badge">Most popular</div>
+          <div class="pricing-card__tier">Growth</div>
+          <div class="pricing-card__price"><sup>$</sup><span data-price-monthly="149" data-price-annual="119">149</span></div>
+          <div class="pricing-card__period" data-period>/ month</div>
+          <p class="pricing-card__desc">For teams that have found traction and need the analytics and automation to scale it.</p>
+          <hr class="pricing-card__divider">
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> <span>Everything in Starter</span></li>
+            <li><span class="check">✓</span> <span>500 GB bandwidth / month</span></li>
+            <li><span class="check">✓</span> <span>50M analytics events</span></li>
+            <li><span class="check">✓</span> <span>Priority support (8h SLA)</span></li>
+            <li><span class="check">✓</span> <span><strong>25 team members</strong></span></li>
+            <li><span class="check">✓</span> <span>Unlimited workflow flows</span></li>
+            <li><span class="check">✓</span> <span>A/B testing</span></li>
+            <li><span class="check">✓</span> <span>Funnel &amp; cohort analysis</span></li>
+          </ul>
+          <a href="#" class="btn-primary" style="text-align:center;justify-content:center">Start free trial</a>
+        </div>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div class="col-lg-3 col-md-6">
+        <div class="pricing-card">
+          <div class="pricing-card__tier">Enterprise</div>
+          <div class="pricing-card__price" style="font-size:2rem;line-height:1.2;padding-top:6px">Custom</div>
+          <div class="pricing-card__period">Contact sales</div>
+          <p class="pricing-card__desc">For organisations that need SLAs, security reviews, custom contracts, and dedicated support.</p>
+          <hr class="pricing-card__divider">
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> <span>Everything in Growth</span></li>
+            <li><span class="check">✓</span> <span>Unlimited bandwidth &amp; events</span></li>
+            <li><span class="check">✓</span> <span>Dedicated Slack support</span></li>
+            <li><span class="check">✓</span> <span><strong>Unlimited team members</strong></span></li>
+            <li><span class="check">✓</span> <span>SSO / SAML / SCIM</span></li>
+            <li><span class="check">✓</span> <span>Custom SLA (99.99% uptime)</span></li>
+            <li><span class="check">✓</span> <span>Audit logs &amp; RBAC</span></li>
+            <li><span class="check">✓</span> <span>HIPAA / SOC 2 BAA</span></li>
+          </ul>
+          <a href="#" class="btn-ghost" style="text-align:center;justify-content:center">Talk to sales</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- All plans note -->
+    <p class="text-center mt-4" style="font-size:13px;color:var(--ts-muted)">
+      All plans include a 14-day free trial. No credit card required. Downgrade or cancel at any time.
+    </p>
+  </div>
+</section>
+
+<!-- COMPARISON TABLE -->
+<section class="section">
+  <div class="container">
+    <div class="section-header section-header--center mb-5">
+      <span class="eyebrow">Compare plans</span>
+      <h2 class="display-3">Everything, side by side</h2>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <thead>
+          <tr style="border-bottom:2px solid var(--ts-border)">
+            <th style="padding:14px 16px;text-align:left;color:var(--ts-muted);font-weight:600;width:38%">Feature</th>
+            <th style="padding:14px 16px;text-align:center;color:var(--ts-text);font-weight:700">Free</th>
+            <th style="padding:14px 16px;text-align:center;color:var(--ts-text);font-weight:700">Starter</th>
+            <th style="padding:14px 16px;text-align:center;color:var(--ts-orange);font-weight:700;background:var(--ts-orange-light);border-radius:8px 8px 0 0">Growth</th>
+            <th style="padding:14px 16px;text-align:center;color:var(--ts-text);font-weight:700">Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--ts-border)">
+            <td style="padding:14px 16px;font-weight:600">Projects</td>
+            <td style="padding:14px 16px;text-align:center">3</td>
+            <td style="padding:14px 16px;text-align:center">Unlimited</td>
+            <td style="padding:14px 16px;text-align:center;background:rgba(232,103,42,.04)">Unlimited</td>
+            <td style="padding:14px 16px;text-align:center">Unlimited</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ts-border)">
+            <td style="padding:14px 16px;font-weight:600">Team members</td>
+            <td style="padding:14px 16px;text-align:center">1</td>
+            <td style="padding:14px 16px;text-align:center">5</td>
+            <td style="padding:14px 16px;text-align:center;background:rgba(232,103,42,.04)">25</td>
+            <td style="padding:14px 16px;text-align:center">Unlimited</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ts-border)">
+            <td style="padding:14px 16px;font-weight:600">Analytics events / month</td>
+            <td style="padding:14px 16px;text-align:center">100K</td>
+            <td style="padding:14px 16px;text-align:center">5M</td>
+            <td style="padding:14px 16px;text-align:center;background:rgba(232,103,42,.04)">50M</td>
+            <td style="padding:14px 16px;text-align:center">Unlimited</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ts-border)">
+            <td style="padding:14px 16px;font-weight:600">A/B testing</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-muted)">✗</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-muted)">✗</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-success);background:rgba(232,103,42,.04)">✓</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-success)">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ts-border)">
+            <td style="padding:14px 16px;font-weight:600">SSO / SAML</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-muted)">✗</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-muted)">✗</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-muted);background:rgba(232,103,42,.04)">✗</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-success)">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--ts-border)">
+            <td style="padding:14px 16px;font-weight:600">Audit logs</td>
+            <td style="padding:14px 16px;text-align:center;color:var(--ts-muted)">✗</td>
+            <td style="padding:14px 16px;text-align:center">30 days</td>
+            <td style="padding:14px 16px;text-align:center;background:rgba(232,103,42,.04)">90 days</td>
+            <td style="padding:14px 16px;text-align:center">365 days</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px;font-weight:600">Support</td>
+            <td style="padding:14px 16px;text-align:center">Community</td>
+            <td style="padding:14px 16px;text-align:center">Email</td>
+            <td style="padding:14px 16px;text-align:center;background:rgba(232,103,42,.04)">Priority email</td>
+            <td style="padding:14px 16px;text-align:center">Dedicated Slack</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section section--muted">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="section-header section-header--center mb-5">
+          <span class="eyebrow">FAQ</span>
+          <h2 class="display-3">Common questions</h2>
+        </div>
+
+        <details class="faq-item">
+          <summary>Is the 14-day trial really free — no credit card needed?</summary>
+          <div class="faq-item__body">Yes. You can trial any paid plan for 14 days without entering payment information. At the end of the trial you'll be asked to add a card if you want to continue. If you don't, you'll automatically move to the Free plan.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I change plans at any time?</summary>
+          <div class="faq-item__body">Absolutely. Upgrade whenever you need more capacity — billing is prorated to the day. Downgrade takes effect at the start of the next billing cycle.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What happens if I go over my analytics event limit?</summary>
+          <div class="faq-item__body">We'll send you a warning at 80% and 100% of your limit. We never drop events silently — instead we queue the overage and prompt you to upgrade. You can also set custom overage budgets on Growth and above.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Do you offer discounts for startups or non-profits?</summary>
+          <div class="faq-item__body">Yes. We have a Startup Program (50% off Growth for 12 months) for early-stage companies backed by recognised accelerators, and a 40% discount for registered non-profits. Apply via the support portal.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Where is my data stored?</summary>
+          <div class="faq-item__body">By default, data is stored in the US (AWS us-east-1). European customers can opt into EU-only storage (Germany, AWS eu-central-1) from the account settings panel. Enterprise customers can choose any supported region.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I export my data if I leave?</summary>
+          <div class="faq-item__body">Yes, always. You can export your analytics events, deployment logs, and configuration as JSON or CSV at any time from the dashboard. We retain your data for 90 days after cancellation.</div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section--sm section--dark" style="text-align:center">
+  <div class="container">
+    <h2 style="color:#fff;margin-bottom:12px">Still unsure? Talk to the team.</h2>
+    <p style="color:#8da4ba;margin-bottom:28px;font-size:15px">We'll help you pick the right plan for where you are now — and where you're heading.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="#" class="btn-primary btn-primary--lg">Start free trial</a>
+      <a href="#" class="btn-outline-light">Schedule a demo</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="saas-footer">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <img src="img/logo.svg" class="logo" alt="Launchpad" height="32">
+        <p class="saas-footer__desc">The SaaS platform built for founders, product teams, and growth marketers.</p>
+      </div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Product</p><ul class="saas-footer__links"><li><a href="features.html">Features</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="#">Changelog</a></li></ul></div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Company</p><ul class="saas-footer__links"><li><a href="about.html">About</a></li><li><a href="customers.html">Customers</a></li><li><a href="#">Blog</a></li></ul></div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Resources</p><ul class="saas-footer__links"><li><a href="#">Docs</a></li><li><a href="#">API</a></li><li><a href="#">Status</a></li></ul></div>
+      <div class="col-6 col-lg-2"><p class="saas-footer__heading">Legal</p><ul class="saas-footer__links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Security</a></li></ul></div>
+    </div>
+    <div class="saas-footer__bottom">
+      <span>© 2025 Launchpad, Inc. All rights reserved.</span>
+      <div class="saas-footer__bottom-links"><a href="#">Twitter / X</a><a href="#">LinkedIn</a><a href="https://github.com/daemondevin/Themestrap">GitHub</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.darkmode.js"></script>
+<script src="js/saas.js"></script>
+</body>
+</html>

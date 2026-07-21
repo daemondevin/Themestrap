@@ -124,6 +124,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    isolation: isolate;        /* keep backdrop/panel layering deterministic */
 
     /* Hidden state — plugin toggles this class */
     &.dialog-hidden {
@@ -134,8 +135,9 @@
 }
 
 [data-dialog-backdrop] {
-    position: fixed;
+    position: absolute;
     inset: 0;
+    z-index: 0;
     background-color: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Features — Launchpad</title>
+<meta name="description" content="Explore every Launchpad feature: deployment pipelines, real-time analytics, workflow automation, integrations, and enterprise security.">
+<script>(function(){try{var s=localStorage.getItem('themestrap-theme'),d=matchMedia('(prefers-color-scheme:dark)').matches,t=s||(d?'dark':'light'),h=document.documentElement;if(t==='dark')h.classList.add('dark');h.setAttribute('data-theme',t);h.setAttribute('data-bs-theme',t);}catch(e){}})();</script>
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../../vendor/fontawesome-free/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,800&family=Syne:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/saas.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="saas-nav" role="navigation" aria-label="Main navigation">
+  <div class="container saas-nav__inner">
+    <a href="index.html" class="saas-nav__brand">
+      <img src="img/logo.svg" class="logo" alt="Launchpad" height="32">
+    </a>
+    <ul class="saas-nav__links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="features.html" class="active">Features</a></li>
+      <li><a href="pricing.html">Pricing</a></li>
+      <li><a href="customers.html">Customers</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+    <div class="saas-nav__actions">
+      <button data-plugin-darkmode aria-label="Toggle dark mode"></button>
+      <a href="#" class="btn-ghost">Log in</a>
+      <a href="pricing.html" class="btn-primary">Start free trial</a>
+      <button class="saas-nav__toggle" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<section class="hero" style="padding:72px 0 64px">
+  <div class="hero__grid-bg"></div>
+  <div class="container text-center">
+    <span class="eyebrow">The full platform</span>
+    <h1 class="display-2 mb-4">Built for every stage of growth</h1>
+    <p class="lead mx-auto" style="max-width:560px">
+      From the first line of code to your Series B and beyond, Launchpad scales with your ambition.
+    </p>
+  </div>
+</section>
+
+<!-- CATEGORY TABS (Bootstrap) -->
+<div style="background:var(--ts-surface);border-bottom:1px solid var(--ts-border);position:sticky;top:68px;z-index:900">
+  <div class="container">
+    <ul class="nav nav-tabs border-0 gap-1 py-2" id="feature-tabs" role="tablist" style="flex-wrap:nowrap;overflow-x:auto">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-deploy" type="button" role="tab" style="white-space:nowrap">🚀 Deployment</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-analytics" type="button" role="tab" style="white-space:nowrap">📊 Analytics</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-workflow" type="button" role="tab" style="white-space:nowrap">⚙️ Workflow</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-integrations" type="button" role="tab" style="white-space:nowrap">🔗 Integrations</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-security" type="button" role="tab" style="white-space:nowrap">🛡️ Security</button>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="tab-content">
+
+  <!-- DEPLOYMENT -->
+  <div class="tab-pane fade show active" id="tab-deploy" role="tabpanel">
+    <section class="section">
+      <div class="container">
+        <div class="row align-items-center gy-5 mb-6">
+          <div class="col-lg-5">
+            <span class="eyebrow">Deployment</span>
+            <h2 class="display-3 mb-4">Zero-config deployments that just work</h2>
+            <p class="lead mb-4">Launchpad detects your framework, builds your project, and routes traffic — all without a single config file if you don't want one.</p>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px">
+              <li style="display:flex;gap:10px;font-size:14px"><span style="color:var(--ts-teal)">✓</span> Atomic deployments with instant rollback</li>
+              <li style="display:flex;gap:10px;font-size:14px"><span style="color:var(--ts-teal)">✓</span> Preview environments per pull request</li>
+              <li style="display:flex;gap:10px;font-size:14px"><span style="color:var(--ts-teal)">✓</span> Global edge network — &lt;50ms to 95% of users</li>
+              <li style="display:flex;gap:10px;font-size:14px"><span style="color:var(--ts-teal)">✓</span> Automatic SSL, CDN, and DDoS protection</li>
+              <li style="display:flex;gap:10px;font-size:14px"><span style="color:var(--ts-teal)">✓</span> Multi-region active-active failover</li>
+            </ul>
+          </div>
+          <div class="col-lg-6 offset-lg-1">
+            <!-- Terminal-style code preview using PluginCodeWindow aesthetic -->
+            <div style="background:var(--ts-navy);border-radius:12px;padding:20px;font-family:var(--ts-font-mono);font-size:13px;line-height:1.7;box-shadow:var(--ts-shadow-lg)">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)">
+                <div style="width:10px;height:10px;border-radius:50%;background:#ff5f57"></div>
+                <div style="width:10px;height:10px;border-radius:50%;background:#febc2e"></div>
+                <div style="width:10px;height:10px;border-radius:50%;background:#28c840"></div>
+                <span style="color:rgba(255,255,255,.3);font-size:11px;margin-left:8px">launchpad deploy</span>
+              </div>
+              <div style="color:#6ee7b7">✓ Framework detected: <span style="color:#a8e1ff">Next.js 14</span></div>
+              <div style="color:#8da4ba">→ Building project…</div>
+              <div style="color:#6ee7b7">✓ Build completed in <span style="color:#fde68a">12.4s</span></div>
+              <div style="color:#8da4ba">→ Deploying to edge (14 regions)…</div>
+              <div style="color:#6ee7b7">✓ Deployment live: <span style="color:var(--ts-teal)">https://my-app.lp.dev</span></div>
+              <div style="color:#8da4ba;margin-top:8px">→ Preview URL: <span style="color:rgba(255,255,255,.5)">https://pr-42.my-app.lp.dev</span></div>
+              <div style="color:#6ee7b7;margin-top:8px">✓ All checks passed — 🚀</div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider my-5">
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="feature-icon feature-icon--orange">🔄</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">Instant rollback</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">One click to revert any deployment. Zero downtime, zero panic during incidents.</p>
+          </div>
+          <div class="card">
+            <div class="feature-icon feature-icon--teal">🌐</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">Edge network</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Your app runs at 47 PoPs globally. Static assets serve from the CDN closest to each visitor.</p>
+          </div>
+          <div class="card">
+            <div class="feature-icon feature-icon--navy">👁️</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">PR previews</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Every pull request gets a unique, shareable URL. Review design changes before merging.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="tab-pane fade" id="tab-analytics" role="tabpanel">
+    <section class="section">
+      <div class="container">
+        <div class="section-header section-header--center mb-5">
+          <span class="eyebrow">Analytics</span>
+          <h2 class="display-3">See exactly what drives growth</h2>
+          <p class="lead">Built-in product analytics that go from event ingestion to actionable insight in minutes — no data engineering team required.</p>
+        </div>
+        <div class="grid-3">
+          <div class="card card--hover">
+            <div class="feature-icon feature-icon--orange">🎯</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">Funnel analysis</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Visualise where users drop off in any conversion flow. Identify friction and A/B test fixes.</p>
+          </div>
+          <div class="card card--hover">
+            <div class="feature-icon feature-icon--teal">🔁</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">Retention cohorts</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Track daily, weekly, and monthly retention by cohort. Know exactly when users churn and why.</p>
+          </div>
+          <div class="card card--hover">
+            <div class="feature-icon feature-icon--navy">💰</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">Revenue attribution</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Connect product behaviour to billing events. See which features actually drive MRR expansion.</p>
+          </div>
+          <div class="card card--hover">
+            <div class="feature-icon feature-icon--orange">🧪</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">A/B testing</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Run experiments server-side or client-side. Statistical significance is calculated automatically.</p>
+          </div>
+          <div class="card card--hover">
+            <div class="feature-icon feature-icon--teal">🔔</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">Anomaly alerts</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Launchpad AI alerts you when any metric moves outside its normal band. Catch issues in hours, not weeks.</p>
+          </div>
+          <div class="card card--hover">
+            <div class="feature-icon feature-icon--navy">📤</div>
+            <h3 style="font-size:1.05rem;margin-bottom:6px">Data export</h3>
+            <p style="font-size:13.5px;color:var(--ts-text-2);margin:0">Export raw events to BigQuery, Snowflake, or S3. Your data always stays portable.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- WORKFLOW -->
+  <div class="tab-pane fade" id="tab-workflow" role="tabpanel">
+    <section class="section">
+      <div class="container">
+        <div class="section-header mb-5">
+          <span class="eyebrow">Workflow Automation</span>
+          <h2 class="display-3">Automate the work between shipping and growing</h2>
+          <p class="lead">Connect triggers, actions, and conditions without writing glue code. Visual workflow builder included.</p>
+        </div>
+        <div class="grid-2">
+          <div class="card" style="padding:32px">
+            <div class="feature-icon feature-icon--orange">📬</div>
+            <h3 style="margin-bottom:8px">User lifecycle emails</h3>
+            <p style="font-size:14px;color:var(--ts-text-2);line-height:1.65">Trigger onboarding sequences, upgrade nudges, and re-engagement campaigns based on product events — not time delays.</p>
+          </div>
+          <div class="card" style="padding:32px">
+            <div class="feature-icon feature-icon--teal">🏷️</div>
+            <h3 style="margin-bottom:8px">Segment builder</h3>
+            <p style="font-size:14px;color:var(--ts-text-2);line-height:1.65">Build dynamic user segments using any combination of properties, events, and computed traits. Segments update in real time.</p>
+          </div>
+          <div class="card" style="padding:32px">
+            <div class="feature-icon feature-icon--navy">🤖</div>
+            <h3 style="margin-bottom:8px">AI-suggested workflows</h3>
+            <p style="font-size:14px;color:var(--ts-text-2);line-height:1.65">Launchpad AI analyses your product data and recommends automation recipes that have worked for similar companies.</p>
+          </div>
+          <div class="card" style="padding:32px">
+            <div class="feature-icon feature-icon--orange">🕐</div>
+            <h3 style="margin-bottom:8px">Scheduled jobs</h3>
+            <p style="font-size:14px;color:var(--ts-text-2);line-height:1.65">Run any task on a cron schedule — data exports, digest emails, usage reports — without managing infrastructure.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- INTEGRATIONS -->
+  <div class="tab-pane fade" id="tab-integrations" role="tabpanel">
+    <section class="section">
+      <div class="container">
+        <div class="section-header section-header--center mb-5">
+          <span class="eyebrow">200+ Integrations</span>
+          <h2 class="display-3">Works with everything in your stack</h2>
+          <p class="lead">Native connectors, webhooks, and an open API mean Launchpad fits your workflow — not the other way around.</p>
+        </div>
+        <div class="grid-4">
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">💬</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">Slack</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Deploy notifications &amp; alerts</div>
+          </div>
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">💳</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">Stripe</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Revenue data sync</div>
+          </div>
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">🧲</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">HubSpot</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Contact &amp; deal sync</div>
+          </div>
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">☁️</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">Salesforce</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Enterprise CRM integration</div>
+          </div>
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">🐙</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">GitHub</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Source &amp; CI connection</div>
+          </div>
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">📧</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">Postmark</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Transactional email</div>
+          </div>
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">📊</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">BigQuery</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Data warehouse export</div>
+          </div>
+          <div class="card text-center" style="padding:24px 16px">
+            <div style="font-size:28px;margin-bottom:10px">🔌</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">REST API</div>
+            <div style="font-size:12px;color:var(--ts-muted)">Build your own connector</div>
+          </div>
+        </div>
+        <p class="text-center mt-4" style="font-size:14px;color:var(--ts-muted)">+ 192 more integrations in the Launchpad App Store</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="tab-pane fade" id="tab-security" role="tabpanel">
+    <section class="section">
+      <div class="container">
+        <div class="row align-items-center gy-5">
+          <div class="col-lg-5">
+            <span class="eyebrow">Security &amp; Compliance</span>
+            <h2 class="display-3 mb-4">Enterprise-grade security, startup simplicity</h2>
+            <p class="lead mb-4">Your security team will thank you. Launchpad handles the hard stuff so you can focus on shipping.</p>
+            <div class="d-flex flex-wrap gap-3">
+              <span class="badge badge--teal">SOC 2 Type II</span>
+              <span class="badge badge--orange">GDPR</span>
+              <span class="badge badge--teal">ISO 27001</span>
+              <span class="badge badge--orange">CCPA</span>
+              <span class="badge badge--teal">HIPAA (add-on)</span>
+            </div>
+          </div>
+          <div class="col-lg-6 offset-lg-1">
+            <div class="grid-2" style="gap:16px">
+              <div class="card">
+                <div class="feature-icon feature-icon--orange" style="margin-bottom:12px">🔐</div>
+                <h3 style="font-size:14px;margin-bottom:4px">SSO &amp; SAML</h3>
+                <p style="font-size:13px;color:var(--ts-text-2);margin:0">Okta, Azure AD, Google Workspace — plug in your IdP in minutes.</p>
+              </div>
+              <div class="card">
+                <div class="feature-icon feature-icon--teal" style="margin-bottom:12px">🗝️</div>
+                <h3 style="font-size:14px;margin-bottom:4px">Secrets management</h3>
+                <p style="font-size:13px;color:var(--ts-text-2);margin:0">Encrypted at rest and in transit. Secret rotation built in.</p>
+              </div>
+              <div class="card">
+                <div class="feature-icon feature-icon--navy" style="margin-bottom:12px">📋</div>
+                <h3 style="font-size:14px;margin-bottom:4px">Audit logs</h3>
+                <p style="font-size:13px;color:var(--ts-text-2);margin:0">Every action logged and exportable. 365-day retention on all plans.</p>
+              </div>
+              <div class="card">
+                <div class="feature-icon feature-icon--orange" style="margin-bottom:12px">👥</div>
+                <h3 style="font-size:14px;margin-bottom:4px">Role-based access</h3>
+                <p style="font-size:13px;color:var(--ts-text-2);margin:0">Granular RBAC with custom roles for complex org structures.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</div><!-- /tab-content -->
+
+<!-- CTA -->
+<section class="section--sm" style="background:var(--ts-surface);border-top:1px solid var(--ts-border)">
+  <div class="container text-center">
+    <h2 class="display-3 mb-3">Start building today</h2>
+    <p class="lead mb-4">Free 14-day trial. No credit card. No setup fees.</p>
+    <a href="pricing.html" class="btn-primary btn-primary--lg">See pricing &amp; start trial →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="saas-footer">
+  <div class="container">
+    <div class="row gy-5">
+      <div class="col-lg-4">
+        <a href="index.html" class="saas-footer__brand">
+          <img src="img/logo.svg" class="logo" alt="Launchpad" height="32">
+        </a>
+        <p class="saas-footer__desc">The SaaS platform built for founders, product teams, and growth marketers who need to ship and scale fast.</p>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Product</p>
+        <ul class="saas-footer__links">
+          <li><a href="features.html">Features</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Company</p>
+        <ul class="saas-footer__links">
+          <li><a href="about.html">About</a></li>
+          <li><a href="customers.html">Customers</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Resources</p>
+        <ul class="saas-footer__links">
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">API Reference</a></li>
+          <li><a href="#">Status</a></li>
+          <li><a href="#">Community</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <p class="saas-footer__heading">Legal</p>
+        <ul class="saas-footer__links">
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">GDPR</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="saas-footer__bottom">
+      <span>© 2025 Launchpad, Inc. All rights reserved.</span>
+      <div class="saas-footer__bottom-links">
+        <a href="#">Twitter / X</a><a href="#">LinkedIn</a><a href="https://github.com/daemondevin/Themestrap">GitHub</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.darkmode.js"></script>
+<script src="js/saas.js"></script>
+</body>
+</html>

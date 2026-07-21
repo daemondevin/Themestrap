@@ -33,6 +33,18 @@
  * a <code> child or a wrapper <div>, the plugin locates the nearest <pre>,
  * relocates any highlight data-* attrs, and uses the <pre> from that point on.
  *
+ * RESILIENCE
+ * highlight.js core and per-language grammars are fetched from a CDN via dynamic
+ * import(). Those requests can fail (502 Bad Gateway, network drops, CSP blocks,
+ * timeouts). The plugin is designed to degrade gracefully rather than throw:
+ *   - Each import is wrapped in a per-attempt timeout and retried with backoff.
+ *   - A failed import is evicted from the in-flight cache so it is never "poisoned"
+ *     (a single transient 502 will not permanently disable highlighting).
+ *   - If core never loads, blocks still render as ESCAPED plaintext with line
+ *     numbers and copy intact — no raw-HTML injection, no thrown errors.
+ *   - After a hard core failure the loader backs off for a cooldown window to
+ *     avoid hammering a down CDN, then transparently retries later.
+ *
  * USAGE
  *   <pre id="ex1"
  *        data-plugin-highlight="javascript"
@@ -51,9 +63,21 @@
  *       themestrap.fn.intObsInit('[data-plugin-highlight]:not(.manual)', 'themestrapPluginHighlight');
  *   }
  */
+// Syntax Highlight
 (((themestrap = {}, $) => {
     const instanceName = '__highlight';
-    
+
+    // Resilience tuning
+    // CDN endpoints (extracted so they can be swapped / mirrored in one place).
+    const HLJS_CORE_URL  = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11-stable/build/es/core.js';
+    const HLJS_LANG_BASE = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/es/languages/';
+    const MODX_LANG_URL  = 'https://nskiag6l.modx.dev/assets/components/themestrap/js/modx.js';
+
+    const LOAD_TIMEOUT_MS  = 10000;  // per-attempt ceiling for a single import()
+    const LOAD_RETRIES     = 2;      // extra attempts after the first (so 3 total)
+    const RETRY_BASE_MS    = 400;    // exponential backoff base between attempts
+    const CORE_COOLDOWN_MS = 15000;  // back-off window after a hard core failure
+
     // Syntax Highlight stylesheet — injected lazily on first init (see
     // injectStyles), so merely loading this script never adds CSS to pages
     // that don't actually use the this plugin.
@@ -65,12 +89,16 @@
             .code-highlight {
                 
             }
-
+            
             .code-highlight-header {
-                background-color: #282c34;
+                background-color: var(--dark--300);
                 width: 100%;
                 text-align: right;
                 border-radius: var(--border-radius);
+            }
+            
+            html.dark .code-highlight-header {
+                background-color: var(--dark-100);
             }
 
             .code-highlight .code-highlight-caption {
@@ -82,11 +110,15 @@
             }
 
             .code-highlight .topfix {
-                background-color: #282c34;
+                background-color: var(--dark--300);
                 width: 100%;
                 height: 1em;
                 margin-top: -1em;
                 border-bottom: 1px var(--light-rgba-10) solid;
+            }
+
+            html.dark .code-highlight .topfix {
+                background-color: var(--dark-100);
             }
 
             .code-highlight .buttons {
@@ -130,20 +162,20 @@
             }
 
             .hljs {
-                color: #383838;
-                background: #f8f8f8
+                background: var(--light-100);
+                color: var(--dark--300);
             }
 
             .hljs ::-moz-selection,
             .hljs::-moz-selection {
-                background-color: #d8d8d8;
-                color: #383838
+                background-color: var(--light-inverse);
+                color: var(--dark-inverse)
             }
 
             .hljs ::selection,
             .hljs::selection {
-                background-color: #d8d8d8;
-                color: #383838
+                background-color: var(--light-inverse);
+                color: var(--dark-inverse)
             }
 
             .hljs-comment {
@@ -360,9 +392,15 @@
                 font-weight: 700
             }
 
-            .hljs-ln-highlight-line {
+            html.dark .hljs-ln-highlight-line {
                 background: rgba(229,192,123,.12); 
                 border-left: 2px solid #e5c07b; 
+                padding-left: 2px;
+            }
+
+            .hljs-ln-highlight-line {
+                background: rgba(229,192,123,.3); 
+                border-left: 2px solid #cfa85e; 
                 padding-left: 2px;
             }
 
@@ -459,15 +497,28 @@
             }
 
             .hljs-copy-btn {
-                top: 10px;
+                box-shadow:inset 0px 1px 0px 0px #ffffff;
+                background:linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
+                background-color:#ffffff;
+                border-radius:8px;
+                border:1px solid #dcdcdc;
+                display:inline-block;
+                cursor:pointer;
+                color:#666666;
+                padding:3px 10px;
+                text-decoration:none;
+                text-shadow:0px 1px 0px #ffffff;
+                top: 12px;
                 right: 10px;
-                opacity: .2;
+                opacity: .15;
                 align-items: flex-end;
                 background-color: var(--light-rgba-20) !important;
             }
-
+            
             .hljs-copy-btn:hover {
-                opacity: 1;
+                background:linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
+                background-color:#f6f6f6;
+                opacity: 0.75;
             }
         `;
 
@@ -479,6 +530,58 @@
         style.id = STYLE_ID;
         style.textContent = CSS_TEXT;
         (document.head || document.documentElement).appendChild(style);
+    }
+
+    // HTML-escape source text for the fallback render path. When hljs is NOT
+    // available we must never write raw textContent into innerHTML — code blocks
+    // routinely contain <, >, & and even literal <script>/<style>, which would
+    // otherwise be parsed as markup (broken layout at best, injection at worst).
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        }[c]));
+    }
+
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
+    // import() cannot be aborted, but we can stop *waiting* on it. The module
+    // keeps downloading in the background and the browser caches it, so a later
+    // retry resolves instantly from cache. The timer is always cleared to avoid
+    // a dangling reject on the winning path.
+    function importWithTimeout(url, timeout) {
+        let timer;
+        const timeoutP = new Promise((_, reject) => {
+            timer = setTimeout(
+                () => reject(new Error(`timeout after ${timeout}ms`)),
+                timeout
+            );
+        });
+        return Promise.race([import(url), timeoutP]).finally(() => clearTimeout(timer));
+    }
+
+    // Resilient dynamic import: per-attempt timeout + exponential backoff retry.
+    // Throws the last error only after all attempts are exhausted. Note that a
+    // browser dynamic-import failure (e.g. a 502 from the CDN) surfaces as a
+    // TypeError without an accessible HTTP status, so every failure is treated
+    // as retryable rather than branching on status codes.
+    async function loadModule(url, { timeout = LOAD_TIMEOUT_MS, retries = LOAD_RETRIES, label = url } = {}) {
+        let lastErr;
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                return await importWithTimeout(url, timeout);
+            } catch (e) {
+                lastErr = e;
+                console.warn(
+                    `PluginHighlight: load attempt ${attempt + 1}/${retries + 1} failed for ${label} — ${e?.message || e}`
+                );
+                if (attempt < retries) await delay(RETRY_BASE_MS * Math.pow(2, attempt));
+            }
+        }
+        throw lastErr;
     }
 
     // Maps shorthand / alternate names to canonical highlight.js grammar IDs.
@@ -513,9 +616,10 @@
     ]);
 
     // Shared caches (global across all instances on the page)
-    themestrap._hljs        = null;  // hljs core singleton
-    themestrap._hljsLangs   = {};    // { [lang]: true } registration flags
-    themestrap._hljsLoading = {};    // { [lang|'__core__']: Promise } — in-flight coalescing
+    themestrap._hljs           = null;  // hljs core singleton
+    themestrap._hljsLangs      = {};    // { [lang]: true } registration flags
+    themestrap._hljsLoading    = {};    // { [lang|'__core__']: Promise } — in-flight coalescing
+    themestrap._hljsCoreFailed = 0;     // epoch ms of the last hard core failure (cooldown gate)
 
     class PluginHighlight {
 
@@ -536,7 +640,7 @@
             this
                 .setData()
                 .setOptions(opts)
-                .build();
+                .build(); // async, fire-and-forget — build() never rejects (see below)
 
             return this;
         }
@@ -664,90 +768,169 @@
             return nums;
         }
 
+        /**
+         * Loads the hljs core singleton. Resolves to the hljs object on success
+         * or to `null` on failure (callers degrade to escaped plaintext).
+         *
+         * Resilience:
+         *   - Coalesces concurrent loads onto one promise.
+         *   - On failure, EVICTS the in-flight cache entry so the next init can
+         *     retry — a transient 502 never poisons the cache for the session.
+         *   - After a hard failure, refuses to retry for CORE_COOLDOWN_MS to avoid
+         *     a retry storm against a down CDN, then transparently tries again.
+         */
         async loadHLJS() {
             if (themestrap._hljs) return themestrap._hljs;
 
-            // Coalesce: if another instance already started loading core, await
-            // the same promise rather than firing a second network request.
+            // Cooldown gate: skip fast (return null) if we failed very recently.
+            if (themestrap._hljsCoreFailed &&
+                (Date.now() - themestrap._hljsCoreFailed) < CORE_COOLDOWN_MS) {
+                return null;
+            }
+
             if (!themestrap._hljsLoading['__core__']) {
-                themestrap._hljsLoading['__core__'] = import(
-                    'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11-stable/build/es/core.js'
-                ).then(m => {
-                    themestrap._hljs = m.default;
-                    return themestrap._hljs;
-                });
+                themestrap._hljsLoading['__core__'] = loadModule(HLJS_CORE_URL, { label: 'hljs core' })
+                    .then(m => {
+                        themestrap._hljs = m.default;
+                        themestrap._hljsCoreFailed = 0;     // clear any prior failure
+                        return themestrap._hljs;
+                    })
+                    .catch(err => {
+                        // Record the failure window and EVICT so a later init retries.
+                        themestrap._hljsCoreFailed = Date.now();
+                        delete themestrap._hljsLoading['__core__'];
+                        console.warn('PluginHighlight: highlight.js core failed to load — rendering plain code blocks for now.', err?.message || err);
+                        return null;                        // graceful, non-throwing
+                    });
             }
 
             return themestrap._hljsLoading['__core__'];
         }
 
+        /**
+         * Registers a language grammar. Resolves to `true` when the grammar is
+         * available afterwards, `false` otherwise. Never throws.
+         *
+         * Resilience: failed language imports are evicted from the in-flight
+         * cache (so they can be retried), and a failure simply falls the block
+         * back to escaped plaintext rather than aborting the whole build.
+         */
         async loadLanguage(lang, hljs) {
-            if (themestrap._hljsLangs[lang]) return; // already registered
+            if (!hljs) return false;
+            if (lang === 'plaintext') return false;   // no grammar needed; escape path handles it
+            if (themestrap._hljsLangs[lang]) return true;
 
-            // Coalesce: multiple blocks using the same language share one import()
             if (!themestrap._hljsLoading[lang]) {
                 if (!POPULAR_LANGUAGES.has(lang)) {
                     console.warn(`PluginHighlight: "${lang}" is not in the known-language list and may 404.`);
                 }
 
-                themestrap._hljsLoading[lang] = (
-                    lang === 'modx'
-                        ? import('https://nskiag6l.modx.dev/assets/components/themestrap/js/modx.js')
-                        : import(`https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/es/languages/${lang}.min.js`)
-                ).then(mod => {
-                    hljs.registerLanguage(lang, mod.default);
-                    themestrap._hljsLangs[lang] = true;
-                }).catch(() => {
-                    console.warn(`PluginHighlight: language "${lang}" failed to load — falling back to plaintext.`);
-                    this.options.lang = 'plaintext';
-                });
+                const url = (lang === 'modx') ? MODX_LANG_URL : `${HLJS_LANG_BASE}${lang}.min.js`;
+                
+                themestrap._hljsLoading[lang] = (async () => {
+                    // modx requires xml to be registered first
+                    if (lang === 'modx' && !themestrap._hljsLangs['xml']) {
+                        await loadModule(`${HLJS_LANG_BASE}xml.min.js`, { label: 'language "xml"' })
+                            .then(mod => {
+                                hljs.registerLanguage('xml', mod.default);
+                                themestrap._hljsLangs['xml'] = true;
+                            });
+                    }
+                    if (lang === 'modx' && !themestrap._hljsLangs['json']) {
+                        await loadModule(`${HLJS_LANG_BASE}json.min.js`, { label: 'language "json"' })
+                            .then(mod => {
+                                hljs.registerLanguage('json', mod.default);
+                                themestrap._hljsLangs['json'] = true;
+                            });
+                    }
+                    return loadModule(url, { label: `language "${lang}"` })
+                        .then(mod => {
+                            hljs.registerLanguage(lang, mod.default);
+                            themestrap._hljsLangs[lang] = true;
+                            return true;
+                        })
+                        .catch(err => {
+                            console.warn(`PluginHighlight: language "${lang}" failed to load — falling back to plaintext.`, err?.message || err);
+                            delete themestrap._hljsLoading[lang];
+                            return false;
+                        });
+                })();
             }
-
             return themestrap._hljsLoading[lang];
         }
 
+        // The whole build is wrapped so that NOTHING here can produce an
+        // unhandled promise rejection from the fire-and-forget call in
+        // initialize(). Any unexpected error leaves the block untouched.
         async build() {
-            injectStyles();
-            
-            const hljs = await this.loadHLJS();
-            await this.loadLanguage(this.options.lang, hljs);
+            try {
+                injectStyles();
 
-            if (this.options.hljsOptions && Object.keys(this.options.hljsOptions).length) {
-                hljs.configure(this.options.hljsOptions);
+                const hljs = await this.loadHLJS();          // null on failure
+                const langReady = hljs
+                    ? await this.loadLanguage(this.options.lang, hljs)
+                    : false;
+
+                if (hljs && this.options.hljsOptions && Object.keys(this.options.hljsOptions).length) {
+                    try {
+                        hljs.configure(this.options.hljsOptions);
+                    } catch (e) {
+                        console.warn('PluginHighlight: hljs.configure() failed — continuing with defaults.', e);
+                    }
+                }
+
+                this.instances = [];
+
+                this.$el.each((blockIndex, elem) => {
+                    try {
+                        const instance = this.buildBlock(elem, blockIndex, hljs, langReady);
+                        if (instance) this.instances.push(instance);
+                    } catch (e) {
+                        console.warn('PluginHighlight: failed to build a code block — left as-is.', e);
+                    }
+                });
+
+                this.bindGlobalEvents();
+                this.handleHash();
+            } catch (e) {
+                console.warn('PluginHighlight: build() aborted unexpectedly.', e);
+                this.instances = this.instances || [];
             }
-
-            this.instances = [];
-
-            this.$el.each((blockIndex, elem) => {
-                const instance = this.buildBlock(elem, blockIndex, hljs);
-                if (instance) this.instances.push(instance);
-            });
-
-            this.bindGlobalEvents();
-            this.handleHash();
 
             return this;
         }
 
-        buildBlock(elem, blockIndex, hljs) {
+        buildBlock(elem, blockIndex, hljs, langReady) {
             const code  = elem.querySelector('code') || elem;
             const $code = $(code);
 
             if ($code.hasClass('hljs-ln-done')) return null;
-
-            const rawText  = code.textContent;
+            
+            let rawText  = code.textContent;
             const rawLines = rawText.split('\n');
 
-            // Syntax highlight
-            let highlightedHTML = rawText;
+            // Syntax highlight when possible; otherwise render ESCAPED plaintext.
+            // Either branch produces HTML-safe markup before touching innerHTML.
+            let highlightedHTML;
 
-            if (hljs.getLanguage(this.options.lang)) {
-                const result = hljs.highlight(rawText, {
-                    language: this.options.lang,
-                    ignoreIllegals: true,
-                });
-                highlightedHTML = result.value;
-                $code.addClass(`hljs language-${this.options.lang}`);
+            const canHighlight = !!hljs && langReady && !!hljs.getLanguage(this.options.lang);
+
+            if (canHighlight) {
+                try {
+                    const result = hljs.highlight(rawText, {
+                        language: this.options.lang,
+                        ignoreIllegals: true,
+                    });
+                    highlightedHTML = result.value;            // already escaped by hljs
+                    $code.addClass(`hljs language-${this.options.lang}`);
+                } catch (e) {
+                    console.warn('PluginHighlight: hljs.highlight() threw — rendering escaped plaintext.', e);
+                    highlightedHTML = escapeHtml(rawText);
+                    $code.addClass('hljs');
+                }
+            } else {
+                highlightedHTML = escapeHtml(rawText);          // never inject raw text
+                $code.addClass('hljs');                         // keep base styling/background
             }
 
             code.innerHTML = highlightedHTML;
@@ -809,11 +992,13 @@
                 const $copyBtn = $('<button class="btn btn-modern btn-light btn-outline btn-xs btn-effect-1 hljs-copy-corner hljs-copy-btn">Copy</button>');
 
                 $copyBtn.on('click', async () => {
-                    await this.copy(rawText);
-                    $copyBtn.text('Copied!');
-                    setTimeout(() => {
-                        themestrap.PluginToast?.show({ type: 'success', body: 'Copied!' });
-                    }, this.options.copyTimeout);
+                    const ok = await this.copy(rawText);
+                    $copyBtn.text(ok ? 'Copied!' : 'Copy failed');
+                    if (ok) {
+                        setTimeout(() => {
+                            themestrap.PluginToast?.show({ type: 'success', body: 'Copied!' });
+                        }, this.options.copyTimeout);
+                    }
                     setTimeout(() => $copyBtn.text('Copy'), this.options.copyTimeout);
                 });
 
@@ -835,10 +1020,12 @@
                         .join('\n');
 
                     if (text.trim()) {
-                        await this.copy(text);
-                        setTimeout(() => {
-                            themestrap.PluginToast?.show({ type: 'success', body: 'Copied!' });
-                        }, this.options.copyTimeout);
+                        const ok = await this.copy(text);
+                        if (ok) {
+                            setTimeout(() => {
+                                themestrap.PluginToast?.show({ type: 'success', body: 'Copied!' });
+                            }, this.options.copyTimeout);
+                        }
                     }
                 }
             });
@@ -881,15 +1068,77 @@
             inst.selection = [];
         }
 
+        // Returns true on success, false on failure (both clipboard paths covered).
         async copy(text) {
             try {
-                await navigator.clipboard.writeText(text);
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+                throw new Error('clipboard API unavailable');
             } catch {
                 // Fallback for older browsers / non-HTTPS contexts
-                const $ta = $('<textarea/>').val(text).appendTo('body');
-                $ta[0].select();
-                document.execCommand('copy');
-                $ta.remove();
+                try {
+                    const $ta = $('<textarea/>')
+                        .val(text)
+                        .css({ position: 'fixed', top: '-1000px', opacity: 0 })
+                        .appendTo('body');
+                    $ta[0].select();
+                    const ok = document.execCommand('copy');
+                    $ta.remove();
+                    return ok;
+                } catch (e) {
+                    console.warn('PluginHighlight: copy to clipboard failed.', e);
+                    return false;
+                }
+            }
+        }
+        
+        highlightBackticks(input, hljs) {
+            return input.replace(/`([^`]*?)`/g, (fullMatch, content) => {
+                const trimmed = content.trim();
+        
+                let language = "xml";
+                if (this.isJson(trimmed)) {
+                    language = "json";
+                } else if (this.isModx(trimmed)) {
+                    language = "modx";
+                }
+        
+                return "`" + hljs.highlight(trimmed, { language }).value + "`";
+            });
+        }
+        
+        isJson(value) {
+            if (typeof value !== "string") return false;
+        
+            // Accept either the raw backtick-delimited value or just the contents.
+            const match = value.match(/^`([\s\S]*)`$/);
+            const content = (match ? match[1] : value).trim();
+        
+            if (!content || !/^[\[{]/.test(content)) {
+                return false;
+            }
+        
+            try {
+                JSON.parse(content);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+        
+        isModx(value) {
+            if (typeof value !== "string") return false;
+        
+            // Accept either the raw backtick-delimited value or just the contents.
+            const match = value.match(/^`([\s\S]*)`$/);
+            const content = (match ? match[1] : value).trim();
+        
+            if (!content || !/^[\[\[]]/.test(content)) {
+                return false;
+            } else {
+                return true;
             }
         }
 
