@@ -177,7 +177,6 @@ Some plugins depend on a third-party libraries:
 | waitForImages | `waitforimages` | beforeAfter, masonry, sort |
 | easyPieChart | `easypiechart` | chartCircular |
 | The Final Countdown | `jquery-countdown` | countdown |
-| countTo | `countto` | counter |
 | jquery.visible | `jquery-visible` | floatElement, parallax, icon, nav |
 | jquery.cookie | `jquery-cookie` | gdpr, gdprWrapper |
 | Vivus | `vivus` | icon |
