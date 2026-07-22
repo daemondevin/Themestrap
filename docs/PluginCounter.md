@@ -1,111 +1,243 @@
-# Counter Guide
+# Counter Plugin
 
-Themestrap's viewport-triggered number animation — counts from 0 to a target value with easing when the element scrolls into view.
-
-## [How It **Works**](#how-it-works)
-
-PluginCounter reads the target number from the element's text content (or from `data-to`), registers the element with `themestrap.fn.intObsInit`, and fires a linear tick animation from `0` to the target over a configurable duration when the IntersectionObserver triggers. Each tick calls the optional `onUpdate` callback and formats the value with optional decimals and comma separators.
-
-### Viewport entry
-
-The IntersectionObserver fires when the element crosses the `accY` threshold from the bottom of the viewport (default: no offset). The animation starts immediately on first entry and does not repeat on subsequent re-entries.
+**File:** `js/components/themestrap.plugin.counter.js`  
+**jQuery method:** `$.fn.themestrapPluginCounter`  
+**Instance key:** `__pluginCounter`  
+**Data attribute:** `data-plugin-counter`
 
 ---
 
-## [Quick **Start**](#quick-start)
+## Overview
+
+Animates a number from a start value to a target value over a configurable duration. No external dependencies — the counter runs entirely on `requestAnimationFrame` with an ease-in-out-quad easing curve. Affix strings (prepend/append) are applied after the animation completes.
+
+---
+
+## Quick Start
 
 ```html
-<!-- Value from text content -->
-<span data-plugin-counter
-      data-plugin-options='{"speed": 2500, "decimals": 0}'>
-  1500
-</span>
-
-<!-- Value from data attribute -->
-<span data-plugin-counter
-      data-to="99.9"
-      data-plugin-options='{"decimals": 1, "comma": true}'>
-  0
-</span>
+<span data-plugin-counter data-to="1250" data-plugin-options='{"speed":2500}'>0</span>
 ```
 
-### Append/prepend mode
-
-The plugin can write the animated number into a generated `<span>` adjacent to the element rather than replacing its text content, preserving any surrounding markup (currency symbols, suffixes):
-
-```html
-<p>
-  <span data-plugin-counter
-        data-plugin-options='{"prependWrapper": true}'>4000</span>+
-</p>
-```
-
----
-
-## [Configuration **Options**](#options)
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `accX` | number | `0` | IntersectionObserver X offset in px. |
-| `accY` | number | `0` | IntersectionObserver Y offset in px (negative = trigger earlier). |
-| `appendWrapper` | bool | `false` | Write the animated value into a `<span>` appended after the element. |
-| `prependWrapper` | bool | `false` | Write the animated value into a `<span>` prepended before the element. |
-| `speed` | number | `3000` | Total animation duration in ms. |
-| `refreshInterval` | number | `100` | Tick interval in ms (lower = smoother, more CPU). |
-| `decimals` | number | `0` | Number of decimal places to display. |
-| `comma` | bool | `false` | Format the value with comma thousands separator. |
-| `onUpdate` | function | `null` | Called on every tick: `fn(currentValue)`. |
-| `onComplete` | function | `null` | Called when the animation reaches the target value. |
-
----
-
-## [Instance **API**](#instance-api)
+Auto-init in `themestrap.init.js`:
 
 ```js
-const counter = $('[data-plugin-counter]').data('__counter');
-
-counter.start();    // manually start the animation
-counter.stop();     // pause at the current value
-counter.reset();    // return to 0 and stop
-counter.destroy();  // teardown, restore original text
+themestrap.fn.intObsInit(
+    '[data-plugin-counter]:not(.manual)',
+    function($el) {
+        const opts = themestrap.fn.getOptions($el);
+        $el.themestrapPluginCounter(opts);
+    }
+);
 ```
 
----
-
-## [Recipe **Cookbook**](#recipes)
-
-#### Stats bar
-
-```html
-<div class="stats-row">
-  <div class="stat">
-    <h3><span data-plugin-counter
-              data-plugin-options='{"speed":2000}'>4200</span>+</h3>
-    <p>Happy customers</p>
-  </div>
-  <div class="stat">
-    <h3>$<span data-plugin-counter
-               data-plugin-options='{"speed":2000,"comma":true}'>1200000</span></h3>
-    <p>Revenue generated</p>
-  </div>
-</div>
-```
-
-#### Callback on complete
+Manual init via jQuery:
 
 ```js
-$('[data-plugin-counter]').themestrapPluginCounter({
-  speed: 2000,
-  onComplete: function () {
-    $(this).closest('.stat').addClass('complete');
-  }
+$('#my-counter').themestrapPluginCounter({
+    to:    5000,
+    speed: 3000
 });
 ```
 
 ---
 
-## [Common **Pitfalls**](#pitfalls)
+## Data Attributes
 
-**Text content must be a plain number.** The plugin uses `parseFloat()` on the element's trimmed text content. Currency symbols, commas, or other non-numeric characters will result in `NaN` and the animation will not run. Use `data-to` for the numeric value and style the surrounding text separately.
+| Attribute | Type | Description |
+|---|---|---|
+| `data-plugin-counter` | — | Marks the element for auto-init |
+| `data-to` | number | Target value (required unless passed in options) |
+| `data-from` | number | Starting value (default: `0`) |
+| `data-speed` | number | Duration in ms (default: `3000`) |
+| `data-prepend` | string | Text inserted before the number on complete |
+| `data-append` | string | Text inserted after the number on complete |
+| `data-plugin-options` | JSON | Any option key from the table below |
 
-**Animation fires only once.** The IntersectionObserver unregisters after the first trigger so the counter doesn't re-animate on every scroll. For a repeatable counter, call `reset()` then `start()` manually.
+`data-to`, `data-from`, and `data-speed` take precedence over their `data-plugin-options` equivalents when both are present.
+
+---
+
+## Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `from` | number | `0` | Start value |
+| `to` | number | `null` | End value — required |
+| `speed` | number | `3000` | Animation duration in milliseconds |
+| `refreshInterval` | number | `100` | Minimum ms between DOM text updates (floored at 16) |
+| `decimals` | number | `0` | Decimal places in the formatted output |
+| `comma` | boolean | `false` | Replace `.` decimal point with `,` |
+| `thousandsSeparator` | string | `''` | Character inserted every 3 integer digits, e.g. `','` or `'.'` |
+| `appendWrapper` | string/false | `false` | Selector or HTML tag wrapping the append string |
+| `prependWrapper` | string/false | `false` | Selector or HTML tag wrapping the prepend string |
+| `formatter` | function/null | `null` | `(value, opts) => string` — overrides all built-in formatting |
+| `onUpdate` | function/null | `null` | Called each refresh tick with the current `value` |
+| `onComplete` | function/null | `null` | Called once when the animation ends with the final `value` |
+
+---
+
+## Methods
+
+| Method | Signature | Description |
+|---|---|---|
+| `replay` | `replay(to?)` | Re-run animation from the current displayed value. Pass a new `to` to change the target. |
+| `setValue` | `setValue(value)` | Jump instantly to a value with no animation. Cancels any running animation. |
+| `stop` | `stop()` | Freeze the animation at its current position. |
+| `destroy` | `destroy()` | Stop animation and remove the instance data from the element. |
+
+Retrieve the instance:
+
+```js
+const inst = $('#my-counter').data('__pluginCounter');
+inst.replay();
+```
+
+---
+
+## Examples
+
+### Thousands separator
+
+```html
+<span
+  data-plugin-counter
+  data-to="1234567"
+  data-plugin-options='{"thousandsSeparator":",","speed":3000}'>0</span>
+```
+
+### Comma decimal (European style)
+
+```html
+<span
+  data-plugin-counter
+  data-to="3.14159"
+  data-plugin-options='{"decimals":5,"comma":true}'>0</span>
+```
+
+### Prepend / append affixes
+
+```html
+<!-- Currency prefix -->
+<span data-plugin-counter data-to="4999" data-prepend="$"
+      data-plugin-options='{"thousandsSeparator":","}'>$0</span>
+
+<!-- Percentage suffix -->
+<span data-plugin-counter data-to="87" data-append="%">0%</span>
+```
+
+The element's initial text mirrors the pre-animation state so users with JS disabled see a reasonable fallback.
+
+### Affix wrappers
+
+Wrap the affix in a styled `<sup>` or `<span>`:
+
+```js
+$('#counter').themestrapPluginCounter({
+    to:            99,
+    append:        '%',          // not a data attribute — set via options is not supported;
+                                 // use data-append on the element
+    appendWrapper: '<sup class="text-sm">'
+});
+```
+
+> [!Note]
+> `appendWrapper`/`prependWrapper` only apply to affixes set via `data-append`/`data-prepend` on the element. They are applied after the animation completes.
+
+### Custom formatter
+
+```js
+$('#counter').themestrapPluginCounter({
+    to: 1073741824,
+    speed: 3500,
+    formatter(value) {
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let u = 0;
+        while (value >= 1024 && u < units.length - 1) { value /= 1024; u++; }
+        return value.toFixed(2) + '\u202f' + units[u];
+    }
+});
+```
+
+### Callbacks
+
+```js
+$('#counter').themestrapPluginCounter({
+    to:    100,
+    speed: 3000,
+    onUpdate(v)  { console.log('tick:', v.toFixed(0)); },
+    onComplete(v){ console.log('done:', v); }
+});
+```
+
+Both callbacks receive the raw numeric `value` as their first argument. `this` inside the callback is the DOM element.
+
+### Programmatic replay
+
+```js
+const inst = $('#counter').data('__pluginCounter');
+
+inst.replay();        // replay from current display value to original data-to
+inst.replay(500);     // count to a new target from current position
+inst.stop();          // freeze mid-animation
+inst.setValue(0);     // reset display instantly
+inst.replay();        // animate from 0 to original target
+```
+
+---
+
+## init.js Wiring
+
+```js
+// themestrap.init.js
+themestrap.fn.intObsInit(
+    '[data-plugin-counter]:not(.manual)',
+    function($el) {
+        const opts = themestrap.fn.getOptions($el);
+        $el.themestrapPluginCounter(opts);
+    }
+);
+```
+
+Use `intObsInit` (not `dynIntObsInit`) because the plugin merges `data-plugin-options` internally via `setOptions`.
+
+---
+
+## Easing
+
+The animation uses **ease-in-out quad**:
+
+```
+t < 0.5  ->  2t²
+t ≥ 0.5  ->  -1 + (4 - 2t)t
+```
+
+There is no option to change the easing curve. Pass a custom `formatter` or drive the animation externally via `setValue()` on a `requestAnimationFrame` loop if a different curve is needed.
+
+---
+
+## Accessibility
+
+- The counter element updates its text content on every tick. Screen readers in live-region mode will announce each change, which is noisy. Wrap the counter in a `role="status"` `aria-live="polite"` container and put only the static label inside `aria-live` — not the animating number — or add `aria-hidden="true"` to the counter element and provide a visually-hidden final value via `onComplete`.
+- Counters respect `prefers-reduced-motion` if you add a guard in the `speed` option: pass `speed: 0` (instant) when the media query matches, then call `setValue(to)` directly.
+
+---
+
+## Diagnostics
+
+**Counter stays at 0 / never animates**  
+- Confirm `data-to` is present and its value parses as a finite number (`isNaN` check).  
+ Confirm the element is in the viewport when `intObsInit` fires — counters off-screen at load will animate when they scroll into view.
+
+**Affix not appearing**  
+- `data-append` / `data-prepend` are applied only in `onComplete`, after the animation ends. If you call `stop()` mid-animation, affixes will not be added.  
+ If the element's initial HTML already contains the affix (e.g. `>0%</span>`), the affix will be doubled after completion. Either initialise clean (`>0</span>`) or omit `data-append`.
+
+**`onComplete` / `onUpdate` not firing**  
+- These must be passed via jQuery init or `data-plugin-options` — they cannot be serialised as JSON if they contain function bodies. Use jQuery init.
+
+**Thousands separator not showing**  
+- `thousandsSeparator` must be passed as a string in `data-plugin-options`, e.g. `'{"thousandsSeparator":","}'`. An empty string `""` disables it (default).
+
+**`formatter` option ignored**  
+- `formatter` cannot be set via `data-plugin-options` (functions are not valid JSON). Use jQuery init.
