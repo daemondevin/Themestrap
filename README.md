@@ -87,7 +87,9 @@ On DOM ready the manifest calls `loader.scan()`, which:
 3. **Fetches**: loads CSS and JS in dependency order with `cache: true` so returning visitors hit the browser cache
 4. **Activates**: runs the same `intObsInit` / `dynIntObsInit` / event wiring that `themestrap.init.js` uses, so a plugin fetched after DOM ready still gets its IntersectionObserver
 
-> **One owner per plugin.** If the loader manages a plugin, that plugin must not also be statically included or wired in `themestrap.init.js`. Two owners means two init passes.
+> [!WARNING]
+> **One owner per plugin.**  
+> If the loader manages a plugin, that plugin must not also be statically included or wired in `themestrap.init.js`. Two owners means two init passes.
 
 ### Quick start
 
@@ -195,37 +197,6 @@ Most of the components need no third-party library; they inject their own CSS an
 
 ---
 
-## Components
-
-### UI Plugins
-
-| Plugin | jQuery Method | Description |
-|---|---|---|
-| **Accordion** | `themestrapPluginAccordion` | Animated expand/collapse panels |
-| **BeforeAfter** | `themestrapPluginBeforeAfter` | Drag-to-reveal image comparison slider |
-| **Carousel** | `themestrapPluginCarousel` | Owl Carousel wrapper with responsive breakpoints |
-| **CodeRail** | `themestrapPluginCodeRail` | Floating sticky code snippet rail |
-| **CodeWindow** | `themestrapPluginCodeWindow` | Styled terminal / code window display |
-| **CommandMenu** | `themestrapPluginCommandMenu` | Keyboard-driven command palette (`⌘K`) |
-| **Collapsible** | `themestrapPluginCollapsible` | Generic collapsible content regions |
-| **Counter** | `themestrapPluginCounter` | Animated number counter with easing |
-| **DarkMode** | `themestrapPluginDarkMode` | System-aware dark/light mode toggle |
-| **Dialog** | `themestrapPluginDialog` | Accessible modal dialog with focus trap |
-| **Highlight** | `themestrapPluginHighlight` | Syntax highlighting for code blocks |
-| **Masonry** | `themestrapPluginMasonry` | CSS/JS masonry grid layout |
-| **Navbar** | `themestrapPluginNavbar` | Sticky, scroll-aware navigation bar |
-| **NavMenu** | `themestrapPluginNavMenu` | Mega-menu / flyout navigation |
-| **PanelNav** | `themestrapPluginPanelNav` | Sliding panel navigation |
-| **Popover** | `themestrapPluginPopover` | Portal-mode popovers with dark mode and mutual exclusion |
-| **Scroller** | `themestrapPluginScroller` | Custom scrollbar / scroll container |
-| **ScrollFx** | `themestrapPluginScrollFx` | Scroll-driven entrance animation effects |
-| **ScrollShadow** | `themestrapPluginScrollShadow` | Dynamic shadow applied on scroll |
-| **SideNav** | `themestrapPluginSideNav` | Off-canvas side navigation drawer |
-| **Toast** | `themestrapPluginToast` | Notification toasts with auto-dismiss |
-| **VerticalNav** | `themestrapPluginVerticalNav` | Vertical tree navigation with sub-levels |
-
----
-
 ## Configuration
 
 ### Data attributes
@@ -269,7 +240,9 @@ Requires the plugin to implement `destroy()`.
 
 ### What's Here
 
-- 23 UI plugins
+- 60+ plugins
+- A guide for each plugin located under the docs folder
+- 3 starter templates showing how to use the plugins in the wild
 - IntersectionObserver lazy-init pipeline (`themestrap.init.js`)
 - Module Loader (`themestrap.loader.js` + `themestrap.modules.js`) with full vendor dependency map
 - Full `destroy()` / re-init support on all plugins
