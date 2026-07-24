@@ -260,9 +260,7 @@ a:not(.btn):hover { text-decoration: none; }
     to any element to render its text content — or point <code>data-plugin-markdown-src</code> at a <code>.md</code> 
     file URL. All demos are live — edit, toggle, and re-render in the browser.
   </p>
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 1 — Inline GFM: basic block-level elements
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 1 — Inline GFM: basic block-level elements -->
 <span class="demo-section-label">Block elements</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -299,9 +297,7 @@ Paragraph with **bold** and *italic*.
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 2 — Code blocks
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 2 — Code blocks -->
 <span class="demo-section-label">Code</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -339,9 +335,7 @@ function greet(name) {
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 3 — Lists and task lists
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 3 — Lists and task lists -->
 <span class="demo-section-label">Lists</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -389,9 +383,7 @@ function greet(name) {
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 4 — GFM Tables
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 4 — GFM Tables -->
 <span class="demo-section-label">Tables</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -424,9 +416,7 @@ Column 1 is left-aligned (`:----`), Column 2 centered (`:---:`), Columns 3-4 rig
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 5 — Block quotes and reference links
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 5 — Block quotes and reference links -->
 <span class="demo-section-label">Quotes &amp; Links</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -463,9 +453,7 @@ Auto-link: &lt;https://nskiag6l.modx.dev/&gt;
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 6 — Live editor
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 6 — Live editor -->
 <span class="demo-section-label">Live editor</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -512,7 +500,7 @@ const msg = 'hello world';
 console.log(msg);
 ```
 
-> Block quote with **bold** inside.
+> Blockquote with **bold** inside.
 </textarea>
         </div>
         <div class="editor-pane">
@@ -525,9 +513,7 @@ console.log(msg);
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 7 — Custom theming
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 7 — Custom theming -->
 <span class="demo-section-label">Theming</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -575,9 +561,7 @@ Paragraph with **bold**, *italic*, and [a link](https://example.com).
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     CARD 8 — Programmatic API
-     ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- CARD 8 — Programmatic API -->
 <span class="demo-section-label">API</span>
 <div class="demo-card">
     <div class="demo-card-header">
@@ -593,7 +577,7 @@ Paragraph with **bold**, *italic*, and [a link](https://example.com).
         <button class="btn btn-sm btn-outline-primary" id="api-render-h1">render() — h1</button>
         <button class="btn btn-sm btn-outline-primary" id="api-render-table">render() — table</button>
         <button class="btn btn-sm btn-outline-primary" id="api-render-tasks">render() — tasks</button>
-        <button class="btn btn-sm btn-outline-secondary" id="api-get-html">getHtml() → log</button>
+        <button class="btn btn-sm btn-outline-secondary" id="api-get-html">getHtml() -> log</button>
         <button class="btn btn-sm btn-outline-danger"  id="api-destroy">destroy()</button>
         <button class="btn btn-sm btn-outline-success" id="api-reinit">re-init</button>
     </div>
@@ -615,15 +599,197 @@ md.<span class="sh-fn">render</span>(<span class="sh-str">'# Hello World\n\nSome
 md.<span class="sh-fn">destroy</span>();</code></pre>
     </div>
 </div>
+<!-- CARD 9 — Multi-language syntax highlight showcase -->
+<span class="demo-section-label">Syntax highlighting</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>Multi-language Highlight Showcase</h3>
+        <span class="demo-badge">highlight</span>
+    </div>
+    <div class="demo-stage">
+        <div id="demo-highlight-langs" data-plugin-markdown class="manual">
+```javascript
+// JavaScript
+class ApiClient {
+  constructor(baseUrl) {
+    this.baseUrl = baseUrl;
+  }
+  async get(path) {
+    const { data } = await fetch(`${this.baseUrl}${path}`)
+      .then(r => r.json());
+    return data;
+  }
+}
+```
+ 
+```python
+# Python
+from typing import List
+ 
+def fibonacci(n: int) -> List[int]:
+    seq = [0, 1]
+    while len(seq) < n:
+        seq.append(seq[-1] + seq[-2])
+    return seq[:n]
+ 
+print(fibonacci(10))
+```
+ 
+```css
+/* CSS
+.ts-markdown {
+  --ts-md-link: #2ab8c8;
+  --ts-md-heading-mt: 1.5em;
+  font-family: inherit;
+  line-height: 1.7;
+}
+ 
+.ts-markdown pre {
+  padding: 1em 1.2em;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+```
+ 
+```sql
+-- SQL
+SELECT
+    u.name,
+    COUNT(o.id)   AS order_count,
+    SUM(o.total)  AS revenue,
+    RANK() OVER (ORDER BY SUM(o.total) DESC) AS rank
+FROM users u
+JOIN orders o ON o.user_id = u.id
+WHERE o.created_at >= '2026-01-01'
+GROUP BY u.id, u.name
+ORDER BY revenue DESC;
+```
+ 
+```html
+<!-- HTML — data attributes, template syntax -->
+<div data-plugin-markdown
+     data-plugin-options='{"highlight":true,"highlightOptions":{"lineNumbers":true}}'>
+  # Hello
+  ```js
+  console.log('nested fenced block');
+  ```
+</div>
+```
+        </div>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">&lt;!-- Language detected from the fenced block info string --&gt;
+&lt;!-- PluginHighlight lazy-loads only the languages it sees --&gt;</span>
+<span class="sh-tag">&lt;div</span> <span class="sh-attr">data-plugin-markdown</span><span class="sh-tag">&gt;</span>
+```javascript
+// ...
+```
+ 
+```python
+# ...
+```
+ 
+```css
+/* ... */
+```
+<span class="sh-tag">&lt;/div&gt;</span>
+ 
+<span class="sh-cm">&lt;!-- Each &lt;code class="language-*"&gt; gets its own PluginHighlight instance --&gt;
+&lt;!-- All instances tracked in md._highlightInstances for clean destroy() --&gt;</span></code></pre>
+    </div>
+</div>
+ 
+<!-- CARD 10 — highlightOptions configurator -->
+<span class="demo-section-label">Highlight options</span>
+<div class="demo-card">
+    <div class="demo-card-header">
+        <h3>highlightOptions Configurator</h3>
+        <span class="demo-badge">interactive</span>
+    </div>
+    <div class="demo-controls">
+        <span class="demo-section-label mb-0" style="font-size:10px">highlightOptions:</span>
+        <button class="opt-toggle" id="hlo-linenumbers" title="Enable line numbers on all code blocks">
+            <span class="dot"></span> lineNumbers
+        </button>
+        <button class="opt-toggle active" id="hlo-showcopy" title="Show the copy-to-clipboard button">
+            <span class="dot"></span> showCopy
+        </button>
+        <button class="opt-toggle" id="hlo-highlight-off" title="Disable highlight integration entirely">
+            <span class="dot"></span> highlight: false
+        </button>
+    </div>
+    <div class="demo-stage" id="hlo-stage">
+        <div id="demo-hlo" data-plugin-markdown class="manual">
+```typescript
+// TypeScript — interfaces, generics, optional chaining
+interface Plugin<T extends HTMLElement = HTMLElement> {
+  readonly $el: JQuery<T>;
+  options:  Record<string, unknown>;
+  build():  this;
+  destroy(): this;
+}
+ 
+class PluginMarkdown implements Plugin {
+  readonly $el: JQuery;
+  options = { highlight: true, sanitize: true };
+ 
+  build(): this {
+    this.$el.addClass('ts-markdown');
+    return this;
+  }
+ 
+  destroy(): this {
+    this.$el.removeData('__pluginMarkdown');
+    return this;
+  }
+}
+```
+ 
+```bash
+# Shell — showing lineNumbers option clearly
+node --check themestrap.plugin.markdown.js && echo "SYNTAX OK"
+python3 -c "import plugin_content_markdown; print('Module OK')"
+diff /mnt/user-data/outputs/themestrap.plugin.markdown.js \
+     /home/claude/themestrap.plugin.markdown.js
+```
+        </div>
+    </div>
+    <div class="event-log" id="hlo-log">
+        <span class="text-muted" style="font-size:11px">Toggle options above to re-render with new highlightOptions…</span>
+    </div>
+    <div class="demo-snip">
+        <pre class="snip"><code><span class="sh-cm">// highlightOptions are forwarded to each PluginHighlight instance</span>
+$(<span class="sh-str">'#readme'</span>).<span class="sh-fn">themestrapPluginMarkdown</span>({
+    highlight: <span class="sh-kw">true</span>,
+    highlightOptions: {
+        lineNumbers: <span class="sh-kw">true</span>,   <span class="sh-cm">// line numbers on all fenced blocks</span>
+        showCopy:    <span class="sh-kw">true</span>,   <span class="sh-cm">// copy-to-clipboard button</span>
+    }
+});
+ 
+<span class="sh-cm">// language key is set automatically from class="language-*"
+// do NOT set it manually in highlightOptions</span></code></pre>
+    </div>
+</div>
 </div>
 <!--END PAGE CONTENT-->
     <script src="../vendor/jquery/jquery.min.js"></script>
     <script src="../js/themestrap.js"></script>
+    <script src="../js/components/themestrap.plugin.highlight.js"></script>
     <script src="../js/components/themestrap.plugin.markdown.js"></script>
-    <script src="../js/themestrap.init.js"></script>
     <script>
     (function ($) {
         'use strict';
+        
+        // Syntax Highlight
+        if ($.isFunction($.fn['themestrapPluginHighlight']) && $('[data-plugin-highlight]').length) {
+            $(() => {
+                $('[data-plugin-highlight]:not(.manual)').each(function() {
+                    const $this = $(this);
+                    $this.themestrapPluginHighlight();
+                });
+            });
+        }
 
         // Manual init for all .manual elements (skipped by auto-init)
         $('[data-plugin-markdown].manual').each(function () {
@@ -686,7 +852,7 @@ md.<span class="sh-fn">destroy</span>();</code></pre>
                 logEvent('rendered.ts.markdown', renderedHtml.length + ' chars');
             });
             updateLivePreview();
-            logEvent('option changed', 'breaks → ' + liveOpts.breaks);
+            logEvent('option changed', 'breaks -> ' + liveOpts.breaks);
         });
 
         $('#toggle-sanitize').on('click', function () {
@@ -699,7 +865,7 @@ md.<span class="sh-fn">destroy</span>();</code></pre>
                 logEvent('rendered.ts.markdown', renderedHtml.length + ' chars');
             });
             updateLivePreview();
-            logEvent('option changed', 'sanitize → ' + liveOpts.sanitize);
+            logEvent('option changed', 'sanitize -> ' + liveOpts.sanitize);
         });
 
         $('#toggle-tasklists').on('click', function () {
@@ -712,7 +878,7 @@ md.<span class="sh-fn">destroy</span>();</code></pre>
                 logEvent('rendered.ts.markdown', renderedHtml.length + ' chars');
             });
             updateLivePreview();
-            logEvent('option changed', 'taskLists → ' + liveOpts.taskLists);
+            logEvent('option changed', 'taskLists -> ' + liveOpts.taskLists);
         });
 
         // Card 7 — Theme switcher
@@ -759,6 +925,56 @@ md.<span class="sh-fn">destroy</span>();</code></pre>
             }
         };
 
+        //Card 10 — highlightOptions configurator
+        var hloOpts = {
+            highlight:       true,
+            sanitize:        false,
+            highlightOptions: { lineNumbers: false, showCopy: true }
+        };
+ 
+        var $hloEl  = $('#demo-hlo');
+        var $hloLog = $('#hlo-log');
+ 
+        function hloLog(msg) {
+            var time = new Date().toLocaleTimeString('en', { hour12: false });
+            var line = $('<div class="ev"></div>').html(
+                '<span class="ev-detail">' + msg + '</span>' +
+                ' <span style="color:#555;float:right">' + time + '</span>'
+            );
+            $hloLog.find('.text-muted').remove();
+            $hloLog.prepend(line);
+        }
+ 
+        function reinitHlo() {
+            var inst = $hloEl.data('__pluginMarkdown');
+            if (inst) { inst.destroy(); }
+            $hloEl.themestrapPluginMarkdown(hloOpts);
+        }
+ 
+        reinitHlo(); // initial render for Card 10
+ 
+        $('#hlo-linenumbers').on('click', function () {
+            hloOpts.highlightOptions.lineNumbers = !hloOpts.highlightOptions.lineNumbers;
+            $(this).toggleClass('active', hloOpts.highlightOptions.lineNumbers);
+            reinitHlo();
+            hloLog('highlightOptions.lineNumbers -> ' + hloOpts.highlightOptions.lineNumbers);
+        });
+ 
+        $('#hlo-showcopy').on('click', function () {
+            hloOpts.highlightOptions.showCopy = !hloOpts.highlightOptions.showCopy;
+            $(this).toggleClass('active', hloOpts.highlightOptions.showCopy);
+            reinitHlo();
+            hloLog('highlightOptions.showCopy -> ' + hloOpts.highlightOptions.showCopy);
+        });
+ 
+        $('#hlo-highlight-off').on('click', function () {
+            var currentlyOff = $(this).hasClass('active');
+            hloOpts.highlight = currentlyOff; // toggle: active = highlight:false
+            $(this).toggleClass('active', !currentlyOff);
+            reinitHlo();
+            hloLog('highlight -> ' + hloOpts.highlight + (hloOpts.highlight ? '' : ' (PluginHighlight bypassed)'));
+        });
+ 
         // Init the themed element
         $('#demo-themed').themestrapPluginMarkdown({ sanitize: false });
 
@@ -835,7 +1051,7 @@ md.<span class="sh-fn">destroy</span>();</code></pre>
         $('#api-get-html').on('click', function () {
             var inst = ensureApiInst();
             var html = inst.getHtml();
-            apiLog('<span class="ev-name">getHtml()</span> → ' + html.length + ' chars: <code>' +
+            apiLog('<span class="ev-name">getHtml()</span> -> ' + html.length + ' chars: <code>' +
                    $('<span>').text(html.slice(0, 60)).html() + (html.length > 60 ? '…' : '') + '</code>');
         });
 
@@ -854,11 +1070,6 @@ md.<span class="sh-fn">destroy</span>();</code></pre>
             $apiEl.data('__pluginMarkdown', null).removeData('__pluginMarkdown');
             ensureApiInst();
             apiLog('<span class="ev-name">re-init</span> — new instance created');
-        });
-
-        // Command menu actions
-        $(document).on('command:go-guide', function () {
-            window.location.href = 'plugin-markdown-guide.html';
         });
 
     }(jQuery));

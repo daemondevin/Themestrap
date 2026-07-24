@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" class="side-header-hamburguer-sidebar side-header-above side-header-hamburguer-sidebar-narrow-bar side-header-hide">
+<head>
+	<title>PluginWizard | Themestrap</title>
+
+<meta name="keywords" content="">
+<meta name="description" content="Themestrap's multi-step wizard plugin — accessible form stepper with validated navigation, animated transitions, progress tracking, and a clean programmatic API.">
+<meta name="author" content="daemon.devin">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+
+<link rel="icon" type="image/png" href="../img/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
+<link rel="shortcut icon" href="../img/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="../img/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Themestrap">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+
+<style>
+h2 a, h2 a:hover { text-decoration: none; color: var(--dark); }
+a:not(.btn):hover { text-decoration: none; }
+a:not(.btn):hover::before { text-decoration: none; }
+.section-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:3px;vertical-align:middle;position:relative;top:-1px}
+.tag-classic{background:#e9ecef;color:#495057}
+.tag-modern{background:#cfe2ff;color:#084298}
+.tag-shared{background:#d1e7dd;color:#0f5132}
+.tag-js{background:#fff3cd;color:#664d03}
+pre { background: #282c34; color: #abb2bf; padding: 16px 20px; border-radius: 6px; overflow-x: auto; margin-bottom: 1rem; }
+pre code { font-family: var(--bs-font-monospace, monospace); font-size: 12.5px; line-height: 1.65; }
+.section { margin-bottom: 56px; }
+.anchor-link:hover::after { content: " #"; color: var(--bs-primary); font-size: .75em; }
+.method-sig { background: rgba(255,255,255,.03); border: 1px solid var(--border, #333); border-radius: 6px; padding: 12px 16px; margin: 10px 0; font-family: var(--bs-font-monospace, monospace); font-size: 13px; line-height: 1.7; }
+.method-sig .kw { color: #c678dd; } .method-sig .fn { color: #61afef; } .method-sig .param { color: #d19a66; } .method-sig .ret { color: #98c379; } .method-sig .cm { color: #5c6370; font-style: italic; }
+.anatomy-wrap { background: #1e2127; border-radius: 6px; padding: 18px 20px; font-family: var(--bs-font-monospace, monospace); font-size: 12px; line-height: 2; color: #abb2bf; overflow-x: auto; margin-bottom: 1rem; }
+.anatomy-wrap .a-tag { color: #e06c75; } .anatomy-wrap .a-attr { color: #d19a66; } .anatomy-wrap .a-val { color: #98c379; } .anatomy-wrap .a-comment { color: #5c6370; font-style: italic; } .anatomy-wrap .a-hl { background: rgba(97,175,239,.15); border-radius: 3px; padding: 1px 4px; }
+.layer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.5rem; }
+@media (max-width: 768px) { .layer-grid { grid-template-columns: 1fr; } }
+.layer-card { border: 1px solid var(--border,#333); border-radius: 8px; overflow: hidden; }
+.layer-card .lc-head { padding: 12px 16px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.layer-card.open .lc-head { background: rgba(40,167,69,.18); color: #6cc070; border-bottom: 1px solid rgba(40,167,69,.3); }
+.layer-card.closed .lc-head { background: rgba(255,255,255,.05); color: var(--muted,#999); border-bottom: 1px solid var(--border,#333); }
+.layer-card.mini .lc-head { background: rgba(232,103,42,.18); color: #e8915f; border-bottom: 1px solid rgba(232,103,42,.3); }
+.layer-card.expanded .lc-head { background: rgba(13,110,253,.18); color: #6ea8fe; border-bottom: 1px solid rgba(13,110,253,.3); }
+.layer-card .lc-body { padding: 14px 16px; font-size: 13px; line-height: 1.6; color: var(--default,#c1c1c1); }
+.layer-card .lc-body ul { margin: 8px 0 0 0; padding-left: 18px; } .layer-card .lc-body li { margin-bottom: 4px; }
+.res-step { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border: 1px solid var(--border,#333); border-radius: 8px; margin-bottom: 10px; background: rgba(255,255,255,.02); }
+.res-step .res-num { flex: 0 0 32px; height: 32px; border-radius: 50%; background: #e8672a; color: #fff; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.res-step .res-body { flex: 1; } .res-step .res-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; color: var(--default,#f8f7f2); }
+.res-step .res-desc { font-size: 13px; color: var(--muted,#999); line-height: 1.5; margin: 0; }
+/* ── Demo card structure ── */
+.demo-card { border: 1px solid var(--border, #333); border-radius: 10px; margin-bottom: 2rem; overflow: hidden; background: rgba(255,255,255,.015); }
+.demo-card .demo-head { padding: 14px 20px; border-bottom: 1px solid var(--border, #333); display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.03); }
+.demo-card .demo-head h3 { margin: 0; font-size: 14px; font-weight: 600; color: var(--default, #e8e6e1); }
+.demo-card .demo-head .demo-badge { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; }
+.demo-card .demo-stage { padding: 28px 24px; }
+.demo-card pre.snip { margin: 0; border-radius: 0; border-top: 1px solid var(--border, #333); font-size: 11.5px; }
+.demo-card .demo-log { padding: 10px 16px; border-top: 1px solid var(--border,#333); font-family: var(--bs-font-monospace, monospace); font-size: 11.5px; color: var(--muted,#999); min-height: 32px; display: flex; align-items: center; gap: 6px; }
+.demo-card .demo-log .log-dot { width: 7px; height: 7px; border-radius: 50%; background: #2ab8c8; flex-shrink: 0; }
+/* ── Wizard demo local tweaks ── */
+.wiz-demo-wrap { max-width: 680px; margin: 0 auto; }
+#wiz-api-log { font-family: var(--bs-font-monospace,monospace); font-size: 12px; color: var(--muted,#888); min-height: 22px; }
+#wiz-api-log .ev { color: #61afef; } #wiz-api-log .det { color: #98c379; }
+/* Trim default wizard label font so it fits demo nicely */
+.demo-stage [data-wizard-indicator-label] { font-size: .6rem; }
+.demo-stage [data-plugin-wizard] { --wizard-accent: #e8672a; }
+/* Custom-validation demo wizard */
+#wiz-custom [data-plugin-wizard] { --wizard-accent: #2ab8c8; }
+/* Persist demo */
+#wiz-persist [data-plugin-wizard] { --wizard-accent: #7c3aed; }
+</style>
+<style>
+        :root {
+            --ts-navy:   #0a1929;
+            --ts-navy2:  #0e2238;
+            --ts-orange: #e8672a;
+            --ts-teal:   #2ab8c8;
+            --ts-cream:  #fdf6ee;
+        }
+
+        body {
+            background: var(--ts-navy);
+            color: #d0dbe8;
+            font-family: 'DM Sans', system-ui, sans-serif;
+        }
+
+        .demo-header {
+            background: var(--ts-navy2);
+            border-bottom: 2px solid var(--ts-orange);
+            padding: 2rem 0 1.5rem;
+        }
+        .demo-header h1 {
+            font-family: 'Fraunces', Georgia, serif;
+            color: #fff;
+            font-size: 2rem;
+        }
+        .demo-header .badge-plugin {
+            background: var(--ts-teal);
+            color: #fff;
+            font-size: .7rem;
+            letter-spacing: .08em;
+            padding: .25em .6em;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            vertical-align: middle;
+        }
+        .demo-header p {
+            color: #8aa5bf;
+            margin: 0;
+        }
+        .demo-header a {
+            color: var(--ts-orange);
+            text-decoration: none;
+        }
+
+        /* Cards */
+        .demo-card {
+            background: var(--ts-navy2);
+            border: 1px solid #1a3050;
+            border-radius: 10px;
+            margin-bottom: 1.75rem;
+            overflow: hidden;
+        }
+        .demo-card-header {
+            background: #0b1e33;
+            border-bottom: 1px solid #1a3050;
+            padding: .6rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .78rem;
+            color: var(--ts-teal);
+            letter-spacing: .04em;
+        }
+        .demo-stage {
+            
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        pre.snip {
+            background: #060f1a;
+            border-top: 1px solid #1a3050;
+            margin: 0;
+            padding: 1rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .78rem;
+            color: #7ecce0;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        .demo-log {
+            background: #060f1a;
+            border-top: 1px solid #1a3050;
+            padding: .6rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .73rem;
+            color: #6bb;
+            min-height: 2.4rem;
+        }
+        .demo-log span { color: var(--ts-orange); }
+
+/* Wizard demo local tweaks */
+.wiz-demo-wrap { max-width: 680px; margin: 0 auto; }
+#wiz-api-log { font-family: var(--bs-font-monospace,monospace); font-size: 12px; color: var(--muted,#888); min-height: 22px; }
+#wiz-api-log .ev { color: #61afef; } #wiz-api-log .det { color: #98c379; }
+/* Trim default wizard label font so it fits demo nicely */
+.demo-stage [data-wizard-indicator-label] { font-size: .6rem; }
+.demo-stage [data-plugin-wizard] { --wizard-accent: #e8672a; }
+/* Custom-validation demo wizard */
+#wiz-custom [data-plugin-wizard] { --wizard-accent: #2ab8c8; }
+/* Persist demo */
+#wiz-persist [data-plugin-wizard] { --wizard-accent: #7c3aed; }
+</style>
+</head>
+<body>
+
+
+<!-- Header -->
+<header class="demo-header">
+  <div class="container">
+    <div class="demo-header-eyebrow">Themestrap · Plugin</div>
+    <h1>Wizard</h1>
+    <p>Interactive demos for the multi-step wizard plugin. Each card shows a live wizard followed by the minimal markup that produced it. Navigate steps, trigger validation, and fire the programmatic API from the control panel.</p>
+  </div>
+</header>
+<br>
+<!-- Body -->
+<main class="demo-body">
+<div class="container">
+
+      <!-- CARD 1: Basic 3-step HTML5 validated wizard -->
+      <div class="demo-card" id="demo-basic">
+        <div class="demo-head">
+          <i class="fas fa-list-ol" style="color:#e8672a"></i>
+          <h3>Basic Wizard — HTML5 validation</h3>
+          <span class="demo-badge" style="background:rgba(232,103,42,.15);color:#e8672a;">validate: 'html5'</span>
+        </div>
+        <div class="demo-stage" id="wiz-basic">
+          <div class="wiz-demo-wrap">
+            <div data-plugin-wizard id="wiz-basic-instance"
+                 data-plugin-options='{"validate":"html5","animationDuration":280}'>
+
+              <!-- Indicator strip -->
+              <ol data-wizard-indicators role="tablist" aria-label="Registration steps"
+                  class="mb-3 gap-0"></ol>
+
+              <!-- Progress bar -->
+              <div data-wizard-progress class="mb-4">
+                <div data-wizard-progress-bar role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+
+              <!-- Steps viewport -->
+              <div data-wizard-steps>
+
+                <section data-wizard-step="1"
+                         data-wizard-title="Account"
+                         data-wizard-icon="fas fa-user">
+                  <h5 class="mb-3">Create your account</h5>
+                  <div class="mb-3">
+                    <label class="form-label text-3">Email address</label>
+                    <input type="email" class="form-control" name="email" placeholder="you@example.com" required>
+                    <div data-wizard-error class="text-danger text-3 mt-1"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label text-3">Password</label>
+                    <input type="password" class="form-control" name="password" placeholder="8+ characters" minlength="8" required>
+                    <div data-wizard-error class="text-danger text-3 mt-1"></div>
+                  </div>
+                </section>
+
+                <section data-wizard-step="2"
+                         data-wizard-title="Profile"
+                         data-wizard-icon="fas fa-id-card">
+                  <h5 class="mb-3">Tell us about yourself</h5>
+                  <div class="mb-3">
+                    <label class="form-label text-3">Full name</label>
+                    <input type="text" class="form-control" name="name" placeholder="Your name" required>
+                    <div data-wizard-error class="text-danger text-3 mt-1"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label text-3">Role</label>
+                    <select class="form-select" name="role" required>
+                      <option value="">Select a role…</option>
+                      <option>Developer</option>
+                      <option>Designer</option>
+                      <option>Product Manager</option>
+                      <option>Other</option>
+                    </select>
+                    <div data-wizard-error class="text-danger text-3 mt-1"></div>
+                  </div>
+                </section>
+
+                <section data-wizard-step="3"
+                         data-wizard-title="Done"
+                         data-wizard-icon="fas fa-check">
+                  <div class="text-center py-3">
+                    <div style="width:64px;height:64px;border-radius:50%;background:rgba(232,103,42,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                      <i class="fas fa-check" style="font-size:1.75rem;color:#e8672a;"></i>
+                    </div>
+                    <h5>You're all set!</h5>
+                    <p class="text-muted text-3">Your account has been created. Check your email to verify.</p>
+                  </div>
+                </section>
+
+              </div>
+
+              <!-- Nav -->
+              <div data-wizard-nav class="mt-3 d-flex align-items-center gap-2">
+                <button data-wizard-prev type="button" class="btn btn-outline-secondary btn-sm">
+                  <i class="fas fa-arrow-left me-1"></i> Back
+                </button>
+                <button data-wizard-next type="button" class="btn btn-primary btn-sm ms-auto">
+                  Next <i class="fas fa-arrow-right ms-1"></i>
+                </button>
+                <button data-wizard-submit type="button" class="btn btn-success btn-sm ms-auto">
+                  <i class="fas fa-check me-1"></i> Finish
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <pre class="snip"><code>&lt;div data-plugin-wizard id="signup-wizard"
+     data-plugin-options='{"validate":"html5"}'&gt;
+
+  &lt;ol data-wizard-indicators role="tablist"&gt;&lt;/ol&gt;
+
+  &lt;div data-wizard-progress&gt;&lt;div data-wizard-progress-bar&gt;&lt;/div&gt;&lt;/div&gt;
+
+  &lt;div data-wizard-steps&gt;
+    &lt;section data-wizard-step="1" data-wizard-title="Account" data-wizard-icon="fas fa-user"&gt;
+      &lt;input type="email" required&gt;
+      &lt;input type="password" minlength="8" required&gt;
+    &lt;/section&gt;
+    &lt;section data-wizard-step="2" data-wizard-title="Profile" data-wizard-icon="fas fa-id-card"&gt;
+      &lt;input type="text" required&gt;
+    &lt;/section&gt;
+    &lt;section data-wizard-step="3" data-wizard-title="Done" data-wizard-icon="fas fa-check"&gt;
+      &lt;!-- confirmation content --&gt;
+    &lt;/section&gt;
+  &lt;/div&gt;
+
+  &lt;div data-wizard-nav&gt;
+    &lt;button data-wizard-prev type="button"&gt;Back&lt;/button&gt;
+    &lt;button data-wizard-next type="button"&gt;Next&lt;/button&gt;
+    &lt;button data-wizard-submit type="button"&gt;Finish&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        <div class="demo-log"><span class="log-dot"></span><span id="log-basic">Awaiting navigation…</span></div>
+      </div>
+
+      <!-- CARD 2: No validation (progress-only) -->
+      <div class="demo-card" id="demo-novalidate">
+        <div class="demo-head">
+          <i class="fas fa-bars-progress" style="color:#2ab8c8"></i>
+          <h3>No Validation — Progress Stepper</h3>
+          <span class="demo-badge" style="background:rgba(42,184,200,.12);color:#2ab8c8;">validate: false</span>
+        </div>
+        <div class="demo-stage" id="wiz-novalidate">
+          <div class="wiz-demo-wrap">
+            <div data-plugin-wizard id="wiz-novalidate-instance"
+                 data-plugin-options='{"validate":false}'>
+
+              <ol data-wizard-indicators role="tablist" aria-label="Onboarding steps" class="mb-3"></ol>
+
+              <div data-wizard-steps>
+                <section data-wizard-step="1" data-wizard-title="Welcome" data-wizard-icon="fas fa-hand-wave">
+                  <div class="py-2">
+                    <h5>Welcome to Themestrap!</h5>
+                    <p class="text-muted text-3">This stepper has no validation — every step passes automatically. Use it for informational onboarding flows, tutorials, or install wizards.</p>
+                  </div>
+                </section>
+                <section data-wizard-step="2" data-wizard-title="Install" data-wizard-icon="fas fa-download">
+                  <div class="py-2">
+                    <h5>Install the plugin</h5>
+                    <pre style="margin:0"><code>npm install themestrap
+# or just drop the script tag:</code></pre>
+                    <pre style="margin:0;margin-top:4px"><code>&lt;script src="js/themestrap.plugin.wizard.js"&gt;&lt;/script&gt;</code></pre>
+                  </div>
+                </section>
+                <section data-wizard-step="3" data-wizard-title="Wire up" data-wizard-icon="fas fa-plug">
+                  <div class="py-2">
+                    <h5>Wire it up</h5>
+                    <pre style="margin:0"><code>$('[data-plugin-wizard]:not(.manual)').each(function () {
+    const opts = themestrap.fn.getOptions(
+        $(this).data('plugin-options')) || undefined;
+    $(this).themestrapPluginWizard(opts);
+});</code></pre>
+                  </div>
+                </section>
+                <section data-wizard-step="4" data-wizard-title="Done" data-wizard-icon="fas fa-rocket">
+                  <div class="text-center py-3">
+                    <i class="fas fa-rocket" style="font-size:2.5rem;color:#2ab8c8;display:block;margin-bottom:1rem;"></i>
+                    <h5>Ready to launch</h5>
+                    <p class="text-muted text-3">All steps complete. Your wizard is live.</p>
+                  </div>
+                </section>
+              </div>
+
+              <div data-wizard-nav class="mt-3 d-flex gap-2">
+                <button data-wizard-prev type="button" class="btn btn-outline-secondary btn-sm">Back</button>
+                <button data-wizard-next type="button" class="btn btn-sm ms-auto" style="background:#2ab8c8;color:#fff;border:none;">Next</button>
+                <button data-wizard-submit type="button" class="btn btn-sm ms-auto" style="background:#2ab8c8;color:#fff;border:none;">Done</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <pre class="snip"><code>data-plugin-options='{"validate": false}'</code></pre>
+        <div class="demo-log"><span class="log-dot" style="background:#2ab8c8"></span><span id="log-novalidate">Awaiting navigation…</span></div>
+      </div>
+
+      <!-- CARD 3: Custom validation function -->
+      <div class="demo-card" id="demo-custom">
+        <div class="demo-head">
+          <i class="fas fa-shield-check" style="color:#7c3aed"></i>
+          <h3>Custom Validation Function</h3>
+          <span class="demo-badge" style="background:rgba(124,58,237,.12);color:#7c3aed;">validate: fn</span>
+        </div>
+        <div class="demo-stage" id="wiz-custom">
+          <div class="wiz-demo-wrap">
+            <div data-plugin-wizard id="wiz-custom-instance"
+                 data-plugin-options='{}'>
+
+              <ol data-wizard-indicators role="tablist" aria-label="Custom validation steps" class="mb-3"></ol>
+
+              <div data-wizard-steps>
+                <section data-wizard-step="1" data-wizard-title="Username" data-wizard-icon="fas fa-at">
+                  <h5 class="mb-3">Choose a username</h5>
+                  <div class="mb-2">
+                    <label class="form-label text-3">Username <small class="text-muted">(letters &amp; numbers only, 3–16 chars)</small></label>
+                    <input type="text" id="custom-username" class="form-control" placeholder="e.g. themestrap42">
+                    <div id="custom-username-error" class="text-danger text-3 mt-1" style="display:none"></div>
+                  </div>
+                </section>
+                <section data-wizard-step="2" data-wizard-title="Terms" data-wizard-icon="fas fa-file-contract">
+                  <h5 class="mb-3">Accept the terms</h5>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="custom-tos">
+                    <label class="form-check-label text-3" for="custom-tos">I agree to the Terms of Service</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="custom-privacy">
+                    <label class="form-check-label text-3" for="custom-privacy">I have read the Privacy Policy</label>
+                  </div>
+                  <div id="custom-tos-error" class="text-danger text-3 mt-2" style="display:none"></div>
+                </section>
+                <section data-wizard-step="3" data-wizard-title="Done" data-wizard-icon="fas fa-trophy">
+                  <div class="text-center py-3">
+                    <i class="fas fa-trophy" style="font-size:2.5rem;color:#7c3aed;display:block;margin-bottom:1rem;"></i>
+                    <h5>Account ready</h5>
+                    <p class="text-muted text-3">Custom validation passed on both steps.</p>
+                  </div>
+                </section>
+              </div>
+
+              <div data-wizard-nav class="mt-3 d-flex gap-2">
+                <button data-wizard-prev type="button" class="btn btn-outline-secondary btn-sm">Back</button>
+                <button data-wizard-next type="button" class="btn btn-sm ms-auto" style="background:#7c3aed;color:#fff;border:none;">Next</button>
+                <button data-wizard-submit type="button" class="btn btn-sm ms-auto" style="background:#7c3aed;color:#fff;border:none;">Finish</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <pre class="snip"><code>$('#wiz-custom-instance').themestrapPluginWizard({
+    validate: function ($step, stepNum) {
+        if (stepNum === 1) {
+            const val = $('#custom-username').val().trim();
+            const ok  = /^[a-zA-Z0-9]{3,16}$/.test(val);
+            $('#custom-username-error')
+                .text(ok ? '' : 'Must be 3–16 alphanumeric characters.')
+                .toggle(!ok);
+            $('#custom-username').toggleClass('wiz-invalid', !ok);
+            return ok;
+        }
+        if (stepNum === 2) {
+            const ok = $('#custom-tos').prop('checked') &amp;&amp; $('#custom-privacy').prop('checked');
+            $('#custom-tos-error')
+                .text(ok ? '' : 'Both checkboxes are required.')
+                .toggle(!ok);
+            return ok;
+        }
+        return true;
+    }
+});</code></pre>
+        <div class="demo-log"><span class="log-dot" style="background:#7c3aed"></span><span id="log-custom">Awaiting navigation…</span></div>
+      </div>
+
+      <!-- CARD 4: Programmatic API control panel -->
+      <div class="demo-card" id="demo-api">
+        <div class="demo-head">
+          <i class="fas fa-terminal" style="color:#98c379"></i>
+          <h3>Programmatic API</h3>
+          <span class="demo-badge" style="background:rgba(152,195,121,.12);color:#98c379;">getStep · goTo · reset</span>
+        </div>
+        <div class="demo-stage">
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="wiz-demo-wrap" style="max-width:100%">
+                <div data-plugin-wizard id="wiz-api-instance"
+                     data-plugin-options='{"validate":false}'>
+                  <ol data-wizard-indicators role="tablist" aria-label="API demo steps" class="mb-3"></ol>
+                  <div data-wizard-steps>
+                    <section data-wizard-step="1" data-wizard-title="Step 1" data-wizard-icon="fas fa-one">
+                      <div class="py-2 text-center"><span style="font-size:3rem;">①</span><p class="text-muted text-3 mt-2">Step 1 of 5</p></div>
+                    </section>
+                    <section data-wizard-step="2" data-wizard-title="Step 2" data-wizard-icon="fas fa-two">
+                      <div class="py-2 text-center"><span style="font-size:3rem;">②</span><p class="text-muted text-3 mt-2">Step 2 of 5</p></div>
+                    </section>
+                    <section data-wizard-step="3" data-wizard-title="Step 3" data-wizard-icon="fas fa-three">
+                      <div class="py-2 text-center"><span style="font-size:3rem;">③</span><p class="text-muted text-3 mt-2">Step 3 of 5</p></div>
+                    </section>
+                    <section data-wizard-step="4" data-wizard-title="Step 4" data-wizard-icon="fas fa-four">
+                      <div class="py-2 text-center"><span style="font-size:3rem;">④</span><p class="text-muted text-3 mt-2">Step 4 of 5</p></div>
+                    </section>
+                    <section data-wizard-step="5" data-wizard-title="Step 5" data-wizard-icon="fas fa-five">
+                      <div class="py-2 text-center"><span style="font-size:3rem;">⑤</span><p class="text-muted text-3 mt-2">Step 5 of 5</p></div>
+                    </section>
+                  </div>
+                  <div data-wizard-nav class="mt-3 d-flex gap-2">
+                    <button data-wizard-prev type="button" class="btn btn-outline-secondary btn-sm">Back</button>
+                    <button data-wizard-next type="button" class="btn btn-primary btn-sm ms-auto">Next</button>
+                    <button data-wizard-submit type="button" class="btn btn-success btn-sm ms-auto">Done</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <p class="text-3 text-muted mb-2" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">API Controls</p>
+              <div class="d-grid gap-2 mb-3">
+                <button class="btn btn-sm btn-outline-secondary" onclick="wizApi().next()"><code>wiz.next()</code></button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="wizApi().prev()"><code>wiz.prev()</code></button>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="wizApi().goTo(1)"><code>goTo(1)</code></button>
+                  <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="wizApi().goTo(3)"><code>goTo(3)</code></button>
+                  <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="wizApi().goTo(5)"><code>goTo(5)</code></button>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="wizApi().markComplete(2); wizApi().markComplete(4)"><code>markComplete(2) + markComplete(4)</code></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="wizApi().reset()"><code>wiz.reset()</code></button>
+              </div>
+              <p class="text-3 text-muted mb-1" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Event Log</p>
+              <div style="background:rgba(255,255,255,.02);border:1px solid var(--border,#333);border-radius:6px;padding:10px 14px;min-height:80px;max-height:160px;overflow-y:auto;">
+                <div id="wiz-api-log" class="text-3">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <pre class="snip"><code>const wiz = $('#wiz-api-instance').data('__pluginWizard');
+
+wiz.next();           // advance (runs validation)
+wiz.prev();           // go back
+wiz.goTo(3);          // jump to step 3
+wiz.markComplete(2);  // manually mark step 2 done
+wiz.getStep();        // → 3   (current step, 1-indexed)
+wiz.getStepCount();   // → 5
+wiz.isFirst();        // → false
+wiz.isLast();         // → false
+wiz.reset();          // return to step 1, clear completions
+
+$('#wiz-api-instance').on('wizard:change', function (e, detail, from, to, dir) {
+    console.log('moved', from, '→', to, '(', dir, ')');
+});
+$('#wiz-api-instance').on('wizard:complete', function () {
+    console.log('wizard finished!');
+});</code></pre>
+        <div class="demo-log"><span class="log-dot" style="background:#98c379"></span><span id="log-api">Use the controls above…</span></div>
+      </div>
+
+      <!-- CARD 5: localStorage persistence -->
+      <div class="demo-card" id="demo-persist">
+        <div class="demo-head">
+          <i class="fas fa-floppy-disk" style="color:#d19a66"></i>
+          <h3>localStorage Persistence</h3>
+          <span class="demo-badge" style="background:rgba(209,154,102,.12);color:#d19a66;">persist: true</span>
+        </div>
+        <div class="demo-stage" id="wiz-persist">
+          <div class="callout callout-info">
+            <strong>Try it:</strong> advance a few steps, then reload the page — the wizard resumes from where you left off.
+            The step is stored under <code>ts.wizard.step.wiz-persist-instance</code> in <code>localStorage</code>.
+          </div>
+          <div class="wiz-demo-wrap">
+            <div data-plugin-wizard id="wiz-persist-instance"
+                 data-plugin-options='{"validate":false,"persist":true}'>
+              <ol data-wizard-indicators role="tablist" aria-label="Persistent steps" class="mb-3"></ol>
+              <div data-wizard-steps>
+                <section data-wizard-step="1" data-wizard-title="Intro" data-wizard-icon="fas fa-flag">
+                  <div class="py-2"><h5 class="mb-2">Introduction</h5><p class="text-muted text-3">This is step 1. Click Next and reload — you'll land on whatever step you left at.</p></div>
+                </section>
+                <section data-wizard-step="2" data-wizard-title="Config" data-wizard-icon="fas fa-gear">
+                  <div class="py-2"><h5 class="mb-2">Configuration</h5><p class="text-muted text-3">Step 2 content. The wizard resumes here after a page reload.</p></div>
+                </section>
+                <section data-wizard-step="3" data-wizard-title="Review" data-wizard-icon="fas fa-eye">
+                  <div class="py-2"><h5 class="mb-2">Review</h5><p class="text-muted text-3">Step 3 — almost done.</p></div>
+                </section>
+                <section data-wizard-step="4" data-wizard-title="Done" data-wizard-icon="fas fa-check">
+                  <div class="text-center py-3">
+                    <i class="fas fa-check-circle" style="font-size:2.5rem;color:#d19a66;display:block;margin-bottom:1rem;"></i>
+                    <h5>All done</h5>
+                    <p class="text-muted text-3">On next reload the wizard will restart from step 1.</p>
+                  </div>
+                </section>
+              </div>
+              <div data-wizard-nav class="mt-3 d-flex gap-2">
+                <button data-wizard-prev type="button" class="btn btn-outline-secondary btn-sm">Back</button>
+                <button data-wizard-next type="button" class="btn btn-sm ms-auto" style="background:#d19a66;color:#fff;border:none;">Next</button>
+                <button data-wizard-submit type="button" class="btn btn-sm ms-auto" style="background:#d19a66;color:#fff;border:none;"
+                        onclick="if(confirm('Clear saved step?')) { localStorage.removeItem('ts.wizard.step.wiz-persist-instance'); location.reload(); }">Finish &amp; Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <pre class="snip"><code>data-plugin-options='{"persist": true}'
+
+// Key written to localStorage:
+// ts.wizard.step.{wizard-id}
+// Value: current step number as a string</code></pre>
+        <div class="demo-log"><span class="log-dot" style="background:#d19a66"></span><span id="log-persist">Resumed from localStorage step <strong id="log-persist-step">1</strong></span></div>
+      </div>
+
+      <!-- CARD 6: Events -->
+      <div class="demo-card" id="demo-events">
+        <div class="demo-head">
+          <i class="fas fa-bolt" style="color:#e5c07b"></i>
+          <h3>Event Hooks</h3>
+          <span class="demo-badge" style="background:rgba(229,192,123,.12);color:#e5c07b;">wizard:beforechange · wizard:change · wizard:complete · wizard:invalid</span>
+        </div>
+        <div class="demo-stage">
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="wiz-demo-wrap" style="max-width:100%">
+                <div data-plugin-wizard id="wiz-events-instance"
+                     data-plugin-options='{"validate":"html5"}'>
+                  <ol data-wizard-indicators role="tablist" aria-label="Events demo" class="mb-3"></ol>
+                  <div data-wizard-steps>
+                    <section data-wizard-step="1" data-wizard-title="Info" data-wizard-icon="fas fa-info">
+                      <h5 class="mb-3">Required info</h5>
+                      <div class="mb-3">
+                        <label class="form-label text-3">Project name</label>
+                        <input type="text" class="form-control" placeholder="My project" required minlength="3">
+                        <div data-wizard-error class="text-danger text-3 mt-1"></div>
+                      </div>
+                    </section>
+                    <section data-wizard-step="2" data-wizard-title="Confirm" data-wizard-icon="fas fa-check-double">
+                      <h5 class="mb-3">Confirm</h5>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="events-confirm" required>
+                        <label class="form-check-label text-3" for="events-confirm">I confirm this is correct</label>
+                        <div data-wizard-error class="text-danger text-3 mt-1"></div>
+                      </div>
+                    </section>
+                    <section data-wizard-step="3" data-wizard-title="Done" data-wizard-icon="fas fa-party-horn">
+                      <div class="text-center py-3">
+                        <i class="fas fa-stars" style="font-size:2rem;color:#e5c07b;display:block;margin-bottom:.75rem;"></i>
+                        <h5>Events fired!</h5>
+                        <p class="text-muted text-3">Check the event log.</p>
+                      </div>
+                    </section>
+                  </div>
+                  <div data-wizard-nav class="mt-3 d-flex gap-2">
+                    <button data-wizard-prev type="button" class="btn btn-outline-secondary btn-sm">Back</button>
+                    <button data-wizard-next type="button" class="btn btn-sm ms-auto" style="background:#e5c07b;color:#1e2127;border:none;">Next</button>
+                    <button data-wizard-submit type="button" class="btn btn-sm ms-auto" style="background:#e5c07b;color:#1e2127;border:none;">Complete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <p class="text-3 text-muted mb-1" style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">Event Log</p>
+              <div id="events-log" style="background:rgba(255,255,255,.02);border:1px solid var(--border,#333);border-radius:6px;padding:10px 14px;min-height:120px;max-height:240px;overflow-y:auto;font-family:var(--bs-font-monospace,monospace);font-size:12px;color:var(--muted,#888);">
+                <div>—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <pre class="snip"><code>$('#wiz-events-instance')
+    .on('wizard:beforechange', function (e, inst, from, to, dir) {
+        // call e.preventDefault() to block the transition
+        console.log('before', from, '→', to);
+    })
+    .on('wizard:change', function (e, inst, from, to, dir) {
+        console.log('changed to step', to, '(', dir, ')');
+    })
+    .on('wizard:invalid', function (e, inst, stepNum) {
+        console.log('validation failed on step', stepNum);
+    })
+    .on('wizard:complete', function (e, inst) {
+        console.log('wizard completed!');
+    })
+    .on('wizard:reset', function (e, inst) {
+        console.log('wizard reset');
+    });</code></pre>
+        <div class="demo-log"><span class="log-dot" style="background:#e5c07b"></span><span id="log-events">Navigate to fire events…</span></div>
+      </div>
+</div>
+</main>
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.wizard.js"></script>
+<script>
+$(function () {
+
+    // Init: Basic wizard (HTML5 validate)
+    $('#wiz-basic-instance').themestrapPluginWizard();
+    $('#wiz-basic-instance').on('wizard:change', function (e, inst, from, to, dir) {
+        $('#log-basic').html('Step <strong>' + to + '</strong> of ' + inst.getStepCount() + ' (' + dir + ')');
+    }).on('wizard:complete', function () {
+        $('#log-basic').html('<span style="color:#98c379">✓ wizard:complete fired</span>');
+    }).on('wizard:invalid', function (e, inst, step) {
+        $('#log-basic').html('<span style="color:#e06c75">✗ wizard:invalid on step ' + step + '</span>');
+    });
+
+    // Init: No-validate stepper
+    $('#wiz-novalidate-instance').themestrapPluginWizard({ validate: false });
+    $('#wiz-novalidate-instance').on('wizard:change', function (e, inst, from, to) {
+        $('#log-novalidate').html('Moved to step <strong>' + to + '</strong>');
+    });
+
+    // Init: Custom validation
+    $('#wiz-custom-instance').themestrapPluginWizard({
+        validate: function ($step, stepNum) {
+            if (stepNum === 1) {
+                var val = $('#custom-username').val().trim();
+                var ok  = /^[a-zA-Z0-9]{3,16}$/.test(val);
+                $('#custom-username-error').text(ok ? '' : 'Must be 3–16 alphanumeric characters.').toggle(!ok);
+                $('#custom-username').toggleClass('wiz-invalid', !ok);
+                return ok;
+            }
+            if (stepNum === 2) {
+                var ok = $('#custom-tos').prop('checked') && $('#custom-privacy').prop('checked');
+                $('#custom-tos-error').text(ok ? '' : 'Both checkboxes are required.').toggle(!ok);
+                return ok;
+            }
+            return true;
+        }
+    });
+    $('#wiz-custom-instance').on('wizard:change', function (e, inst, from, to) {
+        $('#log-custom').html('Step <strong>' + to + '</strong> reached');
+    }).on('wizard:invalid', function (e, inst, step) {
+        $('#log-custom').html('<span style="color:#e06c75">Validation failed on step ' + step + '</span>');
+    });
+
+    // Init: API demo
+    $('#wiz-api-instance').themestrapPluginWizard({ validate: false });
+    $('#wiz-api-instance').on('wizard:change', function (e, inst, from, to, dir) {
+        var html = '<span class="ev">wizard:change</span> from <span class="det">' + from + '</span> → <span class="det">' + to + '</span> (' + dir + ')';
+        $('#wiz-api-log').html(html);
+        $('#log-api').html('Step <strong>' + to + '</strong> active');
+    }).on('wizard:complete', function () {
+        $('#wiz-api-log').html('<span class="ev">wizard:complete</span> <span class="det">✓</span>');
+    }).on('wizard:reset', function () {
+        $('#wiz-api-log').html('<span class="ev">wizard:reset</span>');
+    });
+
+    // Init: Persist
+    $('#wiz-persist-instance').themestrapPluginWizard({ validate: false, persist: true });
+    var persistStep = $('#wiz-persist-instance').data('__pluginWizard').getStep();
+    $('#log-persist-step').text(persistStep);
+    $('#wiz-persist-instance').on('wizard:change', function (e, inst, from, to) {
+        $('#log-persist-step').text(to);
+    });
+
+    // Init: Events demo
+    $('#wiz-events-instance').themestrapPluginWizard();
+    var $evLog = $('#events-log');
+    function logEv(msg, color) {
+        var t = new Date().toLocaleTimeString('en', {hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        $evLog.prepend('<div><span style="color:var(--muted,#666)">' + t + '</span> ' + msg + '</div>');
+    }
+    $('#wiz-events-instance')
+        .on('wizard:beforechange', function (e, inst, from, to) {
+            logEv('<span style="color:#e5c07b">wizard:beforechange</span> ' + from + '→' + to);
+        })
+        .on('wizard:change', function (e, inst, from, to, dir) {
+            logEv('<span style="color:#61afef">wizard:change</span> step <strong>' + to + '</strong> (' + dir + ')');
+            $('#log-events').html('Step <strong>' + to + '</strong>');
+        })
+        .on('wizard:invalid', function (e, inst, step) {
+            logEv('<span style="color:#e06c75">wizard:invalid</span> step ' + step);
+            $('#log-events').html('<span style="color:#e06c75">Invalid on step ' + step + '</span>');
+        })
+        .on('wizard:complete', function () {
+            logEv('<span style="color:#98c379">wizard:complete</span> ✓');
+            $('#log-events').html('<span style="color:#98c379">Complete!</span>');
+        });
+});
+
+function wizApi() { return $('#wiz-api-instance').data('__pluginWizard'); }
+</script>
+</body>
+</html
