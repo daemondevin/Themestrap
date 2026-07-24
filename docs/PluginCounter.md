@@ -22,13 +22,9 @@ Animates a number from a start value to a target value over a configurable durat
 Auto-init in `themestrap.init.js`:
 
 ```js
-themestrap.fn.intObsInit(
-    '[data-plugin-counter]:not(.manual)',
-    function($el) {
-        const opts = themestrap.fn.getOptions($el);
-        $el.themestrapPluginCounter(opts);
-    }
-);
+if ($.isFunction($.fn['themestrapPluginCounter']) && ($('[data-plugin-counter]').length || $('.counters [data-to]').length)) {
+    themestrap.fn.dynIntObsInit('[data-plugin-counter]:not(.manual), .counters [data-to]', 'themestrapPluginCounter', themestrap.PluginCounter.defaults);
+}
 ```
 
 Manual init via jQuery:
@@ -190,17 +186,10 @@ inst.replay();        // animate from 0 to original target
 
 ```js
 // themestrap.init.js
-themestrap.fn.intObsInit(
-    '[data-plugin-counter]:not(.manual)',
-    function($el) {
-        const opts = themestrap.fn.getOptions($el);
-        $el.themestrapPluginCounter(opts);
-    }
-);
+if ($.isFunction($.fn['themestrapPluginCounter']) && ($('[data-plugin-counter]').length || $('.counters [data-to]').length)) {
+    themestrap.fn.dynIntObsInit('[data-plugin-counter]:not(.manual), .counters [data-to]', 'themestrapPluginCounter', themestrap.PluginCounter.defaults);
+}
 ```
-
-Use `intObsInit` (not `dynIntObsInit`) because the plugin merges `data-plugin-options` internally via `setOptions`.
-
 ---
 
 ## Easing
