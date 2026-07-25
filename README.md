@@ -172,7 +172,6 @@ Some plugins depend on a third-party libraries:
 | Owl Carousel | `owl` | carousel |
 | touchSwipe | `touchswipe` | carouselLight *(opt)* |
 | twentytwenty + event.move | `twentytwenty` | beforeAfter |
-| Magnific Popup | `magnific-popup` | lightbox |
 | Isotope | `isotope` | masonry, sort |
 | waitForImages | `waitforimages` | beforeAfter, masonry, sort |
 | easyPieChart | `easypiechart` | chartCircular |
