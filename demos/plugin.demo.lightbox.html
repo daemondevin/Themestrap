@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lightbox Plugin — Themestrap Demo</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+
+    <!-- Demo shell styles (mirrors Themestrap docs shell) -->
+    <style>
+        :root {
+            --ts-navy:   #0a1929;
+            --ts-navy2:  #0e2238;
+            --ts-orange: #e8672a;
+            --ts-teal:   #2ab8c8;
+            --ts-cream:  #f5f0e8;
+            --ts-mono:   'JetBrains Mono', 'Fira Mono', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--ts-navy);
+            color: #cdd9e5;
+            font-family: 'DM Sans', system-ui, sans-serif;
+            margin: 0;
+            padding: 0 0 80px;
+        }
+
+        /* Page header */
+        .demo-header {
+            background: var(--ts-navy2);
+            border-bottom: 1px solid rgba(255,255,255,.07);
+            padding: 40px 32px 32px;
+            margin-bottom: 40px;
+        }
+        .demo-header h1 {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: 2rem;
+            color: #fff;
+            margin: 0 0 6px;
+        }
+        .demo-header .badge-plugin {
+            display: inline-block;
+            background: var(--ts-orange);
+            color: #fff;
+            font-size: .7rem;
+            font-family: var(--ts-mono);
+            letter-spacing: .06em;
+            padding: 2px 8px;
+            border-radius: 3px;
+            vertical-align: middle;
+            margin-bottom: 10px;
+        }
+        .demo-header p {
+            color: rgba(255,255,255,.55);
+            margin: 0;
+            font-size: .95rem;
+        }
+        .demo-header a {
+            color: var(--ts-teal);
+            text-decoration: none;
+        }
+
+        /* Demo cards */
+        .demo-card {
+            background: var(--ts-navy2);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 8px;
+            margin-bottom: 28px;
+            overflow: hidden;
+        }
+        .demo-card-header {
+            padding: 16px 20px 14px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+        .demo-card-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            margin: 0;
+        }
+        .demo-card-header span {
+            font-size: .78rem;
+            color: rgba(255,255,255,.4);
+        }
+
+        /* Demo stage */
+        .demo-stage {
+            padding: 32px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: flex-start;
+            min-height: 90px;
+        }
+
+        /* Code snippet */
+        pre.snip {
+            margin: 0;
+            background: rgba(0,0,0,.35);
+            border-top: 1px solid rgba(255,255,255,.05);
+            padding: 16px 20px;
+            font-family: var(--ts-mono);
+            font-size: .78rem;
+            color: #9dc6e8;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.6;
+        }
+        pre.snip .c  { color: rgba(255,255,255,.3); }   /* comment  */
+        pre.snip .k  { color: var(--ts-teal);       }     /* keyword  */
+        pre.snip .s  { color: #b5dc8f;              }   /* string   */
+        pre.snip .a  { color: #e8b96a;              }   /* attr     */
+        pre.snip .t  { color: #d08cf0;              }   /* tag      */
+
+        /* Log output */
+        .demo-log {
+            background: rgba(0,0,0,.3);
+            border-top: 1px solid rgba(255,255,255,.05);
+            padding: 10px 20px;
+            font-family: var(--ts-mono);
+            font-size: .76rem;
+            color: var(--ts-teal);
+            min-height: 36px;
+        }
+        .demo-log .log-entry { display: block; line-height: 1.9; }
+        .demo-log .log-entry::before { content: '› '; color: rgba(255,255,255,.25); }
+
+        /* Thumb grid for gallery demos */
+        .thumb-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 8px;
+            width: 100%;
+        }
+        .thumb-grid a {
+            display: block;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: border-color .18s ease, transform .18s ease;
+            cursor: pointer;
+        }
+        .thumb-grid a:hover { border-color: var(--ts-orange); transform: scale(1.03); }
+        .thumb-grid a img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        /* Single trigger buttons */
+        .ts-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 20px;
+            background: var(--ts-orange);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .16s ease, transform .14s ease;
+        }
+        .ts-btn:hover { background: #d2541b; color: #fff; transform: translateY(-1px); }
+        .ts-btn-ghost {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,.22);
+            color: #cdd9e5;
+        }
+        .ts-btn-ghost:hover { background: rgba(255,255,255,.08); color: #fff; }
+        .ts-btn-teal { background: var(--ts-teal); }
+        .ts-btn-teal:hover { background: #209fb0; }
+
+        /* Video card thumb */
+        .video-card-thumb {
+            position: relative;
+            display: inline-block;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color .18s ease;
+        }
+        .video-card-thumb:hover { border-color: var(--ts-orange); }
+        .video-card-thumb img { display: block; width: 240px; border-radius: 6px; }
+        .play-badge {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,.42);
+            transition: background .18s ease;
+        }
+        .video-card-thumb:hover .play-badge { background: rgba(0,0,0,.28); }
+        .play-badge svg { width: 48px; height: 48px; fill: rgba(255,255,255,.9); filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+
+        /* API control strip */
+        .api-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .api-strip code {
+            font-family: var(--ts-mono);
+            font-size: .78rem;
+            color: var(--ts-teal);
+        }
+
+        /* Section label */
+        .section-label {
+            font-size: .68rem;
+            font-family: var(--ts-mono);
+            letter-spacing: .12em;
+            color: rgba(255,255,255,.3);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        /* Colour pills */
+        .color-swatch {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,.1);
+            font-size: .78rem;
+            color: #cdd9e5;
+            cursor: pointer;
+            transition: background .16s ease;
+        }
+        .color-swatch:hover { background: rgba(255,255,255,.06); }
+        .color-swatch span.dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Responsive container */
+        .demo-container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Caption text demo */
+        .caption-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        .caption-grid a {
+            display: block;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color .18s ease;
+        }
+        .caption-grid a:hover { border-color: var(--ts-teal); }
+        .caption-grid a img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+        .caption-grid .cap-label {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,.55);
+            color: rgba(255,255,255,.8);
+            font-size: .73rem;
+            padding: 6px 8px;
+            line-height: 1.3;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .caption-grid { grid-template-columns: 1fr; }
+            .demo-header  { padding: 24px 16px 20px; }
+            .demo-stage   { padding: 20px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Page header -->
+<div class="demo-header">
+    <div class="demo-container">
+        <div class="badge-plugin">themestrap.plugin.lightbox.js</div>
+        <h1>Lightbox Plugin</h1>
+        <p>
+            Zero-dependency lightbox for images, video, YouTube, Vimeo, and iframes.
+            Galleries, captions, keyboard/swipe nav, and a full programmatic API — no external libraries required.
+        </p>
+    </div>
+</div>
+
+<div class="demo-container">
+
+    <!-- 1 · Single image -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>Single Image</h2>
+            <span>Basic trigger — wrap any element in an anchor with data-plugin-lightbox</span>
+        </div>
+        <div class="demo-stage">
+            <a href="../img/demos/scapes/01.png"
+               data-plugin-lightbox
+               data-caption="Scapes - Waterfall">
+                <img src="../img/demos/scapes/01.png" alt="Scapes - Waterfall"
+                     style="height:150px;border-radius:6px;cursor:pointer;border:2px solid rgba(255,255,255,.1);transition:border-color .18s ease"
+                     onmouseover="this.style.borderColor='#e8672a'" onmouseout="this.style.borderColor='rgba(255,255,255,.1)'">
+            </a>
+            <a href="../img/demos/computer.png"
+               data-plugin-lightbox
+               data-caption="Portrait orientation">
+                <img src="../img/demos/computer.png" alt="Portrait thumbnail"
+                     style="height:250px;border-radius:6px;cursor:pointer;border:2px solid rgba(255,255,255,.1);transition:border-color .18s ease"
+                     onmouseover="this.style.borderColor='#e8672a'" onmouseout="this.style.borderColor='rgba(255,255,255,.1)'">
+            </a>
+        </div>
+        <pre class="snip"><span class="t">&lt;a</span> <span class="a">href</span>=<span class="s">"photo-full.jpg"</span>
+   <span class="a">data-plugin-lightbox</span>
+   <span class="a">data-caption</span>=<span class="s">"Rolling hills at dawn"</span><span class="t">&gt;</span>
+  <span class="t">&lt;img</span> <span class="a">src</span>=<span class="s">"photo-thumb.jpg"</span> <span class="a">alt</span>=<span class="s">"Thumbnail"</span><span class="t">&gt;</span>
+<span class="t">&lt;/a&gt;</span></pre>
+    </div>
+
+    <!-- 2 · Image gallery -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>Image Gallery</h2>
+            <span>Linked triggers via data-lightbox-group — arrow keys, click arrows, or swipe</span>
+        </div>
+        <div class="demo-stage">
+            <div class="thumb-grid">
+                <a href="../img/demos/foliage/01.png" data-plugin-lightbox data-lightbox-group="nature" data-caption="Foliage — frame 1 of 6">
+                    <img src="../img/demos/foliage/01.png" alt="Foliage">
+                </a>
+                <a href="../img/demos/foliage/02.png" data-plugin-lightbox data-lightbox-group="nature" data-caption="Foliage — frame 2 of 6">
+                    <img src="../img/demos/foliage/02.png" alt="Foliage">
+                </a>
+                <a href="../img/demos/foliage/03.png" data-plugin-lightbox data-lightbox-group="nature" data-caption="Foliage — frame 3 of 6">
+                    <img src="../img/demos/foliage/03.png" alt="Foliage">
+                </a>
+                <a href="../img/demos/foliage/04.png" data-plugin-lightbox data-lightbox-group="nature" data-caption="Foliage — frame 4 of 6">
+                    <img src="../img/demos/foliage/04.png" alt="Foliage">
+                </a>
+                <a href="../img/demos/foliage/05.png" data-plugin-lightbox data-lightbox-group="nature" data-caption="Foliage — frame 5 of 6">
+                    <img src="../img/demos/foliage/05.png" alt="Foliage">
+                </a>
+                <a href="../img/demos/foliage/06.png" data-plugin-lightbox data-lightbox-group="nature" data-caption="Foliage — frame 6 of 6">
+                    <img src="../img/demos/foliage/06.png" alt="Foliage">
+                </a>
+            </div>
+        </div>
+        <pre class="snip"><span class="c">&lt;!-- All items sharing the same group= string form one gallery --&gt;</span>
+<span class="t">&lt;a</span> <span class="a">href</span>=<span class="s">"full-1.jpg"</span> <span class="a">data-plugin-lightbox</span> <span class="a">data-lightbox-group</span>=<span class="s">"nature"</span> <span class="a">data-caption</span>=<span class="s">"..."</span><span class="t">&gt;...&lt;/a&gt;</span>
+<span class="t">&lt;a</span> <span class="a">href</span>=<span class="s">"full-2.jpg"</span> <span class="a">data-plugin-lightbox</span> <span class="a">data-lightbox-group</span>=<span class="s">"nature"</span> <span class="a">data-caption</span>=<span class="s">"..."</span><span class="t">&gt;...&lt;/a&gt;</span>
+<span class="t">&lt;a</span> <span class="a">href</span>=<span class="s">"full-3.jpg"</span> <span class="a">data-plugin-lightbox</span> <span class="a">data-lightbox-group</span>=<span class="s">"nature"</span> <span class="a">data-caption</span>=<span class="s">"..."</span><span class="t">&gt;...&lt;/a&gt;</span></pre>
+        <div class="demo-log" id="log-gallery">
+            <span class="log-entry">Awaiting interaction…</span>
+        </div>
+    </div>
+
+    <!-- 3 · Captions -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>Caption Sources</h2>
+            <span>data-caption, title attribute, or img alt — resolved in that order</span>
+        </div>
+        <div class="demo-stage">
+            <div class="caption-grid">
+                <a href="../img/demos/liquid/01.png"
+                   data-plugin-lightbox
+                   data-caption="Explicit data-caption attribute — highest priority">
+                    <img src="../img/demos/liquid/01.png" alt="Should not appear">
+                    <div class="cap-label">data-caption</div>
+                </a>
+                <a href="../img/demos/liquid/02.png"
+                   data-plugin-lightbox
+                   title="Caption from the title attribute — second priority">
+                    <img src="../img/demos/liquid/02.png" alt="Should not appear">
+                    <div class="cap-label">title attr</div>
+                </a>
+                <a href="../img/demos/liquid/03.png"
+                   data-plugin-lightbox>
+                    <img src="../img/demos/liquid/03.png" alt="Caption falls back to img alt — third priority">
+                    <div class="cap-label">img alt</div>
+                </a>
+                <a href="../img/demos/liquid/04.png"
+                   data-plugin-lightbox>
+                    <img src="../img/demos/liquid/04.png" alt="">
+                    <div class="cap-label">no caption</div>
+                </a>
+            </div>
+        </div>
+        <pre class="snip"><span class="c">&lt;!-- Priority: data-caption &gt; title &gt; img[alt] &gt; (empty) --&gt;</span>
+<span class="t">&lt;a</span> <span class="a">data-caption</span>=<span class="s">"Explicit caption"</span> ...<span class="t">&gt;</span>...<span class="t">&lt;/a&gt;</span>
+<span class="t">&lt;a</span> <span class="a">title</span>=<span class="s">"From title attr"</span> ...<span class="t">&gt;</span>...<span class="t">&lt;/a&gt;</span>
+<span class="t">&lt;a</span> ...<span class="t">&gt;&lt;img</span> <span class="a">alt</span>=<span class="s">"From img alt"</span><span class="t">&gt;&lt;/a&gt;</span></pre>
+    </div>
+
+    <!-- 4 · YouTube -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>YouTube Embed</h2>
+            <span>Point href at any youtube.com or youtu.be URL — plugin auto-detects and builds the embed</span>
+        </div>
+        <div class="demo-stage">
+            <a href="https://www.youtube.com/watch?v=kKr1eSjF-7Q"
+               data-plugin-lightbox
+               data-caption="Our Fallacious Thoughts"
+               class="video-card-thumb">
+                <img src="https://img.youtube.com/vi/kKr1eSjF-7Q/mqdefault.jpg" alt="Our Fallacious Thoughts thumbnail">
+                <div class="play-badge">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+            </a>
+            <a href="https://youtu.be/6RTW5IahDEE"
+               data-plugin-lightbox
+               data-caption="When Justice Demands Anger"
+               class="video-card-thumb">
+                <img src="https://img.youtube.com/vi/6RTW5IahDEE/mqdefault.jpg" alt="When Justice Demands Anger thumbnail">
+                <div class="play-badge">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+            </a>
+        </div>
+        <pre class="snip"><span class="c">&lt;!-- Full URL or short link — both work --&gt;</span>
+<span class="t">&lt;a</span> <span class="a">href</span>=<span class="s">"https://www.youtube.com/watch?v=kKr1eSjF-7Q"</span>
+   <span class="a">data-plugin-lightbox</span>
+   <span class="a">data-caption</span>=<span class="s">"Big Buck Bunny"</span><span class="t">&gt;</span>
+  <span class="t">&lt;img</span> <span class="a">src</span>=<span class="s">"https://img.youtube.com/vi/kKr1eSjF-7Q/mqdefault.jpg"</span> <span class="a">alt</span>=<span class="s">"..."</span><span class="t">&gt;</span>
+<span class="t">&lt;/a&gt;</span></pre>
+    </div>
+
+    <!-- 5 · Programmatic API -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>Programmatic API</h2>
+            <span>Initialize manually, drive via JS, listen to callbacks</span>
+        </div>
+        <div class="demo-stage">
+            <div class="api-strip" id="api-demo-triggers">
+                <!-- Hidden gallery anchors wired manually -->
+                <a href="../img/demos/oil/01.png" data-lightbox-group="api-gallery" data-caption="API gallery — item 1" class="manual" id="api-item-0" style="display:none"></a>
+                <a href="../img/demos/oil/02.png" data-lightbox-group="api-gallery" data-caption="API gallery — item 2" class="manual" id="api-item-1" style="display:none"></a>
+                <a href="../img/demos/oil/03.png" data-lightbox-group="api-gallery" data-caption="API gallery — item 3" class="manual" id="api-item-2" style="display:none"></a>
+
+                <button class="ts-btn" id="btn-open-0">open(0)</button>
+                <button class="ts-btn ts-btn-ghost" id="btn-open-1">open(1)</button>
+                <button class="ts-btn ts-btn-ghost" id="btn-open-2">open(2)</button>
+                <button class="ts-btn ts-btn-teal" id="btn-close" disabled>close()</button>
+            </div>
+        </div>
+        <pre class="snip"><span class="c">// Manual init — skip auto-init by adding .manual class</span>
+<span class="k">const</span> lb = $(<span class="s">'#trigger'</span>).themestrapPluginLightbox({
+  group: <span class="s">'api-gallery'</span>,
+  onOpen:  (item, idx) =&gt; console.log(<span class="s">'opened'</span>, idx),
+  onClose: ()          =&gt; console.log(<span class="s">'closed'</span>),
+});
+
+<span class="c">// Public methods</span>
+lb.open(0);    <span class="c">// open at index</span>
+lb.next();     <span class="c">// advance</span>
+lb.prev();     <span class="c">// go back</span>
+lb.goTo(2);    <span class="c">// jump to index</span>
+lb.isOpen();   <span class="c">// → boolean</span>
+lb.close();
+lb.destroy();</pre>
+        <div class="demo-log" id="log-api">
+            <span class="log-entry">Waiting for button click…</span>
+        </div>
+    </div>
+
+    <!-- 6 · Options via data-plugin-options -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>Options via data-plugin-options</h2>
+            <span>JSON options object on the trigger element</span>
+        </div>
+        <div class="demo-stage">
+            <a href="../img/demos/scapes/05.png"
+               data-plugin-lightbox
+               data-plugin-options='{"closeOnBackdrop": false, "mediaWidth": 800}'
+               data-caption="closeOnBackdrop: false — must use × button to dismiss">
+                <button class="ts-btn ts-btn-ghost">No backdrop close</button>
+            </a>
+            <a href="../img/demos/scapes/06.png"
+               data-plugin-lightbox
+               data-plugin-options='{"mediaWidth": 400, "mediaHeight": 400}'
+               data-caption="mediaWidth + mediaHeight constrained to 400px">
+                <button class="ts-btn ts-btn-ghost">Constrained size</button>
+            </a>
+        </div>
+        <pre class="snip"><span class="c">&lt;!-- Inline JSON (single-quoted attr, double-quoted keys) --&gt;</span>
+<span class="t">&lt;a</span> <span class="a">href</span>=<span class="s">"large.jpg"</span>
+   <span class="a">data-plugin-lightbox</span>
+   <span class="a">data-plugin-options</span>=<span class="s">'{"closeOnBackdrop": false, "mediaWidth": 800}'</span>
+   <span class="a">data-caption</span>=<span class="s">"Must use × button to dismiss"</span><span class="t">&gt;</span>
+  Open
+<span class="t">&lt;/a&gt;</span></pre>
+    </div>
+
+    <!-- 7 · Non-anchor trigger -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>Non-Anchor Triggers</h2>
+            <span>Any element works — use data-src for the media URL when not an &lt;a&gt;</span>
+        </div>
+        <div class="demo-stage">
+            <span data-plugin-lightbox
+                  data-src="../img/demos/scapes/07.png"
+                  data-caption="Triggered from a &lt;span&gt; using data-src"
+                  class="ts-btn ts-btn-ghost"
+                  style="cursor:pointer">
+                &lt;span&gt; trigger (data-src)
+            </span>
+            <div data-plugin-lightbox
+                 data-src="../img/demos/scapes/08.png"
+                 data-caption="Triggered from a &lt;div&gt;"
+                 class="ts-btn ts-btn-ghost"
+                 style="cursor:pointer">
+                &lt;div&gt; trigger (data-src)
+            </div>
+        </div>
+        <pre class="snip"><span class="c">&lt;!-- href= is preferred for &lt;a&gt;. For anything else, use data-src= --&gt;</span>
+<span class="t">&lt;span</span> <span class="a">data-plugin-lightbox</span>
+      <span class="a">data-src</span>=<span class="s">"photo.jpg"</span>
+      <span class="a">data-caption</span>=<span class="s">"Span trigger"</span><span class="t">&gt;</span>
+  Open image
+<span class="t">&lt;/span&gt;</span></pre>
+    </div>
+
+    <!-- 8 · Callbacks -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h2>Callbacks</h2>
+            <span>onOpen, onClose, onItemLoad — fire on lifecycle events</span>
+        </div>
+        <div class="demo-stage">
+            <a href="../img/demos/scapes/09.png"
+               data-lightbox-group="cb-gallery"
+               data-caption="Item one — check the log below"
+               class="manual" id="cb-item-0">
+                <img src="../img/demos/scapes/09.png" alt="Callback demo 1"
+                     style="border-radius:5px;cursor:pointer;border:2px solid rgba(255,255,255,.1)">
+            </a>
+            <a href="../img/demos/scapes/10.png"
+               data-lightbox-group="cb-gallery"
+               data-caption="Item two — check the log below"
+               class="manual" id="cb-item-1">
+                <img src="../img/demos/scapes/10.png" alt="Callback demo 2"
+                     style="border-radius:5px;cursor:pointer;border:2px solid rgba(255,255,255,.1)">
+            </a>
+        </div>
+        <pre class="snip">$(<span class="s">'#trigger'</span>).themestrapPluginLightbox({
+  group: <span class="s">'cb-gallery'</span>,
+  onOpen:     (item, idx) =&gt; log(<span class="s">`opened index ${idx}: ${item.src}`</span>),
+  onClose:    ()          =&gt; log(<span class="s">'lightbox closed'</span>),
+  onItemLoad: (item, idx) =&gt; log(<span class="s">`item ${idx} loaded`</span>),
+});</pre>
+        <div class="demo-log" id="log-callbacks">
+            <span class="log-entry">Click an image above to see callback output…</span>
+        </div>
+    </div>
+
+</div><!-- /demo-container -->
+
+<!-- jQuery + Bootstrap JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Lightbox plugin (self-contained) -->
+<script src="../js/components/themestrap.plugin.lightbox.js"></script>
+
+<script>
+$(function() {
+
+    function log(targetId, msg) {
+        const $log = $('#' + targetId);
+        $log.html($log.html().replace(/<span[^>]+>Awaiting.*?<\/span>|<span[^>]+>Waiting.*?<\/span>|<span[^>]+>Click.*?<\/span>/g, ''));
+        $('<span class="log-entry">' + msg + '</span>').prependTo($log);
+        // Trim to 5 entries
+        $log.find('.log-entry').filter(':gt(4)').remove();
+    }
+
+    // Auto-init all data-plugin-lightbox elements (excluding .manual) 
+    // (In a real project this lives in themestrap.init.js via execOnceThroughEvent)
+    $('[data-plugin-lightbox]:not(.manual)').each(function() {
+        const $this = $(this);
+        const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+        $this.themestrapPluginLightbox(opts);
+    });
+
+    // Gallery log (card 2) 
+    $('[data-lightbox-group="nature"]').each(function() {
+        const inst = $(this).data('__pluginLightbox');
+        if (!inst) return;
+        const origOpen = inst.open.bind(inst);
+        inst.open = function(idx) {
+            log('log-gallery', 'open() called → index ' + idx + ' of ' + inst._items.length);
+            return origOpen(idx);
+        };
+    });
+
+    // API demo (card 5) 
+    // Init the first hidden anchor manually — it owns the group
+    const $apiAnchor = $('#api-item-0');
+    $apiAnchor.themestrapPluginLightbox({
+        group: 'api-gallery',
+        onOpen: function(item, idx) {
+            log('log-api', 'onOpen → idx=' + idx + ' type=' + item.type);
+            $('#btn-close').prop('disabled', false);
+        },
+        onClose: function() {
+            log('log-api', 'onClose fired');
+            $('#btn-close').prop('disabled', true);
+        },
+        onItemLoad: function(item, idx) {
+            log('log-api', 'onItemLoad → idx=' + idx);
+        },
+    });
+
+    // Also init the sibling anchors so the group resolves
+    $('#api-item-1, #api-item-2').each(function() {
+        $(this).themestrapPluginLightbox({ group: 'api-gallery' });
+    });
+
+    const apiLb = $apiAnchor.data('__pluginLightbox');
+
+    $('#btn-open-0').on('click', function() { apiLb.open(0); });
+    $('#btn-open-1').on('click', function() { apiLb.open(1); });
+    $('#btn-open-2').on('click', function() { apiLb.open(2); });
+    $('#btn-close').on('click',  function() { apiLb.close(); });
+
+    // Callbacks demo (card 8) 
+    $('#cb-item-0').themestrapPluginLightbox({
+        group: 'cb-gallery',
+        onOpen:     function(item, idx) { log('log-callbacks', 'onOpen → idx=' + idx + ', src=…' + item.src.slice(-20)); },
+        onClose:    function()          { log('log-callbacks', 'onClose fired'); },
+        onItemLoad: function(item, idx) { log('log-callbacks', 'onItemLoad → idx=' + idx); },
+    });
+    $('#cb-item-1').themestrapPluginLightbox({ group: 'cb-gallery' });
+
+    // Wire image clicks for card 8
+    $('#cb-item-0 img, #cb-item-1 img').on('click', function(e) {
+        e.preventDefault();
+        $(this).closest('a').trigger('click');
+    });
+
+});
+</script>
+</body>
+</html>
