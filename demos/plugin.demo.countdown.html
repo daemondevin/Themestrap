@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Countdown Plugin — Demo | Themestrap-MODX</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  <style>
+    :root {
+      --ts-navy:    #0a1929;
+      --ts-navy-2:  #0e2238;
+      --ts-orange:  #e8672a;
+      --ts-orange-2:#d2541b;
+      --ts-teal:    #2ab8c8;
+      --ts-cream:   #f5f0e8;
+      --ts-font-serif:  'Fraunces', Georgia, serif;
+      --ts-font-display:'Syne', sans-serif;
+      --ts-font-body:   'DM Sans', system-ui, sans-serif;
+      --ts-font-mono:   'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: var(--ts-font-body);
+      background: #f0f2f5;
+      color: #1a2332;
+      margin: 0;
+    }
+
+    /* Page header */
+    .demo-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 3px solid var(--ts-orange);
+    }
+    .demo-header h1 {
+      font-family: var(--ts-font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 .25rem;
+      letter-spacing: -.02em;
+    }
+    .demo-header p {
+      margin: 0;
+      opacity: .7;
+      font-size: .95rem;
+    }
+    .demo-header .badge-pill {
+      display: inline-block;
+      background: var(--ts-orange);
+      color: #fff;
+      font-family: var(--ts-font-mono);
+      font-size: .7rem;
+      padding: .2em .6em;
+      border-radius: 99px;
+      margin-left: .5rem;
+      vertical-align: middle;
+    }
+
+    /* Nav strip */
+    .demo-nav {
+      background: var(--ts-navy-2);
+      padding: .6rem 2rem;
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .demo-nav a {
+      color: rgba(255,255,255,.6);
+      text-decoration: none;
+      font-size: .82rem;
+      font-family: var(--ts-font-mono);
+      transition: color .15s;
+    }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-nav a.active { color: var(--ts-orange); }
+
+    /* Layout */
+    .demo-body {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* Demo cards */
+    .demo-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .demo-card-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .demo-card-header h2 {
+      font-family: var(--ts-font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: .02em;
+    }
+    .demo-card-header .card-num {
+      font-family: var(--ts-font-mono);
+      font-size: .75rem;
+      color: var(--ts-teal);
+      border: 1px solid var(--ts-teal);
+      border-radius: 4px;
+      padding: .1em .45em;
+    }
+
+    .demo-stage {
+      padding: 2.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      background: var(--ts-cream);
+      border-bottom: 1px solid #e8e0d4;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    pre.snip {
+      margin: 0;
+      padding: 1.25rem 1.5rem;
+      background: #0d1b2a;
+      color: #c9d1d9;
+      font-family: var(--ts-font-mono);
+      font-size: .78rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    pre.snip .hl-attr  { color: #79c0ff; }
+    pre.snip .hl-val   { color: #a5d6a7; }
+    pre.snip .hl-tag   { color: #ff7b72; }
+    pre.snip .hl-cmt   { color: #6a737d; }
+
+    .demo-log {
+      font-family: var(--ts-font-mono);
+      font-size: .78rem;
+      padding: .75rem 1.5rem;
+      background: #0d1b2a;
+      color: #8b949e;
+      border-top: 1px solid rgba(255,255,255,.05);
+      min-height: 2.5rem;
+    }
+    .demo-log .log-entry { color: var(--ts-teal); }
+    .demo-log .log-warn  { color: var(--ts-orange); }
+
+    /* Controls */
+    .demo-controls {
+      padding: 1rem 1.5rem;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      align-items: center;
+    }
+    .demo-controls label {
+      font-size: .8rem;
+      font-family: var(--ts-font-mono);
+      color: #555;
+      margin-right: .25rem;
+    }
+    .demo-controls .btn-ts {
+      font-family: var(--ts-font-mono);
+      font-size: .78rem;
+      padding: .3rem .85rem;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .demo-controls .btn-ts:active { transform: scale(.97); }
+    .btn-primary-ts  { background: var(--ts-orange); color: #fff; }
+    .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts     { background: var(--ts-teal); color: #fff; }
+    .btn-teal-ts:hover { background: #22a0af; }
+    .btn-navy-ts     { background: var(--ts-navy); color: #fff; }
+    .btn-navy-ts:hover { background: var(--ts-navy-2); }
+    .btn-ghost-ts    { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; }
+    .btn-ghost-ts:hover { background: #f0f2f5; }
+
+    /* Countdown component styles pulled from plugin */
+    .ts-countdown {
+      display: inline-flex;
+      align-items: flex-end;
+      line-height: 1em;
+    }
+    .ts-countdown > span {
+      visibility: hidden;
+      position: relative;
+      display: inline-block;
+      overflow: hidden;
+      height: 1em;
+      transition: width 0.4s ease-out 0.2s;
+      --value-v: max(0, var(--value, 0));
+      --value-hundreds: round(to-zero, var(--value-v) / 100, 1);
+      --value-tens: round(to-zero, calc(var(--value-v) - var(--value-hundreds) * 100) / 10, 1);
+      --value-ones: calc(var(--value-v) - var(--value-hundreds) * 100 - var(--value-tens) * 10);
+      --show-hundreds: clamp(clamp(0, var(--digits, 1) - 2, 1), var(--value-hundreds), 1);
+      --show-tens: clamp(clamp(0, var(--digits, 1) - 1, 1), calc(var(--value-tens) + var(--show-hundreds)), 1);
+      --first-digits: round(to-zero, var(--value-v) / 10, 1);
+      width: calc(1ch + var(--show-tens) * 1ch + var(--show-hundreds) * 1ch);
+      direction: ltr;
+    }
+    .ts-countdown > span::before,
+    .ts-countdown > span::after {
+      visibility: visible;
+      position: absolute;
+      overflow: hidden;
+      white-space: pre;
+      text-align: end;
+      direction: rtl;
+      font-variant-numeric: tabular-nums;
+      content: "00\A 01\A 02\A 03\A 04\A 05\A 06\A 07\A 08\A 09\A 10\A 11\A 12\A 13\A 14\A 15\A 16\A 17\A 18\A 19\A 20\A 21\A 22\A 23\A 24\A 25\A 26\A 27\A 28\A 29\A 30\A 31\A 32\A 33\A 34\A 35\A 36\A 37\A 38\A 39\A 40\A 41\A 42\A 43\A 44\A 45\A 46\A 47\A 48\A 49\A 50\A 51\A 52\A 53\A 54\A 55\A 56\A 57\A 58\A 59\A 60\A 61\A 62\A 63\A 64\A 65\A 66\A 67\A 68\A 69\A 70\A 71\A 72\A 73\A 74\A 75\A 76\A 77\A 78\A 79\A 80\A 81\A 82\A 83\A 84\A 85\A 86\A 87\A 88\A 89\A 90\A 91\A 92\A 93\A 94\A 95\A 96\A 97\A 98\A 99\A";
+      transition: top 1s cubic-bezier(1, 0, 0, 1),
+                  width 0.2s ease-out 0.2s,
+                  opacity 0.2s ease-out 0.2s;
+    }
+    .ts-countdown > span::before {
+      width: calc(1ch + var(--show-hundreds) * 1ch);
+      top: calc(var(--first-digits) * -1em);
+      inset-inline-end: 0;
+      opacity: var(--show-tens);
+    }
+    .ts-countdown > span::after {
+      width: 1ch;
+      top: calc(var(--value-ones) * -1em);
+      inset-inline-start: 0;
+    }
+
+    /* Section label */
+    .section-label {
+      font-family: var(--ts-font-display);
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--ts-teal);
+      margin: 0 0 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Page Header -->
+<div class="demo-header">
+  <h1>Countdown <span class="badge-pill">plugin</span></h1>
+  <p>DaisyUI-style CSS slot-machine countdown &mdash; zero dependencies, pure CSS animation</p>
+</div>
+
+<div class="demo-nav">
+  <a href="#card-labels-under" class="active">Labels Under</a>
+  <a href="#card-boxes">Boxes</a>
+  <a href="#card-clock">Clock</a>
+  <a href="#card-labels-side">Labels Side</a>
+  <a href="#card-api">API Control</a>
+  <a href="#card-event">Event Hook</a>
+</div>
+
+<div class="demo-body">
+
+  <!-- Card 1: Labels Under (default) -->
+  <div class="demo-card" id="card-labels-under">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Labels Under — default layout</h2>
+    </div>
+
+    <div class="demo-stage">
+      <div
+        id="demo-labels-under"
+        data-plugin-countdown
+        data-plugin-countdown-date=""
+        data-plugin-options='{"layout":"labels-under","fontSize":"font-mono","showDays":true,"showHours":true,"showMinutes":true,"showSeconds":true}'
+        style="font-size: 3.5rem;"
+      ></div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span>
+  <span class="hl-attr">data-plugin-countdown</span>
+  <span class="hl-attr">data-plugin-countdown-date</span>=<span class="hl-val">"2027-01-01T00:00:00"</span>
+  <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"layout":"labels-under","fontSize":"font-mono"}'</span>
+  <span class="hl-attr">style</span>=<span class="hl-val">"font-size:3.5rem"</span>
+<span class="hl-tag">&gt;&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-labels-under">
+      <span class="log-entry">// waiting for tick…</span>
+    </div>
+  </div>
+
+
+  <!-- Card 2: Boxes -->
+  <div class="demo-card" id="card-boxes">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Boxes — pill background per unit</h2>
+    </div>
+
+    <div class="demo-stage" style="background: var(--ts-navy); padding: 3rem 2rem;">
+      <div
+        id="demo-boxes"
+        data-plugin-countdown
+        data-plugin-countdown-date=""
+        data-plugin-options='{"layout":"boxes","fontSize":"font-mono","boxBg":"#e8672a","boxColor":"#fff","boxPadding":"0.6rem 1.2rem","boxRadius":"8px","gap":"1rem"}'
+        style="font-size: 3rem;"
+      ></div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span>
+  <span class="hl-attr">data-plugin-countdown</span>
+  <span class="hl-attr">data-plugin-countdown-date</span>=<span class="hl-val">"2027-01-01T00:00:00"</span>
+  <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"layout":"boxes","boxBg":"#e8672a","boxColor":"#fff","boxRadius":"8px"}'</span>
+  <span class="hl-attr">style</span>=<span class="hl-val">"font-size:3rem"</span>
+<span class="hl-tag">&gt;&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-boxes">
+      <span class="log-entry">// boxes layout — boxBg, boxColor, boxRadius configurable</span>
+    </div>
+  </div>
+
+
+  <!-- Card 3: Clock -->
+  <div class="demo-card" id="card-clock">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Clock — inline with separator</h2>
+    </div>
+
+    <div class="demo-stage">
+      <div
+        id="demo-clock"
+        data-plugin-countdown
+        data-plugin-countdown-date=""
+        data-plugin-options='{"layout":"clock","separator":":","showDays":false,"showHours":true,"showMinutes":true,"showSeconds":true}'
+        style="font-size: 4rem; font-family: var(--ts-font-mono);"
+      ></div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span>
+  <span class="hl-attr">data-plugin-countdown</span>
+  <span class="hl-attr">data-plugin-countdown-date</span>=<span class="hl-val">"2027-01-01T00:00:00"</span>
+  <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"layout":"clock","separator":":","showDays":false}'</span>
+  <span class="hl-attr">style</span>=<span class="hl-val">"font-size:4rem"</span>
+<span class="hl-tag">&gt;&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-clock">
+      <span class="log-entry">// clock layout — separator defaults to ":"</span>
+    </div>
+  </div>
+
+
+  <!-- Card 4: Labels Side -->
+  <div class="demo-card" id="card-labels-side">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Labels Side — inline label after each unit</h2>
+    </div>
+
+    <div class="demo-stage">
+      <div
+        id="demo-labels-side"
+        data-plugin-countdown
+        data-plugin-countdown-date=""
+        data-plugin-options='{"layout":"labels-side","showDays":true,"showHours":true,"showMinutes":true,"showSeconds":true,"labelDays":"d","labelHours":"h","labelMinutes":"m","labelSeconds":"s"}'
+        style="font-size: 2.5rem; font-family: var(--ts-font-mono);"
+      ></div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span>
+  <span class="hl-attr">data-plugin-countdown</span>
+  <span class="hl-attr">data-plugin-countdown-date</span>=<span class="hl-val">"2027-01-01T00:00:00"</span>
+  <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"layout":"labels-side","labelDays":"d","labelHours":"h","labelMinutes":"m","labelSeconds":"s"}'</span>
+<span class="hl-tag">&gt;&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-labels-side">
+      <span class="log-entry">// labels-side — label keys: labelDays, labelHours, labelMinutes, labelSeconds</span>
+    </div>
+  </div>
+
+
+  <!-- Card 5: API Control -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">05</span>
+      <h2>Programmatic API — pause / resume / setDate</h2>
+    </div>
+
+    <div class="demo-stage">
+      <div
+        id="demo-api"
+        class="manual"
+        style="font-size: 3rem; font-family: var(--ts-font-mono);"
+      ></div>
+    </div>
+
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="apiPause()">pause()</button>
+      <button class="btn-ts btn-teal-ts"    onclick="apiResume()">resume()</button>
+      <button class="btn-ts btn-navy-ts"    onclick="apiSetDate(30)">+30 s</button>
+      <button class="btn-ts btn-navy-ts"    onclick="apiSetDate(3600)">+1 h</button>
+      <button class="btn-ts btn-navy-ts"    onclick="apiSetDate(86400)">+1 day</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="apiDestroy()">destroy()</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="apiReinit()">reinit</button>
+    </div>
+
+<pre class="snip"><span class="hl-cmt">// manual init</span>
+<span class="hl-tag">$</span>('#demo-api').themestrapPluginCountdown({
+  layout: 'labels-under',
+  date:   new Date(Date.now() + 90000)  <span class="hl-cmt">// 90 seconds from now</span>
+});
+
+<span class="hl-tag">const</span> inst = $('#demo-api').data('__pluginCountdown');
+
+inst.pause();
+inst.resume();
+inst.setDate(new Date(Date.now() + 86400000));
+inst.destroy();</pre>
+
+    <div class="demo-log" id="log-api">
+      <span class="log-entry">// click a button to see API output here</span>
+    </div>
+  </div>
+
+
+  <!-- Card 6: Finished Event -->
+  <div class="demo-card" id="card-event">
+    <div class="demo-card-header">
+      <span class="card-num">06</span>
+      <h2>Finished Event — <code>ts.countdown.finished</code></h2>
+    </div>
+
+    <div class="demo-stage" style="flex-direction: column; gap: 1rem;">
+      <div
+        id="demo-event"
+        class="manual"
+        style="font-size: 3rem; font-family: var(--ts-font-mono);"
+      ></div>
+      <p style="font-size:.85rem; color:#555; margin:0; text-align:center;" id="event-status">
+        Counting down 10 seconds&hellip;
+      </p>
+    </div>
+
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="eventReset()">Reset (10 s)</button>
+    </div>
+
+<pre class="snip">$('#demo-event').on('ts.countdown.finished', function() {
+  console.log('Countdown finished!');
+});
+
+$('#demo-event').themestrapPluginCountdown({
+  layout:      'clock',
+  separator:   ':',
+  showDays:    false,
+  showHours:   false,
+  date:        new Date(Date.now() + 10000)
+});</pre>
+
+    <div class="demo-log" id="log-event">
+      <span class="log-entry">// ts.countdown.finished fires when timer hits 0</span>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- jQuery + Bootstrap 5 -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- Themestrap core -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin source — load from project assets in production -->
+<script src="../js/components/themestrap.plugin.countdown.js"></script>
+
+<script>
+$(function () {
+
+  // Set a shared target: New Year 2027 
+  const NYE = '2027-01-01T00:00:00';
+
+  // Card 1 — labels-under
+  $('#demo-labels-under').attr('data-plugin-countdown-date', NYE);
+  $('#demo-labels-under').themestrapPluginCountdown();
+  setInterval(function () {
+    const inst = $('#demo-labels-under').data('__pluginCountdown');
+    if (!inst) return;
+    const diff = Math.max(0, Math.floor((new Date(NYE) - Date.now()) / 1000));
+    const d = Math.floor(diff / 86400);
+    const h = Math.floor((diff % 86400) / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    $('#log-labels-under').html('<span class="log-entry">// ' + d + 'd ' + h + 'h ' + m + 'm ' + s + 's remaining until the New Year 2027</span>');
+  }, 1000);
+
+  // Card 2 — boxes
+  $('#demo-boxes').attr('data-plugin-countdown-date', NYE);
+  $('#demo-boxes').themestrapPluginCountdown();
+  $('#log-boxes').html('<span class="log-entry">// boxes — each unit wrapped in a colored pill</span>');
+
+  // Card 3 — clock
+  $('#demo-clock').attr('data-plugin-countdown-date', NYE);
+  $('#demo-clock').themestrapPluginCountdown();
+  $('#log-clock').html('<span class="log-entry">// clock — hh:mm:ss inline, days hidden</span>');
+
+  // Card 4 — labels-side
+  $('#demo-labels-side').attr('data-plugin-countdown-date', NYE);
+  $('#demo-labels-side').themestrapPluginCountdown();
+  $('#log-labels-side').html('<span class="log-entry">// labels-side — short unit suffixes</span>');
+
+  // Card 5 — API (manual)
+  $('#demo-api').themestrapPluginCountdown({
+    layout: 'labels-under',
+    date:   new Date(Date.now() + 90000)
+  });
+  log('log-api', '// init: +90 s from now');
+
+  // Card 6 — event
+  initEventDemo();
+
+});
+
+// Card 5 helpers 
+function getApi() { return $('#demo-api').data('__pluginCountdown'); }
+
+function apiPause() {
+  const inst = getApi();
+  if (!inst) return log('log-api', '// not initialized', 'warn');
+  inst.pause();
+  log('log-api', '// pause() called');
+}
+
+function apiResume() {
+  const inst = getApi();
+  if (!inst) return log('log-api', '// not initialized', 'warn');
+  inst.resume();
+  log('log-api', '// resume() called');
+}
+
+function apiSetDate(offsetSecs) {
+  const inst = getApi();
+  if (!inst) return log('log-api', '// not initialized — click reinit first', 'warn');
+  const d = new Date(Date.now() + offsetSecs * 1000);
+  inst.setDate(d);
+  log('log-api', '// setDate(' + d.toISOString() + ')');
+}
+
+function apiDestroy() {
+  const inst = getApi();
+  if (!inst) return log('log-api', '// already destroyed', 'warn');
+  inst.destroy();
+  log('log-api', '// destroy() called — DOM restored');
+}
+
+function apiReinit() {
+  if ($('#demo-api').data('__pluginCountdown')) {
+    log('log-api', '// already initialized; destroy first', 'warn');
+    return;
+  }
+  $('#demo-api').themestrapPluginCountdown({
+    layout: 'labels-under',
+    date:   new Date(Date.now() + 90000)
+  });
+  log('log-api', '// reinit: +90 s from now');
+}
+
+// Card 6 helpers 
+function initEventDemo() {
+  $('#demo-event').off('ts.countdown.finished');
+
+  // destroy if exists
+  const old = $('#demo-event').data('__pluginCountdown');
+  if (old) old.destroy();
+
+  $('#demo-event').on('ts.countdown.finished', function () {
+    $('#event-status').html('<strong style="color:var(--ts-orange)">🎉 ts.countdown.finished fired!</strong>');
+    log('log-event', '// ts.countdown.finished — event received on #demo-event');
+  });
+
+  $('#demo-event').themestrapPluginCountdown({
+    layout:      'clock',
+    separator:   ':',
+    showDays:    false,
+    showHours:   false,
+    date:        new Date(Date.now() + 10000)
+  });
+
+  $('#event-status').text('Counting down 10 seconds…');
+  log('log-event', '// listening for ts.countdown.finished…');
+}
+
+function eventReset() {
+  initEventDemo();
+}
+
+// log helper 
+function log(id, msg, type) {
+  const cls = type === 'warn' ? 'log-warn' : 'log-entry';
+  $('#' + id).html('<span class="' + cls + '">' + msg + '</span>');
+}
+</script>
+
+</body>
+</html>

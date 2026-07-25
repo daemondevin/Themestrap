@@ -132,7 +132,7 @@
     overflow: visible;
 }
 
-/* ── Item ── */
+/* Item */
 .ts-accordion__item {
     position: relative;
     border-top: 1px solid var(--ts-acc-border);
@@ -156,7 +156,7 @@
 }
 .ts-accordion__item.is-open::before { transform: scaleY(1); }
 
-/* ── Trigger / header ── */
+/* Trigger / header */
 .ts-accordion__trigger {
     display: flex;
     align-items: center;
@@ -189,7 +189,7 @@
     box-shadow: inset 0 0 0 2px var(--ts-acc-ring);
 }
 
-/* ── Chevron (CSS-drawn caret; no icon font) ── */
+/* Chevron (CSS-drawn caret; no icon font) */
 .ts-accordion__chev {
     flex: 0 0 auto;
     margin-left: auto;
@@ -213,7 +213,7 @@
     transform: rotate(var(--ts-acc-icon-rot));
 }
 
-/* ── Panel shell + body ── */
+/* Panel shell + body */
 .ts-accordion__shell {
     overflow: hidden;
     height: 0;
@@ -235,7 +235,7 @@
 }
 .ts-accordion__panel > :last-child { margin-bottom: 0; }
 
-/* ── Disabled ── */
+/* Disabled */
 .ts-accordion--disabled .ts-accordion__trigger {
     cursor: not-allowed;
     opacity: .55;
@@ -460,8 +460,6 @@
             return this;
         }
 
-        // ── Public API ───────────────────────────────────────────────
-
         open(i)   { this._request(i, true);  return this; }
         close(i)  { this._request(i, false); return this; }
         toggle(i) {
@@ -521,8 +519,6 @@
                 .removeData(instanceName);
             return this;
         }
-
-        // ── Internals ────────────────────────────────────────────────
 
         _item(i)  { return this.$items && this.$items.eq(i).length ? this.$items.eq(i) : null; }
 

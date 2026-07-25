@@ -171,12 +171,9 @@ Some plugins depend on a third-party libraries:
 |---|---|---|
 | Owl Carousel | `owl` | carousel |
 | touchSwipe | `touchswipe` | carouselLight *(opt)* |
-| twentytwenty + event.move | `twentytwenty` | beforeAfter |
-| Magnific Popup | `magnific-popup` | lightbox |
 | Isotope | `isotope` | masonry, sort |
-| waitForImages | `waitforimages` | beforeAfter, masonry, sort |
+| waitForImages | `waitforimages` | masonry, sort |
 | easyPieChart | `easypiechart` | chartCircular |
-| The Final Countdown | `jquery-countdown` | countdown |
 | jquery.visible | `jquery-visible` | floatElement, parallax, icon, nav |
 | jquery.cookie | `jquery-cookie` | gdpr, gdprWrapper |
 | Vivus | `vivus` | icon |
@@ -247,6 +244,7 @@ Requires the plugin to implement `destroy()`.
 - Full `destroy()` / re-init support on all plugins
 
 ### On the Horizon
+- Rewrite all plugins with dependencies to be self-contained. (_in progress_)
 - Integration with [**MODX Revolution**](https://modx.com/). Will include dedicated snippets and chunks for almost every component. 
 - **jQuery 4 compatibility** — A `themestrap.component.js` base class with auto-tracked teardown, reactive `setState()`, and a `defineComponent()` factory was designed and prototyped. A few plugins have been migrated as a proof of concept; broader rollout is pending.
 

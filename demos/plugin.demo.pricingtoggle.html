@@ -134,8 +134,8 @@ pre.snip .va { color: #fde68a; } /* value */
 <body>
 <div class="demo-page">
 
-  <div class="demo-tag">Plugin</div>
-  <h1 class="demo-page-title">PluginPricingToggle</h1>
+  <div class="demo-tag">PluginPricingToggle</div>
+  <h1 class="demo-page-title">Pricing Toggle</h1>
   <p class="demo-page-sub">
     A billing-period switcher that animates a pill thumb, crossfades price
     values, shows a savings badge, and fires namespaced jQuery events — all
@@ -146,7 +146,7 @@ pre.snip .va { color: #fde68a; } /* value */
     <div class="demo-card-header">
       <div>
         <div class="demo-card-title">Pricing table</div>
-        <div class="demo-card-desc">Monthly ↔ Annual — prices crossfade, savings badge animates in</div>
+        <div class="demo-card-desc">Monthly <-> Annual — prices crossfade, savings badge animates in</div>
       </div>
     </div>
 
@@ -220,8 +220,8 @@ pre.snip .va { color: #fde68a; } /* value */
 
     <div class="demo-controls">
       <label>API:</label>
-      <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').setState('primary')">→ Monthly</button>
-      <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').setState('secondary')">→ Annual</button>
+      <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').setState('primary')">-> Monthly</button>
+      <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').setState('secondary')">-> Annual</button>
       <button class="ctrl-btn" onclick="$('#pt-main').data('__pricingToggle').toggle()">toggle()</button>
       <button class="ctrl-btn" onclick="alert('State: ' + $('#pt-main').data('__pricingToggle').getState())">getState()</button>
     </div>
@@ -314,7 +314,7 @@ pre.snip .va { color: #fde68a; } /* value */
       </div>
     </div>
 
-    <pre class="snip"><span class="cm">&lt;!-- aria-pressed="true" on the track → plugin starts in secondary --&gt;</span>
+    <pre class="snip"><span class="cm">&lt;!-- aria-pressed="true" on the track -> plugin starts in secondary --&gt;</span>
 &lt;<span class="kw">button</span> <span class="va">data-pt-track</span> <span class="va">aria-pressed</span>=<span class="st">"true"</span> <span class="va">type</span>=<span class="st">"button"</span>&gt;
   &lt;<span class="kw">span</span> <span class="va">data-pt-thumb</span>&gt;&lt;/<span class="kw">span</span>&gt;
 &lt;/<span class="kw">button</span>&gt;</pre>
@@ -465,7 +465,7 @@ $(function () {
 
   $('#pt-main').on('ts-pricingtoggle-changed', function (e, d) {
     addLog('log-main',
-      `<span>ts-pricingtoggle-changed</span> → state: <strong>${d.state}</strong>` +
+      `<span>ts-pricingtoggle-changed</span> -> state: <strong>${d.state}</strong>` +
       ` | isPrimary: ${d.isPrimary} | isSecondary: ${d.isSecondary}`
     );
   });
