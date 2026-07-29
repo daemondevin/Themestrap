@@ -169,10 +169,6 @@ Some plugins depend on a third-party libraries:
 
 | Vendor library | Module name | Plugins |
 |---|---|---|
-| Owl Carousel | `owl` | carousel |
-| touchSwipe | `touchswipe` | carouselLight *(opt)* |
-| Isotope | `isotope` | masonry, sort |
-| waitForImages | `waitforimages` | masonry, sort |
 | easyPieChart | `easypiechart` | chartCircular |
 | jquery.visible | `jquery-visible` | floatElement, parallax, icon, nav |
 | jquery.cookie | `jquery-cookie` | gdpr, gdprWrapper |
