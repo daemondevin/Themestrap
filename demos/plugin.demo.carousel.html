@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PluginCarousel — Demo | Themestrap-MODX</title>
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  <style>
+    :root {
+      --ts-navy:     #0a1929;
+      --ts-navy-2:   #0e2238;
+      --ts-orange:   #e8672a;
+      --ts-orange-2: #d2541b;
+      --ts-teal:     #2ab8c8;
+      --ts-cream:    #f5f0e8;
+      --ts-font-serif:   'Fraunces', Georgia, serif;
+      --ts-font-display: 'Syne', sans-serif;
+      --ts-font-body:    'DM Sans', system-ui, sans-serif;
+      --ts-font-mono:    'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: var(--ts-font-body);
+      background: var(--ts-navy-2);
+      color: #1a2332;
+      margin: 0;
+    }
+
+    /* Page header */
+    .demo-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 3px solid var(--ts-orange);
+    }
+    .demo-header h1 {
+      font-family: var(--ts-font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 .25rem;
+      letter-spacing: -.02em;
+    }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .demo-header .badge-pill {
+      display: inline-block;
+      background: var(--ts-orange);
+      color: #fff;
+      font-family: var(--ts-font-mono);
+      font-size: .7rem;
+      padding: .2em .6em;
+      border-radius: 99px;
+      margin-left: .5rem;
+      vertical-align: middle;
+    }
+    .demo-header .badge-nodep {
+      display: inline-block;
+      background: transparent;
+      color: var(--ts-teal);
+      font-family: var(--ts-font-mono);
+      font-size: .7rem;
+      padding: .2em .6em;
+      border-radius: 99px;
+      border: 1px solid var(--ts-teal);
+      margin-left: .4rem;
+      vertical-align: middle;
+    }
+
+    /* Nav strip */
+    .demo-nav {
+      background: var(--ts-navy-2);
+      padding: .6rem 2rem;
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .demo-nav a {
+      color: rgba(255,255,255,.55);
+      text-decoration: none;
+      font-size: .8rem;
+      font-family: var(--ts-font-mono);
+      transition: color .15s;
+      white-space: nowrap;
+    }
+    .demo-nav a:hover  { color: var(--ts-teal); }
+    .demo-nav a.active { color: var(--ts-orange); }
+
+    /* Layout */
+    .demo-body {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2rem 1rem 5rem;
+    }
+
+    /* Demo cards */
+    .demo-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 14px rgba(0,0,0,.09);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .demo-card-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .demo-card-header h2 {
+      font-family: var(--ts-font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: .02em;
+    }
+    .demo-card-header .card-num {
+      font-family: var(--ts-font-mono);
+      font-size: .75rem;
+      color: var(--ts-teal);
+      border: 1px solid var(--ts-teal);
+      border-radius: 4px;
+      padding: .1em .45em;
+      flex-shrink: 0;
+    }
+    .demo-card-header .card-tag {
+      font-family: var(--ts-font-mono);
+      font-size: .65rem;
+      color: rgba(255,255,255,.4);
+      margin-left: auto;
+    }
+
+    /* Demo stage */
+    .demo-stage {
+      padding: 2.5rem 1.75rem;
+      background: var(--ts-cream);
+      border-bottom: 1px solid #e8e0d4;
+    }
+    .demo-stage.dark-stage {
+      background: var(--ts-navy);
+    }
+
+    /* Snippet block */
+    pre.snip {
+      margin: 0;
+      padding: 1.1rem 1.5rem;
+      background: #0d1b2a;
+      color: #c9d1d9;
+      font-family: var(--ts-font-mono);
+      font-size: .77rem;
+      line-height: 1.65;
+      overflow-x: auto;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    pre.snip .hl-attr { color: #79c0ff; }
+    pre.snip .hl-val  { color: #a5d6a7; }
+    pre.snip .hl-tag  { color: #ff7b72; }
+    pre.snip .hl-cmt  { color: #6a737d; }
+    pre.snip .hl-kw   { color: #c792ea; }
+    pre.snip .hl-fn   { color: #82aaff; }
+    pre.snip .hl-str  { color: #c3e88d; }
+
+    /* Log bar */
+    .demo-log {
+      font-family: var(--ts-font-mono);
+      font-size: .77rem;
+      padding: .65rem 1.5rem;
+      background: #0d1b2a;
+      color: #8b949e;
+      border-top: 1px solid rgba(255,255,255,.05);
+      min-height: 2.4rem;
+      display: flex;
+      align-items: center;
+    }
+    .demo-log .log-entry { color: var(--ts-teal); }
+    .demo-log .log-warn  { color: var(--ts-orange); }
+
+    /* Controls bar */
+    .demo-controls {
+      padding: .9rem 1.5rem;
+      background: #f0f2f5;
+      border-top: 1px solid #e2e5ea;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      align-items: center;
+    }
+    .btn-ts {
+      font-family: var(--ts-font-mono);
+      font-size: .76rem;
+      padding: .3rem .85rem;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      line-height: 1.4;
+    }
+    .btn-ts:active { transform: scale(.97); }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; }
+    .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts  { background: var(--ts-teal); color: #fff; }
+    .btn-teal-ts:hover { background: #22a0af; }
+    .btn-navy-ts  { background: var(--ts-navy); color: #fff; }
+    .btn-navy-ts:hover { background: #0e2238; }
+    .btn-ghost-ts { background: transparent; color: var(--ts-navy); border: 1px solid #bfc5cc; }
+    .btn-ghost-ts:hover { background: #e8ecf0; }
+    .btn-ts:disabled { opacity: .4; cursor: default; }
+
+    /* Slide boxes */
+    .slide-box {
+      border-radius: 6px;
+      padding: 32px 16px;
+      text-align: center;
+      color: #fff;
+      font-family: var(--ts-font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      user-select: none;
+      letter-spacing: .01em;
+    }
+    .slide-box small {
+      font-size: .65rem;
+      font-weight: 400;
+      font-family: var(--ts-font-mono);
+      opacity: .7;
+      margin-top: 5px;
+    }
+    .slide-box.c1 { background: linear-gradient(135deg, #e8672a, #c9531a); }
+    .slide-box.c2 { background: linear-gradient(135deg, #2ab8c8, #1d9dab); }
+    .slide-box.c3 { background: linear-gradient(135deg, #0a1929, #0e2238); }
+    .slide-box.c4 { background: linear-gradient(135deg, #6f42c1, #5a33a6); }
+    .slide-box.c5 { background: linear-gradient(135deg, #198754, #146c43); }
+    .slide-box.c6 { background: linear-gradient(135deg, #dc3545, #b02a37); }
+
+    /* Center-active scale */
+    .ts-carousel.carousel-center-active-item .ts-item.current .slide-box,
+    .ts-carousel.carousel-center-active-item .owl-item.current .slide-box {
+      transform: scale(1.09);
+      transition: transform .35s ease;
+      box-shadow: 0 8px 28px rgba(0,0,0,.22);
+    }
+
+    /* External nav buttons */
+    .ext-nav-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+    .ext-nav-row .btn-ts.active {
+      background: var(--ts-orange);
+      color: #fff;
+    }
+
+    /* Section heading in demo body */
+    .demo-section-label {
+      font-family: var(--ts-font-display);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--ts-teal);
+      margin: 0 0 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>PluginCarousel <span class="badge-pill">plugin</span><span class="badge-nodep">no Owl Carousel</span></h1>
+  <p>Native translate3d slide engine with clone-loop, responsive breakpoints, drag/touch and full Porto modifier-class compatibility</p>
+</div>
+
+<div class="demo-nav">
+  <a href="#card-responsive"   class="active">Responsive</a>
+  <a href="#card-autoplay">Autoplay</a>
+  <a href="#card-noloop">No Loop</a>
+  <a href="#card-external-nav">External Nav</a>
+  <a href="#card-center">Center Active</a>
+  <a href="#card-nav-offset">Nav Offset</a>
+  <a href="#card-stage-padding">Stage Padding</a>
+  <a href="#card-api">API Control</a>
+</div>
+
+<div class="demo-body">
+
+
+  <!-- 01 RESPONSIVE -->
+  <div class="demo-card" id="card-responsive">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Responsive multi-item — 1 -> 4 items across breakpoints</h2>
+      <span class="card-tag">default breakpoint ramp</span>
+    </div>
+    <div class="demo-stage">
+      <div class="ts-carousel" data-plugin-carousel
+           data-plugin-options='{"items":4,"loop":true,"margin":12,"nav":true,"dots":true}'>
+        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/01.png"></div>
+        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/02.png"></div>
+        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/03.png"></div>
+        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/04.png"></div>
+        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/05.png"></div>
+        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/06.png"></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":4,"loop":true,"margin":12,"nav":true,"dots":true}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div&gt;</span>...slide...<span class="hl-tag">&lt;/div&gt;</span>
+  <span class="hl-cmt">&lt;!-- repeat --&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-01">
+      <span class="log-entry">// resize the window to watch item count update live</span>
+    </div>
+  </div>
+
+
+  <!-- 02 AUTOPLAY -->
+  <div class="demo-card" id="card-autoplay">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Autoplay single-item hero — hover to pause</h2>
+      <span class="card-tag">autoplayHoverPause · smartSpeed:600</span>
+    </div>
+
+    <div class="demo-stage dark-stage">
+      <div class="ts-carousel"
+           data-plugin-options='{"items":1,"loop":true,"autoplay":true,"autoplayTimeout":3000,"autoplayHoverPause":true,"nav":false,"dots":true,"smartSpeed":600,"responsive":{}}'>
+        <div><div class="slide-box c1" style="min-height:160px;font-size:1.3rem">Hero Slide 1<small>autoplayTimeout:3000</small></div></div>
+        <div><div class="slide-box c3" style="min-height:160px;font-size:1.3rem">Hero Slide 2<small>smartSpeed:600</small></div></div>
+        <div><div class="slide-box c4" style="min-height:160px;font-size:1.3rem">Hero Slide 3<small>hover to pause</small></div></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,
+       "autoplay":true,"autoplayTimeout":3000,
+       "autoplayHoverPause":true,
+       "nav":false,"dots":true,"smartSpeed":600,
+       "responsive":{}}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div&gt;</span>...slide...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-02">
+      <span class="log-entry">// autoplay advances every 3 s — hover over the stage to pause</span>
+    </div>
+  </div>
+
+
+  <!-- 03 NO LOOP -->
+  <div class="demo-card" id="card-noloop">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>No loop, two items — bounded navigation</h2>
+      <span class="card-tag">loop:false · responsive:{}</span>
+    </div>
+
+    <div class="demo-stage">
+      <div class="ts-carousel"
+           data-plugin-options='{"items":2,"loop":false,"margin":16,"nav":true,"dots":true,"responsive":{}}'>
+        <div><div class="slide-box c2">Alpha</div></div>
+        <div><div class="slide-box c5">Beta</div></div>
+        <div><div class="slide-box c1">Gamma</div></div>
+        <div><div class="slide-box c6">Delta</div></div>
+        <div><div class="slide-box c4">Epsilon</div></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-cmt">&lt;!-- responsive:{} locks items:2 at every breakpoint --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":2,"loop":false,"margin":16,
+       "nav":true,"dots":true,"responsive":{}}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-03">
+      <span class="log-entry">// prev/next buttons gain .disabled class at first and last positions</span>
+    </div>
+  </div>
+
+
+  <!-- 04 EXTERNAL NAV -->
+  <div class="demo-card" id="card-external-nav">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>External navigation — data-carousel-navigate-*</h2>
+      <span class="card-tag">active state tracks current slide</span>
+    </div>
+
+    <div class="demo-stage">
+      <div class="ext-nav-row" data-carousel-navigate>
+        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="1">Slide 1</button>
+        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="2">Slide 2</button>
+        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="3">Slide 3</button>
+        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="4">Slide 4</button>
+      </div>
+
+      <div id="ext-carousel" class="ts-carousel"
+           data-plugin-options='{"items":1,"loop":true,"nav":false,"dots":false,"responsive":{}}'>
+        <div><div class="slide-box c1" style="min-height:130px">Slide 1</div></div>
+        <div><div class="slide-box c2" style="min-height:130px">Slide 2</div></div>
+        <div><div class="slide-box c3" style="min-height:130px">Slide 3</div></div>
+        <div><div class="slide-box c4" style="min-height:130px">Slide 4</div></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;button</span> <span class="hl-attr">data-carousel-navigate-to</span>=<span class="hl-val">"2"</span>
+        <span class="hl-attr">data-carousel-navigate-id</span>=<span class="hl-val">"#my-carousel"</span><span class="hl-tag">&gt;</span>Go to slide 2<span class="hl-tag">&lt;/button&gt;</span>
+
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"my-carousel"</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,"nav":false,"dots":false,"responsive":{}}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-04">
+      <span class="log-entry">// click a button above to jump directly to that slide</span>
+    </div>
+  </div>
+
+
+  <!-- 05 CENTER ACTIVE -->
+  <div class="demo-card" id="card-center">
+    <div class="demo-card-header">
+      <span class="card-num">05</span>
+      <h2>Center active item — .carousel-center-active-item</h2>
+      <span class="card-tag">.current class on middle visible slide</span>
+    </div>
+
+    <div class="demo-stage">
+      <div class="ts-carousel carousel-center-active-item"
+           data-plugin-options='{"items":3,"loop":true,"margin":12,"nav":true,"dots":true,"responsive":{}}'>
+        <div><div class="slide-box c5">Slide A</div></div>
+        <div><div class="slide-box c1">Slide B</div></div>
+        <div><div class="slide-box c2">Slide C</div></div>
+        <div><div class="slide-box c6">Slide D</div></div>
+        <div><div class="slide-box c4">Slide E</div></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel carousel-center-active-item"</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":3,"loop":true,"margin":12}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">/* Style the .current item in your own CSS */</span>
+<span class="hl-fn">.carousel-center-active-item</span> <span class="hl-fn">.ts-item.current</span> <span class="hl-fn">.my-slide</span> {
+  <span class="hl-attr">transform</span>: <span class="hl-val">scale(1.1)</span>;
+  <span class="hl-attr">box-shadow</span>: <span class="hl-val">0 8px 24px rgba(0,0,0,.2)</span>;
+}</pre>
+
+    <div class="demo-log" id="log-05">
+      <span class="log-entry">// center item receives .current — scale applied above in demo CSS</span>
+    </div>
+  </div>
+
+
+  <!-- 06 NAV OFFSET -->
+  <div class="demo-card" id="card-nav-offset">
+    <div class="demo-card-header">
+      <span class="card-num">06</span>
+      <h2>Nav offset — navVerticalOffset</h2>
+      <span class="card-tag">arrows shifted 40 px below centre</span>
+    </div>
+
+    <div class="demo-stage dark-stage">
+      <div class="ts-carousel"
+           data-plugin-options='{"items":1,"loop":true,"nav":true,"dots":false,"navVerticalOffset":"40px","smartSpeed":400,"responsive":{}}'>
+        <div><div class="slide-box c3" style="min-height:180px;font-size:1.2rem">Image Slide 1<small>navVerticalOffset: "40px"</small></div></div>
+        <div><div class="slide-box c1" style="min-height:180px;font-size:1.2rem">Image Slide 2</div></div>
+        <div><div class="slide-box c4" style="min-height:180px;font-size:1.2rem">Image Slide 3</div></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,"nav":true,
+       "navVerticalOffset":"40px"}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Also available: navHorizontalOffset, dotsVerticalOffset, dotsHorizontalOffset</span></pre>
+
+    <div class="demo-log" id="log-06">
+      <span class="log-entry">// navigationOffsets() re-applies offsets after layout changes</span>
+    </div>
+  </div>
+
+
+  <!-- 07 STAGE PADDING -->
+  <div class="demo-card" id="card-stage-padding">
+    <div class="demo-card-header">
+      <span class="card-num">07</span>
+      <h2>Stage padding — peek effect</h2>
+      <span class="card-tag">stagePadding:40 reveals adjacent slides</span>
+    </div>
+
+    <div class="demo-stage" style="overflow:hidden;">
+      <div class="ts-carousel"
+           data-plugin-options='{"items":1,"loop":true,"nav":true,"dots":true,"stagePadding":40,"margin":16,"responsive":{}}'>
+        <div><div class="slide-box c2" style="min-height:130px">Peek A<small>stagePadding:40</small></div></div>
+        <div><div class="slide-box c5" style="min-height:130px">Peek B</div></div>
+        <div><div class="slide-box c1" style="min-height:130px">Peek C</div></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,
+       "stagePadding":40,"margin":16,"responsive":{}}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-07">
+      <span class="log-entry">// .ts-stage-padding class added to host; overflow:visible on .ts-stage-outer</span>
+    </div>
+  </div>
+
+
+  <!-- 08 PROGRAMMATIC -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">08</span>
+      <h2>Programmatic API — next / prev / to / destroy</h2>
+      <span class="card-tag">.manual class — no auto-init</span>
+    </div>
+
+    <div class="demo-stage dark-stage">
+      <div id="api-carousel" class="ts-carousel manual"
+           data-plugin-options='{"items":3,"loop":true,"margin":12,"nav":false,"dots":false}'>
+        <div><div class="slide-box c1">One</div></div>
+        <div><div class="slide-box c2">Two</div></div>
+        <div><div class="slide-box c3">Three</div></div>
+        <div><div class="slide-box c4">Four</div></div>
+        <div><div class="slide-box c5">Five</div></div>
+      </div>
+    </div>
+
+    <div class="demo-controls">
+      <button class="btn-ts btn-ghost-ts"   id="api-prev"><- prev()</button>
+      <button class="btn-ts btn-ghost-ts"   id="api-next">next() -></button>
+      <button class="btn-ts btn-teal-ts"    id="api-to2">to(2)</button>
+      <button class="btn-ts btn-teal-ts"    id="api-to4">to(4)</button>
+      <button class="btn-ts btn-primary-ts" id="api-destroy">destroy()</button>
+      <button class="btn-ts btn-navy-ts"    id="api-reinit" disabled>re-init</button>
+    </div>
+
+<pre class="snip"><span class="hl-cmt">// .manual skips auto-init; call themestrapPluginCarousel() yourself</span>
+<span class="hl-kw">const</span> <span class="hl-fn">$el</span>   = $(<span class="hl-str">'#api-carousel'</span>).<span class="hl-fn">themestrapPluginCarousel</span>();
+<span class="hl-kw">const</span> <span class="hl-fn">inst</span>  = <span class="hl-fn">$el</span>.data(<span class="hl-str">'__carousel'</span>);
+
+inst.<span class="hl-fn">prev</span>();
+inst.<span class="hl-fn">next</span>();
+inst.<span class="hl-fn">to</span>(<span class="hl-str">2</span>);          <span class="hl-cmt">// zero-based index</span>
+inst.<span class="hl-fn">destroy</span>();     <span class="hl-cmt">// removes clones, unbinds, clears data</span>
+
+<span class="hl-fn">$el</span>.on(<span class="hl-str">'changed.owl.carousel'</span>, <span class="hl-kw">e</span> =&gt; {
+  console.<span class="hl-fn">log</span>(<span class="hl-str">'slide'</span>, e.item.index);
+});</pre>
+
+    <div class="demo-log" id="log-08">
+      <span class="log-entry">// click a button above — changed.owl.carousel events logged here</span>
+    </div>
+  </div>
+
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.carousel.js"></script>
+<script src="../js/themestrap.init.js"></script>
+
+<script>
+	if ($.isFunction($.fn['themestrapPluginCarousel']) && $('[data-plugin-carousel]:not(.manual), .ts-carousel:not(.manual)').length) {
+		themestrap.fn.intObsInit( '[data-plugin-carousel]:not(.manual), .ts-carousel:not(.manual)', 'themestrapPluginCarousel' );
+	}
+
+(function ($) {
+
+  /* log helper */
+  function log(id, msg, type) {
+    const cls = type === 'warn' ? 'log-warn' : 'log-entry';
+    $('#' + id).html('<span class="' + cls + '">' + msg + '</span>');
+  }
+
+  /* wire change events for auto-init carousels */
+  $(document).on('changed.owl.carousel', '#card-responsive .ts-carousel', function (e) {
+    if (e.item) log('log-01', '// changed -> slide ' + (e.item.index + 1) + ' of ' + e.item.count);
+  });
+
+  $(document).on('changed.owl.carousel', '#card-autoplay .ts-carousel', function (e) {
+    if (e.item) log('log-02', '// autoplay -> slide ' + (e.item.index + 1));
+  });
+
+  $(document).on('changed.owl.carousel', '#card-noloop .ts-carousel', function (e) {
+    if (e.item) log('log-03', '// navigated -> slide ' + (e.item.index + 1) + ' of ' + e.item.count);
+  });
+
+  $(document).on('changed.owl.carousel', '#ext-carousel', function (e) {
+    if (e.item) log('log-04', '// jumped to slide ' + (e.item.index + 1));
+  });
+
+  $(document).on('changed.owl.carousel', '#card-center .ts-carousel', function (e) {
+    if (e.item) log('log-05', '// center-active updated — current slide ' + (e.item.index + 1));
+  });
+
+  /* Card 08 — manual API carousel */
+  const $apiEl = $('#api-carousel').themestrapPluginCarousel();
+  let   destroyed = false;
+
+  $apiEl.on('changed.owl.carousel', function (e) {
+    if (e.item) log('log-08', '// changed.owl.carousel -> index ' + e.item.index);
+  });
+
+  $('#api-prev').on('click', function () {
+    if (destroyed) return log('log-08', '// not initialized — click re-init first', 'warn');
+    $apiEl.data('__carousel').prev();
+  });
+
+  $('#api-next').on('click', function () {
+    if (destroyed) return log('log-08', '// not initialized — click re-init first', 'warn');
+    $apiEl.data('__carousel').next();
+  });
+
+  $('#api-to2').on('click', function () {
+    if (destroyed) return log('log-08', '// not initialized', 'warn');
+    $apiEl.data('__carousel').to(2);
+  });
+
+  $('#api-to4').on('click', function () {
+    if (destroyed) return log('log-08', '// not initialized', 'warn');
+    $apiEl.data('__carousel').to(4);
+  });
+
+  $('#api-destroy').on('click', function () {
+    if (destroyed) return log('log-08', '// already destroyed', 'warn');
+    $apiEl.data('__carousel').destroy();
+    destroyed = true;
+    log('log-08', '// destroy() called — DOM restored to pre-init state');
+    $(this).prop('disabled', true);
+    $('#api-reinit').prop('disabled', false);
+  });
+
+  $('#api-reinit').on('click', function () {
+    if (!destroyed) return log('log-08', '// already initialized', 'warn');
+    $apiEl.themestrapPluginCarousel();
+    destroyed = false;
+    log('log-08', '// re-init complete');
+    $(this).prop('disabled', true);
+    $('#api-destroy').prop('disabled', false);
+
+    $apiEl.on('changed.owl.carousel', function (e) {
+      if (e.item) log('log-08', '// changed.owl.carousel -> index ' + e.item.index);
+    });
+  });
+
+}(jQuery));
+</script>
+</body>
+</html>

@@ -1,173 +1,341 @@
-# Carousel Guide
+# PluginCarousel — Complete Guide
 
-Themestrap's full-featured carousel plugin — wraps Owl Carousel 2 with RTL auto-detection, nav/dot offset positioning, auto-height, carousel sync, AnimateIn/Out integration, and external navigation support.
+> **No external dependency.** The rewritten plugin ships its own slide engine, clone-loop, drag/touch handling, and injected CSS. ts Carousel 2 is no longer required.
 
-## [How It **Works**](#how-it-works)
+---
 
-PluginCarousel is a thin but feature-rich wrapper around [Owl Carousel 2](https://owlcarousel2.github.io/OwlCarousel2/). It auto-detects RTL direction from `<html dir="rtl">`, resolves `data-plugin-options` JSON into the Owl config, wires up custom nav/dot positioning via injected CSS custom properties, coordinates PluginAnimate for per-slide entrance effects, re-injects PluginIcon instances on cloned slides, and manages cross-carousel sync.
+## How It Works
 
-### RTL detection
+`PluginCarousel` is a fully self-contained jQuery class plugin that replaces the old ts Carousel wrapper. It builds a native `translate3d` slide rail inside a `.ts-stage-outer / .ts-stage` scaffold, clones edge items for seamless infinite loop, and wires responsive breakpoints, autoplay, drag, dots, nav, and a rich set of Porto modifier classes — all without any third-party slider library.
 
-When `<html>` carries `dir="rtl"` the plugin automatically sets Owl's `rtl: true`. No extra config needed.
+The plugin fires the same jQuery events ts used (`change.ts.carousel`, `changed.ts.carousel`, `initialized.ts.carousel`) so every downstream integration (animated-letters, video-background, `data-carousel-navigate-*`, sync) continues to work without markup changes.
 
-### AnimateIn/Out integration
+### Lifecycle
 
-Set `animateIn` / `animateOut` to any Animate.css class name and Owl handles per-slide enter/exit animations. PluginCarousel wires `PluginAnimate` for any `[data-appear-animation]` elements inside each slide on the `translated.owl.carousel` event.
+```
+initialize -> setData -> setOptions -> build -> events
+```
 
-### Cloned slide handling
+`build()` injects the CSS block once (guarded by `#themestrap-carousel-styles`), scaffolds the DOM, clones loop items, wires nav/dots, drag, autoplay, resize observer, and fires `initialized.ts.carousel`.
 
-Owl Carousel clones items for infinite loop mode. PluginCarousel listens to `initialized.owl.carousel` and `translated.owl.carousel` and re-runs `$.fn.themestrapPluginIcon` on any `[data-icon]` inside cloned slides, since cloned DOM nodes don't share the original plugin instances.
+### Loop cloning
+
+When `loop: true`, the plugin prepends and appends `visibleItems` clones of the real slides. On `transitionend` it detects overflow into the clone zone and silently jumps (no-transition) back to the real counterpart — giving the appearance of infinite looping.
+
+### Responsive breakpoints
+
+Option `responsive` is a breakpoint -> `{items}` map identical to ts's format. On each resize the plugin recalculates `visibleItems`, rebuilds clones if the count changed, and re-applies item widths via `calc()`.
+
+---
+
+## Quick Start
+
+### Markup
+
+```html
+<div class="ts-carousel"
+     data-plugin-options='{"items": 3, "loop": true, "margin": 20, "autoplay": true}'>
+  <div><img src="1.jpg" alt=""></div>
+  <div><img src="2.jpg" alt=""></div>
+  <div><img src="3.jpg" alt=""></div>
+</div>
+```
+
+The `data-plugin-carousel` data attribute or the `ts-carousel` class can auto-initialize the plugin. `data-plugin-options` accepts all options as a single-quoted attribute containing double-quoted JSON.
+
+### Automatic Initialization
+
+`themestrap.init.js` wires the plugin via `intObsInit()` — the carousel initializes lazily when it scrolls into the viewport:
+
+```
+[data-plugin-carousel]:not(.manual), .ts-carousel:not(.manual)
+```
+
+Add the `manual` class to opt out of auto-init.
+
+### Manual Initialization
+
+```js
+$('.ts-carousel').themestrapPluginCarousel({ items: 3, loop: true });
+```
+
+---
+
+## Configuration Options
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `items` | number | `3` | Visible item count (overridden by `responsive`). |
+| `loop` | bool | `true` | Infinite clone-based loop. |
+| `margin` | number | `0` | Gap between items in px. Applied as `margin-right` on each `.ts-item`. |
+| `stagePadding` | number | `0` | Horizontal padding on `.ts-stage-outer`, revealing adjacent slides. |
+| `startPosition` | number | `0` | Zero-based index of the first visible slide. |
+| `smartSpeed` | number | `350` | Slide transition duration in ms. |
+| `rtl` | bool | `false` | Right-to-left mode. Also detected from `html[dir="rtl"]`. |
+| `responsive` | object | `{0:{items:1}, 479:{items:1}, 768:{items:2}, 979:{items:3}, 1199:{items:4}}` | Breakpoint -> `{items}` map. Pass `{}` to disable. |
+| `nav` | bool | `true` | Show prev/next buttons. |
+| `navText` | array | `[]` | Two-element array of HTML strings for prev/next button content. |
+| `navVerticalOffset` | string | — | CSS value applied to `top` of the nav wrapper (e.g. `"40px"`). |
+| `navHorizontalOffset` | string | — | CSS `translate3d` X offset for the nav wrapper. |
+| `dots` | bool | `true` | Show dot indicators. |
+| `dotsData` | bool | `false` | Pull dot content from `[data-dot]` inside each slide. |
+| `dotsVerticalOffset` | string | — | CSS value applied to dots wrapper vertical position. |
+| `dotsHorizontalOffset` | string | — | CSS `translate3d` X offset for the dots wrapper. |
+| `slideBy` | number\|`'page'` | `1` | Steps per nav click. `'page'` advances by `visibleItems`. |
+| `autoplay` | bool | `false` | Auto-advance slides. |
+| `autoplayTimeout` | number | `5000` | Interval between auto-advances in ms. |
+| `autoplayHoverPause` | bool | `false` | Pause autoplay while the cursor is over the carousel. |
+| `autoHeight` | bool | `false` | Set `.ts-stage-outer` height to the tallest active item. |
+| `animateIn` | bool | `false` | Enable `change.ts.carousel` / `changed.ts.carousel` hooks for animated-letters and appear-animation re-triggering. |
+| `animateOut` | bool | `false` | Same as `animateIn`; both flags activate the same integration hooks. |
+| `mouseDrag` | bool | `true` | Enable click-drag navigation. |
+| `touchDrag` | bool | `true` | Enable swipe navigation. |
+| `center` | bool | `false` | Reserved (not yet implemented; use `carousel-center-active-item` class). |
+| `refresh` | bool | `false` | Legacy compat shim — no-op in the new plugin. |
+
+> [!TIP]
+> Every option can be set globally by modifying `PluginCarousel.defaults`, or per-element via `data-plugin-options`.
+
+---
+
+## Instance API
+
+### Getting the instance
+
+```js
+// Init (idempotent — returns existing instance on repeat calls)
+const $el  = $('.ts-carousel').themestrapPluginCarousel();
+
+// Pull from data store directly
+const inst = $el.data('__carousel');
+```
+
+### Public methods
+
+| Method | Description |
+|--------|-------------|
+| `inst.next(speed?)` | Advance one slide. Optional `speed` overrides `smartSpeed` for this transition. |
+| `inst.prev(speed?)` | Step back one slide. |
+| `inst.to(index, speed?)` | Jump to a zero-based real slide index. Wraps modulo item count. |
+| `inst.destroy()` | Remove clones, unbind all events, restore the element to pre-init state. |
+| `inst.navigationOffsets()` | Re-apply `navVerticalOffset` / `navHorizontalOffset` after a layout change. |
+| `inst.carouselNavigate()` | Internal: binds `data-carousel-navigate-*` external buttons. Called during `build()`. |
+
+### Events
+
+Bind with jQuery `.on()` on the carousel element:
+
+| Event | Payload | Fires when |
+|-------|---------|------------|
+| `initialized.ts.carousel` | — | Plugin has finished `build()`. |
+| `change.ts.carousel` | `{ item: { index, count } }` | A slide transition is about to start. |
+| `changed.ts.carousel` | `{ item: { index, count }, property: { name, value } }` | Transition complete (after `smartSpeed + 50 ms`). |
+
+---
+
+## Modifier Classes
+
+### Nav position
+
+| Class | Effect |
+|-------|--------|
+| `nav-inside` | Buttons inside the stage at 15 px inset. |
+| `nav-inside-edge` | Buttons flush with stage edges. |
+| `nav-inside-plus` | Buttons at 30 px inset. |
+| `nav-outside` | Buttons outside stage (−50 px on ≥992 px). |
+| `nav-bottom` | Buttons below the stage in normal document flow. |
+| `nav-bottom-inside` | Buttons overlaid at the bottom of the stage. |
+| `nav-center-outside` | Nav wrapper extended 90 px beyond the stage width, centred. |
+| `nav-position-1` | Buttons at 20 px inset. |
+
+### Nav appearance
+
+| Class | Effect |
+|-------|--------|
+| `show-nav-hover` | Nav fades in on hover and slides in from outside. |
+| `show-nav-title` | Nav positioned top-right above a heading, transparent background. |
+| `nav-style-1` | Transparent background, inherits text colour. |
+| `nav-style-2` | CSS chevron arrows (no icon font required). |
+| `nav-style-3` | Large transparent icon style. |
+| `nav-style-4` | Pill-shaped buttons with drop shadow. |
+| `nav-style-diamond` | Diamond-rotated buttons. |
+| `nav-svg-arrows-1` | SVG arrow icons injected by the plugin. |
+| `nav-arrows-1` | FA `f060`/`f061` long arrows. |
+| `nav-arrows-2` | FA `f100`/`f101` double chevrons. |
+| `nav-arrows-thin` | Simple-line-icons thin chevrons. |
+| `nav-icon-1` | FA `f060`/`f061` icons on default buttons. |
+| `rounded-nav` | Circular border on buttons. |
+| `nav-squared` | No border-radius. |
+| `nav-rounded` | 50% border-radius. |
+| `full-width` / `big-nav` | Full-height padded buttons. |
+
+### Nav color
+
+`nav-light`, `nav-dark`, `nav-transparent`, `nav-borders`, `nav-borders-light`, `nav-arrow-light`, `nav-with-transparency`
+
+### Nav size
+
+`nav-sm` (30 px), `nav-md` (40 px), `nav-lg` (60 px tall), `nav-font-size-sm/md/lg/xl`
+
+### Nav visibility
+
+`nav-remove-prev`, `nav-remove-next`, `nav-full-height`
+
+### Dots
+
+| Class | Effect |
+|-------|--------|
+| `dots-inside` | Dots overlaid at bottom-right of stage. |
+| `dots-title` | Dots positioned above stage beside a heading. |
+| `dots-light` / `dots-dark` | White or dark dot colors. |
+| `dots-morphing` | Dots stretch horizontally when active. |
+| `dots-modern` | Tiny dots that scale up on active. |
+| `dots-orientation-portrait` | Vertical dot stack. |
+| `dots-align-left` / `dots-align-right` | Dot alignment. |
+| `dots-horizontal-center` | Full-width centred dots. |
+| `dots-vertical-center` | Vertically centred dots (use with `dots-inside`). |
+| `show-dots-hover` | Dots fade in on carousel hover. |
+| `show-dots-xs/sm/md` | Show dots only at specific breakpoints. |
+
+### Misc
+
+| Class | Effect |
+|-------|--------|
+| `stage-margin` | 40 px margins on stage outer; `stage-margin-sm/md/lg` for larger values. |
+| `top-border` | 1 px top border + 18 px padding. |
+| `carousel-center-active-item` | Non-current items at 0.2 opacity; current at 1. |
+| `carousel-center-active-item-style-2` | Same but 0.7 opacity for non-current. |
+| `carousel-center-active-item-2` | Card-style active item with primary background. |
+| `carousel-center-active-item-3` | Full-width active item layout. |
+| `show-nav-hover` | Nav hidden until hover. |
+| `carousel-shadow-1` | Radial shadow behind the carousel. |
+| `carousel-bottom-inside-shadow` | Gradient shadow at stage bottom. |
+| `carousel-right-side-nav` | Stage narrowed 55 px; next button positioned outside right. |
+
+---
+
+## Recipes
+
+### Three-up image grid
+
+```html
+<div class="ts-carousel"
+     data-plugin-options='{"items":3,"loop":true,"margin":16}'>
+  <div><img src="a.jpg" alt=""></div>
+  <div><img src="b.jpg" alt=""></div>
+  <div><img src="c.jpg" alt=""></div>
+</div>
+```
+
+### Autoplay hero banner
+
+```html
+<div class="ts-carousel"
+     data-plugin-options='{
+       "items": 1, "loop": true,
+       "autoplay": true, "autoplayTimeout": 5000,
+       "autoplayHoverPause": true,
+       "nav": false, "dots": true, "smartSpeed": 600,
+       "responsive": {}
+     }'>
+  <div>...slide...</div>
+</div>
+```
+
+### Fixed two-item, no loop
+
+```html
+<!-- responsive:{} locks item count regardless of viewport width -->
+<div class="ts-carousel"
+     data-plugin-options='{"items":2,"loop":false,"margin":20,"responsive":{}}'>
+  <div>A</div>
+  <div>B</div>
+  <div>C</div>
+</div>
+```
 
 ### External navigation
 
-Any element with `data-carousel-navigate-id="myCarouselId"` and `data-carousel-go="next"` / `"prev"` will drive the matching carousel externally, without needing to be inside the Owl markup.
-
----
-
-## [Quick **Start**](#quick-start)
-
 ```html
-<div class="owl-carousel"
-     data-plugin-carousel
-     data-plugin-options='{
-       "loop": true,
-       "items": 3,
-       "nav": true,
-       "dots": true,
-       "autoplay": true,
-       "autoplayTimeout": 5000,
-       "responsive": {
-         "0":    {"items": 1},
-         "768":  {"items": 2},
-         "1200": {"items": 3}
-       }
-     }'>
-  <div class="item"><img src="a.jpg" alt=""></div>
-  <div class="item"><img src="b.jpg" alt=""></div>
-  <div class="item"><img src="c.jpg" alt=""></div>
+<button data-carousel-navigate-to="2"
+        data-carousel-navigate-id="#hero">Go to slide 2</button>
+
+<div id="hero" class="ts-carousel"
+     data-plugin-options='{"items":1,"loop":true,"nav":false,"dots":false,"responsive":{}}'>
+  <div>Slide 1</div>
+  <div>Slide 2</div>
 </div>
 ```
 
-### Init.js Wiring
+### Peek (stagePadding)
+
+```html
+<div class="ts-carousel"
+     data-plugin-options='{"items":1,"loop":true,"stagePadding":50,"margin":20,"responsive":{}}'>
+  <div>Slide A</div>
+  <div>Slide B</div>
+</div>
+```
+
+### Synced carousels
+
+```html
+<div id="main-car" class="ts-carousel" data-sync="#thumb-car"
+     data-plugin-options='{"items":1,"loop":true,"nav":true,"dots":false,"responsive":{}}'>
+  <div>Main 1</div>
+  <div>Main 2</div>
+</div>
+
+<div id="thumb-car" class="ts-carousel manual"
+     data-plugin-options='{"items":4,"loop":false,"nav":false,"dots":false}'>
+  <div>Thumb 1</div>
+  <div>Thumb 2</div>
+</div>
+```
+
+### Programmatic API
 
 ```js
-if ($.isFunction($.fn['themestrapPluginCarousel'])
-    && $('[data-plugin-carousel]').length) {
-  themestrap.fn.intObsInit(
-    '[data-plugin-carousel]:not(.manual)',
-    'themestrapPluginCarousel'
-  );
-}
+// Manual init (add .manual to skip auto-init)
+const $el  = $('#my-carousel').themestrapPluginCarousel({ items: 3 });
+const inst = $el.data('__carousel');
+
+$('#btn-next').on('click', () => inst.next());
+$('#btn-prev').on('click', () => inst.prev());
+$('#btn-go3').on('click', () => inst.to(2));   // zero-based
+
+$el.on('changed.ts.carousel', (e) => {
+  console.log('Now at slide', e.item.index);
+});
+
+// Clean up
+inst.destroy();
 ```
 
 ---
 
-## [Configuration **Options**](#options)
+## Common Pitfalls
 
-All [Owl Carousel 2 options](https://owlcarousel2.github.io/OwlCarousel2/docs/api-options.html) are accepted. Themestrap-specific additions:
+### Carousel collapses inside a hidden tab
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `loop` | bool | `true` | Infinite loop cloning. |
-| `navText` | array | `[]` | Custom prev/next HTML strings (empty = CSS-only nav). |
-| `refresh` | bool | `false` | Force a refresh after init (useful inside hidden tabs). |
-| `navHorizontalOffset` | string | `''` | CSS value offsetting the nav element horizontally. |
-| `navVerticalOffset` | string | `''` | CSS value offsetting the nav element vertically. |
-| `dotsHorizontalOffset` | string | `''` | CSS value offsetting the dots. |
-| `dotsVerticalOffset` | string | `''` | CSS value offsetting the dots. |
-| `responsive` | object | `{0:1, 479:1, 768:2, 979:3, 1199:4}` | Breakpoints → `items` count. |
-
-### Cross-carousel sync
-
-```html
-<!-- Primary carousel -->
-<div id="main-slider" class="owl-carousel" data-plugin-carousel
-     data-plugin-options='{"items":1,"nav":false}'>
-  <div class="item">...</div>
-</div>
-
-<!-- Thumbnail carousel synced to the primary -->
-<div class="owl-carousel" data-plugin-carousel
-     data-plugin-options='{"items":4,"syncedCarouselId":"main-slider","center":true}'>
-  <div class="item">...</div>
-</div>
-```
-
----
-
-## [Instance **API**](#instance-api)
-
-The Owl Carousel 2 instance is accessible via the standard Owl data key:
+The plugin cannot measure a hidden element. If you manually initialize inside a Bootstrap tab, trigger a resize after the tab opens:
 
 ```js
-const owl = $('.owl-carousel').data('owl.carousel');
-
-owl.trigger('next.owl.carousel');   // go to next slide
-owl.trigger('prev.owl.carousel');   // go to previous slide
-owl.trigger('to.owl.carousel', [3]); // jump to slide index 3
-owl.trigger('destroy.owl.carousel'); // destroy
+$('#myTab').on('shown.bs.tab', () => $(window).trigger('resize'));
 ```
 
-### External navigation
+### `responsive: {}` vs omitting `responsive`
 
-```html
-<!-- Place anywhere on the page -->
-<button data-carousel-navigate-id="my-slider" data-carousel-go="prev">‹</button>
-<button data-carousel-navigate-id="my-slider" data-carousel-go="next">›</button>
+Omitting `responsive` applies the default breakpoint ramp (1 -> 4 items). Pass `responsive: {}` to **lock** the carousel to the `items` value at all widths.
 
-<div id="my-slider" class="owl-carousel" data-plugin-carousel ...>
-  ...
-</div>
-```
+### Icons not rendered before init
 
----
+If slides contain `[data-icon]` elements that haven't rendered yet, the plugin defers init until `icon.rendered` fires on `window`. Add the `manual` class and initialize yourself after icons are ready if you need tighter control.
 
-## [Recipe **Cookbook**](#recipes)
+### CSS specificity with nav-light / nav-dark
 
-#### Full-width hero with AnimateIn
+These modifiers use `!important` to override the skin defaults. Don't add your own `!important` to nav button colors unless you're above the modifier level in specificity.
 
-```html
-<div class="owl-carousel" data-plugin-carousel
-     data-plugin-options='{
-       "items": 1,
-       "loop": true,
-       "autoplay": true,
-       "animateIn": "fadeIn",
-       "animateOut": "fadeOut"
-     }'>
-  <div class="item">
-    <h2 data-appear-animation="fadeInUp" data-appear-animation-delay="300">
-      Slide One
-    </h2>
-  </div>
-</div>
-```
+### Destroy and re-init
 
-#### Responsive product grid carousel
-
-```html
-<div class="owl-carousel" data-plugin-carousel
-     data-plugin-options='{
-       "loop": false,
-       "nav": true,
-       "dots": false,
-       "responsive": {
-         "0":    {"items":1},
-         "576":  {"items":2},
-         "992":  {"items":3},
-         "1200": {"items":4}
-       }
-     }'>
-  <div class="item product-card">...</div>
-</div>
-```
-
----
-
-## [Common **Pitfalls**](#pitfalls)
-
-**Carousel inside a hidden tab or collapsed element.** Owl Carousel measures item widths at init time. If the carousel is inside a `display:none` parent, all measurements are zero and the layout breaks. Set `refresh: true` in options, or call `$(el).trigger('refresh.owl.carousel')` when the tab becomes visible.
-
-**Cloned slides and event delegation.** Owl Carousel clones `.item` elements for infinite loop. Event listeners bound directly to `.item` elements won't fire on clones. Use event delegation on the `.owl-carousel` wrapper: `$('.owl-carousel').on('click', '.item .btn', handler)`.
-
-**RTL nav arrow direction.** When RTL is active, Owl reverses internal slide order. If you supply custom `navText`, supply them in visual order (left arrow first) — Owl handles the RTL reversal.
+`destroy()` removes clones, unbinds events, and clears `data('__carousel')`. After destroy, calling `$.fn.themestrapPluginCarousel()` on the same element starts a fresh instance. The stage scaffold is also removed, so re-init rebuilds it from the original children.

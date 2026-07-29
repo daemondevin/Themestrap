@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sort Plugin — Demo | Themestrap-MODX</title>
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../css/themestrap.css">
+  <style>
+    :root {
+      --ts-navy:     #0a1929;
+      --ts-navy-2:   #0e2238;
+      --ts-orange:   #e8672a;
+      --ts-orange-2: #d2541b;
+      --ts-teal:     #2ab8c8;
+      --ts-cream:    #f5f0e8;
+      --ts-font-serif:   'Fraunces', Georgia, serif;
+      --ts-font-display: 'Syne', sans-serif;
+      --ts-font-body:    'DM Sans', system-ui, sans-serif;
+      --ts-font-mono:    'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: var(--ts-font-body);
+      background: var(--ts-navy-2);
+      color: #1a2332;
+      margin: 0;
+    }
+
+    /* Page header */
+    .demo-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 3px solid var(--ts-orange);
+    }
+    .demo-header h1 {
+      font-family: var(--ts-font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 .25rem;
+      letter-spacing: -.02em;
+    }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .demo-header .badge-pill {
+      display: inline-block;
+      background: var(--ts-orange);
+      color: #fff;
+      font-family: var(--ts-font-mono);
+      font-size: .7rem;
+      padding: .2em .6em;
+      border-radius: 99px;
+      margin-left: .5rem;
+      vertical-align: middle;
+    }
+    .demo-header .badge-nodep {
+      display: inline-block;
+      background: transparent;
+      color: var(--ts-teal);
+      font-family: var(--ts-font-mono);
+      font-size: .7rem;
+      padding: .2em .6em;
+      border-radius: 99px;
+      border: 1px solid var(--ts-teal);
+      margin-left: .4rem;
+      vertical-align: middle;
+    }
+
+    /* Nav strip */
+    .demo-nav {
+      background: var(--ts-navy-2);
+      padding: .6rem 2rem;
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .demo-nav a {
+      color: rgba(255,255,255,.55);
+      text-decoration: none;
+      font-size: .8rem;
+      font-family: var(--ts-font-mono);
+      transition: color .15s;
+      white-space: nowrap;
+    }
+    .demo-nav a:hover  { color: var(--ts-teal); }
+    .demo-nav a.active { color: var(--ts-orange); }
+
+    /* Layout */
+    .demo-body {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2rem 1rem 5rem;
+    }
+
+    /* Demo cards */
+    .demo-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 14px rgba(0,0,0,.09);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .demo-card-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .demo-card-header h2 {
+      font-family: var(--ts-font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: .02em;
+    }
+    .demo-card-header .card-num {
+      font-family: var(--ts-font-mono);
+      font-size: .75rem;
+      color: var(--ts-teal);
+      border: 1px solid var(--ts-teal);
+      border-radius: 4px;
+      padding: .1em .45em;
+      flex-shrink: 0;
+    }
+    .demo-card-header .card-tag {
+      font-family: var(--ts-font-mono);
+      font-size: .65rem;
+      color: rgba(255,255,255,.4);
+      margin-left: auto;
+    }
+
+    /* Demo stage */
+    .demo-stage {
+      padding: 2.5rem 1.75rem;
+      background: var(--ts-cream);
+      border-bottom: 1px solid #e8e0d4;
+    }
+    .demo-stage.dark-stage {
+      background: var(--ts-navy);
+    }
+
+    /* Snippet block */
+    pre.snip {
+      margin: 0;
+      padding: 1.1rem 1.5rem;
+      background: #0d1b2a;
+      color: #c9d1d9;
+      font-family: var(--ts-font-mono);
+      font-size: .77rem;
+      line-height: 1.65;
+      overflow-x: auto;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    pre.snip .hl-attr { color: #79c0ff; }
+    pre.snip .hl-val  { color: #a5d6a7; }
+    pre.snip .hl-tag  { color: #ff7b72; }
+    pre.snip .hl-cmt  { color: #6a737d; }
+    pre.snip .hl-kw   { color: #c792ea; }
+    pre.snip .hl-fn   { color: #82aaff; }
+    pre.snip .hl-str  { color: #c3e88d; }
+
+    /* Log bar */
+    .demo-log {
+      font-family: var(--ts-font-mono);
+      font-size: .77rem;
+      padding: .65rem 1.5rem;
+      background: #0d1b2a;
+      color: #8b949e;
+      border-top: 1px solid rgba(255,255,255,.05);
+      min-height: 2.4rem;
+      display: flex;
+      align-items: center;
+    }
+    .demo-log .log-entry { color: var(--ts-teal); }
+    .demo-log .log-warn  { color: var(--ts-orange); }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="demo-header">
+  <div class="container">
+    <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+    <h1>BeforeAfter <span class="badge-plugin">data-plugin-beforeafter</span></h1>
+    <p>Zero-dependency before/after image comparison slider. Drag the handle to reveal — supports horizontal and vertical orientations, hover tracking, click-to-move, label overlays, and a programmatic API with destroy/reinit.</p>
+  </div>
+</header>
+
+<br>
+<main>
+<div class="container">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         DEMO 1 — Basic Filter Grid
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h4>Basic Filter Grid</h4>
+            <p>Filter controls linked to a masonry grid by a shared <code>data-sort-id</code>. Click a category to show only matching items.</p>
+        </div>
+
+        <div class="demo-stage">
+
+            <!-- Filter nav -->
+            <ul class="nav nav-pills sort-source sort-source-style-2 mb-4" data-plugin-sort data-sort-id="demo1">
+                <li class="active" data-option-value="*"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">all</span></a></li>
+                <li data-option-value=".cat-nature"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">nature</span></a></li>
+                <li data-option-value=".cat-city"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">city</span></a></li>
+                <li data-option-value=".cat-abstract"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">abstract</span></a></li>
+            </ul>
+
+            <!-- Grid destination -->
+            <div class="sort-destination sort-destination-loader sort-destination-loader-showing" data-sort-id="demo1">
+                <div class="isotope-item cat-nature col-sm-4">
+                    <div class="thumb-info mb-4">
+                        <div class="thumb-info-image" style="background:#4caf50;height:160px;border-radius:4px;"></div>
+                        <div class="thumb-info-caption p-2">
+                            <h5 class="mb-0">Forest Path</h5>
+                            <p class="text-muted mb-0">Nature</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item cat-city col-sm-4">
+                    <div class="thumb-info mb-4">
+                        <div class="thumb-info-image" style="background:#2196f3;height:200px;border-radius:4px;"></div>
+                        <div class="thumb-info-caption p-2">
+                            <h5 class="mb-0">Skyline at Dusk</h5>
+                            <p class="text-muted mb-0">City</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item cat-abstract col-sm-4">
+                    <div class="thumb-info mb-4">
+                        <div class="thumb-info-image" style="background:#9c27b0;height:140px;border-radius:4px;"></div>
+                        <div class="thumb-info-caption p-2">
+                            <h5 class="mb-0">Gradient Wave</h5>
+                            <p class="text-muted mb-0">Abstract</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item cat-nature col-sm-4">
+                    <div class="thumb-info mb-4">
+                        <div class="thumb-info-image" style="background:#8bc34a;height:180px;border-radius:4px;"></div>
+                        <div class="thumb-info-caption p-2">
+                            <h5 class="mb-0">Mountain Lake</h5>
+                            <p class="text-muted mb-0">Nature</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item cat-city col-sm-4">
+                    <div class="thumb-info mb-4">
+                        <div class="thumb-info-image" style="background:#03a9f4;height:150px;border-radius:4px;"></div>
+                        <div class="thumb-info-caption p-2">
+                            <h5 class="mb-0">Bridge at Night</h5>
+                            <p class="text-muted mb-0">City</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item cat-abstract col-sm-4">
+                    <div class="thumb-info mb-4">
+                        <div class="thumb-info-image" style="background:#e91e63;height:190px;border-radius:4px;"></div>
+                        <div class="thumb-info-caption p-2">
+                            <h5 class="mb-0">Neon Spiral</h5>
+                            <p class="text-muted mb-0">Abstract</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.demo-stage -->
+
+        <pre class="snip"><!-- Filter nav — links to grid via data-sort-id -->
+&lt;ul class="nav nav-pills sort-source" data-plugin-sort data-sort-id="gallery1"&gt;
+    &lt;li class="active" data-option-value="*"&gt;&lt;a href="#"&gt;All&lt;/a&gt;&lt;/li&gt;
+    &lt;li data-option-value=".cat-nature"&gt;&lt;a href="#"&gt;Nature&lt;/a&gt;&lt;/li&gt;
+    &lt;li data-option-value=".cat-city"&gt;&lt;a href="#"&gt;City&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Grid destination —— items carry the filter class --&gt;
+&lt;div class="sort-destination" data-sort-id="gallery1"&gt;
+    &lt;div class="isotope-item cat-nature col-sm-4"&gt;...&lt;/div&gt;
+    &lt;div class="isotope-item cat-city col-sm-4"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+        <div class="demo-log" id="log-demo1">
+            <span class="demo-log-label">Events</span>
+        </div>
+
+    </div><!-- /.demo-card -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         DEMO 2 — Text Search Filter
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h4>Text Search Filter</h4>
+            <p>Combine category filtering with a live text search field via <code>filterFieldId</code>. Items carry <code>data-sort-search</code> to match against.</p>
+        </div>
+
+        <div class="demo-stage">
+
+            <div class="row align-items-center mb-4">
+                <div class="col-sm-6">
+                    <ul class="nav nav-pills sort-source" data-plugin-sort data-sort-id="demo2"
+                        data-plugin-options='{"filterFieldId":"search-demo2","useHash":false}'>
+                        <li class="active" data-option-value="*"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">all</span></a></a></li>
+                        <li data-option-value=".tag-design"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">design</span></a></li>
+                        <li data-option-value=".tag-dev"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">dev</span></a></li>
+                        <li data-option-value=".tag-motion"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">motion</span></a></li>
+                    </ul>
+                </div>
+                <div class="col-sm-6">
+                    <input type="text" id="search-demo2" class="form-control" placeholder="Search items…">
+                </div>
+            </div>
+
+            <div class="sort-destination" data-sort-id="demo2">
+                <div class="isotope-item tag-design col-sm-3" data-sort-search="brand identity logo design">
+                    <div class="card mb-3">
+                        <div style="background:#ff7043;height:110px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Brand Identity</strong><br><small class="text-muted">Design</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item tag-dev col-sm-3" data-sort-search="react component library frontend dev">
+                    <div class="card mb-3">
+                        <div style="background:#00bcd4;height:140px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Component Lib</strong><br><small class="text-muted">Dev</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item tag-motion col-sm-3" data-sort-search="after effects motion reel animation">
+                    <div class="card mb-3">
+                        <div style="background:#ab47bc;height:120px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Motion Reel</strong><br><small class="text-muted">Motion</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item tag-design col-sm-3" data-sort-search="icon set ui design pack">
+                    <div class="card mb-3">
+                        <div style="background:#ffb300;height:100px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Icon Set</strong><br><small class="text-muted">Design</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item tag-dev col-sm-3" data-sort-search="node api backend express server">
+                    <div class="card mb-3">
+                        <div style="background:#26a69a;height:130px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Node API</strong><br><small class="text-muted">Dev</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item tag-motion col-sm-3" data-sort-search="lottie animation loop motion design">
+                    <div class="card mb-3">
+                        <div style="background:#7e57c2;height:115px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Lottie Loop</strong><br><small class="text-muted">Motion</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item tag-design col-sm-3" data-sort-search="typography layout poster print design">
+                    <div class="card mb-3">
+                        <div style="background:#ef5350;height:145px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Poster Layout</strong><br><small class="text-muted">Design</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-item tag-dev col-sm-3" data-sort-search="webpack build tool bundler dev tooling">
+                    <div class="card mb-3">
+                        <div style="background:#29b6f6;height:105px;border-radius:4px 4px 0 0;"></div>
+                        <div class="card-body p-2">
+                            <strong>Build Tool</strong><br><small class="text-muted">Dev</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.demo-stage -->
+
+        <pre class="snip">&lt;!-- Filter nav with filterFieldId pointing to the search input --&gt;
+&lt;ul class="nav nav-pills sort-source" data-plugin-sort data-sort-id="gallery2"
+    data-plugin-options='{"filterFieldId":"my-search","useHash":false}'&gt;
+    &lt;li class="active" data-option-value="*"&gt;&lt;a href="#"&gt;All&lt;/a&gt;&lt;/li&gt;
+    &lt;li data-option-value=".tag-design"&gt;&lt;a href="#"&gt;Design&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;input type="text" id="my-search" placeholder="Search…"&gt;
+
+&lt;!-- Items carry data-sort-search for text matching --&gt;
+&lt;div class="sort-destination" data-sort-id="gallery2"&gt;
+    &lt;div class="isotope-item tag-design col-sm-3"
+         data-sort-search="brand identity logo"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+        <div class="demo-log" id="log-demo2">
+            <span class="demo-log-label">Events</span>
+        </div>
+
+    </div><!-- /.demo-card -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         DEMO 3 — fitRows Layout Mode
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h4>fitRows Layout Mode</h4>
+            <p>Set <code>layoutMode: "fitRows"</code> to use a CSS flex-wrap row layout instead of the default masonry stacking. Works well for uniform-height cards.</p>
+        </div>
+
+        <div class="demo-stage">
+
+            <ul class="nav nav-pills sort-source mb-4" data-plugin-sort data-sort-id="demo3"
+                data-plugin-options='{"layoutMode":"fitRows","useHash":false}'>
+                <li class="active" data-option-value="*"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">all</span></a></a></li>
+                <li data-option-value=".shape-circle"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">circle</span></a></li>
+                <li data-option-value=".shape-square"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">square</span></a></li>
+                <li data-option-value=".shape-triangle"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">triangle</span></a></li>
+            </ul>
+
+            <div class="sort-destination" data-sort-id="demo3">
+                <div class="isotope-item shape-circle col-sm-2 mb-3 text-center">
+                    <div style="width:80px;height:80px;border-radius:50%;background:#e53935;margin:0 auto;"></div>
+                    <small class="d-block mt-2 text-muted">Circle A</small>
+                </div>
+                <div class="isotope-item shape-square col-sm-2 mb-3 text-center">
+                    <div style="width:80px;height:80px;background:#1e88e5;margin:0 auto;border-radius:4px;"></div>
+                    <small class="d-block mt-2 text-muted">Square A</small>
+                </div>
+                <div class="isotope-item shape-triangle col-sm-2 mb-3 text-center">
+                    <div style="width:0;height:0;border-left:40px solid transparent;border-right:40px solid transparent;border-bottom:70px solid #43a047;margin:0 auto;"></div>
+                    <small class="d-block mt-2 text-muted">Triangle A</small>
+                </div>
+                <div class="isotope-item shape-circle col-sm-2 mb-3 text-center">
+                    <div style="width:80px;height:80px;border-radius:50%;background:#8e24aa;margin:0 auto;"></div>
+                    <small class="d-block mt-2 text-muted">Circle B</small>
+                </div>
+                <div class="isotope-item shape-square col-sm-2 mb-3 text-center">
+                    <div style="width:80px;height:80px;background:#fb8c00;margin:0 auto;border-radius:4px;"></div>
+                    <small class="d-block mt-2 text-muted">Square B</small>
+                </div>
+                <div class="isotope-item shape-triangle col-sm-2 mb-3 text-center">
+                    <div style="width:0;height:0;border-left:40px solid transparent;border-right:40px solid transparent;border-bottom:70px solid #00acc1;margin:0 auto;"></div>
+                    <small class="d-block mt-2 text-muted">Triangle B</small>
+                </div>
+                <div class="isotope-item shape-circle col-sm-2 mb-3 text-center">
+                    <div style="width:80px;height:80px;border-radius:50%;background:#f4511e;margin:0 auto;"></div>
+                    <small class="d-block mt-2 text-muted">Circle C</small>
+                </div>
+                <div class="isotope-item shape-square col-sm-2 mb-3 text-center">
+                    <div style="width:80px;height:80px;background:#00897b;margin:0 auto;border-radius:4px;"></div>
+                    <small class="d-block mt-2 text-muted">Square C</small>
+                </div>
+            </div>
+
+        </div><!-- /.demo-stage -->
+
+        <pre class="snip">&lt;ul class="sort-source" data-plugin-sort data-sort-id="gallery3"
+    data-plugin-options='{"layoutMode":"fitRows","useHash":false}'&gt;
+    &lt;li class="active" data-option-value="*"&gt;&lt;a href="#"&gt;All&lt;/a&gt;&lt;/li&gt;
+    &lt;li data-option-value=".shape-circle"&gt;&lt;a href="#"&gt;Circle&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class="sort-destination" data-sort-id="gallery3"&gt;
+    &lt;div class="isotope-item shape-circle col-sm-2"&gt;...&lt;/div&gt;
+    &lt;div class="isotope-item shape-square col-sm-2"&gt;...&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+        <div class="demo-log" id="log-demo3">
+            <span class="demo-log-label">Events</span>
+        </div>
+
+    </div><!-- /.demo-card -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         DEMO 4 — Programmatic Control
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h4>Programmatic Control</h4>
+            <p>Initialize with <code>.manual</code> and drive filtering via the instance API: <code>instance.setFilter(filter)</code>.</p>
+        </div>
+
+        <div class="demo-stage">
+
+            <ul class="nav nav-pills sort-source manual" data-plugin-sort data-sort-id="demo4">
+                <li class="active" data-option-value="*"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">all</span></a></li>
+                <li data-option-value=".tier-gold"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">gold</span></a></li>
+                <li data-option-value=".tier-silver"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">silver</span></a></li>
+                <li data-option-value=".tier-bronze"><a href="#"><span class="badge rounded-pill text-bg-dark text-uppercase">bronze</span></a></li>
+            </ul>
+
+            <div class="sort-destination mb-4" data-sort-id="demo4">
+                <div class="isotope-item tier-gold col-sm-3">
+                    <div class="card mb-3 border-warning">
+                        <div class="card-body"><span class="badge bg-warning text-dark">Gold</span> Item 1</div>
+                    </div>
+                </div>
+                <div class="isotope-item tier-silver col-sm-3">
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-body"><span class="badge bg-secondary">Silver</span> Item 2</div>
+                    </div>
+                </div>
+                <div class="isotope-item tier-bronze col-sm-3">
+                    <div class="card mb-3" style="border-color:#cd7f32;">
+                        <div class="card-body"><span class="badge" style="background:#cd7f32;">Bronze</span> Item 3</div>
+                    </div>
+                </div>
+                <div class="isotope-item tier-gold col-sm-3">
+                    <div class="card mb-3 border-warning">
+                        <div class="card-body"><span class="badge bg-warning text-dark">Gold</span> Item 4</div>
+                    </div>
+                </div>
+                <div class="isotope-item tier-silver col-sm-3">
+                    <div class="card mb-3 border-secondary">
+                        <div class="card-body"><span class="badge bg-secondary">Silver</span> Item 5</div>
+                    </div>
+                </div>
+                <div class="isotope-item tier-bronze col-sm-3">
+                    <div class="card mb-3" style="border-color:#cd7f32;">
+                        <div class="card-body"><span class="badge" style="background:#cd7f32;">Bronze</span> Item 6</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap mb-2">
+                <button class="btn btn-sm btn-outline-secondary" id="btn-init-manual">Init Plugin</button>
+                <button class="btn btn-sm btn-warning" id="btn-filter-gold">Filter: Gold</button>
+                <button class="btn btn-sm btn-secondary" id="btn-filter-silver">Filter: Silver</button>
+                <button class="btn btn-sm btn-outline-dark" id="btn-filter-bronze">Filter: Bronze</button>
+                <button class="btn btn-sm btn-light border" id="btn-filter-all">Filter: All</button>
+                <button class="btn btn-sm btn-outline-danger" id="btn-destroy">Destroy</button>
+            </div>
+
+        </div><!-- /.demo-stage -->
+
+        <pre class="snip">// Initialize with .manual to skip auto-init
+$('[data-sort-id="gallery4"]').closest('.sort-source')
+    // or just call manually:
+$('[data-plugin-sort][data-sort-id="gallery4"]').themestrapPluginSort({
+    useHash: false
+});
+
+// Get instance and drive it
+const instance = $('[data-plugin-sort][data-sort-id="gallery4"]').data('__sort');
+instance.setFilter('.tier-gold');
+instance.setFilter('*'); // show all</pre>
+
+        <div class="demo-log" id="log-demo4">
+            <span class="demo-log-label">Events</span>
+        </div>
+
+    </div><!-- /.demo-card -->
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         DEMO 5 — Options Reference
+    ═══════════════════════════════════════════════════════════════════════════ -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <h4>Options Reference</h4>
+        </div>
+
+        <div class="demo-stage demo-stage--table">
+            <table class="table table-sm table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Option</th>
+                        <th>Type</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>useHash</code></td>
+                        <td>Boolean</td>
+                        <td><code>true</code></td>
+                        <td>Sync active filter to URL hash and react to <code>hashchange</code> events.</td>
+                    </tr>
+                    <tr>
+                        <td><code>itemSelector</code></td>
+                        <td>String</td>
+                        <td><code>".isotope-item"</code></td>
+                        <td>CSS selector for grid items inside the destination element.</td>
+                    </tr>
+                    <tr>
+                        <td><code>layoutMode</code></td>
+                        <td>String</td>
+                        <td><code>"masonry"</code></td>
+                        <td><code>"masonry"</code> (native absolute positioning) or <code>"fitRows"</code> (CSS flex wrap).</td>
+                    </tr>
+                    <tr>
+                        <td><code>filter</code></td>
+                        <td>String</td>
+                        <td><code>"*"</code></td>
+                        <td>Initial active filter. Use <code>"*"</code> for all or a CSS class selector like <code>".cat-nature"</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><code>filterFieldId</code></td>
+                        <td>String / false</td>
+                        <td><code>false</code></td>
+                        <td>ID of an <code>&lt;input&gt;</code> element whose value is used for live text search against <code>data-sort-search</code>.</td>
+                    </tr>
+                    <tr>
+                        <td><code>filterFieldText</code></td>
+                        <td>String</td>
+                        <td><code>""</code></td>
+                        <td>Internal: current value of the search field. Not typically set manually.</td>
+                    </tr>
+                    <tr>
+                        <td><code>hiddenStyle</code></td>
+                        <td>Object</td>
+                        <td><code>{ opacity: 0 }</code></td>
+                        <td>CSS properties applied to filtered-out items.</td>
+                    </tr>
+                    <tr>
+                        <td><code>visibleStyle</code></td>
+                        <td>Object</td>
+                        <td><code>{ opacity: 1 }</code></td>
+                        <td>CSS properties applied to visible items.</td>
+                    </tr>
+                    <tr>
+                        <td><code>stagger</code></td>
+                        <td>Number</td>
+                        <td><code>30</code></td>
+                        <td>Per-item <code>transition-delay</code> increment in ms for masonry layout (staggered cascade effect).</td>
+                    </tr>
+                    <tr>
+                        <td><code>isOriginLeft</code></td>
+                        <td>Boolean</td>
+                        <td><code>true</code></td>
+                        <td>Set <code>false</code> for RTL layouts. Auto-detected from <code>&lt;html dir="rtl"&gt;</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+</main>
+<!-- ─── Scripts ─────────────────────────────────────────────────────────────── -->
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.sort.js"></script>
+
+<script>
+(function ($) {
+	if ($.isFunction($.fn['themestrapPluginSort']) && ( $('[data-plugin-sort]').length || $('.sort-source').length )) {
+		themestrap.fn.intObsInit( '[data-plugin-sort]:not(.manual), .sort-source:not(.manual)', 'themestrapPluginSort' );
+	}
+    // ── Demo 1 event logging ─────────────────────────────────────────────────
+    (function () {
+        const $log = $('#log-demo1');
+        const log = (msg) => {
+            const ts = new Date().toLocaleTimeString();
+            $log.append('<div class="demo-log-entry"><span class="demo-log-time">' + ts + '</span> ' + msg + '</div>');
+            $log.scrollTop($log[0].scrollHeight);
+        };
+
+        $(document).on('filtered', '.sort-destination[data-sort-id="demo1"]', function () {
+            const filter = $(this).attr('data-filter') || '*';
+            log('filtered → <code>' + filter + '</code>');
+        });
+
+        $(document).on('layoutComplete', '.sort-destination[data-sort-id="demo1"]', function () {
+            log('layoutComplete');
+        });
+    }());
+
+    // ── Demo 2 event logging ─────────────────────────────────────────────────
+    (function () {
+        const $log = $('#log-demo2');
+        const log = (msg) => {
+            const ts = new Date().toLocaleTimeString();
+            $log.append('<div class="demo-log-entry"><span class="demo-log-time">' + ts + '</span> ' + msg + '</div>');
+            $log.scrollTop($log[0].scrollHeight);
+        };
+
+        $(document).on('filtered', '.sort-destination[data-sort-id="demo2"]', function () {
+            const filter = $(this).attr('data-filter') || '*';
+            log('filtered → <code>' + filter + '</code>');
+        });
+
+        $('#search-demo2').on('keyup', function () {
+            log('search → <code>"' + $(this).val() + '"</code>');
+        });
+    }());
+
+    // ── Demo 3 event logging ─────────────────────────────────────────────────
+    (function () {
+        const $log = $('#log-demo3');
+        const log = (msg) => {
+            const ts = new Date().toLocaleTimeString();
+            $log.append('<div class="demo-log-entry"><span class="demo-log-time">' + ts + '</span> ' + msg + '</div>');
+            $log.scrollTop($log[0].scrollHeight);
+        };
+
+        $(document).on('filtered', '.sort-destination[data-sort-id="demo3"]', function () {
+            const filter = $(this).attr('data-filter') || '*';
+            log('layoutMode: fitRows — filtered → <code>' + filter + '</code>');
+        });
+    }());
+
+    // ── Demo 4 — Programmatic control ────────────────────────────────────────
+    (function () {
+        const $log = $('#log-demo4');
+        const $source = $('[data-plugin-sort][data-sort-id="demo4"]');
+        const log = (msg) => {
+            const ts = new Date().toLocaleTimeString();
+            $log.append('<div class="demo-log-entry"><span class="demo-log-time">' + ts + '</span> ' + msg + '</div>');
+            $log.scrollTop($log[0].scrollHeight);
+        };
+
+        $(document).on('filtered', '.sort-destination[data-sort-id="demo4"]', function () {
+            const filter = $(this).attr('data-filter') || '*';
+            log('filtered → <code>' + filter + '</code>');
+        });
+
+        $('#btn-init-manual').on('click', function () {
+            if ($source.data('__sort')) {
+                log('already initialized');
+                return;
+            }
+            $source.themestrapPluginSort({ useHash: false });
+            log('plugin initialized manually');
+        });
+
+        $('#btn-filter-gold').on('click', function () {
+            const inst = $source.data('__sort');
+            if (!inst) { log('not initialized yet'); return; }
+            inst.setFilter('.tier-gold');
+            log('setFilter(".tier-gold")');
+        });
+
+        $('#btn-filter-silver').on('click', function () {
+            const inst = $source.data('__sort');
+            if (!inst) { log('not initialized yet'); return; }
+            inst.setFilter('.tier-silver');
+            log('setFilter(".tier-silver")');
+        });
+
+        $('#btn-filter-bronze').on('click', function () {
+            const inst = $source.data('__sort');
+            if (!inst) { log('not initialized yet'); return; }
+            inst.setFilter('.tier-bronze');
+            log('setFilter(".tier-bronze")');
+        });
+
+        $('#btn-filter-all').on('click', function () {
+            const inst = $source.data('__sort');
+            if (!inst) { log('not initialized yet'); return; }
+            inst.setFilter('*');
+            log('setFilter("*")');
+        });
+
+        $('#btn-destroy').on('click', function () {
+            const inst = $source.data('__sort');
+            if (!inst) { log('no instance to destroy'); return; }
+            inst.destroy();
+            log('destroy() called — instance removed');
+        });
+    }());
+
+}(jQuery));
+</script>
+
+</body>
+</html>
