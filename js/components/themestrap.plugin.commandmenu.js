@@ -1,7 +1,7 @@
 /**
  * Themestrap Command Menu Plugin
  * Accessible, keyboard-driven command palette
- * Part of the Themestrap component library for MODX 3.
+ * Part of the Themestrap component library.
  *
  * Features:
  *   • Global keyboard shortcut (default: Cmd/Ctrl+K) to summon the palette anywhere.
@@ -127,20 +127,20 @@
              *  .command-menu element, or via theme skins (dark mode, brand colors).
              */
             :root {
-                --command-bg:              var(--light);
-                --command-fg:              #0f172a;
-                --command-muted:           #64748b;
-                --command-border:          rgba(15, 23, 42, 0.08);
-                --command-border-strong:   rgba(15, 23, 42, 0.16);
-                --command-hover:           rgba(15, 23, 42, 0.04);
-                --command-active-bg:       rgba(15, 23, 42, 0.06);
-                --command-active-fg:       #0f172a;
-                --command-accent:          #e8672a;
-                --command-backdrop:        rgba(15, 23, 42, 0.55);
-                --command-radius:          var(--border-radius);
-                --command-radius-item:     var(--border-radius2x);
-                --command-shadow:          0 24px 56px -12px rgba(15, 23, 42, 0.32),
-                                           0 4px 12px -4px rgba(15, 23, 42, 0.16);
+                --command-bg:              var(--light, #fff);
+                --command-fg:              var(--default, #777);
+                --command-muted:           var(--light-rgba-60, rgba(255, 255, 255, 0.6));
+                --command-border:          var(--light-rgba-80, rgba(255, 255, 255, 0.8));
+                --command-border-strong:   var(--light-rgba-20, rgba(255, 255, 255, 0.2));
+                --command-hover:           var(--light-rgba-10, rgba(255, 255, 255, 0.1));
+                --command-active-bg:       var(--light-rgba-10, rgba(255, 255, 255, 0.1));
+                --command-active-fg:       var(--dark, #0a0c0d);
+                --command-accent:          var(--primary, #0088CC);
+                --command-backdrop:        var(--dark-rgba-90, rgba(33, 37, 41, 0.9));
+                --command-radius:          var(--border-radius, 4px);
+                --command-radius-item:     var(--border-radius2x, 8px);
+                --command-shadow:          0 24px 56px -12px rgba(0, 0, 0, 0.32),
+                                           0 4px 12px -4px rgba(0, 0, 0, 0.16);
                 --command-panel-width:     min(96vw, 640px);
                 --command-list-max-h:      min(60vh, 480px);
                 --command-z:               1080;
@@ -149,15 +149,15 @@
 
             /* Dark variant */
             html.dark .command-menu, .command-menu.command-dark {
-                --command-bg: var(--dark-300);
-                --command-fg: var(--grey);
-                --command-muted: var(--dark--300);
-                --command-border: var(--dark-rgba-80);
-                --command-border-strong: var(--dark-rgba-20);
-                --command-hover: var(--dark-rgba-10);
-                --command-active-bg: var(--dark-rgba-10);
-                --command-active-fg: var(--light);
-                --command-backdrop: rgba(0, 0, 0, .6);
+                --command-bg: var(--dark-300, #0a0c0d);
+                --command-fg: var(--grey, #969696);
+                --command-muted: var(--dark--300, #383f45);
+                --command-border: var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
+                --command-border-strong: var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
+                --command-hover: var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --command-active-bg: var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --command-active-fg: var(--light, #fff);
+                --command-backdrop: var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
                 --command-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.6),
                                   0 4px 12px -4px rgba(0, 0, 0, 0.4);
             }
