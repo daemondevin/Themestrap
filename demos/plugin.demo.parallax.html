@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PluginParallax | Themestrap</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+  <meta name="description" content="Live examples of every parallax mode: classic background scroll, scale zoom, scroll-scrubbed CSS properties, and mouse pointer parallax — all zero-dependency.">
+  <link rel="icon" type="image/png" href="../img/favicon-96x96.png" sizes="96x96">
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:     #0a1929;
+      --ts-navy-2:   #0e2238;
+      --ts-orange:   #e8672a;
+      --ts-orange-2: #d2541b;
+      --ts-teal:     #2ab8c8;
+      --ts-cream:    #f5f0e8;
+      --ts-font-serif:   'Fraunces', Georgia, serif;
+      --ts-font-display: 'Syne', sans-serif;
+      --ts-font-body:    'DM Sans', system-ui, sans-serif;
+      --ts-font-mono:    'JetBrains Mono', monospace;
+    }
+    body {
+      background: var(--ts-navy);
+      color: #d0dbe8;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+    .demo-header {
+      background: var(--ts-navy2);
+      border-bottom: 2px solid var(--ts-orange);
+      padding: 2rem 0 1.5rem;
+    }
+    .demo-header h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      color: #fff;
+      font-size: 2rem;
+    }
+    .demo-header p { color: #8aa5bf; margin: 0; }
+    .demo-header a { color: var(--ts-orange); text-decoration: none; }
+    .badge-plugin {
+      background: var(--ts-teal);
+      color: #fff;
+      font-size: .7rem;
+      letter-spacing: .08em;
+      padding: .25em .6em;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      vertical-align: middle;
+    }
+    .badge-mode { 
+        background: var(--ts-orange);
+        color: #fff;
+        font-size: .7rem; 
+        letter-spacing: .08em; 
+        padding: .25em .6em; 
+        border-radius: 4px; 
+        font-family: 'JetBrains Mono', monospace; 
+        vertical-align: middle; 
+    }
+    .demo-card {
+      background: var(--ts-navy2);
+      border: 1px solid #1a3050;
+      border-radius: 10px;
+      margin-bottom: 1.75rem;
+      overflow: hidden;
+    }
+    .demo-card-header {
+      background: #0b1e33;
+      border-bottom: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: var(--ts-teal);
+      letter-spacing: .04em;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .demo-card-header .demo-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+    .demo-stage {
+      padding: 1.5rem 1.25rem;
+    }
+    pre.snip {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      margin: 0;
+      padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: #7ecce0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .demo-log {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .73rem;
+      color: #6bb;
+      min-height: 2.4rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .demo-log .log-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--ts-teal);
+      flex-shrink: 0;
+    }
+    .demo-log span.hi { color: var(--ts-orange); }
+    /* API controls */
+    .api-panel { background: rgba(255,255,255,.02); border: 1px solid #1a3050; border-radius: 8px; padding: 1rem 1.125rem; }
+    .api-panel p.label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; color: #5a7898; margin-bottom: .5rem; }
+    code { color: var(--ts-teal); font-family: 'JetBrains Mono', monospace; font-size: .82em; }
+    /* Parallax stage overrides */
+.plx-stage {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+.plx-stage .plx-label {
+    position: relative;
+    z-index: 2;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    padding: 20px 36px;
+    border-radius: 6px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+}
+.plx-stage .plx-label h4 { margin: 0 0 6px; font-size: 18px; }
+.plx-stage .plx-label p  { margin: 0; font-size: 13px; opacity: .8; }
+
+/* Scrollable demo */
+.scrollable-demo-wrap {
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.scrollable-bar-host {
+    position: relative;
+    height: 80px;
+    background: #f0f1f3;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.scrollable-parallax-wrapper {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #e8672a 0%, #c0392b 100%);
+    border-radius: 6px;
+    width: 40%;
+    transition: width 200ms ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 14px;
+}
+.scrollable-parallax-wrapper span {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.scrollable-note { font-size: 12.5px; color: #666; }
+
+/* Mouse parallax demo */
+.mouse-demo-area {
+    height: 280px;
+    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.parallax-mouse-object { position: absolute; border-radius: 50%; will-change: transform; }
+.mo-1 { width:120px; height:120px; background:rgba(232,103,42,.35); top:20%; left:15%; }
+.mo-2 { width:70px;  height:70px;  background:rgba(100,180,255,.3); top:55%; left:60%; }
+.mo-3 { width:50px;  height:50px;  background:rgba(255,220,100,.25); top:30%; left:70%; }
+.mo-4 { width:90px;  height:90px;  background:rgba(180,80,255,.2); top:65%; left:25%; }
+.mouse-demo-overlay {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #fff;
+    pointer-events: none;
+}
+.mouse-demo-overlay h4 { margin:0 0 6px; font-size:16px; }
+.mouse-demo-overlay p  { margin:0; font-size:12px; opacity:.6; }
+
+/* Direction demo */
+.dir-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:20px; }
+@media (max-width:640px) { .dir-grid { grid-template-columns:1fr; } }
+.dir-item { height:180px; border-radius:6px; overflow:hidden; position:relative; }
+.dir-item .dir-badge {
+    position:absolute; bottom:10px; right:10px; z-index:2;
+    background:rgba(0,0,0,.6); color:#fff; font-size:11px; padding:3px 10px;
+    border-radius:4px; backdrop-filter:blur(4px);
+}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="demo-header">
+  <div class="container">
+    <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+    <h1>Parallax <span class="badge-plugin">data-plugin-parallax</span></h1>
+    <p>Live examples of every parallax mode: classic background scroll, scale zoom, scroll-scrubbed CSS properties, and mouse pointer parallax — all zero-dependency.</p>
+  </div>
+</header>
+
+<br>
+<main>
+<div class="container">
+
+        <!-- DEMO 1: Background Parallax (default) -->
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <h5>Background Parallax <span class="badge-mode ms-1">default mode</span></h5>
+          </div>
+          <div class="demo-stage">
+            <div class="plx-stage manual"
+                 id="demo-bg-parallax"
+                 data-plugin-parallax
+                 data-image-src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80"
+                 data-plugin-options='{"speed":1.5,"parallaxHeight":"220%"}'>
+              <div class="plx-label">
+                <h4>Background Parallax</h4>
+                <p>Image shifts slower than page scroll</p>
+              </div>
+            </div>
+          </div>
+          <pre class="snip"><code>&lt;section data-plugin-parallax
+         data-image-src="img/bg.jpg"
+         data-plugin-options='{"speed":1.5,"parallaxHeight":"220%"}'&gt;
+  &lt;div class="container py-5"&gt;Foreground content&lt;/div&gt;
+&lt;/section&gt;</code></pre>
+          <div class="demo-log"><span>Scroll the page to see the parallax layer move.</span></div>
+        </div>
+
+        <!-- DEMO 2: Direction variants -->
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <h5>Direction Variants <span class="badge-mode ms-1">parallaxDirection</span></h5>
+          </div>
+          <div class="demo-stage">
+            <div class="dir-grid">
+              <div class="dir-item"
+                   data-plugin-parallax
+                   data-image-src="https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=800&q=80"
+                   data-plugin-options='{"parallaxDirection":"top","parallaxHeight":"200%"}'>
+                <div class="dir-badge">top (default)</div>
+              </div>
+              <div class="dir-item"
+                   data-plugin-parallax
+                   data-image-src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80"
+                   data-plugin-options='{"parallaxDirection":"bottom","parallaxHeight":"200%"}'>
+                <div class="dir-badge">bottom</div>
+              </div>
+            </div>
+          </div>
+          <pre class="snip"><code>&lt;!-- Top direction (default) --&gt;
+&lt;div data-plugin-parallax data-image-src="img/bg.jpg"
+     data-plugin-options='{"parallaxDirection":"top"}'&gt;...&lt;/div&gt;
+
+&lt;!-- Bottom direction --&gt;
+&lt;div data-plugin-parallax data-image-src="img/bg.jpg"
+     data-plugin-options='{"parallaxDirection":"bottom"}'&gt;...&lt;/div&gt;</code></pre>
+          <div class="demo-log"><span>Compare how each direction shifts the background layer on scroll.</span></div>
+        </div>
+
+        <!-- DEMO 3: Scale (zoom) -->
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <h5>Scale Zoom <span class="badge-mode ms-1">parallaxScale</span></h5>
+          </div>
+          <div class="demo-stage">
+            <div class="plx-stage"
+                 data-plugin-parallax
+                 data-image-src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80"
+                 data-plugin-options='{"parallaxScale":true,"parallaxHeight":"200%"}'>
+              <div class="plx-label">
+                <h4>Scale Parallax</h4>
+                <p>Image zooms as you scroll</p>
+              </div>
+            </div>
+          </div>
+          <pre class="snip"><code>&lt;section data-plugin-parallax
+         data-image-src="img/bg.jpg"
+         data-plugin-options='{"parallaxScale":true}'&gt;
+  &lt;div class="container py-5"&gt;Content&lt;/div&gt;
+&lt;/section&gt;</code></pre>
+          <div class="demo-log" id="log-scale"><span>Scroll down — the image zooms in progressively.</span></div>
+        </div>
+
+        <!-- DEMO 4: Scale inverted -->
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <h5>Scale Inverted <span class="badge-mode ms-1">parallaxScaleInvert</span></h5>
+          </div>
+          <div class="demo-stage">
+            <div class="plx-stage"
+                 data-plugin-parallax
+                 data-image-src="https://images.unsplash.com/photo-1497449493050-aad1e7cad165?w=1200&q=80"
+                 data-plugin-options='{"parallaxScale":true,"parallaxScaleInvert":true,"parallaxHeight":"200%"}'>
+              <div class="plx-label">
+                <h4>Inverted Scale</h4>
+                <p>Image starts large and shrinks</p>
+              </div>
+            </div>
+          </div>
+          <pre class="snip"><code>&lt;section data-plugin-parallax
+         data-image-src="img/bg.jpg"
+         data-plugin-options='{"parallaxScale":true,"parallaxScaleInvert":true}'&gt;
+  ...
+&lt;/section&gt;</code></pre>
+          <div class="demo-log"><span>The image begins zoomed in and scales down as you scroll through.</span></div>
+        </div>
+
+        <!-- DEMO 5: Scrollable CSS scrub -->
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <h5>Scroll-Scrubbed CSS Property <span class="badge-mode ms-1">scrollableParallax</span></h5>
+          </div>
+          <div class="demo-stage padded"
+               id="demo-scrollable"
+               data-plugin-parallax
+               data-plugin-options='{"scrollableParallax":true,"cssProperty":"width","cssValueStart":20,"cssValueEnd":100,"cssValueUnit":"%","scrollableParallaxMinWidth":0}'>
+            <div class="scrollable-demo-wrap">
+              <p class="scrollable-note">Scroll down with this element in view to watch the bar grow:</p>
+              <div class="scrollable-bar-host">
+                <div class="scrollable-parallax-wrapper">
+                  <span id="scrollable-pct">20%</span>
+                </div>
+              </div>
+              <p class="scrollable-note mb-0">The <code>width</code> CSS property is scrubbed from <code>20%</code> → <code>100%</code> as the element passes through the viewport.</p>
+            </div>
+          </div>
+          <pre class="snip"><code>&lt;div data-plugin-parallax
+     data-plugin-options='{
+       "scrollableParallax": true,
+       "cssProperty": "width",
+       "cssValueStart": 20,
+       "cssValueEnd": 100,
+       "cssValueUnit": "%"
+     }'&gt;
+  &lt;div class="scrollable-parallax-wrapper"&gt;...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          <div class="demo-log" id="log-scrollable"><span>Scroll the page — watch the bar width grow.</span></div>
+        </div>
+
+        <!-- DEMO 6: Mouse parallax -->
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <h5>Mouse Parallax <span class="badge-mode ms-1">mouseParallax</span></h5>
+          </div>
+          <div class="demo-stage">
+            <div class="mouse-demo-area manual"
+                 id="demo-mouse"
+                 data-plugin-parallax
+                 data-plugin-options='{"mouseParallax":true}'>
+              <div class="parallax-mouse-object mo-1" data-value="3"></div>
+              <div class="parallax-mouse-object mo-2" data-value="-5"></div>
+              <div class="parallax-mouse-object mo-3" data-value="7"></div>
+              <div class="parallax-mouse-object mo-4" data-value="-4"></div>
+              <div class="mouse-demo-overlay">
+                <h4>Move your cursor here</h4>
+                <p>Each circle has a different <code>data-value</code> depth</p>
+              </div>
+            </div>
+          </div>
+          <pre class="snip"><code>&lt;div data-plugin-parallax data-plugin-options='{"mouseParallax":true}'&gt;
+  &lt;div class="parallax-mouse-object" data-value="3"&gt;&lt;/div&gt;
+  &lt;div class="parallax-mouse-object" data-value="-5"&gt;&lt;/div&gt;
+  &lt;div class="parallax-mouse-object" data-value="7"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          <div class="demo-log" id="log-mouse"><span>Move your pointer over the stage above.</span></div>
+        </div>
+
+        <!-- DEMO 7: Manual JS init + destroy -->
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <h5>Manual Init &amp; Destroy <span class="badge-mode ms-1">jQuery API</span></h5>
+          </div>
+          <div class="demo-stage padded" style="min-height:0">
+            <div class="d-flex gap-2 flex-wrap">
+              <button class="btn btn-primary" id="btn-init">Init Parallax</button>
+              <button class="btn btn-outline-danger" id="btn-destroy">Destroy</button>
+            </div>
+            <div id="manual-target"
+                 class="manual mt-3 plx-stage"
+                 style="height:200px;border-radius:6px;"
+                 data-plugin-parallax
+                 data-image-src="https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=1200&q=80">
+              <div class="plx-label">
+                <h4>Manual Target</h4>
+                <p><code>.manual</code> — not auto-initialized</p>
+              </div>
+            </div>
+          </div>
+          <pre class="snip"><code>// Init
+$('#target.manual').themestrapPluginParallax({ speed: 2 });
+
+// Retrieve instance
+const inst = $('#target').data('__parallax');
+
+// Destroy
+inst.destroy();</code></pre>
+          <div class="demo-log" id="log-manual"><span>Use the buttons above to init / destroy.</span></div>
+        </div>
+
+
+</div>
+</main>
+
+<!-- jQuery + Bootstrap 5 -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- Themestrap core -->
+<script src="../js/themestrap.js"></script>
+<!-- Parallax plugin (no other deps required) -->
+<script src="../js/components/themestrap.plugin.parallax.js"></script>
+<script>
+$(function () {
+
+  /* Auto-init all non-manual parallax elements */
+  $('[data-plugin-parallax]:not(.manual)').each(function () {
+    const $el = $(this);
+    const opts = themestrap.fn.getOptions($el.data('plugin-options')) || undefined;
+    $el.themestrapPluginParallax(opts);
+  });
+
+  /* Demo 1: log scroll events on the manual BG parallax */
+  var bgScrollCount = 0;
+  $('#demo-bg-parallax').themestrapPluginParallax({ speed: 1.5, parallaxHeight: '220%' });
+  $(window).on('scroll', function () {
+    bgScrollCount++;
+    if (bgScrollCount % 5 === 0) {
+      $('#demo-bg-parallax').closest('.demo-card').find('.demo-log').html(
+        'scroll event #' + bgScrollCount + ' — scrollTop: ' + $(window).scrollTop() + 'px'
+      );
+    }
+  });
+
+  /* Demo 5: mirror width value into the pct label */
+  var scrubObs = new MutationObserver(function () {
+    var w = document.querySelector('#demo-scrollable .scrollable-parallax-wrapper');
+    if (w) {
+      var pct = Math.round(parseFloat(w.style.width)) || 20;
+      document.getElementById('scrollable-pct').textContent = pct + '%';
+      document.getElementById('log-scrollable').textContent = 'width scrubbed to: ' + pct + '%';
+    }
+  });
+  var scrubWrapper = document.querySelector('#demo-scrollable .scrollable-parallax-wrapper');
+  if (scrubWrapper) scrubObs.observe(scrubWrapper, { attributes: true, attributeFilter: ['style'] });
+
+  /* Demo 6: log mouse coordinates */
+  $('#demo-mouse').themestrapPluginParallax({ mouseParallax: true });
+  $('#demo-mouse').on('mousemove', function (e) {
+    $('#log-mouse').text('mouse → x: ' + e.clientX + 'px, y: ' + e.clientY + 'px');
+  });
+
+  /* Demo 7: manual init/destroy buttons */
+  $('#btn-init').on('click', function () {
+    var $t = $('#manual-target');
+    var inst = $t.data('__parallax');
+    if (inst) {
+      $('#log-manual').text('Already initialized — instance at $el.data("__parallax")');
+    } else {
+      $t.themestrapPluginParallax({ speed: 2 });
+      $('#log-manual').text('Initialized. Instance stored under data("__parallax").');
+    }
+  });
+
+  $('#btn-destroy').on('click', function () {
+    var inst = $('#manual-target').data('__parallax');
+    if (inst) {
+      inst.destroy();
+      $('#log-manual').text('Destroyed — background removed, events unbound, data cleared.');
+    } else {
+      $('#log-manual').text('No instance to destroy — click Init first.');
+    }
+  });
+
+});
+</script>
+</body>
+</html>
