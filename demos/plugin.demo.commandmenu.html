@@ -485,7 +485,10 @@ body {
             The same <code>PluginCommandMenu</code> drives all four examples below. Each just feeds it
             different items and different options. Click any trigger to see it in action.
         </p>
-
+        <p class="sec-lead">
+            The <code>Actions</code> menu, <code>PluginDialog</code> is used to show how you could 
+            potentionally use that component with this one.
+        </p>
         <div class="example-grid">
 
             <!-- 1. Main navigation palette (re-uses the hero menu) -->
@@ -870,6 +873,39 @@ body {
     </p>
 </footer>
 
+<div data-plugin-dialog id="rename-dialog">
+    <div data-dialog-backdrop></div>
+    <div data-dialog-panel dialog-lg">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 data-dialog-title class="mb-0">Rename Document</h2>
+            <button class="btn-close" data-dialog-close aria-label="Close"></button>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="rename">Display Name</label>
+            <input type="text" id="rename-input" class="form-control" value="Q4 Strategy Memo">
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end mt-4">
+            <button class="btn btn-outline-secondary" data-dialog-close>Discard</button>
+            <button id="rename-save" class="btn btn-primary" data-dialog-close>Save Changes</button>
+        </div>
+    </div>
+</div>
+<div data-plugin-dialog id="delete-dialog">
+    <div data-dialog-backdrop></div>
+    <div data-dialog-panel>
+        <h2 data-dialog-title>Are you absolutely sure?</h2>
+        <p data-dialog-description>
+            This action cannot be undone. This document's data
+            will be permanently deleted.
+        </p>
+        <div class="d-flex gap-2 justify-content-end mt-3">
+            <button class="btn btn-outline-secondary" data-dialog-close>Cancel</button>
+            <button class="btn btn-danger" id="delete-btn" data-dialog-close>Yes, delete it!</button>
+        </div>
+    </div>
+</div>
 
 <!-- jQuery + Bootstrap 5 JS -->
 <script src="../vendor/jquery/jquery.min.js"></script>
@@ -878,12 +914,13 @@ body {
 <!-- Themestrap core (must come first; path relative to your install) -->
 <script src="../js/themestrap.js"></script>
 
-<!-- Plugin -->
+<!-- Plugins -->
+<script src="../js/components/themestrap.plugin.dialog.js"></script>
 <script src="../js/components/themestrap.plugin.commandmenu.js"></script>
 <script>
 $(function () {
 
-    /* Initialise the menus that carry their options in data-plugin-options.
+    /* Initialize the menus that carry their options in data-plugin-options.
        The main-cmd has none, so we init it separately below with recents. */
     $('[data-plugin-command-menu]:not(.manual)').not('#main-cmd').each(function () {
         const $this = $(this);
@@ -891,14 +928,29 @@ $(function () {
         $this.themestrapPluginCommandMenu(opts);
     });
 
+    $('#rename-input').val($('#doc-title').text());
+
     /* The main menu uses recents — pass that option explicitly */
     $('#main-cmd').themestrapPluginCommandMenu({
         recent: true,
         recentLimit: 4,
     });
-    const main = $('#main-cmd').data('__pluginCommandMenu');
 
-    /* Event log ─────────────────────────────────────────────*/
+    $('#rename-dialog').themestrapPluginDialog({
+        animationIn : 'fadeInUp',
+        animationOut: 'fadeOutDown'
+    });
+
+    $('#delete-dialog').themestrapPluginDialog({
+        animationIn : 'fadeInUp',
+        animationOut: 'fadeOutDown'
+    });
+    
+    const main = $('#main-cmd').data('__pluginCommandMenu');
+    const renameDlg = $('#rename-dialog').data('__pluginDialog');
+    const deleteDlg = $('#delete-dialog').data('__pluginDialog');
+
+    /* Event log */
     const $log = $('#event-log');
     let logCount = 0;
 
@@ -944,7 +996,7 @@ $(function () {
         logCount = 0;
     });
 
-    /* Action callbacks ──────────────────────────────────────*/
+    /* Action callbacks */
 
     /* Main menu — nav + action + help. The select event is already logged
        by the global handler above, so these callbacks can be no-ops in the
@@ -980,16 +1032,22 @@ $(function () {
         refreshDocStatus();
     });
     actions.registerAction('rename', () => {
-        const next = prompt('New document name:', $('#doc-title').text());
-        if (next) $('#doc-title').text(next);
+        // const next = prompt('New document name:', $('#doc-title').text());
+        renameDlg.open();
+        $('#rename-save').on('click', () => {
+            $('#doc-title').text($('#rename-input').val());
+            renameDlg.close();
+        });
     });
     actions.registerAction('delete', () => {
-        if (confirm('Delete the document? This is just a demo — nothing is actually deleted.')) {
+        deleteDlg.open();
+        $('#delete-btn').on('click', () => {
             $('#doc-title').text('(deleted)');
             docStatus = 'deleted';
             starred = false;
             refreshDocStatus();
-        }
+            deleteDlg.close();
+        });
     });
 
     /* Theme switcher */
