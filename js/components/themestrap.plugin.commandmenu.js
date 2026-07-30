@@ -149,17 +149,17 @@
 
             /* Dark variant */
             html.dark .command-menu, .command-menu.command-dark {
-                --command-bg: var(--dark-300, #0a0c0d);
-                --command-fg: var(--grey, #969696);
-                --command-muted: var(--dark--300, #383f45);
-                --command-border: var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
-                --command-border-strong: var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
-                --command-hover: var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-                --command-active-bg: var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-                --command-active-fg: var(--light, #fff);
-                --command-backdrop: var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
-                --command-shadow: 0 24px 56px -12px rgba(0, 0, 0, 0.6),
-                                  0 4px 12px -4px rgba(0, 0, 0, 0.4);
+                --command-bg:             var(--dark-300, #0a0c0d);
+                --command-fg:             var(--grey, #969696);
+                --command-muted:          var(--dark--300, #383f45);
+                --command-border:         var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
+                --command-border-strong:  var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
+                --command-hover:          var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --command-active-bg:      var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --command-active-fg:      var(--light, #fff);
+                --command-backdrop:       var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
+                --command-shadow:         0 24px 56px -12px rgba(0, 0, 0, 0.6),
+                                          0 4px 12px -4px rgba(0, 0, 0, 0.4);
             }
 
             /* Root container */
