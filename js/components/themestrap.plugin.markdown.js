@@ -654,9 +654,12 @@
         }
 
         setOptions(opts) {
-            this.options = $.extend(true, {}, PluginMarkdown.defaults, opts, {
+            const pluginOpts = themestrap.fn.getOptions(this.$el.data('plugin-options')) || {};
+
+            this.options = $.extend(true, {}, PluginMarkdown.defaults, pluginOpts, opts, {
                 wrapper: this.$el
             });
+            
             return this;
         }
 
