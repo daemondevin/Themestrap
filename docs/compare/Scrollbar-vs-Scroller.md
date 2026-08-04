@@ -4,30 +4,6 @@ Both plugins hide the browser's default scrollbar and replace it with a styled, 
 
 ---
 
-## Contents
-
-1. [One-line summary](#one-line-summary)
-2. [Lineage](#lineage)
-3. [Scrolling mechanism](#scrolling-mechanism)
-4. [DOM structure](#dom-structure)
-5. [CSS and theming](#css-and-theming)
-6. [Axes](#axes)
-7. [Animation and easing](#animation-and-easing)
-8. [Touch and momentum](#touch-and-momentum)
-9. [Keyboard support](#keyboard-support)
-10. [Auto-update strategy](#auto-update-strategy)
-11. [Public API comparison](#public-api-comparison)
-12. [scrollTo() targets](#scrollto-targets)
-13. [Callbacks and events](#callbacks-and-events)
-14. [Height handling](#height-handling)
-15. [Init and wiring](#init-and-wiring)
-16. [Instance data key and data attribute](#instance-data-key-and-data-attribute)
-17. [Destroy behavior](#destroy-behavior)
-18. [Feature matrix](#feature-matrix)
-19. [When to use which](#when-to-use-which)
-
----
-
 ## One-line summary
 
 | Plugin | What it does |
@@ -151,9 +127,9 @@ Six class names total versus ~16 for `PluginScrollbar`. No rail element, no butt
 
 | | `PluginScrollbar` | `PluginScroller` |
 |---|---|---|
-| Vertical (`y`) | [X] | [X] |
-| Horizontal (`x`) | [X] | [ ] |
-| Both simultaneously (`yx`) | [X] | [ ] |
+| Vertical (`y`) | ✓ | ✓ |
+| Horizontal (`x`) | ✓ | ✗ |
+| Both simultaneously (`yx`) | ✓ | ✗ |
 
 `PluginScroller` is **vertical only**. Its `.ts-scroller__content` div is configured with `overflow-y: auto; overflow-x: hidden`. There is no option to enable horizontal scrolling.
 
@@ -228,9 +204,9 @@ Both plugins use `ResizeObserver` to re-measure when the container's dimensions 
 
 | Observer | `PluginScrollbar` | `PluginScroller` |
 |---|---|---|
-| `ResizeObserver` on host box | [X] | [X] |
-| `ResizeObserver` on content container | [X] | [X] |
-| `MutationObserver` on content children | [ ] | [X] |
+| `ResizeObserver` on host box | ✓ | ✓ |
+| `ResizeObserver` on content container | ✓ | ✓ |
+| `MutationObserver` on content children | ✗ | ✓ |
 
 `PluginScroller` adds a `MutationObserver` that watches `childList`, `subtree`, and `characterData` mutations inside the viewport. This means appending elements, changing text, or toggling classes on children will automatically trigger a recalculation — no `update()` call required.
 
@@ -244,15 +220,15 @@ The one edge case both plugins share: **built while hidden**. A scroller initial
 
 | Method | `PluginScrollbar` | `PluginScroller` | Notes |
 |---|---|---|---|
-| `update()` | [X] | [X] | Re-measure and resize the thumb. |
-| `scrollTo(target, opts)` | [X] | [X] | Rich format differences — see below. |
-| `scrollTop(smooth)` | [ ] | [X] | Shortcut for `scrollTo('top')`. |
-| `scrollBottom(smooth)` | [ ] | [X] | Shortcut for `scrollTo('bottom')`. |
-| `stop()` | [X] | [ ] | Cancels the rAF animation mid-flight. No equivalent in `PluginScroller` (native scroll cannot be interrupted). |
-| `disable(reset)` | [X] | [ ] | Makes the scrollbar non-interactive; optionally resets position. |
-| `enable()` | [X] | [ ] | Re-activates after `disable()`. |
-| `setEnabled(state)` | [ ] | [X] | Toggle scrollbar rendering without tearing down the instance. Equivalent to `disable()`/`enable()` combined. |
-| `destroy()` | [X] | [X] | Tear down the instance and restore the DOM. |
+| `update()` | ✓ | ✓ | Re-measure and resize the thumb. |
+| `scrollTo(target, opts)` | ✓ | ✓ | Rich format differences — see below. |
+| `scrollTop(smooth)` | ✗ | ✓ | Shortcut for `scrollTo('top')`. |
+| `scrollBottom(smooth)` | ✗ | ✓ | Shortcut for `scrollTo('bottom')`. |
+| `stop()` | ✓ | ✗ | Cancels the rAF animation mid-flight. No equivalent in `PluginScroller` (native scroll cannot be interrupted). |
+| `disable(reset)` | ✓ | ✗ | Makes the scrollbar non-interactive; optionally resets position. |
+| `enable()` | ✓ | ✗ | Re-activates after `disable()`. |
+| `setEnabled(state)` | ✗ | ✓ | Toggle scrollbar rendering without tearing down the instance. Equivalent to `disable()`/`enable()` combined. |
+| `destroy()` | ✓ | ✓ | Tear down the instance and restore the DOM. |
 
 ### Why `PluginScrollbar` has `stop()` and `PluginScroller` does not
 
@@ -425,25 +401,25 @@ Because `jQuery.contents()` moves nodes without cloning them, **event handlers b
 
 | Feature | `PluginScrollbar` | `PluginScroller` |
 |---|---|---|
-| **Vertical axis** | [X] | [X] |
-| **Horizontal axis** | [X] | [ ] |
-| **Both axes (yx)** | [X] | [ ] |
-| **Custom easing / inertia** | [X] (rAF + polynomial) | [ ] (native smooth-scroll) |
-| **Snap scrolling** | [X] | [ ] |
-| **Touch momentum** | [X] (custom JS) | [X] (native iOS) |
-| **Scroll buttons on track** | [X] | [ ] |
-| **Keyboard handler** | [X] (custom JS) | [X] (native via tabindex) |
-| **stop() mid-animation** | [X] | [ ] |
-| **disable() / enable()** | [X] | via `setEnabled()` |
-| **Named callbacks** | [X] (5 hooks) | [ ] (listen on `$content`) |
-| **Pre-built themes** | [X] (26) | [ ] |
-| **CSS custom properties** | [ ] | [X] |
-| **Self-contained CSS** | [ ] (external file) | [X] (injected `<style>`) |
-| **MutationObserver** | [ ] | [X] |
-| **ResizeObserver** | [X] | [X] |
-| **`maxHeight` (grow-then-scroll)** | [ ] | [X] |
-| **Preserves child event handlers on destroy** | [ ] (innerHTML reset) | [X] (node move) |
-| **Accessibility (native focus / AT scroll)** | [!] (synthetic scroll) | [X] (native scroll) |
+| **Vertical axis** | ✓ | ✓ |
+| **Horizontal axis** | ✓ | ✗ |
+| **Both axes (yx)** | ✓ | ✗ |
+| **Custom easing / inertia** | ✓ (rAF + polynomial) | ✗ (native smooth-scroll) |
+| **Snap scrolling** | ✓ | ✗ |
+| **Touch momentum** | ✓ (custom JS) | ✓ (native iOS) |
+| **Scroll buttons on track** | ✓ | ✗ |
+| **Keyboard handler** | ✓ (custom JS) | ✓ (native via tabindex) |
+| **stop() mid-animation** | ✓ | ✗ |
+| **disable() / enable()** | ✓ | via `setEnabled()` |
+| **Named callbacks** | ✓ (5 hooks) | ✗ (listen on `$content`) |
+| **Pre-built themes** | ✓ (26) | ✗ |
+| **CSS custom properties** | ✗ | ✓ |
+| **Self-contained CSS** | ✗ (external file) | ✓ (injected `<style>`) |
+| **MutationObserver** | ✗ | ✓ |
+| **ResizeObserver** | ✓ | ✓ |
+| **`maxHeight` (grow-then-scroll)** | ✗ | ✓ |
+| **Preserves child event handlers on destroy** | ✗ (innerHTML reset) | ✓ (node move) |
+| **Accessibility (native focus / AT scroll)** | ! (synthetic scroll) | ✓ (native scroll) |
 
 ---
 
