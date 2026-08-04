@@ -4,29 +4,11 @@ A self-contained Themestrap scrollbar plugin with zero vendor JS dependencies �
 
 ---
 
-## Contents
-
-1. [Overview](#overview)
-2. [Files](#files)
-3. [Load Order](#load-order)
-4. [init.js Wiring](#initjs-wiring)
-5. [HTML Auto-Init](#html-auto-init)
-6. [Programmatic Init](#programmatic-init)
-7. [Options Reference](#options-reference)
-8. [scrollTo() Targets](#scrollto-targets)
-9. [Public API](#public-api)
-10. [Callbacks](#callbacks)
-11. [Themes](#themes)
-12. [CSS Classes Reference](#css-classes-reference)
-13. [Browser Support](#browser-support)
-
----
-
 ## Overview
 
 ```
 Axes          y (vertical) · x (horizontal) · yx (both simultaneously)
-Themes        26 built-in, all pure CSS — no sprite sheet
+Themes        Built-in, all pure CSS — no sprite sheet
 Input         Mouse wheel · Pointer drag · Touch momentum · Keyboard
 Auto-update   ResizeObserver — no manual update() call needed for most cases
 Animation     5th-order polynomial easing curve matching the original malihu feel
@@ -370,14 +352,11 @@ Pass the theme name as the `theme` option.
 |---|---|---|---|
 | `light` | Semi-transparent black | White 75% | Default |
 | `light-2` | White 10% | White 75% | 4 px wide rail, 1 px radius |
-| `light-thick` | White 10% | White 75% | 6 px wide bar, 2 px radius |
-| `light-thin` | White 10% | White 75% | 2 px wide bar |
 | `light-3` | Black 20% | White 75% | 6 px rail, expands on drag |
-| `rounded` | White 15% | White 75% | 14 px pill-shaped thumb |
-| `rounded-dots` | Dot pattern (light) | White 75% | Transparent rail with PNG dot texture |
-| `3d` | Black 20% + inset shadow | #555 + gradient | 70 px fixed thumb, 8 px rail |
-| `3d-thick` | Container background | #555 + gradient | Rounded container, fills absolute |
 | `minimal` | Transparent | White 20% | No rail, 50 px thumb |
+| `thin` | White 10% | White 75% | 2 px wide bar |
+| `thick` | White 10% | White 75% | 6 px wide bar, 2 px radius |
+| `rounded` | White 15% | White 75% | 14 px pill-shaped thumb |
 | `inset` | Black 20% | Black 75% | 12 px rail, inset 6 px bar |
 | `inset-2` | Outlined (1 px border) | Black 75% | Border-only rail |
 | `inset-3` | White 60% | Black 75% | Solid light rail, dark bar |
@@ -387,10 +366,9 @@ Pass the theme name as the `theme` option.
 Each light theme has a `*-dark` counterpart that inverts the colour palette from white-on-dark to black-on-light. The full list:
 
 ```
-dark           dark-2         dark-thick     dark-thin      dark-3
-rounded-dark   rounded-dots-dark
-3d-dark        3d-thick-dark
-minimal-dark
+dark           dark-2          dark-3
+thick-dark     thin-dark    
+minimal-dark   rounded-dark   
 inset-dark     inset-2-dark   inset-3-dark
 ```
 
@@ -443,12 +421,12 @@ These classes are added to the DOM by the plugin. You can hook into them for add
 
 | Browser | Status | Notes |
 |---|---|---|
-| Chrome / Edge 80+ | ✅ Full | Pointer events, ResizeObserver, `wheel` event all present |
-| Firefox 75+ | ✅ Full | Same |
-| Safari 14+ | ✅ Full | ResizeObserver available since Safari 13.1 |
-| iOS Safari 14+ | ✅ Full | Touch momentum uses `touchstart`/`touchmove`/`touchend` |
-| Safari 13 | ⚠️ Partial | ResizeObserver available but `setPointerCapture` may behave differently — dragger drag still works via `mousemove` fallback |
-| IE 11 | ❌ Not supported | No ResizeObserver, no `const`/`class`/template literals |
+| Chrome / Edge 80+ | Full | Pointer events, ResizeObserver, `wheel` event all present |
+| Firefox 75+ | Full | Same |
+| Safari 14+ | Full | ResizeObserver available since Safari 13.1 |
+| iOS Safari 14+ | Full | Touch momentum uses `touchstart`/`touchmove`/`touchend` |
+| Safari 13 | Partial | ResizeObserver available but `setPointerCapture` may behave differently — dragger drag still works via `mousemove` fallback |
+| IE 11 | Not supported | No ResizeObserver, no `const`/`class`/template literals |
 
 > [!NOTE]  
 > **ResizeObserver fallback.**  
