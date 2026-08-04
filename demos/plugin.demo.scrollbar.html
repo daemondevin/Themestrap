@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PluginScrollbar — Themestrap Demo</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <style>
+    :root {
+      --bg:        #12161c;
+      --bg-panel:  #191d26;
+      --bg-card:   #1f2535;
+      --bg-code:   #0d1117;
+      --border:    #28303f;
+      --text:      #c8d0dc;
+      --muted:     #7d8fa3;
+      --faint:     #3d4d60;
+      --accent:    #4a8fd4;
+      --accent-bg: rgba(74,143,212,.12);
+      --accent-bd: rgba(74,143,212,.28);
+      --green:     #3ab885;
+      --red:       #d95757;
+      --yellow:    #e0a030;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    a { color: var(--accent); }
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 11.5px;
+      background: var(--bg-card);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+
+    /* Nav */
+    .t-nav {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 11px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    .t-nav-brand {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: .02em;
+    }
+    .t-nav-brand em { color: var(--accent); font-style: normal; }
+    .t-nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 2px;
+    }
+    .t-nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12.5px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      transition: color .15s, background .15s;
+    }
+    .t-nav-links a:hover { color: var(--text); background: var(--bg-card); }
+    .t-nav-pill {
+      margin-left: auto;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-bd);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* Hero */
+    .t-hero {
+      background: radial-gradient(ellipse at 50% 0%, #1a2236 0%, var(--bg) 70%);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 28px 52px;
+      text-align: center;
+    }
+    .t-hero h1 {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -.025em;
+      margin: 0 0 10px;
+      color: #fff;
+    }
+    .t-hero h1 em { color: var(--accent); font-style: normal; }
+    .t-hero p {
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 26px;
+      font-size: 14.5px;
+    }
+    .t-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+    .t-badge {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 3px 11px;
+      border-radius: 20px;
+    }
+
+    /* Sections */
+    .t-section {
+      padding: 52px 28px;
+      border-bottom: 1px solid var(--border);
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .t-section:last-of-type { border-bottom: none; }
+    .t-section-eyebrow {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 5px;
+    }
+    .t-section-title {
+      font-size: 21px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 7px;
+      letter-spacing: -.01em;
+    }
+    .t-section-desc {
+      color: var(--muted);
+      max-width: 580px;
+      margin: 0 0 28px;
+    }
+
+    /* Cards */
+    .t-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      height: 100%;
+    }
+    .t-card-head {
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .t-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      margin: 0;
+    }
+    .t-card-tag {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--muted);
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .t-card-body { padding: 16px; }
+
+    /* Scroll panels */
+    .sp {
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-panel);
+    }
+    .sp-body {
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.75;
+    }
+    .sp-body h5 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    .sp-body p { margin: 0 0 10px; }
+    .sp-body p:last-child { margin: 0; }
+    .sp-item {
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .sp-item:last-child { border-bottom: none; }
+    .sp-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    /* Code blocks */
+    .t-code {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 13px 16px;
+      font-size: 11.5px;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      line-height: 1.7;
+      color: #8fa8c0;
+      overflow-x: auto;
+    }
+    .t-code .kw  { color: #c792ea; }
+    .t-code .str { color: #7ec87e; }
+    .t-code .cm  { color: #445566; }
+    .t-code .nm  { color: #f6a87a; }
+    .t-code .fn  { color: #82aaff; }
+
+    /* Wide content (horizontal demo) */
+    .wide-row {
+      display: flex;
+      gap: 10px;
+      padding: 12px;
+      min-width: 860px;
+    }
+    .wide-card {
+      flex-shrink: 0;
+      width: 150px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .wide-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      background: var(--accent-bg);
+      border: 1px solid var(--accent-bd);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .wide-label { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .wide-sub   { font-size: 11px; color: var(--muted); }
+
+    /* yx grid */
+    .yx-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 120px);
+      grid-template-rows: repeat(5, 60px);
+      gap: 8px;
+      padding: 12px;
+      min-width: 800px;
+    }
+    .yx-cell {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--faint);
+    }
+
+    /* Theme grid */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 10px;
+    }
+    .theme-tile {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .theme-tile:hover { border-color: var(--accent); }
+    .theme-tile-wrap { padding: 10px; }
+    .theme-tile-label {
+      padding: 7px 10px;
+      font-size: 11.5px;
+      font-family: monospace;
+      font-weight: 600;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Feature caption */
+    .t-caption {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 12px;
+      line-height: 1.6;
+    }
+
+    /* API buttons */
+    .api-group-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 8px;
+    }
+    .api-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ab {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 13px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: 'Cascadia Code', monospace;
+    }
+    .ab:hover { background: var(--bg-card); color: var(--text); border-color: #3a4a5e; }
+    .ab.blue  { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-bd); }
+    .ab.blue:hover  { background: rgba(74,143,212,.22); }
+    .ab.red   { background: rgba(217,87,87,.1); color: var(--red); border-color: rgba(217,87,87,.25); }
+    .ab.red:hover   { background: rgba(217,87,87,.18); }
+    .ab.green { background: rgba(58,184,133,.1); color: var(--green); border-color: rgba(58,184,133,.25); }
+    .ab.green:hover { background: rgba(58,184,133,.18); }
+
+    /* Callback log */
+    .cb-log {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 11.5px;
+      font-family: monospace;
+      color: var(--muted);
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 1px;
+    }
+    .cb-log .e  { color: var(--text); }
+    .cb-log .v  { color: var(--accent); }
+    .cb-log .ok { color: var(--green); }
+    .cb-log .wr { color: var(--yellow); }
+
+    /* Status */
+    .status-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .status-dot.off { background: var(--red); }
+
+    /* Snap rows */
+    .snap-row {
+      height: 58px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+    .snap-row:last-child { border-bottom: none; }
+    .snap-row strong { color: var(--accent); margin-right: 6px; font-size: 10px; }
+
+    @media (max-width: 767px) {
+      .t-nav-links, .t-nav-pill { display: none; }
+      .t-hero h1 { font-size: 24px; }
+      .t-section { padding: 36px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="t-nav">
+  <a class="t-nav-brand" href="#">Plugin<em>Scrollbar</em></a>
+  <ul class="t-nav-links">
+    <li><a href="#axes">Axes</a></li>
+    <li><a href="#themes">Themes</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="#callbacks">Callbacks</a></li>
+  </ul>
+  <span class="t-nav-pill">Themestrap</span>
+</nav>
+
+<header class="t-hero">
+  <h1>Plugin<em>Scrollbar</em></h1>
+  <p>A fully self-contained Themestrap scrollbar. No vendor JS dependencies — wheel, pointer, touch, and keyboard all built in from scratch.</p>
+  <div class="t-badges">
+    <span class="t-badge">Zero JS Deps</span>
+    <span class="t-badge">Mouse · Touch · Keyboard</span>
+    <span class="t-badge">Themes</span>
+    <span class="t-badge">Y · X · YX Axes</span>
+    <span class="t-badge">ResizeObserver</span>
+    <span class="t-badge">Momentum Scrolling</span>
+    <span class="t-badge">MIT License</span>
+  </div>
+</header>
+
+<section class="t-section" id="axes">
+  <div class="t-section-eyebrow">axis: 'y' | 'x' | 'yx'</div>
+  <h2 class="t-section-title">Scroll Axes</h2>
+  <p class="t-section-desc">Vertical, horizontal, or simultaneous dual-axis scrolling. Configure with the <code>axis</code> option or inline via <code>data-plugin-options</code>.</p>
+
+  <div class="row g-4">
+
+    <!-- Vertical -->
+    <div class="col-md-4">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Vertical</span>
+          <span class="t-card-tag">axis: 'y'</span>
+        </div>
+        <div class="t-card-body">
+          <div class="sp"
+               id="demo-v"
+               data-plugin-scrollbar
+               data-plugin-options='{"axis":"y","theme":"light","scrollInertia":650}'
+               style="height:230px;">
+            <div class="sp-body">
+              <div class="sp-item" id="vp-1">
+                <div class="sp-num">01</div>
+                <p>Drag the thumb, spin the wheel, swipe on touch, or press ↑ ↓ Page Up Page Down Home End. All input methods are handled natively without a mousewheel polyfill.</p>
+              </div>
+              <div class="sp-item" id="vp-2">
+                <div class="sp-num">02</div>
+                <p>The thumb automatically sizes to reflect the content-to-viewport ratio. <code>autoDraggerLength: false</code> locks it at the CSS minimum height instead.</p>
+              </div>
+              <div class="sp-item" id="vp-3">
+                <div class="sp-num">03</div>
+                <p>ResizeObserver re-measures whenever the box or content changes size — no manual <code>update()</code> call needed for most dynamic content.</p>
+              </div>
+              <div class="sp-item" id="vp-4">
+                <div class="sp-num">04</div>
+                <p>Touch scrolling uses a rolling 100 ms velocity window to project momentum, giving a natural flick-and-coast feeling on mobile devices.</p>
+              </div>
+              <div class="sp-item" id="vp-5">
+                <div class="sp-num">05</div>
+                <p>Animation uses a 5th-order polynomial easing curve that matches the feel of the original malihu plugin exactly.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Horizontal -->
+    <div class="col-md-4">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Horizontal</span>
+          <span class="t-card-tag">axis: 'x'</span>
+        </div>
+        <div class="t-card-body">
+          <div class="sp"
+               id="demo-h"
+               data-plugin-scrollbar
+               data-plugin-options='{"axis":"x","theme":"dark","scrollInertia":650}'
+               style="height:196px;">
+            <div class="wide-row">
+              <div class="wide-card"><div class="wide-icon">📊</div><div class="wide-label">Analytics</div><div class="wide-sub">Track metrics</div></div>
+              <div class="wide-card"><div class="wide-icon">🔧</div><div class="wide-label">Config</div><div class="wide-sub">Manage settings</div></div>
+              <div class="wide-card"><div class="wide-icon">📁</div><div class="wide-label">Files</div><div class="wide-sub">Browse assets</div></div>
+              <div class="wide-card"><div class="wide-icon">🔔</div><div class="wide-label">Alerts</div><div class="wide-sub">View notices</div></div>
+              <div class="wide-card"><div class="wide-icon">👤</div><div class="wide-label">Users</div><div class="wide-sub">Manage accounts</div></div>
+              <div class="wide-card"><div class="wide-icon">💬</div><div class="wide-label">Messages</div><div class="wide-sub">View inbox</div></div>
+              <div class="wide-card"><div class="wide-icon">⚡</div><div class="wide-label">Jobs</div><div class="wide-sub">Background tasks</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Both axes (yx) -->
+    <div class="col-md-4">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Both Axes</span>
+          <span class="t-card-tag">axis: 'yx'</span>
+        </div>
+        <div class="t-card-body">
+          <div class="sp"
+               id="demo-yx"
+               data-plugin-scrollbar
+               data-plugin-options='{"axis":"yx","theme":"rounded","scrollInertia":650}'
+               style="height:196px;">
+            <div class="yx-grid">
+              <div class="yx-cell">A1</div><div class="yx-cell">B1</div><div class="yx-cell">C1</div><div class="yx-cell">D1</div><div class="yx-cell">E1</div><div class="yx-cell">F1</div>
+              <div class="yx-cell">A2</div><div class="yx-cell">B2</div><div class="yx-cell">C2</div><div class="yx-cell">D2</div><div class="yx-cell">E2</div><div class="yx-cell">F2</div>
+              <div class="yx-cell">A3</div><div class="yx-cell">B3</div><div class="yx-cell">C3</div><div class="yx-cell">D3</div><div class="yx-cell">E3</div><div class="yx-cell">F3</div>
+              <div class="yx-cell">A4</div><div class="yx-cell">B4</div><div class="yx-cell">C4</div><div class="yx-cell">D4</div><div class="yx-cell">E4</div><div class="yx-cell">F4</div>
+              <div class="yx-cell">A5</div><div class="yx-cell">B5</div><div class="yx-cell">C5</div><div class="yx-cell">D5</div><div class="yx-cell">E5</div><div class="yx-cell">F5</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="t-section" id="themes">
+  <div class="t-section-eyebrow">theme: '...'</div>
+  <h2 class="t-section-title">Built-in Themes</h2>
+  <p class="t-section-desc">20+themes, all pure CSS. Scroll button arrows are drawn with CSS borders — no sprite sheet or PNG needed. Pass the name string to the <code>theme</code> option.</p>
+  <div class="theme-grid" id="theme-grid"><!-- populated by JS --></div>
+</section>
+
+
+<section class="t-section" id="features">
+  <div class="t-section-eyebrow">options</div>
+  <h2 class="t-section-title">Feature Options</h2>
+  <p class="t-section-desc">Six of the most-used configuration options demonstrated live, each on its own independently-configured panel.</p>
+
+  <div class="row g-4">
+
+    <!-- Auto-hide -->
+    <div class="col-lg-4 col-md-6">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Auto-Hide</span>
+          <span class="t-card-tag">autoHideScrollbar: true</span>
+        </div>
+        <div class="t-card-body">
+          <p class="t-caption">Hover over the panel — the scrollbar fades in. It fades out 400 ms after you stop scrolling.</p>
+          <div class="sp"
+               id="demo-autohide"
+               data-plugin-scrollbar
+               data-plugin-options='{"theme":"dark","autoHideScrollbar":true,"scrollInertia":700}'
+               style="height:188px;">
+            <div class="sp-body">
+              <p><strong style="color:var(--text)">Hover here.</strong> The scrollbar fades in on activity via a CSS <code>transition: opacity 0.2s ease-in-out</code> and fades out after the idle delay.</p>
+              <p>JS handles both scroll activity <em>and</em> hover state so the auto-hide works correctly alongside the CSS cascade.</p>
+              <p>Mouse, touch, and keyboard input all trigger the show state independently of one another.</p>
+              <p>Setting <code>alwaysShowScrollbar: 1</code> alongside <code>autoHideScrollbar: true</code> — <code>alwaysShowScrollbar</code> wins.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll buttons -->
+    <div class="col-lg-4 col-md-6">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Scroll Buttons</span>
+          <span class="t-card-tag">scrollButtons.enable: true</span>
+        </div>
+        <div class="t-card-body">
+          <p class="t-caption">Arrow buttons on the track scroll by <code>scrollAmount</code> px per click. Hold for continuous scrolling.</p>
+          <div class="sp"
+               id="demo-buttons"
+               data-plugin-scrollbar
+               data-plugin-options='{"theme":"dark-2","scrollButtons":{"enable":true,"scrollAmount":35},"scrollInertia":300}'
+               style="height:188px;">
+            <div class="sp-body">
+              <p>Click the <strong style="color:var(--text)">▲ ▼</strong> arrows on the track to scroll 35 px at a time. Hold for continuous firing.</p>
+              <p>Arrows are drawn with pure CSS borders — no sprite sheet or image file is required. Dark-theme arrow colour is detected automatically via the <code>[class*="dark"]</code> selector.</p>
+              <p>Rail-click page-jumps (clicking the track above or below the thumb) are active at the same time as button scrolling.</p>
+              <p>Configure the step size with <code>scrollButtons.scrollAmount</code> in pixels.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Always visible -->
+    <div class="col-lg-4 col-md-6">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Always Visible</span>
+          <span class="t-card-tag">alwaysShowScrollbar: 1</span>
+        </div>
+        <div class="t-card-body">
+          <p class="t-caption">The track and thumb stay visible even when content fits entirely in the viewport — useful for fixed sidebars.</p>
+          <div class="sp"
+               id="demo-always"
+               data-plugin-scrollbar
+               data-plugin-options='{"theme":"3d","alwaysShowScrollbar":1,"scrollInertia":800}'
+               style="height:188px;">
+            <div class="sp-body">
+              <p><code>alwaysShowScrollbar: 1</code> keeps both track and thumb permanently visible regardless of overflow state.</p>
+              <p>Use <code>alwaysShowScrollbar: 2</code> to keep the track but hide the thumb when content doesn't overflow — a visual affordance without implying scrollability.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Snap -->
+    <div class="col-lg-4 col-md-6">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Snap Scrolling</span>
+          <span class="t-card-tag">snapAmount: 60</span>
+        </div>
+        <div class="t-card-body">
+          <p class="t-caption">Every scroll action rounds to the nearest 60 px boundary. The panel snaps cleanly between each row.</p>
+          <div class="sp"
+               id="demo-snap"
+               data-plugin-scrollbar
+               data-plugin-options='{"theme":"rounded-dark","snapAmount":60,"scrollInertia":450}'
+               style="height:188px;">
+            <div class="snap-row"><strong>01</strong> Snap grid boundary — 0 px</div>
+            <div class="snap-row"><strong>02</strong> Snap grid boundary — 60 px</div>
+            <div class="snap-row"><strong>03</strong> Snap grid boundary — 120 px</div>
+            <div class="snap-row"><strong>04</strong> Snap grid boundary — 180 px</div>
+            <div class="snap-row"><strong>05</strong> Snap grid boundary — 240 px</div>
+            <div class="snap-row"><strong>06</strong> Snap grid boundary — 300 px</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No inertia -->
+    <div class="col-lg-4 col-md-6">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Instant Jump</span>
+          <span class="t-card-tag">scrollInertia: 0</span>
+        </div>
+        <div class="t-card-body">
+          <p class="t-caption">Setting <code>scrollInertia</code> to <code>0</code> disables easing entirely — scroll position changes snap immediately with no animation.</p>
+          <div class="sp"
+               id="demo-noinertia"
+               data-plugin-scrollbar
+               data-plugin-options='{"theme":"minimal-dark","scrollInertia":0}'
+               style="height:188px;">
+            <div class="sp-body">
+              <p>Each wheel notch, keypress, or dragger drag maps directly to the final position with zero animation latency. Useful inside canvas dashboards or code editors where the easing feels like lag.</p>
+              <p>Touch momentum still applies a 200 ms minimum animation for flick gestures, since the momentum physics are separate from the config duration.</p>
+              <p>Track-click page-jumps also jump instantly rather than easing into place.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Outside position -->
+    <div class="col-lg-4 col-md-6">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Outside Position</span>
+          <span class="t-card-tag">scrollbarPosition: 'outside'</span>
+        </div>
+        <div class="t-card-body">
+          <p class="t-caption">The track renders outside the element, leaving the full content width. Parent must allow <code>overflow: visible</code>.</p>
+          <div style="padding-right: 22px;">
+            <div class="sp"
+                 id="demo-outside"
+                 data-plugin-scrollbar
+                 data-plugin-options='{"theme":"thin","scrollbarPosition":"outside","scrollInertia":650}'
+                 style="height:188px;">
+              <div class="sp-body">
+                <p>In <code>outside</code> mode the track sits outside the element's bounds, so the content area loses no width. The plugin sets <code>overflow: visible</code> on the element automatically.</p>
+                <p>Ideal for bordered panels where an interior scrollbar would overlap the border or trim the content column.</p>
+                <p>Make sure the wrapping layout has enough clearance — the track is 16 px wide and positioned 26 px from the element's right edge when in outside mode.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="t-section" id="api">
+  <div class="t-section-eyebrow">public api</div>
+  <h2 class="t-section-title">Programmatic Control</h2>
+  <p class="t-section-desc">All public methods return <code>this</code> for chaining. Retrieve an instance with <code>$el.data('__scrollbar')</code>.</p>
+
+  <div class="row g-4">
+
+    <div class="col-lg-6">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Demo Panel</span>
+          <span class="t-card-tag" id="api-status-tag"><span class="status-dot"></span>active</span>
+        </div>
+        <div class="t-card-body">
+          <div class="sp"
+               id="demo-api"
+               data-plugin-scrollbar
+               data-plugin-options='{"theme":"dark","scrollInertia":750,"alwaysShowScrollbar":1}'
+               style="height:280px;">
+            <div class="sp-body">
+              <div class="sp-item" id="api-1">
+                <div class="sp-num">Anchor — #api-1</div>
+                <p>First item. Click <em>top</em> to jump here from anywhere.</p>
+              </div>
+              <div class="sp-item" id="api-2">
+                <div class="sp-num">Anchor — #api-2</div>
+                <p>Second item. Use <em>#api-2</em> button to target by CSS selector.</p>
+              </div>
+              <div class="sp-item" id="api-3">
+                <div class="sp-num">Anchor — #api-3</div>
+                <p>Third item. The <em>50%</em> button lands roughly here depending on total height.</p>
+              </div>
+              <div class="sp-item" id="api-4">
+                <div class="sp-num">Anchor — #api-4</div>
+                <p>Fourth item. Add content below and then click <em>update()</em> — the scrollbar extends without reinitialising.</p>
+              </div>
+              <div class="sp-item" id="api-5">
+                <div class="sp-num">Anchor — #api-5</div>
+                <p>Fifth item. Click <em>bottom</em> to reach here. Click <em>&minus;=120</em> to scroll 120 px back up from the current position.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="t-card h-100">
+        <div class="t-card-head">
+          <span class="t-card-title">Controls</span>
+        </div>
+        <div class="t-card-body d-flex flex-column gap-4">
+
+          <div>
+            <div class="api-group-label">scrollTo( target )</div>
+            <div class="api-btns">
+              <button class="ab blue" onclick="apisb.scrollTo('top')">top</button>
+              <button class="ab blue" onclick="apisb.scrollTo('bottom')">bottom</button>
+              <button class="ab blue" onclick="apisb.scrollTo('50%')">50%</button>
+              <button class="ab blue" onclick="apisb.scrollTo('+=120')">+=120</button>
+              <button class="ab blue" onclick="apisb.scrollTo('-=120')">&minus;=120</button>
+              <button class="ab blue" onclick="apisb.scrollTo('#api-2')">#api-2</button>
+              <button class="ab blue" onclick="apisb.scrollTo('#api-4')">#api-4</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="api-group-label">stop() · disable() · enable()</div>
+            <div class="api-btns">
+              <button class="ab" onclick="apisb.stop()">stop()</button>
+              <button class="ab red" id="btn-dis" onclick="doDisable()">disable()</button>
+              <button class="ab green" id="btn-en" onclick="doEnable()" style="display:none">enable()</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="api-group-label">update() — dynamic content</div>
+            <div class="api-btns">
+              <button class="ab" onclick="addItem()">+ Add item</button>
+              <button class="ab" onclick="removeItem()">− Remove item</button>
+              <button class="ab green" onclick="apisb.update()">update()</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="api-group-label">destroy() · re-init</div>
+            <div class="api-btns">
+              <button class="ab red" onclick="doDestroy()">destroy()</button>
+              <button class="ab" id="btn-reinit" onclick="doReinit()" style="display:none">Re-init</button>
+            </div>
+          </div>
+
+          <pre class="t-code">
+<span class="cm">// Retrieve instance and call methods:</span>
+<span class="kw">const</span> sb = $(<span class="str">'#demo-api'</span>).data(<span class="str">'__scrollbar'</span>);<br>
+sb.scrollTo(<span class="str">'bottom'</span>);
+sb.scrollTo(<span class="str">'#api-3'</span>);
+sb.scrollTo(<span class="nm">200</span>);
+sb.scrollTo(<span class="str">'+=120'</span>);
+sb.scrollTo([<span class="nm">0</span>, <span class="nm">100</span>]); <span class="cm">// [y, x] for yx axis</span>
+sb.stop();
+sb.update();
+sb.disable(<span class="kw">false</span>);
+sb.enable();
+sb.destroy();
+          </pre>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="t-section" id="callbacks">
+  <div class="t-section-eyebrow">callbacks</div>
+  <h2 class="t-section-title">Lifecycle Callbacks</h2>
+  <p class="t-section-desc">Five hooks fire at key scroll events. Each receives a data object: <code>{ scrollY, scrollX, maxScrollY, maxScrollX, pctY, pctX }</code>.</p>
+ 
+  <div class="row g-4">
+ 
+    <div class="col-lg-5">
+      <div class="t-card">
+        <div class="t-card-head">
+          <span class="t-card-title">Live Log</span>
+        </div>
+        <div class="t-card-body d-flex flex-column gap-3">
+          <p class="t-caption" style="margin:0">Scroll the panel below to see callbacks fire in real time.</p>
+          <div class="sp"
+               id="demo-cb"
+               style="height:196px;">
+            <div class="sp-body">
+              <p>Scroll this panel — watch the log update. <code>whileScrolling</code> fires every animation frame; <code>onScroll</code> fires once when it settles.</p>
+              <p><code>onTotalScroll</code> fires at the very bottom. <code>onTotalScrollBack</code> fires when you return to the top. Both support an offset in pixels.</p>
+              <p>All five callbacks receive the same data object so you can build a progress bar, lazy-loader, or sticky header using any single callback.</p>
+              <p>Callbacks are set programmatically on init — they are not supported through <code>data-plugin-options</code>.</p>
+            </div>
+          </div>
+          <div class="cb-log" id="cblog">
+            <div style="color:var(--faint)">// scroll the panel above ↑</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="col-lg-7">
+      <div class="t-card h-100">
+        <div class="t-card-head">
+          <span class="t-card-title">Configuration Example</span>
+        </div>
+        <div class="t-card-body">
+          <pre class="t-code">
+<span class="cm">// Programmatic init — callbacks go in the config object:</span>
+$(<span class="str">'#myPanel'</span>).themestrapPluginScrollbar({
+  theme: <span class="str">'dark'</span>,
+  scrollInertia: <span class="nm">700</span>,
+  callbacks: {
+ 
+    <span class="cm">// Fires once when scroll animation begins</span>
+    <span class="fn">onScrollStart</span>: <span class="kw">function</span>(data) {
+      console.log(<span class="str">'start — at'</span>, data.pctY + <span class="str">'%'</span>);
+    },
+ 
+    <span class="cm">// Fires every rAF frame — use sparingly</span>
+    <span class="fn">whileScrolling</span>: <span class="kw">function</span>(data) {
+      $(<span class="str">'#progress'</span>).css(<span class="str">'width'</span>, data.pctY + <span class="str">'%'</span>);
+    },
+ 
+    <span class="cm">// Fires once when the animation settles</span>
+    <span class="fn">onScroll</span>: <span class="kw">function</span>(data) {
+      console.log(<span class="str">'settled at'</span>, data.scrollY + <span class="str">'px'</span>);
+    },
+ 
+    <span class="cm">// Fires when scroll reaches (or passes) the bottom</span>
+    <span class="fn">onTotalScroll</span>: <span class="kw">function</span>() {
+      loadNextPage(); <span class="cm">// infinite scroll hook</span>
+    },
+ 
+    <span class="cm">// How many px from the bottom counts as "at bottom"</span>
+    onTotalScrollOffset: <span class="nm">80</span>,
+ 
+    <span class="cm">// Fires when scroll returns to (or passes) the top</span>
+    <span class="fn">onTotalScrollBack</span>: <span class="kw">function</span>() {
+      showBackToTop(<span class="kw">false</span>);
+    },
+ 
+    onTotalScrollBackOffset: <span class="nm">0</span>,
+  }
+});
+</pre>
+        </div>
+      </div>
+    </div>
+ 
+  </div>
+</section>
+ 
+<!-- Footer -->
+<footer style="padding:32px 28px;text-align:center;border-top:1px solid var(--border);">
+  <p style="color:var(--faint);font-size:12px;margin:0;">PluginScrollbar · Themestrap Component · Zero vendor JS dependencies · MIT License</p>
+</footer>
+
+<!-- Scripts -->
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.scrollbar.js"></script>
+
+<script>
+$(function () {
+
+    /* Auto-init data-plugin-scrollbar elements */
+    $('[data-plugin-scrollbar]').each(function () {
+        var $el  = $(this);
+        var opts = themestrap.fn.getOptions($el.data('plugin-options')) || {};
+        $el.themestrapPluginScrollbar(opts);
+    });
+
+    /* Callback demo */
+    var $log = $('#cblog');
+
+    function cblog(html) {
+        $log.find('.while-line').remove(); // clear live line
+        $log.append('<div>' + html + '</div>');
+        while ($log.children().length > 5) $log.children().first().remove();
+    }
+
+    $('#demo-cb').themestrapPluginScrollbar({
+        theme: 'dark',
+        scrollInertia: 700,
+        alwaysShowScrollbar: 1,
+        callbacks: {
+            onScrollStart: function (d) {
+                cblog('<span class="e">onScrollStart</span> — from <span class="v">' + d.pctY + '%</span>');
+            },
+            whileScrolling: function (d) {
+                $log.find('.while-line').remove();
+                $log.append('<div class="while-line">whileScrolling — <span class="v">' + d.scrollY.toFixed(0) + 'px</span> / <span class="v">' + d.pctY + '%</span></div>');
+                while ($log.children().length > 5) $log.children().first().remove();
+            },
+            onScroll: function (d) {
+                cblog('<span class="e">onScroll</span> — settled <span class="v">' + d.scrollY.toFixed(0) + 'px</span> (<span class="v">' + d.pctY + '%</span>)');
+            },
+            onTotalScroll: function () {
+                cblog('<span class="ok">onTotalScroll</span> — reached bottom ↓');
+            },
+            onTotalScrollBack: function () {
+                cblog('<span class="wr">onTotalScrollBack</span> — back at top ↑');
+            }
+        }
+    });
+
+    /* Theme grid */
+    var THEMES = [
+        { name: 'light',             bg: '#181c25' },
+        { name: 'dark',              bg: '#efefef' },
+        { name: 'light-2',           bg: '#181c25' },
+        { name: 'dark-2',            bg: '#efefef' },
+        { name: 'light-3',           bg: '#181c25' },
+        { name: 'dark-3',            bg: '#efefef' },
+        { name: 'minimal',           bg: '#181c25' },
+        { name: 'minimal-dark',      bg: '#dde3e8' },
+        { name: 'thin',              bg: '#181c25' },
+        { name: 'thin-dark',         bg: '#efefef' },
+        { name: 'thick',             bg: '#181c25' },
+        { name: 'thick-dark',        bg: '#efefef' },
+        { name: 'rounded',           bg: '#181c25' },
+        { name: 'rounded-dark',      bg: '#efefef' },
+        { name: 'inset',             bg: '#181c25' },
+        { name: 'inset-dark',        bg: '#efefef' },
+        { name: 'inset-2',           bg: '#181c25' },
+        { name: 'inset-2-dark',      bg: '#efefef' },
+        { name: 'inset-3',           bg: '#f0f0f0' },
+        { name: 'inset-3-dark',      bg: '#181c25' },
+    ];
+
+    var LIPSUM = 'Custom scrollbar preview. Drag the thumb or scroll the mouse wheel to interact. Each theme changes only colours and proportions — the DOM structure is identical across all 26 variants.';
+
+    THEMES.forEach(function (t) {
+        var id = 'th-' + t.name.replace(/[^a-z0-9]/g, '-');
+        $('#theme-grid').append(
+            '<div class="theme-tile">' +
+                '<div class="theme-tile-wrap" style="background:' + t.bg + '">' +
+                    '<div id="' + id + '" style="height:96px;font-size:12px;color:#888;">' +
+                        '<div style="padding:8px 10px;line-height:1.6">' + LIPSUM + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="theme-tile-label">' + t.name + '</div>' +
+            '</div>'
+        );
+        $('#' + id).themestrapPluginScrollbar({ theme: t.name, scrollInertia: 450 });
+    });
+
+    /* API */
+    window.apisb    = $('#demo-api').data('__scrollbar');
+    var addedCount  = 0;
+    var apiDestroyed = false;
+
+    window.addItem = function () {
+        addedCount++;
+        var $inner = $('#demo-api .ts-scrollbox-container .sp-body');
+        $inner.append(
+            '<div class="sp-item"><div class="sp-num">Added — #' + addedCount + '</div>' +
+            '<p>Dynamically added item ' + addedCount + '. Call <strong>update()</strong> to recalculate the scrollbar height.</p></div>'
+        );
+    };
+
+    window.removeItem = function () {
+        var $last = $('#demo-api .ts-scrollbox-container .sp-body .sp-item').last();
+        if ($last.length) { $last.remove(); if (addedCount > 0) addedCount--; }
+    };
+
+    window.doDisable = function () {
+        apisb.disable();
+        $('#btn-dis').hide(); $('#btn-en').show();
+        $('#api-status-tag').html('<span class="status-dot off"></span>disabled');
+    };
+
+    window.doEnable = function () {
+        apisb.enable();
+        $('#btn-en').hide(); $('#btn-dis').show();
+        $('#api-status-tag').html('<span class="status-dot"></span>active');
+    };
+
+    window.doDestroy = function () {
+        if (apiDestroyed) return;
+        apisb.destroy();
+        apiDestroyed = true;
+        $('#btn-dis, #btn-en').hide();
+        $('#btn-reinit').show();
+        $('#api-status-tag').html('<span class="status-dot off"></span>destroyed');
+    };
+
+    window.doReinit = function () {
+        if (!apiDestroyed) return;
+        $('#demo-api').themestrapPluginScrollbar({ theme: 'dark', scrollInertia: 750, alwaysShowScrollbar: 1 });
+        window.apisb = $('#demo-api').data('__scrollbar');
+        apiDestroyed = false;
+        $('#btn-reinit').hide(); $('#btn-dis').show();
+        $('#api-status-tag').html('<span class="status-dot"></span>active');
+    };
+
+});
+</script>
+</body>
+</html>
