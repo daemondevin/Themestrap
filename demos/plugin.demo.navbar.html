@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../css/skins/default.css">
 
 <style>
 :root {
@@ -55,7 +56,7 @@ code {
 /* Cards */
 .demo-card {
     background: #fff; border: 1px solid var(--ts-border); border-radius: 14px;
-    box-shadow: 0 6px 24px rgba(10,25,41,.05); margin-bottom: 28px; overflow: hidden;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05); margin-bottom: 28px;
 }
 .demo-card .card-body { padding: 20px 24px 24px; }
 .demo-section-label {
@@ -119,7 +120,7 @@ pre.snip .c1 { color: #6c8bab; font-style: italic; }
   <div class="container">
     <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
     <h1 class="mt-3">PluginNavbar Live Demo</h1>
-    <p class="lead">A secondary navigation that connects a series of related pages — modelled on Red Hat's Design System "Navigation (secondary)" element, rebuilt in the Themestrap color scheme. The current page carries a warm-orange accent border, dropdowns reveal sub-pages, external links open in a new tab, and the bar pins to the top on scroll. Everything below runs live.</p>
+    <p class="lead">A secondary navigation that connects a series of related pages. The current page carries a warm-orange accent border, dropdowns reveal sub-pages, external links open in a new tab, and the bar pins to the top on scroll. Everything below runs live.</p>
   </div>
 </div>
 
@@ -178,13 +179,17 @@ pre.snip .c1 { color: #6c8bab; font-style: italic; }
         <div class="card-body">
           <p class="demo-section-label">palette: dark</p>
           <h3>Dark secondary navigation</h3>
-          <p class="lead-sm">The navy surface variant for dark page themes or hero sections. The accent border and CTA keep the warm-orange Themestrap accent.</p>
+          <p class="lead-sm">The variant for dark page themes or hero sections. The accent border and CTA keep the warm-orange Themestrap accent.</p>
         </div>
-        <nav class="ts-navbar manual" data-demo-navbar data-plugin-options='{"palette":"dark","sticky":false}' aria-label="Platform secondary">
+        <nav class="ts-navbar" data-demo-navbar data-plugin-options='{"palette":"dark","sticky":true}' aria-label="MyPlatform">
           <div class="ts-navbar__container">
-            <a href="#platform" class="ts-navbar__logo">Atlas Platform</a>
+            <a href="#platform" class="ts-navbar__logo">MyPlatform</a>
             <button class="ts-navbar__toggle" type="button" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="ts-navbar__toggle-icon" aria-hidden="true"><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span><span class="ts-navbar__toggle-bar"></span></span>
+              <span class="ts-navbar__toggle-icon" aria-hidden="true">
+                <span class="ts-navbar__toggle-bar"></span>
+                <span class="ts-navbar__toggle-bar"></span>
+                <span class="ts-navbar__toggle-bar"></span>
+              </span>
             </button>
             <div class="ts-navbar__collapse">
               <ul class="ts-navbar__nav">

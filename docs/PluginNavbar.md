@@ -105,7 +105,7 @@ All styles are self-contained and injected once into a `<style id="ts-navbar-sty
 
 ---
 
-## BEM Class **Reference**
+## Class **Reference**
 
 | Class | Element |
 |---|---|

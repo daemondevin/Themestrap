@@ -2,7 +2,7 @@
     const instanceName = '__toast';
 
     // Container registry
-    // — one container div per position, lazily created.
+    // one container div per position, lazily created.
     const containers = {};
 
     function getContainer(position) {
@@ -30,7 +30,7 @@
         return $c;
     }
 
-    // Icon map — Bootstrap icon SVG paths keyed by toast type.
+    // Icon map
     const typeIcons = {
         success: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" stroke="#0088cc"></path><path d="M9 12l2 2l4 -4" stroke="#777"></path></g></svg>`,
         danger:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" stroke="#0088cc"></path><path d="M12 8v4" stroke="#777"></path><path d="M12 16h.01" stroke="#777"></path></g></svg>`,
@@ -135,7 +135,7 @@
                 delay:    o.delay,
             });
 
-            // Progress bar animation — shrinks width over `delay` ms.
+            // Progress bar animation, shrinks width over `delay` ms.
             if (o.autohide && o.progress) {
                 const $bar = $toast.find('.toast-progress-bar');
                 // Reset then animate on next tick so the transition fires.
@@ -149,7 +149,7 @@
             if (o.autohide && o.progress) {
                 $toast.on('mouseenter', () => {
                     $toast.find('.toast-progress-bar').css('transition', 'none');
-                    bsToast._clearTimeout?.();  // Bootstrap internal — gracefully no-ops if absent.
+                    bsToast._clearTimeout?.();  
                 }).on('mouseleave', () => {
                     bsToast.show();             // Re-arms the autohide timer.
                 });
@@ -190,8 +190,8 @@
             return this;
         }
 
-        // Fire-and-forget: PluginToast.show({ title: '…', body: '…', type: 'success' })
-        // No element needed — mounts to a detached anchor appended to body.
+        // Fire-and-forget: PluginToast.show({ title: '', body: '', type: 'success' })
+        // No element needed, mounts to a detached anchor appended to body.
         static show(opts) {
             const $anchor = $('<div />').appendTo('body').hide();
             return new PluginToast($anchor, opts);

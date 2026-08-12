@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PluginMenubar — Themestrap Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<style>
+:root {
+    --navy:       #0a1929;
+    --navy-alt:   #0e2238;
+    --orange:     #e8672a;
+    --orange-d:   #d2541b;
+    --teal:       #2ab8c8;
+    --cream:      #f5f0e8;
+    --ff-display: 'Fraunces', Georgia, serif;
+    --ff-ui:      'Syne', system-ui, sans-serif;
+    --ff-body:    'DM Sans', system-ui, sans-serif;
+    --ff-code:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: #f8f9fb;
+    font-family: var(--ff-body);
+    font-size: 15px;
+    color: #1a1a2e;
+}
+
+.demo-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 0 40px;
+    border-bottom: 3px solid var(--orange);
+}
+.demo-header-eyebrow {
+    font-family: var(--ff-code);
+    font-size: .72rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 10px;
+}
+.demo-header h1 {
+    font-family: var(--ff-display);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    margin: 0 0 10px;
+    line-height: 1.1;
+}
+.demo-header p {
+    color: rgba(255,255,255,.65);
+    max-width: 560px;
+    margin: 0;
+    font-size: .95rem;
+    line-height: 1.6;
+}
+
+.demo-body { padding: 56px 0 80px; }
+
+.demo-card {
+    background: #fff;
+    border: 1px solid #e5e9f0;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+.demo-card-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid #f0f2f7;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.demo-card-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--teal);
+    font-family: var(--ff-code);
+    font-size: .65rem;
+    font-weight: 700;
+    color: var(--teal);
+    flex-shrink: 0;
+}
+.demo-card-title {
+    font-family: var(--ff-ui);
+    font-size: .9rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    color: var(--navy);
+    margin: 0;
+    flex: 1;
+}
+.demo-card-tag {
+    font-family: var(--ff-code);
+    font-size: .65rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-left: auto;
+}
+.demo-card-tag.orange { background: #fff3ee; color: var(--orange-d); }
+.demo-card-tag.teal   { background: #e7fafa; color: #0e8f9e; }
+.demo-card-tag.blue   { background: #eef2ff; color: #4f46e5; }
+
+.demo-stage {
+    padding: 36px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    background: repeating-linear-gradient(
+        45deg, transparent, transparent 10px,
+        rgba(0,0,0,.018) 10px, rgba(0,0,0,.018) 20px
+    );
+    min-height: 140px;
+}
+
+.demo-stage.center {
+    justify-content: center;
+    align-items: center;
+}
+
+.demo-section-label {
+    font-family: var(--ff-code);
+    font-size: .67rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 0 24px;
+    margin-bottom: 8px;
+    margin-top: 20px;
+}
+pre.snip {
+    margin: 0 24px 24px;
+    padding: 16px 18px;
+    background: var(--navy);
+    border-radius: 8px;
+    font-family: var(--ff-code);
+    font-size: .78rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #cdd9f0;
+}
+pre.snip .hl-kw  { color: #7dd3fc; }
+pre.snip .hl-str { color: #86efac; }
+pre.snip .hl-cmt { color: #64748b; font-style: italic; }
+pre.snip .hl-fn  { color: #f0abfc; }
+pre.snip .hl-val { color: #fca5a5; }
+pre.snip .hl-attr{ color: #fcd34d; }
+pre.snip .hl-tag { color: #93c5fd; }
+
+.demo-log {
+    margin: 0 24px 24px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: var(--ff-code);
+    font-size: .75rem;
+    min-height: 52px;
+    max-height: 120px;
+    overflow-y: auto;
+    color: #475569;
+    line-height: 1.7;
+}
+.demo-log .log-entry { display: block; }
+.demo-log .ts  { color: #94a3b8; margin-right: 6px; }
+.demo-log .ev  { color: var(--teal); }
+.demo-log .val { color: var(--orange); }
+
+/* App frame mock */
+.app-frame {
+    background: #fff;
+    border: 1px solid #dde3ef;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.07);
+}
+.app-frame-bar {
+    background: #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.app-frame-dots { display: flex; gap: 6px; }
+.app-frame-dot  {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+}
+.app-frame-dot.red    { background: #ff5f57; }
+.app-frame-dot.yellow { background: #febc2e; }
+.app-frame-dot.green  { background: #28c840; }
+.app-frame-title {
+    font-family: var(--ff-ui);
+    font-size: .72rem;
+    color: #9ca3af;
+    font-weight: 600;
+    letter-spacing: .03em;
+    flex: 1;
+    text-align: center;
+}
+.app-frame-menubar-row {
+    background: #f9fafb;
+    border-bottom: 1px solid #ebeef5;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+}
+.app-frame-body {
+    padding: 20px 24px;
+    height: 140px;
+    font-family: var(--ff-code);
+    font-size: .8rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Option table */
+.option-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .82rem;
+    margin: 0 0 24px;
+}
+.option-table th {
+    font-family: var(--ff-ui);
+    font-size: .72rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 600;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 2px solid #e8edf5;
+}
+.option-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #f0f4f9;
+    vertical-align: top;
+    color: #374151;
+}
+.option-table code {
+    font-family: var(--ff-code);
+    font-size: .78rem;
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #4f46e5;
+}
+
+.kbd-demo {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--ff-code);
+    font-size: .75rem;
+}
+.kbd-demo kbd {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: .72rem;
+    color: #475569;
+    font-family: var(--ff-code);
+}
+footer.demo-foot { padding: 40px 0 60px; text-align: center; color: var(--ts-muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="container">
+    <div class="demo-header-eyebrow">Themestrap · Component</div>
+    <h1>PluginMenubar</h1>
+    <p>An accessible menubar with checkbox items, radio groups, nested sub-menus, and complete keyboard navigation — all driven by data attributes.</p>
+  </div>
+</header>
+
+<main class="demo-body">
+<div class="container">
+
+  <!-- Card 1: App Menubar -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="demo-card-num">1</span>
+      <h2 class="demo-card-title">App Menubar</h2>
+      <span class="demo-card-tag blue">all features</span>
+    </div>
+
+    <div class="demo-stage center">
+      <div class="app-frame">
+        <div class="app-frame-bar">
+          <div class="app-frame-dots">
+            <div class="app-frame-dot red"></div>
+            <div class="app-frame-dot yellow"></div>
+            <div class="app-frame-dot green"></div>
+          </div>
+          <div class="app-frame-title">Document Editor</div>
+        </div>
+
+        <div class="app-frame-menubar-row">
+          <div id="mb-app" data-plugin-menubar>
+
+            <div data-menubar-menu>
+              <button data-menubar-trigger>File</button>
+              <div data-menubar-content>
+                <button data-menubar-item data-menubar-shortcut="⌘N">
+                  <span data-menubar-item-icon>+</span>
+                  <span data-menubar-item-label>New Window</span>
+                </button>
+                <button data-menubar-item data-menubar-shortcut="⌘O">
+                  <span data-menubar-item-icon>📂</span>
+                  <span data-menubar-item-label>Open…</span>
+                </button>
+                <button data-menubar-item data-menubar-shortcut="⌘S">
+                  <span data-menubar-item-icon>💾</span>
+                  <span data-menubar-item-label>Save</span>
+                </button>
+                <button data-menubar-item data-menubar-disabled="true" data-menubar-shortcut="⇧⌘S">
+                  <span data-menubar-item-icon>📋</span>
+                  <span data-menubar-item-label>Save As…</span>
+                </button>
+                <hr data-menubar-separator>
+                <div data-menubar-sub>
+                  <button data-menubar-item data-menubar-sub-trigger>
+                    <span data-menubar-item-icon>🔗</span>
+                    <span data-menubar-item-label>Share</span>
+                  </button>
+                  <div data-menubar-sub-content>
+                    <button data-menubar-item>Copy Link</button>
+                    <button data-menubar-item>Email…</button>
+                    <hr data-menubar-separator>
+                    <button data-menubar-item>Export PDF</button>
+                  </div>
+                </div>
+                <hr data-menubar-separator>
+                <button data-menubar-item data-menubar-shortcut="⌘Q">
+                  <span data-menubar-item-label>Quit</span>
+                </button>
+              </div>
+            </div>
+
+            <div data-menubar-menu>
+              <button data-menubar-trigger>Edit</button>
+              <div data-menubar-content>
+                <button data-menubar-item data-menubar-shortcut="⌘Z">
+                  <span data-menubar-item-label>Undo</span>
+                </button>
+                <button data-menubar-item data-menubar-shortcut="⇧⌘Z">
+                  <span data-menubar-item-label>Redo</span>
+                </button>
+                <hr data-menubar-separator>
+                <button data-menubar-item data-menubar-shortcut="⌘X">
+                  <span data-menubar-item-label>Cut</span>
+                </button>
+                <button data-menubar-item data-menubar-shortcut="⌘C">
+                  <span data-menubar-item-label>Copy</span>
+                </button>
+                <button data-menubar-item data-menubar-shortcut="⌘V">
+                  <span data-menubar-item-label>Paste</span>
+                </button>
+                <hr data-menubar-separator>
+                <button data-menubar-item data-menubar-shortcut="⌘F">
+                  <span data-menubar-item-label>Find…</span>
+                </button>
+              </div>
+            </div>
+
+            <div data-menubar-menu>
+              <button data-menubar-trigger>View</button>
+              <div data-menubar-content>
+                <div data-menubar-label>Panel</div>
+                <div data-menubar-radio-group>
+                  <button data-menubar-item data-menubar-type="radio"
+                          data-menubar-value="top" data-menubar-checked="true">
+                    <span data-menubar-indicator>●</span>
+                    <span data-menubar-item-label>Top</span>
+                  </button>
+                  <button data-menubar-item data-menubar-type="radio"
+                          data-menubar-value="right">
+                    <span data-menubar-indicator>●</span>
+                    <span data-menubar-item-label>Right</span>
+                  </button>
+                  <button data-menubar-item data-menubar-type="radio"
+                          data-menubar-value="bottom">
+                    <span data-menubar-indicator>●</span>
+                    <span data-menubar-item-label>Bottom</span>
+                  </button>
+                </div>
+                <hr data-menubar-separator>
+                <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true">
+                  <span data-menubar-indicator>✓</span>
+                  <span data-menubar-item-label>Status Bar</span>
+                </button>
+                <button data-menubar-item data-menubar-type="checkbox">
+                  <span data-menubar-indicator>✓</span>
+                  <span data-menubar-item-label>Activity Bar</span>
+                </button>
+              </div>
+            </div>
+
+            <div data-menubar-menu>
+              <button data-menubar-trigger>Preferences</button>
+              <div data-menubar-content>
+                <button data-menubar-item data-menubar-shortcut="⌘,">
+                  <span data-menubar-item-label>Settings</span>
+                </button>
+                <button data-menubar-item>
+                  <span data-menubar-item-label>Extensions</span>
+                </button>
+                <hr data-menubar-separator>
+                <div data-menubar-label>Theme</div>
+                <div data-menubar-radio-group>
+                  <button data-menubar-item data-menubar-type="radio"
+                          data-menubar-value="light" data-menubar-checked="true">
+                    <span data-menubar-indicator>●</span>
+                    <span data-menubar-item-label>Light</span>
+                  </button>
+                  <button data-menubar-item data-menubar-type="radio"
+                          data-menubar-value="dark">
+                    <span data-menubar-indicator>●</span>
+                    <span data-menubar-item-label>Dark</span>
+                  </button>
+                  <button data-menubar-item data-menubar-type="radio"
+                          data-menubar-value="system">
+                    <span data-menubar-indicator>●</span>
+                    <span data-menubar-item-label>System</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="app-frame-body">
+          <span>👆</span> Click a menu above to open it, then hover to traverse
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section-label">HTML</div>
+    <pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-menubar</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-menubar-menu</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-trigger</span><span class="hl-tag">&gt;</span>File<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-menubar-content</span><span class="hl-tag">&gt;</span>
+      <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-item</span> <span class="hl-attr">data-menubar-shortcut</span>=<span class="hl-str">"⌘N"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-menubar-item-icon</span><span class="hl-tag">&gt;</span>+<span class="hl-tag">&lt;/span&gt;</span>
+        <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-menubar-item-label</span><span class="hl-tag">&gt;</span>New Window<span class="hl-tag">&lt;/span&gt;</span>
+      <span class="hl-tag">&lt;/button&gt;</span>
+      <span class="hl-tag">&lt;hr</span> <span class="hl-attr">data-menubar-separator</span><span class="hl-tag">&gt;</span>
+      <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-item</span> <span class="hl-attr">data-menubar-disabled</span>=<span class="hl-str">"true"</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;/div&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-section-label">Events</div>
+    <div class="demo-log" id="log-app">
+      <span class="log-entry"><span class="ts">—</span> Waiting for interaction…</span>
+    </div>
+  </div>
+
+
+  <!-- Card 2: Checkbox Items -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="demo-card-num">2</span>
+      <h2 class="demo-card-title">Checkbox Items</h2>
+      <span class="demo-card-tag orange">data-menubar-type="checkbox"</span>
+    </div>
+
+    <div class="demo-stage center">
+      <div data-plugin-menubar id="mb-checkbox">
+        <div data-menubar-menu>
+          <button data-menubar-trigger>Display</button>
+          <div data-menubar-content>
+            <div data-menubar-label>Interface</div>
+            <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true">
+              <span data-menubar-indicator>✓</span>
+              <span data-menubar-item-label>Show Toolbar</span>
+            </button>
+            <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true">
+              <span data-menubar-indicator>✓</span>
+              <span data-menubar-item-label>Show Status Bar</span>
+            </button>
+            <button data-menubar-item data-menubar-type="checkbox">
+              <span data-menubar-indicator>✓</span>
+              <span data-menubar-item-label>Show Sidebar</span>
+            </button>
+            <hr data-menubar-separator>
+            <button data-menubar-item data-menubar-type="checkbox">
+              <span data-menubar-indicator>✓</span>
+              <span data-menubar-item-label>Word Wrap</span>
+            </button>
+            <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true">
+              <span data-menubar-indicator>✓</span>
+              <span data-menubar-item-label>Line Numbers</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section-label">HTML — Checkbox item</div>
+    <pre class="snip"><span class="hl-cmt">&lt;!-- Toggle with data-menubar-checked="true" for initial on state --&gt;</span>
+<span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-item</span>
+        <span class="hl-attr">data-menubar-type</span>=<span class="hl-str">"checkbox"</span>
+        <span class="hl-attr">data-menubar-checked</span>=<span class="hl-str">"true"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-menubar-indicator</span><span class="hl-tag">&gt;</span>✓<span class="hl-tag">&lt;/span&gt;</span>
+  <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-menubar-item-label</span><span class="hl-tag">&gt;</span>Show Status Bar<span class="hl-tag">&lt;/span&gt;</span>
+<span class="hl-tag">&lt;/button&gt;</span>
+
+<span class="hl-cmt">// The plugin toggles aria-checked and .ts-mb-indicator-on automatically.</span>
+<span class="hl-cmt">// Read current state from the element:</span>
+$(<span class="hl-str">'[data-menubar-item][data-menubar-type="checkbox"]'</span>).attr(<span class="hl-str">'aria-checked'</span>); <span class="hl-cmt">// "true"|"false"</span></pre>
+
+    <div class="demo-section-label">Events</div>
+    <div class="demo-log" id="log-checkbox">
+      <span class="log-entry"><span class="ts">—</span> Waiting for interaction…</span>
+    </div>
+  </div>
+
+
+  <!-- Card 3: Radio Groups -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="demo-card-num">3</span>
+      <h2 class="demo-card-title">Radio Groups</h2>
+      <span class="demo-card-tag teal">data-menubar-type="radio"</span>
+    </div>
+
+    <div class="demo-stage center">
+      <div data-plugin-menubar id="mb-radio">
+        <div data-menubar-menu>
+          <button data-menubar-trigger>Format</button>
+          <div data-menubar-content>
+            <div data-menubar-label>Font Size</div>
+            <div data-menubar-radio-group>
+              <button data-menubar-item data-menubar-type="radio" data-menubar-value="sm">
+                <span data-menubar-indicator>●</span>
+                <span data-menubar-item-label>Small</span>
+              </button>
+              <button data-menubar-item data-menubar-type="radio" data-menubar-value="md" data-menubar-checked="true">
+                <span data-menubar-indicator>●</span>
+                <span data-menubar-item-label>Medium</span>
+              </button>
+              <button data-menubar-item data-menubar-type="radio" data-menubar-value="lg">
+                <span data-menubar-indicator>●</span>
+                <span data-menubar-item-label>Large</span>
+              </button>
+              <button data-menubar-item data-menubar-type="radio" data-menubar-value="xl">
+                <span data-menubar-indicator>●</span>
+                <span data-menubar-item-label>Extra Large</span>
+              </button>
+            </div>
+            <hr data-menubar-separator>
+            <div data-menubar-label>Alignment</div>
+            <div data-menubar-radio-group>
+              <button data-menubar-item data-menubar-type="radio" data-menubar-value="left" data-menubar-checked="true">
+                <span data-menubar-indicator>●</span>
+                <span data-menubar-item-label>Left</span>
+              </button>
+              <button data-menubar-item data-menubar-type="radio" data-menubar-value="center">
+                <span data-menubar-indicator>●</span>
+                <span data-menubar-item-label>Center</span>
+              </button>
+              <button data-menubar-item data-menubar-type="radio" data-menubar-value="right">
+                <span data-menubar-indicator>●</span>
+                <span data-menubar-item-label>Right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section-label">HTML — Radio group</div>
+    <pre class="snip"><span class="hl-cmt">&lt;!-- Wrap radio items in [data-menubar-radio-group] --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-menubar-radio-group</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-item</span>
+          <span class="hl-attr">data-menubar-type</span>=<span class="hl-str">"radio"</span>
+          <span class="hl-attr">data-menubar-value</span>=<span class="hl-str">"small"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-menubar-indicator</span><span class="hl-tag">&gt;</span>●<span class="hl-tag">&lt;/span&gt;</span>
+    <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-menubar-item-label</span><span class="hl-tag">&gt;</span>Small<span class="hl-tag">&lt;/span&gt;</span>
+  <span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-cmt">&lt;!-- ... more radio items --&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Read selected value from menubar:select event:</span>
+$(<span class="hl-str">'#my-menubar'</span>).on(<span class="hl-str">'menubar:select'</span>, <span class="hl-kw">function</span>(e) {
+  <span class="hl-kw">const</span> { type, value, label } = e.detail.payload;
+  <span class="hl-kw">if</span> (type === <span class="hl-str">'radio'</span>) console.<span class="hl-fn">log</span>(<span class="hl-str">'Selected:'</span>, value);
+});</pre>
+
+    <div class="demo-section-label">Events</div>
+    <div class="demo-log" id="log-radio">
+      <span class="log-entry"><span class="ts">—</span> Waiting for interaction…</span>
+    </div>
+  </div>
+
+
+  <!-- Card 4: Sub-menus -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="demo-card-num">4</span>
+      <h2 class="demo-card-title">Nested Sub-menus</h2>
+      <span class="demo-card-tag orange">data-menubar-sub</span>
+    </div>
+
+    <div class="demo-stage center">
+      <div data-plugin-menubar id="mb-sub">
+        <div data-menubar-menu>
+          <button data-menubar-trigger>Arrange</button>
+          <div data-menubar-content>
+            <button data-menubar-item>Bring to Front</button>
+            <button data-menubar-item>Send to Back</button>
+            <hr data-menubar-separator>
+            <div data-menubar-sub>
+              <button data-menubar-item data-menubar-sub-trigger>
+                <span data-menubar-item-label>Align Objects</span>
+              </button>
+              <div data-menubar-sub-content>
+                <button data-menubar-item>Align Left</button>
+                <button data-menubar-item>Align Center</button>
+                <button data-menubar-item>Align Right</button>
+                <hr data-menubar-separator>
+                <button data-menubar-item>Align Top</button>
+                <button data-menubar-item>Align Middle</button>
+                <button data-menubar-item>Align Bottom</button>
+              </div>
+            </div>
+            <div data-menubar-sub>
+              <button data-menubar-item data-menubar-sub-trigger>
+                <span data-menubar-item-label>Distribute</span>
+              </button>
+              <div data-menubar-sub-content>
+                <button data-menubar-item>Horizontal</button>
+                <button data-menubar-item>Vertical</button>
+              </div>
+            </div>
+            <hr data-menubar-separator>
+            <button data-menubar-item data-menubar-disabled="true">Lock</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section-label">HTML — Submenu</div>
+    <pre class="snip"><span class="hl-cmt">&lt;!-- Wrap sub-trigger + sub-content inside [data-menubar-sub] --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-menubar-sub</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-cmt">&lt;!-- This acts as both a menuitem and a sub-menu trigger --&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-item</span> <span class="hl-attr">data-menubar-sub-trigger</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;span</span> <span class="hl-attr">data-menubar-item-label</span><span class="hl-tag">&gt;</span>Align Objects<span class="hl-tag">&lt;/span&gt;</span>
+  <span class="hl-tag">&lt;/button&gt;</span>
+
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-menubar-sub-content</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-item</span><span class="hl-tag">&gt;</span>Align Left<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-menubar-item</span><span class="hl-tag">&gt;</span>Align Center<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Keyboard: ArrowRight / Enter opens sub; ArrowLeft / Esc closes it.</span></pre>
+
+    <div class="demo-section-label">Events</div>
+    <div class="demo-log" id="log-sub">
+      <span class="log-entry"><span class="ts">—</span> Waiting for interaction…</span>
+    </div>
+  </div>
+
+
+  <!-- Card 5: Options reference -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="demo-card-num">5</span>
+      <h2 class="demo-card-title">Options &amp; Keyboard Reference</h2>
+    </div>
+
+    <div style="padding: 0 24px;">
+      <p class="demo-section-label" style="padding:0;margin-top:20px;margin-bottom:8px;">Plugin options</p>
+      <table class="option-table">
+        <thead>
+          <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>subDelay</code></td><td><code>Number</code></td><td><code>200</code></td><td>ms before a hovered sub-menu trigger opens.</td></tr>
+          <tr><td><code>subCloseDelay</code></td><td><code>Number</code></td><td><code>120</code></td><td>ms hover-out grace period before sub-menu closes.</td></tr>
+          <tr><td><code>animationDuration</code></td><td><code>Number</code></td><td><code>150</code></td><td>Panel open/close animation duration in ms.</td></tr>
+          <tr><td><code>closeOnOutside</code></td><td><code>Boolean</code></td><td><code>true</code></td><td>Close active menu on outside click.</td></tr>
+          <tr><td><code>closeOnEscape</code></td><td><code>Boolean</code></td><td><code>true</code></td><td>Close active menu on Escape key.</td></tr>
+          <tr><td><code>loop</code></td><td><code>Boolean</code></td><td><code>true</code></td><td>Arrow key navigation wraps between first and last menus.</td></tr>
+          <tr><td><code>onOpen</code></td><td><code>Function</code></td><td><code>null</code></td><td>Callback <code>(menuIndex, instance)</code> fired when a menu opens.</td></tr>
+          <tr><td><code>onClose</code></td><td><code>Function</code></td><td><code>null</code></td><td>Callback <code>(menuIndex, instance)</code> fired when a menu closes.</td></tr>
+          <tr><td><code>onSelect</code></td><td><code>Function</code></td><td><code>null</code></td><td>Callback <code>($item, payload, instance)</code> on item activation.</td></tr>
+        </tbody>
+      </table>
+
+      <p class="demo-section-label" style="padding:0;margin-top:4px;margin-bottom:8px;">Keyboard navigation</p>
+      <table class="option-table" style="margin-bottom:28px;">
+        <thead>
+          <tr><th>Context</th><th>Key</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Trigger focused</td><td><span class="kbd-demo"><kbd>→</kbd></span></td><td>Move focus to next trigger (opens if hot).</td></tr>
+          <tr><td>Trigger focused</td><td><span class="kbd-demo"><kbd>←</kbd></span></td><td>Move focus to previous trigger (opens if hot).</td></tr>
+          <tr><td>Trigger focused</td><td><span class="kbd-demo"><kbd>↓</kbd> / <kbd>Enter</kbd> / <kbd>Space</kbd></span></td><td>Open menu, focus first item.</td></tr>
+          <tr><td>Trigger focused</td><td><span class="kbd-demo"><kbd>↑</kbd></span></td><td>Open menu, focus last item.</td></tr>
+          <tr><td>Menu open</td><td><span class="kbd-demo"><kbd>↑</kbd> <kbd>↓</kbd></span></td><td>Navigate items.</td></tr>
+          <tr><td>Menu open</td><td><span class="kbd-demo"><kbd>Home</kbd> / <kbd>End</kbd></span></td><td>Jump to first / last item.</td></tr>
+          <tr><td>Menu open</td><td><span class="kbd-demo"><kbd>→</kbd></span></td><td>Move to next menu (not on sub-trigger).</td></tr>
+          <tr><td>Menu open</td><td><span class="kbd-demo"><kbd>←</kbd></span></td><td>Move to previous menu (not inside sub).</td></tr>
+          <tr><td>Sub-trigger focused</td><td><span class="kbd-demo"><kbd>→</kbd> / <kbd>Enter</kbd></span></td><td>Open sub-menu, focus first sub-item.</td></tr>
+          <tr><td>Sub-menu open</td><td><span class="kbd-demo"><kbd>←</kbd> / <kbd>Esc</kbd></span></td><td>Close sub-menu, return focus to trigger.</td></tr>
+          <tr><td>Any</td><td><span class="kbd-demo"><kbd>Esc</kbd></span></td><td>Close menu, return focus to its trigger.</td></tr>
+          <tr><td>Any</td><td><span class="kbd-demo">Letter</span></td><td>Type-ahead: jump to matching item.</td></tr>
+        </tbody>
+      </table>
+
+      <p class="demo-section-label" style="padding:0;margin-top:4px;margin-bottom:8px;">CSS variables</p>
+      <table class="option-table" style="margin-bottom:28px;">
+        <thead>
+          <tr><th>Variable</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>--ts-mb-fg</code></td><td>Text colour for triggers and items.</td></tr>
+          <tr><td><code>--ts-mb-muted</code></td><td>Secondary text (icons, shortcuts, labels).</td></tr>
+          <tr><td><code>--ts-mb-hover-bg</code></td><td>Trigger hover / focus background.</td></tr>
+          <tr><td><code>--ts-mb-content-bg</code></td><td>Dropdown panel background.</td></tr>
+          <tr><td><code>--ts-mb-content-border</code></td><td>Dropdown border colour.</td></tr>
+          <tr><td><code>--ts-mb-content-shadow</code></td><td>Dropdown box-shadow.</td></tr>
+          <tr><td><code>--ts-mb-separator</code></td><td>Separator line colour.</td></tr>
+          <tr><td><code>--ts-mb-focus-ring</code></td><td>Trigger focus ring (outline) colour.</td></tr>
+          <tr><td><code>--ts-mb-radius</code></td><td>Trigger border-radius.</td></tr>
+          <tr><td><code>--ts-mb-content-radius</code></td><td>Dropdown border-radius.</td></tr>
+          <tr><td><code>--ts-mb-z</code></td><td>Dropdown z-index (default <code>1050</code>).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+    <footer class="demo-foot">
+    Themestrap &middot; PluginMenubar &middot; part of the Themestrap Component Library
+    </footer>
+</div>
+</main>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.menubar.js"></script>
+<script>
+$(function() {
+
+    function logTo(logId, ev, val) {
+        const $log = $('#' + logId);
+        const ts   = new Date().toLocaleTimeString('en-GB', { hour12: false });
+        const entry = $('<span class="log-entry">').html(
+            '<span class="ts">' + ts + '</span> ' +
+            '<span class="ev">' + ev + '</span>' +
+            (val != null ? ' → <span class="val">' + String(val) + '</span>' : '')
+        );
+        if ($log.find('.log-entry').first().text().includes('Waiting')) $log.empty();
+        $log.prepend(entry);
+    }
+
+    /* App menubar */
+    $('#mb-app').themestrapPluginMenubar({
+        onOpen:   function(idx)            { logTo('log-app', 'menubar:open',   idx); },
+        onClose:  function(idx)            { logTo('log-app', 'menubar:close',  idx); },
+        onSelect: function($item, payload) { logTo('log-app', 'menubar:select', payload.label + (payload.value ? ' → ' + payload.value : '')); }
+    });
+
+    /* Checkbox menubar */
+    $('#mb-checkbox').themestrapPluginMenubar({
+        onSelect: function($item, payload) {
+            if (payload.type === 'checkbox') {
+                logTo('log-checkbox', payload.label, payload.checked === 'true' ? 'ON' : 'OFF');
+            }
+        }
+    });
+
+    /* Radio menubar */
+    $('#mb-radio').themestrapPluginMenubar({
+        onSelect: function($item, payload) {
+            if (payload.type === 'radio') {
+                logTo('log-radio', payload.label, 'value=' + payload.value);
+            }
+        }
+    });
+
+    /* Sub-menu menubar */
+    $('#mb-sub').themestrapPluginMenubar({
+        onOpen:   function(idx)            { logTo('log-sub', 'menubar:open', idx); },
+        onSelect: function($item, payload) { logTo('log-sub', 'menubar:select', payload.label); }
+    });
+
+    /* Listen to native CustomEvents too */
+    document.getElementById('mb-app').addEventListener('menubar:select', function(e) {
+        /* Already handled via onSelect above */
+    });
+
+});
+</script>
+</body>
+</html>

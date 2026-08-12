@@ -16,59 +16,59 @@
     --ts-sidenav-easing:            cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Colours — override via CSS or data-plugin-options */
-    --ts-sidenav-bg:                var(--light);
-    --ts-sidenav-border-color:      var(--light--200);
-    --ts-sidenav-header-bg:         var(--light--100);
-    --ts-sidenav-footer-bg:         var(--light--300);
+    --ts-sidenav-bg:                var(--light, #ffffff);
+    --ts-sidenav-border-color:      var(--light--200, #ececec);
+    --ts-sidenav-header-bg:         var(--light--100, #ffffff);
+    --ts-sidenav-footer-bg:         var(--light--300, #ffffff);
 
-    --ts-sidenav-text:              var(--default);
-    --ts-sidenav-text-muted:        var(--muted);
-    --ts-sidenav-icon-color:        var(--grey);
-    --ts-sidenav-icon-active-color: var(--primary);
+    --ts-sidenav-text:              var(--default, #777);
+    --ts-sidenav-text-muted:        var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
+    --ts-sidenav-icon-color:        var(--grey, #969696);
+    --ts-sidenav-icon-active-color: var(--primary, #0088CC);
 
-    --ts-sidenav-item-hover-bg:     var(--light-rgba-10);
-    --ts-sidenav-item-active-bg:    var(--light-rgba-20);
-    --ts-sidenav-item-active-color: var(--primary);
-    --ts-sidenav-item-active-border:var(--primary);
+    --ts-sidenav-item-hover-bg:     var(--light-rgba-10, rgba(255, 255, 255, 0.1));
+    --ts-sidenav-item-active-bg:    var(--light-rgba-20, rgba(255, 255, 255, 0.2));
+    --ts-sidenav-item-active-color: var(--primary, #0088CC);
+    --ts-sidenav-item-active-border:var(--primary, #0088CC);
 
-    --ts-sidenav-group-title-color: #6b7280;
+    --ts-sidenav-group-title-color: var(--grey-1000, #757575);
     --ts-sidenav-sub-item-indent:   2.75rem;
 
-    --ts-sidenav-badge-bg:          #e5e7eb;
-    --ts-sidenav-badge-color:       #374151;
-    --ts-sidenav-badge-active-bg:   #dbeafe;
-    --ts-sidenav-badge-active-color:var(--primary);
+    --ts-sidenav-badge-bg:          var(--light-300, #e6e6e6);
+    --ts-sidenav-badge-color:       var(--dark-300, #383f45);
+    --ts-sidenav-badge-active-bg:   var(--grey-500, #dbdbdb);
+    --ts-sidenav-badge-active-color:var(--primary, #0088CC);
 
-    --ts-sidenav-toggle-color:      #6b7280;
-    --ts-sidenav-toggle-hover-bg:   #f3f4f6;
+    --ts-sidenav-toggle-color:      var(--grey-1000, #757575);
+    --ts-sidenav-toggle-hover-bg:   var(--light-100, #f2f2f2);
 }
 
 /* Dark variant */
 html.dark .ts-sidenav {
-    --ts-sidenav-bg:                var(--dark);
-    --ts-sidenav-border-color:      var(--dark--200);
-    --ts-sidenav-header-bg:         var(--dark--100);
-    --ts-sidenav-footer-bg:         var(--dark);
+    --ts-sidenav-bg:                var(--dark, #212529);
+    --ts-sidenav-border-color:      var(--dark--200, #32383e);
+    --ts-sidenav-header-bg:         var(--dark--100, #2c3237);
+    --ts-sidenav-footer-bg:         var(--dark, #212529);
 
-    --ts-sidenav-text:              var(--light);
-    --ts-sidenav-text-muted:        var(--light-rgba-20);
-    --ts-sidenav-icon-color:        var(--grey-700));
-    --ts-sidenav-icon-active-color: var(--grey-900);
+    --ts-sidenav-text:              var(--light, #ffffff);
+    --ts-sidenav-text-muted:        var(--light-rgba-20, rgba(255, 255, 255, 0.2));
+    --ts-sidenav-icon-color:        var(--grey-700, #c1c1c1);
+    --ts-sidenav-icon-active-color: var(--grey-900, #8e8e8e);
 
-    --ts-sidenav-item-hover-bg:     var(--dark-200);
-    --ts-sidenav-item-active-bg:    var(--dark-100);
-    --ts-sidenav-item-active-color: #93c5fd;
-    --ts-sidenav-item-active-border:#3b82f6;
+    --ts-sidenav-item-hover-bg:     var(--dark-200, #101214);
+    --ts-sidenav-item-active-bg:    var(--dark-100, #16181b);
+    --ts-sidenav-item-active-color: var(--primary, #0088CC);
+    --ts-sidenav-item-active-border:var(--primary, #0088CC);
 
-    --ts-sidenav-group-title-color: var(--dark--300);
+    --ts-sidenav-group-title-color: var(--dark--300, #383f45);
 
-    --ts-sidenav-badge-bg:          var(--dark--100);
-    --ts-sidenav-badge-color:       var(--light);
-    --ts-sidenav-badge-active-bg:   var(--primary-100);
-    --ts-sidenav-badge-active-color:var(--primary--200);
+    --ts-sidenav-badge-bg:          var(--dark--100, #2c3237);
+    --ts-sidenav-badge-color:       var(--light, #ffffff);
+    --ts-sidenav-badge-active-bg:   var(--primary-100, #0077b3);
+    --ts-sidenav-badge-active-color:var(--primary--200, #00a1f2);
 
-    --ts-sidenav-toggle-color:      var(--grey-200);
-    --ts-sidenav-toggle-hover-bg:   var(--dark-100);
+    --ts-sidenav-toggle-color:      var(--grey-200, #eaeaea);
+    --ts-sidenav-toggle-hover-bg:   var(--dark-100, #16181b);
 }
 
 /* Root */

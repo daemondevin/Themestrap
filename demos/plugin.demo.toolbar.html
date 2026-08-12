@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolbar Plugin — Demo | Themestrap-MODX</title>
+<link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../css/themestrap.css">
+<style>
+  :root {
+    --ts-navy:     #0a1929;
+    --ts-navy-2:   #0e2238;
+    --ts-orange:   #e8672a;
+    --ts-orange-2: #d2541b;
+    --ts-teal:     #2ab8c8;
+    --ts-cream:    #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: var(--ts-font-body);
+    background:  var(--ts-navy-2);
+    color:       #1a2332;
+    margin:      0;
+  }
+
+  .demo-header {
+    background:    var(--ts-navy);
+    color:         #fff;
+    padding:       2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+  }
+  .demo-header h1 {
+    font-family:    var(--ts-font-display);
+    font-size:      2rem;
+    font-weight:    700;
+    margin:         0 0 .25rem;
+    letter-spacing: -.02em;
+  }
+  .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+  .demo-header .badge-pill {
+    display:       inline-block;
+    background:    var(--ts-orange);
+    color:         #fff;
+    font-family:   var(--ts-font-mono);
+    font-size:     .7rem;
+    padding:       .2em .6em;
+    border-radius: 99px;
+    margin-left:   .5rem;
+    vertical-align: middle;
+  }
+  .demo-header .badge-nodep {
+    display:       inline-block;
+    background:    transparent;
+    color:         var(--ts-teal);
+    font-family:   var(--ts-font-mono);
+    font-size:     .7rem;
+    padding:       .2em .6em;
+    border-radius: 99px;
+    border:        1px solid var(--ts-teal);
+    margin-left:   .4rem;
+    vertical-align: middle;
+  }
+
+  .demo-nav {
+    background:    var(--ts-navy-2);
+    padding:       .6rem 2rem;
+    display:       flex;
+    gap:           1.25rem;
+    flex-wrap:     wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .demo-nav a {
+    color:       rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size:   .8rem;
+    font-family: var(--ts-font-mono);
+    transition:  color .15s;
+    white-space: nowrap;
+  }
+  .demo-nav a:hover  { color: var(--ts-teal); }
+  .demo-nav a.active { color: var(--ts-orange); }
+
+  .demo-body {
+    max-width: 980px;
+    margin:    0 auto;
+    padding:   2rem 1rem 5rem;
+  }
+
+  .demo-card {
+    background:    #fff;
+    border-radius: 10px;
+    box-shadow:    0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow:      hidden;
+  }
+  .demo-card-header {
+    background: var(--ts-navy);
+    color:      #fff;
+    padding:    .75rem 1.25rem;
+    display:    flex;
+    align-items: center;
+    gap:        .75rem;
+  }
+  .demo-card-header h2 {
+    font-family:    var(--ts-font-display);
+    font-size:      1rem;
+    font-weight:    600;
+    margin:         0;
+    letter-spacing: .02em;
+  }
+  .demo-card-header .card-num {
+    font-family:   var(--ts-font-mono);
+    font-size:     .75rem;
+    color:         var(--ts-teal);
+    border:        1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding:       .1em .45em;
+    flex-shrink:   0;
+  }
+  .demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size:   .65rem;
+    color:       rgba(255,255,255,.4);
+    margin-left: auto;
+  }
+
+  .demo-stage {
+    padding:       2.5rem 1.75rem;
+    background:    var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+    display:       flex;
+    align-items:   flex-start;
+    flex-wrap:     wrap;
+    gap:           1.25rem;
+  }
+  .demo-stage.dark-stage {
+    background: var(--ts-navy);
+  }
+  .demo-stage.demo-stage--table {
+    padding:        0;
+    display:        block;
+  }
+  .demo-stage.demo-stage--col {
+    flex-direction: column;
+    align-items:    flex-start;
+  }
+
+  pre.snip {
+    margin:      0;
+    padding:     1.1rem 1.5rem;
+    background:  #0d1b2a;
+    color:       #c9d1d9;
+    font-family: var(--ts-font-mono);
+    font-size:   .77rem;
+    line-height: 1.65;
+    overflow-x:  auto;
+    border-top:  1px solid rgba(255,255,255,.05);
+  }
+  pre.snip .hl-attr { color: #79c0ff; }
+  pre.snip .hl-val  { color: #a5d6a7; }
+  pre.snip .hl-tag  { color: #ff7b72; }
+  pre.snip .hl-cmt  { color: #6a737d; }
+  pre.snip .hl-kw   { color: #c792ea; }
+  pre.snip .hl-fn   { color: #82aaff; }
+  pre.snip .hl-str  { color: #c3e88d; }
+
+  .demo-log {
+    font-family:  var(--ts-font-mono);
+    font-size:    .77rem;
+    padding:      .65rem 1.5rem;
+    background:   #0d1b2a;
+    color:        #8b949e;
+    border-top:   1px solid rgba(255,255,255,.05);
+    min-height:   2.4rem;
+    display:      flex;
+    align-items:  center;
+    gap:          .5rem;
+    flex-wrap:    wrap;
+  }
+  .demo-log .log-entry { color: var(--ts-teal); }
+  .demo-log .log-warn  { color: var(--ts-orange); }
+
+  /* Stage helpers */
+  .stage-label {
+    font-family: var(--ts-font-mono);
+    font-size:   .72rem;
+    color:       #6b7280;
+    margin-bottom: .5rem;
+    display:     block;
+  }
+  .stage-row {
+    display:     flex;
+    align-items: flex-start;
+    gap:         1.5rem;
+    flex-wrap:   wrap;
+  }
+
+  /* Demo 5 — output box */
+  .output-box {
+    background:    #1a2332;
+    color:         #c9d1d9;
+    font-family:   var(--ts-font-mono);
+    font-size:     .8rem;
+    border-radius: 6px;
+    padding:       .85rem 1rem;
+    min-height:    3rem;
+    min-width:     260px;
+  }
+  .output-box span { color: var(--ts-teal); }
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="container">
+    <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Component</div>
+    <h1>PluginToolbar <span class="badge-pill">data-plugin-toolbar</span><span class="badge-nodep">no deps</span></h1>
+    <p>An accessible toolbar with roving-tabindex keyboard navigation, single and multiple toggle groups, separators, link items, RTL support, and full WAI-ARIA wiring — zero dependencies beyond jQuery.</p>
+  </div>
+</header>
+
+<nav class="demo-nav">
+  <a href="#demo1" class="active">Basic</a>
+  <a href="#demo2">Rich Text</a>
+  <a href="#demo3">Toggle Groups</a>
+  <a href="#demo4">Vertical</a>
+  <a href="#demo5">Dark</a>
+  <a href="#demo6">Disabled</a>
+  <a href="#demo7">Sizes</a>
+  <a href="#demo8">Programmatic</a>
+  <a href="#demo9">Options</a>
+</nav>
+
+<main>
+<div class="demo-body">
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 1 — Basic toolbar with buttons, separator, toggle group
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo1">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Basic Toolbar</h2>
+      <span class="card-tag">data-plugin-toolbar</span>
+    </div>
+
+    <div class="demo-stage">
+      <div data-plugin-toolbar aria-label="Document actions" id="tb-basic">
+
+        <button data-toolbar-button data-toolbar-value="new">New</button>
+        <button data-toolbar-button data-toolbar-value="open">Open</button>
+        <button data-toolbar-button data-toolbar-value="save">Save</button>
+
+        <div data-toolbar-separator role="separator"></div>
+
+        <div data-toolbar-toggle-group data-toolbar-type="multiple" data-toolbar-group-label="View options">
+          <button data-toolbar-toggle-item data-toolbar-value="rulers">Rulers</button>
+          <button data-toolbar-toggle-item data-toolbar-value="grid" data-toolbar-pressed="true">Grid</button>
+          <button data-toolbar-toggle-item data-toolbar-value="guides">Guides</button>
+        </div>
+
+        <div data-toolbar-separator role="separator"></div>
+
+        <a data-toolbar-link href="#" data-toolbar-value="help">Help</a>
+
+      </div>
+    </div>
+
+    <pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span> <span class="hl-attr">aria-label</span>=<span class="hl-str">"Document actions"</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-button</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"new"</span><span class="hl-tag">&gt;</span>New<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-button</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"save"</span><span class="hl-tag">&gt;</span>Save<span class="hl-tag">&lt;/button&gt;</span>
+
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-toolbar-separator</span><span class="hl-tag">&gt;&lt;/div&gt;</span>
+
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-toolbar-toggle-group</span> <span class="hl-attr">data-toolbar-type</span>=<span class="hl-str">"multiple"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"grid"</span> <span class="hl-attr">data-toolbar-pressed</span>=<span class="hl-str">"true"</span><span class="hl-tag">&gt;</span>Grid<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"guides"</span><span class="hl-tag">&gt;</span>Guides<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+
+  <span class="hl-tag">&lt;a</span> <span class="hl-attr">data-toolbar-link</span> <span class="hl-attr">href</span>=<span class="hl-str">"#"</span><span class="hl-tag">&gt;</span>Help<span class="hl-tag">&lt;/a&gt;</span>
+
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log1">
+      <span style="color:#8b949e;">Use ← → arrow keys to navigate · Tab exits the toolbar</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 2 — Rich text editor toolbar (SVG icon buttons)
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo2">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Rich Text Editor Toolbar</h2>
+      <span class="card-tag">SVG icons · multiple toggle groups</span>
+    </div>
+
+    <div class="demo-stage demo-stage--col">
+
+      <div data-plugin-toolbar aria-label="Text formatting" id="tb-rte">
+
+        <!-- Inline formatting — multiple -->
+        <div data-toolbar-toggle-group data-toolbar-type="multiple" data-toolbar-group-label="Inline formatting">
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="bold" title="Bold">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="italic" title="Italic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="underline" title="Underline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="strikethrough" title="Strikethrough">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.3 4.9c-2.3-.6-4.4-1-6.2-.9-2.7 0-5.3.7-5.3 3.6 0 1.5 1.8 3.3 6.2 3.6h.2m8.2 3.7c0 3.8-3.3 6.1-7.2 6.1-2.1 0-4.1-.5-5.8-1.4"/><line x1="4" y1="11.5" x2="20" y2="11.5"/></svg>
+          </button>
+        </div>
+
+        <div data-toolbar-separator role="separator"></div>
+
+        <!-- Alignment — single -->
+        <div data-toolbar-toggle-group data-toolbar-type="single" data-toolbar-group-label="Text alignment">
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="left" data-toolbar-pressed="true" title="Align left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="6" x2="3" y2="6"/><line x1="15" y1="12" x2="3" y2="12"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="center" title="Align center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="6" x2="3" y2="6"/><line x1="18" y1="12" x2="6" y2="12"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="right" title="Align right">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="12" x2="9" y2="12"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="justify" title="Justify">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="12" x2="3" y2="12"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div data-toolbar-separator role="separator"></div>
+
+        <!-- List type — single -->
+        <div data-toolbar-toggle-group data-toolbar-type="single" data-toolbar-group-label="List type">
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="bullet" title="Bullet list">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="numbered" title="Numbered list">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+          </button>
+        </div>
+
+        <div data-toolbar-separator role="separator"></div>
+
+        <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="link" title="Insert link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        </button>
+        <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="image" title="Insert image">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+
+      </div>
+
+      <!-- Simulated editor area -->
+      <div style="width:100%;max-width:480px;background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;padding:1rem 1.25rem;font-size:.9rem;line-height:1.7;color:#374151;min-height:80px;">
+        Select text or place cursor, then use the <strong>toolbar above</strong> to apply formatting. Arrow keys navigate between toolbar items without leaving the editor flow.
+      </div>
+
+    </div>
+
+    <pre class="snip"><span class="hl-cmt">&lt;!-- Multiple-type group: any combination can be active --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-toolbar-toggle-group</span> <span class="hl-attr">data-toolbar-type</span>=<span class="hl-str">"multiple"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">class</span>=<span class="hl-str">"ts-tb-icon"</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"bold"</span><span class="hl-tag">&gt;</span>...svg...<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">class</span>=<span class="hl-str">"ts-tb-icon"</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"italic"</span><span class="hl-tag">&gt;</span>...svg...<span class="hl-tag">&lt;/button&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">&lt;!-- Single-type group: only one item can be active at a time --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-toolbar-toggle-group</span> <span class="hl-attr">data-toolbar-type</span>=<span class="hl-str">"single"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"left"</span> <span class="hl-attr">data-toolbar-pressed</span>=<span class="hl-str">"true"</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"center"</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/button&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log2">
+      <span style="color:#8b949e;">Events fire on the root element — listen with toolbar:toggle and toolbar:button</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 3 — Single vs Multiple toggle group comparison
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo3">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Single vs Multiple Toggle Groups</h2>
+      <span class="card-tag">type="single" · type="multiple" · allowDeselect</span>
+    </div>
+
+    <div class="demo-stage demo-stage--col">
+
+      <div>
+        <span class="stage-label">type="single" — only one active (default: cannot deselect)</span>
+        <div data-plugin-toolbar id="tb-single" data-plugin-options='{"ariaLabel":"Size picker"}'>
+          <div data-toolbar-toggle-group data-toolbar-type="single">
+            <button data-toolbar-toggle-item data-toolbar-value="xs">XS</button>
+            <button data-toolbar-toggle-item data-toolbar-value="sm">SM</button>
+            <button data-toolbar-toggle-item data-toolbar-value="md" data-toolbar-pressed="true">MD</button>
+            <button data-toolbar-toggle-item data-toolbar-value="lg">LG</button>
+            <button data-toolbar-toggle-item data-toolbar-value="xl">XL</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span class="stage-label">type="single" + allowDeselect: true — clicking active item deselects it</span>
+        <div data-plugin-toolbar id="tb-deselect" data-plugin-options='{"ariaLabel":"Mode picker","allowDeselect":true}'>
+          <div data-toolbar-toggle-group data-toolbar-type="single">
+            <button data-toolbar-toggle-item data-toolbar-value="read">Read</button>
+            <button data-toolbar-toggle-item data-toolbar-value="edit" data-toolbar-pressed="true">Edit</button>
+            <button data-toolbar-toggle-item data-toolbar-value="preview">Preview</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span class="stage-label">type="multiple" — any combination active</span>
+        <div data-plugin-toolbar id="tb-multi" data-plugin-options='{"ariaLabel":"Filter tags"}'>
+          <div data-toolbar-toggle-group data-toolbar-type="multiple">
+            <button data-toolbar-toggle-item data-toolbar-value="js" data-toolbar-pressed="true">JavaScript</button>
+            <button data-toolbar-toggle-item data-toolbar-value="ts">TypeScript</button>
+            <button data-toolbar-toggle-item data-toolbar-value="php" data-toolbar-pressed="true">PHP</button>
+            <button data-toolbar-toggle-item data-toolbar-value="css">CSS</button>
+            <button data-toolbar-toggle-item data-toolbar-value="html">HTML</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <pre class="snip"><span class="hl-cmt">&lt;!-- allowDeselect via data-plugin-options --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-str">'{"allowDeselect":true}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-toolbar-toggle-group</span> <span class="hl-attr">data-toolbar-type</span>=<span class="hl-str">"single"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"edit"</span> <span class="hl-attr">data-toolbar-pressed</span>=<span class="hl-str">"true"</span><span class="hl-tag">&gt;</span>Edit<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-toggle-item</span> <span class="hl-attr">data-toolbar-value</span>=<span class="hl-str">"preview"</span><span class="hl-tag">&gt;</span>Preview<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log3">
+      <span style="color:#8b949e;">Click items to see selection state — log updates on every toolbar:toggle event</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 4 — Vertical orientation
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo4">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Vertical Toolbar</h2>
+      <span class="card-tag">orientation: vertical · ↑↓ navigation</span>
+    </div>
+
+    <div class="demo-stage">
+
+      <div data-plugin-toolbar id="tb-vert"
+           data-plugin-options='{"orientation":"vertical","ariaLabel":"Drawing tools"}'>
+
+        <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="select" title="Select">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l7.07 17 2.51-7.39L21 11.07z"/></svg>
+        </button>
+
+        <div data-toolbar-separator role="separator"></div>
+
+        <div data-toolbar-toggle-group data-toolbar-type="single" data-toolbar-group-label="Tool">
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="pen" data-toolbar-pressed="true" title="Pen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="brush" title="Brush">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1 1 2.48 1.02 3.5 1.02 2.2 0 3-1.8 3-3.02 0-1.67-1.33-3.04-1.5-3.04z"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="eraser" title="Eraser">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-.8-.8-.8-2 0-2.83l9.9-9.9a2 2 0 0 1 2.83 0l6.2 6.2c.8.8.8 2 0 2.83z"/><line x1="6.5" y1="17.5" x2="3.5" y2="14.5"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="fill" title="Fill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11L8.93 21.07 3.86 16 14 5.93"/><path d="M19.07 3.93a2 2 0 0 1 2.83 2.83l-1.41 1.41-2.83-2.83 1.41-1.41z"/><path d="M3 21a1 1 0 0 1 0-2c.55 0 1 .45 1 1 0 .55-.45 1-1 1z" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <div data-toolbar-separator role="separator"></div>
+
+        <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="undo" title="Undo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+        </button>
+        <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="redo" title="Redo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+        </button>
+
+      </div>
+
+      <div style="flex:1;min-width:240px;background:#e8e0d4;border-radius:8px;min-height:180px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:.85rem;">
+        Canvas area
+      </div>
+
+    </div>
+
+    <pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-str">'{"orientation":"vertical"}'</span><span class="hl-tag">&gt;</span>
+  ...
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Or via JS:
+// $('[data-plugin-toolbar]').themestrapPluginToolbar({ orientation: 'vertical' });</span>
+
+<span class="hl-cmt">/* Separators auto-flip to horizontal in vertical mode */
+/* Arrow keys flip to ↑↓ automatically */</span></pre>
+
+    <div class="demo-log" id="log4">
+      <span style="color:#8b949e;">In vertical mode, ↑↓ navigate between items — ←→ are ignored</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 5 — Dark theme
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo5">
+    <div class="demo-card-header">
+      <span class="card-num">05</span>
+      <h2>Dark Theme</h2>
+      <span class="card-tag">dark: true · ts-toolbar--dark · auto html.dark</span>
+    </div>
+
+    <div class="demo-stage dark-stage" style="flex-direction:column;gap:1.25rem;">
+
+      <div>
+        <span class="stage-label" style="color:rgba(255,255,255,.4);">Via option: dark: true</span>
+        <div data-plugin-toolbar id="tb-dark"
+             data-plugin-options='{"dark":true,"ariaLabel":"Player controls"}'>
+
+          <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="prev" title="Previous">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="play" title="Play">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="ts-tb-icon" data-toolbar-button data-toolbar-value="next" title="Next">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm8.5-6L23 18V6z"/></svg>
+          </button>
+
+          <div data-toolbar-separator role="separator"></div>
+
+          <div data-toolbar-toggle-group data-toolbar-type="multiple" data-toolbar-group-label="Playback options">
+            <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="shuffle" title="Shuffle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+            </button>
+            <button class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="repeat" data-toolbar-pressed="true" title="Repeat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </button>
+          </div>
+
+          <div data-toolbar-separator role="separator"></div>
+
+          <a data-toolbar-link href="#" data-toolbar-value="queue" title="Queue">Queue</a>
+
+        </div>
+      </div>
+
+      <div>
+        <span class="stage-label" style="color:rgba(255,255,255,.4);">Via class: ts-toolbar--dark (no JS option needed)</span>
+        <div data-plugin-toolbar id="tb-dark2" class="ts-toolbar--dark" aria-label="Quick actions">
+          <button data-toolbar-button data-toolbar-value="copy">Copy</button>
+          <button data-toolbar-button data-toolbar-value="paste">Paste</button>
+          <button data-toolbar-button data-toolbar-value="cut">Cut</button>
+          <div data-toolbar-separator role="separator"></div>
+          <div data-toolbar-toggle-group data-toolbar-type="single">
+            <button data-toolbar-toggle-item data-toolbar-value="a">Option A</button>
+            <button data-toolbar-toggle-item data-toolbar-value="b" data-toolbar-pressed="true">Option B</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <pre class="snip"><span class="hl-cmt">&lt;!-- Via option --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-str">'{"dark":true}'</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">&lt;!-- Via class — works even without JS options --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span> <span class="hl-attr">class</span>=<span class="hl-str">"ts-toolbar--dark"</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">/* Auto-applies when html.dark is present (PluginDarkMode):
+   html.dark .ts-toolbar:not(.ts-toolbar--light) { dark vars } */</span></pre>
+
+    <div class="demo-log" id="log5">
+      <span style="color:#8b949e;">The teal accent color replaces orange in dark mode — override with --ts-tb-on-bg</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 6 — Disabled states
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo6">
+    <div class="demo-card-header">
+      <span class="card-num">06</span>
+      <h2>Disabled States</h2>
+      <span class="card-tag">data-toolbar-disabled · instance.disable() / enable()</span>
+    </div>
+
+    <div class="demo-stage demo-stage--col">
+
+      <div>
+        <span class="stage-label">Mixed disabled — keyboard skips disabled items automatically</span>
+        <div data-plugin-toolbar id="tb-disabled" aria-label="Edit actions">
+          <button data-toolbar-button data-toolbar-value="cut">Cut</button>
+          <button data-toolbar-button data-toolbar-value="copy">Copy</button>
+          <button data-toolbar-button data-toolbar-value="paste" data-toolbar-disabled="true">Paste</button>
+
+          <div data-toolbar-separator role="separator"></div>
+
+          <div data-toolbar-toggle-group data-toolbar-type="multiple">
+            <button data-toolbar-toggle-item data-toolbar-value="bold" data-toolbar-pressed="true">Bold</button>
+            <button data-toolbar-toggle-item data-toolbar-value="italic" data-toolbar-disabled="true">Italic</button>
+            <button data-toolbar-toggle-item data-toolbar-value="underline">Underline</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm btn-outline-secondary" id="btn-enable-paste">Enable Paste</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btn-disable-paste">Disable Paste</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btn-enable-italic">Enable Italic</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btn-disable-italic">Disable Italic</button>
+      </div>
+
+    </div>
+
+    <pre class="snip"><span class="hl-cmt">&lt;!-- Static: attribute in markup --&gt;</span>
+<span class="hl-tag">&lt;button</span> <span class="hl-attr">data-toolbar-button</span> <span class="hl-attr">data-toolbar-disabled</span>=<span class="hl-str">"true"</span><span class="hl-tag">&gt;</span>Paste<span class="hl-tag">&lt;/button&gt;</span>
+
+<span class="hl-cmt">// Dynamic: via instance API</span>
+<span class="hl-kw">const</span> tb = <span class="hl-fn">$</span>(<span class="hl-str">'#my-toolbar'</span>).data(<span class="hl-str">'__pluginToolbar'</span>);
+tb.<span class="hl-fn">disable</span>(<span class="hl-str">'paste'</span>);   <span class="hl-cmt">// by data-toolbar-value</span>
+tb.<span class="hl-fn">enable</span>(<span class="hl-str">'paste'</span>);    <span class="hl-cmt">// re-enable and restore roving tabindex</span></pre>
+
+    <div class="demo-log" id="log6">
+      <span style="color:#8b949e;">Disabled items are skipped by arrow-key navigation — roving tabindex updates automatically</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 7 — Size modifiers
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo7">
+    <div class="demo-card-header">
+      <span class="card-num">07</span>
+      <h2>Size Modifiers</h2>
+      <span class="card-tag">size: "sm" · default · size: "lg"</span>
+    </div>
+
+    <div class="demo-stage demo-stage--col">
+
+      <div>
+        <span class="stage-label">Small — 28 px item height</span>
+        <div data-plugin-toolbar data-plugin-options='{"size":"sm","ariaLabel":"Small toolbar"}'>
+          <button data-toolbar-button data-toolbar-value="a">Action A</button>
+          <button data-toolbar-button data-toolbar-value="b">Action B</button>
+          <div data-toolbar-separator role="separator"></div>
+          <div data-toolbar-toggle-group data-toolbar-type="single">
+            <button data-toolbar-toggle-item data-toolbar-value="x" data-toolbar-pressed="true">X</button>
+            <button data-toolbar-toggle-item data-toolbar-value="y">Y</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span class="stage-label">Default — 34 px item height</span>
+        <div data-plugin-toolbar aria-label="Default toolbar">
+          <button data-toolbar-button data-toolbar-value="a">Action A</button>
+          <button data-toolbar-button data-toolbar-value="b">Action B</button>
+          <div data-toolbar-separator role="separator"></div>
+          <div data-toolbar-toggle-group data-toolbar-type="single">
+            <button data-toolbar-toggle-item data-toolbar-value="x" data-toolbar-pressed="true">X</button>
+            <button data-toolbar-toggle-item data-toolbar-value="y">Y</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <span class="stage-label">Large — 40 px item height</span>
+        <div data-plugin-toolbar data-plugin-options='{"size":"lg","ariaLabel":"Large toolbar"}'>
+          <button data-toolbar-button data-toolbar-value="a">Action A</button>
+          <button data-toolbar-button data-toolbar-value="b">Action B</button>
+          <div data-toolbar-separator role="separator"></div>
+          <div data-toolbar-toggle-group data-toolbar-type="single">
+            <button data-toolbar-toggle-item data-toolbar-value="x" data-toolbar-pressed="true">X</button>
+            <button data-toolbar-toggle-item data-toolbar-value="y">Y</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span> <span class="hl-attr">data-plugin-options</span>=<span class="hl-str">'{"size":"sm"}'</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span> <span class="hl-attr">data-plugin-options</span>=<span class="hl-str">'{"size":"lg"}'</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">/* Sizes map to modifier classes:
+   .ts-toolbar--sm  → 28 px items, 8 px padding, 0.81rem font
+   (default)        → 34 px items, 10 px padding, 0.875rem font
+   .ts-toolbar--lg  → 40 px items, 14 px padding, 0.94rem font */</span></pre>
+
+    <div class="demo-log" id="log7">
+      <span style="color:#8b949e;">All three sizes share the same token set — override --ts-tb-item-h to add custom sizes</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 8 — Programmatic control + event log
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo8">
+    <div class="demo-card-header">
+      <span class="card-num">08</span>
+      <h2>Programmatic Control</h2>
+      <span class="card-tag">.manual · instance API · getValues / setValue / clearGroup</span>
+    </div>
+
+    <div class="demo-stage demo-stage--col">
+
+      <div data-plugin-toolbar class="manual" id="tb-prog">
+        <button data-toolbar-button data-toolbar-value="run">Run</button>
+        <button data-toolbar-button data-toolbar-value="stop">Stop</button>
+        <div data-toolbar-separator role="separator"></div>
+        <div data-toolbar-toggle-group data-toolbar-type="single" id="tg-env">
+          <button data-toolbar-toggle-item data-toolbar-value="dev">Dev</button>
+          <button data-toolbar-toggle-item data-toolbar-value="staging">Staging</button>
+          <button data-toolbar-toggle-item data-toolbar-value="prod" data-toolbar-pressed="true">Prod</button>
+        </div>
+        <div data-toolbar-separator role="separator"></div>
+        <div data-toolbar-toggle-group data-toolbar-type="multiple" id="tg-flags">
+          <button data-toolbar-toggle-item data-toolbar-value="verbose">Verbose</button>
+          <button data-toolbar-toggle-item data-toolbar-value="debug" data-toolbar-pressed="true">Debug</button>
+          <button data-toolbar-toggle-item data-toolbar-value="dryrun">Dry run</button>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm btn-outline-secondary" id="btn-prog-init">Init Plugin</button>
+        <button class="btn btn-sm btn-outline-info"    id="btn-prog-get-env">getValues(#tg-env)</button>
+        <button class="btn btn-sm btn-outline-info"    id="btn-prog-get-flags">getValues(#tg-flags)</button>
+        <button class="btn btn-sm btn-outline-primary" id="btn-prog-set">setValue("staging")</button>
+        <button class="btn btn-sm btn-outline-primary" id="btn-prog-multi">setValues(["verbose","dryrun"])</button>
+        <button class="btn btn-sm btn-outline-warning" id="btn-prog-clear">clearGroup(#tg-flags)</button>
+        <button class="btn btn-sm btn-outline-danger"  id="btn-prog-destroy">Destroy</button>
+      </div>
+
+      <div class="output-box" id="output-prog">
+        <span style="color:#8b949e;">— waiting for init —</span>
+      </div>
+
+    </div>
+
+    <pre class="snip"><span class="hl-cmt">// Add .manual to suppress auto-init</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-toolbar</span> <span class="hl-attr">class</span>=<span class="hl-str">"manual"</span> <span class="hl-attr">id</span>=<span class="hl-str">"tb"</span><span class="hl-tag">&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Initialize manually</span>
+<span class="hl-fn">$</span>(<span class="hl-str">'#tb'</span>).<span class="hl-fn">themestrapPluginToolbar</span>({ ariaLabel: <span class="hl-str">'My toolbar'</span> });
+
+<span class="hl-cmt">// Get instance</span>
+<span class="hl-kw">const</span> tb = <span class="hl-fn">$</span>(<span class="hl-str">'#tb'</span>).data(<span class="hl-str">'__pluginToolbar'</span>);
+
+<span class="hl-cmt">// Read values</span>
+tb.<span class="hl-fn">getValues</span>(<span class="hl-str">'#tg-env'</span>);          <span class="hl-cmt">// → "prod" (single)</span>
+tb.<span class="hl-fn">getValues</span>(<span class="hl-str">'#tg-flags'</span>);        <span class="hl-cmt">// → ["debug"] (multiple)</span>
+
+<span class="hl-cmt">// Set values</span>
+tb.<span class="hl-fn">setValue</span>(<span class="hl-str">'staging'</span>, <span class="hl-str">'#tg-env'</span>);
+tb.<span class="hl-fn">setValues</span>([<span class="hl-str">'verbose'</span>, <span class="hl-str">'dryrun'</span>], <span class="hl-str">'#tg-flags'</span>);
+
+<span class="hl-cmt">// Clear selections</span>
+tb.<span class="hl-fn">clearGroup</span>(<span class="hl-str">'#tg-flags'</span>);
+
+<span class="hl-cmt">// Teardown</span>
+tb.<span class="hl-fn">destroy</span>();   <span class="hl-cmt">// restores initialHTML, removes events, removes stylesheet if last instance</span></pre>
+
+    <div class="demo-log" id="log8" style="max-height:8rem;overflow-y:auto;flex-direction:column;align-items:flex-start;">
+      <span style="color:#8b949e;">Events appear here</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DEMO 9 — Options reference
+  ═══════════════════════════════════════════════════════════════════ -->
+  <div class="demo-card" id="demo9">
+    <div class="demo-card-header">
+      <span class="card-num">09</span>
+      <h2>Options Reference</h2>
+    </div>
+
+    <div class="demo-stage demo-stage--table">
+      <table class="table table-sm table-bordered mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Option</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>orientation</code></td><td>String</td><td><code>"horizontal"</code></td><td><code>"horizontal"</code> or <code>"vertical"</code>. Controls arrow-key axis and separator direction.</td></tr>
+          <tr><td><code>loop</code></td><td>Boolean</td><td><code>true</code></td><td>Arrow-key navigation wraps from last item back to first and vice-versa.</td></tr>
+          <tr><td><code>dir</code></td><td>String</td><td><code>"ltr"</code></td><td><code>"ltr"</code> or <code>"rtl"</code>. Flips the arrow key → previous/next mapping for right-to-left layouts.</td></tr>
+          <tr><td><code>ariaLabel</code></td><td>String</td><td><code>"Toolbar"</code></td><td>Sets <code>aria-label</code> on the root element (only when no <code>aria-label</code> is already present in markup).</td></tr>
+          <tr><td><code>size</code></td><td>String</td><td><code>null</code></td><td><code>null</code>, <code>"sm"</code>, or <code>"lg"</code>. Adds <code>.ts-toolbar--sm</code> or <code>.ts-toolbar--lg</code>.</td></tr>
+          <tr><td><code>dark</code></td><td>Boolean</td><td><code>false</code></td><td>Apply the dark colour scheme. Equivalent to adding <code>.ts-toolbar--dark</code> in markup. Auto-applies under <code>html.dark</code> even when <code>false</code>.</td></tr>
+          <tr><td><code>full</code></td><td>Boolean</td><td><code>false</code></td><td>Stretch the toolbar to 100% width (<code>.ts-toolbar--full</code>). Items wrap to new lines when needed.</td></tr>
+          <tr><td><code>allowDeselect</code></td><td>Boolean</td><td><code>false</code></td><td>In <code>type="single"</code> groups, allow clicking the active item to deselect it (producing no selection).</td></tr>
+          <tr><td><code>onToggle</code></td><td>Function</td><td><code>null</code></td><td><code>fn(value, pressed, groupEl)</code> — called after a toggle item state changes.</td></tr>
+          <tr><td><code>onButton</code></td><td>Function</td><td><code>null</code></td><td><code>fn(value, buttonEl)</code> — called when a regular button is clicked.</td></tr>
+          <tr><td><code>onLink</code></td><td>Function</td><td><code>null</code></td><td><code>fn(value, linkEl)</code> — called when a link item is clicked.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+
+</div>
+</main>
+
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.toolbar.js"></script>
+
+<script>
+(function ($) {
+
+    /* Auto-init all non-manual toolbars */
+    if ($.isFunction($.fn['themestrapPluginToolbar']) && $('[data-plugin-toolbar]').length) {
+        themestrap.fn.intObsInit('[data-plugin-toolbar]:not(.manual)', 'themestrapPluginToolbar');
+    }
+
+    function ts() {
+        return new Date().toLocaleTimeString();
+    }
+
+    function logEntry($log, msg) {
+        $log.html('<span class="log-entry">' + ts() + ' ' + msg + '</span>');
+    }
+
+    /* Demo 1 — basic log */
+    (function() {
+        const $log = $('#log1');
+        $('#tb-basic').on('toolbar:button toolbar:toggle toolbar:link', function(e, ...args) {
+            const type  = e.type;
+            const value = args[0];
+            logEntry($log, type + ' → <code>' + value + '</code>');
+        });
+    }());
+
+    /* Demo 2 — rich text log */
+    (function() {
+        const $log = $('#log2');
+        $('#tb-rte').on('toolbar:button toolbar:toggle', function(e, value, pressed) {
+            if (e.type === 'toolbar:toggle') {
+                logEntry($log, 'toolbar:toggle → value: <code>' + value + '</code>, pressed: <code>' + pressed + '</code>');
+            } else {
+                logEntry($log, 'toolbar:button → value: <code>' + value + '</code>');
+            }
+        });
+    }());
+
+    /* Demo 3 — toggle state log */
+    (function() {
+        const $log = $('#log3');
+        function refreshLog() {
+            const single = $('#tb-single').data('__pluginToolbar');
+            const desel  = $('#tb-deselect').data('__pluginToolbar');
+            const multi  = $('#tb-multi').data('__pluginToolbar');
+            if (!single || !desel || !multi) return;
+            const sv = single.getValues()  || 'none';
+            const dv = desel.getValues()   || 'none';
+            const mv = (multi.getValues() || []).join(', ') || 'none';
+            logEntry($log,
+                'single: <code>' + sv + '</code> &nbsp; deselect: <code>' + dv +
+                '</code> &nbsp; multi: <code>[' + mv + ']</code>'
+            );
+        }
+        $('#tb-single, #tb-deselect, #tb-multi').on('toolbar:toggle', function() {
+            setTimeout(refreshLog, 0);
+        });
+    }());
+
+    /* Demo 4 — vertical log */
+    (function() {
+        const $log = $('#log4');
+        $('#tb-vert').on('toolbar:button toolbar:toggle', function(e, value, pressed) {
+            if (e.type === 'toolbar:toggle') {
+                logEntry($log, 'tool selected → <code>' + value + '</code>');
+            } else {
+                logEntry($log, 'toolbar:button → <code>' + value + '</code>');
+            }
+        });
+    }());
+
+    /* Demo 5 — dark log */
+    (function() {
+        const $log = $('#log5');
+        $('#tb-dark, #tb-dark2').on('toolbar:button toolbar:toggle toolbar:link', function(e, value) {
+            logEntry($log, e.type + ' → <code>' + value + '</code>');
+        });
+    }());
+
+    /* Demo 6 — disabled / enable */
+    (function() {
+        const $log = $('#log6');
+
+        $('#btn-enable-paste').on('click', function() {
+            const tb = $('#tb-disabled').data('__pluginToolbar');
+            if (tb) { tb.enable('paste'); logEntry($log, 'enable("paste") called'); }
+        });
+        $('#btn-disable-paste').on('click', function() {
+            const tb = $('#tb-disabled').data('__pluginToolbar');
+            if (tb) { tb.disable('paste'); logEntry($log, 'disable("paste") called'); }
+        });
+        $('#btn-enable-italic').on('click', function() {
+            const tb = $('#tb-disabled').data('__pluginToolbar');
+            if (tb) { tb.enable('italic'); logEntry($log, 'enable("italic") called'); }
+        });
+        $('#btn-disable-italic').on('click', function() {
+            const tb = $('#tb-disabled').data('__pluginToolbar');
+            if (tb) { tb.disable('italic'); logEntry($log, 'disable("italic") called'); }
+        });
+    }());
+
+    /* Demo 8 — programmatic control */
+    (function() {
+        const $log    = $('#log8');
+        const $output = $('#output-prog');
+        const $el     = $('#tb-prog');
+
+        function appendLog(msg) {
+            const entry = '<span class="log-entry" style="display:block;">' + ts() + ' ' + msg + '</span>';
+            if ($log.children().first().css('color') === 'rgb(139, 148, 158)') $log.empty();
+            $log.append(entry);
+            $log[0].scrollTop = $log[0].scrollHeight;
+        }
+
+        function showOutput(val) {
+            $output.html('<span>' + JSON.stringify(val) + '</span>');
+        }
+
+        $('#btn-prog-init').on('click', function() {
+            if ($el.data('__pluginToolbar')) {
+                appendLog('<span class="log-warn">already initialized</span>');
+                return;
+            }
+            $el.themestrapPluginToolbar({ ariaLabel: 'Build controls' });
+            appendLog('themestrapPluginToolbar() → initialized');
+
+            $el.on('toolbar:toggle.demo8', function(e, value, pressed) {
+                appendLog('toolbar:toggle → <code>' + value + '</code>, pressed: <code>' + pressed + '</code>');
+            });
+            $el.on('toolbar:button.demo8', function(e, value) {
+                appendLog('toolbar:button → <code>' + value + '</code>');
+            });
+        });
+
+        $('#btn-prog-get-env').on('click', function() {
+            const tb = $el.data('__pluginToolbar');
+            if (!tb) { appendLog('<span class="log-warn">not initialized</span>'); return; }
+            const v = tb.getValues('#tg-env');
+            appendLog('getValues(#tg-env) →');
+            showOutput(v);
+        });
+
+        $('#btn-prog-get-flags').on('click', function() {
+            const tb = $el.data('__pluginToolbar');
+            if (!tb) { appendLog('<span class="log-warn">not initialized</span>'); return; }
+            const v = tb.getValues('#tg-flags');
+            appendLog('getValues(#tg-flags) →');
+            showOutput(v);
+        });
+
+        $('#btn-prog-set').on('click', function() {
+            const tb = $el.data('__pluginToolbar');
+            if (!tb) { appendLog('<span class="log-warn">not initialized</span>'); return; }
+            tb.setValue('staging', '#tg-env');
+            appendLog('setValue("staging", "#tg-env")');
+        });
+
+        $('#btn-prog-multi').on('click', function() {
+            const tb = $el.data('__pluginToolbar');
+            if (!tb) { appendLog('<span class="log-warn">not initialized</span>'); return; }
+            tb.setValues(['verbose', 'dryrun'], '#tg-flags');
+            appendLog('setValues(["verbose","dryrun"], "#tg-flags")');
+        });
+
+        $('#btn-prog-clear').on('click', function() {
+            const tb = $el.data('__pluginToolbar');
+            if (!tb) { appendLog('<span class="log-warn">not initialized</span>'); return; }
+            tb.clearGroup('#tg-flags');
+            appendLog('clearGroup("#tg-flags")');
+        });
+
+        $('#btn-prog-destroy').on('click', function() {
+            const tb = $el.data('__pluginToolbar');
+            if (!tb) { appendLog('<span class="log-warn">no instance to destroy</span>'); return; }
+            $el.off('.demo8');
+            tb.destroy();
+            appendLog('destroy() → instance removed, stylesheet ejected if last instance');
+            showOutput(null);
+        });
+    }());
+
+}(jQuery));
+</script>
+
+</body>
+</html>

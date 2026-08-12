@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PluginSplashScreen | Themestrap Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<style>
+    :root {
+      --ts-navy:   #0a1929;
+      --ts-navy2:  #0e2238;
+      --ts-orange: #e8672a;
+      --ts-teal:   #2ab8c8;
+      --ts-cream:  #fdf6ee;
+    }
+    body {
+      background: var(--ts-navy);
+      color: #d0dbe8;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+    .demo-header {
+      background: var(--ts-navy2);
+      border-bottom: 2px solid var(--ts-orange);
+      padding: 2rem 0 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .demo-header h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      color: #fff;
+      font-size: 2rem;
+    }
+    .demo-header p { color: #8aa5bf; margin: 0; }
+    .demo-header a { color: var(--ts-orange); text-decoration: none; }
+    .badge-plugin {
+      background: var(--ts-teal);
+      color: #fff;
+      font-size: .7rem;
+      letter-spacing: .08em;
+      padding: .25em .6em;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      vertical-align: middle;
+    }
+    .demo-card {
+      background: var(--ts-navy2);
+      border: 1px solid #1a3050;
+      border-radius: 10px;
+      margin-bottom: 1.75rem;
+      overflow: hidden;
+    }
+    .demo-card-header {
+      background: #0b1e33;
+      border-bottom: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: var(--ts-teal);
+      letter-spacing: .04em;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .demo-card-header .demo-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+    .demo-stage {
+      padding: 1.5rem 1.25rem;
+    }
+    pre.snip {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      margin: 0;
+      padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: #7ecce0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .demo-log {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .73rem;
+      color: #6bb;
+      min-height: 2.4rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .demo-log .log-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--ts-teal);
+      flex-shrink: 0;
+    }
+    .demo-log span.hi { color: var(--ts-orange); }
+    /* BA wrappers */
+    .ba-demo-wrap { max-width: 680px; margin: 0 auto; }
+    .ba-demo-wrap-sm { max-width: 420px; margin: 0 auto; }
+    /* API controls */
+    .api-panel { background: rgba(255,255,255,.02); border: 1px solid #1a3050; border-radius: 8px; padding: 1rem 1.125rem; }
+    .api-panel p.label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; color: #5a7898; margin-bottom: .5rem; }
+    code { color: var(--ts-teal); font-family: 'JetBrains Mono', monospace; font-size: .82em; }
+    /* placeholder images generated via SVG data URIs */
+    .ph-before, .ph-after { display: block; width: 100%; }
+.demo-card {
+    border: 1px solid var(--border, #2a2c3a);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    background: rgba(255,255,255,.02);
+}
+.demo-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border, #2a2c3a);
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.demo-card-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--default, #c1c1c1);
+}
+.demo-card-header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted, #888);
+    flex: 1;
+}
+.demo-stage {
+    position: relative;
+    min-height: 200px;
+    background: #0b0c10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.demo-overlay-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0e1117;
+    gap: 14px;
+    transition: opacity 0.4s ease;
+}
+.demo-overlay-wrap.hidden { opacity: 0; pointer-events: none; }
+.demo-overlay-title {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.demo-progress-bar-wrap {
+    width: 220px;
+    height: 3px;
+    background: rgba(255,255,255,.08);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.demo-progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: #e8672a;
+    border-radius: 2px;
+    transition: width 0.25s ease;
+}
+.demo-file-name {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 11px;
+    color: rgba(255,255,255,.3);
+    letter-spacing: 0.04em;
+    min-height: 16px;
+}
+.demo-ready-msg {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 13px;
+    color: #87bb53;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.demo-ready-msg.visible { opacity: 1; }
+ 
+/* ribbon canvas fills the stage */
+.demo-stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+ 
+.demo-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border, #2a2c3a);
+    background: rgba(255,255,255,.015);
+    align-items: center;
+}
+.demo-controls .btn { font-size: 12px; padding: 5px 14px; }
+ 
+.demo-log {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 11.5px;
+    line-height: 1.7;
+    background: #0b0c10;
+    border-top: 1px solid var(--border, #2a2c3a);
+    color: var(--muted, #888);
+    padding: 12px 18px;
+    max-height: 160px;
+    overflow-y: auto;
+    min-height: 48px;
+}
+.demo-log::-webkit-scrollbar { width: 3px; }
+.demo-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+.demo-log .log-ts   { color: rgba(255,255,255,.2); margin-right: 6px; user-select: none; }
+.demo-log .log-ok   { color: #87bb53; }
+.demo-log .log-err  { color: #ff6159; }
+.demo-log .log-info { color: #5ecfdb; }
+.demo-log .log-dim  { color: rgba(255,255,255,.25); }
+ 
+pre.snip {
+    background: #0e1420;
+    border-top: 1px solid var(--border, #2a2c3a);
+    margin: 0;
+    padding: 16px 20px;
+    font-size: 12px;
+    line-height: 1.65;
+    border-radius: 0;
+    max-height: 220px;
+    overflow: auto;
+}
+pre.snip code { font-family: var(--bs-font-monospace, monospace); }
+ 
+.snip-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: var(--muted, #888);
+    cursor: pointer;
+    border-top: 1px solid var(--border, #2a2c3a);
+    user-select: none;
+    transition: color 0.15s;
+}
+.snip-toggle:hover { color: var(--default, #c1c1c1); }
+.snip-toggle i { font-size: 10px; transition: transform 0.2s; }
+.snip-toggle.open i { transform: rotate(90deg); }
+</style>
+
+</head>
+<body>
+
+<!-- Header -->
+<header class="demo-header">
+  <div class="container">
+    <div class="demo-header-eyebrow">Themestrap · Component</div>
+    <h1>Context Menu</h1>
+    <p>See PluginSplashScreen in action. Each demo mounts the overlay on a contained 
+        <code>#demo-overlay</code> element, downloads a small set of real CDN assets,
+        then dismisses itself. The demo log tracks every event so you can follow the 
+        load sequence in real time.</p>
+  </div>
+</header>
+
+<!-- Body -->
+<main class="demo-body">
+<div class="container">
+<script>
+/* Mini set of real CDN files small enough to be meaningfully fast */
+const DEMO_FILES = [
+    'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js',
+];
+ 
+function demoLog(logEl, msg, cls = '') {
+    const now = new Date();
+    const ts  = String(now.getMinutes()).padStart(2,'0') + ':' +
+                String(now.getSeconds()).padStart(2,'0') + '.' +
+                String(now.getMilliseconds()).padStart(3,'0');
+    const line = document.createElement('div');
+    line.innerHTML = `<span class="log-ts">[${ts}]</span><span class="${cls}">${msg}</span>`;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+}
+ 
+function snipToggle(btn, pre) {
+    const open = btn.classList.toggle('open');
+    pre.style.display = open ? 'block' : 'none';
+    btn.querySelector('span').textContent = open ? 'Hide code' : 'Show code';
+}
+</script>
+ 
+ 
+<!-- DEMO 1 — Basic: file download + inject, no progress UI -->
+<div class="section" id="demo-basic">
+   
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <h3>Basic</h3>
+      <p>No progress bar — just a spinner and an <code>onSuccess</code> callback.</p>
+    </div>
+ 
+    <div class="demo-stage" id="stage-basic" style="min-height:180px;">
+      <div class="demo-overlay-wrap" id="overlay-basic">
+        <div class="demo-overlay-title">Loading…</div>
+        <div class="spinner-border text-secondary" role="status" style="width:1.4rem;height:1.4rem;border-width:2px;opacity:.4;"></div>
+        <div class="demo-ready-msg" id="ready-basic">✓ All resources ready</div>
+      </div>
+    </div>
+ 
+    <div class="demo-log" id="log-basic"><div style="color:rgba(255,255,255,.18)">— ready to run —</div></div>
+ 
+    <div class="demo-controls">
+      <button class="btn btn-modern btn-secondary btn-sm" id="btn-basic">▶ Run demo</button>
+      <button class="btn btn-modern btn-outline btn-sm" id="btn-basic-fresh">⟳ Reset cache</button>
+    </div>
+ 
+    <div class="snip-toggle" onclick="snipToggle(this, document.getElementById('snip-basic'))">
+      <i class="bi bi-chevron-right"></i>
+      <span>Show code</span>
+    </div>
+    <pre class="snip" id="snip-basic" style="display:none;"><code>$('#overlay-basic').themestrapPluginSplashScreen({
+    files:   DEMO_FILES,
+    threads: 1,
+    debug:   true,
+    onLoaded(current, total, path) {
+        const name = path.split('/').pop();
+        demoLog(log, `(${current}/${total}) ${name}`, 'log-info');
+    },
+    onSuccess() {
+        demoLog(log, 'onSuccess — all files injected', 'log-ok');
+        document.getElementById('ready-basic').classList.add('visible');
+        setTimeout(() => {
+            document.getElementById('overlay-basic').classList.add('hidden');
+        }, 1200);
+    }
+});</code></pre>
+  </div>
+</div>
+ 
+<script>
+(function () {
+    const log     = document.getElementById('log-basic');
+    const overlay = document.getElementById('overlay-basic');
+    const ready   = document.getElementById('ready-basic');
+ 
+    function reset() {
+        log.innerHTML = '<div style="color:rgba(255,255,255,.18)">— ready to run —</div>';
+        overlay.classList.remove('hidden');
+        ready.classList.remove('visible');
+        const old = overlay.data ? overlay.data('__splashScreen') : null;
+        // destroy any previous instance
+        const inst = $(overlay).data('__splashScreen');
+        if (inst) { inst.destroy(); }
+    }
+ 
+    document.getElementById('btn-basic').addEventListener('click', () => {
+        reset();
+        demoLog(log, 'Initializing…', 'log-dim');
+        $(overlay).themestrapPluginSplashScreen({
+            files:   DEMO_FILES,
+            threads: 1,
+            debug:   true,
+            onLoaded(current, total, path) {
+                const name = path.split('/').pop();
+                demoLog(log, `(${current}/${total}) ${name}`, 'log-info');
+            },
+            onSuccess() {
+                demoLog(log, 'onSuccess — all files injected', 'log-ok');
+                ready.classList.add('visible');
+                setTimeout(() => { overlay.classList.add('hidden'); }, 1200);
+            },
+            onError(path) {
+                demoLog(log, `ERROR: ${path.split('/').pop()}`, 'log-err');
+            }
+        });
+    });
+ 
+    document.getElementById('btn-basic-fresh').addEventListener('click', () => {
+        const inst = $(overlay).data('__splashScreen');
+        if (inst) { inst.destroy(); }
+        themestrap.fn.createStorage({ backend: 'localStorage' }).del('ts_splashscreen_cache');
+        reset();
+        demoLog(log, 'Cache cleared', 'log-dim');
+    });
+})();
+</script>
+ 
+ 
+<!-- DEMO 2 — Progress bar -->
+<div class="section" id="demo-progress">
+ 
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <h3>With progress bar</h3>
+      <p>File count, progress fill, and filename readout updated on every <code>onLoaded</code>.</p>
+    </div>
+ 
+    <div class="demo-stage" id="stage-progress" style="min-height:200px;">
+      <div class="demo-overlay-wrap" id="overlay-progress">
+        <div class="demo-overlay-title" id="prog-title">Initializing…</div>
+        <div class="demo-progress-bar-wrap">
+          <div class="demo-progress-bar-fill" id="prog-fill"></div>
+        </div>
+        <div class="demo-file-name" id="prog-file"></div>
+        <div class="demo-ready-msg" id="ready-progress">✓ All resources ready</div>
+      </div>
+    </div>
+ 
+    <div class="demo-log" id="log-progress"><div style="color:rgba(255,255,255,.18)">— ready to run —</div></div>
+ 
+    <div class="demo-controls">
+      <button class="btn btn-modern btn-secondary btn-sm" id="btn-progress">▶ Run demo</button>
+      <button class="btn btn-modern btn-outline btn-sm" id="btn-progress-fresh">⟳ Reset cache</button>
+    </div>
+ 
+    <div class="snip-toggle" onclick="snipToggle(this, document.getElementById('snip-progress'))">
+      <i class="bi bi-chevron-right"></i>
+      <span>Show code</span>
+    </div>
+    <pre class="snip" id="snip-progress" style="display:none;"><code>$('#overlay-progress').themestrapPluginSplashScreen({
+    files:   DEMO_FILES,
+    threads: 1,
+    onLoaded(current, total, path) {
+        const name = path.split('/').pop();
+        document.getElementById('prog-title').textContent =
+            `Downloading ${current} of ${total}`;
+        document.getElementById('prog-fill').style.width =
+            Math.round((current / total) * 100) + '%';
+        document.getElementById('prog-file').textContent = name;
+    },
+    onSuccess() {
+        document.getElementById('prog-title').textContent = 'Complete!';
+        document.getElementById('prog-fill').style.width = '100%';
+        document.getElementById('prog-file').textContent = '';
+        document.getElementById('ready-progress').classList.add('visible');
+        setTimeout(() => {
+            document.getElementById('overlay-progress').classList.add('hidden');
+        }, 1400);
+    }
+});</code></pre>
+  </div>
+</div>
+ 
+<script>
+(function () {
+    const log     = document.getElementById('log-progress');
+    const overlay = document.getElementById('overlay-progress');
+    const fill    = document.getElementById('prog-fill');
+    const title   = document.getElementById('prog-title');
+    const file    = document.getElementById('prog-file');
+    const ready   = document.getElementById('ready-progress');
+ 
+    function reset() {
+        log.innerHTML = '<div style="color:rgba(255,255,255,.18)">— ready to run —</div>';
+        overlay.classList.remove('hidden');
+        ready.classList.remove('visible');
+        fill.style.width = '0%';
+        title.textContent = 'Initializing…';
+        file.textContent  = '';
+        const inst = $(overlay).data('__splashScreen');
+        if (inst) { inst.destroy(); }
+    }
+ 
+    document.getElementById('btn-progress').addEventListener('click', () => {
+        reset();
+        demoLog(log, 'Starting download…', 'log-dim');
+        $(overlay).themestrapPluginSplashScreen({
+            files:   DEMO_FILES,
+            threads: 1,
+            onLoaded(current, total, path) {
+                const name = path.split('/').pop();
+                title.textContent = `Downloading ${current} of ${total}`;
+                fill.style.width  = Math.round((current / total) * 100) + '%';
+                file.textContent  = name;
+                demoLog(log, `(${current}/${total}) ${name}`, 'log-info');
+            },
+            onSuccess() {
+                title.textContent = 'Complete!';
+                fill.style.width  = '100%';
+                file.textContent  = '';
+                ready.classList.add('visible');
+                demoLog(log, 'onSuccess fired', 'log-ok');
+                setTimeout(() => { overlay.classList.add('hidden'); }, 1400);
+            },
+            onError(path) {
+                demoLog(log, `ERROR: ${path.split('/').pop()}`, 'log-err');
+            }
+        });
+    });
+ 
+    document.getElementById('btn-progress-fresh').addEventListener('click', () => {
+        const inst = $(overlay).data('__splashScreen');
+        if (inst) { inst.destroy(); }
+        themestrap.fn.createStorage({ backend: 'localStorage' }).del('ts_splashscreen_cache');
+        reset();
+        demoLog(log, 'Cache cleared', 'log-dim');
+    });
+})();
+</script>
+ 
+ 
+<!-- DEMO 3 — THREE.js ribbon -->
+<div class="section" id="demo-ribbon">
+ 
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <h3>Ribbon background</h3>
+      <p>THREE.js r128 imported on demand via <code>import()</code>. The canvas fills the stage.</p>
+    </div>
+ 
+    <div class="demo-stage" id="overlay-ribbon" style="min-height:240px;background:#0b0c10;">
+      <!-- plugin appends the WebGL canvas here; overlay text sits above it in z-order -->
+      <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;">
+        <div class="demo-overlay-title" id="ribbon-title">ribbon: true</div>
+        <div class="demo-progress-bar-wrap">
+          <div class="demo-progress-bar-fill" id="ribbon-fill"></div>
+        </div>
+        <div class="demo-file-name" id="ribbon-file"></div>
+        <div class="demo-ready-msg" id="ready-ribbon">✓ Files ready — ribbon running</div>
+      </div>
+    </div>
+ 
+    <div class="demo-log" id="log-ribbon"><div style="color:rgba(255,255,255,.18)">— ready to run —</div></div>
+ 
+    <div class="demo-controls">
+      <button class="btn btn-modern btn-secondary btn-sm" id="btn-ribbon">▶ Run demo</button>
+      <button class="btn btn-modern btn-outline btn-sm" id="btn-ribbon-stop">■ Stop ribbon</button>
+    </div>
+ 
+    <div class="snip-toggle" onclick="snipToggle(this, document.getElementById('snip-ribbon'))">
+      <i class="bi bi-chevron-right"></i>
+      <span>Show code</span>
+    </div>
+    <pre class="snip" id="snip-ribbon" style="display:none;"><code>$('#overlay-ribbon').themestrapPluginSplashScreen({
+    files:   DEMO_FILES,
+    threads: 1,
+    ribbon:  true,            // lazy-loads THREE.js r128 from jsDelivr
+    debug:   true,
+    onLoaded(current, total, path) {
+        document.getElementById('ribbon-fill').style.width =
+            Math.round((current / total) * 100) + '%';
+        document.getElementById('ribbon-file').textContent =
+            path.split('/').pop();
+    },
+    onSuccess() {
+        document.getElementById('ribbon-title').textContent = 'Done';
+        document.getElementById('ready-ribbon').classList.add('visible');
+        /* ribbon keeps animating until destroy() */
+    }
+});
+ 
+/* Stop ribbon and clean up: */
+$('#overlay-ribbon').data('__splashScreen').destroy();</code></pre>
+  </div>
+</div>
+ 
+<script>
+(function () {
+    const log   = document.getElementById('log-ribbon');
+    const stage = document.getElementById('overlay-ribbon');
+    const fill  = document.getElementById('ribbon-fill');
+    const title = document.getElementById('ribbon-title');
+    const file  = document.getElementById('ribbon-file');
+    const ready = document.getElementById('ready-ribbon');
+ 
+    function resetRibbon() {
+        const inst = $(stage).data('__splashScreen');
+        if (inst) { inst.destroy(); }
+        log.innerHTML = '<div style="color:rgba(255,255,255,.18)">— ready to run —</div>';
+        ready.classList.remove('visible');
+        fill.style.width  = '0%';
+        title.textContent = 'ribbon: true';
+        file.textContent  = '';
+    }
+ 
+    document.getElementById('btn-ribbon').addEventListener('click', () => {
+        resetRibbon();
+        demoLog(log, 'Loading THREE.js + files…', 'log-dim');
+        $(stage).themestrapPluginSplashScreen({
+            files:   DEMO_FILES,
+            threads: 1,
+            ribbon:  true,
+            debug:   true,
+            onLoaded(current, total, path) {
+                const name = path.split('/').pop();
+                fill.style.width = Math.round((current / total) * 100) + '%';
+                file.textContent = name;
+                demoLog(log, `(${current}/${total}) ${name}`, 'log-info');
+            },
+            onSuccess() {
+                title.textContent = 'Done';
+                ready.classList.add('visible');
+                demoLog(log, 'onSuccess — ribbon running', 'log-ok');
+            },
+            onError(path) {
+                demoLog(log, `ERROR loading THREE.js or: ${path.split('/').pop()}`, 'log-err');
+            }
+        });
+    });
+ 
+    document.getElementById('btn-ribbon-stop').addEventListener('click', () => {
+        const inst = $(stage).data('__splashScreen');
+        if (inst) {
+            inst.destroy();
+            demoLog(log, 'destroy() called — RAF cancelled, renderer disposed', 'log-dim');
+        }
+    });
+})();
+</script>
+ 
+ 
+<!-- DEMO 4 — getFile() API -->
+<div class="section" id="demo-getfile">
+ 
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <h3>getFile()</h3>
+      <p>Downloads a small JSON file, reads it back via <code>getFile()</code>, and displays the parsed result.</p>
+    </div>
+ 
+    <div class="demo-stage" id="stage-getfile" style="min-height:180px;">
+      <div class="demo-overlay-wrap" id="overlay-getfile">
+        <div class="demo-overlay-title">Fetching config…</div>
+        <div class="spinner-border text-secondary" role="status" style="width:1.4rem;height:1.4rem;border-width:2px;opacity:.4;"></div>
+      </div>
+      <div id="getfile-result" style="display:none;padding:20px;font-family:monospace;font-size:12px;color:#87bb53;white-space:pre-wrap;max-width:100%;overflow:auto;"></div>
+    </div>
+ 
+    <div class="demo-log" id="log-getfile"><div style="color:rgba(255,255,255,.18)">— ready to run —</div></div>
+ 
+    <div class="demo-controls">
+      <button class="btn btn-modern btn-secondary btn-sm" id="btn-getfile">▶ Run demo</button>
+    </div>
+ 
+    <div class="snip-toggle" onclick="snipToggle(this, document.getElementById('snip-getfile'))">
+      <i class="bi bi-chevron-right"></i>
+      <span>Show code</span>
+    </div>
+    <pre class="snip" id="snip-getfile" style="display:none;"><code>/* Download a JSON file and read its content after load */
+const CONFIG_URL = 'https://jsonplaceholder.typicode.com/todos/1';
+ 
+const splash = $('#overlay-getfile').themestrapPluginSplashScreen({
+    files:   [CONFIG_URL],
+    threads: 1,
+    fresh:   true,           // always fetch — don't cache placeholder data
+    onSuccess() {
+        const raw    = splash.getFile(CONFIG_URL);
+        const parsed = JSON.parse(raw);
+ 
+        document.getElementById('overlay-getfile').classList.add('hidden');
+        const out = document.getElementById('getfile-result');
+        out.textContent = JSON.stringify(parsed, null, 2);
+        out.style.display = 'block';
+    }
+});</code></pre>
+  </div>
+</div>
+ 
+<script>
+(function () {
+    const CONFIG_URL = 'https://jsonplaceholder.typicode.com/todos/1';
+    const log     = document.getElementById('log-getfile');
+    const overlay = document.getElementById('overlay-getfile');
+    const result  = document.getElementById('getfile-result');
+ 
+    document.getElementById('btn-getfile').addEventListener('click', () => {
+        log.innerHTML = '<div style="color:rgba(255,255,255,.18)">— ready to run —</div>';
+        overlay.classList.remove('hidden');
+        result.style.display = 'none';
+        result.textContent   = '';
+ 
+        const inst = $(overlay).data('__splashScreen');
+        if (inst) { inst.destroy(); }
+ 
+        demoLog(log, `Fetching ${CONFIG_URL.split('/').slice(-2).join('/')}…`, 'log-dim');
+ 
+        const splash = $(overlay).themestrapPluginSplashScreen({
+            files:   [CONFIG_URL],
+            threads: 1,
+            fresh:   true,
+            onLoaded(current, total, path) {
+                demoLog(log, `Downloaded: ${path.split('/').pop()}`, 'log-info');
+            },
+            onSuccess() {
+                const raw    = splash.getFile(CONFIG_URL);
+                let parsed;
+                try {
+                    parsed = JSON.parse(raw);
+                    demoLog(log, 'getFile() returned valid JSON — parsed OK', 'log-ok');
+                } catch (e) {
+                    demoLog(log, 'JSON parse failed: ' + e.message, 'log-err');
+                    return;
+                }
+                overlay.classList.add('hidden');
+                result.textContent = JSON.stringify(parsed, null, 2);
+                result.style.display = 'block';
+            },
+            onError(path) {
+                demoLog(log, `ERROR: ${path}`, 'log-err');
+            }
+        });
+    });
+})();
+</script>
+ 
+<!-- DEMO 5 — PluginProgressBar integration -->
+<div class="section" id="demo-progressbar">
+ 
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <h3>With PluginProgressBar</h3>
+      <p>SplashScreen calls <code>instance.set(pct)</code> internally. Pick a color variant then run.</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:11px;color:var(--muted,#888);font-family:monospace;">color:</span>
+        <select id="pb-color-select" style="background:#1a1b1f;border:1px solid rgba(255,255,255,.15);color:#c1c1c1;font-size:11px;padding:3px 8px;border-radius:4px;font-family:monospace;">
+          <option value="primary">primary</option>
+          <option value="secondary">secondary</option>
+          <option value="success" selected>success</option>
+          <option value="warning">warning</option>
+          <option value="danger">danger</option>
+          <option value="info">info</option>
+        </select>
+        <select id="pb-size-select" style="background:#1a1b1f;border:1px solid rgba(255,255,255,.15);color:#c1c1c1;font-size:11px;padding:3px 8px;border-radius:4px;font-family:monospace;">
+          <option value="">default</option>
+          <option value="xs">xs</option>
+          <option value="sm">sm</option>
+          <option value="md">md</option>
+          <option value="lg" selected>lg</option>
+        </select>
+        <label style="font-size:11px;color:var(--muted,#888);display:flex;align-items:center;gap:4px;cursor:pointer;font-family:monospace;">
+          <input type="checkbox" id="pb-animated-check"> animated
+        </label>
+        <label style="font-size:11px;color:var(--muted,#888);display:flex;align-items:center;gap:4px;cursor:pointer;font-family:monospace;">
+          <input type="checkbox" id="pb-label-check" checked> label
+        </label>
+      </div>
+    </div>
+ 
+    <div class="demo-stage" id="stage-pb" style="min-height:220px;">
+      <div class="demo-overlay-wrap" id="overlay-pb">
+        <div class="demo-overlay-title" id="pb-title">Loading…</div>
+ 
+        <!-- PluginProgressBar host — initialized before SplashScreen runs -->
+        <div id="pb-bar"
+             data-plugin-progress-bar
+             style="width:260px;"
+             data-plugin-options='{"value":0,"color":"success","size":"lg","label":true,"duration":400}'></div>
+ 
+        <div class="demo-file-name" id="pb-file"></div>
+        <div class="demo-ready-msg" id="ready-pb">✓ All resources ready</div>
+      </div>
+    </div>
+ 
+    <div class="demo-log" id="log-pb"><div style="color:rgba(255,255,255,.18)">— ready to run —</div></div>
+ 
+    <div class="demo-controls">
+      <button class="btn btn-modern btn-secondary btn-sm" id="btn-pb">▶ Run demo</button>
+      <button class="btn btn-modern btn-outline btn-sm" id="btn-pb-fresh">⟳ Reset cache</button>
+    </div>
+ 
+    <div class="snip-toggle" onclick="snipToggle(this, document.getElementById('snip-pb'))">
+      <i class="bi bi-chevron-right"></i>
+      <span>Show code</span>
+    </div>
+    <pre class="snip" id="snip-pb" style="display:none;"><code>/* 1. Initialize PluginProgressBar first so its instance is in jQuery data */
+$('#pb-bar').themestrapPluginProgressBar({
+    value:    0,
+    color:    'success',
+    size:     'lg',
+    label:    true,
+    duration: 400,
+});
+ 
+/* 2. Listen to native events fired by PluginProgressBar */
+document.getElementById('pb-bar').addEventListener('progressbar:change', (e) => {
+    console.log('bar changed →', e.detail.value);
+});
+document.getElementById('pb-bar').addEventListener('progressbar:complete', () => {
+    console.log('bar reached 100%');
+});
+ 
+/* 3. Pass the selector to SplashScreen — set() is called automatically */
+$('#overlay-pb').themestrapPluginSplashScreen({
+    files:       DEMO_FILES,
+    threads:     1,
+    progressBar: '#pb-bar',   // SplashScreen drives the bar; no onLoaded needed
+    onLoaded(current, total, path) {
+        /* onLoaded still fires — use it for text readouts */
+        document.getElementById('pb-title').textContent =
+            'Downloading ' + current + ' of ' + total;
+        document.getElementById('pb-file').textContent =
+            path.split('/').pop();
+    },
+    onSuccess() {
+        document.getElementById('pb-title').textContent = 'Complete!';
+        document.getElementById('pb-file').textContent  = '';
+        document.getElementById('ready-pb').classList.add('visible');
+        setTimeout(() => {
+            document.getElementById('overlay-pb').classList.add('hidden');
+        }, 1400);
+    }
+});</code></pre>
+  </div>
+</div>
+ 
+<script>
+(function () {
+    const log     = document.getElementById('log-pb');
+    const overlay = document.getElementById('overlay-pb');
+    const pbEl    = document.getElementById('pb-bar');
+    const title   = document.getElementById('pb-title');
+    const file    = document.getElementById('pb-file');
+    const ready   = document.getElementById('ready-pb');
+ 
+    function resetDemo() {
+        log.innerHTML = '<div style="color:rgba(255,255,255,.18)">— ready to run —</div>';
+        overlay.classList.remove('hidden');
+        ready.classList.remove('visible');
+        title.textContent = 'Loading…';
+        file.textContent  = '';
+ 
+        // Tear down any running SplashScreen instance
+        const splashInst = $(overlay).data('__splashScreen');
+        if (splashInst) { splashInst.destroy(); }
+ 
+        // Tear down and re-initialize ProgressBar with current control values
+        const pbInst = $(pbEl).data('__pluginProgressBar');
+        if (pbInst) { pbInst.destroy(); }
+ 
+        const color    = document.getElementById('pb-color-select').value;
+        const size     = document.getElementById('pb-size-select').value;
+        const animated = document.getElementById('pb-animated-check').checked;
+        const label    = document.getElementById('pb-label-check').checked;
+ 
+        $(pbEl).themestrapPluginProgressBar({
+            value:    0,
+            color:    color,
+            size:     size,
+            animated: animated,
+            label:    label,
+            duration: 400,
+        });
+ 
+        // Log native ProgressBar events so the demo log shows both pipelines
+        pbEl.addEventListener('progressbar:change', onPbChange);
+        pbEl.addEventListener('progressbar:complete', onPbComplete);
+    }
+ 
+    function onPbChange(e) {
+        demoLog(log, `progressbar:change → ${e.detail.value}%  (prev: ${e.detail.previous}%)`, 'log-dim');
+    }
+    function onPbComplete() {
+        demoLog(log, 'progressbar:complete fired', 'log-ok');
+    }
+ 
+    function cleanup() {
+        pbEl.removeEventListener('progressbar:change', onPbChange);
+        pbEl.removeEventListener('progressbar:complete', onPbComplete);
+    }
+ 
+    document.getElementById('btn-pb').addEventListener('click', () => {
+        cleanup();
+        resetDemo();
+        demoLog(log, 'PluginProgressBar initialized — starting SplashScreen…', 'log-dim');
+ 
+        $(overlay).themestrapPluginSplashScreen({
+            files:       DEMO_FILES,
+            threads:     1,
+            progressBar: '#pb-bar',
+            onLoaded(current, total, path) {
+                const name = path.split('/').pop();
+                title.textContent = `Downloading ${current} of ${total}`;
+                file.textContent  = name;
+                demoLog(log, `(${current}/${total}) ${name}`, 'log-info');
+            },
+            onSuccess() {
+                title.textContent = 'Complete!';
+                file.textContent  = '';
+                ready.classList.add('visible');
+                demoLog(log, 'onSuccess — all files injected', 'log-ok');
+                setTimeout(() => { overlay.classList.add('hidden'); cleanup(); }, 1400);
+            },
+            onError(path) {
+                demoLog(log, `ERROR: ${path.split('/').pop()}`, 'log-err');
+                cleanup();
+            }
+        });
+    });
+ 
+    document.getElementById('btn-pb-fresh').addEventListener('click', () => {
+        cleanup();
+        const splashInst = $(overlay).data('__splashScreen');
+        if (splashInst) { splashInst.destroy(); }
+        themestrap.fn.createStorage({ backend: 'localStorage' }).del('ts_splashscreen_cache');
+        resetDemo();
+        demoLog(log, 'Cache cleared', 'log-dim');
+    });
+})();
+</script>
+
+      <p class="text-center mt-4 mb-5" style="color:var(--ts-muted);font-size:12.5px">
+        Themestrap &middot; PluginSplashScreen &middot; part of the Themestrap Component Library
+      </p>
+</div>
+</main>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.progressbar.js"></script>
+<script src="../js/components/themestrap.plugin.splashscreen.js"></script>
+<script>
+
+</script>
+</body>
+</html>

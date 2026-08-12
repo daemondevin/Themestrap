@@ -1,3 +1,268 @@
+/**
+ * StorageBin
+ *
+ * A lightweight, backend-independent storage abstraction.
+ *
+ * Supported backends:
+ *     "auto"           Automatically select localStorage, then cookies.
+ *     "localStorage"   Browser localStorage.
+ *     "sessionStorage" Browser sessionStorage.
+ *     "cookie"         Browser cookies.
+ *     "memory"         In-memory storage.
+ *
+ * Example:
+ *
+ *     const prefs = new StorageBin();
+ *
+ *     prefs.set("theme", "dark");
+ *     prefs.set("enabled", true);
+ *     prefs.set("settings", {
+ *         sidebar: true,
+ *         compact: false
+ *     });
+ *
+ *     prefs.get("theme");
+ *     prefs.contains("enabled");
+ *     prefs.del("theme");
+ *
+ *     // Explicit backend:
+ *     const session = new StorageBin({
+ *         backend: "sessionStorage"
+ *     });
+ *
+ *     // Cookie storage:
+ *     const cookies = new StorageBin({
+ *         backend: "cookie"
+ *     });
+ *
+ *     // Automatic fallback:
+ *     const storage = new StorageBin({
+ *         backend: "auto"
+ *     });
+ */
+// StorageBin 
+const StorageBin = (() => {
+    "use strict";
+ 
+    const TEST_KEY = "__storagebin_test__";
+ 
+    const encode = (value) => {
+        if (typeof value === "string") {
+            return value;
+        }
+        try {
+            const result = JSON.stringify(value);
+            if (typeof result === "undefined") {
+                throw new TypeError("StorageBin: undefined cannot be stored.");
+            }
+            return result;
+        } catch (error) {
+            if (error instanceof TypeError) {
+                throw error;
+            }
+            throw new TypeError("StorageBin: value could not be serialized.");
+        }
+    };
+ 
+    const decode = (value) => {
+        if (value === null) {
+            return null;
+        }
+        try {
+            return JSON.parse(value);
+        } catch (error) {
+            return value;
+        }
+    };
+ 
+    const createWebStorageBackend = (name) => {
+        const getStorage = () => {
+            if (typeof window === "undefined" || !window[name]) {
+                return null;
+            }
+            return window[name];
+        };
+ 
+        return {
+            name,
+            available() {
+                try {
+                    const storage = getStorage();
+                    if (!storage) { return false; }
+                    storage.setItem(TEST_KEY, TEST_KEY);
+                    const works = storage.getItem(TEST_KEY) === TEST_KEY;
+                    storage.removeItem(TEST_KEY);
+                    return works;
+                } catch (error) {
+                    return false;
+                }
+            },
+            set(key, value)  { getStorage().setItem(key, value); },
+            get(key)         { return getStorage().getItem(key); },
+            has(key)         { return getStorage().getItem(key) !== null; },
+            remove(key)      { getStorage().removeItem(key); },
+            keys() {
+                const storage = getStorage();
+                const result = [];
+                for (let i = 0; i < storage.length; i++) {
+                    const key = storage.key(i);
+                    if (key !== null) { result.push(key); }
+                }
+                return result;
+            },
+            clear() { getStorage().clear(); }
+        };
+    };
+ 
+    const cookieBackend = {
+        name: "cookie",
+        available() {
+            if (typeof document === "undefined") { return false; }
+            try {
+                this.set(TEST_KEY, TEST_KEY);
+                const works = this.get(TEST_KEY) === TEST_KEY;
+                this.remove(TEST_KEY);
+                return works;
+            } catch (error) {
+                return false;
+            }
+        },
+        set(key, value) {
+            document.cookie = encodeURIComponent(key) + "=" + encodeURIComponent(value) + "; path=/";
+        },
+        get(key) {
+            const target = encodeURIComponent(key) + "=";
+            const cookies = document.cookie ? document.cookie.split(";") : [];
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.indexOf(target) === 0) {
+                    const value = cookie.substring(target.length);
+                    try { return decodeURIComponent(value); } catch (e) { return value; }
+                }
+            }
+            return null;
+        },
+        has(key)    { return this.get(key) !== null; },
+        remove(key) {
+            document.cookie = encodeURIComponent(key) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        },
+        keys() {
+            if (typeof document === "undefined" || !document.cookie) { return []; }
+            return document.cookie.split(";").map(c => c.trim()).filter(Boolean).map(c => {
+                const idx = c.indexOf("=");
+                const key = idx === -1 ? c : c.substring(0, idx);
+                try { return decodeURIComponent(key); } catch (e) { return key; }
+            });
+        },
+        clear() { this.keys().forEach(key => { this.remove(key); }); }
+    };
+ 
+    const createMemoryBackend = () => {
+        const data = Object.create(null);
+        return {
+            name: "memory",
+            available() { return true; },
+            set(key, value)  { data[key] = value; },
+            get(key)         { return Object.prototype.hasOwnProperty.call(data, key) ? data[key] : null; },
+            has(key)         { return Object.prototype.hasOwnProperty.call(data, key); },
+            remove(key)      { delete data[key]; },
+            keys()           { return Object.keys(data); },
+            clear()          { Object.keys(data).forEach(key => { delete data[key]; }); }
+        };
+    };
+ 
+    const createBackends = () => ({
+        localStorage:   createWebStorageBackend("localStorage"),
+        sessionStorage: createWebStorageBackend("sessionStorage"),
+        cookie:         cookieBackend,
+        memory:         createMemoryBackend()
+    });
+ 
+    const selectBackend = (requested, backends) => {
+        const name = requested || "auto";
+        if (name === "auto") {
+            if (backends.localStorage.available())  { return backends.localStorage; }
+            if (backends.cookie.available())        { return backends.cookie; }
+            return backends.memory;
+        }
+        if (!backends[name]) {
+            throw new TypeError(
+                "StorageBin: unknown backend \"" + name + "\". Supported: " +
+                Object.keys(backends).join(", ") + "."
+            );
+        }
+        if (!backends[name].available()) {
+            throw new Error("StorageBin: backend \"" + name + "\" is not available.");
+        }
+        return backends[name];
+    };
+ 
+    class StorageBin {
+        constructor(options = {}) {
+            if (options === null || typeof options !== "object" || Array.isArray(options)) {
+                throw new TypeError("StorageBin: options must be an object.");
+            }
+            const backends     = createBackends();
+            this._backend      = selectBackend(options.backend || "auto", backends);
+            this._backendName  = this._backend.name;
+        }
+ 
+        get backend() { return this._backendName; }
+ 
+        set(key, value) {
+            if (typeof key !== "string") { throw new TypeError("StorageBin.set(): key must be a string."); }
+            this._backend.set(key, encode(value));
+            return this;
+        }
+ 
+        store(values) {
+            if (values === null || typeof values !== "object" || Array.isArray(values)) {
+                throw new TypeError("StorageBin.store(): argument must be an object.");
+            }
+            Object.keys(values).forEach(key => { this.set(key, values[key]); });
+            return this;
+        }
+ 
+        get(key, defaultValue = null) {
+            if (typeof key !== "string") { throw new TypeError("StorageBin.get(): key must be a string."); }
+            const value = this._backend.get(key);
+            return value === null ? defaultValue : decode(value);
+        }
+ 
+        getKeys()      { return this._backend.keys(); }
+ 
+        contains(key) {
+            if (typeof key !== "string") { throw new TypeError("StorageBin.contains(): key must be a string."); }
+            return this._backend.has(key);
+        }
+ 
+        del(keys) {
+            if (typeof keys === "string") { this._backend.remove(keys); return this; }
+            if (Array.isArray(keys)) {
+                keys.forEach((key, index) => {
+                    if (typeof key !== "string") {
+                        throw new TypeError("StorageBin.del(): key at index " + index + " must be a string.");
+                    }
+                    this._backend.remove(key);
+                });
+                return this;
+            }
+            throw new TypeError("StorageBin.del(): key must be a string or array.");
+        }
+ 
+        empty() { return this.clear(); }
+ 
+        clear() { this._backend.clear(); return this; }
+ 
+        toObject() {
+            const result = {};
+            this.getKeys().forEach(key => { result[key] = this.get(key); });
+            return result;
+        }
+    }
+ 
+    return StorageBin;
+})();
 
 // Themestrap
 window.themestrap = {};
@@ -232,14 +497,6 @@ window.themestrap.fn = {
 		);
 	},
 
-	//getScripts(arr, path) {
-	//	const _arr = $.map(arr, scr => $.getScript((path || "") + scr));
-	//	_arr.push($.Deferred(({resolve}) => {
-	//		$(resolve);
-	//	}));
-	//	return $.when(..._arr);
-	//},
-
     getScripts(arr, path = '') {
         const loadedScripts = new Set();
         const requests = arr.map(src => {
@@ -262,6 +519,10 @@ window.themestrap.fn = {
             arr.map(src => import(path + src))
         );
     },
+
+	createStorage(options = {}) {
+		return new StorageBin(options);
+	},
 
 	showErrorMessage(title, content) {
 
@@ -1112,9 +1373,9 @@ window.themestrap.fn = {
 		} );
 	}
 
-	/*
-	* Marquee
-	*/
+	/**
+	 * Marquee
+	 */
 	if( $('.marquee').length && $.isFunction($.fn.marquee) ) {
 		$('.marquee').marquee({
 			duration: 5000,
@@ -1123,89 +1384,6 @@ window.themestrap.fn = {
 			direction: 'left',
 			duplicated: true
 		});
-	}
-
-	/*
-	* Style Switcher Open Loader Button
-	*/
-	if( $('.style-switcher-open-loader').length ) {
-
-		const urlParams = new URLSearchParams(window.location.search);
-
-		let hideStyleSwitcherAfterShow = false;
-
-		$('.style-switcher-open-loader').on('click', function(e){
-			e.preventDefault();
-
-			const $this = $(this);
-
-			// Add Spinner to icon
-			$this.addClass('style-switcher-open-loader-loading');
-
-			const basePath = $(this).data('base-path'), skinSrc = $(this).data('skin-src');
-
-			const script1 = document.createElement("script");
-			script1.src = basePath + "master/style-switcher/style.switcher.localstorage.js";
-
-			const script2 = document.createElement("script");
-			script2.src = basePath + "master/style-switcher/style.switcher.js";
-			script2.id = "styleSwitcherScript";
-			script2.setAttribute('data-base-path', basePath);
-			script2.setAttribute('data-skin-src', skinSrc);
-
-			script2.onload = () => {
-				setTimeout(() => {
-					// Trigger a click to open the style switcher sidebar
-					function checkIfReady() {
-						if( !$('.style-switcher-open').length ) {
-							window.setTimeout(checkIfReady, 100);
-						} else {
-							$('.style-switcher-open').trigger('click');
-
-							if (hideStyleSwitcherAfterShow) {
-								setTimeout(() => {
-									$('.style-switcher-open').trigger('click');
-								}, 2000);
-							}
-						}
-					}
-					checkIfReady();
-
-				}, 500);
-			}
-
-			document.body.appendChild(script1);
-			document.body.appendChild(script2);	
-
-		});
-
-		let htmlDataOptions = $('html').data('style-switcher-options');
-		let showSwitcher = false;
-
-		if(htmlDataOptions) {
-			htmlDataOptions = htmlDataOptions.replace(/'/g, '"');
-
-			if (JSON.parse(htmlDataOptions).showSwitcher) {
-				showSwitcher = true;
-			}
-
-			if (JSON.parse(htmlDataOptions).hideStyleSwitcherAfterShow) {
-				hideStyleSwitcherAfterShow = true;
-			}
-		}
-
-		if (urlParams.has("showStyleSwitcher")) {
-			showSwitcher = true;
-		}
-
-		if (urlParams.has("hideStyleSwitcherAfterShow")) {
-			hideStyleSwitcherAfterShow = true;
-		}
-
-		if (showSwitcher) {
-			$('.style-switcher-open-loader').trigger('click');
-		}
-
 	}
 
 })).apply(this, [ window.themestrap, jQuery ]);

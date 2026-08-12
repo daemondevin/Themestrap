@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>COD [ E ] DITOR</title>
+  
+  <template type="text/javascript" id="HumanObject.js">
+    /* jshint esversion: 8 */
+    const human = {
+    /**
+    * Executes the asynchronous (you only get one [at a time?]),
+    * but highly mutable (did I mean miserable?) existence of a
+    * human's prototype and awaits the Promise that is death.
+    *
+    * @param {boolean} life Where there is life, there is death
+    * @param {integer} age Alias for your life's setTimeout()
+    * @param {boolean} dead Death is one of life's const
+    */
+    "alive": async function (life, age, dead = false) {
+    if (life) {
+    let dying = false;
+    while (!dead) {
+    let upkeep = await eat();
+    let reboot = await sleep();
+    let career = await code();
+
+    // Oxymoronic condition
+    if ((parseInt(career) !== Number.isNaN(upkeep)) && !reboot) {
+    console.log("You're born to die!");
+    continue;
+    } else {
+    dying = true;
+    }
+
+    if (dying) {
+    setTimeout(function() {
+    console.warn("Unexpected end of execution!");
+    break;
+    }, age);
+    }
+    }
+    } else {
+    throw new Error("Unexpected end of script!");
+    }
+    },
+    /**
+    * Death is just the end of biological IIFE
+    */
+    "dead": void function () {
+    return new Promise(resolve => {
+    return resolve(eval(null));
+    });
+    }
+    };
+  </template>
+
+  <template type="text/css" id="style.css">
+    *:root {
+    font-size: 16px;
+    }
+
+    * {
+    transition: all 500ms ease-in;
+    }
+
+    body {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    }
+    body:before, body:after {
+    box-sizing: border-box;
+    }
+
+    section {
+    background: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    height: 100vh;
+    width: 100vw;
+    border: 2px solid red;
+    }
+    section .container {
+    float: left;
+    border: 1px solid #000;
+    }
+    section .container .human {
+    background: #16365c;
+    width: 19em;
+    height: 31em;
+    position: relative;
+    border: 2px solid green;
+    display: flex;
+    justify-content: center;
+    }
+
+    .cheveux:nth-child(1) {
+    width: 7.1em;
+    height: 4em;
+    transform: translateY(2em);
+    border-radius: 0.5em;
+    background: #de4c0e;
+    }
+    .cheveux:nth-child(2) {
+    width: 4em;
+    height: 2.4em;
+    position: absolute;
+    top: 1em;
+    transform: translateX(1.5em);
+    border-radius: 0 1em 0 1em;
+    background: #de4c0e;
+    z-index: 11;
+    }
+    .cheveux:nth-child(3) {
+    width: 6em;
+    height: 3.4em;
+    position: absolute;
+    transform: translateX(-0.1em);
+    border-radius: 0 2em 0 2em;
+    background: #fe802b;
+    z-index: 10;
+    }
+    .cheveux:nth-child(4) {
+    width: 3em;
+    height: 2.5em;
+    position: absolute;
+    top: 0.7em;
+    transform: translateX(-3em);
+    border-radius: 0 2em;
+    background: #c32a03;
+    z-index: 9;
+    }
+
+    .visage {
+    width: 6em;
+    height: 7.7em;
+    padding: 0.8em;
+    position: absolute;
+    top: 3.5em;
+    border-radius: 0 0 3em 3em;
+    box-sizing: border-box;
+    z-index: 9999;
+    box-shadow: 0 1.5em 0 -0.7em rgba(0, 0, 0, 0.1), 0 3em 0 -0.5em #f2b191;
+    background: #fccdab;
+    }
+    .visage .longmay {
+    width: 1.6em;
+    height: 0.4em;
+    background: #de4c0e;
+    border-radius: 1em;
+    box-shadow: 0.1em 0.2em 0 0 rgba(0, 0, 0, 0.2), 2.5em 0em 0 0 #de4c0e, 2.6em 0.2em 0 0 rgba(0, 0, 0, 0.2);
+    }
+    .visage .yeux {
+    opacity: 1;
+    width: 0.6em;
+    height: 1.3em;
+    background: #183a65;
+    margin: 0.8em 0.65em;
+    border-radius: 1em;
+    box-shadow: 0 0 0 0.25em white, 2.5em 0 0 0 #183a65, 2.5em 0 0 0.25em white;
+    }
+    .visage .mouth {
+    padding: 1em 2em;
+    background: #183a65;
+    border-radius: 0 0 5em 5em;
+    position: relative;
+    overflow: hidden;
+    }
+    .visage .mouth .rang {
+    padding: 0.3em 1.8em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: white;
+    border-radius: 0 0 0.5em 0;
+    }
+    .visage .mouth:before {
+    content: "";
+    display: block;
+    clear: 0;
+    padding: 1.5em;
+    background: #eb1b68;
+    border-radius: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 1.5em;
+    }
+
+    .oreille {
+    padding: 0.5em 4em;
+    background: #fccdab;
+    position: absolute;
+    top: 6em;
+    border-radius: 0.5em;
+    z-index: 5;
+    }
+
+    .cothe {
+    width: 9em;
+    height: 14.9em;
+    background: #0771dd;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 1.3em;
+    border-radius: 5em;
+    overflow: hidden;
+    z-index: 12;
+    }
+    .cothe .tui {
+    padding: 0.8em;
+    border: 0.1em solid #000;
+    position: absolute;
+    overflow: hidden;
+    }
+    .cothe .tui:before {
+    display: block;
+    clear: both;
+    content: "";
+    width: 100%;
+    height: 100%;
+    border: 0.1em solid #000;
+    transform: rotate(45deg);
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-top: -1.2em;
+    }
+    .cothe .tui:after {
+    content: "";
+    display: block;
+    clear: both;
+    padding: 0.3em;
+    position: absolute;
+    background: #41b3fc;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 100%;
+    }
+    .cothe .tui:nth-child(1) {
+    top: 5.5em;
+    left: 0.9em;
+    }
+    .cothe .tui:nth-child(2) {
+    top: 5.6em;
+    left: 6.3em;
+    }
+    .cothe .quan {
+    width: 100%;
+    height: 100%;
+    background: #490689;
+    position: absolute;
+    margin-top: 8.6em;
+    }
+    .cothe .quan .thanglung {
+    padding: 0.5em;
+    background: #2c0559;
+    position: relative;
+    }
+    .cothe .quan .thanglung:before {
+    content: "";
+    display: block;
+    clear: both;
+    padding: 0.5em;
+    background: #f0d319;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    }
+
+    .vai {
+    width: 14.5em;
+    height: 3em;
+    background: #0261b1;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: -3em;
+    border-radius: 2em 2em 0 0;
+    z-index: 11;
+    }
+
+    .tay {
+    width: 13.5em;
+    height: 6em;
+    background: #fccdab;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 1em;
+    z-index: 0;
+    }
+
+    .mains {
+    padding: 2.3em;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 100%;
+    margin: 4.5em 5.7em;
+    box-shadow: -11.5em 0 0 0 #fccdab;
+    background: #fccdab;
+    }
+
+    .jamb {
+    width: 7em;
+    height: 7em;
+    border-bottom-style: solid;
+    border-width: 0.5em;
+    background: #490689;
+    position: absolute;
+    bottom: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    }
+    .jamb:before {
+    content: "";
+    display: block;
+    clear: both;
+    padding: 5em;
+    border: 0.5em solid #2c0559;
+    position: absolute;
+    bottom: 3.8em;
+    border-radius: 100%;
+    box-shadow: 0 0 1em 0 #2c0559;
+    }
+    .jamb:after {
+    content: "";
+    display: block;
+    clear: both;
+    width: 0.5em;
+    height: 10em;
+    background: #2c0559;
+    }
+
+    .pieds {
+    position: absolute;
+    bottom: 0.5em;
+    width: 10.5em;
+    height: 1.5em;
+    background: #0472de;
+    border-radius: 2em 2em 0 0;
+    overflow: hidden;
+    z-index: 10;
+    }
+    .pieds:before {
+    content: "";
+    display: block;
+    clear: both;
+    width: 0.5em;
+    height: 4em;
+    border: 1px solid #000;
+    background: #2c0559;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    }
+
+    .dat {
+    width: 15em;
+    height: 0.5em;
+    background: #ec3e88;
+    position: absolute;
+    bottom: 0.2em;
+    border-radius: 2em;
+    z-index: 0;
+    }
+  </template>
+
+  <script type="text/tim" id="jsbOptToggle">
+      <div class="item">    <div class="ui toggle" id="{{opt}}">
+          <label for="{{opt}}">
+            <span class="ui small text" data-plugin-tooltip="{{desc}}" data-inverted="" data-variation="mini">{{name}}</span>
+            <input type="checkbox" name="{{opt}}"{{checked}}/>
+            <span class="indicator"> </span>
+            <span class="led"></span>
+          </label>
+        </div>
+      </div>
+    </script>
+  <script type="text/tim" id="jsbOptSpinner">
+      <div class="item">
+        <div class="ui spinner" id="{{opt}}">
+          <label class="quantity" for="{{opt}}">
+            <span class="ui small text" data-plugin-tooltip="{{desc}}" data-inverted="" data-variation="mini">{{name}}</span>
+            <div class="decrement"></div>
+            <input type="number" name="{{opt}}" value="{{default}}" class="quantity-spinner" />
+            <div class="increment"></div>
+          </label>
+        </div>
+      </div>
+    </script>
+  <script type="text/tim" id="jsbOptStrInput">
+      <div class="item">
+        <div class="setting input">
+          <label for="{{opt}}">
+            <span class="ui small text" data-plugin-tooltip="{{desc}}" data-inverted="" data-variation="mini">{{name}}</span>
+            <input type="text" id="{{opt}}" name="{{opt}}" value="{{default}}" />
+        </label>
+        </div>
+      </div>
+    </script>
+
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/codemirror.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/lint/lint.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/hint/show-hint.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/dialog/dialog.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/search/matchesonscrollbar.css'>
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/daemondevin/cdn@main/CodeMirror/addon/dialog/advanced-dialog.css'>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+
+<body>
+  <div id="app">
+
+    <div id="titlebar">
+      <img id="app-icon" class="app-icon"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAl1JREFUOE+FU09IFHEU/r5Z12oVdSaFCsGkIls7FURQWBYEbtu/QxEEHkKMZrOsTqWUJJV2SVJZLIIiokLoUO0KEhp18BhURAa6u2F5SGcSEc125sWujoym9Lu99733fe/fj1jwQn6t1JNkk1CCLsgAcWN8Kqf9QTw+5U6hY5wvzdEsK6NehDogyxYSz9qfBEpdW//ICwdPE5wtUatF2ARAdQABBkk2wra3ggwBmBMD+NKm3Gz/YvSlnec25JXZinIVwB4AUyJomk5Ky91BcyyF12zStougmYIyV2XPWvuN4wxoWotYVmvX2NhAqEQNQmFsbaE37pv21ZLQSXZbkIYzPbFEzUbtJIGALXK/7avZlSJjQFMnBJikoG6bad4r2Fu0i7ZyB8Bml9pvIQ6GemLdC2fDCk39TmCNAKOWN7PosN/3HMA+V+AkhB0ey7p16l1i+B+CgKb+ALAawLekN9N/xO97LMAhZ+q07MrTbxPvl9hKugWHIJH0ZpbOr0DCem9cXyrZmcEMATEQHTXXh3cXXxSiGYAHwCO9N1b5P4JUX6sAjFNQHTHNp+HydTtsWJcJDuu9sSqHIKCqQQH8f4CO1+bMilMt/ASQ71KJQHApapofHd+B3NxiO0NpFMGJWd8gBPVR03zC/fl55WKzAZh3JBMgHtJGGOQxG6ITWOkS+UywIWIYnelLPAp4JlS1CkQ9gEJXYBJAxpxNpKq9nbUiq6VzaGgy3YJ7QBXZ2QWK11srxAUAy12YgOgQ4fUuwxha9De6ncH83C22pVwRYicFHxSPXHs18uvNYtv4C7Gh5hFCcPUAAAAAAElFTkSuQmCC"
+        alt="">
+      <span class="app-title">cod[e]ditor</span>
+      <span class="separator"></span>
+      <div class="file-info">
+        <span id="filename">untitled.js</span>
+        <span id="led"></span>
+      </div>
+      <div id="win-controls">
+        <a class="win-btn" id="btn-minimize" title="Minimize"><i class="bi bi-dash-lg"></i></a>
+        <a class="win-btn" id="btn-fullscreen" title="Fullscreen"><i class="bi bi-copy" style="transform: rotate(180deg);"></i></a>
+        <a class="win-btn close" id="btn-close" title="Close"><i class="bi bi-x-lg"></i></a>
+      </div>
+    </div>
+
+    <nav id="mainmenu">
+
+      <!-- File -->
+      <div data-menubar-menu>
+        <button data-menubar-trigger type="button">File</button>
+        <div data-menubar-content>
+          <button data-menubar-item data-action="new" data-menubar-shortcut="Ctrl+N" type="button"><span data-menubar-item-label>New</span></button>
+          <button data-menubar-item data-action="open" data-menubar-shortcut="Ctrl+O" type="button"><span data-menubar-item-label>Open…</span></button>
+          <button data-menubar-item data-action="save" data-menubar-shortcut="Ctrl+S" type="button"><span data-menubar-item-label>Save</span></button>
+          <button data-menubar-item data-action="saveAs" data-menubar-shortcut="Ctrl+Shift+S" type="button"><span data-menubar-item-label>Save As…</span></button>
+          <hr data-menubar-separator>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Encoding</span></button>
+            <div data-menubar-sub-content>
+              <div data-menubar-radio-group>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-checked="true" data-menubar-value="UTF-8" data-action="encoding" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>UTF-8</span></button>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-value="UTF-16" data-action="encoding" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>UTF-16</span></button>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-value="ASCII" data-action="encoding" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>ASCII</span></button>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-value="ISO-8859-1" data-action="encoding" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>ISO-8859-1</span></button>
+              </div>
+            </div>
+          </div>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Line Endings</span></button>
+            <div data-menubar-sub-content>
+              <div data-menubar-radio-group>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-checked="true" data-menubar-value="lf" data-action="eol" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>LF (Unix)</span></button>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-value="crlf" data-action="eol" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>CRLF (Windows)</span></button>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-value="cr" data-action="eol" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>CR (Mac Classic)</span></button>
+              </div>
+            </div>
+          </div>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="download" type="button"><span data-menubar-item-label>Download As…</span></button>
+          <button data-menubar-item data-action="close-file" type="button"><span data-menubar-item-label>Close</span></button>
+        </div>
+      </div>
+
+      <!-- Edit -->
+      <div data-menubar-menu>
+        <button data-menubar-trigger type="button">Edit</button>
+        <div data-menubar-content>
+          <button data-menubar-item data-action="undo" data-menubar-shortcut="Ctrl+Z" type="button"><span data-menubar-item-label>Undo</span></button>
+          <button data-menubar-item data-action="redo" data-menubar-shortcut="Ctrl+Y" id="redo-menu-item" data-menubar-disabled="true" type="button"><span data-menubar-item-label>Redo</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="cut" data-menubar-shortcut="Ctrl+X" type="button"><span data-menubar-item-label>Cut</span></button>
+          <button data-menubar-item data-action="copy" data-menubar-shortcut="Ctrl+C" type="button"><span data-menubar-item-label>Copy</span></button>
+          <button data-menubar-item data-action="paste" data-menubar-shortcut="Ctrl+V" type="button"><span data-menubar-item-label>Paste</span></button>
+          <button data-menubar-item data-action="clear" data-menubar-shortcut="Del" type="button"><span data-menubar-item-label>Delete Selection</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="selectAll" data-menubar-shortcut="Ctrl+A" type="button"><span data-menubar-item-label>Select All</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="find" data-menubar-shortcut="Ctrl+F" type="button"><span data-menubar-item-label>Find…</span></button>
+          <button data-menubar-item data-action="replace" data-menubar-shortcut="Ctrl+H" type="button"><span data-menubar-item-label>Replace…</span></button>
+          <button data-menubar-item data-action="jumpToLine" data-menubar-shortcut="Alt+G" type="button"><span data-menubar-item-label>Go to Line…</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="format" type="button"><span data-menubar-item-label>Format Code</span></button>
+        </div>
+      </div>
+
+      <!-- View -->
+      <div data-menubar-menu>
+        <button data-menubar-trigger type="button">View</button>
+        <div data-menubar-content>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Syntax Theme</span></button>
+            <div data-menubar-sub-content id="themes-submenu" style="max-height:280px;overflow-y:auto;"></div>
+          </div>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Interface Theme</span></button>
+            <div data-menubar-sub-content>
+              <div data-menubar-radio-group>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-checked="true" data-menubar-value="dark" data-action="ui-theme" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Dark</span></button>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-value="dim" data-action="ui-theme" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Dim</span></button>
+                <button data-menubar-item data-menubar-type="radio" data-menubar-value="light" data-action="ui-theme" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Light</span></button>
+              </div>
+            </div>
+          </div>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Icon Theme</span></button>
+            <div data-menubar-sub-content id="icons-submenu"></div>
+          </div>
+          <hr data-menubar-separator>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Font</span></button>
+            <div data-menubar-sub-content id="fonts-submenu"></div>
+          </div>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Font Size</span></button>
+            <div data-menubar-sub-content id="fontsize-submenu"></div>
+          </div>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="fullscreen" data-menubar-shortcut="F11" type="button"><span data-menubar-item-label>Fullscreen</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-menubar-type="checkbox" data-action="toggle-wordwrap" id="view-wordwrap" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Word Wrap</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-activeline" id="view-activeline" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Highlight Active Line</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-linenumbers" id="view-linenumbers" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Line Numbers</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-action="toggle-whitespace" id="view-whitespace" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Show Whitespace</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-toolbar" id="view-toolbar" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Show Toolbar</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-statusbar" id="view-statusbar" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Show Status Bar</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-action="toggle-explorer" id="view-explorer" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>File Explorer</span></button>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div data-menubar-menu>
+        <button data-menubar-trigger type="button">Settings</button>
+        <div data-menubar-content>
+          <div data-menubar-sub>
+            <button data-menubar-item data-menubar-sub-trigger type="button"><span data-menubar-item-label>Language</span></button>
+            <div data-menubar-sub-content id="languages-submenu" style="max-height:300px;overflow-y:auto;"></div>
+          </div>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-lint" id="setting-lint" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Lint / Error Checking</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-autocomplete" id="setting-autocomplete" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Auto Complete</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-closebrackets" id="setting-closebrackets" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Auto Close Brackets</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-closetags" id="setting-closetags" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Auto Close Tags</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-action="toggle-tabsasspaces" id="setting-tabsasspaces" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Tabs as Spaces</span></button>
+          <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true" data-action="toggle-matchbrackets" id="setting-matchbrackets" type="button"><span data-menubar-indicator></span><span data-menubar-item-label>Match Brackets</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="format-settings" type="button"><span data-menubar-item-label>Format Settings…</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="export-settings" data-menubar-shortcut="F7" type="button"><span data-menubar-item-label>Export Settings…</span></button>
+          <button data-menubar-item data-action="reset-settings" type="button"><span data-menubar-item-label>Reset Settings…</span></button>
+        </div>
+      </div>
+
+      <!-- Help -->
+      <div data-menubar-menu>
+        <button data-menubar-trigger type="button">Help</button>
+        <div data-menubar-content>
+          <button data-menubar-item data-action="show-shortcuts" data-menubar-shortcut="?" type="button"><span data-menubar-item-label>Keyboard Shortcuts</span></button>
+          <hr data-menubar-separator>
+          <button data-menubar-item data-action="about" data-menubar-shortcut="F1" type="button"><span data-menubar-item-label>About Codeditor…</span></button>
+        </div>
+      </div>
+
+    </nav>
+
+
+    <div id="toolbar" data-plugin-toolbar>
+      <button class="tb-btn" data-toolbar-button data-action="new" data-plugin-tooltip="New (Ctrl+N)" data-plugin-options='{"type":"dark","location":"right","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button data-action="open" data-plugin-tooltip="Open (Ctrl+O)" data-plugin-options='{"type":"dark","location":"right","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button data-action="save" data-plugin-tooltip="Save (Ctrl+S)" data-plugin-options='{"type":"dark","location":"right","delay":[200,0]}'></button>
+      <span data-toolbar-separator></span>
+      <button class="tb-btn" data-toolbar-button data-action="find" data-plugin-tooltip="Find (Ctrl+F)" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button data-action="replace" data-plugin-tooltip="Replace (Ctrl+H)" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <span data-toolbar-separator></span>
+      <button class="tb-btn" data-toolbar-button data-action="undo" data-plugin-tooltip="Undo (Ctrl+Z)" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button id="tb-redo" data-action="redo" data-plugin-tooltip="Redo (Ctrl+Y)" disabled></button>
+      <span data-toolbar-separator></span>
+      <button class="tb-btn" data-toolbar-button data-action="cut" data-plugin-tooltip="Cut" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button data-action="copy" data-plugin-tooltip="Copy" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button data-action="paste" data-plugin-tooltip="Paste" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <span data-toolbar-separator></span>
+      <button class="tb-btn" data-toolbar-button data-action="format" data-plugin-tooltip="Format Code" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button data-action="settings" data-plugin-tooltip="Format Settings" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <span data-toolbar-separator></span>
+      <button class="tb-btn" data-toolbar-button id="tb-explorer" data-action="explorer" data-plugin-tooltip="File Explorer" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <span data-toolbar-separator></span>
+      <button class="tb-btn" data-toolbar-button id="tb-terminal" data-action="terminal" data-plugin-tooltip="Terminal" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <button class="tb-btn" data-toolbar-button id="tb-debugger" data-action="debugger" data-plugin-tooltip="Debugger" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+      <button id="command-trigger" class="tb-btn command-trigger" data-command-open="codeditor-command">
+
+      </button>
+      <span data-toolbar-separator></span>
+      <button class="tb-btn" data-toolbar-button data-action="shortcuts" data-plugin-tooltip="Help" data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></button>
+    </div>
+
+    <div id="sidebar-region" style="flex:1;display:flex;overflow:hidden;position:relative;">
+
+      <div class="sidebar hidden" id="explorer-sidebar">
+        <div class="sidebar-header">Explorer</div>
+        <div class="sidebar-body" id="explorer-tree"></div>
+      </div>
+
+      <div id="editor-wrap">
+        <textarea id="codeditor">/* jshint esversion: 8 */
+const human = {
+    /**
+     * Executes the asynchronous (you only get one [at a time?]),
+     * but highly mutable (did I mean miserable?) existence of a
+     * human's prototype and awaits the Promise that is death.
+     *
+     * @param {boolean}  life  Where there is life, there is death
+     * @param {integer}  age   Alias for your life's setTimeout()
+     * @param {boolean}  dead  Death is one of life's const
+     */
+    alive: async function(life, age, dead = false) {
+        if (life) {
+            let dying = false;
+            while (!dead) {
+                let upkeep = await eat();
+                let reboot = await sleep();
+                let career = await code();
+
+                // Oxymoronic condition
+                if ((parseInt(career) !== Number.isNaN(upkeep)) && !reboot) {
+                    console.log("You're born to die!");
+                    continue;
+                } else {
+                    dying = true;
+                }
+
+                if (dying) {
+                    setTimeout(function() {
+                        console.warn('Unexpected end of execution!');
+                    }, age);
+                }
+            }
+        } else {
+            throw new Error('Unexpected end of script!');
+        }
+    },
+
+    /**
+     * Death is just the end of biological IIFE
+     */
+    dead: (function() {
+        return new Promise(resolve => resolve(null));
+    })
+};
+</textarea>
+      </div>
+
+      <div class="sidebar right hidden" id="format-sidebar">
+        <div class="sidebar-header">Format Settings</div>
+        <div class="format-tab-bar">
+          <div class="format-tab active" data-lang="js">JS</div>
+          <div class="format-tab" data-lang="css">CSS</div>
+          <div class="format-tab" data-lang="html">HTML</div>
+        </div>
+        <div class="sidebar-body">
+          <div class="format-panel active" id="fmt-js"></div>
+          <div class="format-panel" id="fmt-css"></div>
+          <div class="format-panel" id="fmt-html"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="panel-region">
+      <div id="panel-resize"></div>
+      <div id="panel-tabs">
+        <div class="panel-tab active" data-panel="terminal">Terminal</div>
+        <div class="panel-tab" data-panel="debugger">Debugger</div>
+        <div class="panel-close" id="panel-close-btn">✕</div>
+      </div>
+      <div class="panel-content active" id="panel-terminal">
+        <div id="terminal-output"></div>
+        <div id="terminal-input-line">
+          <div id="terminal-input-prompt"></div>
+          <input type="text" id="terminal-input" autocomplete="off" autocorrect="off" spellcheck="false"
+            placeholder="type 'help' to get started…">
+        </div>
+      </div>
+      <div class="panel-content" id="panel-debugger">
+        <div id="debugger-output"></div>
+      </div>
+    </div>
+
+    <div id="statusbar">
+      <div class="sb-item" id="sb-lang">javascript</div>
+      <div class="sb-item" id="sb-mime">text/javascript</div>
+      <div class="sb-item" id="sb-encoding">UTF-8</div>
+      <div class="sb-item" id="sb-eol">LF</div>
+      <div class="sb-item" id="sb-cursor"><a id="sb-cursor-link">1:0</a></div>
+      <div class="sb-item" id="sb-lines">lines: 0</div>
+      <div class="sb-item" id="sb-words">words: 0</div>
+      <div class="sb-item right" id="sb-changes">No Unsaved Changes</div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="alert-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="alert-title">Alert</div>
+      <div class="modal-body" id="alert-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="alert-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="confirm-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="confirm-title">Confirm</div>
+      <div class="modal-body" id="confirm-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-default" id="confirm-cancel">Cancel</button>
+        <button class="btn btn-primary" id="confirm-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="prompt-modal">
+    <div class="modal-box">
+      <div class="modal-title" id="prompt-title">Input</div>
+      <div class="modal-body">
+        <div id="prompt-body" style="margin-bottom:10px;"></div>
+        <input type="text" id="prompt-input" class="str-input" style="width:100%;padding:6px 8px;font-size:13px;">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" id="prompt-cancel">Cancel</button>
+        <button class="btn btn-primary" id="prompt-ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="about-modal">
+    <div class="modal-box">
+      <div class="modal-title">About Codeditor</div>
+      <div class="modal-body">
+        <div class="about-art">░▒█▀▀▄░▄▀▀▄░█▀▄░█▀▀░█▀▄░░▀░░▀█▀░▄▀▀▄░█▀▀▄
+          ░▒█░░░░█░░█░█░█░█▀▀░█░█░░█▀░░█░░█░░█░█▄▄▀
+          ░▒█▄▄▀░░▀▀░░▀▀░░▀▀▀░▀▀░░▀▀▀░░▀░░░▀▀░░▀░▀▀</div>
+        <p>An in-browser code editor built with CodeMirror 5. Still under active development — in fact, Codeditor is the
+          tool used in its own development.</p>
+        <div class="about-links">
+          <a href="https://github.com/daemondevin" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"></path></g></svg></a>
+          <a href="https://codepen.io/daemondevin" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><path d="M21.838 8.445c0-.001-.001-.001 0 0l-.003-.004-.001-.001v-.001a.809.809 0 0 0-.235-.228l-9.164-6.08a.834.834 0 0 0-.898 0L2.371 8.214A.786.786 0 0 0 2 8.897v6.16a.789.789 0 0 0 .131.448v.001l.002.002.01.015v.002h.001l.001.001.001.001c.063.088.14.16.226.215l9.165 6.082a.787.787 0 0 0 .448.139.784.784 0 0 0 .45-.139l9.165-6.082a.794.794 0 0 0 .371-.685v-6.16a.793.793 0 0 0-.133-.452zm-9.057-4.172 6.953 4.613-3.183 2.112-3.771-2.536V4.273zm-1.592 0v4.189l-3.771 2.536-3.181-2.111 6.952-4.614zm-7.595 6.098 2.395 1.59-2.395 1.611v-3.201zm7.595 9.311-6.96-4.617 3.195-2.15 3.765 2.498v4.269zm.795-5.653-3.128-2.078 3.128-2.105 3.131 2.105-3.131 2.078zm.797 5.653v-4.27l3.766-2.498 3.193 2.15-6.959 4.618zm7.597-6.11-2.396-1.611 2.396-1.59v3.201z"></path></g></svg></a>
+          <a href="https://www.deviantart.com/devin" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><path d="M17.57 3h-3.271l-.326.33-1.544 2.942-.486.327H6.432v4.495h3.03l.27.327-3.3 6.305v3.273h3.272l.327-.33 1.543-2.943.486-.326h5.511v-4.495h-3.03l-.269-.329 3.299-6.303L17.57 3z"></path></g></svg></a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" id="about-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="shortcuts-modal">
+    <div class="modal-box" style="max-width:460px;">
+      <div class="modal-title">Keyboard Shortcuts</div>
+      <div class="modal-body" style="max-height:340px;overflow-y:auto;">
+        <table style="width:100%;font-size:12px;border-collapse:collapse;">
+          <tbody id="shortcuts-table"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" id="shortcuts-close">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- Command Menu — Ctrl/⌘+K -->
+  <div data-plugin-command-menu id="codeditor-command" aria-label="Editor commands">
+    <div data-command-backdrop></div>
+    <div data-command-panel>
+      <div data-command-search>
+        <i class="bi bi-search"></i>
+        <input data-command-input type="text" placeholder="Search commands…" autocomplete="off">
+        <kbd>Esc</kbd>
+      </div>
+      <div data-command-list>
+        <div data-command-empty>
+          <strong>No commands found</strong>
+          Try a different keyword.
+        </div>
+
+        <!-- File -->
+        <div data-command-group data-command-heading="File">
+          <button data-command-item data-command-action="new" data-command-keywords="new file create empty blank" type="button">
+            <i class="bi bi-file-earmark" data-command-icon></i>
+            <span data-command-label>New File</span>
+            <kbd data-command-shortcut>Ctrl+N</kbd>
+          </button>
+          <button data-command-item data-command-action="open" data-command-keywords="open file load import" type="button">
+            <i class="bi bi-folder2-open" data-command-icon></i>
+            <span data-command-label>Open File…</span>
+            <kbd data-command-shortcut>Ctrl+O</kbd>
+          </button>
+          <button data-command-item data-command-action="save" data-command-keywords="save write disk" type="button">
+            <i class="bi bi-floppy" data-command-icon></i>
+            <span data-command-label>Save</span>
+            <kbd data-command-shortcut>Ctrl+S</kbd>
+          </button>
+          <button data-command-item data-command-action="saveAs" data-command-keywords="save as rename copy" type="button">
+            <i class="bi bi-floppy2" data-command-icon></i>
+            <span data-command-label>Save As…</span>
+            <kbd data-command-shortcut>Ctrl+Shift+S</kbd>
+          </button>
+          <button data-command-item data-command-action="download" data-command-keywords="download export" type="button">
+            <i class="bi bi-download" data-command-icon></i>
+            <span data-command-label>Download As…</span>
+          </button>
+        </div>
+
+        <!-- Edit -->
+        <div data-command-group data-command-heading="Edit">
+          <button data-command-item data-command-action="undo" data-command-keywords="undo history back" type="button">
+            <i class="bi bi-arrow-counterclockwise" data-command-icon></i>
+            <span data-command-label>Undo</span>
+            <kbd data-command-shortcut>Ctrl+Z</kbd>
+          </button>
+          <button data-command-item data-command-action="redo" data-command-keywords="redo history forward" type="button">
+            <i class="bi bi-arrow-clockwise" data-command-icon></i>
+            <span data-command-label>Redo</span>
+            <kbd data-command-shortcut>Ctrl+Y</kbd>
+          </button>
+          <button data-command-item data-command-action="find" data-command-keywords="find search query lookup" type="button">
+            <i class="bi bi-search" data-command-icon></i>
+            <span data-command-label>Find…</span>
+            <kbd data-command-shortcut>Ctrl+F</kbd>
+          </button>
+          <button data-command-item data-command-action="replace" data-command-keywords="find replace substitute swap" type="button">
+            <i class="bi bi-arrow-left-right" data-command-icon></i>
+            <span data-command-label>Replace…</span>
+            <kbd data-command-shortcut>Ctrl+H</kbd>
+          </button>
+          <button data-command-item data-command-action="jumpToLine" data-command-keywords="go to line jump navigate" type="button">
+            <i class="bi bi-arrow-bar-right" data-command-icon></i>
+            <span data-command-label>Go to Line…</span>
+            <kbd data-command-shortcut>Alt+G</kbd>
+          </button>
+          <button data-command-item data-command-action="selectAll" data-command-keywords="select all highlight" type="button">
+            <i class="bi bi-check2-all" data-command-icon></i>
+            <span data-command-label>Select All</span>
+            <kbd data-command-shortcut>Ctrl+A</kbd>
+          </button>
+          <button data-command-item data-command-action="format" data-command-keywords="format beautify pretty print indent" type="button">
+            <i class="bi bi-justify" data-command-icon></i>
+            <span data-command-label>Format Code</span>
+          </button>
+        </div>
+
+        <!-- View -->
+        <div data-command-group data-command-heading="View">
+          <button data-command-item data-command-action="toggle-wordwrap" data-command-keywords="word wrap toggle line wrap" type="button">
+            <i class="bi bi-text-wrap" data-command-icon></i>
+            <span data-command-label>Toggle Word Wrap</span>
+          </button>
+          <button data-command-item data-command-action="toggle-linenumbers" data-command-keywords="line numbers toggle gutter" type="button">
+            <i class="bi bi-list-ol" data-command-icon></i>
+            <span data-command-label>Toggle Line Numbers</span>
+          </button>
+          <button data-command-item data-command-action="toggle-activeline" data-command-keywords="active line highlight cursor" type="button">
+            <i class="bi bi-cursor-text" data-command-icon></i>
+            <span data-command-label>Toggle Active Line Highlight</span>
+          </button>
+          <button data-command-item data-command-action="toggle-whitespace" data-command-keywords="whitespace spaces tabs show" type="button">
+            <i class="bi bi-pilcrow" data-command-icon></i>
+            <span data-command-label>Toggle Whitespace</span>
+          </button>
+          <button data-command-item data-command-action="toggle-toolbar" data-command-keywords="toolbar toggle show hide" type="button">
+            <i class="bi bi-tools" data-command-icon></i>
+            <span data-command-label>Toggle Toolbar</span>
+          </button>
+          <button data-command-item data-command-action="toggle-statusbar" data-command-keywords="statusbar status bar toggle show hide" type="button">
+            <i class="bi bi-layout-three-columns" data-command-icon></i>
+            <span data-command-label>Toggle Status Bar</span>
+          </button>
+          <button data-command-item data-command-action="toggle-explorer" data-command-keywords="explorer sidebar file tree toggle" type="button">
+            <i class="bi bi-folder" data-command-icon></i>
+            <span data-command-label>Toggle File Explorer</span>
+          </button>
+          <button data-command-item data-command-action="toggle-terminal" data-command-keywords="terminal console panel toggle show" type="button">
+            <i class="bi bi-terminal" data-command-icon></i>
+            <span data-command-label>Toggle Terminal</span>
+          </button>
+          <button data-command-item data-command-action="toggle-debugger" data-command-keywords="debugger debug console panel toggle" type="button">
+            <i class="bi bi-bug" data-command-icon></i>
+            <span data-command-label>Toggle Debugger</span>
+          </button>
+          <button data-command-item data-command-action="fullscreen" data-command-keywords="fullscreen maximize immersive" type="button">
+            <i class="bi bi-fullscreen" data-command-icon></i>
+            <span data-command-label>Fullscreen</span>
+            <kbd data-command-shortcut>F11</kbd>
+          </button>
+        </div>
+
+        <!-- Settings -->
+        <div data-command-group data-command-heading="Settings">
+          <button data-command-item data-command-action="toggle-lint" data-command-keywords="lint error check toggle" type="button">
+            <i class="bi bi-exclamation-triangle" data-command-icon></i>
+            <span data-command-label>Toggle Lint / Error Checking</span>
+          </button>
+          <button data-command-item data-command-action="toggle-autocomplete" data-command-keywords="autocomplete suggestions intellisense toggle" type="button">
+            <i class="bi bi-lightbulb" data-command-icon></i>
+            <span data-command-label>Toggle Auto Complete</span>
+          </button>
+          <button data-command-item data-command-action="toggle-closebrackets" data-command-keywords="close brackets pairs auto toggle" type="button">
+            <i class="bi bi-braces" data-command-icon></i>
+            <span data-command-label>Toggle Auto Close Brackets</span>
+          </button>
+          <button data-command-item data-command-action="toggle-matchbrackets" data-command-keywords="match brackets pairs highlight toggle" type="button">
+            <i class="bi bi-braces-asterisk" data-command-icon></i>
+            <span data-command-label>Toggle Match Brackets</span>
+          </button>
+          <button data-command-item data-command-action="toggle-tabsasspaces" data-command-keywords="tabs spaces indent toggle" type="button">
+            <i class="bi bi-indent" data-command-icon></i>
+            <span data-command-label>Toggle Tabs as Spaces</span>
+          </button>
+          <button data-command-item data-command-action="format-settings" data-command-keywords="format settings options configure beautify" type="button">
+            <i class="bi bi-sliders" data-command-icon></i>
+            <span data-command-label>Format Settings…</span>
+          </button>
+          <button data-command-item data-command-action="export-settings" data-command-keywords="export settings save backup json" type="button">
+            <i class="bi bi-box-arrow-up" data-command-icon></i>
+            <span data-command-label>Export Settings…</span>
+            <kbd data-command-shortcut>F7</kbd>
+          </button>
+          <button data-command-item data-command-action="reset-settings" data-command-keywords="reset settings defaults clear" type="button">
+            <i class="bi bi-arrow-repeat" data-command-icon></i>
+            <span data-command-label>Reset Settings…</span>
+          </button>
+        </div>
+
+        <!-- Help -->
+        <div data-command-group data-command-heading="Help">
+          <button data-command-item data-command-action="show-shortcuts" data-command-keywords="shortcuts keyboard hotkeys help reference" type="button">
+            <i class="bi bi-keyboard" data-command-icon></i>
+            <span data-command-label>Keyboard Shortcuts</span>
+            <kbd data-command-shortcut>?</kbd>
+          </button>
+          <button data-command-item data-command-action="about" data-command-keywords="about info version codeditor" type="button">
+            <i class="bi bi-info-circle" data-command-icon></i>
+            <span data-command-label>About Codeditor…</span>
+            <kbd data-command-shortcut>F1</kbd>
+          </button>
+        </div>
+      </div>
+
+      <div data-command-footer>
+        <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+        <span><kbd>↵</kbd> select</span>
+        <span><kbd>Esc</kbd> close</span>
+      </div>
+    </div>
+  </div>
+  <div id="toast-container"></div>
+  <script src="../../vendor/jquery/jquery.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/codemirror.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/mode/javascript/javascript.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/mode/meta.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/search/searchcursor.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/display/panel.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.13.13/beautify.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.13.13/beautify-css.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.13.13/beautify-html.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/lint/lint.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.60.0/addon/lint/javascript-lint.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/jshint/jshint@master/dist/jshint.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/daemondevin/cdn/CodeMirror/addon/dialog/advanced-dialog.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/daemondevin/cdn/CodeMirror/addon/search/revised-search.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/daemondevin/cdn/CodeMirror/addon/search/revised-jump-to-line.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/premasagar/tim@master/tim.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/daemondevin/cdn/FileBin.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/daemondevin/cdn@main/fomantic-ui/components/spinner.js'></script>
+  <script src='https://cdn.jsdelivr.net/gh/daemondevin/cdn@main/BugBin.js'></script>
+  <script src="../../js/themestrap.js"></script>
+  <script src="../../js/components/themestrap.plugin.menubar.js"></script>
+  <script src="../../js/components/themestrap.plugin.toolbar.js"></script>
+  <script src="../../js/components/themestrap.plugin.tooltip.js"></script>
+  <script src="../../js/components/themestrap.plugin.commandmenu.js"></script>
+  <script src="../../js/components/themestrap.plugin.contextmenu.js"></script>
+  <script src="./script.js"></script>
+
+</body>
+
+</html>

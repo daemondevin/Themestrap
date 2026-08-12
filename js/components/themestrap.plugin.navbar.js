@@ -22,37 +22,30 @@
 (((themestrap = {}, $) => {
     const instanceName = '__navbar';
     
-    // Injected stylesheet — runs once per page, keyed to the plugin stylesheet ID
     const STYLE_ID = 'ts-navbar-styles';
     if (!document.getElementById(STYLE_ID)) {
         const style = document.createElement('style');
         style.id = STYLE_ID;
         style.textContent = `
 :root {
-    /* Themestrap palette */
-    --ts-navy:        #0a1929;
-    --ts-navy-2:      #0e2238;
-    --ts-orange:      #e8672a;
-    --ts-orange-2:    #d2541b;
-    --ts-teal:        #2ab8c8;
-
     /* Semantic surface tokens — LIGHT palette defaults */
-    --ts-navbar-bg:            #ffffff;
-    --ts-navbar-border:        #e4e9f0;
-    --ts-navbar-logo-color:    var(--primary);
-    --ts-navbar-link-color:    #3a4a5e;
-    --ts-navbar-link-hover:    var(--primary-100);
-    --ts-navbar-link-current:  var(--primary);
-    --ts-navbar-accent:        var(--primary);   /* the current-page bar */
-    --ts-navbar-hover-bg:      #f4f6f9;
-    --ts-navbar-menu-bg:       #ffffff;
-    --ts-navbar-menu-border:   #e4e9f0;
-    --ts-navbar-menu-link:     #3a4a5e;
-    --ts-navbar-menu-link-hover: var(--primary);
-    --ts-navbar-menu-heading:  #8190a3;
-    --ts-navbar-toggle-color:  var(--primary);
-    --ts-navbar-shadow:        0 1px 2px rgba(10,25,41,.06),
-                               0 8px 24px rgba(10,25,41,.10);
+    --ts-navbar-bg:                 var(--light, #ffffff);
+    --ts-navbar-border:             var(--light--200, #ececec);
+    --ts-navbar-logo-color:         var(--primary, #0088CC);
+    --ts-navbar-link-color:         var(--primary, #0088CC);
+    --ts-navbar-link-hover:         var(--primary-100, #0077b3);
+    --ts-navbar-link-current:       var(--primary-300, #006699);
+    --ts-navbar-accent:             var(--secondary, #e36159);   
+    --ts-navbar-accent-hover:       var(--secondary-100, #df4c43);
+    --ts-navbar-hover-bg:           var(--light-rgba-10, rgba(255, 255, 255, 0.1));
+    --ts-navbar-menu-bg:            var(--light, #ffffff);
+    --ts-navbar-menu-border:        var(--light--200, #ececec);
+    --ts-navbar-menu-link:          var(--primary, #0088CC);
+    --ts-navbar-menu-link-hover:    var(--primary-100, #0077b3);
+    --ts-navbar-menu-heading:       var(--default, #777);
+    --ts-navbar-toggle-color:       var(--primary, #0088CC);
+    --ts-navbar-shadow:             0 1px 2px var(--dark-rgba-60, rgba(33, 37, 41, 0.6)),
+                                    0 8px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1));;
 
     /* Sizing & motion */
     --ts-navbar-height:        56px;
@@ -63,22 +56,23 @@
     --ts-navbar-z:             1020;
 }
 
+html.dark .ts-navbar,
 .ts-navbar[data-ts-navbar-palette="dark"] {
-    --ts-navbar-bg:            var(--dark);
-    --ts-navbar-border:        var(--dark--200);
-    --ts-navbar-logo-color:    #ffffff;
-    --ts-navbar-link-color:    #b9c6d6;
-    --ts-navbar-link-hover:    #ffffff;
-    --ts-navbar-link-current:  #ffffff;
-    --ts-navbar-hover-bg:      rgba(255,255,255,.05);
-    --ts-navbar-menu-bg:       var(--primary--100);
-    --ts-navbar-menu-border:   #1c3147;
-    --ts-navbar-menu-link:     #b9c6d6;
-    --ts-navbar-menu-link-hover: #ffffff;
-    --ts-navbar-menu-heading:  #6f8194;
-    --ts-navbar-toggle-color:  #ffffff;
-    --ts-navbar-shadow:        0 1px 2px rgba(0,0,0,.3),
-                               0 8px 24px rgba(0,0,0,.35);
+    --ts-navbar-bg:                 var(--dark, #212529);
+    --ts-navbar-border:             var(--dark--200, #101214);
+    --ts-navbar-logo-color:         var(--primary, #0088CC);
+    --ts-navbar-link-color:         var(--primary, #0088CC);
+    --ts-navbar-link-hover:         var(--primary-100, #0077b3);
+    --ts-navbar-link-current:       var(--primary-300, #006699);
+    --ts-navbar-hover-bg:           var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+    --ts-navbar-menu-bg:            var(--dark, #212529);
+    --ts-navbar-menu-border:        var(--dark--200, #101214);
+    --ts-navbar-menu-link:          var(--primary, #0088CC);
+    --ts-navbar-menu-link-hover:    var(--primary-100, #0077b3);
+    --ts-navbar-menu-heading:       var(--default, #777);
+    --ts-navbar-toggle-color:       var(--primary, #0088CC);
+    --ts-navbar-shadow:             0 1px 2px rgba(0,0,0,.3),
+                                    0 8px 24px rgba(0,0,0,.35);
 }
 
 .ts-navbar {
@@ -204,7 +198,7 @@
     outline-offset: -2px;
 }
 
-/* Current page — solid accent top border (Red Hat's signature cue). */
+/* Current page — solid accent top border. */
 .ts-navbar__link--current,
 .ts-navbar__link--current:hover,
 .ts-navbar__link--current-parent {
@@ -213,7 +207,7 @@
     border-top-color: var(--ts-navbar-accent);
 }
 
-/* External links: never show the accent bar except on hover; they leave the IA. */
+/* External links: never show the accent bar except on hover. */
 .ts-navbar__link--external {
     border-top-color: transparent !important;
 }
@@ -326,12 +320,12 @@
     align-items: center;
     gap: 6px;
     margin: 8px 12px 4px;
-    color: var(--ts-orange);
+    color: var(--ts-navbar-accent);
     font-size: .8125rem;
     font-weight: 600;
     text-decoration: none;
 }
-.ts-navbar__menu-cta:hover { color: var(--ts-orange-2); }
+.ts-navbar__menu-cta:hover { color: var(--ts-navbar-accent-hover); }
 .ts-navbar__menu-cta::after {
     content: "";
     width: 12px; height: 12px;
@@ -366,13 +360,13 @@
                 color var(--ts-navbar-transition);
 }
 .ts-navbar__btn--primary {
-    background: var(--secondary);
-    border-color: var(--secondary);
+    background: var(--ts-navbar-accent);
+    border-color: var(--ts-navbar-accent);
     color: #fff;
 }
 .ts-navbar__btn--primary:hover {
-    background: var(--secondary-100);
-    border-color: var(--secondary-100);
+    background: var(--ts-navbar-accent-hover);
+    border-color: var(--ts-navbar-accent-hover);
     color: #fff;
 }
 .ts-navbar__btn--ghost {
@@ -381,7 +375,7 @@
     color: var(--ts-navbar-link-color);
 }
 .ts-navbar__btn--ghost:hover {
-    border-color: var(--tertiary);
+    border-color: var(--ts-navbar-accent-hover);
     color: var(--ts-navbar-link-hover);
 }
 

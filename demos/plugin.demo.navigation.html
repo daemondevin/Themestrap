@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginNavigation — Live Demo | Themestrap</title>
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+<style>
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+}
+code {
+    background: rgba(10,25,41,.06);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+a { color: var(--ts-teal); }
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 720px; margin: 0; line-height: 1.6; }
+.badge-orange {
+    background: var(--ts-orange); color: #fff; font-weight: 600;
+    letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase;
+    font-size: 11px; border-radius: 4px;
+}
+.demo-hero code { background: rgba(255,255,255,.12); color: #ffd9c7; padding: 2px 7px; border-radius: 4px; }
+.feature-tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    color: var(--ts-teal); background: rgba(42,184,200,.15);
+    border-radius: 20px; padding: 3px 10px; margin: 0 4px 4px 0;
+}
+
+/* Cards */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+    overflow: visible;
+}
+.demo-card .card-head { padding: 20px 26px 0; }
+.demo-card .card-body { padding: 20px 26px 26px; }
+.demo-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ts-teal); margin: 0 0 6px;
+}
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 4px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 18px; line-height: 1.5; }
+
+/* Stages */
+.demo-stage {
+    background: #f0f3f8;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: visible;
+}
+.demo-stage.dark-stage { background: #070e18; border-color: #1a2433; }
+.demo-stage.app-stage {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    min-height: 320px;
+}
+.demo-stage.panel-row { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+.demo-stage.megamenu-stage { padding: 24px 20px 100px; }
+
+/* App-shell inside sidebar stage */
+.mock-app { display: flex; width: 100%; }
+.mock-content {
+    flex: 1; min-width: 0; overflow-y: auto;
+    padding: 18px 20px;
+    background: #f9fafb;
+}
+.mock-content h4 { font-size: 14px; font-weight: 600; color: #111827; margin: 0 0 4px; }
+.mock-content p { font-size: 13px; color: #6b7280; margin: 0 0 14px; line-height: 1.5; }
+
+/* Event log */
+.event-log {
+    background: var(--ts-navy); color: #cfe3ff;
+    border-radius: 8px; padding: 12px 14px;
+    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 11.5px; line-height: 1.75;
+    height: 160px; overflow-y: auto; margin-bottom: 0;
+}
+.event-log .l-empty { color: #4c6a85; font-style: italic; }
+.event-log .l-sidebar { color: #a5f3fc; }
+.event-log .l-drawer  { color: #fde68a; }
+.event-log .l-item    { color: #86efac; }
+.event-log .l-panel   { color: #f9a8d4; }
+.event-log .l-api     { color: #93c5fd; }
+.event-log .l-time    { color: #4c6a85; margin-right: 6px; }
+
+/* Snippet */
+pre.snip {
+    background: #0e2238; color: #e1eaf3;
+    padding: 14px 18px; border-radius: 8px;
+    margin: 0; font-size: 12px; line-height: 1.65;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    overflow-x: auto;
+}
+pre.snip .c { color: #6c8bab; font-style: italic; }
+pre.snip .t { color: #ff9d6c; }
+pre.snip .a { color: #f9c98c; }
+pre.snip .v { color: #a8e1ff; }
+
+/* Mode indicator pills */
+.mode-pill {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 4px; margin-right: 6px;
+}
+.mode-sidebar  { background: rgba(99,102,241,.14); color: #6366f1; }
+.mode-panel    { background: rgba(16,185,129,.14); color: #059669; }
+.mode-megamenu { background: rgba(232,103,42,.14); color: var(--ts-orange-2); }
+
+/* Nav chrome */
+.nav-bar {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 50px;
+    box-shadow: 0 1px 4px rgba(10,25,41,.06);
+    position: relative;
+    width: 100%;
+}
+.nav-logo { font-weight: 700; font-size: 14px; color: var(--ts-navy); text-decoration: none; }
+.nav-logo span { color: var(--ts-orange); }
+
+/* Panel content helpers */
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+.simple-link {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 10px; border-radius: 5px; font-size: 13px;
+    color: var(--ts-text); text-decoration: none; transition: background .12s;
+}
+.simple-link:hover { background: #f4f6f9; }
+.panel-sep { height: 1px; background: var(--ts-border); margin: 4px 0; }
+
+/* API controls */
+.ctrl-btn {
+    padding: .3rem .8rem; font-size: 12px; border: 1px solid var(--ts-border);
+    background: #fff; color: var(--ts-text); border-radius: 6px;
+    cursor: pointer; font-weight: 500; transition: background 120ms;
+}
+.ctrl-btn:hover { background: #f4f6f9; }
+.ctrl-btn.primary { background: var(--ts-orange); color: #fff; border-color: var(--ts-orange); }
+.ctrl-btn.primary:hover { background: var(--ts-orange-2); }
+.ctrl-btn.teal { background: var(--ts-teal); color: #fff; border-color: var(--ts-teal); }
+
+/* Indicator tag (demo header) */
+.ind-tag { font-size: 11px; font-weight: 600; border-radius: 4px; padding: 2px 8px; margin: 0 3px; }
+.ind-caret { background: #f0fdf4; color: #15803d; }
+.ind-bar   { background: #eff6ff; color: #1d4ed8; }
+.ind-both  { background: #fdf4ff; color: #7e22ce; }
+
+footer.demo-foot { padding: 40px 0 60px; text-align: center; color: var(--ts-muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · Component</span>
+    <h1 class="mt-3">PluginNavigation — Live Demo</h1>
+    <p class="lead mt-2">
+      One plugin, three modes. <code>mode:"sidebar"</code> gives a collapsible icon-rail app drawer;
+      <code>mode:"panel"</code> gives a vertical nav panel with depth-indented drawers;
+      <code>mode:"megamenu"</code> gives a hover-/click-triggered mega-menu with full keyboard
+      navigation. All from a single unified data-attribute namespace and one file.
+    </p>
+    <div class="mt-3">
+      <span class="feature-tag">sidebar · panel · megamenu</span>
+      <span class="feature-tag">caret/bar/both/none indicators</span>
+      <span class="feature-tag">animated drawers</span>
+      <span class="feature-tag">accordion mode</span>
+      <span class="feature-tag">keyboard navigation</span>
+      <span class="feature-tag">viewport portal</span>
+      <span class="feature-tag">responsive collapse</span>
+      <span class="feature-tag">live API</span>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <!-- 1. Sidebar -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">
+        <span class="mode-pill mode-sidebar">sidebar</span>
+        mode:"sidebar"
+      </p>
+      <h3>Collapsible App Sidebar</h3>
+      <p class="lead-sm">
+        Full header/body/footer structure, group labels, badge counts, animated
+        sub-drawers, CSS tooltip in collapsed state. Click the chevron or use the
+        API buttons to collapse/expand. Event log records every interaction.
+      </p>
+    </div>
+    <div class="card-body">
+      <div class="demo-stage app-stage mb-3">
+        <div class="mock-app">
+
+          <!-- The sidebar -->
+          <nav id="sidebar1"
+               data-plugin-navigation
+               data-plugin-options='{"mode":"sidebar","showToggle":true,"activeOnLoad":false}'>
+
+            <div data-nav-header>
+              <div data-nav-logo>
+                <i class="bi bi-layers-fill" style="font-size:1.3rem;"></i>
+              </div>
+              <span data-nav-title>Themestrap</span>
+            </div>
+
+            <div data-nav-body>
+
+              <div data-nav-section data-nav-section-title="Main">
+                <ul data-nav-list>
+                  <li data-nav-item data-nav-active>
+                    <a href="#" data-nav-link>
+                      <i class="bi bi-house" data-nav-icon></i>
+                      <span data-nav-label>Dashboard</span>
+                      <span data-nav-badge>5</span>
+                    </a>
+                  </li>
+                  <li data-nav-item>
+                    <a href="#" data-nav-link>
+                      <i class="bi bi-bar-chart-line" data-nav-icon></i>
+                      <span data-nav-label>Analytics</span>
+                    </a>
+                  </li>
+                  <li data-nav-item>
+                    <a href="#" data-nav-link>
+                      <i class="bi bi-inbox" data-nav-icon></i>
+                      <span data-nav-label>Inbox</span>
+                      <span data-nav-badge>3</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div data-nav-section data-nav-section-title="Manage">
+                <ul data-nav-list>
+                  <li data-nav-item data-nav-has-children>
+                    <div data-nav-link>
+                      <i class="bi bi-people" data-nav-icon></i>
+                      <span data-nav-label>Users</span>
+                    </div>
+                    <ul data-nav-child-items>
+                      <li data-nav-item><a href="#" data-nav-link><span data-nav-label>All Users</span></a></li>
+                      <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Roles</span></a></li>
+                      <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Invitations</span></a></li>
+                    </ul>
+                  </li>
+                  <li data-nav-item data-nav-has-children>
+                    <div data-nav-link>
+                      <i class="bi bi-gear" data-nav-icon></i>
+                      <span data-nav-label>Settings</span>
+                    </div>
+                    <ul data-nav-child-items>
+                      <li data-nav-item><a href="#" data-nav-link><span data-nav-label>General</span></a></li>
+                      <li data-nav-item><a href="#" data-nav-link><span data-nav-label>API Keys</span></a></li>
+                    </ul>
+                  </li>
+                  <li data-nav-item>
+                    <a href="#" data-nav-link>
+                      <i class="bi bi-shield-check" data-nav-icon></i>
+                      <span data-nav-label>Security</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+
+            <div data-nav-footer>
+              <ul data-nav-list>
+                <li data-nav-item>
+                  <a href="#" data-nav-link>
+                    <i class="bi bi-question-circle" data-nav-icon></i>
+                    <span data-nav-label>Help</span>
+                  </a>
+                </li>
+                <li data-nav-item>
+                  <a href="#" data-nav-link>
+                    <i class="bi bi-box-arrow-right" data-nav-icon></i>
+                    <span data-nav-label>Sign Out</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+
+          <!-- Fake content area -->
+          <div class="mock-content">
+            <h4>Application Content</h4>
+            <p>The sidebar sits to the left in a flex row. Click the toggle chevron in the header to collapse it to an icon-only rail — hover an icon to see its CSS tooltip.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button class="ctrl-btn" id="s1-collapse">collapse()</button>
+              <button class="ctrl-btn" id="s1-expand">expand()</button>
+              <button class="ctrl-btn primary" id="s1-toggle">toggle()</button>
+              <button class="ctrl-btn" id="s1-expandAll">expandAll()</button>
+              <button class="ctrl-btn" id="s1-collapseAll">collapseAll()</button>
+              <button class="ctrl-btn" id="s1-getActive">getActive()</button>
+            </div>
+            <p class="demo-section-label">Event log</p>
+            <div class="event-log" id="log1"><span class="l-empty">Interact with the sidebar…</span></div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="snip">&lt;<span class="t">nav</span> <span class="a">data-plugin-navigation</span>
+     <span class="a">data-plugin-options</span>=<span class="v">'{"mode":"sidebar","showToggle":true}'</span>&gt;
+  &lt;<span class="t">div</span> <span class="a">data-nav-header</span>&gt;
+    &lt;<span class="t">div</span> <span class="a">data-nav-logo</span>&gt;&lt;<span class="t">i</span> <span class="a">class</span>=<span class="v">"bi bi-layers-fill"</span>&gt;&lt;/<span class="t">i</span>&gt;&lt;/<span class="t">div</span>&gt;
+    &lt;<span class="t">span</span> <span class="a">data-nav-title</span>&gt;Themestrap&lt;/<span class="t">span</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+  &lt;<span class="t">div</span> <span class="a">data-nav-body</span>&gt;
+    &lt;<span class="t">div</span> <span class="a">data-nav-section</span> <span class="a">data-nav-section-title</span>=<span class="v">"Main"</span>&gt;
+      &lt;<span class="t">ul</span> <span class="a">data-nav-list</span>&gt;
+        &lt;<span class="t">li</span> <span class="a">data-nav-item</span> <span class="a">data-nav-active</span>&gt;
+          &lt;<span class="t">a</span> <span class="a">href</span>=<span class="v">"/dashboard"</span> <span class="a">data-nav-link</span>&gt;
+            &lt;<span class="t">i</span> <span class="a">class</span>=<span class="v">"bi bi-house"</span> <span class="a">data-nav-icon</span>&gt;&lt;/<span class="t">i</span>&gt;
+            &lt;<span class="t">span</span> <span class="a">data-nav-label</span>&gt;Dashboard&lt;/<span class="t">span</span>&gt;
+            &lt;<span class="t">span</span> <span class="a">data-nav-badge</span>&gt;5&lt;/<span class="t">span</span>&gt;
+          &lt;/<span class="t">a</span>&gt;
+        &lt;/<span class="t">li</span>&gt;
+      &lt;/<span class="t">ul</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+&lt;/<span class="t">nav</span>&gt;</pre>
+    </div>
+  </div>
+
+  <!-- 2. Panel -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">
+        <span class="mode-pill mode-panel">panel</span>
+        mode:"panel" · activeIndicator · accordion
+      </p>
+      <h3>Vertical Panel Nav — Indicators &amp; Drawers</h3>
+      <p class="lead-sm">
+        Three instances showing <span class="ind-tag ind-caret">caret</span>
+        <span class="ind-tag ind-bar">bar</span>
+        <span class="ind-tag ind-both">both</span> indicators, plus a dark accordion
+        panel where only one drawer stays open at a time.
+      </p>
+    </div>
+    <div class="card-body">
+      <div class="demo-stage panel-row mb-3">
+
+        <!-- Caret -->
+        <nav id="panel-caret" data-plugin-navigation
+             data-plugin-options='{"mode":"panel","activeIndicator":"caret","activeOnLoad":false,"bordered":true,"autoExpandActive":false}'>
+          <div data-nav-actions><span data-nav-actions-title>caret</span></div>
+          <div data-nav-body>
+            <ul data-nav-list>
+              <li data-nav-item data-nav-active>
+                <a href="#" data-nav-link><i class="bi bi-house" data-nav-icon></i><span data-nav-label>Home</span><span data-nav-metadata>24</span></a>
+              </li>
+              <li data-nav-item>
+                <a href="#" data-nav-link><i class="bi bi-graph-up" data-nav-icon></i><span data-nav-label>Markets</span></a>
+              </li>
+              <li data-nav-item>
+                <div data-nav-link><i class="bi bi-folder" data-nav-icon></i><span data-nav-label>Files</span></div>
+                <ul data-nav-child-items>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Documents</span></a></li>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Images</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Bar -->
+        <nav id="panel-bar" data-plugin-navigation
+             data-plugin-options='{"mode":"panel","activeIndicator":"bar","activeOnLoad":false,"bordered":true,"autoExpandActive":false}'>
+          <div data-nav-actions><span data-nav-actions-title>bar</span></div>
+          <div data-nav-body>
+            <ul data-nav-list>
+              <li data-nav-item>
+                <a href="#" data-nav-link><i class="bi bi-house" data-nav-icon></i><span data-nav-label>Home</span></a>
+              </li>
+              <li data-nav-item data-nav-active>
+                <a href="#" data-nav-link><i class="bi bi-graph-up" data-nav-icon></i><span data-nav-label>Markets</span><span data-nav-metadata>3</span></a>
+              </li>
+              <li data-nav-item>
+                <div data-nav-link><i class="bi bi-folder" data-nav-icon></i><span data-nav-label>Files</span></div>
+                <ul data-nav-child-items>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Documents</span></a></li>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Images</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Both + Dark + Accordion -->
+        <nav id="panel-dark" data-plugin-navigation
+             data-plugin-options='{"mode":"panel","dark":true,"activeIndicator":"both","accordion":true,"activeOnLoad":false,"bordered":true,"autoExpandActive":false}'>
+          <div data-nav-actions><span data-nav-actions-title>both · dark · accordion</span></div>
+          <div data-nav-body>
+            <ul data-nav-list>
+              <li data-nav-item data-nav-active>
+                <a href="#" data-nav-link><i class="bi bi-grid" data-nav-icon></i><span data-nav-label>Overview</span></a>
+              </li>
+              <li data-nav-item>
+                <div data-nav-link><i class="bi bi-people" data-nav-icon></i><span data-nav-label>Team</span><span data-nav-metadata>5</span></div>
+                <ul data-nav-child-items>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Members</span></a></li>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Roles</span></a></li>
+                </ul>
+              </li>
+              <li data-nav-item>
+                <div data-nav-link><i class="bi bi-gear" data-nav-icon></i><span data-nav-label>Settings</span></div>
+                <ul data-nav-child-items>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>General</span></a></li>
+                  <li data-nav-item><a href="#" data-nav-link><span data-nav-label>Billing</span></a></li>
+                </ul>
+              </li>
+              <li data-nav-item data-nav-disabled>
+                <a href="#" data-nav-link><i class="bi bi-lock" data-nav-icon></i><span data-nav-label>Admin (locked)</span></a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p class="demo-section-label mb-2">Panel controls (bar panel)</p>
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            <button class="ctrl-btn" id="p-expandAll">expandAll()</button>
+            <button class="ctrl-btn" id="p-collapseAll">collapseAll()</button>
+            <button class="ctrl-btn teal" id="p-getActive">getActive()</button>
+          </div>
+          <div class="event-log" id="log2"><span class="l-empty">Interact with a panel…</span></div>
+        </div>
+        <div class="col-md-6">
+<pre class="snip" style="height:165px;overflow-y:auto;">&lt;<span class="t">nav</span> <span class="a">data-plugin-navigation</span>
+     <span class="a">data-plugin-options</span>=<span class="v">'{"mode":"panel",
+       "activeIndicator":"both",
+       "dark":true,
+       "accordion":true}'</span>&gt;
+  &lt;<span class="t">div</span> <span class="a">data-nav-actions</span>&gt;
+    &lt;<span class="t">span</span> <span class="a">data-nav-actions-title</span>&gt;Nav&lt;/<span class="t">span</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+  &lt;<span class="t">div</span> <span class="a">data-nav-body</span>&gt;
+    &lt;<span class="t">ul</span> <span class="a">data-nav-list</span>&gt;
+      &lt;<span class="t">li</span> <span class="a">data-nav-item</span> <span class="a">data-nav-has-children</span>&gt;
+        &lt;<span class="t">div</span> <span class="a">data-nav-link</span>&gt;Label&lt;/<span class="t">div</span>&gt;
+        &lt;<span class="t">ul</span> <span class="a">data-nav-child-items</span>&gt;
+          &lt;<span class="t">li</span> <span class="a">data-nav-item</span>&gt;
+            &lt;<span class="t">a</span> <span class="a">href</span>=<span class="v">"#"</span> <span class="a">data-nav-link</span>&gt;Child&lt;/<span class="t">a</span>&gt;
+          &lt;/<span class="t">li</span>&gt;
+        &lt;/<span class="t">ul</span>&gt;
+      &lt;/<span class="t">li</span>&gt;
+    &lt;/<span class="t">ul</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+&lt;/<span class="t">nav</span>&gt;</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Megamenu -->
+  <div class="demo-card">
+    <div class="card-head">
+      <p class="demo-section-label">
+        <span class="mode-pill mode-megamenu">megamenu</span>
+        mode:"megamenu" · hover + click · horizontal + vertical
+      </p>
+      <h3>Mega-Menu — Site Header Navigation</h3>
+      <p class="lead-sm">
+        Hover (200 ms debounce) opens panels; moving the cursor into the panel before
+        the close timer fires keeps it open. Arrow keys <kbd>←</kbd><kbd>→</kbd> move
+        between triggers, <kbd>↓</kbd> dives into the active panel, <kbd>Esc</kbd>
+        closes and returns focus.
+      </p>
+    </div>
+    <div class="card-body">
+
+      <!-- Hover header -->
+      <p class="demo-section-label mb-2">openOn:"hover" — standard site header</p>
+      <div class="demo-stage megamenu-stage mb-3">
+        <div class="nav-bar">
+          <a href="#" class="nav-logo">Theme<span>strap</span></a>
+
+          <nav id="nav-hover" data-plugin-navigation
+               data-plugin-options='{"mode":"megamenu","openOn":"hover","delay":180}'>
+            <div data-nav-item><a href="#" data-nav-link>Home</a></div>
+            <div data-nav-item>
+              <button data-nav-trigger type="button">Products</button>
+              <div data-nav-content style="min-width:380px">
+                <div class="panel-grid">
+                  <a href="#" data-nav-list-item>
+                    <span data-nav-list-item-icon>🧩</span>
+                    <div>
+                      <div data-nav-list-item-title>Components</div>
+                      <p data-nav-list-item-desc>Reusable UI blocks</p>
+                    </div>
+                  </a>
+                  <a href="#" data-nav-list-item>
+                    <span data-nav-list-item-icon>⚡</span>
+                    <div>
+                      <div data-nav-list-item-title>Plugins</div>
+                      <p data-nav-list-item-desc>jQuery enhancements</p>
+                    </div>
+                  </a>
+                  <a href="#" data-nav-list-item>
+                    <span data-nav-list-item-icon>🎨</span>
+                    <div>
+                      <div data-nav-list-item-title>Themes</div>
+                      <p data-nav-list-item-desc>Design system presets</p>
+                    </div>
+                  </a>
+                  <a href="#" data-nav-list-item>
+                    <span data-nav-list-item-icon>📦</span>
+                    <div>
+                      <div data-nav-list-item-title>Packages</div>
+                      <p data-nav-list-item-desc>MODX extras</p>
+                    </div>
+                  </a>
+                </div>
+                <div class="panel-sep"></div>
+                <a href="#" style="font-size:12.5px;color:var(--ts-orange);display:block;padding:4px 8px;text-decoration:none;">View all products →</a>
+              </div>
+            </div>
+            <div data-nav-item>
+              <button data-nav-trigger type="button">Docs</button>
+              <div data-nav-content style="min-width:200px">
+                <a href="#" class="simple-link">📖 Getting started</a>
+                <a href="#" class="simple-link">🔌 Plugin API</a>
+                <a href="#" class="simple-link">🧱 Chunks</a>
+                <div class="panel-sep"></div>
+                <a href="#" class="simple-link">🛠 Snippets</a>
+              </div>
+            </div>
+            <div data-nav-item><a href="#" data-nav-link>Pricing</a></div>
+          </nav>
+
+          <a href="#" style="font-size:13px;padding:5px 14px;background:var(--ts-orange);color:#fff;border-radius:6px;text-decoration:none;">Sign up</a>
+        </div>
+      </div>
+
+      <!-- Click mode -->
+      <p class="demo-section-label mb-2">openOn:"click" — programmatic controls</p>
+      <div class="demo-stage megamenu-stage mb-3">
+        <div class="nav-bar">
+          <a href="#" class="nav-logo">Theme<span>strap</span></a>
+
+          <nav id="nav-click" data-plugin-navigation
+               data-plugin-options='{"mode":"megamenu","openOn":"click"}'>
+            <div data-nav-item>
+              <button data-nav-trigger type="button">File</button>
+              <div data-nav-content style="min-width:160px">
+                <a href="#" class="simple-link">New…</a>
+                <a href="#" class="simple-link">Open recent</a>
+                <div class="panel-sep"></div>
+                <a href="#" class="simple-link">Save</a>
+              </div>
+            </div>
+            <div data-nav-item>
+              <button data-nav-trigger type="button">Edit</button>
+              <div data-nav-content style="min-width:160px">
+                <a href="#" class="simple-link">Undo</a>
+                <a href="#" class="simple-link">Redo</a>
+                <div class="panel-sep"></div>
+                <a href="#" class="simple-link">Cut</a>
+                <a href="#" class="simple-link">Copy</a>
+                <a href="#" class="simple-link">Paste</a>
+              </div>
+            </div>
+            <div data-nav-item>
+              <button data-nav-trigger type="button">View</button>
+              <div data-nav-content style="min-width:160px">
+                <a href="#" class="simple-link">Zoom in</a>
+                <a href="#" class="simple-link">Zoom out</a>
+                <div class="panel-sep"></div>
+                <a href="#" class="simple-link">Full screen</a>
+              </div>
+            </div>
+            <div data-nav-item><a href="#" data-nav-link>Help</a></div>
+          </nav>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <p class="demo-section-label mb-2">API controls (click nav)</p>
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            <button class="ctrl-btn" id="nm-open0">open(0)</button>
+            <button class="ctrl-btn" id="nm-open1">open(1)</button>
+            <button class="ctrl-btn" id="nm-open2">open(2)</button>
+            <button class="ctrl-btn" id="nm-close">close()</button>
+            <button class="ctrl-btn teal" id="nm-getActive">getActivePanel()</button>
+          </div>
+          <div class="event-log" id="log3"><span class="l-empty">Interact with the click nav or use the buttons…</span></div>
+        </div>
+        <div class="col-md-6">
+<pre class="snip" style="height:165px;overflow-y:auto;">&lt;<span class="t">nav</span> <span class="a">data-plugin-navigation</span>
+     <span class="a">data-plugin-options</span>=<span class="v">'{"mode":"megamenu",
+       "openOn":"hover","delay":200}'</span>&gt;
+
+  &lt;<span class="t">div</span> <span class="a">data-nav-item</span>&gt;
+    &lt;<span class="t">a</span> <span class="a">href</span>=<span class="v">"/"</span> <span class="a">data-nav-link</span>&gt;Home&lt;/<span class="t">a</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+
+  &lt;<span class="t">div</span> <span class="a">data-nav-item</span>&gt;
+    &lt;<span class="t">button</span> <span class="a">data-nav-trigger</span>&gt;Products&lt;/<span class="t">button</span>&gt;
+    &lt;<span class="t">div</span> <span class="a">data-nav-content</span>&gt;
+      &lt;<span class="t">a</span> <span class="a">href</span>=<span class="v">"#"</span> <span class="a">data-nav-list-item</span>&gt;
+        &lt;<span class="t">span</span> <span class="a">data-nav-list-item-icon</span>&gt;🧩&lt;/<span class="t">span</span>&gt;
+        &lt;<span class="t">div</span>&gt;
+          &lt;<span class="t">div</span> <span class="a">data-nav-list-item-title</span>&gt;Components&lt;/<span class="t">div</span>&gt;
+          &lt;<span class="t">p</span> <span class="a">data-nav-list-item-desc</span>&gt;Reusable UI.&lt;/<span class="t">p</span>&gt;
+        &lt;/<span class="t">div</span>&gt;
+      &lt;/<span class="t">a</span>&gt;
+    &lt;/<span class="t">div</span>&gt;
+  &lt;/<span class="t">div</span>&gt;
+
+&lt;/<span class="t">nav</span>&gt;</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="demo-foot">
+  Themestrap &middot; PluginNavigation &middot; part of the Themestrap Component Library
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.navigation.js"></script>
+<script>
+$(function () {
+
+    /* Auto-init all navigation instances */
+    $('[data-plugin-navigation]').each(function () {
+        const $el  = $(this);
+        const opts = themestrap.fn.getOptions($el.attr('data-plugin-options')) || undefined;
+        $el.themestrapPluginNavigation(opts);
+    });
+
+    /* Shared log helpers */
+    function stamp() {
+        return new Date().toLocaleTimeString([], { hour12: false });
+    }
+
+    function makeLogger($log) {
+        let first = true;
+        return function log(cls, msg) {
+            if (first) { $log.empty(); first = false; }
+            $log.append(
+                $('<div>').html(
+                    '<span class="l-time">' + stamp() + '</span>' +
+                    '<span class="' + cls + '">' + msg + '</span>'
+                )
+            );
+            $log[0].scrollTop = $log[0].scrollHeight;
+        };
+    }
+
+    /* 1. Sidebar event log + API */
+    const $sb   = $('#sidebar1');
+    const log1  = makeLogger($('#log1'));
+    const sbInst = () => $sb.data('__pluginNavigation');
+
+    $sb.on('sidebar.toggle.ts.navigation', function (e, d) {
+        log1('l-sidebar', 'sidebar.toggle → ' + (d.collapsed ? 'collapsed ⟵' : 'expanded ⟶'));
+    });
+    $sb.on('drawer.toggle.ts.navigation', function (e, d) {
+        const lbl = d.$item.children('.ts-nav__link').children('.ts-nav__label').text().trim() || 'item';
+        log1('l-drawer', 'drawer.toggle → "' + lbl + '" ' + (d.open ? 'opened ▾' : 'closed ▸'));
+    });
+    $sb.on('item.ts.navigation', function (e, d) {
+        const lbl = d.$link.children('.ts-nav__label').text().trim() || 'leaf';
+        log1('l-item', 'item.ts.navigation → "' + lbl + '"');
+    });
+
+    $('#s1-collapse').on('click',    function () { sbInst()?.collapse(); log1('l-api', 'API collapse()'); });
+    $('#s1-expand').on('click',      function () { sbInst()?.expand();   log1('l-api', 'API expand()'); });
+    $('#s1-toggle').on('click',      function () { sbInst()?.toggle();   log1('l-api', 'API toggle()'); });
+    $('#s1-expandAll').on('click',   function () { sbInst()?.expandAll(); log1('l-api', 'API expandAll()'); });
+    $('#s1-collapseAll').on('click', function () { sbInst()?.collapseAll(); log1('l-api', 'API collapseAll()'); });
+    $('#s1-getActive').on('click',   function () {
+        const r = sbInst()?.getActive();
+        const lbl = r && r.item.length ? (r.item.children('.ts-nav__link').children('.ts-nav__label').text().trim() || 'item') : 'none';
+        log1('l-api', 'API getActive() → "' + lbl + '"');
+    });
+
+    /* 2. Panel event log + API */
+    const $pb   = $('#panel-bar');
+    const log2  = makeLogger($('#log2'));
+    const pbInst = () => $pb.data('__pluginNavigation');
+
+    $pb.on('item.ts.navigation', function (e, d) {
+        const lbl = d.$link.children('.ts-nav__label').text().trim() || 'leaf';
+        log2('l-item', 'item.ts.navigation → "' + lbl + '"');
+    });
+    $pb.on('drawer.toggle.ts.navigation', function (e, d) {
+        const lbl = d.$item.children('.ts-nav__link').children('.ts-nav__label').text().trim() || 'item';
+        log2('l-drawer', 'drawer.toggle → "' + lbl + '" ' + (d.open ? 'opened' : 'closed'));
+    });
+
+    $('#p-expandAll').on('click',   function () { pbInst()?.expandAll();   log2('l-api', 'API expandAll()'); });
+    $('#p-collapseAll').on('click', function () { pbInst()?.collapseAll(); log2('l-api', 'API collapseAll()'); });
+    $('#p-getActive').on('click',   function () {
+        const r = pbInst()?.getActive();
+        const lbl = r && r.item.length ? (r.item.children('.ts-nav__link').children('.ts-nav__label').text().trim() || '(item)') : 'none';
+        log2('l-api', 'API getActive() → "' + lbl + '"');
+    });
+
+    /* 3. Megamenu event log + API */
+    const $nm   = $('#nav-click');
+    const log3  = makeLogger($('#log3'));
+    const nmInst = () => $nm.data('__pluginNavigation');
+
+    $nm[0].addEventListener('panel.open.ts.navigation',  function (e) {
+        log3('l-panel', 'panel.open.ts.navigation → index ' + (e.detail ? e.detail.index : '?'));
+    });
+    $nm[0].addEventListener('panel.close.ts.navigation', function (e) {
+        log3('l-panel', 'panel.close.ts.navigation → index ' + (e.detail ? e.detail.index : '?'));
+    });
+
+    /* jQuery events also fire on megamenu triggers */
+    $nm.on('panel.open.ts.navigation',  function (e, d) {
+        if (!d) return;
+        log3('l-panel', 'panel.open  → index ' + d.index);
+    });
+    $nm.on('panel.close.ts.navigation', function (e, d) {
+        if (!d) return;
+        log3('l-panel', 'panel.close → index ' + d.index);
+    });
+
+    $('#nm-open0').on('click', function () { nmInst()?.open(0);    log3('l-api', 'API open(0)'); });
+    $('#nm-open1').on('click', function () { nmInst()?.open(1);    log3('l-api', 'API open(1)'); });
+    $('#nm-open2').on('click', function () { nmInst()?.open(2);    log3('l-api', 'API open(2)'); });
+    $('#nm-close').on('click', function () { nmInst()?.close();    log3('l-api', 'API close()'); });
+    $('#nm-getActive').on('click', function () {
+        const idx = nmInst()?.getActivePanel() ?? -1;
+        log3('l-api', 'API getActivePanel() → ' + (idx > -1 ? idx : '−1 (none)'));
+    });
+
+});
+</script>
+</body>
+</html>
