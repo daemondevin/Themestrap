@@ -1,6 +1,8 @@
 # Themestrap
 
-> A zero-build JavaScript component system using jQuery and Bootstrap.
+> Themestrap is a genuinely interesting project; the zero-build, no-React-needed philosophy is a principled stance that's easy to second-guess but hard to argue with once you see it working.
+> 
+> _Claude AI_
 
 [![jQuery](https://img.shields.io/badge/jQuery-3.x%2F4.x-0769AD?style=flat-square)](https://jquery.com)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-7952B3?style=flat-square)](https://getbootstrap.com)

@@ -41,7 +41,7 @@
  * Options (data-plugin-options JSON or JS object)
  *
  *   value         0           fill percentage: 0–100
- *   color         'primary'   variant: primary|secondary|success|warning|danger|info|dark
+ *   color         'primary'   variant: primary|secondary|tertiary|quaternary|success|warning|danger|info|dark
  *   striped       false       diagonal stripe pattern on the fill
  *   animated      false       animates the stripe pattern (implies striped: true)
  *   indeterminate false       endless back-and-forth animation; ignores value
@@ -293,7 +293,7 @@
 
             /* Fill element classes */
             const fillClasses = ['ts-progress-fill'];
-            if (o.color)                         fillClasses.push('ts-progress-fill--' + o.color);
+            if (o.color)                          fillClasses.push('ts-progress-fill--' + o.color);
             if (o.striped || o.animated)          fillClasses.push('ts-progress-fill--striped');
             if (o.animated && !o.indeterminate)   fillClasses.push('ts-progress-fill--animated');
             if (o.indeterminate)                  fillClasses.push('ts-progress-fill--indeterminate');
