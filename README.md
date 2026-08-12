@@ -236,7 +236,7 @@ Requires the plugin to implement `destroy()`.
 
 - 60+ plugins
 - A guide for each plugin located under the docs folder
-- 3 starter templates showing how to use the plugins in the wild
+- 3 starter templates and 1 webapp showcasing how to use the plugins in the wild
 - IntersectionObserver lazy-init pipeline (`themestrap.init.js`)
 - Module Loader (`themestrap.loader.js` + `themestrap.modules.js`) with full vendor dependency map
 - Full `destroy()` / re-init support on all plugins
