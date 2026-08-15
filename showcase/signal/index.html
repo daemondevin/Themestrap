@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGNAL — system status</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+
+  <style>
+    /* TOKEN SYSTEM — dark defaults, light overrides */
+    :root {
+      --bg-deep:     #080a0f;
+      --bg-card:     #0f1117;
+      --bg-raised:   #161922;
+      --bg-line:     rgba(255,255,255,0.045);
+      --accent:      #00d4aa;
+      --accent-dim:  rgba(0,212,170,0.15);
+      --accent-warm: #f5a623;
+      --accent-red:  #f04040;
+      --text-hi:     #e2e8f0;
+      --text-mid:    #64748b;
+      --text-lo:     rgba(255,255,255,0.1);
+      --bar-track:   #1e2330;
+      --border:      rgba(255,255,255,0.07);
+      --shadow:      0 1px 3px rgba(0,0,0,0.6);
+      --font-ui:     'Space Grotesk', system-ui, sans-serif;
+      --font-mono:   'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg-deep:     #edf2f7;
+      --bg-card:     #ffffff;
+      --bg-raised:   #f7fafc;
+      --bg-line:     rgba(0,0,0,0.01);
+      --accent:      #00997a;
+      --accent-dim:  rgba(0,153,122,0.1);
+      --accent-warm: #c97d10;
+      --text-hi:     #0f1723;
+      --text-mid:    #4a5568;
+      --text-lo:     rgba(0,0,0,0.12);
+      --bar-track:   #e2e8f0;
+      --border:      rgba(0,0,0,0.08);
+      --shadow:      0 1px 4px rgba(0,0,0,0.12);
+    }
+
+    /* RESET & BASE */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      font-family: var(--font-ui);
+      background: var(--bg-deep);
+      color: var(--text-mid);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Signature: horizontal scanline grid — the single bold aesthetic choice */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 3px,
+        var(--bg-line) 3px,
+        var(--bg-line) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* LAYOUT SHELL */
+    .sg-app {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* HEADER */
+    .sg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .sg-wordmark {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .sg-wordmark-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    .sg-wordmark-sub {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--text-mid);
+      font-family: var(--font-mono);
+    }
+
+    .sg-status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--text-mid);
+    }
+
+    .sg-status-dot::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Dark mode toggle */
+    .sg-darkmode-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-raised);
+      color: var(--text-mid);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .sg-darkmode-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* RULE DIVIDER */
+    .sg-rule {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 24px 0 16px;
+    }
+
+    .sg-rule-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .sg-rule-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* COUNTDOWN BLOCK */
+    .sg-countdown-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .sg-countdown-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sg-countdown-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      font-family: var(--font-mono);
+    }
+
+    .sg-countdown-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-hi);
+      letter-spacing: -0.01em;
+    }
+
+    /* The countdown plugin renders .days .hours .minutes .seconds */
+    #signal-countdown {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .cd-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      min-width: 56px;
+    }
+
+    #signal-countdown .days,
+    #signal-countdown .hours,
+    #signal-countdown .minutes,
+    #signal-countdown .seconds {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      min-width: 60px;
+      position: relative;
+    }
+
+    #signal-countdown .cd-num {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--text-hi);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    /* The text label after the number */
+    #signal-countdown .days,
+    #signal-countdown .hours,
+    #signal-countdown .minutes,
+    #signal-countdown .seconds {
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      gap: 4px;
+    }
+
+    /* CIRCULAR CHARTS ROW */
+    .sg-circles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .sg-circle-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .sg-circle-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* easyPieChart creates a <canvas> that we center with positioning */
+    .sg-chart-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      pointer-events: none;
+    }
+
+    .sg-chart-pct {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-hi);
+      line-height: 1;
+    }
+
+    .sg-chart-pct-sym {
+      font-size: 11px;
+      color: var(--text-mid);
+      font-family: var(--font-mono);
+    }
+
+    .sg-circle-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .sg-circle-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-hi);
+    }
+
+    .sg-circle-desc {
+      font-size: 11px;
+      color: var(--text-mid);
+    }
+
+    /* PROGRESS BARS */
+    .sg-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 8px;
+    }
+
+    .sg-bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .sg-bar-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .sg-bar-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-hi);
+    }
+
+    .sg-bar-track {
+      background: var(--bar-track);
+      border-radius: 4px;
+      height: 5px;
+      overflow: visible;
+      position: relative;
+    }
+
+    /* The plugin animates width on this element */
+    .sg-bar-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 4px;
+      position: relative;
+      overflow: visible;
+    }
+
+    .progress-bar-tooltip {
+      opacity: 0;
+      position: absolute;
+      right: -2px;
+      top: -26px;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      background: var(--bg-raised);
+      color: var(--text-hi);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    /* RATING / SESSION */
+    .sg-session-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .sg-session-left {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sg-session-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    /* Stars */
+    .ts-stars {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .ts-stars .icon {
+      font-style: normal;
+      cursor: pointer;
+      font-size: 26px;
+      line-height: 1;
+      color: var(--text-lo);
+      transition: color 0.1s, transform 0.1s;
+      user-select: none;
+    }
+
+    .ts-stars .icon.active { color: var(--accent-warm); }
+    .ts-stars .icon.selected { color: #fbbf24; transform: scale(1.18); }
+    .ts-stars.disabled .icon { cursor: default; }
+    .ts-stars.disabled .icon.selected { transform: none; }
+
+    .sg-rating-status {
+      font-size: 12px;
+      color: var(--text-mid);
+      font-family: var(--font-mono);
+      min-height: 1.4em;
+      transition: color 0.2s;
+    }
+
+    .sg-rating-status.rated {
+      color: var(--accent);
+    }
+
+    /* Log button */
+    .sg-log-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .sg-log-btn:hover {
+      background: rgba(0, 212, 170, 0.25);
+    }
+
+    .sg-log-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* FOOTNOTE */
+    .sg-footnote {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-mid);
+      letter-spacing: 0.08em;
+      opacity: 0.5;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .sg-circles { grid-template-columns: repeat(3, 1fr); }
+      .sg-circle-card { padding: 14px 10px; }
+      .sg-chart-pct { font-size: 16px; }
+      .sg-countdown-card { flex-direction: column; align-items: flex-start; }
+      .sg-session-card { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sg-status-dot::before { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="sg-app">
+
+  <!-- HEADER -->
+  <header class="sg-header">
+    <div class="sg-wordmark">
+      <span class="sg-wordmark-name">Signal</span>
+      <span class="sg-wordmark-sub">// personal status board</span>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <span class="sg-status-dot">operational</span>
+
+      <!-- PluginDarkMode -->
+      <button class="sg-darkmode-btn"
+              data-plugin-darkmode
+              aria-label="Toggle dark mode"
+              data-plugin-options='{"renderIcon":true}'></button>
+    </div>
+  </header>
+
+
+  <!-- COUNTDOWN -->
+  <div class="sg-rule">
+    <span class="sg-rule-label">time remaining</span>
+    <span class="sg-rule-line"></span>
+  </div>
+
+  <div class="sg-countdown-card">
+    <div class="sg-countdown-meta">
+      <span class="sg-countdown-eyebrow">session ends at 6pm</span>
+      <span class="sg-countdown-label">End of Day Countdown</span>
+    </div>
+
+    <!-- PluginCountdown — manual class, init via JS with computed date -->
+    <div id="signal-countdown"
+         class="manual"
+         data-plugin-tooltip="Time remaining in your standard workday. Resets at midnight."
+         data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'></div>
+  </div>
+
+
+  <!-- CIRCULAR CHARTS -->
+  <div class="sg-rule">
+    <span class="sg-rule-label">efficiency metrics</span>
+    <span class="sg-rule-line"></span>
+  </div>
+ 
+  <div class="sg-circles">
+ 
+    <!-- Focus Metric -->
+    <div class="sg-circle-card">
+      <div class="sg-circle-wrap"
+           style="width:110px;height:110px;"
+           data-plugin-tooltip="Focus score — ratio of deep-work time to total tracked time today."
+           data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'>
+        <!-- PluginChartCircular — data-plugin-options controls chart appearance -->
+        <div class="sg-chart-el manual"
+             id="chart-focus"
+             data-percent="82"
+             data-plugin-options='{"barColor":"#00d4aa","trackColor":"#1e2330","size":110,"lineWidth":7,"animate":{"duration":2000,"enabled":true}}'>
+          <div class="sg-chart-inner">
+            <div class="sg-chart-pct">
+              <span class="percent">0</span>
+              <span class="sg-chart-pct-sym">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-circle-meta">
+        <div class="sg-circle-title">Focus</div>
+        <div class="sg-circle-desc">deep work ratio</div>
+      </div>
+    </div>
+ 
+    <!-- Sessions Metric -->
+    <div class="sg-circle-card">
+      <div class="sg-circle-wrap"
+           style="width:110px;height:110px;"
+           data-plugin-tooltip="Session completion — tasks finished vs. tasks started in this sprint."
+           data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'>
+        <div class="sg-chart-el manual"
+             id="chart-sessions"
+             data-percent="61"
+             data-plugin-options='{"barColor":"#a78bfa","trackColor":"#1e2330","size":110,"lineWidth":7,"animate":{"duration":2000,"enabled":true}}'>
+          <div class="sg-chart-inner">
+            <div class="sg-chart-pct">
+              <span class="percent">0</span>
+              <span class="sg-chart-pct-sym">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-circle-meta">
+        <div class="sg-circle-title">Completion</div>
+        <div class="sg-circle-desc">tasks finished</div>
+      </div>
+    </div>
+ 
+    <!-- Output Metric -->
+    <div class="sg-circle-card">
+      <div class="sg-circle-wrap"
+           style="width:110px;height:110px;"
+           data-plugin-tooltip="Output velocity — lines committed relative to your 30-day average."
+           data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'>
+        <div class="sg-chart-el manual"
+             id="chart-output"
+             data-percent="45"
+             data-plugin-options='{"barColor":"#f5a623","trackColor":"#1e2330","size":110,"lineWidth":7,"animate":{"duration":2000,"enabled":true}}'>
+          <div class="sg-chart-inner">
+            <div class="sg-chart-pct">
+              <span class="percent">0</span>
+              <span class="sg-chart-pct-sym">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sg-circle-meta">
+        <div class="sg-circle-title">Output</div>
+        <div class="sg-circle-desc">vs. 30-day avg</div>
+      </div>
+    </div>
+ 
+  </div>
+
+
+  <!-- PROGRESS BARS -->
+  <div class="sg-rule">
+    <span class="sg-rule-label">resource allocation</span>
+    <span class="sg-rule-line"></span>
+  </div>
+
+  <div class="sg-bars">
+
+    <!-- Focus Capacity -->
+    <div class="sg-bar-row"
+         data-plugin-tooltip="Estimated focus capacity remaining for the day based on session depth and duration."
+         data-plugin-options='{"type":"dark","location":"right","delay":[200,0]}'>
+      <div class="sg-bar-head">
+        <span class="sg-bar-name">Focus Capacity</span>
+      </div>
+      <div class="sg-bar-track">
+        <div data-plugin-progress-bar data-plugin-options='{"value":73,"color":"primary","size":"sm","label":true,"animated":true}'></div>
+        <div class="progress-bar-tooltip">73%</div>
+      </div>
+    </div>
+
+    <!-- Energy Reserve -->
+    <div class="sg-bar-row"
+         data-plugin-tooltip="Cognitive energy reserve — affected by context switching, meetings, and time of day."
+         data-plugin-options='{"type":"dark","location":"right","delay":[200,0]}'>
+      <div class="sg-bar-head">
+        <span class="sg-bar-name">Energy Reserve</span>
+      </div>
+      <div class="sg-bar-track">
+        <div data-plugin-progress-bar data-plugin-options='{"value":52,"color":"secondary","size":"sm","label":true,"animated":true}'></div>
+        <div class="progress-bar-tooltip">52%</div>
+      </div>
+    </div>
+
+    <!-- Creative Output -->
+    <div class="sg-bar-row"
+         data-plugin-tooltip="Creative bandwidth — a running estimate of idea generation capacity based on rest and flow state history."
+         data-plugin-options='{"type":"dark","location":"right","delay":[200,0]}'>
+      <div class="sg-bar-head">
+        <span class="sg-bar-name">Creative Output</span>
+      </div>
+      <div class="sg-bar-track">
+        <div data-plugin-progress-bar data-plugin-options='{"value":38,"color":"success","size":"sm","label":true,"animated":true}'></div>
+        <div class="progress-bar-tooltip">38%</div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- SESSION RATING -->
+  <div class="sg-rule">
+    <span class="sg-rule-label">session quality</span>
+    <span class="sg-rule-line"></span>
+  </div>
+
+  <div class="sg-session-card">
+    <div class="sg-session-left">
+      <span class="sg-session-label">Rate this session</span>
+
+      <!-- Pre-populated .icon elements so PluginRating's build() picks them up
+           without needing Font Awesome or SVG icon generation -->
+      <div id="session-rating" class="ts-stars">
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+      </div>
+
+      <div class="sg-rating-status" id="rating-label">tap to rate your session</div>
+    </div>
+
+    <!-- Log button fires PluginToast -->
+    <button class="sg-log-btn" id="log-btn"
+            data-plugin-tooltip="Commits your session rating and resource estimates to the log."
+            data-plugin-options='{"type":"dark","location":"top","delay":[200,0]}'>
+      ▶ Log Session
+    </button>
+  </div>
+
+
+  <p class="sg-footnote">Signal v0.1 · Themestrap Demo · metrics are illustrative</p>
+
+</div>
+
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.darkmode.js"></script>
+<script src="../../js/components/themestrap.plugin.progressbar.js"></script>
+<script src="../../js/components/themestrap.plugin.chartcircular.js"></script>
+<script src="../../js/components/themestrap.plugin.countdown.js"></script>
+<script src="../../js/components/themestrap.plugin.tooltip.js"></script>
+<script src="../../js/components/themestrap.plugin.rating.js"></script>
+<script src="../../js/components/themestrap.plugin.toast.js"></script>
+
+<!-- APP INIT -->
+<script>
+'use strict';
+
+/* PluginDarkMode runs its early-apply on script load.
+   Initialize the button after DOM ready. */
+$(function() {
+
+  /* 1 — Dark Mode toggle */
+  $('[data-plugin-darkmode]').each(function() {
+    const $el  = $(this);
+    const opts = themestrap.fn.getOptions($el.attr('data-plugin-options')) || undefined;
+    $el.themestrapPluginDarkMode(opts);
+  });
+
+
+  /* 2 — Countdown to 18:00 today (or tomorrow if already past) */
+  const eodDate = (function() {
+    const d = new Date();
+    d.setHours(18, 0, 0, 0);
+    if (Date.now() >= d.getTime()) {
+      d.setDate(d.getDate() + 1);
+    }
+    const pad = function(n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' 18:00:00';
+  }());
+
+  $('#signal-countdown').themestrapPluginCountdown({
+    date:         eodDate,
+    textDay:      'DAY',
+    textHour:     'HR',
+    textMin:      'MIN',
+    textSec:      'SEC',
+    wrapperClass: 'cd-unit',
+    numberClass:  'cd-num'
+  });
+
+
+  /* 3 — Circular charts */
+  ['chart-focus', 'chart-sessions', 'chart-output'].forEach(function(id) {
+    const $el  = $('#' + id);
+    const opts = themestrap.fn.getOptions($el.attr('data-plugin-options')) || undefined;
+    $el.themestrapPluginChartCircular(opts);
+  });
+
+
+  /* 4 — Progress bars */
+  $('[data-plugin-progress-bar]').each(function() {
+    const $el  = $(this);
+    const opts = themestrap.fn.getOptions($el.attr('data-plugin-options')) || undefined;
+    $el.themestrapPluginProgressBar(opts);
+  });
+
+
+  /* 5 — Tooltips */
+  $('[data-plugin-tooltip]').each(function() {
+    const $el  = $(this);
+    const opts = themestrap.fn.getOptions($el.attr('data-plugin-options')) || undefined;
+    $el.themestrapPluginTooltip(opts);
+  });
+
+
+  /* 6 — Session rating (Rating + Toast on log) */
+  const ratingLabels = ['', 'Rough session', 'Okay session', 'Good session', 'Great session', 'Flow state ⚡'];
+
+  $('#session-rating').themestrapPluginRating({
+    maxRating:     5,
+    initialRating: 0,
+    interactive:   true,
+    onRate: function(rating) {
+      const $label = $('#rating-label');
+      if (rating > 0) {
+        $label.text(ratingLabels[rating]).addClass('rated');
+      } else {
+        $label.text('tap to rate your session').removeClass('rated');
+      }
+    }
+  });
+
+
+  /* Log button -> PluginToast */
+  $('#log-btn').on('click', function() {
+    const instance = $('#session-rating').data('__rating');
+    const rating   = instance ? instance.getRating() : 0;
+    const label    = ratingLabels[rating] || 'Unrated';
+    const time     = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    themestrap.PluginToast.show({
+      title:    'Session Logged',
+      body:     label + ' · logged at ' + time,
+      type:     rating >= 4 ? 'success' : rating >= 2 ? 'info' : 'warning',
+      position: 'bottom-end',
+      delay:    4500,
+      progress: true
+    });
+  });
+
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PluginChartCircular — Themestrap Demo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Syne:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../vendor/bootstrap-icons/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --navy-deep:  #0a1929;
+      --navy-mid:   #0e2238;
+      --navy-card:  #132f4c;
+      --navy-hi:    #1e3d5c;
+      --teal:       #2ab8c8;
+      --teal-dim:   rgba(42,184,200,0.14);
+      --orange:     #e8672a;
+      --orange-dim: rgba(232,103,42,0.14);
+      --text-hi:    #eaf2fb;
+      --text-mid:   #7896b4;
+      --text-lo:    rgba(255,255,255,0.2);
+      --border:     rgba(255,255,255,0.07);
+      --font-serif: 'Fraunces', Georgia, serif;
+      --font-sans:  'Syne', system-ui, sans-serif;
+      --font-mono:  'JetBrains Mono', 'Consolas', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--navy-mid);
+      color: var(--text-mid);
+      font-family: var(--font-sans);
+      padding: 36px 20px 64px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Page header */
+    .page-header {
+      max-width: 840px;
+      margin: 0 auto 48px;
+    }
+    .page-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+    }
+    .page-title {
+      font-family: var(--font-serif);
+      font-size: 34px;
+      font-weight: 600;
+      color: var(--text-hi);
+      line-height: 1.18;
+      margin-bottom: 10px;
+    }
+    .page-desc {
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 560px;
+    }
+    .page-header-links {
+      display: flex;
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .page-header-links a {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--teal);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(42,184,200,0.3);
+      padding-bottom: 1px;
+      transition: border-color 0.15s;
+    }
+    .page-header-links a:hover { border-color: var(--teal); }
+
+    /* Demo card */
+    .demo-grid {
+      max-width: 840px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .demo-card {
+      background: var(--navy-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .demo-card-header {
+      padding: 16px 22px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .demo-card-header h3 {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-hi);
+      margin: 0 0 4px;
+    }
+    .demo-card-header p {
+      font-size: 12.5px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .demo-stage {
+      padding: 32px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      background: var(--navy-deep);
+    }
+
+    /* Chart host — the plugin target */
+    .chart-host {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Centered label overlay — sits on top of the prepended canvas */
+    .chart-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      pointer-events: none;
+    }
+    .chart-num {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-hi);
+      line-height: 1;
+    }
+    .chart-sym {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-mid);
+    }
+    .chart-sub {
+      font-size: 11px;
+      color: var(--text-mid);
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* Variant label under each chart */
+    .chart-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .chart-tag {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-lo);
+    }
+
+    /* Code snippet */
+    pre.snip {
+      margin: 0;
+      padding: 14px 22px;
+      background: #0d1b2a;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.65;
+      color: #a8c0d6;
+      overflow-x: auto;
+    }
+
+    /* Demo controls */
+    .demo-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 22px;
+      border-top: 1px solid var(--border);
+      background: var(--navy-hi);
+      flex-wrap: wrap;
+    }
+    .demo-controls label {
+      font-size: 12px;
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .demo-controls input[type="range"] {
+      width: 140px;
+      accent-color: var(--teal);
+    }
+    .demo-btn {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--teal);
+      background: var(--teal-dim);
+      color: var(--teal);
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .demo-btn:hover { background: rgba(42,184,200,0.24); }
+    .demo-btn.orange {
+      border-color: var(--orange);
+      background: var(--orange-dim);
+      color: var(--orange);
+    }
+    .demo-btn.orange:hover { background: rgba(232,103,42,0.24); }
+
+    /* Demo log */
+    .demo-log {
+      padding: 10px 22px;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--teal);
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Section rule */
+    .section-rule {
+      max-width: 840px;
+      margin: 16px auto 8px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-lo);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .demo-stage { padding: 20px 16px; gap: 16px; }
+      pre.snip { font-size: 11px; padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <p class="page-eyebrow">Themestrap — JS Plugin</p>
+  <h1 class="page-title">PluginChartCircular</h1>
+  <p class="page-desc">Animated circular progress rings drawn directly to a <code style="color:var(--teal);font-family:var(--font-mono);font-size:13px">&lt;canvas&gt;</code> element. No external dependencies — reads <code style="color:var(--teal);font-family:var(--font-mono);font-size:13px">data-percent</code>, animates on scroll-in via IntersectionObserver, and renders sharp on any display density.</p>
+  <div class="page-header-links">
+    <a href="plugin-chartcircular-guide.html">Full reference guide &rarr;</a>
+    <a href="../js/components/themestrap.plugin.chartcircular.js">Source &rarr;</a>
+  </div>
+</div>
+
+
+<!-- 1. BASIC -->
+<div class="section-rule">Basic</div>
+<div class="demo-grid">
+
+<div class="demo-card">
+  <div class="demo-card-header">
+    <h3>Default ring</h3>
+    <p>175 px, 13 px stroke, <code>round</code> end-cap, 2.5 s easeOutCubic fill.</p>
+  </div>
+  <div class="demo-stage">
+    <div class="chart-host manual"
+         id="chart-basic"
+         data-percent="78"
+         data-plugin-options='{"barColor":"#e8672a","trackColor":"rgba(255,255,255,0.07)","size":175,"lineWidth":13}'>
+      <div class="chart-overlay">
+        <div class="chart-num"><span class="percent">0</span><span class="chart-sym">%</span></div>
+      </div>
+    </div>
+  </div>
+  <pre class="snip">&lt;div class="chart-host"
+     data-percent="78"
+     data-plugin-options='{"barColor":"#e8672a","trackColor":"rgba(255,255,255,0.07)","size":175,"lineWidth":13}'&gt;
+  &lt;div class="chart-overlay"&gt;
+    &lt;span class="percent"&gt;0&lt;/span&gt;%
+  &lt;/div&gt;
+&lt;/div&gt;
+
+$('.chart-host').themestrapPluginChartCircular();</pre>
+</div>
+
+
+<!-- 2. SIZE VARIANTS -->
+<div class="demo-card">
+  <div class="demo-card-header">
+    <h3>Size variants</h3>
+    <p>Pass <code>size</code> (diameter in px). Scale <code>lineWidth</code> proportionally — roughly 5&ndash;8% of the diameter reads well.</p>
+  </div>
+  <div class="demo-stage">
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-sm"
+           data-percent="65"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.07)","size":100,"lineWidth":7}'>
+        <div class="chart-overlay">
+          <div class="chart-num" style="font-size:15px"><span class="percent">0</span><span class="chart-sym" style="font-size:9px">%</span></div>
+        </div>
+      </div>
+      <span class="chart-tag">size: 100</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-md"
+           data-percent="82"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.07)","size":160,"lineWidth":11}'>
+        <div class="chart-overlay">
+          <div class="chart-num" style="font-size:20px"><span class="percent">0</span><span class="chart-sym">%</span></div>
+        </div>
+      </div>
+      <span class="chart-tag">size: 160</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-lg"
+           data-percent="54"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.07)","size":230,"lineWidth":15}'>
+        <div class="chart-overlay">
+          <div class="chart-num" style="font-size:28px"><span class="percent">0</span><span class="chart-sym" style="font-size:13px">%</span></div>
+        </div>
+      </div>
+      <span class="chart-tag">size: 230</span>
+    </div>
+  </div>
+  <pre class="snip">/* Small */   data-plugin-options='{"size":100,"lineWidth":7}'
+/* Medium */  data-plugin-options='{"size":160,"lineWidth":11}'
+/* Large */   data-plugin-options='{"size":230,"lineWidth":15}'</pre>
+</div>
+
+
+<!-- 3. LINE CAP -->
+<div class="demo-card">
+  <div class="demo-card-header">
+    <h3>Line cap</h3>
+    <p><code>lineCap</code> controls the arc end treatment. <code>round</code> is the default; <code>butt</code> gives flush ends; <code>square</code> adds a half-stroke-width protrusion.</p>
+  </div>
+  <div class="demo-stage">
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-cap-round"
+           data-percent="70"
+           data-plugin-options='{"barColor":"#a78bfa","trackColor":"rgba(255,255,255,0.07)","size":140,"lineWidth":14,"lineCap":"round"}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">round</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-cap-butt"
+           data-percent="70"
+           data-plugin-options='{"barColor":"#a78bfa","trackColor":"rgba(255,255,255,0.07)","size":140,"lineWidth":14,"lineCap":"butt"}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">butt</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-cap-sq"
+           data-percent="70"
+           data-plugin-options='{"barColor":"#a78bfa","trackColor":"rgba(255,255,255,0.07)","size":140,"lineWidth":14,"lineCap":"square"}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">square</span>
+    </div>
+  </div>
+  <pre class="snip">data-plugin-options='{"lineCap":"round"}'   /* default &mdash; rounded arc ends */
+data-plugin-options='{"lineCap":"butt"}'    /* flush cut at both ends       */
+data-plugin-options='{"lineCap":"square"}'  /* square protrusion            */</pre>
+</div>
+
+
+<!-- 4. TRACK + COLOR -->
+<div class="demo-card">
+  <div class="demo-card-header">
+    <h3>Track &amp; color options</h3>
+    <p>Set <code>trackColor: false</code> for a floating arc with no background ring. Any CSS color string works for <code>barColor</code> and <code>trackColor</code>.</p>
+  </div>
+  <div class="demo-stage">
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-notrack"
+           data-percent="60"
+           data-plugin-options='{"barColor":"#f5a623","trackColor":false,"size":140,"lineWidth":12}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">no track</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-solid-track"
+           data-percent="88"
+           data-plugin-options='{"barColor":"#34d399","trackColor":"#064e3b","size":140,"lineWidth":12}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">solid track</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-thin"
+           data-percent="47"
+           data-plugin-options='{"barColor":"#f87171","trackColor":"rgba(248,113,113,0.12)","size":140,"lineWidth":4,"lineCap":"butt"}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">thin stroke</span>
+    </div>
+  </div>
+  <pre class="snip">/* Floating arc &mdash; no track ring */
+{"barColor":"#f5a623","trackColor":false}
+
+/* Solid-filled track */
+{"barColor":"#34d399","trackColor":"#064e3b"}
+
+/* Hairline stroke with tinted track */
+{"barColor":"#f87171","trackColor":"rgba(248,113,113,0.12)","lineWidth":4,"lineCap":"butt"}</pre>
+</div>
+
+
+<!-- 5. SCALE TICKS + ROTATE -->
+<div class="demo-card">
+  <div class="demo-card-header">
+    <h3>Scale ticks &amp; rotate</h3>
+    <p><code>scaleColor</code> draws 24 equidistant tick marks outside the track ring. <code>rotate</code> shifts the arc&rsquo;s zero-point in degrees &mdash; 0 is top (12 o&rsquo;clock), 90 is right.</p>
+  </div>
+  <div class="demo-stage">
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-ticks"
+           data-percent="66"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.07)","scaleColor":"rgba(255,255,255,0.2)","scaleLength":6,"size":160,"lineWidth":9}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:20px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">scale ticks</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-rot90"
+           data-percent="50"
+           data-plugin-options='{"barColor":"#e8672a","trackColor":"rgba(255,255,255,0.07)","size":160,"lineWidth":10,"rotate":90}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:20px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">rotate: 90&deg;</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-rot180"
+           data-percent="50"
+           data-plugin-options='{"barColor":"#e8672a","trackColor":"rgba(255,255,255,0.07)","size":160,"lineWidth":10,"rotate":180}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:20px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">rotate: 180&deg;</span>
+    </div>
+  </div>
+  <pre class="snip">/* 24 tick marks drawn outside the track ring */
+{"scaleColor":"rgba(255,255,255,0.2)","scaleLength":6}
+
+/* Shift the arc start-point by 90&deg; and 180&deg; */
+{"rotate":90}
+{"rotate":180}</pre>
+</div>
+
+
+<!-- 6. ANIMATION SPEED -->
+<div class="demo-card">
+  <div class="demo-card-header">
+    <h3>Animation speed</h3>
+    <p>Control fill duration via <code>animate.duration</code> in ms. Set <code>animate.enabled: false</code> to skip the rAF loop and snap straight to the target value.</p>
+  </div>
+  <div class="demo-stage">
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-fast"
+           data-percent="73"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.07)","size":140,"lineWidth":10,"animate":{"duration":400,"enabled":true}}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">400 ms</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-normal"
+           data-percent="73"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.07)","size":140,"lineWidth":10,"animate":{"duration":2500,"enabled":true}}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">2500 ms (default)</span>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-instant"
+           data-percent="73"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.07)","size":140,"lineWidth":10,"animate":{"enabled":false}}'>
+        <div class="chart-overlay"><div class="chart-num" style="font-size:18px"><span class="percent">0</span><span class="chart-sym">%</span></div></div>
+      </div>
+      <span class="chart-tag">no animation</span>
+    </div>
+  </div>
+  <pre class="snip">{"animate":{"duration":400,"enabled":true}}    /* fast */
+{"animate":{"duration":2500,"enabled":true}}   /* default */
+{"animate":{"enabled":false}}                  /* instant snap */</pre>
+</div>
+
+
+<!-- 7. INTERACTIVE -->
+<div class="demo-card">
+  <div class="demo-card-header">
+    <h3>Interactive &mdash; destroy &amp; re-init</h3>
+    <p>Use the range slider to pick a target, then click <strong>Animate</strong>. Internally it calls <code>instance.destroy()</code> then re-initializes with the new <code>data-percent</code> value.</p>
+  </div>
+  <div class="demo-stage">
+    <div class="chart-wrap">
+      <div class="chart-host manual"
+           id="chart-live"
+           data-percent="60"
+           data-plugin-options='{"barColor":"#2ab8c8","trackColor":"rgba(255,255,255,0.09)","size":200,"lineWidth":14,"animate":{"duration":1200,"enabled":true}}'>
+        <div class="chart-overlay">
+          <div class="chart-num" style="font-size:30px"><span class="percent">0</span><span class="chart-sym" style="font-size:14px">%</span></div>
+          <div class="chart-sub" id="live-label">initial</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="demo-controls">
+    <label>
+      Target: <strong id="slider-val" style="color:var(--teal);font-family:var(--font-mono)">60</strong>%
+      <input type="range" id="pct-slider" min="0" max="100" value="60">
+    </label>
+    <button class="demo-btn" id="btn-animate">&#9654; Animate</button>
+    <button class="demo-btn orange" id="btn-destroy">Destroy</button>
+  </div>
+  <div class="demo-log" id="live-log">ready &mdash; drag the slider, then click Animate</div>
+  <pre class="snip">/* Destroy and re-init at a new percentage */
+const inst = $('#chart-live').data('__chartCircular');
+if (inst) inst.destroy();
+
+$('#chart-live')
+    .attr('data-percent', newPct)
+    .themestrapPluginChartCircular({
+        barColor: '#2ab8c8',
+        trackColor: 'rgba(255,255,255,0.09)',
+        size: 200, lineWidth: 14,
+        animate: { duration: 1200, enabled: true }
+    });</pre>
+</div>
+
+</div><!-- /.demo-grid -->
+
+
+<!-- SCRIPTS -->
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.chartcircular.js"></script>
+<script>
+'use strict';
+
+$(function() {
+
+  /* Init all manual charts using their data-plugin-options */
+  $('.chart-host.manual').each(function() {
+    var $el  = $(this);
+    var opts = themestrap.fn.getOptions($el.attr('data-plugin-options')) || undefined;
+    $el.themestrapPluginChartCircular(opts);
+  });
+
+
+  /* Interactive demo controls */
+  var liveOpts = {
+    barColor:   '#2ab8c8',
+    trackColor: 'rgba(255,255,255,0.09)',
+    size:       200,
+    lineWidth:  14,
+    animate:    { duration: 1200, enabled: true }
+  };
+
+  function reinit(pct) {
+    var inst = $('#chart-live').data('__chartCircular');
+    if (inst) inst.destroy();
+    $('#chart-live').attr('data-percent', pct).themestrapPluginChartCircular(liveOpts);
+    $('#live-label').text('target: ' + pct + '%');
+    $('#live-log').text('\u2192 destroy() + re-init at ' + pct + '% (' + new Date().toLocaleTimeString() + ')');
+  }
+
+  $('#pct-slider').on('input', function() {
+    $('#slider-val').text(this.value);
+  });
+
+  $('#btn-animate').on('click', function() {
+    reinit(parseInt($('#pct-slider').val(), 10));
+  });
+
+  $('#btn-destroy').on('click', function() {
+    var inst = $('#chart-live').data('__chartCircular');
+    if (inst) {
+      inst.destroy();
+      $('#live-log').text('\u2192 destroy() called \u2014 canvas removed, initialHTML restored');
+      $('#live-label').text('destroyed');
+    } else {
+      $('#live-log').text('\u2192 no active instance found');
+    }
+  });
+
+});
+</script>
+
+</body>
+</html>

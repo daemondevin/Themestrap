@@ -171,19 +171,16 @@ Some plugins depend on a third-party libraries:
 
 | Vendor library | Module name | Plugins |
 |---|---|---|
-| easyPieChart | `easypiechart` | chartCircular |
-| jquery.visible | `jquery-visible` | floatElement, parallax, icon, nav |
+| jquery.visible | `jquery-visible` | floatElement, icon |
 | jquery.cookie | `jquery-cookie` | gdpr, gdprWrapper |
 | Vivus | `vivus` | icon |
 | observe-element-in-viewport | `observe-element-in-viewport` | inViewportStyle |
 | vide | `vide` | videoBackground |
 | hover3d | `hover3d` | hoverEffect *(opt)* |
 | jquery.matchHeight | `matchheight` | matchHeight |
-| jquery.easing | `jquery-easing` | progressBar, sectionScroll, scrollToTop, nav |
-| nanoScrollerJS | `nanoscroller` | scrollable |
+| jquery.easing | `jquery-easing` | sectionScroll, scrollToTop |
 | jquery.pin | `jquery-pin` | sticky |
 | jquery-validation | `jquery-validation` | validation, newsletter, search |
-| Slider Revolution | `rs-plugin` | revolutionSlider |
 
 ### Self-contained plugins
 
