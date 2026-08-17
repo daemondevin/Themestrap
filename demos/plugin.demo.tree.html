@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PluginTree · Themestrap Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Syne:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --navy-0:   #04090f;
+      --navy-1:   #0a1929;
+      --navy-2:   #0e2238;
+      --navy-3:   #132b46;
+      --navy-4:   #1a3556;
+      --navy-5:   #204068;
+      --teal:     #5ecfdb;
+      --teal-d:   #3db8c6;
+      --orange:   #f4a261;
+      --green:    #87bb53;
+      --red:      #ff6159;
+      --amber:    #f4bf75;
+      --purple:   #aa759f;
+
+      /* PluginTree CSS variable mapping */
+      --bg-deepest:  var(--navy-1);
+      --bg-dark:     var(--navy-2);
+      --bg-main:     var(--navy-3);
+      --bg-raised:   var(--navy-4);
+      --bg-hover:    var(--navy-5);
+      --bg-active:   #265080;
+      --border-dim:  rgba(94,207,219,0.07);
+      --border-soft: rgba(94,207,219,0.14);
+      --border-mid:  rgba(94,207,219,0.26);
+      --text-bright: #f0f0f0;
+      --text-normal: #c5d4e0;
+      --text-muted:  rgba(197,212,224,0.45);
+      --text-dim:    rgba(197,212,224,0.20);
+      --accent-cyan: var(--teal);
+      --font-ui:     'Syne', system-ui, sans-serif;
+      --font-mono:   'JetBrains Mono', 'Consolas', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      background: var(--navy-0);
+      color: var(--text-normal);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Page header */
+    .demo-hero {
+      background: linear-gradient(160deg, var(--navy-2) 0%, var(--navy-1) 100%);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 48px 0 36px;
+      margin-bottom: 40px;
+    }
+    .demo-hero .badge-plugin {
+      display: inline-block;
+      background: rgba(94,207,219,0.12);
+      border: 1px solid rgba(94,207,219,0.30);
+      color: var(--teal);
+      border-radius: 20px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 2px 12px;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+    .demo-hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .demo-hero h1 span { color: var(--teal); }
+    .demo-hero p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0;
+    }
+
+    .demo-hero .hero-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .hero-pill {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 3px 10px;
+    }
+    .hero-pill strong { color: var(--text-normal); }
+
+    /* Demo cards */
+    .demo-card {
+      background: var(--navy-2);
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    .demo-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      background: var(--navy-1);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .demo-card-header .card-title {
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+      color: var(--text-bright);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .demo-card-header .card-badge {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      border: 1px solid var(--border-dim);
+      padding: 1px 8px;
+      border-radius: 3px;
+    }
+    .demo-card-header .card-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(94,207,219,0.10);
+      border: 1px solid rgba(94,207,219,0.22);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--teal);
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Two-column layout inside card */
+    .demo-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+    @media (max-width: 900px) {
+      .demo-body { grid-template-columns: 1fr; }
+    }
+
+    .demo-pane {
+      padding: 20px;
+    }
+    .demo-pane + .demo-pane {
+      border-left: 1px solid var(--border-dim);
+    }
+    .demo-pane-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    /* Stage: where the plugin lives */
+    .demo-stage {
+      background: var(--navy-1);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      padding: 14px;
+      min-height: 160px;
+    }
+
+    /* Controls */
+    .demo-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    /* Buttons */
+    .btn-ts {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      font-family: var(--font-ui);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      user-select: none;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .btn-primary-ts {
+      background: rgba(94,207,219,0.12);
+      border-color: rgba(94,207,219,0.35);
+      color: var(--teal);
+    }
+    .btn-primary-ts:hover { background: rgba(94,207,219,0.22); }
+    .btn-teal-ts {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #05141f;
+    }
+    .btn-teal-ts:hover { background: var(--teal-d); border-color: var(--teal-d); }
+    .btn-navy-ts {
+      background: rgba(255,255,255,0.05);
+      border-color: var(--border-soft);
+      color: var(--text-muted);
+    }
+    .btn-navy-ts:hover { background: rgba(255,255,255,0.10); color: var(--text-bright); }
+    .btn-ghost-ts {
+      background: transparent;
+      border-color: var(--border-soft);
+      color: var(--text-dim);
+    }
+    .btn-ghost-ts:hover { border-color: var(--border-mid); color: var(--text-normal); }
+    .btn-danger-ts {
+      background: rgba(255,97,89,0.10);
+      border-color: rgba(255,97,89,0.35);
+      color: var(--red);
+    }
+    .btn-danger-ts:hover { background: rgba(255,97,89,0.20); }
+
+    /* Code snip */
+    pre.snip {
+      background: var(--navy-0);
+      border: 1px solid var(--border-dim);
+      border-radius: 5px;
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      line-height: 1.7;
+      color: var(--text-normal);
+      overflow-x: auto;
+      margin: 0;
+    }
+    .hl-tag    { color: #61afef; }
+    .hl-attr   { color: #e06c75; }
+    .hl-val    { color: #98c379; }
+    .hl-cmt    { color: rgba(197,212,224,0.30); font-style: italic; }
+    .hl-kw     { color: #c678dd; }
+    .hl-fn     { color: #61afef; }
+    .hl-str    { color: #98c379; }
+    .hl-num    { color: var(--amber); }
+    .hl-prop   { color: #e06c75; }
+
+    /* Event log */
+    .demo-log {
+      background: var(--navy-0);
+      border: 1px solid var(--border-dim);
+      border-radius: 5px;
+      height: 130px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.6;
+      padding: 8px 10px;
+      margin-top: 10px;
+    }
+    .demo-log::-webkit-scrollbar { width: 4px; }
+    .demo-log::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 2px; }
+    .demo-log .log-entry { display: flex; gap: 8px; color: var(--text-muted); }
+    .demo-log .log-ts    { color: var(--text-dim); flex-shrink: 0; }
+    .demo-log .log-ev    { color: var(--teal); flex-shrink: 0; }
+    .demo-log .log-val   { color: var(--text-normal); }
+    .demo-log .log-empty { color: var(--text-dim); font-style: italic; }
+    .demo-log-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      color: var(--text-dim);
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+
+    /* Output area */
+    .demo-output {
+      background: var(--navy-0);
+      border: 1px solid var(--border-dim);
+      border-radius: 5px;
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      min-height: 36px;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+    .demo-output strong { color: var(--teal); }
+
+    /* Inline toggle */
+    .demo-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .demo-toggle input[type="checkbox"] { accent-color: var(--teal); cursor: pointer; }
+
+    /* Section header between cards */
+    .demo-section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 13px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    /* Selected items output */
+    .selected-list { color: var(--text-normal); }
+    .selected-list .sel-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(94,207,219,0.10);
+      border: 1px solid rgba(94,207,219,0.22);
+      border-radius: 3px;
+      padding: 1px 7px;
+      margin: 2px;
+      font-size: 11px;
+      color: var(--teal);
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-hero">
+  <div class="container">
+    <div class="badge-plugin">$.fn.themestrapPluginTree</div>
+    <h1>Plugin<span>Tree</span></h1>
+    <p>A tree widget with JSON/HTML data sources, animated expand/collapse, single/multi-select, cascading checkboxes, keyboard navigation, and fuzzy search.</p>
+    <div class="hero-pills">
+      <span class="hero-pill"><strong>No deps</strong> · native Canvas &amp; CSS</span>
+      <span class="hero-pill"><strong>data-plugin-tree</strong></span>
+      <span class="hero-pill"><strong>ts.tree.select</strong> · <strong>ts.tree.open</strong> · <strong>ts.tree.search</strong></span>
+      <span class="hero-pill"><strong>ARIA treeview</strong> · keyboard nav</span>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- CARD 1: Sidebar Navigation -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div class="card-icon"><i class="bi bi-list-nested"></i></div>
+      <div class="card-title">Sidebar Navigation</div>
+      <div class="card-badge">JSON data · custom icons</div>
+    </div>
+    <div class="demo-body">
+      <div class="demo-pane">
+        <div class="demo-pane-label">Live Demo</div>
+        <div class="demo-stage">
+          <div id="tree-nav" class="manual"></div>
+        </div>
+        <div class="demo-controls">
+          <button class="btn-ts btn-teal-ts" id="nav-open-all"><i class="bi bi-folder2-open"></i> Open All</button>
+          <button class="btn-ts btn-navy-ts" id="nav-close-all"><i class="bi bi-folder"></i> Close All</button>
+          <button class="btn-ts btn-primary-ts" id="nav-get-sel"><i class="bi bi-check2-square"></i> Get Selected</button>
+          <button class="btn-ts btn-ghost-ts" id="nav-desel-all">Deselect All</button>
+        </div>
+        <div class="demo-log-label">Events</div>
+        <div class="demo-log" id="log-nav"><div class="log-empty">Waiting for interaction…</div></div>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-pane-label">Usage</div>
+        <pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"my-tree"</span><span class="hl-tag">&gt;&lt;/div&gt;</span>
+
+<span class="hl-kw">const</span> tree = $(<span class="hl-str">'#my-tree'</span>).<span class="hl-fn">themestrapPluginTree</span>({
+  <span class="hl-prop">data</span>: [
+    {
+      <span class="hl-prop">id</span>:   <span class="hl-str">'dash'</span>,
+      <span class="hl-prop">text</span>: <span class="hl-str">'Dashboard'</span>,
+      <span class="hl-prop">icon</span>: <span class="hl-str">'bi bi-speedometer2'</span>
+    },
+    {
+      <span class="hl-prop">id</span>:   <span class="hl-str">'comp'</span>,
+      <span class="hl-prop">text</span>: <span class="hl-str">'Components'</span>,
+      <span class="hl-prop">icon</span>: <span class="hl-str">'bi bi-grid'</span>,
+      <span class="hl-prop">state</span>: { <span class="hl-prop">opened</span>: <span class="hl-kw">true</span> },
+      <span class="hl-prop">children</span>: [...]
+    }
+  ],
+  <span class="hl-prop">multiSelect</span>: <span class="hl-kw">false</span>,
+  <span class="hl-prop">animation</span>: <span class="hl-num">200</span>
+});</pre>
+        <div style="margin-top:14px;" class="demo-pane-label">Selected output</div>
+        <div class="demo-output" id="nav-output">Nothing selected yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 2: File Explorer from HTML -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div class="card-icon"><i class="bi bi-folder-symlink"></i></div>
+      <div class="card-title">File Explorer</div>
+      <div class="card-badge">HTML source · inline &lt;ul&gt;</div>
+    </div>
+    <div class="demo-body">
+      <div class="demo-pane">
+        <div class="demo-pane-label">Live Demo</div>
+        <div class="demo-stage">
+          <div id="tree-files" class="manual">
+            <ul>
+              <li data-node-id="src" data-state="open">src
+                <ul>
+                  <li data-node-id="components">components
+                    <ul>
+                      <li data-node-id="tree" data-state="open">Tree
+                        <ul>
+                          <li data-node-id="tree-index">index.js</li>
+                          <li data-node-id="tree-style">style.css</li>
+                        </ul>
+                      </li>
+                      <li data-node-id="modal">Modal
+                        <ul>
+                          <li data-node-id="modal-index">index.js</li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li data-node-id="utils">utils.js</li>
+                  <li data-node-id="main">main.js</li>
+                </ul>
+              </li>
+              <li data-node-id="public">public
+                <ul>
+                  <li data-node-id="index-html">index.html</li>
+                  <li data-node-id="favicon">favicon.ico</li>
+                </ul>
+              </li>
+              <li data-node-id="pkg">package.json</li>
+              <li data-node-id="readme">README.md</li>
+            </ul>
+          </div>
+        </div>
+        <div class="demo-controls">
+          <button class="btn-ts btn-teal-ts" id="files-open-all"><i class="bi bi-folder2-open"></i> Open All</button>
+          <button class="btn-ts btn-navy-ts" id="files-close-all"><i class="bi bi-folder"></i> Close All</button>
+          <button class="btn-ts btn-primary-ts" id="files-open-src">Open <code style="font-size:10px">src</code></button>
+          <button class="btn-ts btn-ghost-ts" id="files-select-utils">Select utils.js</button>
+        </div>
+        <div class="demo-log-label">Events</div>
+        <div class="demo-log" id="log-files"><div class="log-empty">Waiting for interaction…</div></div>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-pane-label">Usage</div>
+        <pre class="snip"><span class="hl-cmt">&lt;!-- Write your tree as nested ul/li --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"my-tree"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;ul&gt;</span>
+    <span class="hl-tag">&lt;li</span> <span class="hl-attr">data-node-id</span>=<span class="hl-val">"src"</span>
+         <span class="hl-attr">data-state</span>=<span class="hl-val">"open"</span><span class="hl-tag">&gt;</span>src
+      <span class="hl-tag">&lt;ul&gt;</span>
+        <span class="hl-tag">&lt;li</span> <span class="hl-attr">data-node-id</span>=<span class="hl-val">"main"</span><span class="hl-tag">&gt;</span>main.js<span class="hl-tag">&lt;/li&gt;</span>
+      <span class="hl-tag">&lt;/ul&gt;</span>
+    <span class="hl-tag">&lt;/li&gt;</span>
+  <span class="hl-tag">&lt;/ul&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Plugin reads inline HTML automatically</span>
+$(<span class="hl-str">'#my-tree'</span>).<span class="hl-fn">themestrapPluginTree</span>();
+
+<span class="hl-cmt">// Public API — ref by id string or $li</span>
+tree.<span class="hl-fn">open</span>(<span class="hl-str">'src'</span>);
+tree.<span class="hl-fn">select</span>(<span class="hl-str">'main'</span>);
+tree.<span class="hl-fn">openAll</span>();
+tree.<span class="hl-fn">closeAll</span>();</pre>
+        <div style="margin-top:14px;" class="demo-pane-label">Node events</div>
+        <pre class="snip">$(<span class="hl-str">'#my-tree'</span>)[<span class="hl-num">0</span>].<span class="hl-fn">addEventListener</span>(
+  <span class="hl-str">'ts.tree.select'</span>, e => {
+  <span class="hl-prop">console</span>.<span class="hl-fn">log</span>(e.detail.id, e.detail.data);
+});</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 3: Checkbox Mode -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div class="card-icon"><i class="bi bi-check2-all"></i></div>
+      <div class="card-title">Checkbox Selection</div>
+      <div class="card-badge">checkbox · cascading · indeterminate</div>
+    </div>
+    <div class="demo-body">
+      <div class="demo-pane">
+        <div class="demo-pane-label">Live Demo</div>
+        <div class="demo-stage">
+          <div id="tree-perms" class="manual"></div>
+        </div>
+        <div class="demo-controls">
+          <button class="btn-ts btn-teal-ts" id="perms-open-all"><i class="bi bi-folder2-open"></i> Expand All</button>
+          <button class="btn-ts btn-primary-ts" id="perms-get-sel"><i class="bi bi-list-check"></i> Get Checked</button>
+          <button class="btn-ts btn-danger-ts" id="perms-desel-all"><i class="bi bi-x-square"></i> Clear All</button>
+        </div>
+        <div class="demo-log-label">Checked nodes</div>
+        <div class="demo-output" id="perms-output" style="height:110px;overflow-y:auto;">Nothing checked yet.</div>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-pane-label">Usage</div>
+        <pre class="snip">$(<span class="hl-str">'#my-tree'</span>).<span class="hl-fn">themestrapPluginTree</span>({
+  <span class="hl-prop">checkbox</span>:   <span class="hl-kw">true</span>,
+  <span class="hl-prop">multiSelect</span>: <span class="hl-kw">true</span>,
+  <span class="hl-prop">data</span>: [
+    {
+      <span class="hl-prop">id</span>: <span class="hl-str">'admin'</span>, <span class="hl-prop">text</span>: <span class="hl-str">'Admin'</span>,
+      <span class="hl-prop">children</span>: [
+        { <span class="hl-prop">id</span>: <span class="hl-str">'usr-read'</span>,   <span class="hl-prop">text</span>: <span class="hl-str">'Read users'</span>   },
+        { <span class="hl-prop">id</span>: <span class="hl-str">'usr-write'</span>,  <span class="hl-prop">text</span>: <span class="hl-str">'Write users'</span>  },
+        { <span class="hl-prop">id</span>: <span class="hl-str">'usr-delete'</span>, <span class="hl-prop">text</span>: <span class="hl-str">'Delete users'</span> }
+      ]
+    }
+  ],
+  <span class="hl-prop">onSelect</span>: (node, $el) => {
+    <span class="hl-prop">console</span>.<span class="hl-fn">log</span>(<span class="hl-str">'checked:'</span>, node.id);
+  }
+});</pre>
+        <div style="margin-top:14px;" class="demo-pane-label">Behaviour</div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+          Clicking a parent checkbox cascades to all descendants.
+          If only some children are checked the parent shows an indeterminate (<code style="font-size:11px;color:var(--teal)">−</code>) state.
+          <code>getSelected()</code> returns every explicitly checked leaf and folder node.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 4: Search -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div class="card-icon"><i class="bi bi-search"></i></div>
+      <div class="card-title">Search &amp; Filter</div>
+      <div class="card-badge">search.enabled · fuzzy · highlight</div>
+    </div>
+    <div class="demo-body">
+      <div class="demo-pane">
+        <div class="demo-pane-label">Live Demo</div>
+        <div class="demo-stage" style="min-height:220px;">
+          <div id="tree-search" class="manual"></div>
+        </div>
+        <div class="demo-controls">
+          <label class="demo-toggle">
+            <input type="checkbox" id="fuzzy-toggle"> Fuzzy search
+          </label>
+          <button class="btn-ts btn-navy-ts" id="search-open-all"><i class="bi bi-folder2-open"></i> Open All</button>
+          <button class="btn-ts btn-ghost-ts" id="search-close-all">Close All</button>
+        </div>
+        <div class="demo-log-label">Search events</div>
+        <div class="demo-log" id="log-search"><div class="log-empty">Type in the search box above…</div></div>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-pane-label">Usage</div>
+        <pre class="snip">$(<span class="hl-str">'#my-tree'</span>).<span class="hl-fn">themestrapPluginTree</span>({
+  <span class="hl-prop">search</span>: {
+    <span class="hl-prop">enabled</span>:     <span class="hl-kw">true</span>,
+    <span class="hl-prop">placeholder</span>: <span class="hl-str">'Filter nodes…'</span>,
+    <span class="hl-prop">fuzzy</span>:       <span class="hl-kw">false</span>,  <span class="hl-cmt">// exact substring</span>
+    <span class="hl-prop">openFound</span>:   <span class="hl-kw">true</span>   <span class="hl-cmt">// auto-open parents</span>
+  },
+  <span class="hl-prop">data</span>: [...]
+});
+
+<span class="hl-cmt">// Call programmatically:</span>
+tree.<span class="hl-fn">search</span>(<span class="hl-str">'butt'</span>);   <span class="hl-cmt">// highlights matches</span>
+tree.<span class="hl-fn">search</span>(<span class="hl-str">''</span>);      <span class="hl-cmt">// clears filter</span>
+
+<span class="hl-cmt">// ts.tree.search event:</span>
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'ts.tree.search'</span>, e => {
+  <span class="hl-prop">console</span>.<span class="hl-fn">log</span>(e.detail.term, e.detail.count);
+});</pre>
+        <div style="margin-top:14px;" class="demo-pane-label">Matching modes</div>
+        <div style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+          <strong style="color:var(--text-normal);">Substring</strong> — case-insensitive <code style="font-size:11px;color:var(--teal)">includes()</code> with in-place mark highlighting.<br>
+          <strong style="color:var(--text-normal);">Fuzzy</strong> — all characters of the term must appear in order in the node text; useful for keyboard-shortcut-style filtering.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 5: API reference -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <div class="card-icon"><i class="bi bi-terminal"></i></div>
+      <div class="card-title">Public API &amp; Events</div>
+      <div class="card-badge">reference</div>
+    </div>
+    <div class="demo-body">
+      <div class="demo-pane">
+        <div class="demo-pane-label">Methods</div>
+        <pre class="snip"><span class="hl-kw">const</span> inst = $(<span class="hl-str">'#el'</span>).data(<span class="hl-str">'__pluginTree'</span>);
+
+<span class="hl-cmt">// Expand / collapse</span>
+inst.<span class="hl-fn">open</span>(<span class="hl-str">'nodeId'</span>);      <span class="hl-cmt">// open by id</span>
+inst.<span class="hl-fn">close</span>($li);          <span class="hl-cmt">// or pass $li</span>
+inst.<span class="hl-fn">toggle</span>(<span class="hl-str">'nodeId'</span>);
+inst.<span class="hl-fn">openAll</span>();
+inst.<span class="hl-fn">closeAll</span>();
+
+<span class="hl-cmt">// Selection</span>
+inst.<span class="hl-fn">select</span>(<span class="hl-str">'nodeId'</span>);
+inst.<span class="hl-fn">deselect</span>(<span class="hl-str">'nodeId'</span>);
+inst.<span class="hl-fn">deselectAll</span>();
+inst.<span class="hl-fn">getSelected</span>();
+<span class="hl-cmt">// → [{ id, data, $el }, ...]</span>
+
+<span class="hl-cmt">// Search</span>
+inst.<span class="hl-fn">search</span>(<span class="hl-str">'term'</span>);
+inst.<span class="hl-fn">search</span>(<span class="hl-str">''</span>);         <span class="hl-cmt">// reset</span>
+
+<span class="hl-cmt">// Teardown</span>
+inst.<span class="hl-fn">destroy</span>();           <span class="hl-cmt">// restores original HTML</span></pre>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-pane-label">Events (all bubble)</div>
+        <pre class="snip"><span class="hl-kw">const</span> el = $(<span class="hl-str">'#my-tree'</span>)[<span class="hl-num">0</span>];
+
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'ts.tree.select'</span>, e => {
+  <span class="hl-cmt">// e.detail → { id, data, $el }</span>
+});
+
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'ts.tree.deselect'</span>, e => {
+  <span class="hl-cmt">// e.detail → { id, data, $el }</span>
+});
+
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'ts.tree.open'</span>, e => {
+  <span class="hl-cmt">// e.detail → { id, data, $el }</span>
+});
+
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'ts.tree.close'</span>, e => {
+  <span class="hl-cmt">// e.detail → { id, data, $el }</span>
+});
+
+el.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'ts.tree.search'</span>, e => {
+  <span class="hl-cmt">// e.detail → { term, count }</span>
+});</pre>
+        <div style="margin-top:14px;" class="demo-pane-label">Options reference</div>
+        <pre class="snip">{
+  <span class="hl-prop">data</span>:        <span class="hl-kw">null</span>,      <span class="hl-cmt">// JSON array | null (HTML)</span>
+  <span class="hl-prop">openAll</span>:     <span class="hl-kw">false</span>,
+  <span class="hl-prop">checkbox</span>:    <span class="hl-kw">false</span>,
+  <span class="hl-prop">multiSelect</span>: <span class="hl-kw">true</span>,
+  <span class="hl-prop">animation</span>:   <span class="hl-num">200</span>,       <span class="hl-cmt">// ms, 0 to disable</span>
+  <span class="hl-prop">icons</span>: {
+    <span class="hl-prop">folder</span>: <span class="hl-kw">null</span>,          <span class="hl-cmt">// CSS class override</span>
+    <span class="hl-prop">leaf</span>:   <span class="hl-kw">null</span>
+  },
+  <span class="hl-prop">search</span>: {
+    <span class="hl-prop">enabled</span>:     <span class="hl-kw">false</span>,
+    <span class="hl-prop">placeholder</span>: <span class="hl-str">'Search…'</span>,
+    <span class="hl-prop">fuzzy</span>:       <span class="hl-kw">false</span>,
+    <span class="hl-prop">openFound</span>:   <span class="hl-kw">true</span>
+  },
+  <span class="hl-prop">onSelect</span>:   <span class="hl-kw">null</span>,       <span class="hl-cmt">// (nodeData, $li)</span>
+  <span class="hl-prop">onDeselect</span>: <span class="hl-kw">null</span>,
+  <span class="hl-prop">onOpen</span>:     <span class="hl-kw">null</span>,
+  <span class="hl-prop">onClose</span>:    <span class="hl-kw">null</span>
+}</pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../../vendor/jquery/jquery.min.js"></script>
+<script src="../../js/themestrap.js"></script>
+<script src="../../js/components/themestrap.plugin.tree.js"></script>
+<script>
+$(function() {
+    'use strict';
+
+    /* Shared log helper */
+    function logEvent($log, ev, val) {
+        $log.find('.log-empty').remove();
+        const now  = new Date();
+        const ts   = [now.getHours(), now.getMinutes(), now.getSeconds()]
+                       .map(n => String(n).padStart(2, '0')).join(':');
+        const $row = $([
+            '<div class="log-entry">',
+            '<span class="log-ts">', ts, '</span>',
+            '<span class="log-ev">', ev, '</span>',
+            '<span class="log-val">', val, '</span>',
+            '</div>'
+        ].join(''));
+        $log.append($row);
+        $log.scrollTop($log[0].scrollHeight);
+    }
+
+    /* DEMO 1: Sidebar Navigation */
+    (function() {
+        const navData = [
+            {
+                id: 'dash', text: 'Dashboard',
+                icon: 'bi bi-speedometer2'
+            },
+            {
+                id: 'components', text: 'Components',
+                icon: 'bi bi-grid-3x3-gap',
+                state: { opened: true },
+                children: [
+                    { id: 'btn',    text: 'Buttons',    icon: 'bi bi-toggles' },
+                    { id: 'cards',  text: 'Cards',      icon: 'bi bi-card-text' },
+                    { id: 'forms',  text: 'Forms',      icon: 'bi bi-ui-checks' },
+                    { id: 'modals', text: 'Modals',     icon: 'bi bi-window' },
+                    { id: 'tables', text: 'Tables',     icon: 'bi bi-table' }
+                ]
+            },
+            {
+                id: 'docs', text: 'Documentation',
+                icon: 'bi bi-journal-text',
+                children: [
+                    { id: 'guide',    text: 'Getting Started', icon: 'bi bi-rocket' },
+                    { id: 'api',      text: 'API Reference',   icon: 'bi bi-code-slash' },
+                    { id: 'examples', text: 'Examples',        icon: 'bi bi-lightbulb' }
+                ]
+            },
+            {
+                id: 'settings', text: 'Settings',
+                icon: 'bi bi-gear'
+            }
+        ];
+
+        const treeNav = $('#tree-nav').themestrapPluginTree({
+            data:        navData,
+            multiSelect: false,
+            animation:   180
+        })[0];
+
+        const $log = $('#log-nav');
+
+        treeNav.$el[0].addEventListener('ts.tree.select', function(e) {
+            logEvent($log, 'select', e.detail.id);
+        });
+        treeNav.$el[0].addEventListener('ts.tree.deselect', function(e) {
+            logEvent($log, 'deselect', e.detail.id);
+        });
+        treeNav.$el[0].addEventListener('ts.tree.open', function(e) {
+            logEvent($log, 'open', e.detail.id);
+        });
+        treeNav.$el[0].addEventListener('ts.tree.close', function(e) {
+            logEvent($log, 'close', e.detail.id);
+        });
+
+        $('#nav-open-all').on('click', function() { treeNav.openAll(); });
+        $('#nav-close-all').on('click', function() { treeNav.closeAll(); });
+        $('#nav-desel-all').on('click', function() { treeNav.deselectAll(); });
+        $('#nav-get-sel').on('click', function() {
+            const sel  = treeNav.getSelected();
+            const $out = $('#nav-output');
+            if (!sel.length) {
+                $out.html('Nothing selected.');
+                return;
+            }
+            $out.html(sel.map(function(s) {
+                return '<span class="sel-item"><i class="bi bi-check2"></i>' + s.id + '</span>';
+            }).join(''));
+        });
+    }());
+
+    /* DEMO 2: File Explorer from HTML */
+    (function() {
+        const treeFiles = $('#tree-files').themestrapPluginTree({
+            animation: 180
+        })[0];
+
+        const $log = $('#log-files');
+
+        treeFiles.$el[0].addEventListener('ts.tree.select', function(e) {
+            logEvent($log, 'select', e.detail.id);
+        });
+        treeFiles.$el[0].addEventListener('ts.tree.open', function(e) {
+            logEvent($log, 'open', e.detail.id);
+        });
+        treeFiles.$el[0].addEventListener('ts.tree.close', function(e) {
+            logEvent($log, 'close', e.detail.id);
+        });
+
+        $('#files-open-all').on('click',    function() { treeFiles.openAll(); });
+        $('#files-close-all').on('click',   function() { treeFiles.closeAll(); });
+        $('#files-open-src').on('click',    function() { treeFiles.open('src'); });
+        $('#files-select-utils').on('click',function() { treeFiles.select('utils'); });
+    }());
+
+    /* DEMO 3: Checkbox Permissions */
+    (function() {
+        const permsData = [
+            {
+                id: 'admin', text: 'Administrator',
+                icon: 'bi bi-shield-fill',
+                children: [
+                    { id: 'admin-read',   text: 'Read all content',    state: { selected: true } },
+                    { id: 'admin-write',  text: 'Write all content',   state: { selected: true } },
+                    { id: 'admin-delete', text: 'Delete all content' },
+                    { id: 'admin-users',  text: 'Manage users',        state: { selected: true } }
+                ]
+            },
+            {
+                id: 'editor', text: 'Editor',
+                icon: 'bi bi-pencil-square',
+                state: { opened: true },
+                children: [
+                    { id: 'ed-posts',  text: 'Publish posts',    state: { selected: true } },
+                    { id: 'ed-media',  text: 'Upload media',     state: { selected: true } },
+                    { id: 'ed-cats',   text: 'Manage categories' }
+                ]
+            },
+            {
+                id: 'viewer', text: 'Viewer',
+                icon: 'bi bi-eye',
+                children: [
+                    { id: 'view-read',     text: 'Read posts',    state: { selected: true } },
+                    { id: 'view-comments', text: 'Post comments', state: { disabled: true } }
+                ]
+            }
+        ];
+
+        const treePerms = $('#tree-perms').themestrapPluginTree({
+            data:        permsData,
+            checkbox:    true,
+            multiSelect: true,
+            animation:   150
+        })[0];
+
+        $('#perms-open-all').on('click', function() { treePerms.openAll(); });
+        $('#perms-desel-all').on('click', function() { treePerms.deselectAll(); });
+        $('#perms-get-sel').on('click', function() {
+            const sel  = treePerms.getSelected();
+            const $out = $('#perms-output');
+            if (!sel.length) {
+                $out.html('Nothing checked.');
+                return;
+            }
+            $out.html('<div class="selected-list">' + sel.map(function(s) {
+                return '<span class="sel-item"><i class="bi bi-check2"></i>' + s.id + '</span>';
+            }).join('') + '</div>');
+        });
+    }());
+
+    /* DEMO 4: Search */
+    (function() {
+        const searchData = [
+            {
+                id: 'layout', text: 'Layout',
+                state: { opened: true },
+                children: [
+                    { id: 'container',  text: 'Container'  },
+                    { id: 'grid',       text: 'Grid'       },
+                    { id: 'flexbox',    text: 'Flexbox'    },
+                    { id: 'columns',    text: 'Columns'    }
+                ]
+            },
+            {
+                id: 'ui', text: 'UI Components',
+                state: { opened: true },
+                children: [
+                    { id: 'button',    text: 'Button'    },
+                    { id: 'badge',     text: 'Badge'     },
+                    { id: 'card',      text: 'Card'      },
+                    { id: 'carousel',  text: 'Carousel'  },
+                    { id: 'collapse',  text: 'Collapse'  },
+                    { id: 'dropdown',  text: 'Dropdown'  },
+                    { id: 'modal',     text: 'Modal'     },
+                    { id: 'navbar',    text: 'Navbar'    },
+                    { id: 'offcanvas', text: 'Offcanvas' },
+                    { id: 'pagination',text: 'Pagination'},
+                    { id: 'popover',   text: 'Popover'   },
+                    { id: 'progress',  text: 'Progress'  },
+                    { id: 'spinner',   text: 'Spinner'   },
+                    { id: 'toast',     text: 'Toast'     },
+                    { id: 'tooltip',   text: 'Tooltip'   }
+                ]
+            },
+            {
+                id: 'forms', text: 'Forms',
+                children: [
+                    { id: 'input',    text: 'Input'    },
+                    { id: 'select',   text: 'Select'   },
+                    { id: 'textarea', text: 'Textarea' },
+                    { id: 'checkbox', text: 'Checkbox' },
+                    { id: 'radio',    text: 'Radio'    },
+                    { id: 'range',    text: 'Range'    },
+                    { id: 'switch',   text: 'Switch'   }
+                ]
+            },
+            {
+                id: 'util', text: 'Utilities',
+                children: [
+                    { id: 'spacing',    text: 'Spacing'    },
+                    { id: 'typography', text: 'Typography' },
+                    { id: 'colors',     text: 'Colors'     },
+                    { id: 'display',    text: 'Display'    },
+                    { id: 'position',   text: 'Position'   }
+                ]
+            }
+        ];
+
+        let treeSearch = $('#tree-search').themestrapPluginTree({
+            data:      searchData,
+            animation: 150,
+            search: {
+                enabled:     true,
+                placeholder: 'Filter components…',
+                fuzzy:       false,
+                openFound:   true
+            }
+        })[0];
+
+        const $log = $('#log-search');
+
+        treeSearch.$el[0].addEventListener('ts.tree.search', function(e) {
+            if (e.detail.term) {
+                logEvent($log, 'search', '"' + e.detail.term + '" → ' + e.detail.count + ' match(es)');
+            } else {
+                logEvent($log, 'search', 'cleared');
+            }
+        });
+
+        $('#search-open-all').on('click',  function() { treeSearch.openAll(); });
+        $('#search-close-all').on('click', function() { treeSearch.closeAll(); });
+
+        $('#fuzzy-toggle').on('change', function() {
+            const isFuzzy = $(this).is(':checked');
+            const currentTerm = treeSearch.$el.find('.ts-tree-search input').val();
+            /* Destroy and re-init with new fuzzy setting */
+            treeSearch.destroy();
+            treeSearch = $('#tree-search').themestrapPluginTree({
+                data:      searchData,
+                animation: 150,
+                search: {
+                    enabled:     true,
+                    placeholder: 'Filter components…',
+                    fuzzy:       isFuzzy,
+                    openFound:   true
+                }
+            })[0];
+            treeSearch.$el[0].addEventListener('ts.tree.search', function(e) {
+                if (e.detail.term) {
+                    logEvent($log, 'search', '"' + e.detail.term + '" → ' + e.detail.count + ' match(es)');
+                } else {
+                    logEvent($log, 'search', 'cleared');
+                }
+            });
+            $('#search-open-all').off('click').on('click',  function() { treeSearch.openAll(); });
+            $('#search-close-all').off('click').on('click', function() { treeSearch.closeAll(); });
+            if (currentTerm) {
+                treeSearch.$el.find('.ts-tree-search input').val(currentTerm).trigger('input');
+            }
+            logEvent($log, 'mode', 'fuzzy=' + isFuzzy);
+        });
+    }());
+
+});
+</script>
+
+</body>
+</html>
