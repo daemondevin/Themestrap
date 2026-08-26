@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PluginCalendar | Themestrap</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+  <meta name="description" content="Interactive demos for the Themestrap Calendar plugin — single, multiple, and range selection, date constraints, disabled dates, week configuration, keyboard navigation, events, and programmatic API.">
+  <link rel="icon" type="image/png" href="../img/favicon-96x96.png" sizes="96x96">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Syne:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --ts-navy:   #0a1929;
+      --ts-navy2:  #0e2238;
+      --ts-orange: #e8672a;
+      --ts-teal:   #2ab8c8;
+      --ts-cream:  #fdf6ee;
+      --text-hi:    #eaf2fb;
+      --text-mid:   #7896b4;
+      --text-lo:    rgba(255,255,255,0.2);
+      --border:     rgba(255,255,255,0.07);
+      --font-serif: 'Fraunces', Georgia, serif;
+      --font-sans:  'Syne', system-ui, sans-serif;
+      --font-mono:  'JetBrains Mono', 'Consolas', monospace;
+    }
+
+    /* Override calendar CSS vars for the demo context */
+    .demo-stage {
+      --bg-raised:   #1e2d3d;
+      --bg-hover:    #263545;
+      --bg-active:   #2e3f51;
+      --border-soft: rgba(255,255,255,0.10);
+      --border-dim:  rgba(255,255,255,0.05);
+      --border-mid:  rgba(255,255,255,0.18);
+      --text-bright: #eaf2fb;
+      --text-normal: #93b4cc;
+      --text-muted:  rgba(255,255,255,0.35);
+      --text-dim:    rgba(255,255,255,0.18);
+      --accent-cyan: #2ab8c8;
+      --font-ui:     'Syne', system-ui, sans-serif;
+      --font-mono:   'JetBrains Mono', monospace;
+    }
+
+    body {
+      background: var(--ts-navy);
+      color: #d0dbe8;
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+
+    .demo-header {
+      background: var(--ts-navy2);
+      border-bottom: 2px solid var(--ts-orange);
+      padding: 2rem 0 1.5rem;
+    }
+
+    .demo-header h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      color: #fff;
+      font-size: 2rem;
+    }
+
+    .demo-header p { color: #8aa5bf; margin: 0; }
+    .demo-header a { color: var(--ts-orange); text-decoration: none; }
+
+    .badge-plugin {
+      background: var(--ts-teal);
+      color: #fff;
+      font-size: .7rem;
+      letter-spacing: .08em;
+      padding: .25em .6em;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      vertical-align: middle;
+    }
+
+    .demo-card {
+      background: var(--ts-navy2);
+      border: 1px solid #1a3050;
+      border-radius: 10px;
+      margin-bottom: 1.75rem;
+      overflow: hidden;
+    }
+
+    .demo-card-header {
+      background: #0b1e33;
+      border-bottom: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: var(--ts-teal);
+      letter-spacing: .04em;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    .demo-card-header .demo-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    .demo-stage {
+      padding: 1.5rem 1.25rem;
+    }
+
+    pre.snip {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      margin: 0;
+      padding: 1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: #7ecce0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .demo-log {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .73rem;
+      color: #6bb;
+      min-height: 2.4rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .demo-log .log-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ts-teal);
+      flex-shrink: 0;
+    }
+
+    .demo-log span.hi { color: var(--ts-orange); }
+
+    /* Section rule */
+    .section-rule {
+      max-width: 900px;
+      margin: 20px auto 10px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-lo);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .cal-demo {
+      min-height: 310px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .cal-demo-wide {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .api-panel {
+      background: rgba(255,255,255,.02);
+      border: 1px solid #1a3050;
+      border-radius: 8px;
+      padding: 1rem 1.125rem;
+    }
+
+    .api-panel p.label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 600;
+      color: #5a7898;
+      margin-bottom: .5rem;
+    }
+
+    code {
+      color: var(--ts-teal);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82em;
+    }
+
+    .value-box {
+      background: #060f1a;
+      border: 1px solid #1a3050;
+      border-radius: 6px;
+      padding: .7rem .8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      color: #8aa5bf;
+      min-height: 46px;
+      word-break: break-word;
+    }
+
+    .event-list {
+      max-height: 150px;
+      overflow-y: auto;
+      background: #060f1a;
+      border: 1px solid #1a3050;
+      border-radius: 6px;
+      padding: .5rem .65rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .7rem;
+    }
+
+    .event-list div {
+      padding: .2rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+
+    .event-list div:last-child { border-bottom: 0; }
+
+    .keyboard-hint {
+      color: #5a7898;
+      font-size: .75rem;
+      margin-top: .75rem;
+    }
+  </style>
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="container">
+    <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+    <h1>Calendar <span class="badge-plugin">data-plugin-calendar</span></h1>
+    <p>A dependency-free Calendar component that supports single, multiple, and range selection with keyboard navigation, disabled date rules, and a roving tabindex ARIA grid.</p>
+  </div>
+</header>
+
+<br>
+
+<main>
+<div class="container">
+
+<div class="section-rule">Selection Modes</div>
+
+  <!-- CARD 1 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-calendar3" style="color:var(--ts-orange)"></i>
+      Basic Single Selection
+      <span class="demo-badge" style="background:rgba(232,103,42,.15);color:#e8672a;">mode: 'single'</span>
+    </div>
+    <div class="demo-stage">
+      <div class="cal-demo">
+        <div id="cal-basic"></div>
+      </div>
+    </div>
+    <pre class="snip"><code>&lt;div data-plugin-calendar&gt;&lt;/div&gt;
+
+&lt;script&gt;
+$('#cal-basic').themestrapPluginCalendar({
+  mode: 'single',
+  selected: '2026-08-26'
+});
+&lt;/script&gt;</code></pre>
+    <div class="demo-log"><span class="log-dot"></span><span id="log-basic">Select a date — the selected value is reported here.</span></div>
+  </div>
+
+  <!-- CARD 2 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-calendar2-week" style="color:var(--ts-teal)"></i>
+      Multiple Selection
+      <span class="demo-badge" style="background:rgba(42,184,200,.12);color:#2ab8c8;">mode: 'multiple'</span>
+    </div>
+    <div class="demo-stage">
+      <div class="cal-demo">
+        <div id="cal-multiple"></div>
+      </div>
+    </div>
+    <pre class="snip"><code>$('#cal-multiple').themestrapPluginCalendar({
+  mode: 'multiple',
+  selected: ['2026-08-04', '2026-08-12', '2026-08-26'],
+  onSelect(dates) {
+    console.log(dates);
+  }
+});</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:var(--ts-teal)"></span><span id="log-multiple">Click dates to toggle them on and off.</span></div>
+  </div>
+
+  <!-- CARD 3 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-calendar-range" style="color:#a78bfa"></i>
+      Range Selection
+      <span class="demo-badge" style="background:rgba(167,139,250,.12);color:#a78bfa;">mode: 'range'</span>
+    </div>
+    <div class="demo-stage">
+      <div class="cal-demo">
+        <div id="cal-range"></div>
+      </div>
+    </div>
+    <pre class="snip"><code>$('#cal-range').themestrapPluginCalendar({
+  mode: 'range',
+  selected: {
+    from: '2026-08-10',
+    to:   '2026-08-18'
+  },
+  showFooter: true
+});</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:#a78bfa"></span><span id="log-range">Click a start date, then an end date. Hover previews the range.</span></div>
+  </div>
+
+  <div class="section-rule">Constraints</div>
+
+  <!-- CARD 4 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-calendar2" style="color:#e5c07b"></i>
+      Week Start &amp; Outside Days
+      <span class="demo-badge" style="background:rgba(229,192,123,.12);color:#e5c07b;">weekStartsOn · showOutsideDays</span>
+    </div>
+    <div class="demo-stage">
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-5">
+          <div class="text-center mb-2" style="font-size:.72rem;color:#5a7898;font-family:'JetBrains Mono',monospace;">SUNDAY START</div>
+          <div class="cal-demo"><div id="cal-sunday"></div></div>
+        </div>
+        <div class="col-md-5">
+          <div class="text-center mb-2" style="font-size:.72rem;color:#5a7898;font-family:'JetBrains Mono',monospace;">MONDAY START · NO OUTSIDE DAYS</div>
+          <div class="cal-demo"><div id="cal-monday"></div></div>
+        </div>
+      </div>
+    </div>
+    <pre class="snip"><code>// Sunday start, outside days visible
+$('#cal-sunday').themestrapPluginCalendar({
+  initialMonth: '2026-08-01',
+  weekStartsOn: 0,
+  showOutsideDays: true
+});
+
+// Monday start, outside days hidden
+$('#cal-monday').themestrapPluginCalendar({
+  initialMonth: '2026-08-01',
+  weekStartsOn: 1,
+  showOutsideDays: false
+});</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:#e5c07b"></span><span>weekStartsOn accepts <span class="hi">0</span> (Sunday) or <span class="hi">1</span> (Monday).</span></div>
+  </div>
+
+  <!-- CARD 5 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-calendar-check" style="color:#98c379"></i>
+      Date Limits
+      <span class="demo-badge" style="background:rgba(152,195,121,.12);color:#98c379;">minDate · maxDate</span>
+    </div>
+    <div class="demo-stage">
+      <div class="cal-demo">
+        <div id="cal-limits"></div>
+      </div>
+    </div>
+    <pre class="snip"><code>$('#cal-limits').themestrapPluginCalendar({
+  initialMonth: '2026-08-01',
+  minDate: '2026-08-05',
+  maxDate: '2026-08-25',
+  showFooter: true
+});</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:#98c379"></span><span>Only dates from <span class="hi">August 5</span> through <span class="hi">August 25</span> are selectable.</span></div>
+  </div>
+
+  <!-- CARD 6 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-slash-circle" style="color:#d19a66"></i>
+      Disabled Dates
+      <span class="demo-badge" style="background:rgba(209,154,102,.12);color:#d19a66;">array + function</span>
+    </div>
+    <div class="demo-stage">
+      <div class="cal-demo-wide">
+        <div>
+          <div class="text-center mb-2" style="font-size:.72rem;color:#5a7898;font-family:'JetBrains Mono',monospace;">DISABLED ARRAY</div>
+          <div id="cal-disabled-array"></div>
+        </div>
+        <div>
+          <div class="text-center mb-2" style="font-size:.72rem;color:#5a7898;font-family:'JetBrains Mono',monospace;">DISABLED FUNCTION</div>
+          <div id="cal-disabled-fn"></div>
+        </div>
+      </div>
+    </div>
+    <pre class="snip"><code>// Specific dates
+$('#cal-disabled-array').themestrapPluginCalendar({
+  initialMonth: '2026-08-01',
+  disabled: ['2026-08-03', '2026-08-11', '2026-08-19', '2026-08-27']
+});
+
+// Predicate function
+$('#cal-disabled-fn').themestrapPluginCalendar({
+  initialMonth: '2026-08-01',
+  disabled: date => date.getDay() === 0 || date.getDay() === 6
+});</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:#d19a66"></span><span>Disabled dates accept an array of dates or a <code>date =&gt; boolean</code> predicate.</span></div>
+  </div>
+
+  <div class="section-rule">Display Options</div>
+
+  <!-- CARD 7 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-grid-3x3-gap" style="color:#c678dd"></i>
+      Fixed Six-Week Grid &amp; Today Footer
+      <span class="demo-badge" style="background:rgba(198,120,221,.12);color:#c678dd;">fixedWeeks · showFooter</span>
+    </div>
+    <div class="demo-stage">
+      <div class="cal-demo">
+        <div id="cal-footer"></div>
+      </div>
+    </div>
+    <pre class="snip"><code>$('#cal-footer').themestrapPluginCalendar({
+  initialMonth: '2026-08-01',
+  fixedWeeks: true,
+  showOutsideDays: true,
+  showFooter: true
+});</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:#c678dd"></span><span>Exactly six calendar rows are rendered; <span class="hi">Today</span> returns to the current month.</span></div>
+  </div>
+
+  <!-- CARD 8 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-keyboard" style="color:#56b6c2"></i>
+      Keyboard Navigation &amp; Accessibility
+      <span class="demo-badge" style="background:rgba(86,182,194,.12);color:#56b6c2;">Arrow · PageUp/Down · Home · End</span>
+    </div>
+    <div class="demo-stage">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-7">
+          <div class="cal-demo"><div id="cal-keyboard"></div></div>
+        </div>
+        <div class="col-lg-5">
+          <div class="api-panel">
+            <p class="label">Keyboard controls</p>
+            <div class="value-box">
+              ← → &nbsp; previous / next day<br>
+              ↑ ↓ &nbsp; previous / next week<br>
+              PageUp / PageDown &nbsp; previous / next month<br>
+              Home / End &nbsp; first / last day of month
+            </div>
+            <div class="keyboard-hint">Focus a day button, then use the keys above. The plugin maintains a roving tabindex.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="snip"><code>// Day buttons expose keyboard-friendly grid semantics.
+// Arrow keys move by day/week; PageUp/PageDown changes month;
+// Home/End moves to the first/last day of the current month.</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:#56b6c2"></span><span>Calendar cells use <code>role="grid"</code> and a roving <code>tabindex</code>.</span></div>
+  </div>
+
+  <!-- CARD 9 -->
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <i class="bi bi-broadcast" style="color:#61afef"></i>
+      Selection &amp; Month-Change Events
+      <span class="demo-badge" style="background:rgba(97,175,239,.12);color:#61afef;">CustomEvent · onSelect</span>
+    </div>
+    <div class="demo-stage">
+      <div class="row g-4">
+        <div class="col-lg-6">
+          <div class="cal-demo"><div id="cal-events"></div></div>
+        </div>
+        <div class="col-lg-6">
+          <div class="api-panel">
+            <p class="label">Event stream</p>
+            <div id="event-list" class="event-list">
+              <div>Waiting for <code>ts.calendar.select</code>…</div>
+            </div>
+            <p class="label mt-3">Latest selection</p>
+            <div id="event-value" class="value-box">null</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="snip"><code>const el = $('#cal-events')[0];
+
+el.addEventListener('ts.calendar.select', e => {
+  console.log(e.detail.date, e.detail.selected);
+});
+
+el.addEventListener('ts.calendar.monthChange', e => {
+  console.log(e.detail.month, e.detail.year);
+});
+
+$('#cal-events').themestrapPluginCalendar({
+  onSelect(selected) {
+    console.log('callback:', selected);
+  }
+});</code></pre>
+    <div class="demo-log"><span class="log-dot" style="background:#61afef"></span><span>Native bubbling events expose <code>e.detail.date</code>, <code>e.detail.selected</code>, <code>month</code>, and <code>year</code>.</span></div>
+  </div>
+
+  <div class="section-rule">Programmatic API</div>
+
+  <!-- CARD 10 -->
+  <div class="demo-card" id="demo-api">
+    <div class="demo-card-header">
+      <i class="bi bi-terminal" style="color:#e8672a"></i>
+      Programmatic API
+      <span class="demo-badge" style="background:rgba(232,103,42,.12);color:#e8672a;">getValue · setValue · goToMonth · goToToday · destroy</span>
+    </div>
+    <div class="demo-stage">
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="cal-demo"><div id="cal-api"></div></div>
+        </div>
+        <div class="col-lg-5">
+          <div class="api-panel">
+            <p class="label">Selection</p>
+            <div class="d-grid gap-2 mb-3">
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="calApiSet('2026-08-05')"><code>Aug 5</code></button>
+                <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="calApiSet('2026-08-15')"><code>Aug 15</code></button>
+                <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="calApiSet('2026-08-25')"><code>Aug 25</code></button>
+              </div>
+            </div>
+
+            <p class="label">Navigation</p>
+            <div class="d-grid gap-2 mb-3">
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="calApiMonth(2026, 6)"><code>Jul 2026</code></button>
+                <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="calApiMonth(2026, 7)"><code>Aug 2026</code></button>
+                <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="calApiMonth(2026, 8)"><code>Sep 2026</code></button>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary" onclick="calApiToday()"><code>goToToday()</code></button>
+            </div>
+
+            <p class="label">Lifecycle</p>
+            <div class="d-grid gap-2 mb-3">
+              <button class="btn btn-sm btn-outline-danger" onclick="calApiDestroy()"><code>destroy()</code></button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="calApiReinit()"><code>reinit</code></button>
+            </div>
+
+            <p class="label">getValue()</p>
+            <div id="api-value" class="value-box">null</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre class="snip"><code>const cal = $('#cal-api').data('__pluginCalendar');
+
+cal.getValue();                    // current selection
+cal.setValue('2026-08-15');        // set selection
+cal.goToMonth(2026, 8);             // month is 0-indexed
+cal.goToToday();                    // current month
+cal.destroy();                      // teardown
+
+// Reinitialize
+$('#cal-api').themestrapPluginCalendar({
+  selected: '2026-08-15'
+});</code></pre>
+    <div class="demo-log"><span class="log-dot"></span><span id="log-api">Use the controls to drive the Calendar API.</span></div>
+  </div>
+
+</div>
+</main>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.calendar.js"></script>
+
+<script>
+$(function () {
+
+  // Card 1 — basic single selection
+  $('#cal-basic').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    selected: '2026-08-26',
+    onSelect: function (selected) {
+      $('#log-basic').html('Selected <span class="hi">' + fmt(selected) + '</span>');
+    }
+  });
+
+  // Card 2 — multiple selection
+  $('#cal-multiple').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    selected: ['2026-08-04', '2026-08-12', '2026-08-26'],
+    onSelect: function (selected) {
+      $('#log-multiple').html(
+        'Selected <span class="hi">' + selected.map(fmt).join(', ') + '</span>'
+      );
+    }
+  });
+
+  // Card 3 — range
+  $('#cal-range').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    mode: 'range',
+    selected: {
+      from: '2026-08-10',
+      to: '2026-08-18'
+    },
+    showFooter: true,
+    onSelect: function (selected) {
+      $('#log-range').html(
+        'Range <span class="hi">' + fmt(selected.from) + ' → ' + fmt(selected.to) + '</span>'
+      );
+    }
+  });
+
+  // Card 4 — week configuration
+  $('#cal-sunday').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    weekStartsOn: 0,
+    showOutsideDays: true
+  });
+
+  $('#cal-monday').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    weekStartsOn: 1,
+    showOutsideDays: false
+  });
+
+  // Card 5 — min/max
+  $('#cal-limits').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    minDate: '2026-08-05',
+    maxDate: '2026-08-25',
+    showFooter: true
+  });
+
+  // Card 6 — disabled array and predicate
+  $('#cal-disabled-array').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    disabled: [
+      '2026-08-03',
+      '2026-08-11',
+      '2026-08-19',
+      '2026-08-27'
+    ]
+  });
+
+  $('#cal-disabled-fn').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    disabled: function (date) {
+      return date.getDay() === 0 || date.getDay() === 6;
+    }
+  });
+
+  // Card 7 — fixed weeks + footer
+  $('#cal-footer').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    fixedWeeks: true,
+    showOutsideDays: true,
+    showFooter: true
+  });
+
+  // Card 8 — keyboard
+  $('#cal-keyboard').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    selected: '2026-08-26'
+  });
+
+  // Card 9 — events
+  var eventEl = $('#cal-events')[0];
+  var eventList = $('#event-list');
+
+  $('#cal-events').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    selected: '2026-08-10',
+    onSelect: function (selected) {
+      $('#event-value').text(fmt(selected));
+    }
+  });
+
+  eventEl.addEventListener('ts.calendar.select', function (e) {
+    addEvent(
+      'select',
+      fmt(e.detail.date) + ' → ' + fmt(e.detail.selected)
+    );
+    $('#event-value').text(fmt(e.detail.selected));
+  });
+
+  eventEl.addEventListener('ts.calendar.monthChange', function (e) {
+    addEvent(
+      'monthChange',
+      MONTH_NAME(e.detail.month) + ' ' + e.detail.year
+    );
+  });
+
+  // Card 10 — API
+  $('#cal-api').themestrapPluginCalendar({
+    initialMonth: '2026-08-01',
+    selected: '2026-08-15',
+    showFooter: true
+  });
+  updateApiValue();
+
+});
+
+function fmt(value) {
+  if (!value) return 'null';
+
+  if (Array.isArray(value)) {
+    return '[' + value.map(fmt).join(', ') + ']';
+  }
+
+  if (value && typeof value === 'object' &&
+      Object.prototype.hasOwnProperty.call(value, 'from')) {
+    return '{ from: ' + fmt(value.from) + ', to: ' + fmt(value.to) + ' }';
+  }
+
+  if (value instanceof Date) {
+    return value.getFullYear() + '-' +
+      String(value.getMonth() + 1).padStart(2, '0') + '-' +
+      String(value.getDate()).padStart(2, '0');
+  }
+
+  return String(value);
+}
+
+function MONTH_NAME(month) {
+  return [
+    'January', 'February', 'March', 'April',
+    'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December'
+  ][month];
+}
+
+function addEvent(type, value) {
+  var list = $('#event-list');
+
+  if (list.children().length === 1 &&
+      list.children().first().text().indexOf('Waiting for') === 0) {
+    list.empty();
+  }
+
+  list.prepend(
+    $('<div>').html(
+      '<span style="color:var(--ts-orange)">' +
+      type +
+      '</span> · ' +
+      $('<span>').text(value).html()
+    )
+  );
+}
+
+function calApi() {
+  return $('#cal-api').data('__pluginCalendar');
+}
+
+function updateApiValue() {
+  var inst = calApi();
+
+  if (inst) {
+    $('#api-value').text(fmt(inst.getValue()));
+  } else {
+    $('#api-value').text('—');
+  }
+}
+
+function calApiSet(date) {
+  var inst = calApi();
+
+  if (!inst) {
+    $('#log-api').html('Calendar is destroyed — click <span class="hi">reinit</span> first.');
+    return;
+  }
+
+  inst.setValue(date);
+  updateApiValue();
+  $('#log-api').html('setValue(<span class="hi">"' + date + '"</span>)');
+}
+
+function calApiMonth(year, month) {
+  var inst = calApi();
+
+  if (!inst) {
+    $('#log-api').html('Calendar is destroyed — click <span class="hi">reinit</span> first.');
+    return;
+  }
+
+  inst.goToMonth(year, month);
+  updateApiValue();
+  $('#log-api').html('goToMonth(<span class="hi">' + year + ', ' + month + '</span>)');
+}
+
+function calApiToday() {
+  var inst = calApi();
+
+  if (!inst) {
+    $('#log-api').html('Calendar is destroyed — click <span class="hi">reinit</span> first.');
+    return;
+  }
+
+  inst.goToToday();
+  updateApiValue();
+  $('#log-api').html('<span class="hi">goToToday()</span> called.');
+}
+
+function calApiDestroy() {
+  var inst = calApi();
+
+  if (inst) {
+    inst.destroy();
+    updateApiValue();
+    $('#log-api').html('<span class="hi">destroy()</span> called — calendar removed.');
+  } else {
+    $('#log-api').html('Already destroyed. Click <span class="hi">reinit</span> first.');
+  }
+}
+
+function calApiReinit() {
+  if (!calApi()) {
+    $('#cal-api').themestrapPluginCalendar({
+      initialMonth: '2026-08-01',
+      selected: '2026-08-15',
+      showFooter: true
+    });
+
+    updateApiValue();
+    $('#log-api').html(
+      'Reinitialized with <span class="hi">selected: "2026-08-15"</span>.'
+    );
+  } else {
+    $('#log-api').html('Already initialized. Call <span class="hi">destroy()</span> first.');
+  }
+}
+</script>
+</body>
+</html>

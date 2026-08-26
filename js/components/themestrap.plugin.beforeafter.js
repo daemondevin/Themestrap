@@ -1,7 +1,7 @@
-// Before/After Image Comparison Plugin
+// Before/After
 (((themestrap = {}, $) => {
     const instanceName = '__beforeafter';
-    const STYLE_ID = 'themestrap-beforeafter-styles';
+    const STYLE_ID = 'ts-beforeafter-styles';
 
     const CSS = `
 .ts-ba-wrap {
