@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PluginOtp | Themestrap</title>
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/themestrap.css">
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.css">
+    <style>
+        body { background: #0d1117; color: #c9d1d9; font-family: 'DM Sans', system-ui, sans-serif; }
+
+        /* Demo shell */
+        .demo-page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+        .demo-page h1 { font-size: 36px; font-weight: 700; color: #f3f4f6; margin-bottom: 8px; }
+        .demo-page .lead { color: rgba(255,255,255,.55); font-size: 15.5px; margin-bottom: 48px; }
+
+        /* Section */
+        .demo-section { margin-bottom: 52px; }
+        .demo-section h2 {
+            font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+            color: #2ab8c8; margin-bottom: 20px; padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        /* Card */
+        .demo-card {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .demo-card-header {
+            background: rgba(255,255,255,.03);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            padding: 14px 20px;
+            font-size: 13px; font-weight: 600; color: rgba(255,255,255,.5);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .demo-card-header .badge-pill {
+            font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+            padding: 2px 8px; border-radius: 20px;
+            background: rgba(42,184,200,.15); color: #2ab8c8;
+            border: 1px solid rgba(42,184,200,.2);
+        }
+        .demo-stage {
+            padding: 36px 24px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,.2);
+            min-height: 120px;
+        }
+        .demo-controls {
+            padding: 14px 20px;
+            background: rgba(255,255,255,.02);
+            border-top: 1px solid rgba(255,255,255,.06);
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+        }
+        .demo-log {
+            padding: 10px 20px;
+            background: rgba(0,0,0,.3);
+            border-top: 1px solid rgba(255,255,255,.06);
+            min-height: 36px;
+            font-family: monospace; font-size: 12px; color: rgba(255,255,255,.4);
+        }
+        .demo-log .log-entry { padding: 2px 0; }
+        .log-ts { color: rgba(255,255,255,.2); margin-right: 8px; }
+        .log-event { color: #2ab8c8; }
+        .log-val { color: #e8a07a; }
+
+        /* Snippet */
+        .snip {
+            margin: 0;
+            background: rgba(0,0,0,.4);
+            border-top: 1px solid rgba(255,255,255,.05);
+            padding: 16px 20px;
+            font-family: monospace; font-size: 12.5px; line-height: 1.65;
+            color: #abb2bf; overflow-x: auto;
+        }
+        .snip .kw  { color: #c678dd; }
+        .snip .str { color: #98c379; }
+        .snip .num { color: #d19a66; }
+        .snip .fn  { color: #61afef; }
+        .snip .cm  { color: #5c6370; font-style: italic; }
+        .snip .at  { color: #e06c75; }
+        .snip .val { color: #d19a66; }
+
+        /* Controls */
+        .btn-demo {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600;
+            cursor: pointer; border: 1px solid; transition: all .15s;
+        }
+        .btn-demo-teal {
+            background: rgba(42,184,200,.12); color: #2ab8c8;
+            border-color: rgba(42,184,200,.25);
+        }
+        .btn-demo-teal:hover { background: rgba(42,184,200,.2); }
+        .btn-demo-orange {
+            background: rgba(232,103,42,.1); color: #e8a07a;
+            border-color: rgba(232,103,42,.2);
+        }
+        .btn-demo-orange:hover { background: rgba(232,103,42,.2); }
+        .btn-demo-muted {
+            background: rgba(255,255,255,.06); color: rgba(255,255,255,.5);
+            border-color: rgba(255,255,255,.1);
+        }
+        .btn-demo-muted:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+        /* Option table */
+        .opt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .opt-table th {
+            text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.35);
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .opt-table td {
+            padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.05);
+            vertical-align: top; line-height: 1.5;
+        }
+        .opt-table tr:last-child td { border-bottom: none; }
+        .opt-table code {
+            background: rgba(255,255,255,.06); color: #e06c75;
+            padding: 1px 5px; border-radius: 4px; font-size: 12px;
+        }
+        .type-badge {
+            font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+            padding: 1px 6px; border-radius: 4px;
+        }
+        .type-str  { background: rgba(152,195,121,.15); color: #98c379; }
+        .type-bool { background: rgba(97,175,239,.15);  color: #61afef; }
+        .type-num  { background: rgba(209,154,102,.15); color: #d19a66; }
+        .type-fn   { background: rgba(198,120,221,.15); color: #c678dd; }
+    </style>
+</head>
+<body>
+
+<div class="demo-page">
+
+    <h1>PluginOtp</h1>
+    <p class="lead">
+        Digit-segmented OTP / PIN input with auto-advance, backspace navigation, paste
+        handling, complete events, error and valid states, and size variants. No dependencies
+        beyond jQuery — CSS injected lazily on first use.
+    </p>
+
+    <!-- 1. Six-digit numeric -->
+    <div class="demo-section">
+        <h2>Numeric · 6 Digits</h2>
+        <div class="demo-card">
+            <div class="demo-card-header">
+                Default <span class="badge-pill">numeric</span> <span class="badge-pill">length: 6</span>
+            </div>
+            <div class="demo-stage">
+                <div id="otp1" data-plugin-otp></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-demo btn-demo-teal" id="otp1-fill">Fill 483920</button>
+                <button class="btn-demo btn-demo-orange" id="otp1-err">Set Error</button>
+                <button class="btn-demo btn-demo-teal" id="otp1-valid">Set Valid</button>
+                <button class="btn-demo btn-demo-muted" id="otp1-clear">Clear</button>
+                <code id="otp1-val" style="margin-left:auto;font-size:12px;color:#2ab8c8;min-width:90px;text-align:right"></code>
+            </div>
+            <div class="demo-log" id="otp1-log"><span style="color:rgba(255,255,255,.2)">Events will appear here…</span></div>
+<pre class="snip"><span class="cm">// Init</span>
+<span class="fn">$</span>(<span class="str">'#otp1'</span>).<span class="fn">themestrapPluginOtp</span>();
+
+<span class="cm">// Listen for complete</span>
+<span class="fn">$</span>(<span class="str">'#otp1'</span>).<span class="fn">on</span>(<span class="str">'ts.otp.complete'</span>, <span class="kw">function</span>(e) {
+    console.<span class="fn">log</span>(e.detail.value); <span class="cm">// "483920"</span>
+});</pre>
+        </div>
+    </div>
+
+    <!-- 2. 4-digit PIN with auto-submit -->
+    <div class="demo-section">
+        <h2>PIN · 4 Digits · Auto-Submit</h2>
+        <div class="demo-card">
+            <div class="demo-card-header">
+                <span class="badge-pill">length: 4</span>
+                <span class="badge-pill">autoSubmit: true</span>
+                <span class="badge-pill">separator: –</span>
+            </div>
+            <div class="demo-stage">
+                <div id="otp2"></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-demo btn-demo-muted" id="otp2-clear">Clear</button>
+                <span style="font-size:12px;color:rgba(255,255,255,.3);margin-left:8px">Fill all 4 digits to trigger auto-submit</span>
+            </div>
+            <div class="demo-log" id="otp2-log"><span style="color:rgba(255,255,255,.2)">Events will appear here…</span></div>
+<pre class="snip"><span class="fn">$</span>(<span class="str">'#otp2'</span>).<span class="fn">themestrapPluginOtp</span>({
+    <span class="at">length</span>:      <span class="num">4</span>,
+    <span class="at">autoSubmit</span>:  <span class="kw">true</span>,
+    <span class="at">separator</span>:   <span class="str">'–'</span>,
+});
+
+<span class="fn">$</span>(<span class="str">'#otp2'</span>).<span class="fn">on</span>(<span class="str">'ts.otp.submit'</span>, <span class="kw">function</span>(e) {
+    console.<span class="fn">log</span>(<span class="str">'submitted:'</span>, e.detail.value);
+});</pre>
+        </div>
+    </div>
+
+    <!-- 3. Alphanumeric uppercase -->
+    <div class="demo-section">
+        <h2>Alphanumeric · Uppercase · Large</h2>
+        <div class="demo-card">
+            <div class="demo-card-header">
+                <span class="badge-pill">alphanumeric</span>
+                <span class="badge-pill">uppercase: true</span>
+                <span class="badge-pill">size: lg</span>
+                <span class="badge-pill">length: 5</span>
+            </div>
+            <div class="demo-stage">
+                <div id="otp3"></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-demo btn-demo-teal" id="otp3-fill">Fill AB12C</button>
+                <button class="btn-demo btn-demo-muted" id="otp3-clear">Clear</button>
+            </div>
+<pre class="snip"><span class="fn">$</span>(<span class="str">'#otp3'</span>).<span class="fn">themestrapPluginOtp</span>({
+    <span class="at">length</span>:     <span class="num">5</span>,
+    <span class="at">type</span>:       <span class="str">'alphanumeric'</span>,
+    <span class="at">uppercase</span>:  <span class="kw">true</span>,
+    <span class="at">size</span>:       <span class="str">'lg'</span>,
+    <span class="at">label</span>:      <span class="str">'Backup code'</span>,
+    <span class="at">hint</span>:       <span class="str">'Check your recovery sheet.'</span>,
+});</pre>
+        </div>
+    </div>
+
+    <!-- 4. Small variant / light theme -->
+    <div class="demo-section">
+        <h2>Small Variant · Light Theme</h2>
+        <div class="demo-card">
+            <div class="demo-card-header">
+                <span class="badge-pill">size: sm</span>
+                <span class="badge-pill">theme: light</span>
+            </div>
+            <div class="demo-stage" style="background:#f3f4f6">
+                <div id="otp4"></div>
+            </div>
+<pre class="snip"><span class="fn">$</span>(<span class="str">'#otp4'</span>).<span class="fn">themestrapPluginOtp</span>({
+    <span class="at">length</span>:  <span class="num">6</span>,
+    <span class="at">size</span>:    <span class="str">'sm'</span>,
+    <span class="at">theme</span>:   <span class="str">'light'</span>,
+});</pre>
+        </div>
+    </div>
+
+    <!-- Options table -->
+    <div class="demo-section">
+        <h2>Configuration Options</h2>
+        <table class="opt-table">
+            <thead>
+                <tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>length</code></td><td><span class="type-badge type-num">number</span></td><td><code>6</code></td><td>Number of digit boxes rendered.</td></tr>
+                <tr><td><code>type</code></td><td><span class="type-badge type-str">string</span></td><td><code>'numeric'</code></td><td><code>'numeric'</code> or <code>'alphanumeric'</code>. Numeric uses <code>tel</code> input type and numeric keyboard on mobile.</td></tr>
+                <tr><td><code>uppercase</code></td><td><span class="type-badge type-bool">bool</span></td><td><code>false</code></td><td>Forces alphanumeric input to uppercase.</td></tr>
+                <tr><td><code>autoSubmit</code></td><td><span class="type-badge type-bool">bool</span></td><td><code>false</code></td><td>When <code>true</code>, dispatches <code>ts.otp.submit</code> the moment all boxes are filled.</td></tr>
+                <tr><td><code>separator</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td>Character rendered between the left and right halves (e.g. <code>'-'</code>). Only drawn when <code>length</code> is even.</td></tr>
+                <tr><td><code>label</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td>Label text above the inputs.</td></tr>
+                <tr><td><code>hint</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td>Helper text below the inputs.</td></tr>
+                <tr><td><code>ariaLabel</code></td><td><span class="type-badge type-str">string</span></td><td><code>'One-time code'</code></td><td>ARIA label on the wrapper group element.</td></tr>
+                <tr><td><code>size</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td><code>''</code>, <code>'sm'</code>, or <code>'lg'</code>. Adjusts box dimensions and font.</td></tr>
+                <tr><td><code>theme</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td><code>''</code> (dark) or <code>'light'</code>. Swaps CSS variable set for light backgrounds.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Public API -->
+    <div class="demo-section">
+        <h2>Public API</h2>
+        <div class="demo-card">
+            <div class="demo-stage" style="flex-direction:column;gap:16px">
+                <div id="otp-api" style="margin-bottom:8px"></div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+                    <button class="btn-demo btn-demo-teal" id="api-get">getValue()</button>
+                    <button class="btn-demo btn-demo-teal" id="api-set">setValue('112233')</button>
+                    <button class="btn-demo btn-demo-orange" id="api-err">setError('Try again')</button>
+                    <button class="btn-demo btn-demo-teal" id="api-valid">setValid()</button>
+                    <button class="btn-demo btn-demo-muted" id="api-disable">disable(true)</button>
+                    <button class="btn-demo btn-demo-muted" id="api-enable">disable(false)</button>
+                    <button class="btn-demo btn-demo-muted" id="api-clear">clear()</button>
+                </div>
+                <code id="api-result" style="font-size:13px;color:#2ab8c8;min-height:20px"></code>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.otp.js"></script>
+<script>
+$(function () {
+
+    /* 1. Default 6-digit */
+    const otp1 = $('#otp1').themestrapPluginOtp()[0];
+
+    function addLog(logId, eventName, detail) {
+        const $log = $('#' + logId);
+        $log.find('span').remove(); // clear placeholder
+        const ts   = new Date().toLocaleTimeString();
+        const info = detail ? ' → <span class="log-val">' + JSON.stringify(detail) + '</span>' : '';
+        $('<div class="log-entry"></div>')
+            .html('<span class="log-ts">' + ts + '</span><span class="log-event">' + eventName + '</span>' + info)
+            .prependTo($log);
+        if ($log.children().length > 5) $log.children().last().remove();
+    }
+
+    $('#otp1').on('ts.otp.change', function (e) {
+        $('#otp1-val').text('"' + e.detail.value + '"');
+        addLog('otp1-log', 'ts.otp.change', e.detail);
+    });
+    $('#otp1').on('ts.otp.complete', function (e) {
+        addLog('otp1-log', 'ts.otp.complete', e.detail);
+    });
+
+    $('#otp1-fill').on('click', function () { otp1.setValue('483920'); });
+    $('#otp1-err').on('click', function ()  { otp1.setError('Invalid code. Try again.'); });
+    $('#otp1-valid').on('click', function () { otp1.setValid(); });
+    $('#otp1-clear').on('click', function () { otp1.clear(); });
+
+    /* 2. 4-digit auto-submit */
+    const otp2 = $('#otp2').themestrapPluginOtp({
+        length:     4,
+        autoSubmit: true,
+        separator:  '–',
+    })[0];
+
+    $('#otp2').on('ts.otp.change',   function (e) { addLog('otp2-log', 'ts.otp.change', e.detail); });
+    $('#otp2').on('ts.otp.submit',   function (e) { addLog('otp2-log', 'ts.otp.submit', e.detail); });
+    $('#otp2').on('ts.otp.complete', function (e) { addLog('otp2-log', 'ts.otp.complete', e.detail); });
+    $('#otp2-clear').on('click', function () { otp2.clear(); });
+
+    /* 3. Alphanumeric large */
+    const otp3 = $('#otp3').themestrapPluginOtp({
+        length:    5,
+        type:      'alphanumeric',
+        uppercase: true,
+        size:      'lg',
+        label:     'Backup code',
+        hint:      'Check your recovery sheet.',
+    })[0];
+
+    $('#otp3-fill').on('click', function ()  { otp3.setValue('AB12C'); });
+    $('#otp3-clear').on('click', function () { otp3.clear(); });
+
+    /* 4. Small light */
+    $('#otp4').themestrapPluginOtp({ length: 6, size: 'sm', theme: 'light' });
+
+    /* API demo */
+    const otpApi = $('#otp-api').themestrapPluginOtp({ length: 6, label: 'API demo' })[0];
+
+    $('#api-get').on('click', function () {
+        $('#api-result').text('getValue() → "' + otpApi.getValue() + '"');
+    });
+    $('#api-set').on('click', function () {
+        otpApi.setValue('112233');
+        $('#api-result').text('setValue("112233") called');
+    });
+    $('#api-err').on('click', function () {
+        otpApi.setError('Try again', true);
+        $('#api-result').text('setError() called');
+    });
+    $('#api-valid').on('click', function () {
+        otpApi.setValid();
+        $('#api-result').text('setValid() called');
+    });
+    $('#api-disable').on('click', function () {
+        otpApi.disable(true);
+        $('#api-result').text('disable(true) called');
+    });
+    $('#api-enable').on('click', function () {
+        otpApi.disable(false);
+        $('#api-result').text('disable(false) called');
+    });
+    $('#api-clear').on('click', function () {
+        otpApi.clear();
+        $('#api-result').text('clear() called');
+    });
+
+});
+</script>
+</body>
+</html>

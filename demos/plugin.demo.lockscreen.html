@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PluginLockscreen | Themestrap</title>
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/themestrap.css">
+    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.css">
+    <style>
+        body { background: #0d1117; color: #c9d1d9; font-family: 'DM Sans', system-ui, sans-serif; }
+
+        .demo-page { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+        .demo-page h1 { font-size: 36px; font-weight: 700; color: #f3f4f6; margin-bottom: 8px; }
+        .demo-page .lead { color: rgba(255,255,255,.55); font-size: 15.5px; margin-bottom: 48px; }
+
+        .demo-section { margin-bottom: 52px; }
+        .demo-section h2 {
+            font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+            color: #2ab8c8; margin-bottom: 20px; padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .demo-card {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+        }
+        .demo-card-header {
+            background: rgba(255,255,255,.03);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            padding: 14px 20px;
+            font-size: 13px; font-weight: 600; color: rgba(255,255,255,.5);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .badge-pill {
+            font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+            padding: 2px 8px; border-radius: 20px;
+            background: rgba(42,184,200,.15); color: #2ab8c8;
+            border: 1px solid rgba(42,184,200,.2);
+        }
+        .badge-pill-orange {
+            background: rgba(232,103,42,.12); color: #e8a07a;
+            border-color: rgba(232,103,42,.2);
+        }
+
+        .demo-stage {
+            padding: 32px 24px;
+            background: rgba(0,0,0,.2);
+            min-height: 140px;
+            display: flex; align-items: center; justify-content: flex-start;
+            flex-direction: column; gap: 16px;
+        }
+        .demo-controls {
+            padding: 14px 20px;
+            background: rgba(255,255,255,.02);
+            border-top: 1px solid rgba(255,255,255,.06);
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+        }
+        .demo-log {
+            padding: 10px 20px;
+            background: rgba(0,0,0,.3);
+            border-top: 1px solid rgba(255,255,255,.06);
+            min-height: 36px;
+            font-family: monospace; font-size: 12px; color: rgba(255,255,255,.4);
+        }
+        .log-entry { padding: 2px 0; }
+        .log-ts    { color: rgba(255,255,255,.2); margin-right: 8px; }
+        .log-event { color: #2ab8c8; }
+        .log-ok    { color: #98c379; }
+        .log-err   { color: #e8672a; }
+        .log-val   { color: #e8a07a; }
+
+        .snip {
+            margin: 0;
+            background: rgba(0,0,0,.4);
+            border-top: 1px solid rgba(255,255,255,.05);
+            padding: 16px 20px;
+            font-family: monospace; font-size: 12.5px; line-height: 1.65;
+            color: #abb2bf; overflow-x: auto;
+        }
+        .snip .kw  { color: #c678dd; }
+        .snip .str { color: #98c379; }
+        .snip .num { color: #d19a66; }
+        .snip .fn  { color: #61afef; }
+        .snip .cm  { color: #5c6370; font-style: italic; }
+        .snip .at  { color: #e06c75; }
+
+        .btn-demo {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 600;
+            cursor: pointer; border: 1px solid; transition: all .15s; white-space: nowrap;
+        }
+        .btn-demo-teal   { background: rgba(42,184,200,.12); color: #2ab8c8; border-color: rgba(42,184,200,.25); }
+        .btn-demo-teal:hover  { background: rgba(42,184,200,.22); }
+        .btn-demo-orange { background: rgba(232,103,42,.1); color: #e8a07a; border-color: rgba(232,103,42,.2); }
+        .btn-demo-orange:hover { background: rgba(232,103,42,.2); }
+        .btn-demo-muted  { background: rgba(255,255,255,.06); color: rgba(255,255,255,.5); border-color: rgba(255,255,255,.1); }
+        .btn-demo-muted:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+        .callout {
+            border-left: 3px solid; border-radius: 0 6px 6px 0;
+            padding: 12px 16px; margin: 16px 0; font-size: 13.5px; line-height: 1.6;
+        }
+        .callout-info { border-color: #2ab8c8; background: rgba(42,184,200,.07); }
+        .callout-warn { border-color: #e8672a; background: rgba(232,103,42,.07); }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+        .info-card {
+            border: 1px solid rgba(255,255,255,.08); border-radius: 8px;
+            padding: 16px; font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.7);
+        }
+        .info-card h4 { font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 6px; }
+
+        .opt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .opt-table th {
+            text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.35);
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .opt-table td {
+            padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.05);
+            vertical-align: top; line-height: 1.5;
+        }
+        .opt-table tr:last-child td { border-bottom: none; }
+        .opt-table code {
+            background: rgba(255,255,255,.06); color: #e06c75;
+            padding: 1px 5px; border-radius: 4px; font-size: 12px;
+        }
+        .type-badge { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; }
+        .type-str  { background: rgba(152,195,121,.15); color: #98c379; }
+        .type-bool { background: rgba(97,175,239,.15);  color: #61afef; }
+        .type-num  { background: rgba(209,154,102,.15); color: #d19a66; }
+        .type-fn   { background: rgba(198,120,221,.15); color: #c678dd; }
+    </style>
+</head>
+<body>
+
+<div class="demo-page">
+
+    <h1>PluginLockscreen</h1>
+    <p class="lead">
+        Full-viewport PIN lockscreen overlay with blurred backdrop, live clock, avatar,
+        attempt limiting, idle auto-lock, and a clean unlock animation. Built on
+        <strong>PluginOtp</strong> — both files must be included.
+    </p>
+
+    <div class="callout callout-info">
+        <strong>Default PIN for all demos on this page is <code>1234</code>.</strong>
+        Attempt limiting is set to 5 tries — after that the lock blocks for 30 seconds.
+    </div>
+
+    <!-- 1. Basic demo -->
+    <div class="demo-section">
+        <h2>Basic Lockscreen</h2>
+        <div class="demo-card">
+            <div class="demo-card-header">
+                PIN: <code style="color:#2ab8c8">1234</code>
+                <span class="badge-pill">4 digits</span>
+                <span class="badge-pill">maxAttempts: 5</span>
+            </div>
+            <div class="demo-stage">
+                <div id="lock1"
+                     data-plugin-lockscreen
+                     data-plugin-options='{"pin":"1234","name":"Alex Kim","message":"Enter PIN to continue","idleTimeout":0}'></div>
+                <p style="color:rgba(255,255,255,.4);font-size:13.5px;text-align:center;max-width:340px">
+                    Click <strong style="color:#fff">Lock Screen</strong> to activate the overlay.
+                    Enter PIN <strong style="color:#2ab8c8">1234</strong> to unlock.
+                </p>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-demo btn-demo-teal" id="lock1-lock">
+                    <i class="bi bi-lock-fill"></i> Lock Screen
+                </button>
+                <button class="btn-demo btn-demo-muted" id="lock1-unlock">
+                    Programmatic Unlock
+                </button>
+            </div>
+            <div class="demo-log" id="lock1-log"><span style="color:rgba(255,255,255,.2)">Events will appear here…</span></div>
+<pre class="snip"><span class="fn">$</span>(<span class="str">'#lock1'</span>).<span class="fn">themestrapPluginLockscreen</span>({
+    <span class="at">pin</span>:         <span class="str">'1234'</span>,
+    <span class="at">name</span>:        <span class="str">'Alex Kim'</span>,
+    <span class="at">message</span>:     <span class="str">'Enter PIN to continue'</span>,
+    <span class="at">maxAttempts</span>: <span class="num">5</span>,
+});
+
+<span class="fn">$</span>(<span class="str">'#lock1'</span>).<span class="fn">on</span>(<span class="str">'ts.lockscreen.unlocked'</span>, <span class="kw">function</span> (e) {
+    console.<span class="fn">log</span>(<span class="str">'Unlocked with:'</span>, e.detail.enteredPin);
+});</pre>
+        </div>
+    </div>
+
+    <!-- 2. Idle auto-lock demo -->
+    <div class="demo-section">
+        <h2>Idle Auto-Lock</h2>
+        <div class="demo-card">
+            <div class="demo-card-header">
+                <span class="badge-pill">idleTimeout: 20s</span>
+                <span class="badge-pill">showIdleBadge: true</span>
+                <span class="badge-pill orange">PIN: 1234</span>
+            </div>
+            <div class="demo-stage" style="flex-direction:column;gap:12px">
+                <div id="lock2"
+                     data-plugin-lockscreen></div>
+                <p style="color:rgba(255,255,255,.4);font-size:13.5px;text-align:center;max-width:380px">
+                    Click <strong style="color:#fff">Start</strong>. Stop moving the mouse for 20 seconds
+                    and the screen will lock automatically. A countdown badge appears in the
+                    bottom-right corner when 30 seconds remain.
+                </p>
+                <div id="lock2-status" style="font-size:13px;color:#2ab8c8;min-height:20px;text-align:center"></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-demo btn-demo-teal" id="lock2-start">
+                    <i class="bi bi-play-fill"></i> Start Idle Watcher
+                </button>
+                <button class="btn-demo btn-demo-muted" id="lock2-lock">
+                    <i class="bi bi-lock-fill"></i> Lock Now
+                </button>
+            </div>
+            <div class="demo-log" id="lock2-log"><span style="color:rgba(255,255,255,.2)">Events will appear here…</span></div>
+<pre class="snip"><span class="fn">$</span>(<span class="str">'#lock2'</span>).<span class="fn">themestrapPluginLockscreen</span>({
+    <span class="at">pin</span>:          <span class="str">'1234'</span>,
+    <span class="at">name</span>:         <span class="str">'Robin Clarke'</span>,
+    <span class="at">idleTimeout</span>:  <span class="num">20</span>,   <span class="cm">// seconds of inactivity</span>
+    <span class="at">showIdleBadge</span>: <span class="kw">true</span>,
+    <span class="at">lockOnLoad</span>:   <span class="kw">false</span>,
+});</pre>
+        </div>
+    </div>
+
+    <!-- 3. Custom PIN at runtime -->
+    <div class="demo-section">
+        <h2>Runtime PIN Change</h2>
+        <div class="demo-card">
+            <div class="demo-card-header">
+                Change the expected PIN before locking
+            </div>
+            <div class="demo-stage" style="flex-direction:column;gap:12px">
+                <div id="lock3" data-plugin-lockscreen></div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center">
+                    <input type="tel" id="pin-input" maxlength="6"
+                           placeholder="New PIN"
+                           style="
+                               background:rgba(255,255,255,.07);
+                               border:1px solid rgba(255,255,255,.15);
+                               border-radius:7px;
+                               color:#fff;
+                               font-size:14px;
+                               padding:7px 14px;
+                               width:130px;
+                               outline:none;
+                               font-family:monospace;
+                               letter-spacing:.08em;
+                           ">
+                    <button class="btn-demo btn-demo-teal" id="lock3-set">Set PIN &amp; Lock</button>
+                </div>
+                <p style="color:rgba(255,255,255,.3);font-size:12px;text-align:center">
+                    Set a custom 4-digit PIN, then lock. Enter it to unlock.
+                </p>
+            </div>
+            <div class="demo-log" id="lock3-log"><span style="color:rgba(255,255,255,.2)">Events will appear here…</span></div>
+<pre class="snip"><span class="kw">const</span> ls = <span class="fn">$</span>(<span class="str">'#lock3'</span>).<span class="fn">themestrapPluginLockscreen</span>({
+    <span class="at">pin</span>: <span class="str">'0000'</span>,
+}).<span class="fn">data</span>(<span class="str">'__pluginLockscreen'</span>);
+
+<span class="fn">$</span>(<span class="str">'#setBtn'</span>).<span class="fn">on</span>(<span class="str">'click'</span>, <span class="kw">function</span> () {
+    <span class="kw">const</span> newPin = <span class="fn">$</span>(<span class="str">'#pin-input'</span>).<span class="fn">val</span>().<span class="fn">trim</span>();
+    ls.<span class="fn">setPin</span>(newPin).<span class="fn">lock</span>();
+});</pre>
+        </div>
+    </div>
+
+    <!-- Options table -->
+    <div class="demo-section">
+        <h2>Configuration Options</h2>
+        <table class="opt-table">
+            <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td><code>pin</code></td><td><span class="type-badge type-str">string</span></td><td><code>'0000'</code></td><td>Expected PIN. Compared as plain strings. Change at runtime via <code>setPin()</code>.</td></tr>
+                <tr><td><code>pinLength</code></td><td><span class="type-badge type-num">number</span></td><td><code>4</code></td><td>Number of OTP boxes rendered.</td></tr>
+                <tr><td><code>pinType</code></td><td><span class="type-badge type-str">string</span></td><td><code>'numeric'</code></td><td><code>'numeric'</code> or <code>'alphanumeric'</code>. Passed to PluginOtp.</td></tr>
+                <tr><td><code>name</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td>User display name shown under avatar. Initials used if no avatar image.</td></tr>
+                <tr><td><code>avatar</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td>URL to avatar image. Falls back to first letter of <code>name</code>.</td></tr>
+                <tr><td><code>message</code></td><td><span class="type-badge type-str">string</span></td><td><code>'Enter your PIN to continue'</code></td><td>Body message shown below the name.</td></tr>
+                <tr><td><code>use24h</code></td><td><span class="type-badge type-bool">bool</span></td><td><code>false</code></td><td>24-hour clock format.</td></tr>
+                <tr><td><code>maxAttempts</code></td><td><span class="type-badge type-num">number</span></td><td><code>5</code></td><td>Failed attempts before entering blocked state. <code>0</code> = unlimited.</td></tr>
+                <tr><td><code>blockDuration</code></td><td><span class="type-badge type-num">number</span></td><td><code>30000</code></td><td>Milliseconds to stay blocked after max attempts. <code>0</code> = permanent until reload.</td></tr>
+                <tr><td><code>idleTimeout</code></td><td><span class="type-badge type-num">number</span></td><td><code>0</code></td><td>Seconds of inactivity before auto-lock. <code>0</code> = disabled.</td></tr>
+                <tr><td><code>showIdleBadge</code></td><td><span class="type-badge type-bool">bool</span></td><td><code>true</code></td><td>Show a countdown pill in the corner when the idle timer is active.</td></tr>
+                <tr><td><code>lockOnLoad</code></td><td><span class="type-badge type-bool">bool</span></td><td><code>false</code></td><td>Lock immediately when the plugin initializes.</td></tr>
+                <tr><td><code>otpSize</code></td><td><span class="type-badge type-str">string</span></td><td><code>''</code></td><td>Size passed to PluginOtp. <code>''</code>, <code>'sm'</code>, or <code>'lg'</code>.</td></tr>
+                <tr><td><code>showClear</code></td><td><span class="type-badge type-bool">bool</span></td><td><code>true</code></td><td>Show the Clear button below the OTP input.</td></tr>
+                <tr><td><code>submitLabel</code></td><td><span class="type-badge type-str">string</span></td><td><code>'Unlock'</code></td><td>Label on the primary action button.</td></tr>
+                <tr><td><code>wrongPinMessage</code></td><td><span class="type-badge type-str">string</span></td><td><code>'Incorrect PIN. Try again.'</code></td><td>Error shown on failed attempt.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Events -->
+    <div class="demo-section">
+        <h2>Events</h2>
+        <div class="info-grid">
+            <div class="info-card">
+                <h4>ts.lockscreen.locked</h4>
+                Fired when the lockscreen becomes active. No detail payload.
+            </div>
+            <div class="info-card">
+                <h4>ts.lockscreen.unlocked</h4>
+                Fired on successful verification. <code>detail: { enteredPin }</code>
+            </div>
+            <div class="info-card">
+                <h4>ts.lockscreen.failed</h4>
+                Fired on each wrong attempt. <code>detail: { enteredPin, attempts }</code>
+            </div>
+            <div class="info-card">
+                <h4>ts.lockscreen.blocked</h4>
+                Fired when <code>maxAttempts</code> is reached. <code>detail: { attempts }</code>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.otp.js"></script>
+<script src="../js/components/themestrap.plugin.lockscreen.js"></script>
+<script>
+$(function () {
+
+    function addLog(logId, eventName, detail, style) {
+        const $log = $('#' + logId);
+        $log.find('span').remove();
+        const ts   = new Date().toLocaleTimeString();
+        const cls  = style || 'log-event';
+        const info = detail ? ' <span class="log-val">' + JSON.stringify(detail) + '</span>' : '';
+        $('<div class="log-entry"></div>')
+            .html('<span class="log-ts">' + ts + '</span><span class="' + cls + '">' + eventName + '</span>' + info)
+            .prependTo($log);
+        if ($log.children().length > 6) $log.children().last().remove();
+    }
+
+    /* 1. Basic */
+    $('#lock1').themestrapPluginLockscreen({
+        pin:         '1234',
+        name:        'Alex Kim',
+        message:     'Enter PIN to continue',
+        maxAttempts: 5,
+    });
+    const ls1 = $('#lock1').data('__pluginLockscreen');
+
+    $('#lock1').on('ts.lockscreen.locked',   function ()  { addLog('lock1-log', 'ts.lockscreen.locked'); });
+    $('#lock1').on('ts.lockscreen.unlocked', function (e) { addLog('lock1-log', 'ts.lockscreen.unlocked', e.detail, 'log-ok'); });
+    $('#lock1').on('ts.lockscreen.failed',   function (e) { addLog('lock1-log', 'ts.lockscreen.failed', e.detail, 'log-err'); });
+    $('#lock1').on('ts.lockscreen.blocked',  function (e) { addLog('lock1-log', 'ts.lockscreen.blocked', e.detail, 'log-err'); });
+
+    $('#lock1-lock').on('click', function ()   { ls1.lock(); });
+    $('#lock1-unlock').on('click', function ()  { ls1.unlock(); });
+
+    /* 2. Idle auto-lock */
+    let ls2 = null;
+    let ls2Started = false;
+
+    $('#lock2-start').on('click', function () {
+        if (ls2Started) return;
+        ls2Started = true;
+        $(this).prop('disabled', true).text('Watcher Active');
+
+        ls2 = $('#lock2').themestrapPluginLockscreen({
+            pin:          '1234',
+            name:         'Robin Clarke',
+            idleTimeout:  20,
+            showIdleBadge: true,
+            lockOnLoad:   false,
+        }).data('__pluginLockscreen');
+
+        $('#lock2').on('ts.lockscreen.locked',   function ()  { addLog('lock2-log', 'ts.lockscreen.locked'); $('#lock2-status').text('Locked!'); });
+        $('#lock2').on('ts.lockscreen.unlocked', function (e) { addLog('lock2-log', 'ts.lockscreen.unlocked', e.detail, 'log-ok'); $('#lock2-status').text('Unlocked — idle timer reset.'); });
+        $('#lock2').on('ts.lockscreen.failed',   function (e) { addLog('lock2-log', 'ts.lockscreen.failed', e.detail, 'log-err'); });
+
+        $('#lock2-status').text('Idle watcher active — stop moving for 20s.');
+    });
+
+    $('#lock2-lock').on('click', function () {
+        if (!ls2) {
+            $('#lock2-status').text('Start the watcher first.');
+            return;
+        }
+        ls2.lock();
+    });
+
+    /* 3. Runtime PIN */
+    const ls3 = $('#lock3').themestrapPluginLockscreen({
+        pin:     '0000',
+        message: 'Enter your custom PIN to unlock',
+    }).data('__pluginLockscreen');
+
+    $('#lock3').on('ts.lockscreen.unlocked', function (e) { addLog('lock3-log', 'ts.lockscreen.unlocked', e.detail, 'log-ok'); });
+    $('#lock3').on('ts.lockscreen.failed',   function (e) { addLog('lock3-log', 'ts.lockscreen.failed', e.detail, 'log-err'); });
+
+    $('#lock3-set').on('click', function () {
+        const newPin = $('#pin-input').val().trim();
+        if (!newPin || newPin.length < 4) {
+            addLog('lock3-log', 'Enter at least 4 digits', null, 'log-err');
+            return;
+        }
+        ls3.setPin(newPin).resetAttempts().lock();
+        addLog('lock3-log', 'PIN changed & locked', { pin: newPin });
+    });
+
+});
+</script>
+</body>
+</html>
