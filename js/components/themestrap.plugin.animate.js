@@ -53,7 +53,7 @@
 				return this;
 			}
 
-			if($('body').hasClass('loading-overlay-showing')) {
+			if ($('body').hasClass('loading-overlay-showing')) {
 				$(window).on('loading.overlay.ready', () => {
 					self.animate();
 				});
@@ -74,7 +74,7 @@
 
             // If has appear animation elements inside a SVG. 
             // Intersection Observer API do not check elements inside SVG's, so we need initialize trough top parent SVG
-            if( $el.data('appear-animation-svg') ) {
+            if ($el.data('appear-animation-svg')) {
 				$el.find('[data-appear-animation]').each(function(){
                     const $this = $(this);
                     let opts;
@@ -90,16 +90,16 @@
 			}
 
             // No animation at the first load of page. This is good for performance
-            if( self.options.firstLoadNoAnim ) {
+            if (self.options.firstLoadNoAnim) {
 				$el.removeClass('appear-animation');
 
 				// Inside Carousel
-				if( $el.closest('.owl-carousel').get(0) ) {
+				if ($el.closest('.owl-carousel').get(0)) {
 					setTimeout(() => {
 						$el.closest('.owl-carousel').on('change.owl.carousel', () => {
 							self.options.firstLoadNoAnim = false;
 							$el.removeData('__animate');
-							$el.themestrapPluginAnimate( self.options );
+							$el.themestrapPluginAnimate(self.options);
 						});
 					}, 500);
 				}
@@ -140,12 +140,10 @@
 		flagClassOnly: false
 	};
 
-    // expose to scope
     $.extend(themestrap, {
 		PluginAnimate
 	});
 
-    // jquery plugin
     $.fn.themestrapPluginAnimate = function(opts) {
 		return this.map(function() {
 			const $this = $(this);

@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginHoverCard — Live Demo | Themestrap</title>
+<meta name="description" content="Live demo of the Themestrap HoverCard plugin — hover-triggered preview cards with delay, auto-flip, and side-aware animations.">
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --navy:   #0a1929;
+    --navy-2: #0e2238;
+    --navy-3: #0b1f35;
+    --orange: #e8672a;
+    --orange-2: #ff7d3d;
+    --teal:   #2ab8c8;
+    --cream:  #f5f1ea;
+    --serif:  'Fraunces', Georgia, serif;
+    --sans:   'Syne', system-ui, sans-serif;
+    --body:   'DM Sans', system-ui, sans-serif;
+    --mono:   'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+html, body { padding: 0; }
+
+body {
+    font-family: var(--body);
+    background: var(--navy);
+    color: var(--cream);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a { color: var(--teal); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Hero ── */
+.demo-hero {
+    padding: 90px 24px 72px;
+    background:
+        radial-gradient(ellipse at top left, rgba(42,184,200,0.1) 0%, transparent 40%),
+        radial-gradient(ellipse at bottom right, rgba(232,103,42,0.1) 0%, transparent 40%),
+        linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.demo-hero-inner { position: relative; max-width: 820px; margin: 0 auto; }
+
+.eyebrow {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 20px;
+}
+.eyebrow .dot { display: inline-block; width: 5px; height: 5px; background: var(--orange); border-radius: 50%; margin: 0 12px; vertical-align: middle; opacity: .6; }
+
+.demo-hero h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(38px, 6.5vw, 68px);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    margin-bottom: 22px;
+    color: var(--cream);
+}
+.demo-hero h1 em { font-style: italic; color: var(--orange); font-weight: 500; }
+
+.hero-lead {
+    font-size: 17px;
+    color: rgba(245,241,234,0.65);
+    max-width: 580px;
+    margin: 0 auto 48px;
+    line-height: 1.65;
+}
+
+/* ── Hero live example ── */
+.hero-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 20px 32px;
+    font-size: 16px;
+    color: rgba(245,241,234,0.7);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hero-hint {
+    display: block;
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(245,241,234,0.35);
+}
+
+/* ── Sections ── */
+.demo-section {
+    padding: 72px 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.demo-section-inner { max-width: 1060px; margin: 0 auto; }
+
+.demo-section h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+    color: var(--cream);
+}
+.demo-section h2 em { font-style: italic; color: var(--orange); font-weight: 500; }
+
+.sec-lead {
+    color: rgba(245,241,234,0.6);
+    font-size: 15px;
+    max-width: 640px;
+    margin-bottom: 40px;
+    line-height: 1.65;
+}
+
+/* ── Demo cards grid ── */
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 20px;
+}
+
+.demo-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s;
+}
+
+/* Clip header and desc edges to the card's border-radius without clipping hover cards */
+.demo-card-header {
+    border-radius: 14px 14px 0 0;
+}
+
+.demo-desc:last-child {
+    border-radius: 0 0 14px 14px;
+}
+.demo-card:hover { border-color: rgba(42,184,200,0.25); }
+
+.demo-card-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.demo-card-title {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cream);
+}
+.demo-card-tag {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(42,184,200,0.12);
+    color: var(--teal);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(42,184,200,0.2);
+}
+
+.demo-stage {
+    padding: 36px 24px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+}
+
+.demo-desc {
+    padding: 14px 20px;
+    font-size: 12.5px;
+    color: rgba(245,241,234,0.5);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    line-height: 1.5;
+}
+
+/* ── Playground card (full-width) ── */
+.demo-card.full { grid-column: 1 / -1; }
+
+.playground-inner {
+    padding: 28px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.control-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 140px;
+}
+
+.control-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(245,241,234,0.5);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.control-value {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--orange);
+    margin-left: 4px;
+}
+
+.range-input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.1);
+    outline: none;
+    cursor: pointer;
+}
+.range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--orange);
+    cursor: pointer;
+    border: 2px solid var(--navy);
+    box-shadow: 0 0 0 2px rgba(232,103,42,0.3);
+}
+
+.seg-control {
+    display: flex;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    width: fit-content;
+}
+.seg-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 6px 14px;
+    background: transparent;
+    border: none;
+    color: rgba(245,241,234,0.5);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+.seg-btn:last-child { border-right: none; }
+.seg-btn.active, .seg-btn:hover {
+    background: rgba(232,103,42,0.2);
+    color: var(--orange);
+}
+
+.playground-trigger-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+/* ── Four sides grid ── */
+.sides-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 12px;
+    padding: 24px;
+}
+.sides-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+}
+.sides-cell.center-cell {
+    grid-column: 1 / -1;
+    background: transparent;
+    border: none;
+    padding: 4px 18px;
+}
+
+/* ── Inline text demo ── */
+.inline-text-demo {
+    font-size: 16px;
+    line-height: 2.4;
+    color: rgba(245,241,234,0.75);
+    padding: 28px;
+}
+
+/* ── Tag / handle link style ── */
+.hc-link {
+    color: var(--teal);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.hc-link:hover { color: #5dd6e4; text-decoration: none; }
+
+/* ── Trigger buttons ── */
+.trigger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: var(--cream);
+    font-family: var(--body);
+    font-size: 13.5px;
+    cursor: default;
+    user-select: none;
+    transition: border-color 0.15s, background 0.15s;
+}
+.trigger-btn:hover { border-color: rgba(42,184,200,0.4); background: rgba(42,184,200,0.06); }
+
+.trigger-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px 7px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    cursor: default;
+    transition: all 0.15s;
+}
+.trigger-pill:hover { border-color: rgba(232,103,42,0.4); background: rgba(232,103,42,0.06); }
+
+.avatar-sm {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* ── Side label badges ── */
+.side-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    background: rgba(232,103,42,0.15);
+    color: var(--orange);
+    border: 1px solid rgba(232,103,42,0.2);
+}
+
+/* ── API demo section ── */
+.api-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+@media (max-width: 640px) { .api-grid { grid-template-columns: 1fr; } }
+
+.api-target {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px 24px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 10px;
+    min-height: 180px;
+}
+.api-target p { font-size: 13px; color: rgba(245,241,234,0.45); text-align: center; margin: 0; }
+
+.api-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+}
+
+.api-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--cream);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    width: 100%;
+}
+.api-btn:hover { background: rgba(232,103,42,0.12); border-color: rgba(232,103,42,0.3); color: #fff; }
+.api-btn i { width: 14px; color: var(--orange); }
+.api-btn .api-method { color: var(--orange); }
+.api-btn .api-desc { color: rgba(245,241,234,0.45); font-size: 11px; display: block; margin-top: 1px; font-family: var(--body); }
+
+.api-status {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: rgba(245,241,234,0.4);
+    text-align: center;
+    margin-top: 4px;
+}
+.api-status .status-val { color: var(--teal); }
+
+/* ── Event log ── */
+.event-log-wrap {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.event-log-header {
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.event-log-header h3 {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cream);
+}
+.log-clear {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    color: rgba(245,241,234,0.45);
+    font-size: 12px;
+    font-family: var(--body);
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    transition: all 0.15s;
+}
+.log-clear:hover { background: rgba(232,103,42,0.1); color: var(--orange); }
+
+.event-log {
+    padding: 14px 20px;
+    height: 220px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.65;
+    color: rgba(245,241,234,0.55);
+}
+.log-empty { color: rgba(245,241,234,0.28); font-style: italic; }
+.log-line { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 10px; align-items: baseline; }
+.log-line:last-child { border-bottom: 0; }
+.log-time { color: rgba(245,241,234,0.28); flex-shrink: 0; }
+.log-event { font-weight: 600; flex-shrink: 0; }
+.log-show { color: #5dd982; }
+.log-hide { color: #f87171; }
+.log-api  { color: #c084fc; }
+.log-detail { color: rgba(245,241,234,0.4); font-size: 11px; }
+
+/* ── HoverCard content overrides for dark demo bg ── */
+[data-hovercard-content] {
+    background: #132232 !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    color: var(--cream) !important;
+    box-shadow:
+        0 8px 24px rgba(0,0,0,0.4),
+        0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+[data-hovercard-content].ts-hc-side-top::after    { border-top-color: #132232 !important; }
+[data-hovercard-content].ts-hc-side-top::before   { border-top-color: rgba(255,255,255,0.1) !important; }
+[data-hovercard-content].ts-hc-side-bottom::after  { border-bottom-color: #132232 !important; }
+[data-hovercard-content].ts-hc-side-bottom::before { border-bottom-color: rgba(255,255,255,0.1) !important; }
+[data-hovercard-content].ts-hc-side-left::after   { border-left-color: #132232 !important; }
+[data-hovercard-content].ts-hc-side-left::before  { border-left-color: rgba(255,255,255,0.1) !important; }
+[data-hovercard-content].ts-hc-side-right::after  { border-right-color: #132232 !important; }
+[data-hovercard-content].ts-hc-side-right::before { border-right-color: rgba(255,255,255,0.1) !important; }
+
+.hc-handle, .hc-meta-label { color: rgba(245,241,234,0.45) !important; }
+.hc-bio { color: rgba(245,241,234,0.65) !important; }
+.hc-divider { border-top-color: rgba(255,255,255,0.08) !important; }
+
+/* ── Footer ── */
+.demo-footer {
+    padding: 40px 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+    color: rgba(245,241,234,0.35);
+    font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════ -->
+<section class="demo-hero">
+    <div class="demo-hero-inner">
+        <div class="eyebrow">
+            Themestrap <span class="dot"></span> PluginHoverCard <span class="dot"></span> Live Demo
+        </div>
+
+        <h1>Hover cards that<br><em>feel right.</em></h1>
+
+        <p class="hero-lead">
+            Delay-aware, hover-pinned preview cards. Positioned relative to the trigger, auto-flipped at viewport edges, animated with side-aware keyframes. Zero dependencies.
+        </p>
+
+        <div class="hero-live">
+            <span style="color:rgba(245,241,234,0.5);">Written by</span>
+
+            <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"center"}' class="manual" id="hero-card">
+                <span data-hovercard-trigger class="hc-link" tabindex="0">@daemon_devin</span>
+                <div data-hovercard-content>
+                    <div class="hc-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Daemon+Devin&background=0e2a3d&color=2ab8c8&size=96&bold=true" alt="daemon.devin">
+                    </div>
+                    <div class="hc-name">daemon.devin</div>
+                    <div class="hc-handle">@daemon_devin</div>
+                    <p class="hc-bio">Building Themestrap — a zero-build jQuery plugin ecosystem for MODX 3.</p>
+                    <hr class="hc-divider">
+                    <div class="hc-meta">
+                        <span>128 <span class="hc-meta-label">Following</span></span>
+                        <span>4.2k <span class="hc-meta-label">Followers</span></span>
+                    </div>
+                </div>
+            </span>
+
+            <span style="color:rgba(245,241,234,0.5);">·</span>
+
+            <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"center"}' class="manual">
+                <span data-hovercard-trigger class="hc-link" tabindex="0">Themestrap</span>
+                <div data-hovercard-content>
+                    <div class="hc-name">Themestrap</div>
+                    <div class="hc-handle">themestrap.dev</div>
+                    <p class="hc-bio">A zero-build jQuery + Bootstrap 5 component library for MODX 3. 60+ plugins, no React, no build step.</p>
+                    <hr class="hc-divider">
+                    <div class="hc-meta">
+                        <span>60+ <span class="hc-meta-label">Plugins</span></span>
+                        <span>MODX 3 <span class="hc-meta-label">Platform</span></span>
+                    </div>
+                </div>
+            </span>
+        </div>
+
+        <span class="hero-hint">hover the links above to preview</span>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     DEMOS
+═══════════════════════════════════════════════════ -->
+<section class="demo-section">
+    <div class="demo-section-inner">
+        <h2>Six <em>demos</em>, one plugin.</h2>
+        <p class="sec-lead">From user profiles to link previews to interactive controls — the same hover card mechanism drives them all.</p>
+
+        <div class="demo-grid">
+
+            <!-- 1. Profile card -->
+            <div class="demo-card">
+                <div class="demo-card-header">
+                    <span class="demo-card-title">Profile Card</span>
+                    <span class="demo-card-tag">Classic</span>
+                </div>
+                <div class="demo-stage">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"start"}' class="manual">
+                        <span data-hovercard-trigger class="trigger-pill">
+                            <img class="avatar-sm" src="https://ui-avatars.com/api/?name=Alice+Chen&background=1a3a4a&color=2ab8c8&size=96" alt="Alice Chen">
+                            Alice Chen
+                        </span>
+                        <div data-hovercard-content>
+                            <div class="hc-avatar">
+                                <img src="https://ui-avatars.com/api/?name=Alice+Chen&background=1a3a4a&color=2ab8c8&size=96&bold=true" alt="Alice Chen">
+                            </div>
+                            <div class="hc-name">Alice Chen</div>
+                            <div class="hc-handle">@alice · Frontend Lead</div>
+                            <p class="hc-bio">CSS grid evangelist. Accessibility advocate. Loves a good cup of tea and a tight design system.</p>
+                            <hr class="hc-divider">
+                            <div class="hc-meta">
+                                <span>312 <span class="hc-meta-label">Following</span></span>
+                                <span>8.1k <span class="hc-meta-label">Followers</span></span>
+                            </div>
+                        </div>
+                    </span>
+                </div>
+                <div class="demo-desc">Avatar pill trigger → profile card below. Default delay 200/300 ms.</div>
+            </div>
+
+            <!-- 2. Link preview -->
+            <div class="demo-card">
+                <div class="demo-card-header">
+                    <span class="demo-card-title">Link Preview</span>
+                    <span class="demo-card-tag">Doc Teaser</span>
+                </div>
+                <div class="demo-stage">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"top","align":"center","delay":[150,400]}' class="manual">
+                        <a data-hovercard-trigger href="#" class="hc-link" style="font-size:15px;">Plugin Architecture Guide →</a>
+                        <div data-hovercard-content>
+                            <div class="hc-name" style="font-size:.75rem;color:rgba(245,241,234,0.45);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem;">GUIDE · 12 min read</div>
+                            <div class="hc-name">Plugin Architecture</div>
+                            <p class="hc-bio">Deep dive into the Themestrap plugin class lifecycle — initialize, setData, setOptions, build, events, destroy — and the IIFE wrapper pattern.</p>
+                            <hr class="hc-divider">
+                            <div class="hc-meta">
+                                <span style="color:var(--teal)"><i class="fas fa-book" style="font-size:.7rem;margin-right:4px;"></i> Open guide</span>
+                            </div>
+                        </div>
+                    </span>
+                </div>
+                <div class="demo-desc">Opens above the link. Fast open (150 ms), slow close (400 ms) — gives time to read.</div>
+            </div>
+
+            <!-- 3. With arrow -->
+            <div class="demo-card">
+                <div class="demo-card-header">
+                    <span class="demo-card-title">With Arrow</span>
+                    <span class="demo-card-tag">arrow: true</span>
+                </div>
+                <div class="demo-stage">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"right","align":"center","arrow":true,"delay":[100,300]}' class="manual">
+                        <span data-hovercard-trigger class="trigger-btn">
+                            <i class="fas fa-circle-info" style="color:var(--teal)"></i>
+                            Release notes
+                        </span>
+                        <div data-hovercard-content>
+                            <div class="hc-name">v2.4.0 — HoverCard</div>
+                            <p class="hc-bio">New plugin: PluginHoverCard. Hover-triggered preview cards with delay, auto-flip, portaling, and side-aware animations.</p>
+                            <hr class="hc-divider">
+                            <div class="hc-meta">
+                                <span style="color:rgba(245,241,234,0.45);font-size:.75rem;">Released 2 days ago</span>
+                            </div>
+                        </div>
+                    </span>
+                </div>
+                <div class="demo-desc">CSS arrow pointing from the card back to the trigger. Side: right, align: center.</div>
+            </div>
+
+            <!-- 4. Instant (delay: 0) -->
+            <div class="demo-card">
+                <div class="demo-card-header">
+                    <span class="demo-card-title">Instant Preview</span>
+                    <span class="demo-card-tag">delay: 0</span>
+                </div>
+                <div class="demo-stage">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"center","delay":0}' class="manual">
+                        <span data-hovercard-trigger class="trigger-btn">
+                            <i class="fas fa-bolt" style="color:var(--orange)"></i>
+                            Snappy preview
+                        </span>
+                        <div data-hovercard-content style="max-width:220px;">
+                            <div class="hc-name">No delay</div>
+                            <p class="hc-bio mb-0">Opens and closes immediately on mouseenter/mouseleave. Best for toolbars and icon grids.</p>
+                        </div>
+                    </span>
+                </div>
+                <div class="demo-desc">Zero open and close delay. Appears the moment the cursor enters the trigger.</div>
+            </div>
+
+            <!-- 5. Inline in text (full-width) -->
+            <div class="demo-card full">
+                <div class="demo-card-header">
+                    <span class="demo-card-title">Multiple Triggers in Running Text</span>
+                    <span class="demo-card-tag">Inline</span>
+                </div>
+                <div class="inline-text-demo">
+                    The Themestrap project was conceived by
+                    <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"start"}' class="manual">
+                        <span data-hovercard-trigger class="hc-link" tabindex="0">@daemon_devin</span>
+                        <div data-hovercard-content>
+                            <div class="hc-avatar"><img src="https://ui-avatars.com/api/?name=Daemon+Devin&background=0e2a3d&color=2ab8c8&size=96&bold=true" alt=""></div>
+                            <div class="hc-name">daemon.devin</div><div class="hc-handle">@daemon_devin</div>
+                            <p class="hc-bio">Building Themestrap — zero-build jQuery plugins for MODX 3.</p>
+                            <div class="hc-meta"><span>128 <span class="hc-meta-label">Following</span></span><span>4.2k <span class="hc-meta-label">Followers</span></span></div>
+                        </div>
+                    </span>
+                    and is built on top of
+                    <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"start"}' class="manual">
+                        <span data-hovercard-trigger class="hc-link" tabindex="0">Bootstrap 5</span>
+                        <div data-hovercard-content>
+                            <div class="hc-name">Bootstrap 5</div>
+                            <div class="hc-handle">getbootstrap.com</div>
+                            <p class="hc-bio">The world's most popular front-end open source toolkit, featuring Sass variables, responsive grid, and extensive prebuilt components.</p>
+                            <hr class="hc-divider">
+                            <div class="hc-meta"><span>v5.3 <span class="hc-meta-label">Current</span></span></div>
+                        </div>
+                    </span>
+                    and
+                    <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"start"}' class="manual">
+                        <span data-hovercard-trigger class="hc-link" tabindex="0">MODX 3</span>
+                        <div data-hovercard-content>
+                            <div class="hc-name">MODX Revolution 3</div>
+                            <div class="hc-handle">modx.com</div>
+                            <p class="hc-bio">A PHP CMS and application framework that gives developers full creative control. Themestrap is purpose-built for MODX 3 deployments.</p>
+                            <hr class="hc-divider">
+                            <div class="hc-meta"><span>v3.x <span class="hc-meta-label">Platform</span></span></div>
+                        </div>
+                    </span>.
+                    Each hover card is a separate, independent plugin instance.
+                </div>
+                <div class="demo-desc">Each <code>[data-plugin-hovercard]</code> is a self-contained instance. Any number can coexist in prose without conflict.</div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     FOUR SIDES
+═══════════════════════════════════════════════════ -->
+<section class="demo-section">
+    <div class="demo-section-inner">
+        <h2>Four <em>sides</em>, one rule.</h2>
+        <p class="sec-lead">Cards open on any side and auto-flip when the viewport doesn't have enough room. The exit animation always runs toward the trigger.</p>
+
+        <div class="demo-card">
+            <div class="demo-card-header">
+                <span class="demo-card-title">Side Placement</span>
+                <span class="demo-card-tag">Auto-flip enabled</span>
+            </div>
+            <div class="sides-grid">
+                <!-- Top -->
+                <div class="sides-cell center-cell">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"top","align":"center","arrow":true}' class="manual">
+                        <span data-hovercard-trigger class="trigger-btn">top <span class="side-badge">↑</span></span>
+                        <div data-hovercard-content style="max-width:200px;">
+                            <div class="hc-name">side: "top"</div>
+                            <p class="hc-bio mb-0">Slides up into view. Flips to bottom if there's not enough room above.</p>
+                        </div>
+                    </span>
+                </div>
+                <!-- Left + Right -->
+                <div class="sides-cell">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"left","align":"center","arrow":true}' class="manual">
+                        <span data-hovercard-trigger class="trigger-btn">left <span class="side-badge">←</span></span>
+                        <div data-hovercard-content style="max-width:200px;">
+                            <div class="hc-name">side: "left"</div>
+                            <p class="hc-bio mb-0">Slides in from the right. Flips to right if no room on the left.</p>
+                        </div>
+                    </span>
+                </div>
+                <div class="sides-cell">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"right","align":"center","arrow":true}' class="manual">
+                        <span data-hovercard-trigger class="trigger-btn">right <span class="side-badge">→</span></span>
+                        <div data-hovercard-content style="max-width:200px;">
+                            <div class="hc-name">side: "right"</div>
+                            <p class="hc-bio mb-0">Slides in from the left. Flips to left if no room on the right.</p>
+                        </div>
+                    </span>
+                </div>
+                <!-- Bottom -->
+                <div class="sides-cell center-cell">
+                    <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"center","arrow":true}' class="manual">
+                        <span data-hovercard-trigger class="trigger-btn">bottom <span class="side-badge">↓</span></span>
+                        <div data-hovercard-content style="max-width:200px;">
+                            <div class="hc-name">side: "bottom"</div>
+                            <p class="hc-bio mb-0">Slides down into view. The default. Flips to top near the bottom of the page.</p>
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     DELAY PLAYGROUND
+═══════════════════════════════════════════════════ -->
+<section class="demo-section">
+    <div class="demo-section-inner">
+        <h2>Dial in the <em>delay.</em></h2>
+        <p class="sec-lead">Open and close delays are independent. Slow open + fast close = glanceable. Fast open + slow close = sticky and explorable.</p>
+
+        <div class="demo-card full">
+            <div class="demo-card-header">
+                <span class="demo-card-title">Delay Playground</span>
+                <span class="demo-card-tag">Live Controls</span>
+            </div>
+            <div class="playground-inner">
+                <div class="control-row">
+                    <div class="control-group" style="flex:1;min-width:200px;">
+                        <label class="control-label" for="open-delay">Open delay <span class="control-value" id="open-delay-val">200</span> ms</label>
+                        <input type="range" id="open-delay" class="range-input" min="0" max="800" step="50" value="200">
+                    </div>
+                    <div class="control-group" style="flex:1;min-width:200px;">
+                        <label class="control-label" for="close-delay">Close delay <span class="control-value" id="close-delay-val">300</span> ms</label>
+                        <input type="range" id="close-delay" class="range-input" min="0" max="800" step="50" value="300">
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Align</label>
+                        <div class="seg-control">
+                            <button class="seg-btn active" data-align="start">start</button>
+                            <button class="seg-btn" data-align="center">center</button>
+                            <button class="seg-btn" data-align="end">end</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="playground-trigger-wrap">
+                    <span id="playground-card" data-plugin-hovercard class="manual">
+                        <span data-hovercard-trigger class="trigger-btn" style="font-size:15px;">
+                            <i class="fas fa-mouse-pointer" style="color:var(--teal)"></i>
+                            Hover me
+                        </span>
+                        <div data-hovercard-content>
+                            <div class="hc-name">Delay playground</div>
+                            <p class="hc-bio">Try adjusting the sliders while this card is open — the next open/close cycle will use the new values.</p>
+                            <hr class="hc-divider">
+                            <div class="hc-meta">
+                                <span id="pg-open-stat">200 <span class="hc-meta-label">ms open</span></span>
+                                <span id="pg-close-stat">300 <span class="hc-meta-label">ms close</span></span>
+                            </div>
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     JS API
+═══════════════════════════════════════════════════ -->
+<section class="demo-section">
+    <div class="demo-section-inner">
+        <h2>Full <em>API</em> control.</h2>
+        <p class="sec-lead">Every instance exposes <code>show()</code>, <code>hide()</code>, <code>update()</code>, and <code>destroy()</code>. Re-init after destroy with a fresh options object.</p>
+
+        <div class="api-grid">
+            <div class="api-target">
+                <span id="api-card" data-plugin-hovercard class="manual">
+                    <span data-hovercard-trigger class="trigger-pill">
+                        <img class="avatar-sm" src="https://ui-avatars.com/api/?name=Bob+Smith&background=2d1a4a&color=c678dd&size=96&bold=true" alt="Bob Smith">
+                        @bob
+                    </span>
+                    <div data-hovercard-content>
+                        <div class="hc-avatar"><img src="https://ui-avatars.com/api/?name=Bob+Smith&background=2d1a4a&color=c678dd&size=96&bold=true" alt="Bob Smith"></div>
+                        <div class="hc-name">Bob Smith</div>
+                        <div class="hc-handle">@bob · Backend</div>
+                        <p class="hc-bio">PHP and MODX wizard. Writes clean processors and even cleaner SQL.</p>
+                        <div class="hc-meta"><span>55 <span class="hc-meta-label">Following</span></span><span>1.9k <span class="hc-meta-label">Followers</span></span></div>
+                    </div>
+                </span>
+                <p id="api-status-text">Instance alive · hover or use controls →</p>
+            </div>
+
+            <div class="api-controls">
+                <button class="api-btn" id="btn-show">
+                    <i class="fas fa-eye"></i>
+                    <span><span class="api-method">hc.show()</span><span class="api-desc">Force open, bypassing delay</span></span>
+                </button>
+                <button class="api-btn" id="btn-hide">
+                    <i class="fas fa-eye-slash"></i>
+                    <span><span class="api-method">hc.hide()</span><span class="api-desc">Force close, bypassing delay</span></span>
+                </button>
+                <button class="api-btn" id="btn-update">
+                    <i class="fas fa-arrows-rotate"></i>
+                    <span><span class="api-method">hc.update()</span><span class="api-desc">Recompute position</span></span>
+                </button>
+                <button class="api-btn" id="btn-destroy">
+                    <i class="fas fa-trash"></i>
+                    <span><span class="api-method">hc.destroy()</span><span class="api-desc">Full teardown — removes all event listeners</span></span>
+                </button>
+                <button class="api-btn" id="btn-reinit">
+                    <i class="fas fa-rotate-right"></i>
+                    <span><span class="api-method">$el.themestrapPluginHoverCard()</span><span class="api-desc">Re-initialize after destroy</span></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     EVENT LOG
+═══════════════════════════════════════════════════ -->
+<section class="demo-section">
+    <div class="demo-section-inner">
+        <h2>Event <em>visibility.</em></h2>
+        <p class="sec-lead">Every <code>ts.hovercard.show</code> and <code>ts.hovercard.hide</code> event from every card on this page is captured here.</p>
+
+        <div class="event-log-wrap">
+            <div class="event-log-header">
+                <h3>Event log</h3>
+                <button class="log-clear" id="clear-log">Clear</button>
+            </div>
+            <div class="event-log" id="event-log">
+                <div class="log-empty" id="log-empty">No events yet — hover any card above to start.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════ -->
+<footer class="demo-footer">
+    <p>Themestrap MODX 3 · <code>PluginHoverCard</code> · <a href="plugin-hovercard.html">Full documentation</a></p>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════ -->
+
+<!-- Minimal Themestrap namespace shim -->
+<script>
+window.themestrap = window.themestrap || {};
+themestrap.fn = themestrap.fn || {
+    getOptions: function(raw) {
+        if (!raw) return null;
+        if (typeof raw === 'object') return raw;
+        try { return JSON.parse(raw.replace(/'/g, '"')); } catch(_) { return null; }
+    }
+};
+</script>
+
+<!-- HoverCard plugin -->
+<script src="../js/components/themestrap.plugin.hovercard.js"></script>
+
+<!-- Demo init -->
+<script>
+$(function () {
+
+    /* Init all manual instances */
+    $('[data-plugin-hovercard].manual').each(function () {
+        const $this = $(this);
+        const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+        $this.themestrapPluginHoverCard(opts);
+    });
+
+
+    /* ── Event log ─────────────────────────────────────────────── */
+    const $log      = $('#event-log');
+    const $logEmpty = $('#log-empty');
+    let logCount    = 0;
+
+    function ts() {
+        return new Date().toTimeString().slice(0, 8);
+    }
+
+    function addLog(evtType, detail) {
+        $logEmpty.hide();
+        const $line = $('<div class="log-line">');
+        $line.append($('<span class="log-time">').text(ts()));
+        $line.append($('<span>').addClass('log-event log-' + evtType).text('ts.hovercard.' + evtType));
+        if (detail) {
+            $line.append($('<span class="log-detail">').text(' — ' + detail));
+        }
+        $log.prepend($line);
+        logCount++;
+        if (logCount > 60) $log.children('.log-line').slice(60).remove();
+    }
+
+    document.addEventListener('ts.hovercard.show', function(e) {
+        const trigger = e.target.querySelector('[data-hovercard-trigger]');
+        const label   = trigger ? (trigger.textContent.trim() || trigger.getAttribute('aria-label') || 'card') : 'card';
+        addLog('show', label);
+    });
+
+    document.addEventListener('ts.hovercard.hide', function(e) {
+        const trigger = e.target.querySelector('[data-hovercard-trigger]');
+        const label   = trigger ? (trigger.textContent.trim() || 'card') : 'card';
+        addLog('hide', label);
+    });
+
+    $('#clear-log').on('click', function() {
+        $log.children('.log-line').remove();
+        $logEmpty.show();
+        logCount = 0;
+    });
+
+
+    /* ── Delay playground ──────────────────────────────────────── */
+    const $pg          = $('#playground-card');
+    let pgOpenDelay    = 200;
+    let pgCloseDelay   = 300;
+    let pgAlign        = 'start';
+
+    function reinitPlayground() {
+        const inst = $pg.data('__pluginHoverCard');
+        if (inst) inst.destroy();
+        $pg.themestrapPluginHoverCard({
+            side : 'bottom',
+            align: pgAlign,
+            delay: [pgOpenDelay, pgCloseDelay]
+        });
+        $('#pg-open-stat').html(pgOpenDelay + ' <span class="hc-meta-label">ms open</span>');
+        $('#pg-close-stat').html(pgCloseDelay + ' <span class="hc-meta-label">ms close</span>');
+    }
+
+    reinitPlayground();
+
+    $('#open-delay').on('input', function() {
+        pgOpenDelay = parseInt(this.value, 10);
+        $('#open-delay-val').text(pgOpenDelay);
+        reinitPlayground();
+    });
+
+    $('#close-delay').on('input', function() {
+        pgCloseDelay = parseInt(this.value, 10);
+        $('#close-delay-val').text(pgCloseDelay);
+        reinitPlayground();
+    });
+
+    $('.seg-btn[data-align]').on('click', function() {
+        $('.seg-btn[data-align]').removeClass('active');
+        $(this).addClass('active');
+        pgAlign = $(this).data('align');
+        reinitPlayground();
+    });
+
+
+    /* ── JS API demo ───────────────────────────────────────────── */
+    const $apiCard   = $('#api-card');
+    const $apiStatus = $('#api-status-text');
+
+    /* Init API card with side:top so it doesn't clip on the bottom half of the page */
+    $apiCard.themestrapPluginHoverCard({ side: 'top', align: 'center', delay: [0, 200] });
+
+    function getInst() { return $apiCard.data('__pluginHoverCard') || null; }
+
+    $('#btn-show').on('click', function() {
+        const inst = getInst();
+        if (inst) {
+            inst.show();
+            addLog('api', 'show() called');
+        } else {
+            $apiStatus.text('No instance — click Re-init first');
+        }
+    });
+
+    $('#btn-hide').on('click', function() {
+        const inst = getInst();
+        if (inst) {
+            inst.hide();
+            addLog('api', 'hide() called');
+        }
+    });
+
+    $('#btn-update').on('click', function() {
+        const inst = getInst();
+        if (inst) {
+            inst.update();
+            addLog('api', 'update() called');
+        }
+    });
+
+    $('#btn-destroy').on('click', function() {
+        const inst = getInst();
+        if (inst) {
+            inst.destroy();
+            $apiStatus.text('Instance destroyed — re-init to restore');
+            addLog('api', 'destroy() called');
+        }
+    });
+
+    $('#btn-reinit').on('click', function() {
+        if (!getInst()) {
+            $apiCard.themestrapPluginHoverCard({ side: 'top', align: 'center', delay: [0, 200] });
+            $apiStatus.text('Re-initialized · hover or use controls →');
+            addLog('api', 'themestrapPluginHoverCard() re-init');
+        } else {
+            $apiStatus.text('Already initialized');
+        }
+    });
+
+});
+</script>
+
+</body>
+</html>

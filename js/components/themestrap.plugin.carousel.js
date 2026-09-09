@@ -1,2018 +1,1401 @@
+// Carousel
 (((themestrap = {}, $) => {
-	const instanceName  = '__carousel';
-	const STYLE_ID      = 'themestrap-carousel-styles';
+    const instanceName = '__carousel';
+    const STYLE_ID = 'ts-carousel-styles';
 
-	function injectStyles() {
-		if (document.getElementById(STYLE_ID)) return;
-		const css = `
-/* Themestrap Carousel  */
-.ts-carousel { position: relative; overflow: hidden; }
-.ts-carousel .ts-stage-outer { overflow: hidden; width: 100%; }
-.ts-carousel .ts-stage {
-	display: flex;
-	will-change: transform;
-	transition: transform 0.35s ease;
-	align-items: flex-start;
+    class PluginCarousel {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el = $el;
+            this.initialHTML = $el.html();
+            this._uid = ++PluginCarousel._uidCounter;
+
+            // Defer init until icon plugin has rendered its icons to prevent flicker
+            if ($el.find('[data-icon]').get(0)) {
+                const self = this;
+                $(window).on('icon.rendered', function() {
+                    if ($el.data(instanceName)) return;
+                    setTimeout(() => {
+                        self.setData().setOptions(opts).build().events();
+                    }, 1000);
+                });
+                return this;
+            }
+
+            this.setData().setOptions(opts).build().events();
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            PluginCarousel.instances++;
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginCarousel.defaults, opts, {
+                wrapper: this.$el
+            });
+            return this;
+        }
+
+        build() {
+            // Lazy CSS injection — only once, ref-counted for destroy
+            if (!document.getElementById(STYLE_ID)) {
+                const style = document.createElement('style');
+                style.id = STYLE_ID;
+                style.textContent = PluginCarousel.css;
+                document.head.appendChild(style);
+            }
+
+            const self = this;
+            const $el = this.options.wrapper;
+            const opts = this.options;
+
+            // RTL: inherit from html[dir] when not explicitly set
+            if ($('html').attr('dir') === 'rtl') opts.rtl = true;
+
+            // Collect and count original items before mutating the DOM
+            const $originalItems = $el.children();
+            const itemCount = $originalItems.length;
+            if (itemCount === 0) return this;
+
+            this.itemCount = itemCount;
+            this.currentIndex = 0;
+            this.clonedBefore = 0;
+            this.clonedAfter = 0;
+            this.autoplayTimer = null;
+
+            // Single-item shortcut: ignore responsive breakpoints
+            if (opts.items === 1) opts.responsive = {};
+
+            // Items beyond default 4: ensure a 1199px breakpoint entry
+            if (opts.items > 4) {
+                opts.responsive = $.extend(true, {}, opts.responsive, {
+                    1199: { items: opts.items }
+                });
+            }
+
+            // Resolve visible item count for the current viewport width
+            this.getItemsCount = () => {
+                const resp = opts.responsive;
+                if (!resp || Object.keys(resp).length === 0) return Math.max(opts.items || 1, 1);
+                const w = window.innerWidth;
+                const bps = Object.keys(resp).map(Number).sort((a, b) => a - b);
+                let count = Math.max(opts.items || 1, 1);
+                for (const bp of bps) {
+                    if (w >= bp && resp[bp].items !== undefined) count = resp[bp].items;
+                }
+                return Math.max(count, 1);
+            };
+
+            // Build stage structure
+            const $stageOuter = $('<div class="owl-stage-outer"></div>');
+            const $stage = $('<div class="owl-stage"></div>');
+            $stageOuter.append($stage);
+
+            // Wrap every original child in an .owl-item; keep a reference array for cloning
+            const $realItems = [];
+            $originalItems.each(function() {
+                const $item = $('<div class="owl-item"></div>').append($(this).clone(true, true));
+                $stage.append($item);
+                $realItems.push($item[0]);
+            });
+
+            // Clone items for seamless looping
+            if (opts.loop && itemCount > 1) {
+                // Clone count: enough to cover one full page-worth of visible items
+                const cloneCount = Math.min(Math.max(this.getItemsCount(), 2), itemCount);
+
+                // Prepend clones of the tail of the real items (enables backward loop)
+                for (let i = cloneCount - 1; i >= 0; i--) {
+                    const idx = ((itemCount - cloneCount + i) % itemCount + itemCount) % itemCount;
+                    $($realItems[idx]).clone(true, true).addClass('cloned').prependTo($stage);
+                    this.clonedBefore++;
+                }
+
+                // Append clones of the head of the real items (enables forward loop)
+                for (let i = 0; i < cloneCount; i++) {
+                    $($realItems[i % itemCount]).clone(true, true).addClass('cloned').appendTo($stage);
+                    this.clonedAfter++;
+                }
+
+                // Start positioned at the first real item
+                this.currentIndex = this.clonedBefore;
+            }
+
+            // Build navigation
+            const $nav = $('<div class="owl-nav"></div>');
+            const $prev = $('<button type="button" role="button" class="owl-prev"></button>');
+            const $next = $('<button type="button" role="button" class="owl-next"></button>');
+            opts.rtl ? $nav.append($next).append($prev) : $nav.append($prev).append($next);
+
+            // Build dots
+            const $dots = $('<div class="owl-dots"></div>');
+            for (let i = 0; i < itemCount; i++) {
+                $dots.append($('<button type="button" role="button" class="owl-dot"><span></span></button>'));
+            }
+
+            // Replace carousel content with generated structure
+            $el.empty().append($stageOuter).append($nav).append($dots);
+
+            // Honour explicit nav/dots suppression
+            if (opts.nav === false) $nav.addClass('disabled');
+            if (opts.dots === false) $dots.addClass('disabled');
+
+            // SVG arrow icons injected per-button for nav-svg-arrows-1
+            if ($el.hasClass('nav-svg-arrows-1')) {
+                const svg = '<svg version="1.1" viewBox="0 0 15.698 8.706" width="17" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><polygon stroke="#212121" stroke-width="0.1" fill="#212121" points="11.354,0 10.646,0.706 13.786,3.853 0,3.853 0,4.853 13.786,4.853 10.646,8 11.354,8.706 15.698,4.353"/></svg>';
+                $prev.append(svg);
+                $next.append(svg);
+            }
+
+            // Store DOM refs
+            this.$stage = $stage;
+            this.$stageOuter = $stageOuter;
+            this.$nav = $nav;
+            this.$prev = $prev;
+            this.$next = $next;
+            this.$dots = $dots;
+
+            $el.addClass('owl-themestrap owl-drag');
+
+            // Initial layout — no transition
+            this._layout(false);
+
+            // Mark as fully loaded
+            $el.addClass('owl-loaded').removeClass('owl-loading');
+            $el.css('height', 'auto');
+
+            if ($el.prev().hasClass('owl-carousel-loader')) $el.prev().remove();
+
+            if ($el.closest('.owl-carousel-wrapper').get(0)) {
+                setTimeout(() => $el.closest('.owl-carousel-wrapper').css({ height: '' }), 500);
+            }
+
+            if ($el.hasClass('nav-outside')) self._handleNavOutside();
+
+            self.navigationOffsets();
+            self.carouselNavigate();
+
+            if (opts.autoHeight) self._applyAutoHeight();
+            if (opts.autoplay) self._startAutoplay();
+            if ($el.attr('data-sync')) self._setupSync();
+            if ($el.hasClass('carousel-center-active-item')) self._updateCenterActive();
+
+            if ($el.find('[data-plugin-video-background]').get(0)) $(window).trigger('resize');
+
+            return this;
+        }
+
+        // Measure stage, size all items, and position at currentIndex without animation
+        _layout(animate) {
+            const opts = this.options;
+            const visCount = this.getItemsCount();
+            const $allItems = this.$stage.children();
+            const stageW = this.$stageOuter[0].offsetWidth;
+            const itemW = stageW / visCount;
+
+            $allItems.css({
+                width: itemW + 'px',
+                float: opts.rtl ? 'right' : 'left'
+            });
+
+            this.$stage.css({ width: ($allItems.length * itemW) + 'px' });
+            this._moveTo(this.currentIndex, animate !== false);
+        }
+
+        // Apply a CSS transform to the stage for the given slide index
+        _moveTo(index, animate) {
+            const opts = this.options;
+            const visCount = this.getItemsCount();
+            const itemW = this.$stageOuter[0].offsetWidth / visCount;
+
+            this.$stage.css({
+                transition: animate ? `transform ${opts.smartSpeed}ms ease` : 'none',
+                transform: `translate3d(${-(index * itemW)}px, 0, 0)`
+            });
+        }
+
+        // Public: navigate to a real item by 0-based index
+        to(index) {
+            const realIdx = ((index % this.itemCount) + this.itemCount) % this.itemCount;
+            this._slide(this.clonedBefore + realIdx, true);
+        }
+
+        // Public proxy methods
+        next() { this._next(); return this; }
+        prev() { this._prev(); return this; }
+
+        _next() { this._slide(this.currentIndex + 1, true); }
+        _prev() { this._slide(this.currentIndex - 1, true); }
+
+        // Core slide: fires events, moves the stage, handles loop-jump after transition
+        _slide(targetIndex, animate) {
+            const self = this;
+            const opts = this.options;
+            const clonedBefore = this.clonedBefore;
+            const itemCount = this.itemCount;
+            const realIdx = ((targetIndex - clonedBefore) % itemCount + itemCount) % itemCount;
+
+            this.$el[0].dispatchEvent(new CustomEvent('ts.carousel.change', {
+                detail: { property: { name: 'position', value: realIdx } },
+                bubbles: true
+            }));
+
+            this._moveTo(targetIndex, animate);
+            this.currentIndex = targetIndex;
+
+            const afterSlide = () => {
+                // Silent jump when we've slid into the clone region
+                if (opts.loop) {
+                    if (self.currentIndex >= clonedBefore + itemCount) {
+                        self.currentIndex = clonedBefore;
+                        self._moveTo(self.currentIndex, false);
+                    } else if (self.currentIndex < clonedBefore) {
+                        self.currentIndex = clonedBefore + itemCount - 1;
+                        self._moveTo(self.currentIndex, false);
+                    }
+                }
+
+                self._updateActive();
+                self._updateDots();
+                if (self.$el.hasClass('carousel-center-active-item')) self._updateCenterActive();
+
+                const finalIdx = ((self.currentIndex - clonedBefore) % itemCount + itemCount) % itemCount;
+                self.$el[0].dispatchEvent(new CustomEvent('ts.carousel.changed', {
+                    detail: { item: { index: finalIdx, count: itemCount } },
+                    bubbles: true
+                }));
+            };
+
+            animate ? setTimeout(afterSlide, opts.smartSpeed + 50) : afterSlide();
+        }
+
+        // Mark visCount items starting at currentIndex as .active
+        _updateActive() {
+            const visCount = this.getItemsCount();
+            const $allItems = this.$stage.children();
+            $allItems.removeClass('active');
+            for (let i = 0; i < visCount; i++) {
+                $allItems.eq(this.currentIndex + i).addClass('active');
+            }
+        }
+
+        // Sync dot state to real item index
+        _updateDots() {
+            const realIdx = ((this.currentIndex - this.clonedBefore) % this.itemCount + this.itemCount) % this.itemCount;
+            this.$dots.children().removeClass('active').eq(realIdx).addClass('active');
+        }
+
+        // Add .current to the middle visible item for carousel-center-active-item
+        _updateCenterActive() {
+            const $actives = this.$stage.children('.active');
+            const midIdx = Math.floor(($actives.length - 1) / 2);
+            this.$stage.children().removeClass('current');
+            $actives.eq(midIdx).addClass('current');
+        }
+
+        _applyAutoHeight() {
+            const self = this;
+            const measure = () => {
+                const heights = [];
+                self.$stage.children('.active').each(function() {
+                    heights.push($(this).outerHeight());
+                });
+                if (heights.length) self.$stageOuter.height(Math.max(...heights));
+            };
+            const ns = `.carousel-${this._uid}`;
+            $(window).on(`load${ns} resize${ns}`, measure);
+            measure();
+        }
+
+        _startAutoplay() {
+            this._stopAutoplay();
+            this.autoplayTimer = setInterval(() => this._next(), this.options.autoplayTimeout);
+        }
+
+        _stopAutoplay() {
+            if (this.autoplayTimer) {
+                clearInterval(this.autoplayTimer);
+                this.autoplayTimer = null;
+            }
+        }
+
+        _setupSync() {
+            const syncSel = this.$el.attr('data-sync');
+            this.$el[0].addEventListener('ts.carousel.changed', (e) => {
+                const syncInst = $(syncSel).data(instanceName);
+                if (syncInst) syncInst.to(e.detail.item.index);
+            });
+        }
+
+        _handleNavOutside() {
+            const self = this;
+            const $el = this.$el;
+            const opts = this.options;
+            const ns = `.carousel-${this._uid}`;
+
+            const update = () => {
+                if ($(window).width() < 992) {
+                    opts.stagePadding = 40;
+                    $el.addClass('stage-margin');
+                } else {
+                    opts.stagePadding = 0;
+                    $el.removeClass('stage-margin');
+                }
+                self.$stageOuter.css('padding', opts.stagePadding ? `0 ${opts.stagePadding}px` : '');
+                self._layout(false);
+                self.navigationOffsets();
+            };
+
+            $(window).on(`load${ns} resize${ns}`, update);
+            update();
+        }
+
+        // Pointer/touch drag on the stage
+        _setupDrag() {
+            const self = this;
+            const opts = this.options;
+            const stage = this.$stage[0];
+
+            let startX = 0, startY = 0, dragging = false, delta = 0, startTranslate = 0;
+
+            const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
+            const getY = (e) => e.touches ? e.touches[0].clientY : e.clientY;
+
+            const onStart = (e) => {
+                startX = getX(e);
+                startY = getY(e);
+                dragging = true;
+                delta = 0;
+                const mat = new DOMMatrix(getComputedStyle(stage).transform);
+                startTranslate = mat.m41;
+                self.$stage.css('transition', 'none');
+                self._stopAutoplay();
+            };
+
+            const onMove = (e) => {
+                if (!dragging) return;
+                const dx = getX(e) - startX;
+                const dy = getY(e) - startY;
+                // Cancel drag if motion is primarily vertical before a horizontal threshold
+                if (!delta && Math.abs(dy) > Math.abs(dx)) { dragging = false; return; }
+                e.preventDefault();
+                delta = dx;
+                self.$stage.css('transform', `translate3d(${startTranslate + dx}px, 0, 0)`);
+            };
+
+            const onEnd = () => {
+                if (!dragging) return;
+                dragging = false;
+                const visCount = self.getItemsCount();
+                const itemW = self.$stageOuter[0].offsetWidth / visCount;
+                const threshold = itemW * 0.2;
+                if (delta < -threshold) {
+                    self._next();
+                } else if (delta > threshold) {
+                    self._prev();
+                } else {
+                    self._moveTo(self.currentIndex, true);
+                }
+                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+            };
+
+            if (opts.mouseDrag !== false) {
+                stage.addEventListener('mousedown', onStart);
+                this._mouseMoveHandler = onMove;
+                this._mouseUpHandler = onEnd;
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onEnd);
+            }
+
+            if (opts.touchDrag !== false) {
+                stage.addEventListener('touchstart', onStart, { passive: true });
+                stage.addEventListener('touchmove', onMove, { passive: false });
+                stage.addEventListener('touchend', onEnd);
+            }
+        }
+
+        navigationOffsets() {
+            const opts = this.options;
+            const $el = this.options.wrapper;
+            const $navEl = $el.find('.owl-nav');
+            const $dotsEl = $el.find('.owl-dots');
+            const navHasTransform = $navEl.css('transform') !== 'none';
+            const dotsHasTransform = $dotsEl.css('transform') !== 'none';
+
+            if (opts.navHorizontalOffset && !opts.navVerticalOffset) {
+                navHasTransform
+                    ? $navEl.css({ left: opts.navHorizontalOffset })
+                    : $navEl.css({ transform: `translate3d(${opts.navHorizontalOffset}, 0, 0)` });
+            }
+
+            if (opts.navVerticalOffset && !opts.navHorizontalOffset) {
+                navHasTransform
+                    ? $navEl.css({ top: `calc(50% - ${opts.navVerticalOffset})` })
+                    : $navEl.css({ transform: `translate3d(0, ${opts.navVerticalOffset}, 0)` });
+            }
+
+            if (opts.navVerticalOffset && opts.navHorizontalOffset) {
+                navHasTransform
+                    ? $navEl.css({ top: `calc(50% - ${opts.navVerticalOffset})`, left: opts.navHorizontalOffset })
+                    : $navEl.css({ transform: `translate3d(${opts.navHorizontalOffset}, ${opts.navVerticalOffset}, 0)` });
+            }
+
+            if (opts.dotsHorizontalOffset && !opts.dotsVerticalOffset) {
+                $dotsEl.css({ transform: `translate3d(${opts.dotsHorizontalOffset}, 0, 0)` });
+            }
+
+            if (opts.dotsVerticalOffset && !opts.dotsHorizontalOffset) {
+                dotsHasTransform
+                    ? $dotsEl.css({ top: `calc(50% - ${opts.dotsVerticalOffset})` })
+                    : $dotsEl.css({ transform: `translate3d(0, ${opts.dotsVerticalOffset}, 0)` });
+            }
+
+            if (opts.dotsVerticalOffset && opts.dotsHorizontalOffset) {
+                $dotsEl.css({ transform: `translate3d(${opts.dotsHorizontalOffset}, ${opts.dotsVerticalOffset}, 0)` });
+            }
+
+            return this;
+        }
+
+        carouselNavigate() {
+            const self = this;
+            const $el = this.options.wrapper;
+            const id = $el.attr('id');
+            if (!id || !$('[data-carousel-navigate]').get(0)) return this;
+
+            const navSel = `[data-carousel-navigate-id="#${id}"]`;
+
+            $(navSel).each(function() {
+                const $this = $(this);
+                const toIdx = parseInt($this.data('carousel-navigate-to'), 10) - 1;
+                $this.on('click.carousel', () => self.to(toIdx));
+            });
+
+            $el[0].addEventListener('ts.carousel.change', () => $(navSel).removeClass('active'));
+            $el[0].addEventListener('ts.carousel.changed', (e) => {
+                $(`${navSel}[data-carousel-navigate-to="${e.detail.item.index + 1}"]`).addClass('active');
+            });
+
+            return this;
+        }
+
+        events() {
+            const self = this;
+            const $el = this.$el;
+            const opts = this.options;
+            const ns = `.carousel-${this._uid}`;
+
+            this.$prev.on(`click${ns}`, (e) => {
+                e.preventDefault();
+                self._stopAutoplay();
+                self._prev();
+                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+            });
+
+            this.$next.on(`click${ns}`, (e) => {
+                e.preventDefault();
+                self._stopAutoplay();
+                self._next();
+                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+            });
+
+            this.$dots.on(`click${ns}`, '.owl-dot', function() {
+                self._stopAutoplay();
+                self.to($(this).index());
+                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+            });
+
+            this._setupDrag();
+
+            if (opts.keyboard) {
+                $(document).on(`keydown${ns}`, (e) => {
+                    if (e.key === 'ArrowLeft') self._prev();
+                    if (e.key === 'ArrowRight') self._next();
+                });
+            }
+
+            if (opts.autoplayHoverPause && opts.autoplay) {
+                $el.on(`mouseenter${ns}`, () => self._stopAutoplay());
+                $el.on(`mouseleave${ns}`, () => self._startAutoplay());
+            }
+
+            // Responsive relayout via ResizeObserver; fallback to debounced window resize
+            if (window.ResizeObserver) {
+                this._resizeObs = new ResizeObserver(() => {
+                    self._layout(false);
+                    self._updateActive();
+                    self._updateDots();
+                });
+                this._resizeObs.observe(this.$stageOuter[0]);
+            } else {
+                let resizeTimer;
+                $(window).on(`resize${ns}`, () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        self._layout(false);
+                        self._updateActive();
+                        self._updateDots();
+                    }, 150);
+                });
+            }
+
+            // AnimateIn/AnimateOut support for appear-animation plugins inside the carousel
+            if (opts.animateIn || opts.animateOut) {
+                $el[0].addEventListener('ts.carousel.change', () => {
+                    $el.find('[data-appear-animation], [data-plugin-animated-letters]').addClass('d-none');
+                    $el.find('[data-plugin-animated-letters]').trigger('animated.letters.destroy');
+                    $el.find('.owl-item:not(.active) [data-carousel-onchange-show]').removeClass('d-none');
+                });
+
+                $el[0].addEventListener('ts.carousel.changed', () => {
+                    setTimeout(() => {
+                        $el.find('[data-appear-animation]').each(function() {
+                            const $this = $(this);
+                            const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+                            $this.themestrapPluginAnimate(pluginOpts);
+                        });
+                        $el.find('.owl-item.active [data-appear-animation], .owl-item.active [data-plugin-animated-letters]').removeClass('d-none');
+                        $el.find('.owl-item.active [data-plugin-animated-letters]').trigger('animated.letters.initialize');
+                        $el.find('.owl-item.cloned.active [data-plugin-video-background]').trigger('video.background.initialize');
+                    }, 10);
+                });
+            }
+
+            // Re-run icon plugin on cloned items when they become active
+            if ($el.find('[data-icon]').length) {
+                $el[0].addEventListener('ts.carousel.change', () => {
+                    $el.find('.owl-item.cloned [data-icon]').each(function() {
+                        const $this = $(this);
+                        const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+                        if (typeof $.fn.themestrapPluginIcon === 'function') $this.themestrapPluginIcon(pluginOpts);
+                    });
+                });
+            }
+
+            return this;
+        }
+
+        destroy() {
+            const ns = `.carousel-${this._uid}`;
+
+            this._stopAutoplay();
+
+            if (this._resizeObs) this._resizeObs.disconnect();
+            if (this._mouseMoveHandler) document.removeEventListener('mousemove', this._mouseMoveHandler);
+            if (this._mouseUpHandler) document.removeEventListener('mouseup', this._mouseUpHandler);
+
+            $(window).off(ns);
+            $(document).off(ns);
+            this.$el.off(ns);
+            $('[data-carousel-navigate]').off('.carousel');
+
+            this.$el.html(this.initialHTML);
+            this.$el.removeClass('owl-themestrap owl-loaded owl-loading owl-carousel-init owl-drag');
+            this.$el.removeData(instanceName);
+
+            PluginCarousel.instances = Math.max(0, PluginCarousel.instances - 1);
+            if (PluginCarousel.instances === 0) {
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+
+            return this;
+        }
+    }
+
+    PluginCarousel.instances = 0;
+    PluginCarousel._uidCounter = 0;
+
+    PluginCarousel.defaults = {
+        items: 4,
+        loop: true,
+        responsive: {
+            0:    { items: 1 },
+            479:  { items: 1 },
+            768:  { items: 2 },
+            979:  { items: 3 },
+            1199: { items: 4 }
+        },
+        nav: true,
+        navText: [],
+        dots: true,
+        smartSpeed: 250,
+        autoplay: false,
+        autoplayTimeout: 5000,
+        autoplayHoverPause: false,
+        mouseDrag: true,
+        touchDrag: true,
+        stagePadding: 0,
+        autoHeight: false,
+        rtl: false,
+        animateIn: null,
+        animateOut: null,
+        keyboard: false,
+        refresh: false
+    };
+
+    PluginCarousel.css = `
+/* Carousel */
+.owl-carousel {
+    position: relative;
+    z-index: 1;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
 }
-.ts-carousel.ts-no-transition .ts-stage { transition: none !important; }
-.ts-carousel .ts-item { flex: 0 0 auto; box-sizing: border-box; }
-.ts-carousel .ts-item.active { /* hook for external CSS */ }
-.ts-carousel .ts-item.current { /* center-active hook */ }
-
-/* Nav */
-.ts-carousel .ts-nav { display: flex; position: absolute; top: 50%; transform: translateY(-50%); width: 100%; pointer-events: none; justify-content: space-between; }
-.ts-carousel .ts-prev,
-.ts-carousel .ts-next { pointer-events: all; background: rgba(0,0,0,.4); border: none; color: #fff; cursor: pointer; padding: .4em .7em; font-size: 1.25rem; line-height: 1; border-radius: 3px; }
-.ts-carousel .ts-prev.disabled,
-.ts-carousel .ts-next.disabled { opacity: .3; cursor: default; }
-
-/* Dots */
-.ts-carousel .ts-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
-.ts-carousel .ts-dot { width: 10px; height: 10px; border-radius: 50%; background: #ccc; border: none; cursor: pointer; padding: 0; }
-.ts-carousel .ts-dot.active { background: #555; }
-
-/* animateIn / animateOut support */
-.ts-carousel .ts-item.ts-animated-out { position: absolute; top: 0; }
-
-/* stage-padding support */
-.ts-carousel.ts-stage-padding .ts-stage-outer { overflow: visible; }
-.ts-carousel.ts-stage-margin .ts-stage-outer { overflow: visible; }
-
-/* RTL */
-.ts-carousel.ts-rtl .ts-stage { flex-direction: row-reverse; }
-
-/* Nav outside */
-.ts-carousel.nav-outside .ts-nav { position: static; transform: none; }
-.ts-carousel.nav-outside .ts-prev { margin-right: auto; }
-.ts-carousel.nav-outside .ts-next { margin-left: auto; }
-
-/* ts-carousel compat: keep .ts-carousel as selector alias; classes already in markup stay as-is */
-.ts-carousel.ts-carousel { display: block; }
-
-.ts-carousel {
-	display: block;
-	margin-bottom: 20px;
-	transition: opacity 0.2s;
+.owl-carousel .owl-stage {
+    position: relative;
+    will-change: transform;
 }
-.ts-carousel.ts-carousel-init {   /* set by plugin after build() */
-	opacity: 1;
+.owl-carousel .owl-stage::after {
+    content: "";
+    display: block;
+    clear: both;
 }
-/* hide all-but-first child while uninitialised (avoids flash) */
-.ts-carousel:not(.ts-carousel-init):not(.ts-carousel-light) > div,
-.ts-carousel:not(.ts-carousel-init):not(.ts-carousel-light) span {
-	display: none;
+.owl-carousel .owl-stage-outer {
+    position: relative;
+    overflow: hidden;
 }
-.ts-carousel:not(.ts-carousel-init):not(.ts-carousel-light) > div:first-child,
-.ts-carousel:not(.ts-carousel-init):not(.ts-carousel-light) span:first-child {
-	display: block;
+.owl-carousel .owl-item {
+    position: relative;
+    float: left;
+    min-height: 1px;
+    backface-visibility: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    box-sizing: border-box;
 }
-
-/* Stage */
-.ts-carousel .ts-stage-outer { overflow: hidden; position: relative; }
-.ts-carousel .ts-stage        { display: flex; will-change: transform; transition: transform 0.35s ease; align-items: flex-start; }
-.ts-carousel.ts-no-transition .ts-stage { transition: none !important; }
-
-/* item */
-.ts-carousel .ts-item,
-.ts-carousel .ts-item        { flex: 0 0 auto; box-sizing: border-box; }
-.ts-carousel .ts-item img,
-.ts-carousel .ts-item img    { transform-style: unset; max-width: 100%; }
-.ts-carousel .ts-item img[data-icon],
-.ts-carousel .ts-item img[data-icon] { display: inline; }
-.ts-carousel .ts-item .thumbnail,
-.ts-carousel .ts-item .thumbnail    { margin-right: 1px; }
-.ts-carousel .ts-item .item-video,
-.ts-carousel .ts-item .item-video   { height: 300px; }
-
-/* Nav wrapper */
-.ts-carousel .ts-nav,
-.ts-carousel .ts-nav {
-	top: 50%;
-	position: absolute;
-	width: 100%;
-	margin-top: 0;
-	transform: translate3d(0, -50%, 0);
+.owl-carousel .owl-nav .owl-prev,
+.owl-carousel .owl-nav .owl-next,
+.owl-carousel .owl-dots .owl-dot {
+    cursor: pointer;
+    user-select: none;
 }
-
-/* prev / next buttons */
-.ts-carousel .ts-nav .ts-prev,
-.ts-carousel .ts-nav .ts-next,
-.ts-carousel .ts-nav button.ts-prev,
-.ts-carousel .ts-nav button.ts-next {
-	display: inline-block;
-	position: absolute;
-	top: 50%;
-	width: 30px;
-	height: 30px;
-	outline: 0;
-	margin: 0;
-	border: none;
-	cursor: pointer;
-	transform: translate3d(0, -50%, 0);
+.owl-carousel .owl-nav button.owl-prev,
+.owl-carousel .owl-nav button.owl-next,
+.owl-carousel .owl-dots button.owl-dot {
+    background: none;
+    border: none;
+    padding: 0 !important;
+    font: inherit;
+    cursor: pointer;
+    outline: none;
 }
-.ts-carousel .ts-prev,
-.ts-carousel .ts-nav button.ts-prev { left: 0; }
-.ts-carousel .ts-next,
-.ts-carousel .ts-nav button.ts-next { right: 0; }
-
-/* default FA chevron icons via ::before */
-.ts-carousel .ts-prev::before,
-.ts-carousel .ts-nav button.ts-prev::before {
-	font-family: 'Font Awesome 7 Free';
-	font-weight: 900;
-	font-size: 0.7rem;
-	content: "\f053";
-	position: relative;
-	left: -1px;
-	top: -1px;
+.owl-carousel .owl-nav.disabled,
+.owl-carousel .owl-dots.disabled {
+    display: none;
 }
-.ts-carousel .ts-next::before,
-.ts-carousel .ts-nav button.ts-next::before {
-	font-family: 'Font Awesome 7 Free';
-	font-weight: 900;
-	font-size: 0.7rem;
-	content: "\f054";
-	position: relative;
-	left: 1px;
-	top: -1px;
+.owl-carousel .owl-dots .owl-dot span {
+    display: block;
+    background: #d6d6d6;
+    border-radius: 30px;
+    transition: background 200ms ease;
 }
+.owl-carousel.owl-rtl .owl-item { float: right; }
+.owl-carousel.owl-drag .owl-item { touch-action: none; user-select: none; }
 
-/* disabled state (no-loop at boundary) */
-.ts-carousel .ts-prev.disabled,
-.ts-carousel .ts-next.disabled { opacity: 0.35; cursor: default; pointer-events: none; }
-
-/* Dots */
-.ts-carousel .ts-dots,
-.ts-carousel .ts-dots {
-	display: flex;
-	justify-content: center;
-	gap: 4px;
-	margin-top: 8px;
+/* Carousel — Themestrap skin */
+.owl-carousel {
+    display: block;
+    margin-bottom: 20px;
+    opacity: 0;
 }
-.ts-carousel .ts-dot,
-.ts-carousel .ts-dot {
-	outline: 0;
-	background: none;
-	border: none;
-	padding: 0;
-	cursor: pointer;
+.owl-carousel.owl-loaded {
+    opacity: 1;
 }
-.ts-carousel .ts-dot span,
-.ts-carousel .ts-dot span {
-	display: block;
-	width: 8px;
-	height: 8px;
-	margin: 5px 4px;
-	border-radius: 50%;
-	background: #ccc;
-	transition: background 0.2s;
+.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) > div,
+.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) span {
+    display: none;
 }
-
-/* Stage-margin modifier */
-.ts-carousel.stage-margin .ts-stage-outer { margin-left: 40px !important; margin-right: 40px !important; }
-.ts-carousel.stage-margin .ts-stage       { padding-left: 0 !important; padding-right: 0 !important; }
-.ts-carousel.stage-margin.stage-margin-sm .ts-stage-outer { margin-left: 50px  !important; margin-right: 50px  !important; }
-.ts-carousel.stage-margin.stage-margin-md .ts-stage-outer { margin-left: 75px  !important; margin-right: 75px  !important; }
-.ts-carousel.stage-margin.stage-margin-lg .ts-stage-outer { margin-left: 100px !important; margin-right: 100px !important; }
-
-/* Top border */
-.ts-carousel.top-border { border-top: 1px solid #eaeaea; padding-top: 18px; }
-
-/* Nav visibility modifiers */
-.ts-carousel.nav-remove-prev .ts-prev,
-.ts-carousel.nav-remove-prev .ts-prev { display: none; }
-.ts-carousel.nav-remove-next .ts-next,
-.ts-carousel.nav-remove-next .ts-next { display: none; }
-
-/* Nav full-height */
-.ts-carousel.nav-full-height .ts-stage-outer,
-.ts-carousel.nav-full-height .ts-stage-outer { z-index: 1; }
-.ts-carousel.nav-full-height .ts-nav,
-.ts-carousel.nav-full-height .ts-nav { height: 100%; }
-.ts-carousel.nav-full-height .ts-next,
-.ts-carousel.nav-full-height .ts-prev,
-.ts-carousel.nav-full-height .ts-next,
-.ts-carousel.nav-full-height .ts-prev { height: 100% !important; }
-
-/* show-nav-hover */
-.ts-carousel.show-nav-hover .ts-nav,
-.ts-carousel.show-nav-hover .ts-nav                    { opacity: 0; transition: all 0.2s ease-in-out; }
-.ts-carousel.show-nav-hover .ts-prev,
-.ts-carousel.show-nav-hover .ts-prev                   { left: 0;  transition: all 0.2s ease-in-out; }
-.ts-carousel.show-nav-hover .ts-next,
-.ts-carousel.show-nav-hover .ts-next                   { right: 0; transition: all 0.2s ease-in-out; }
-.ts-carousel.show-nav-hover:hover .ts-nav,
-.ts-carousel.show-nav-hover:hover .ts-nav              { opacity: 1; }
-.ts-carousel.show-nav-hover:hover .ts-prev,
-.ts-carousel.show-nav-hover:hover .ts-prev             { left: -40px; }
-.ts-carousel.show-nav-hover:hover .ts-next,
-.ts-carousel.show-nav-hover:hover .ts-next             { right: -40px; }
-
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2:hover .ts-prev,
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2:hover .ts-prev { left: -15px; }
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2:hover .ts-next,
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2:hover .ts-next { right: -15px; }
-
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .ts-prev,
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .ts-prev { left: -20px; }
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .ts-next,
-.ts-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .ts-next { right: -20px; }
-
-.ts-carousel.show-nav-hover.show-nav-hover-pos-3:hover .ts-prev,
-.ts-carousel.show-nav-hover.show-nav-hover-pos-3:hover .ts-prev { left: 10px; }
-.ts-carousel.show-nav-hover.show-nav-hover-pos-3:hover .ts-next,
-.ts-carousel.show-nav-hover.show-nav-hover-pos-3:hover .ts-next { right: 10px; }
-
-/* show-nav-title */
-.ts-carousel.show-nav-title .ts-nav,
-.ts-carousel.show-nav-title .ts-nav {
-	top: 0; right: 0; margin-top: -25px; width: auto;
+.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) > div:first-child,
+.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) span:first-child {
+    display: block;
 }
-.ts-carousel.show-nav-title .ts-prev,
-.ts-carousel.show-nav-title .ts-next,
-.ts-carousel.show-nav-title .ts-nav button[class*="ts-"],
-.ts-carousel.show-nav-title .ts-nav button[class*="ts-"]:hover,
-.ts-carousel.show-nav-title .ts-nav button[class*="ts-"]:active {
-	font-size: 18px; background: transparent !important; width: 18px;
+.owl-carousel .owl-item img {
+    transform-style: unset;
 }
-.ts-carousel.show-nav-title .ts-prev,
-.ts-carousel.show-nav-title .ts-prev { left: -40px; }
-.ts-carousel.show-nav-title .ts-prev::before,
-.ts-carousel.show-nav-title .ts-prev::after,
-.ts-carousel.show-nav-title .ts-next::before,
-.ts-carousel.show-nav-title .ts-next::after,
-.ts-carousel.show-nav-title .ts-prev:before,
-.ts-carousel.show-nav-title .ts-prev:after,
-.ts-carousel.show-nav-title .ts-next:before,
-.ts-carousel.show-nav-title .ts-next:after { font-size: inherit; }
-
-.ts-carousel.show-nav-title.show-nav-title-both-sides .ts-nav,
-.ts-carousel.show-nav-title.show-nav-title-both-sides .ts-nav  { width: 100%; }
-.ts-carousel.show-nav-title.show-nav-title-both-sides .ts-prev,
-.ts-carousel.show-nav-title.show-nav-title-both-sides .ts-prev { left: 0; }
-.ts-carousel.show-nav-title.show-nav-title-both-sides .ts-next,
-.ts-carousel.show-nav-title.show-nav-title-both-sides .ts-next { right: 0; }
-.ts-carousel.show-nav-title.show-nav-title-both-sides-style-2 .ts-nav,
-.ts-carousel.show-nav-title.show-nav-title-both-sides-style-2 .ts-nav { margin-top: 15px; }
-
-/* rounded-nav */
-.ts-carousel.rounded-nav .ts-prev,
-.ts-carousel.rounded-nav .ts-next,
-.ts-carousel.rounded-nav .ts-nav button[class*="ts-"] {
-	padding: 3px 7px; border-radius: 50%;
-	background: transparent; border: 1px solid #999; color: #999;
+.owl-carousel .owl-item img[data-icon] {
+    display: inline;
 }
-.ts-carousel.rounded-nav .ts-prev:hover,
-.ts-carousel.rounded-nav .ts-next:hover,
-.ts-carousel.rounded-nav .ts-nav button[class*="ts-"]:hover {
-	background: transparent; border-color: #a1a1a1; color: #a1a1a1;
+.owl-carousel .thumbnail {
+    margin-right: 1px;
 }
-.ts-carousel.rounded-nav .ts-prev:active,
-.ts-carousel.rounded-nav .ts-next:active,
-.ts-carousel.rounded-nav .ts-nav button[class*="ts-"]:active {
-	background: transparent; border-color: #666; color: #666;
+.owl-carousel .item-video {
+    height: 300px;
 }
-
-/* nav-bottom */
-.ts-carousel.nav-bottom .ts-stage-outer,
-.ts-carousel.nav-bottom .ts-stage-outer { margin-bottom: 10px; }
-.ts-carousel.nav-bottom .ts-nav,
-.ts-carousel.nav-bottom .ts-nav {
-	position: static; margin: 0; padding: 0; width: auto; transform: none;
+.owl-carousel .owl-nav {
+    top: 50%;
+    position: absolute;
+    width: 100%;
+    margin-top: 0;
+    transform: translate3d(0, -50%, 0);
 }
-.ts-carousel.nav-bottom .ts-prev,
-.ts-carousel.nav-bottom .ts-next,
-.ts-carousel.nav-bottom .ts-prev,
-.ts-carousel.nav-bottom .ts-next { position: static; transform: none; }
-.ts-carousel.nav-bottom .ts-prev,
-.ts-carousel.nav-bottom .ts-prev { margin-right: 5px; }
-.ts-carousel.nav-bottom .ts-next,
-.ts-carousel.nav-bottom .ts-next { margin-left: 5px; }
-.ts-carousel.nav-bottom.nav-bottom-align-left  .ts-nav,
-.ts-carousel.nav-bottom.nav-bottom-align-left  .ts-nav { text-align: left; }
-.ts-carousel.nav-bottom.nav-bottom-align-right .ts-nav,
-.ts-carousel.nav-bottom.nav-bottom-align-right .ts-nav { text-align: right; }
-
-/* nav-bottom-inside */
-.ts-carousel.nav-bottom-inside .ts-nav,
-.ts-carousel.nav-bottom-inside .ts-nav {
-	position: relative; margin: -4.3rem 0 0 0; padding: 0; width: auto;
+.owl-carousel .owl-nav button.owl-prev,
+.owl-carousel .owl-nav button.owl-next {
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    width: 30px;
+    height: 30px;
+    outline: 0;
+    margin: 0;
+    transform: translate3d(0, -50%, 0);
 }
-.ts-carousel.nav-bottom-inside .ts-prev,
-.ts-carousel.nav-bottom-inside .ts-next,
-.ts-carousel.nav-bottom-inside .ts-prev,
-.ts-carousel.nav-bottom-inside .ts-next { position: static; }
-
-/* nav-inside */
-.ts-carousel.nav-inside .ts-prev,
-.ts-carousel.nav-inside .ts-prev { left: 15px; }
-.ts-carousel.nav-inside .ts-next,
-.ts-carousel.nav-inside .ts-next { right: 15px; left: auto; }
-
-.ts-carousel.nav-inside.nav-inside-edge .ts-prev,
-.ts-carousel.nav-inside.nav-inside-edge .ts-prev { left: 0; }
-.ts-carousel.nav-inside.nav-inside-edge .ts-next,
-.ts-carousel.nav-inside.nav-inside-edge .ts-next { right: 0; left: auto; }
-
-.ts-carousel.nav-inside.nav-inside-plus .ts-prev,
-.ts-carousel.nav-inside.nav-inside-plus .ts-prev { left: 30px; }
-.ts-carousel.nav-inside.nav-inside-plus .ts-next,
-.ts-carousel.nav-inside.nav-inside-plus .ts-next { right: 30px; left: auto; }
-
-.ts-carousel.nav-inside.nav-bottom .ts-nav,
-.ts-carousel.nav-inside.nav-bottom .ts-nav {
-	position: absolute; top: auto; bottom: 40px; width: 100%;
+.owl-carousel .owl-nav button.owl-prev {
+    left: 0;
 }
-.ts-carousel.nav-inside.nav-bottom .ts-prev,
-.ts-carousel.nav-inside.nav-bottom .ts-next,
-.ts-carousel.nav-inside.nav-bottom .ts-prev,
-.ts-carousel.nav-inside.nav-bottom .ts-next { position: relative; }
-.ts-carousel.nav-inside.nav-bottom .ts-prev,
-.ts-carousel.nav-inside.nav-bottom .ts-prev { left: 0; }
-.ts-carousel.nav-inside.nav-bottom .ts-next,
-.ts-carousel.nav-inside.nav-bottom .ts-next { right: 0; }
-
-.ts-carousel.nav-inside.nav-inside-half-section .ts-nav,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-nav { top: auto; bottom: 60px; }
-.ts-carousel.nav-inside.nav-inside-half-section .ts-prev,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-next,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-prev,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-next {
-	transform: none; width: 60px !important; height: 60px !important;
+.owl-carousel .owl-nav button.owl-prev:before {
+    font-family: 'Font Awesome 7 Free';
+    font-weight: 900;
+    font-size: 11.2px;
+    font-size: 0.7rem;
+    content: "\f053";
+    position: relative;
+    left: -1px;
+    top: -1px;
 }
-.ts-carousel.nav-inside.nav-inside-half-section .ts-prev::before,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-next::before,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-prev::before,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-next::before {
-	font-size: 0.8rem; left: 0; top: 0;
+.owl-carousel .owl-nav button.owl-next {
+    right: 0;
 }
-.ts-carousel.nav-inside.nav-inside-half-section .ts-prev,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-prev { left: -60px; top: -61px; }
-.ts-carousel.nav-inside.nav-inside-half-section .ts-next,
-.ts-carousel.nav-inside.nav-inside-half-section .ts-next { left: -60px; }
+.owl-carousel .owl-nav button.owl-next:before {
+    font-family: 'Font Awesome 7 Free';
+    font-weight: 900;
+    font-size: 11.2px;
+    font-size: 0.7rem;
+    content: "\f054";
+    position: relative;
+    left: 1px;
+    top: -1px;
+}
+.owl-carousel.stage-margin .owl-stage-outer {
+    margin-left: 40px !important;
+    margin-right: 40px !important;
+}
+.owl-carousel.stage-margin .owl-stage-outer .owl-stage {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+.owl-carousel.stage-margin.stage-margin-sm .owl-stage-outer {
+    margin-left: 50px !important;
+    margin-right: 50px !important;
+}
+.owl-carousel.stage-margin.stage-margin-md .owl-stage-outer {
+    margin-left: 75px !important;
+    margin-right: 75px !important;
+}
+.owl-carousel.stage-margin.stage-margin-lg .owl-stage-outer {
+    margin-left: 100px !important;
+    margin-right: 100px !important;
+}
+.owl-carousel.top-border {
+    border-top: 1px solid #eaeaea;
+    padding-top: 18px;
+}
+.owl-carousel.nav-remove-prev .owl-nav .owl-prev { display: none; }
+.owl-carousel.nav-remove-next .owl-nav .owl-next { display: none; }
+.owl-carousel.nav-full-height .owl-stage-outer { z-index: 1; }
+.owl-carousel.nav-full-height .owl-nav { height: 100%; }
+.owl-carousel.nav-full-height .owl-nav .owl-next,
+.owl-carousel.nav-full-height .owl-nav .owl-prev { height: 100% !important; }
+.owl-carousel.show-nav-hover .owl-nav {
+    opacity: 0;
+    transition: all 0.2s ease-in-out;
+}
+.owl-carousel.show-nav-hover .owl-nav button.owl-prev {
+    left: 0;
+    transition: all 0.2s ease-in-out;
+}
+.owl-carousel.show-nav-hover .owl-nav button.owl-next {
+    right: 0;
+    transition: all 0.2s ease-in-out;
+}
+.owl-carousel.show-nav-hover:hover .owl-nav { opacity: 1; }
+.owl-carousel.show-nav-hover:hover .owl-nav button.owl-prev { left: -40px; }
+.owl-carousel.show-nav-hover:hover .owl-nav button.owl-next { right: -40px; }
+.owl-carousel.show-nav-hover.show-nav-hover-pos-2:hover .owl-nav button.owl-prev { left: -15px; }
+.owl-carousel.show-nav-hover.show-nav-hover-pos-2:hover .owl-nav button.owl-next { right: -15px; }
+.owl-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .owl-nav button.owl-prev { left: -20px; }
+.owl-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .owl-nav button.owl-next { right: -20px; }
+.owl-carousel.show-nav-hover.show-nav-hover-pos-3:hover .owl-nav button.owl-prev { left: 10px; }
+.owl-carousel.show-nav-hover.show-nav-hover-pos-3:hover .owl-nav button.owl-next { right: 10px; }
+.owl-carousel.show-nav-title .owl-nav {
+    top: 0;
+    right: 0;
+    margin-top: -25px;
+    width: auto;
+}
+.owl-carousel.show-nav-title .owl-nav button[class*="owl-"],
+.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:hover,
+.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:active {
+    font-size: 18px;
+    background: transparent !important;
+    width: 18px;
+}
+.owl-carousel.show-nav-title .owl-nav button.owl-prev { left: -40px; }
+.owl-carousel.show-nav-title .owl-nav button.owl-prev:before,
+.owl-carousel.show-nav-title .owl-nav button.owl-prev:after,
+.owl-carousel.show-nav-title .owl-nav button.owl-next:before,
+.owl-carousel.show-nav-title .owl-nav button.owl-next:after { font-size: inherit; }
+.owl-carousel.show-nav-title.show-nav-title-both-sides .owl-nav { width: 100%; }
+.owl-carousel.show-nav-title.show-nav-title-both-sides button.owl-prev { left: 0; }
+.owl-carousel.show-nav-title.show-nav-title-both-sides button.owl-next { right: 0; }
+.owl-carousel.show-nav-title.show-nav-title-both-sides-style-2 .owl-nav { margin-top: 15px; }
+.owl-carousel.rounded-nav .owl-nav button[class*="owl-"] {
+    padding: 3px 7px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid #999;
+    color: #999;
+}
+.owl-carousel.rounded-nav .owl-nav button[class*="owl-"]:hover,
+.owl-carousel.rounded-nav .owl-nav button[class*="owl-"].hover {
+    background: transparent;
+    border: 1px solid #a1a1a1;
+    color: #a1a1a1;
+}
+.owl-carousel.rounded-nav .owl-nav button[class*="owl-"]:active,
+.owl-carousel.rounded-nav .owl-nav button[class*="owl-"].active {
+    background: transparent;
+    border: 1px solid #666;
+    color: #666;
+}
+.owl-carousel.nav-bottom .owl-stage-outer { margin-bottom: 10px; }
+.owl-carousel.nav-bottom .owl-nav {
+    position: static;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    transform: none;
+}
+.owl-carousel.nav-bottom .owl-nav button.owl-prev,
+.owl-carousel.nav-bottom .owl-nav button.owl-next {
+    position: static;
+    transform: none;
+}
+.owl-carousel.nav-bottom .owl-nav button.owl-prev { margin-right: 5px; }
+.owl-carousel.nav-bottom .owl-nav button.owl-next { margin-left: 5px; }
+.owl-carousel.nav-bottom.nav-bottom-align-left .owl-nav { text-align: left; }
+.owl-carousel.nav-bottom.nav-bottom-align-right .owl-nav { text-align: right; }
+.owl-carousel.nav-bottom-inside .owl-nav {
+    position: relative;
+    margin: -68.8px 0 0 0;
+    margin: -4.3rem 0 0 0;
+    padding: 0;
+    width: auto;
+}
+.owl-carousel.nav-bottom-inside .owl-nav button.owl-prev,
+.owl-carousel.nav-bottom-inside .owl-nav button.owl-next { position: static; }
+.owl-carousel.nav-inside .owl-nav button.owl-prev { left: 15px; }
+.owl-carousel.nav-inside .owl-nav button.owl-next { right: 15px; left: auto; }
+.owl-carousel.nav-inside.nav-inside-edge .owl-nav button.owl-prev { left: 0; }
+.owl-carousel.nav-inside.nav-inside-edge .owl-nav button.owl-next { right: 0; left: auto; }
+.owl-carousel.nav-inside.nav-inside-plus .owl-nav button.owl-prev { left: 30px; }
+.owl-carousel.nav-inside.nav-inside-plus .owl-nav button.owl-next { right: 30px; left: auto; }
+.owl-carousel.nav-inside.nav-bottom .owl-nav {
+    position: absolute;
+    top: auto;
+    bottom: 40px;
+    width: 100%;
+}
+.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-prev,
+.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-next { position: relative; }
+.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-prev { left: 0; }
+.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-next { right: 0; }
+.owl-carousel.nav-inside.nav-inside-half-section .owl-nav { top: auto; bottom: 60px; }
+.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev,
+.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next {
+    transform: none;
+    width: 60px !important;
+    height: 60px !important;
+}
+.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev:before,
+.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next:before {
+    font-size: 12.8px;
+    font-size: 0.8rem;
+    left: 0;
+    top: 0;
+}
+.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev { left: -60px; top: -61px; }
+.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next { left: -60px; }
 @media (max-width: 991px) {
-	.ts-carousel.nav-inside.nav-inside-half-section .ts-prev,
-	.ts-carousel.nav-inside.nav-inside-half-section .ts-prev { left: 0; }
-	.ts-carousel.nav-inside.nav-inside-half-section .ts-next,
-	.ts-carousel.nav-inside.nav-inside-half-section .ts-next { left: 0; }
+    .owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev { left: 0; }
+    .owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next { left: 0; }
 }
-
-/* nav-outside */
-.ts-carousel.nav-outside .ts-prev,
-.ts-carousel.nav-outside .ts-prev { left: 0; }
-.ts-carousel.nav-outside .ts-next,
-.ts-carousel.nav-outside .ts-next { right: 0; }
+.owl-carousel.nav-outside .owl-nav button.owl-prev { left: 0; }
+.owl-carousel.nav-outside .owl-nav button.owl-next { right: 0; }
 @media (min-width: 992px) {
-	.ts-carousel.nav-outside .ts-prev,
-	.ts-carousel.nav-outside .ts-prev { left: -50px; }
-	.ts-carousel.nav-outside .ts-next,
-	.ts-carousel.nav-outside .ts-next { right: -50px; }
+    .owl-carousel.nav-outside .owl-nav button.owl-prev { left: -50px; }
+    .owl-carousel.nav-outside .owl-nav button.owl-next { right: -50px; }
 }
-
-/* nav-position-1 */
-.ts-carousel.nav-position-1 .ts-prev,
-.ts-carousel.nav-position-1 .ts-prev { left: 20px; }
-.ts-carousel.nav-position-1 .ts-next,
-.ts-carousel.nav-position-1 .ts-next { right: 20px; }
-
-/* nav-icon-1 */
-.ts-carousel.nav-icon-1 .ts-next::before,
-.ts-carousel.nav-icon-1 .ts-next::before { content: "\f061"; }
-.ts-carousel.nav-icon-1 .ts-prev::before,
-.ts-carousel.nav-icon-1 .ts-prev::before { content: "\f060"; }
-
-/* nav sizes */
-.ts-carousel.nav-size-md .ts-prev,
-.ts-carousel.nav-size-md .ts-next,
-.ts-carousel.nav-size-md .ts-prev,
-.ts-carousel.nav-size-md .ts-next { width: 40px; height: 40px; }
-.ts-carousel.nav-size-md .ts-prev::before,
-.ts-carousel.nav-size-md .ts-next::before,
-.ts-carousel.nav-size-md .ts-prev::before,
-.ts-carousel.nav-size-md .ts-next::before { top: 0; font-size: 0.75rem; }
-
-/* nav-style-1 */
-.ts-carousel.nav-style-1 .ts-prev,
-.ts-carousel.nav-style-1 .ts-next,
-.ts-carousel.nav-style-1 .ts-next,
-.ts-carousel.nav-style-1 .ts-prev {
-	width: 20px; background: transparent !important; color: #000;
+.owl-carousel.nav-position-1 .owl-nav button.owl-prev { left: 20px; }
+.owl-carousel.nav-position-1 .owl-nav button.owl-next { right: 20px; }
+.owl-carousel.nav-icon-1 .owl-nav .owl-next:before { content: "\f061"; }
+.owl-carousel.nav-icon-1 .owl-nav .owl-prev:before { content: "\f060"; }
+.owl-carousel.nav-size-md .owl-nav .owl-next,
+.owl-carousel.nav-size-md .owl-nav .owl-prev { width: 40px; height: 40px; }
+.owl-carousel.nav-size-md .owl-nav .owl-next:before,
+.owl-carousel.nav-size-md .owl-nav .owl-prev:before { top: 0; font-size: 12px; font-size: 0.75rem; }
+.owl-carousel.nav-style-1 .owl-nav .owl-next,
+.owl-carousel.nav-style-1 .owl-nav .owl-prev {
+    width: 20px;
+    background: transparent !important;
+    color: #000;
 }
-.ts-carousel.nav-style-1 .ts-prev:hover,
-.ts-carousel.nav-style-1 .ts-next:hover,
-.ts-carousel.nav-style-1 .ts-next:hover,
-.ts-carousel.nav-style-1 .ts-prev:hover { color: var(--grey-500); }
-.ts-carousel.nav-style-1 .ts-prev::before,
-.ts-carousel.nav-style-1 .ts-prev::after,
-.ts-carousel.nav-style-1 .ts-next::before,
-.ts-carousel.nav-style-1 .ts-next::after,
-.ts-carousel.nav-style-1 .ts-prev::before,
-.ts-carousel.nav-style-1 .ts-prev::after,
-.ts-carousel.nav-style-1 .ts-next::before,
-.ts-carousel.nav-style-1 .ts-next::after { font-size: inherit; }
-
-/* nav-style-2 */
-.ts-carousel.nav-style-2 .ts-prev,
-.ts-carousel.nav-style-2 .ts-next,
-.ts-carousel.nav-style-2 .ts-next,
-.ts-carousel.nav-style-2 .ts-prev { background: transparent !important; }
-.ts-carousel.nav-style-2 .ts-prev::before,
-.ts-carousel.nav-style-2 .ts-next::before,
-.ts-carousel.nav-style-2 .ts-next::before,
-.ts-carousel.nav-style-2 .ts-prev::before {
-	content: ''; display: block; position: absolute;
-	top: 50%; left: 1px; width: 1.3em; height: 1.3em;
-	border-top: 2px solid var(--grey-500); border-left: 2px solid var(--grey-500);
-	font-size: inherit;
-	transform: translate3d(0, -50%, 0) rotate(-45deg);
+.owl-carousel.nav-style-1 .owl-nav .owl-next:hover,
+.owl-carousel.nav-style-1 .owl-nav .owl-next:active,
+.owl-carousel.nav-style-1 .owl-nav .owl-prev:hover,
+.owl-carousel.nav-style-1 .owl-nav .owl-prev:active { color: var(--grey-500); }
+.owl-carousel.nav-style-1 .owl-nav .owl-next:before,
+.owl-carousel.nav-style-1 .owl-nav .owl-next:after,
+.owl-carousel.nav-style-1 .owl-nav .owl-prev:before,
+.owl-carousel.nav-style-1 .owl-nav .owl-prev:after { font-size: inherit; }
+.owl-carousel.nav-style-2 .owl-nav .owl-next,
+.owl-carousel.nav-style-2 .owl-nav .owl-prev { background: transparent !important; }
+.owl-carousel.nav-style-2 .owl-nav .owl-next:before,
+.owl-carousel.nav-style-2 .owl-nav .owl-prev:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 1px;
+    width: 1.3em;
+    height: 1.3em;
+    border-top: 2px solid var(--grey-500);
+    border-left: 2px solid var(--grey-500);
+    font-size: inherit;
+    transform: translate3d(0, -50%, 0) rotate(-45deg);
 }
-.ts-carousel.nav-style-2 .ts-prev::after,
-.ts-carousel.nav-style-2 .ts-next::after,
-.ts-carousel.nav-style-2 .ts-next::after,
-.ts-carousel.nav-style-2 .ts-prev::after {
-	content: ''; display: block; border-top: 3px solid var(--grey-500);
-	width: 2.5em; position: absolute; top: 50%; font-size: inherit;
-	transform: translate3d(0, -50%, 0);
+.owl-carousel.nav-style-2 .owl-nav .owl-next:after,
+.owl-carousel.nav-style-2 .owl-nav .owl-prev:after {
+    content: '';
+    display: block;
+    border-top: 3px solid var(--grey-500);
+    width: 2.5em;
+    position: absolute;
+    top: 50%;
+    font-size: inherit;
+    transform: translate3d(0, -50%, 0);
 }
-.ts-carousel.nav-style-2 .ts-next,
-.ts-carousel.nav-style-2 .ts-next {
-	transform: rotate(180deg) !important; transform-origin: 15px 8px;
+.owl-carousel.nav-style-2 .owl-nav .owl-next {
+    transform: rotate(180deg) !important;
+    transform-origin: 15px 8px;
 }
-.ts-carousel.nav-style-2.nav-bottom.nav-inside .ts-next,
-.ts-carousel.nav-style-2.nav-bottom.nav-inside .ts-next { transform-origin: 15px; }
-
-/* nav-style-3 */
-.ts-carousel.nav-style-3 .ts-nav,
-.ts-carousel.nav-style-3 .ts-nav { top: 25%; }
-.ts-carousel.nav-style-3 .ts-prev,
-.ts-carousel.nav-style-3 .ts-next,
-.ts-carousel.nav-style-3 .ts-next,
-.ts-carousel.nav-style-3 .ts-prev { width: 30px; background: transparent !important; color: var(--grey-500); }
-.ts-carousel.nav-style-3 .ts-prev::before,
-.ts-carousel.nav-style-3 .ts-prev::after,
-.ts-carousel.nav-style-3 .ts-next::before,
-.ts-carousel.nav-style-3 .ts-next::after,
-.ts-carousel.nav-style-3 .ts-next::before,
-.ts-carousel.nav-style-3 .ts-next::after,
-.ts-carousel.nav-style-3 .ts-prev::before,
-.ts-carousel.nav-style-3 .ts-prev::after { font-size: 1.5em; }
-
-/* nav-style-4 */
-.ts-carousel.nav-style-4 .ts-prev,
-.ts-carousel.nav-style-4 .ts-prev { left: 75px; }
-.ts-carousel.nav-style-4 .ts-next,
-.ts-carousel.nav-style-4 .ts-next { right: 75px; }
-@media (max-width: 991px) {
-	.ts-carousel.nav-style-4 .ts-prev,
-	.ts-carousel.nav-style-4 .ts-prev { left: 40px; }
-	.ts-carousel.nav-style-4 .ts-next,
-	.ts-carousel.nav-style-4 .ts-next { right: 40px; }
+.owl-carousel.nav-style-2.nav-bottom.nav-inside .owl-nav .owl-next { transform-origin: 15px; }
+.owl-carousel.nav-style-3 .owl-nav { top: 25%; }
+.owl-carousel.nav-style-3 .owl-nav .owl-next,
+.owl-carousel.nav-style-3 .owl-nav .owl-prev {
+    width: 30px;
+    background: transparent !important;
+    color: var(--grey-500);
 }
-@media (max-width: 767px) {
-	.ts-carousel.nav-style-4 .ts-prev,
-	.ts-carousel.nav-style-4 .ts-prev { left: 13px; }
-	.ts-carousel.nav-style-4 .ts-next,
-	.ts-carousel.nav-style-4 .ts-next { right: 13px; }
+.owl-carousel.nav-style-3 .owl-nav .owl-next:before,
+.owl-carousel.nav-style-3 .owl-nav .owl-next:after,
+.owl-carousel.nav-style-3 .owl-nav .owl-prev:before,
+.owl-carousel.nav-style-3 .owl-nav .owl-prev:after { font-size: 1.5em; }
+.owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 75px; }
+@media (max-width: 991px) { .owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 40px; } }
+@media (max-width: 767px) { .owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 13px; } }
+.owl-carousel.nav-style-4 .owl-nav .owl-next { right: 75px; }
+@media (max-width: 991px) { .owl-carousel.nav-style-4 .owl-nav .owl-next { right: 40px; } }
+@media (max-width: 767px) { .owl-carousel.nav-style-4 .owl-nav .owl-next { right: 13px; } }
+.owl-carousel.nav-style-4 .owl-nav .owl-prev,
+.owl-carousel.nav-style-4 .owl-nav .owl-next {
+    background: var(--light);
+    font-size: 11.2px;
+    font-size: 0.7rem;
+    width: 40px;
+    height: 40px;
+    color: #000;
+    border-radius: 100%;
+    box-shadow: 0px 0px 40px -10px rgba(0, 0, 0, 0.3);
 }
-.ts-carousel.nav-style-4 .ts-prev,
-.ts-carousel.nav-style-4 .ts-next,
-.ts-carousel.nav-style-4 .ts-prev,
-.ts-carousel.nav-style-4 .ts-next {
-	background: var(--light); font-size: 0.7rem;
-	width: 40px; height: 40px; color: #000;
-	border-radius: 100%;
-	box-shadow: 0 0 40px -10px rgba(0,0,0,.3);
+.owl-carousel.nav-style-4 .owl-nav .owl-prev:hover,
+.owl-carousel.nav-style-4 .owl-nav .owl-next:hover { color: var(--light); }
+.owl-carousel.nav-style-4.nav-style-4-pos-2 .owl-nav .owl-prev { left: 0px; }
+.owl-carousel.nav-style-4.nav-style-4-pos-2 .owl-nav .owl-next { right: 0px; }
+.owl-carousel.nav-style-diamond .owl-nav .owl-prev,
+.owl-carousel.nav-style-diamond .owl-nav .owl-next {
+    transform: rotate(45deg);
+    transform-origin: 100% 0%;
 }
-.ts-carousel.nav-style-4 .ts-prev:hover,
-.ts-carousel.nav-style-4 .ts-next:hover,
-.ts-carousel.nav-style-4 .ts-prev:hover,
-.ts-carousel.nav-style-4 .ts-next:hover { color: var(--light); }
-
-.ts-carousel.nav-style-4.nav-style-4-pos-2 .ts-prev,
-.ts-carousel.nav-style-4.nav-style-4-pos-2 .ts-prev { left: 0; }
-.ts-carousel.nav-style-4.nav-style-4-pos-2 .ts-next,
-.ts-carousel.nav-style-4.nav-style-4-pos-2 .ts-next { right: 0; }
-
-/* nav-style-diamond */
-.ts-carousel.nav-style-diamond .ts-prev,
-.ts-carousel.nav-style-diamond .ts-next,
-.ts-carousel.nav-style-diamond .ts-prev,
-.ts-carousel.nav-style-diamond .ts-next {
-	transform: rotate(45deg); transform-origin: 100% 0%;
+.owl-carousel.nav-style-diamond .owl-nav .owl-prev:before,
+.owl-carousel.nav-style-diamond .owl-nav .owl-next:before {
+    display: block;
+    transform: rotate(-45deg);
+    transform-origin: 60% 50%;
 }
-.ts-carousel.nav-style-diamond .ts-prev::before,
-.ts-carousel.nav-style-diamond .ts-next::before,
-.ts-carousel.nav-style-diamond .ts-prev::before,
-.ts-carousel.nav-style-diamond .ts-next::before {
-	display: block; transform: rotate(-45deg); transform-origin: 60% 50%;
+.owl-carousel.nav-style-diamond .owl-nav .owl-next:before { transform-origin: 50%; }
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev,
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next { width: 35px; height: 35px; }
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev:before,
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next:before { content: none; }
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg,
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg { width: 2em; }
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon,
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg polygon { fill: #FFF; stroke: #FFF; }
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg { transform: rotate(180deg); }
+.owl-carousel.nav-arrows-1 .owl-nav .owl-prev,
+.owl-carousel.nav-arrows-1 .owl-nav .owl-next {
+    width: 35px;
+    height: 35px;
+    font-size: 19.2px;
+    font-size: 1.2rem;
+    background: transparent;
 }
-.ts-carousel.nav-style-diamond .ts-next::before,
-.ts-carousel.nav-style-diamond .ts-next::before { transform-origin: 50%; }
-
-/* nav-svg-arrows-1 */
-.ts-carousel.nav-svg-arrows-1 .ts-prev,
-.ts-carousel.nav-svg-arrows-1 .ts-next,
-.ts-carousel.nav-svg-arrows-1 .ts-prev,
-.ts-carousel.nav-svg-arrows-1 .ts-next { width: 35px; height: 35px; }
-.ts-carousel.nav-svg-arrows-1 .ts-prev::before,
-.ts-carousel.nav-svg-arrows-1 .ts-next::before,
-.ts-carousel.nav-svg-arrows-1 .ts-prev::before,
-.ts-carousel.nav-svg-arrows-1 .ts-next::before { content: none; }
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg,
-.ts-carousel.nav-svg-arrows-1 .ts-next svg,
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg,
-.ts-carousel.nav-svg-arrows-1 .ts-next svg { width: 2em; }
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-svg-arrows-1 .ts-next svg polygon { fill: #FFF; stroke: #FFF; }
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg,
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg { transform: rotate(180deg); }
-
-/* nav-arrows-1 / nav-arrows-2 / nav-arrows-thin */
-.ts-carousel.nav-arrows-1 .ts-prev,
-.ts-carousel.nav-arrows-1 .ts-next,
-.ts-carousel.nav-arrows-1 .ts-prev,
-.ts-carousel.nav-arrows-1 .ts-next { width: 35px; height: 35px; font-size: 1.2rem; background: transparent; }
-.ts-carousel.nav-arrows-1 .ts-next::before,
-.ts-carousel.nav-arrows-1 .ts-next::before { content: '\f061'; font-size: inherit; }
-.ts-carousel.nav-arrows-1 .ts-prev::before,
-.ts-carousel.nav-arrows-1 .ts-prev::before { content: '\f060'; font-size: inherit; }
-
-.ts-carousel.nav-arrows-2 .ts-prev,
-.ts-carousel.nav-arrows-2 .ts-next,
-.ts-carousel.nav-arrows-2 .ts-prev,
-.ts-carousel.nav-arrows-2 .ts-next { width: 35px; height: 35px; font-size: 1.2rem; background: transparent; }
-.ts-carousel.nav-arrows-2 .ts-next::before,
-.ts-carousel.nav-arrows-2 .ts-next::before { content: '\f101'; font-size: inherit; }
-.ts-carousel.nav-arrows-2 .ts-prev::before,
-.ts-carousel.nav-arrows-2 .ts-prev::before { content: '\f100'; font-size: inherit; }
-
-.ts-carousel.nav-arrows-thin .ts-prev::before,
-.ts-carousel.nav-arrows-thin .ts-next::before,
-.ts-carousel.nav-arrows-thin .ts-prev::before,
-.ts-carousel.nav-arrows-thin .ts-next::before {
-	font-family: simple-line-icons; speak: none;
-	font-style: normal; font-weight: 700; font-variant: normal; text-transform: none;
-	line-height: 1; -webkit-font-smoothing: antialiased;
+.owl-carousel.nav-arrows-1 .owl-nav .owl-next:before { content: '\f061'; font-size: inherit; }
+.owl-carousel.nav-arrows-1 .owl-nav .owl-prev:before { content: '\f060'; font-size: inherit; }
+.owl-carousel.nav-arrows-2 .owl-nav .owl-prev,
+.owl-carousel.nav-arrows-2 .owl-nav .owl-next {
+    width: 35px;
+    height: 35px;
+    font-size: 19.2px;
+    font-size: 1.2rem;
+    background: transparent;
 }
-.ts-carousel.nav-arrows-thin .ts-next::before,
-.ts-carousel.nav-arrows-thin .ts-next::before { content: "\e606"; font-size: inherit; }
-.ts-carousel.nav-arrows-thin .ts-prev::before,
-.ts-carousel.nav-arrows-thin .ts-prev::before { content: "\e605"; font-size: inherit; }
-
-/* nav-center-images-only */
-.ts-carousel.nav-center-images-only .ts-nav,
-.ts-carousel.nav-center-images-only .ts-nav { top: 37%; }
-
-/* nav-center-outside */
-.ts-carousel.nav-center-outside .ts-nav,
-.ts-carousel.nav-center-outside .ts-nav {
-	width: calc(100% + 90px); left: 49.9%; transform: translate3d(-50%, 0, 0);
+.owl-carousel.nav-arrows-2 .owl-nav .owl-next:before { content: '\f101'; font-size: inherit; }
+.owl-carousel.nav-arrows-2 .owl-nav .owl-prev:before { content: '\f100'; font-size: inherit; }
+.owl-carousel.nav-arrows-thin .owl-nav .owl-prev:before,
+.owl-carousel.nav-arrows-thin .owl-nav .owl-next:before {
+    font-family: simple-line-icons;
+    speak: none;
+    font-style: normal;
+    font-weight: 700;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
 }
-
-/* full-width / big-nav */
-.ts-carousel.full-width .ts-prev,
-.ts-carousel.full-width .ts-next,
-.ts-carousel.full-width .ts-prev:hover,
-.ts-carousel.full-width .ts-next:hover,
-.ts-carousel.big-nav .ts-prev,
-.ts-carousel.big-nav .ts-next,
-.ts-carousel.big-nav .ts-prev:hover,
-.ts-carousel.big-nav .ts-next:hover,
-.ts-carousel.full-width .ts-nav button[class*="ts-"],
-.ts-carousel.full-width .ts-nav button[class*="ts-"]:hover,
-.ts-carousel.big-nav   .ts-nav button[class*="ts-"],
-.ts-carousel.big-nav   .ts-nav button[class*="ts-"]:hover {
-	height: auto; padding: 20px 0 !important;
+.owl-carousel.nav-arrows-thin .owl-nav .owl-next:before { content: "\e606"; font-size: inherit; }
+.owl-carousel.nav-arrows-thin .owl-nav .owl-prev:before { content: "\e605"; font-size: inherit; }
+.owl-carousel.nav-center-images-only .owl-nav { top: 37%; }
+.owl-carousel.nav-center-outside .owl-nav {
+    width: calc(100% + 90px);
+    left: 49.9%;
+    transform: translate3d(-50%, 0, 0);
 }
-.ts-carousel.full-width .ts-prev,
-.ts-carousel.big-nav   .ts-prev,
-.ts-carousel.full-width .ts-prev,
-.ts-carousel.big-nav   .ts-prev { border-radius: 0 4px 4px 0; }
-.ts-carousel.full-width .ts-next,
-.ts-carousel.big-nav   .ts-next,
-.ts-carousel.full-width .ts-next,
-.ts-carousel.big-nav   .ts-next { border-radius: 4px 0 0 4px; }
-
-/* nav-squared / nav-rounded */
-.ts-carousel.nav-squared .ts-prev,
-.ts-carousel.nav-squared .ts-next,
-.ts-carousel.nav-squared .ts-nav button[class*="ts-"] { border-radius: 0; }
-.ts-carousel.nav-rounded .ts-prev,
-.ts-carousel.nav-rounded .ts-next,
-.ts-carousel.nav-rounded .ts-nav button[class*="ts-"] { border-radius: 50%; }
-
-/* nav size helpers */
-.ts-carousel.nav-sm .ts-prev,
-.ts-carousel.nav-sm .ts-next,
-.ts-carousel.nav-sm .ts-prev,
-.ts-carousel.nav-sm .ts-next { width: 30px !important; height: 30px !important; }
-
-.ts-carousel.nav-md .ts-prev,
-.ts-carousel.nav-md .ts-next,
-.ts-carousel.nav-md .ts-prev,
-.ts-carousel.nav-md .ts-next { width: 40px; height: 40px; }
-
-.ts-carousel.nav-lg .ts-prev,
-.ts-carousel.nav-lg .ts-next,
-.ts-carousel.nav-lg .ts-prev,
-.ts-carousel.nav-lg .ts-next { width: 45px; height: 60px; }
-.ts-carousel.nav-lg.rounded-nav .ts-prev,
-.ts-carousel.nav-lg.rounded-nav .ts-next,
-.ts-carousel.nav-lg.rounded-nav .ts-prev,
-.ts-carousel.nav-lg.rounded-nav .ts-next { width: 55px; height: 55px; }
-.ts-carousel.nav-lg.rounded-nav .ts-prev::before,
-.ts-carousel.nav-lg.rounded-nav .ts-next::before,
-.ts-carousel.nav-lg.rounded-nav .ts-prev::before,
-.ts-carousel.nav-lg.rounded-nav .ts-next::before { font-size: 0.9rem; }
-.ts-carousel.nav-lg.rounded-nav .ts-prev::before,
-.ts-carousel.nav-lg.rounded-nav .ts-prev::before { top: -1px; left: -1px; }
-.ts-carousel.nav-lg.rounded-nav .ts-next::before,
-.ts-carousel.nav-lg.rounded-nav .ts-next::before { top: -1px; left: 1px; }
-
-/* nav font-size helpers */
-.ts-carousel.nav-font-size-sm .ts-prev,
-.ts-carousel.nav-font-size-sm .ts-next,
-.ts-carousel.nav-font-size-sm .ts-prev,
-.ts-carousel.nav-font-size-sm .ts-next { font-size: 10px; }
-.ts-carousel.nav-font-size-sm .ts-prev::before,
-.ts-carousel.nav-font-size-sm .ts-next::before,
-.ts-carousel.nav-font-size-sm .ts-prev::before,
-.ts-carousel.nav-font-size-sm .ts-next::before { font-size: inherit; }
-
-.ts-carousel.nav-font-size-md .ts-prev,
-.ts-carousel.nav-font-size-md .ts-next,
-.ts-carousel.nav-font-size-md .ts-prev,
-.ts-carousel.nav-font-size-md .ts-next { font-size: 14px; }
-.ts-carousel.nav-font-size-md .ts-prev::before,
-.ts-carousel.nav-font-size-md .ts-next::before,
-.ts-carousel.nav-font-size-md .ts-prev::before,
-.ts-carousel.nav-font-size-md .ts-next::before { font-size: inherit; }
-
-.ts-carousel.nav-font-size-lg .ts-prev,
-.ts-carousel.nav-font-size-lg .ts-next,
-.ts-carousel.nav-font-size-lg .ts-prev,
-.ts-carousel.nav-font-size-lg .ts-next { font-size: 19px; }
-.ts-carousel.nav-font-size-lg .ts-prev::before,
-.ts-carousel.nav-font-size-lg .ts-next::before,
-.ts-carousel.nav-font-size-lg .ts-prev::before,
-.ts-carousel.nav-font-size-lg .ts-next::before { font-size: inherit; left: 2px; }
-
-.ts-carousel.nav-font-size-xl .ts-prev,
-.ts-carousel.nav-font-size-xl .ts-next,
-.ts-carousel.nav-font-size-xl .ts-prev,
-.ts-carousel.nav-font-size-xl .ts-next { font-size: 25px; }
-.ts-carousel.nav-font-size-xl .ts-prev::before,
-.ts-carousel.nav-font-size-xl .ts-next::before,
-.ts-carousel.nav-font-size-xl .ts-prev::before,
-.ts-carousel.nav-font-size-xl .ts-next::before { font-size: inherit; left: 2px; }
-
-/* nav colour themes */
-.ts-carousel.nav-transparent .ts-prev,
-.ts-carousel.nav-transparent .ts-next,
-.ts-carousel.nav-transparent .ts-nav button[class*="ts-"] {
-	background-color: transparent !important; color: var(--dark) !important;
+.owl-carousel.full-width .owl-nav button[class*="owl-"],
+.owl-carousel.full-width .owl-nav button[class*="owl-"]:hover,
+.owl-carousel.big-nav .owl-nav button[class*="owl-"],
+.owl-carousel.big-nav .owl-nav button[class*="owl-"]:hover { height: auto; padding: 20px 0 !important; }
+.owl-carousel.full-width .owl-nav button.owl-prev,
+.owl-carousel.big-nav .owl-nav button.owl-prev { border-radius: 0 4px 4px 0; }
+.owl-carousel.full-width .owl-nav button.owl-next,
+.owl-carousel.big-nav .owl-nav button.owl-next { border-radius: 4px 0 0 4px; }
+.owl-carousel.nav-squared .owl-nav button[class*="owl-"] { border-radius: 0; }
+.owl-carousel.nav-rounded .owl-nav button[class*="owl-"] { border-radius: 50%; }
+.owl-carousel.nav-sm .owl-nav button.owl-prev,
+.owl-carousel.nav-sm .owl-nav button.owl-next { width: 30px !important; height: 30px !important; }
+.owl-carousel.nav-md .owl-nav button.owl-prev,
+.owl-carousel.nav-md .owl-nav button.owl-next { width: 40px; height: 40px; }
+.owl-carousel.nav-lg .owl-nav button.owl-prev,
+.owl-carousel.nav-lg .owl-nav button.owl-next { width: 45px; height: 60px; }
+.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev,
+.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next { width: 55px; height: 55px; }
+.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev:before,
+.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next:before { font-size: 14.4px; font-size: 0.9rem; }
+.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev:before { top: -1px; left: -1px; }
+.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next:before { top: -1px; left: 1px; }
+.owl-carousel.nav-font-size-sm .owl-nav button.owl-prev,
+.owl-carousel.nav-font-size-sm .owl-nav button.owl-next { font-size: 10px; }
+.owl-carousel.nav-font-size-sm .owl-nav button.owl-prev:before,
+.owl-carousel.nav-font-size-sm .owl-nav button.owl-next:before { font-size: inherit; }
+.owl-carousel.nav-font-size-md .owl-nav button.owl-prev,
+.owl-carousel.nav-font-size-md .owl-nav button.owl-next { font-size: 14px; }
+.owl-carousel.nav-font-size-md .owl-nav button.owl-prev:before,
+.owl-carousel.nav-font-size-md .owl-nav button.owl-next:before { font-size: inherit; }
+.owl-carousel.nav-font-size-lg .owl-nav button.owl-prev,
+.owl-carousel.nav-font-size-lg .owl-nav button.owl-next { font-size: 19px; }
+.owl-carousel.nav-font-size-lg .owl-nav button.owl-prev:before,
+.owl-carousel.nav-font-size-lg .owl-nav button.owl-next:before { font-size: inherit; left: 2px; }
+.owl-carousel.nav-font-size-xl .owl-nav button.owl-prev,
+.owl-carousel.nav-font-size-xl .owl-nav button.owl-next { font-size: 25px; }
+.owl-carousel.nav-font-size-xl .owl-nav button.owl-prev:before,
+.owl-carousel.nav-font-size-xl .owl-nav button.owl-next:before { font-size: inherit; left: 2px; }
+.owl-carousel.nav-transparent .owl-nav button[class*="owl-"] {
+    background-color: transparent !important;
+    color: var(--dark) !important;
 }
-.ts-carousel.nav-transparent .ts-prev:hover,
-.ts-carousel.nav-transparent .ts-next:hover,
-.ts-carousel.nav-transparent .ts-prev:active,
-.ts-carousel.nav-transparent .ts-next:active,
-.ts-carousel.nav-transparent .ts-nav button[class*="ts-"]:hover,
-.ts-carousel.nav-transparent .ts-nav button[class*="ts-"]:active {
-	background-color: transparent !important; border-color: transparent !important;
+.owl-carousel.nav-transparent .owl-nav button[class*="owl-"]:hover,
+.owl-carousel.nav-transparent .owl-nav button[class*="owl-"]:active {
+    background-color: transparent !important;
+    border-color: transparent !important;
 }
-
-.ts-carousel.nav-borders .ts-prev,
-.ts-carousel.nav-borders .ts-next,
-.ts-carousel.nav-borders .ts-nav button[class*="ts-"] { border-color: var(--dark-rgba-10) !important; }
-.ts-carousel.nav-borders .ts-prev:hover,
-.ts-carousel.nav-borders .ts-next:hover,
-.ts-carousel.nav-borders .ts-nav button[class*="ts-"]:hover { border-color: var(--dark-rgba-10) !important; }
-.ts-carousel.nav-borders .ts-prev:active,
-.ts-carousel.nav-borders .ts-next:active,
-.ts-carousel.nav-borders .ts-nav button[class*="ts-"]:active { border-color: var(--dark-rgba-30) !important; }
-
-.ts-carousel.nav-borders-light .ts-prev,
-.ts-carousel.nav-borders-light .ts-next,
-.ts-carousel.nav-borders-light .ts-nav button[class*="ts-"] { border-color: var(--light-rgba-20) !important; }
-.ts-carousel.nav-borders-light .ts-prev:hover,
-.ts-carousel.nav-borders-light .ts-next:hover,
-.ts-carousel.nav-borders-light .ts-nav button[class*="ts-"]:hover { border-color: var(--light-rgba-20) !important; }
-.ts-carousel.nav-borders-light .ts-prev:active,
-.ts-carousel.nav-borders-light .ts-next:active,
-.ts-carousel.nav-borders-light .ts-nav button[class*="ts-"]:active { border-color: var(--light-rgba-30) !important; }
-
-.ts-carousel.nav-arrow-light .ts-next::before,
-.ts-carousel.nav-arrow-light .ts-next::after,
-.ts-carousel.nav-arrow-light .ts-prev::before,
-.ts-carousel.nav-arrow-light .ts-prev::after,
-.ts-carousel.nav-arrow-light .ts-next::before,
-.ts-carousel.nav-arrow-light .ts-next::after,
-.ts-carousel.nav-arrow-light .ts-prev::before,
-.ts-carousel.nav-arrow-light .ts-prev::after { color: var(--light) !important; }
-
-/* nav-light */
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-nav button[class*="ts-"] {
-	background-color: var(--grey-100) !important; border-color: var(--grey-100) !important; color: var(--dark) !important;
+.owl-carousel.nav-borders .owl-nav button[class*="owl-"] { border-color: var(--dark-rgba-10) !important; }
+.owl-carousel.nav-borders .owl-nav button[class*="owl-"]:hover { border-color: var(--dark-rgba-10) !important; }
+.owl-carousel.nav-borders .owl-nav button[class*="owl-"]:active { border-color: var(--dark-rgba-30) !important; }
+.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"] { border-color: var(--light-rgba-20) !important; }
+.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"]:hover { border-color: var(--light-rgba-20) !important; }
+.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"]:active { border-color: var(--light-rgba-30) !important; }
+.owl-carousel.nav-arrow-light .owl-nav .owl-next:before,
+.owl-carousel.nav-arrow-light .owl-nav .owl-next:after,
+.owl-carousel.nav-arrow-light .owl-nav .owl-prev:before,
+.owl-carousel.nav-arrow-light .owl-nav .owl-prev:after { color: var(--light) !important; }
+.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"] {
+    background-color: var(--grey-100) !important;
+    border-color: var(--grey-100) !important;
+    color: var(--dark) !important;
 }
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev:hover,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next:hover,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-nav button[class*="ts-"]:hover {
-	background-color: var(--light) !important; border-color: var(--light) !important;
+.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"]:hover {
+    background-color: var(--light) !important;
+    border-color: var(--light) !important;
 }
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev:active,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next:active,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-nav button[class*="ts-"]:active {
-	background-color: var(--grey-200) !important; border-color: var(--grey-200) !important;
+.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"]:active {
+    background-color: var(--grey-200) !important;
+    border-color: var(--grey-200) !important;
 }
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-prev,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-next,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-nav button[class*="ts-"] {
-	width: 35px; height: 45px; background-color: var(--dark-rgba-10) !important; border-color: transparent !important;
+.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav button[class*="owl-"] {
+    width: 35px;
+    height: 45px;
+    background-color: var(--dark-rgba-10) !important;
+    border-color: transparent !important;
 }
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-svg-arrows-1 .ts-nav button[class*="ts-"] svg polygon {
-	fill: var(--dark) !important; stroke: var(--dark) !important;
+.owl-carousel.nav-light.nav-style-1 .owl-nav .owl-next,
+.owl-carousel.nav-light.nav-style-1 .owl-nav .owl-prev { color: var(--light) !important; }
+.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-next:before,
+.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-next:after,
+.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-prev:before,
+.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--light) !important; }
+.owl-carousel.nav-light.nav-style-3 .owl-nav .owl-next,
+.owl-carousel.nav-light.nav-style-3 .owl-nav .owl-prev { color: var(--light) !important; }
+.owl-carousel.nav-light.nav-svg-arrows-1 .owl-nav .owl-next svg polygon,
+.owl-carousel.nav-light.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon { fill: #FFF !important; stroke: #FFF !important; }
+.owl-carousel.nav-light.nav-arrows-1 .owl-nav .owl-next,
+.owl-carousel.nav-light.nav-arrows-1 .owl-nav .owl-prev { color: var(--light) !important; }
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next,
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev {
+    background-color: var(--dark--100) !important;
+    border-color: var(--dark--100) var(--dark--100) var(--dark--100) !important;
+    color: var(--light) !important;
 }
-.ts-carousel.nav-light.nav-style-1 .ts-prev,
-.ts-carousel.nav-light.nav-style-1 .ts-next,
-.ts-carousel.nav-light.nav-style-1 .ts-next,
-.ts-carousel.nav-light.nav-style-1 .ts-prev { color: var(--light) !important; }
-.ts-carousel.nav-light.nav-style-2 .ts-prev::before,
-.ts-carousel.nav-light.nav-style-2 .ts-prev::after,
-.ts-carousel.nav-light.nav-style-2 .ts-next::before,
-.ts-carousel.nav-light.nav-style-2 .ts-next::after,
-.ts-carousel.nav-light.nav-style-2 .ts-next::before,
-.ts-carousel.nav-light.nav-style-2 .ts-next::after,
-.ts-carousel.nav-light.nav-style-2 .ts-prev::before,
-.ts-carousel.nav-light.nav-style-2 .ts-prev::after { border-color: var(--light) !important; }
-.ts-carousel.nav-light.nav-style-3 .ts-prev,
-.ts-carousel.nav-light.nav-style-3 .ts-next,
-.ts-carousel.nav-light.nav-style-3 .ts-next,
-.ts-carousel.nav-light.nav-style-3 .ts-prev { color: var(--light) !important; }
-.ts-carousel.nav-light.nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-light.nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-light.nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-light.nav-svg-arrows-1 .ts-prev svg polygon { fill: #FFF !important; stroke: #FFF !important; }
-.ts-carousel.nav-light.nav-arrows-1 .ts-prev,
-.ts-carousel.nav-light.nav-arrows-1 .ts-next,
-.ts-carousel.nav-light.nav-arrows-1 .ts-next,
-.ts-carousel.nav-light.nav-arrows-1 .ts-prev { color: var(--light) !important; }
-
-/* nav-dark */
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev {
-	background-color: var(--dark--100) !important;
-	border-color: var(--dark--100) !important;
-	color: var(--light) !important;
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next:hover,
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev:hover {
+    background-color: var(--dark--100) !important;
+    border-color: var(--dark--100) !important;
 }
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev:hover,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next:hover,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next:hover,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev:hover {
-	background-color: var(--dark--100) !important; border-color: var(--dark--100) !important;
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next:active,
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev:active {
+    background-color: var(--dark) !important;
+    border-color: var(--dark) !important;
 }
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev:active,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next:active,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-next:active,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .ts-prev:active {
-	background-color: var(--dark) !important; border-color: var(--dark) !important;
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-next,
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-prev {
+    width: 35px;
+    height: 45px;
+    background-color: rgba(var(--dark--100), 0.4) !important;
+    border-color: transparent !important;
 }
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-prev,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-next,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-next,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-prev {
-	width: 35px; height: 45px;
-	background-color: rgba(var(--dark--100), 0.4) !important; border-color: transparent !important;
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-next:hover,
+.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-prev:hover {
+    background-color: rgba(var(--dark--100), 1) !important;
 }
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-prev:hover,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-next:hover,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-next:hover,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .ts-prev:hover {
-	background-color: rgba(var(--dark--100), 1) !important;
-}
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency.nav-style-diamond .ts-prev,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency.nav-style-diamond .ts-next,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency.nav-style-diamond .ts-next,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency.nav-style-diamond .ts-prev {
-	width: 40px; height: 40px;
-}
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-svg-arrows-1 .ts-prev svg polygon {
-	fill: #FFF !important; stroke: #FFF !important;
-}
-.ts-carousel.nav-dark.nav-style-1 .ts-prev,
-.ts-carousel.nav-dark.nav-style-1 .ts-next,
-.ts-carousel.nav-dark.nav-style-1 .ts-next,
-.ts-carousel.nav-dark.nav-style-1 .ts-prev { color: var(--dark) !important; }
-.ts-carousel.nav-dark.nav-style-2 .ts-prev::before,
-.ts-carousel.nav-dark.nav-style-2 .ts-prev::after,
-.ts-carousel.nav-dark.nav-style-2 .ts-next::before,
-.ts-carousel.nav-dark.nav-style-2 .ts-next::after,
-.ts-carousel.nav-dark.nav-style-2 .ts-next::before,
-.ts-carousel.nav-dark.nav-style-2 .ts-next::after,
-.ts-carousel.nav-dark.nav-style-2 .ts-prev::before,
-.ts-carousel.nav-dark.nav-style-2 .ts-prev::after { border-color: var(--dark) !important; }
-.ts-carousel.nav-dark.nav-style-3 .ts-prev,
-.ts-carousel.nav-dark.nav-style-3 .ts-next,
-.ts-carousel.nav-dark.nav-style-3 .ts-next,
-.ts-carousel.nav-dark.nav-style-3 .ts-prev { color: var(--dark) !important; }
-.ts-carousel.nav-dark.nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-dark.nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-dark.nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-dark.nav-svg-arrows-1 .ts-prev svg polygon { fill: var(--dark) !important; stroke: var(--dark) !important; }
-.ts-carousel.nav-dark.nav-arrows-1 .ts-prev,
-.ts-carousel.nav-dark.nav-arrows-1 .ts-next,
-.ts-carousel.nav-dark.nav-arrows-1 .ts-next,
-.ts-carousel.nav-dark.nav-arrows-1 .ts-prev { color: var(--dark) !important; }
-
-/* Dots modifiers */
-.ts-carousel.dots-inside .ts-dots,
-.ts-carousel.dots-inside .ts-dots {
-	position: absolute; bottom: 2px; right: 10px; margin-top: 0;
-}
-.ts-carousel.dots-title .ts-dots,
-.ts-carousel.dots-title .ts-dots {
-	position: absolute; margin-top: 0 !important; top: -51px; left: 155px;
-}
-.ts-carousel.dots-title .ts-dot span,
-.ts-carousel.dots-title .ts-dot span { width: 8px; height: 8px; margin: 5px 4px; }
-.ts-carousel.dots-title.dots-title-pos-2 .ts-dots,
-.ts-carousel.dots-title.dots-title-pos-2 .ts-dots { left: 235px; }
-
-.ts-carousel.dots-light .ts-dot span,
-.ts-carousel.dots-light .ts-dot span { background: rgba(255,255,255,.6); }
-.ts-carousel.dots-light .ts-dot.active span,
-.ts-carousel.dots-light .ts-dot:hover span,
-.ts-carousel.dots-light .ts-dot.active span,
-.ts-carousel.dots-light .ts-dot:hover span { background: #FFF !important; }
-
-.ts-carousel.dots-dark .ts-dot span,
-.ts-carousel.dots-dark .ts-dot span { background: rgba(33,33,33,.6); }
-.ts-carousel.dots-dark .ts-dot.active span,
-.ts-carousel.dots-dark .ts-dot:hover span,
-.ts-carousel.dots-dark .ts-dot.active span,
-.ts-carousel.dots-dark .ts-dot:hover span { background: #212121 !important; }
-
-.ts-carousel.dots-morphing .ts-dot span,
-.ts-carousel.dots-morphing .ts-dot span { width: 20px; height: 6px; transition: ease width 300ms; }
-.ts-carousel.dots-morphing .ts-dot.active span,
-.ts-carousel.dots-morphing .ts-dot:hover span,
-.ts-carousel.dots-morphing .ts-dot.active span,
-.ts-carousel.dots-morphing .ts-dot:hover span { width: 40px; }
-
-.ts-carousel.dots-modern .ts-dots,
-.ts-carousel.dots-modern .ts-dots { display: flex; align-items: center; justify-content: center; }
-.ts-carousel.dots-modern .ts-dot,
-.ts-carousel.dots-modern .ts-dot  { display: flex; align-items: center; justify-content: center; margin: 0 2px; }
-.ts-carousel.dots-modern .ts-dot span,
-.ts-carousel.dots-modern .ts-dot span { width: 4px; height: 4px; transition: ease all 300ms 300ms; }
-.ts-carousel.dots-modern .ts-dot.active span,
-.ts-carousel.dots-modern .ts-dot.active span { transition: ease all 300ms; transform: scale(2); }
-.ts-carousel.dots-modern.dots-modern-lg .ts-dot,
-.ts-carousel.dots-modern.dots-modern-lg .ts-dot { margin: 0 3px; }
-.ts-carousel.dots-modern.dots-modern-lg .ts-dot span,
-.ts-carousel.dots-modern.dots-modern-lg .ts-dot span { width: 6px; height: 6px; }
-
-.ts-carousel.dots-orientation-portrait .ts-dots,
-.ts-carousel.dots-orientation-portrait .ts-dots {
-	display: flex; flex-direction: column; margin-left: 15px !important; margin-right: 15px !important;
-}
-.ts-carousel.dots-align-left .ts-dots,
-.ts-carousel.dots-align-left .ts-dots  { text-align: left; justify-content: flex-start; }
-.ts-carousel.dots-align-right .ts-dots,
-.ts-carousel.dots-align-right .ts-dots { text-align: left; }
-.ts-carousel.dots-horizontal-center .ts-dots,
-.ts-carousel.dots-horizontal-center .ts-dots { left: 0; right: 0; width: 100%; }
-.ts-carousel.dots-vertical-center .ts-dots,
-.ts-carousel.dots-vertical-center .ts-dots {
-	top: 50%; bottom: auto; margin: 0; transform: translate3d(0, -50%, 0);
-}
-
+.owl-carousel.nav-dark.nav-style-1 .owl-nav .owl-next,
+.owl-carousel.nav-dark.nav-style-1 .owl-nav .owl-prev { color: var(--dark) !important; }
+.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-next:before,
+.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-next:after,
+.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-prev:before,
+.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--dark) !important; }
+.owl-carousel.nav-dark.nav-style-3 .owl-nav .owl-next,
+.owl-carousel.nav-dark.nav-style-3 .owl-nav .owl-prev { color: var(--dark) !important; }
+.owl-carousel.nav-dark.nav-svg-arrows-1 .owl-nav .owl-next svg polygon,
+.owl-carousel.nav-dark.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon { fill: var(--dark) !important; stroke: var(--dark) !important; }
+.owl-carousel.nav-dark.nav-arrows-1 .owl-nav .owl-next,
+.owl-carousel.nav-dark.nav-arrows-1 .owl-nav .owl-prev { color: var(--dark) !important; }
+.owl-carousel .owl-dots .owl-dot { outline: 0; }
+.owl-carousel .owl-dots .owl-dot span { width: 8px; height: 8px; margin: 5px 4px; }
+.owl-carousel.dots-inside .owl-dots { position: absolute; bottom: 2px; right: 10px; margin-top: 0; }
+.owl-carousel.dots-title .owl-dots { position: absolute; margin-top: 0 !important; top: -51px; left: 155px; }
+.owl-carousel.dots-title .owl-dots .owl-dot span { width: 8px; height: 8px; margin: 5px 4px; }
+.owl-carousel.dots-title.dots-title-pos-2 .owl-dots { left: 235px; }
+.owl-carousel.dots-light .owl-dots .owl-dot span { background: rgba(255, 255, 255, 0.6); }
+.owl-carousel.dots-light .owl-dots .owl-dot.active span,
+.owl-carousel.dots-light .owl-dots .owl-dot:hover span { background: #FFF !important; }
+.owl-carousel.dots-dark .owl-dots .owl-dot span { background: rgba(33, 33, 33, 0.6); }
+.owl-carousel.dots-dark .owl-dots .owl-dot.active span,
+.owl-carousel.dots-dark .owl-dots .owl-dot:hover span { background: #212121 !important; }
+.owl-carousel.dots-morphing .owl-dots .owl-dot span { width: 20px; height: 6px; transition: ease width 300ms; }
+.owl-carousel.dots-morphing .owl-dots .owl-dot.active span,
+.owl-carousel.dots-morphing .owl-dots .owl-dot:hover span { width: 40px; }
+.owl-carousel.dots-modern .owl-dots { display: flex; align-items: center; justify-content: center; }
+.owl-carousel.dots-modern .owl-dots .owl-dot { display: flex; align-items: center; justify-content: center; margin: 0 2px; }
+.owl-carousel.dots-modern .owl-dots .owl-dot span { width: 4px; height: 4px; transition: ease all 300ms 300ms; }
+.owl-carousel.dots-modern .owl-dots .owl-dot.active span { transition: ease all 300ms; transform: scale(2); }
+.owl-carousel.dots-modern.dots-modern-lg .owl-dots .owl-dot { margin: 0 3px; }
+.owl-carousel.dots-modern.dots-modern-lg .owl-dots .owl-dot span { width: 6px; height: 6px; }
+.owl-carousel.dots-orientation-portrait .owl-dots { display: flex; flex-direction: column; margin-left: 15px !important; margin-right: 15px !important; }
+.owl-carousel.dots-align-left .owl-dots { text-align: left; justify-content: flex-start; }
+.owl-carousel.dots-align-right .owl-dots { text-align: left; }
+.owl-carousel.dots-horizontal-center .owl-dots { left: 0; right: 0; width: 100%; }
+.owl-carousel.dots-vertical-center .owl-dots { top: 50%; bottom: auto; margin: 0; transform: translate3d(0, -50%, 0); }
 @media (max-width: 575px) {
-	.ts-carousel.show-dots-xs .ts-dots,
-	.ts-carousel.show-dots-xs .ts-dots { opacity: 1 !important; visibility: visible !important; }
+    .owl-carousel.show-dots-xs .owl-dots { opacity: 1 !important; visibility: visible !important; }
 }
 @media (min-width: 576px) and (max-width: 767px) {
-	.ts-carousel.show-dots-sm .ts-dots,
-	.ts-carousel.show-dots-sm .ts-dots { opacity: 1 !important; visibility: visible !important; }
+    .owl-carousel.show-dots-sm .owl-dots { opacity: 1 !important; visibility: visible !important; }
 }
 @media (min-width: 768px) and (max-width: 991px) {
-	.ts-carousel.show-dots-md .ts-dots,
-	.ts-carousel.show-dots-md .ts-dots { opacity: 1 !important; visibility: visible !important; }
+    .owl-carousel.show-dots-md .owl-dots { opacity: 1 !important; visibility: visible !important; }
 }
-.ts-carousel.show-dots-hover .ts-dots,
-.ts-carousel.show-dots-hover .ts-dots { opacity: 0; visibility: hidden; transition: ease opacity 300ms; }
-.ts-carousel.show-dots-hover:hover .ts-dots,
-.ts-carousel.show-dots-hover:hover .ts-dots { opacity: 1; visibility: visible; }
-
-/* Carousel shadow */
-.ts-carousel.carousel-shadow-1 { position: relative; }
-.ts-carousel.carousel-shadow-1::before {
-	content: ''; position: absolute; top: 50%; left: 50%;
-	width: 65%; height: 0;
-	box-shadow: 0 0 110px 180px rgba(0,0,0,.04);
-	transform: translate3d(-50%, -50%, 0);
-	z-index: 0;
+.owl-carousel.show-dots-hover .owl-dots { opacity: 0; visibility: hidden; transition: ease opacity 300ms; }
+.owl-carousel.show-dots-hover:hover .owl-dots { opacity: 1; visibility: visible; }
+.owl-carousel.carousel-shadow-1 { position: relative; }
+.owl-carousel.carousel-shadow-1:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 65%;
+    height: 0px;
+    box-shadow: 0 0 110px 180px rgba(0, 0, 0, 0.04);
+    transform: translate3d(-50%, -50%, 0);
+    z-index: 0;
 }
-.ts-carousel.carousel-shadow-1.carousel-shadow-1-bold::before { box-shadow: 0 0 110px 230px rgba(0,0,0,.04); }
-
-.ts-carousel .img-thumbnail.img-thumbnail-hover-icon { display: block; }
-
-/* carousel-right-side-nav */
-.ts-carousel.carousel-right-side-nav { width: calc(100% - 55px); }
-.ts-carousel.carousel-right-side-nav .ts-next,
-.ts-carousel.carousel-right-side-nav .ts-next { width: 55px; transform: translate3d(100%, -50%, 0); }
-
-/* carousel-bottom-inside-shadow */
-.ts-carousel.carousel-bottom-inside-shadow .ts-stage-outer::after,
-.ts-carousel.carousel-bottom-inside-shadow .ts-stage-outer::after {
-	content: ''; position: absolute; bottom: 0; left: 0;
-	height: 35%; width: 100%;
-	background-image: linear-gradient(360deg, var(--grey-500) 0%, transparent 100%);
+.owl-carousel.carousel-shadow-1.carousel-shadow-1-bold:before { box-shadow: 0 0 110px 230px rgba(0, 0, 0, 0.04); }
+.owl-carousel .img-thumbnail.img-thumbnail-hover-icon { display: block; }
+.owl-carousel.carousel-right-side-nav { width: calc(100% - 55px); }
+.owl-carousel.carousel-right-side-nav .owl-nav .owl-next { width: 55px; transform: translate3d(100%, -50%, 0); }
+.owl-carousel.carousel-bottom-inside-shadow .owl-stage-outer:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 35%;
+    width: 100%;
+    background-image: linear-gradient(360deg, var(--grey-500) 0%, transparent 100%);
 }
-
-/* opacity-* items */
-.ts-carousel [class*="opacity-"]:not([class*="opacity-hover"]) { transition: ease opacity 300ms; }
-.ts-carousel [class*="opacity-"]:not([class*="opacity-hover"]):hover { opacity: 1 !important; }
-
-/* carousel-sync-style-1 */
+.owl-carousel [class*="opacity-"]:not([class*="opacity-hover"]) { transition: ease opacity 300ms; }
+.owl-carousel [class*="opacity-"]:not([class*="opacity-hover"]):hover { opacity: 1 !important; }
 @media (min-width: 576px) {
-	.ts-carousel.carousel-sync-style-1 {
-		position: absolute; top: 50%; left: -30px;
-		max-width: 355px; transform: translate3d(0, -50%, 0);
-	}
+    .owl-carousel.carousel-sync-style-1 {
+        position: absolute;
+        top: 50%;
+        left: -30px;
+        max-width: 355px;
+        transform: translate3d(0, -50%, 0);
+    }
 }
-
-/* carousel-spaced */
-.carousel-spaced { margin-left: -5px; }
-.carousel-spaced .ts-item > div,
-.carousel-spaced .ts-item > div { margin: 5px; }
-@media (max-width: 575px) { .carousel-spaced { margin-left: 0; } }
-
-/* testimonials */
-.ts-carousel.testimonials img { display: inline-block; height: 70px; width: 70px; }
-
-/* carousel-half-full-width-wrapper */
-.carousel-half-full-width-wrapper > .ts-carousel { width: 100%; }
-@media (min-width: 576px)  { .carousel-half-full-width-wrapper > .ts-carousel { width: calc(100vw - ((100vw - 540px)  / 2)); } }
-@media (min-width: 768px)  { .carousel-half-full-width-wrapper > .ts-carousel { width: calc(100vw - ((100vw - 720px)  / 2)); } }
-@media (min-width: 992px)  { .carousel-half-full-width-wrapper > .ts-carousel { width: calc(100vw - ((100vw - 960px)  / 2)); } }
-@media (min-width: 1200px) { .carousel-half-full-width-wrapper > .ts-carousel { width: calc(100vw - ((100vw - 1140px) / 2)); } }
-.carousel-half-full-width-wrapper > .ts-carousel .ts-stage-outer,
-.carousel-half-full-width-wrapper > .ts-carousel .ts-stage-outer { margin-bottom: 20px; }
+.owl-carousel-spaced { margin-left: -5px; }
+.owl-carousel-spaced .owl-item > div { margin: 5px; }
+.owl-carousel.testimonials img { display: inline-block; height: 70px; width: 70px; }
+@media (max-width: 575px) { .owl-carousel-spaced { margin-left: 0; } }
+.carousel-half-full-width-wrapper > .owl-carousel { width: 100%; }
+@media (min-width: 576px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 540px) / 2)); } }
+@media (min-width: 768px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 720px) / 2)); } }
+@media (min-width: 992px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 960px) / 2)); } }
+@media (min-width: 1200px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 1140px) / 2)); } }
+.carousel-half-full-width-wrapper > .owl-carousel .owl-stage-outer { margin-bottom: 20px; }
 .carousel-half-full-width-wrapper.carousel-half-full-width-left { direction: rtl; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .ts-carousel .ts-nav,
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .ts-carousel .ts-nav { display: flex; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .ts-carousel .ts-prev,
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .ts-carousel .ts-prev { order: 2; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .ts-carousel .ts-next,
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .ts-carousel .ts-next { order: 1; }
-
-/* carousel-areas */
+.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav { display: flex; }
+.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav .owl-prev { order: 2; }
+.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav .owl-next { order: 1; }
 .carousel-areas {
-	background: linear-gradient(to bottom, #f2f2f2 0%, rgba(33,37,41,.5) 100%);
-	margin-bottom: -10px; padding: 8px 8px 0 8px;
-	border-radius: 6px 6px 0 0;
-	box-shadow: 0 0 50px 20px rgba(0,0,0,.07);
+    background: #f2f2f2;
+    background: linear-gradient(to bottom, #f2f2f2 0%, rgba(33, 37, 41, 0.5) 100%);
+    margin-bottom: -10px;
+    padding: 8px 8px 0 8px;
+    border-radius: 6px 6px 0 0;
+    box-shadow: 0px 0px 50px 20px rgba(0, 0, 0, 0.07);
 }
-.carousel-areas .ts-carousel { box-shadow: 0 5px 5px rgba(0,0,0,.2); }
-.carousel-areas .ts-carousel .ts-prev,
-.carousel-areas .ts-carousel .ts-prev { left: -55px; }
-.carousel-areas .ts-carousel .ts-next,
-.carousel-areas .ts-carousel .ts-next { right: -55px; }
-.carousel-areas .ts-carousel:first-child img { border-radius: 6px 6px 0 0; }
-@media (max-width: 991px) {
-	.carousel-areas .ts-nav,
-	.carousel-areas .ts-nav { display: none; }
+.carousel-areas .owl-carousel { box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2); }
+.carousel-areas .owl-carousel .owl-nav button.owl-prev { left: -55px; }
+.carousel-areas .owl-carousel .owl-nav button.owl-next { right: -55px; }
+.carousel-areas .owl-carousel:first-child img { border-radius: 6px 6px 0 0; }
+@media (max-width: 991px) { .carousel-areas .owl-carousel .owl-nav { display: none; } }
+.owl-carousel.carousel-center-active-item .owl-item { opacity: 0.2; transition: ease opacity 300ms; }
+.owl-carousel.carousel-center-active-item .owl-item.current { opacity: 1 !important; }
+.owl-carousel.carousel-center-active-item.carousel-center-active-item-style-2 .owl-item { opacity: 0.7; }
+.owl-carousel.carousel-center-active-item-2 .owl-stage-outer { overflow: visible; }
+.owl-carousel.carousel-center-active-item-2 .owl-item > div {
+    width: 66.6666%;
+    margin-left: auto;
+    padding: 48px;
+    padding: 3rem;
+    background: var(--light);
+    border-radius: 7px;
+    box-shadow: 0px 0px 70px -40px rgba(0, 0, 0, 0.2);
 }
-
-/* center-active-item */
-.ts-carousel.carousel-center-active-item .ts-item,
-.ts-carousel.carousel-center-active-item .ts-item {
-	opacity: 0.2; transition: ease opacity 300ms;
+.owl-carousel.carousel-center-active-item-2 .owl-item.active > div { margin-right: auto; }
+.owl-carousel.carousel-center-active-item-2 .owl-item.active > div * { color: var(--light) !important; }
+.owl-carousel.carousel-center-active-item-2 .owl-item.active + .owl-item > div { margin-right: auto; margin-left: 0; }
+.owl-carousel.carousel-center-active-item-3 .owl-stage-outer { overflow: visible; }
+.owl-carousel.carousel-center-active-item-3 .owl-item > div { width: 100%; margin-left: auto; transition: ease opacity 300ms; }
+.owl-carousel.carousel-center-active-item-3 .owl-item.active > div { margin-right: auto; }
+.owl-carousel.carousel-center-active-item-3 .owl-item.active + .owl-item > div { margin-right: auto; margin-left: 0; }
+.owl-carousel-light.owl-carousel-light-init-fadeIn { transition: ease opacity 300ms; }
+.owl-carousel-light .owl-stage-outer,
+.owl-carousel-light .owl-stage { height: 100%; }
+.owl-carousel-light .owl-item {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    position: absolute !important;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    transition: ease opacity 300ms;
 }
-.ts-carousel.carousel-center-active-item .ts-item.current,
-.ts-carousel.carousel-center-active-item .ts-item.current { opacity: 1 !important; }
-.ts-carousel.carousel-center-active-item.carousel-center-active-item-style-2 .ts-item,
-.ts-carousel.carousel-center-active-item.carousel-center-active-item-style-2 .ts-item { opacity: 0.7; }
+.owl-carousel-light .owl-item.active { display: block; visibility: visible; opacity: 1; }
+.owl-carousel-light .owl-dots .owl-dot span { margin: 5px 2px; }
+.horizontal-scroller { padding: 32px 0; padding: 2rem 0; height: 100vh; position: relative; }
+.horizontal-scroller-scroll { position: relative; overflow: hidden; padding: 32px; padding: 2rem; }
+.horizontal-scroller-images { height: 100%; display: flex; align-items: center; }
+.horizontal-scroller-item { height: 100%; display: flex; justify-content: center; flex: 0 0 auto; padding: 0 32px; padding: 0 2rem; }
+.horizontal-scroller-image { object-fit: fill; margin: 0 auto; max-height: 80vh; padding-top: 10vh; }
 
-/* center-active-item-2 */
-.ts-carousel.carousel-center-active-item-2 .ts-stage-outer,
-.ts-carousel.carousel-center-active-item-2 .ts-stage-outer { overflow: visible; }
-.ts-carousel.carousel-center-active-item-2 .ts-item > div,
-.ts-carousel.carousel-center-active-item-2 .ts-item > div {
-	width: 66.6666%; margin-left: auto; padding: 3rem;
-	background: var(--light); border-radius: 7px;
-	box-shadow: 0 0 70px -40px rgba(0,0,0,.2);
+/* Carousel — skin (primary colour bindings) */
+.owl-carousel .owl-dots .owl-dot.active span,
+.owl-carousel .owl-dots .owl-dot:hover span { background-color: var(--primary-100); }
+.owl-carousel.show-nav-title .owl-nav button[class*="owl-"],
+.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:hover,
+.owl-carousel.show-nav-title .owl-nav button[class*="owl-"].hover { color: var(--primary); }
+.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"] {
+    background-color: var(--primary);
+    border-color: var(--primary) var(--primary) var(--primary-300);
+    color: var(--primary-inverse);
 }
-.ts-carousel.carousel-center-active-item-2 .ts-item.active > div,
-.ts-carousel.carousel-center-active-item-2 .ts-item.active > div { margin-right: auto; }
-.ts-carousel.carousel-center-active-item-2 .ts-item.active > div *,
-.ts-carousel.carousel-center-active-item-2 .ts-item.active > div * { color: var(--light) !important; }
-.ts-carousel.carousel-center-active-item-2 .ts-item.active + .ts-item > div,
-.ts-carousel.carousel-center-active-item-2 .ts-item.active + .ts-item > div {
-	margin-right: auto; margin-left: 0;
+.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"]:hover,
+.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"].hover {
+    background-color: var(--primary--100);
+    border-color: var(--primary--300) var(--primary--300) var(--primary);
 }
-
-/* center-active-item-3 */
-.ts-carousel.carousel-center-active-item-3 .ts-stage-outer,
-.ts-carousel.carousel-center-active-item-3 .ts-stage-outer { overflow: visible; }
-.ts-carousel.carousel-center-active-item-3 .ts-item > div,
-.ts-carousel.carousel-center-active-item-3 .ts-item > div { width: 100%; margin-left: auto; transition: ease opacity 300ms; }
-.ts-carousel.carousel-center-active-item-3 .ts-item.active > div,
-.ts-carousel.carousel-center-active-item-3 .ts-item.active > div { margin-right: auto; }
-.ts-carousel.carousel-center-active-item-3 .ts-item.active + .ts-item > div,
-.ts-carousel.carousel-center-active-item-3 .ts-item.active + .ts-item > div { margin-right: auto; margin-left: 0; }
-
-/* horizontal-scroller */
-.horizontal-scroller         { padding: 2rem 0; height: 100vh; position: relative; }
-.horizontal-scroller-scroll  { position: relative; overflow: hidden; padding: 2rem; }
-.horizontal-scroller-images  { height: 100%; display: flex; align-items: center; }
-.horizontal-scroller-item    { height: 100%; display: flex; justify-content: center; flex: 0 0 auto; padding: 0 2rem; }
-.horizontal-scroller-image   { object-fit: fill; margin: 0 auto; max-height: 80vh; padding-top: 10vh; }
-
-/* Skin (primary colour tokens) */
-/* Dots active */
-.ts-carousel .ts-dot.active span,
-.ts-carousel .ts-dot:hover span,
-.ts-carousel .ts-dots .ts-dot.active span,
-.ts-carousel .ts-dots .ts-dot:hover span { background-color: var(--primary-100); }
-
-/* show-nav-title colour */
-.ts-carousel.show-nav-title .ts-prev,
-.ts-carousel.show-nav-title .ts-next,
-.ts-carousel.show-nav-title .ts-nav button[class*="ts-"],
-.ts-carousel.show-nav-title .ts-nav button[class*="ts-"]:hover { color: var(--primary); }
-
-/* default nav buttons */
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-prev,
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-next,
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-nav button[class*="ts-"] {
-	background-color: var(--primary);
-	border-color: var(--primary) var(--primary) var(--primary-300);
-	color: var(--primary-inverse);
+.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"]:active,
+.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"].active {
+    background-color: var(--primary-300);
+    background-image: none;
+    border-color: var(--primary-300) var(--primary-300) var(--primary-300);
 }
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-prev:hover,
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-next:hover,
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-nav button[class*="ts-"]:hover {
-	background-color: var(--primary--100);
-	border-color: var(--primary--300) var(--primary--300) var(--primary);
-}
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-prev:active,
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-next:active,
-.ts-carousel:not(.nav-arrows-1):not(.show-nav-title) .ts-nav button[class*="ts-"]:active {
-	background-color: var(--primary-300);
-	background-image: none;
-	border-color: var(--primary-300);
-}
-.ts-carousel.nav-with-transparency:not(.nav-style-1):not(.show-nav-title):not(.nav-arrows-1) .ts-prev,
-.ts-carousel.nav-with-transparency:not(.nav-style-1):not(.show-nav-title):not(.nav-arrows-1) .ts-next,
-.ts-carousel.nav-with-transparency:not(.nav-style-1):not(.show-nav-title):not(.nav-arrows-1) .ts-nav button[class*="ts-"] {
-	background-color: var(--primary-rgba-35);
-}
-
-/* nav-style-1 skin */
-.ts-carousel.nav-style-1 .ts-prev,
-.ts-carousel.nav-style-1 .ts-next,
-.ts-carousel.nav-style-1 .ts-next,
-.ts-carousel.nav-style-1 .ts-prev { color: var(--primary) !important; }
-
-/* nav-style-2 skin */
-.ts-carousel.nav-style-2 .ts-prev::before,
-.ts-carousel.nav-style-2 .ts-prev::after,
-.ts-carousel.nav-style-2 .ts-next::before,
-.ts-carousel.nav-style-2 .ts-next::after,
-.ts-carousel.nav-style-2 .ts-next::before,
-.ts-carousel.nav-style-2 .ts-next::after,
-.ts-carousel.nav-style-2 .ts-prev::before,
-.ts-carousel.nav-style-2 .ts-prev::after { border-color: var(--primary); }
-
-/* nav-svg-arrows-1 skin */
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-svg-arrows-1 .ts-next svg polygon,
-.ts-carousel.nav-svg-arrows-1 .ts-prev svg polygon,
-.ts-carousel.nav-svg-arrows-1 .ts-next svg polygon { fill: var(--primary); stroke: var(--primary); }
-
-/* nav-arrows-1 skin */
-.ts-carousel.nav-arrows-1 .ts-prev,
-.ts-carousel.nav-arrows-1 .ts-next,
-.ts-carousel.nav-arrows-1 .ts-prev,
-.ts-carousel.nav-arrows-1 .ts-next { color: var(--primary); }
-
-/* center-active-item-2 skin */
-.ts-carousel.carousel-center-active-item-2 .ts-item.active > div,
-.ts-carousel.carousel-center-active-item-2 .ts-item.active > div { background: var(--primary); }
-
-/* carousel-bottom-inside-shadow skin */
-.ts-carousel.carousel-bottom-inside-shadow .ts-stage-outer::after,
-.ts-carousel.carousel-bottom-inside-shadow .ts-stage-outer::after {
-	background-image: linear-gradient(360deg, var(--primary) 0%, transparent 100%);
-}
-
-/* Cascading images (unrelated to carousel runtime) */
-.cascading-images-wrapper { display: inline-block; padding: 12% 20%; }
-.cascading-images-wrapper .cascading-images { transform: translate3d(0, -35%, 0); }
-.cascading-images-wrapper .cascading-images img { max-width: 100%; }
+.owl-carousel.nav-with-transparency:not(.nav-style-1):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"] { background-color: var(--primary-rgba-35); }
+.owl-carousel.nav-style-1 .owl-nav .owl-next,
+.owl-carousel.nav-style-1 .owl-nav .owl-prev { color: var(--primary) !important; }
+.owl-carousel.nav-style-2 .owl-nav .owl-next:before,
+.owl-carousel.nav-style-2 .owl-nav .owl-next:after,
+.owl-carousel.nav-style-2 .owl-nav .owl-prev:before,
+.owl-carousel.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--primary); }
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon,
+.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg polygon { fill: var(--primary); stroke: var(--primary); }
+.owl-carousel.nav-arrows-1 .owl-nav .owl-prev,
+.owl-carousel.nav-arrows-1 .owl-nav .owl-next { color: var(--primary); }
+.owl-carousel.carousel-center-active-item-2 .owl-item.active > div { background: var(--primary); }
+.owl-carousel.carousel-bottom-inside-shadow .owl-stage-outer:after { background-image: linear-gradient(360deg, var(--primary) 0%, transparent 100%); }
 `;
-		const el = document.createElement('style');
-		el.id   = STYLE_ID;
-		el.textContent = css;
-		document.head.appendChild(el);
-	}
 
-	function resolveItems(options, viewportWidth) {
-		if (!options.responsive || Object.keys(options.responsive).length === 0) {
-			return options.items || 1;
-		}
-		const bps   = Object.keys(options.responsive).map(Number).sort((a, b) => a - b);
-		let   count = options.items || 1;
-		for (const bp of bps) {
-			if (viewportWidth >= bp) {
-				const bpItems = options.responsive[bp].items;
-				if (bpItems !== undefined) count = bpItems;
-			}
-		}
-		return count;
-	}
-
-	class PluginCarousel {
-		constructor($el, opts) {
-			return this.initialize($el, opts);
-		}
-
-		initialize($el, opts) {
-			if ($el.data(instanceName)) return this;
-			this.$el = $el;
-
-			// Defer if icon plugin hasn't rendered yet
-			if ($el.find('[data-icon]').get(0)) {
-				const self = this;
-				$(window).on('icon.rendered', function () {
-					if ($el.data(instanceName)) return;
-					setTimeout(() => {
-						self.setData().setOptions(opts).build().events();
-					}, 1000);
-				});
-				return this;
-			}
-
-			this.setData().setOptions(opts).build().events();
-			return this;
-		}
-
-		setData() {
-			this.$el.data(instanceName, this);
-			return this;
-		}
-
-		setOptions(opts) {
-			this.options = $.extend(true, {}, PluginCarousel.defaults, opts, {
-				wrapper: this.$el
-			});
-			return this;
-		}
-
-		build() {
-			injectStyles();
-
-			const self    = this;
-			const $el     = this.options.wrapper;
-			const o       = this.options;
-
-			// RTL from HTML attribute
-			if ($('html').attr('dir') === 'rtl') o.rtl = true;
-
-			// single-item → clear responsive
-			if (o.items === 1) o.responsive = {};
-
-			// extra-wide responsive fix (items > 4)
-			if (o.items > 4 && (!o.responsive[1199])) {
-				o.responsive = $.extend(true, { 1199: { items: o.items } }, o.responsive);
-			}
-
-			// Support pre-existing ts-item wrappers (Porto markup) or raw children
-			$el.addClass('ts-carousel ts-carousel-init');
-			if (o.rtl) $el.addClass('ts-rtl');
-
-			// Check if children are already .ts-item or bare
-			const $existingItems = $el.children('.ts-item, .ts-item');
-			let   $rawChildren;
-
-			if ($existingItems.length) {
-				$rawChildren = $existingItems;
-			} else {
-				// Wrap bare children
-				$rawChildren = $el.children().not('.ts-stage-outer, .ts-nav, .ts-dots');
-			}
-
-			// Build stage if not present
-			if (!$el.find('.ts-stage-outer').length) {
-				const $stageOuter = $('<div class="ts-stage-outer">');
-				const $stage      = $('<div class="ts-stage">');
-				$stageOuter.append($stage);
-
-				// Move children into stage, wrap each as a ts-item
-				$rawChildren.each(function () {
-					const $child = $(this);
-					if (!$child.hasClass('ts-item')) {
-						$child.addClass('ts-item');
-					}
-					$stage.append($child);
-				});
-
-				$el.prepend($stageOuter);
-			}
-
-			this.$stage      = $el.find('.ts-stage');
-			this.$stageOuter = $el.find('.ts-stage-outer');
-			this.$items      = this.$stage.children('.ts-item, .ts-item');
-
-			// Store real items for loop cloning; clone refs live on this._clones
-			this._realCount  = this.$items.length;
-			this._clones     = [];
-
-			// Nav 
-			this._buildNav();
-
-			// Dots 
-			if (o.dots !== false) {
-				this._buildDots();
-			}
-
-			// stagePadding 
-			if (o.stagePadding) {
-				this.$stageOuter.css({ padding: `0 ${o.stagePadding}px` });
-				$el.addClass('ts-stage-padding');
-			}
-
-			// Layout / sizing 
-			this._currentIndex = o.startPosition || 0;
-			this._visibleItems = resolveItems(o, $(window).width());
-			this._animating    = false;
-			this._clickFlag    = true;
-
-			this._updateLayout();
-
-			// Loop cloning 
-			if (o.loop && this._realCount > 1) {
-				this._buildClones();
-			}
-
-			// Position without animation 
-			$el.addClass('ts-no-transition');
-			this._setPosition(this._loopOffset(), false);
-			setTimeout(() => $el.removeClass('ts-no-transition'), 50);
-
-			this._updateActive();
-			this._updateDots();
-			this._updateNav();
-			this.navigationOffsets();
-
-			// Nav outside 
-			if ($el.hasClass('nav-outside')) {
-				this._initNavOutside();
-			}
-
-			// SVG arrows (nav-svg-arrows-1) 
-			if ($el.hasClass('nav-svg-arrows-1')) {
-				const svg = '<svg version="1.1" viewBox="0 0 15.698 8.706" width="17" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">' +
-					'<polygon stroke="#212121" stroke-width="0.1" fill="#212121" points="11.354,0 10.646,0.706 13.786,3.853 0,3.853 0,4.853 13.786,4.853 10.646,8 11.354,8.706 15.698,4.353 "/>' +
-					'</svg>';
-				$el.find('.ts-next, .ts-prev, .ts-next, .ts-prev').append(svg);
-			}
-
-			// Center active 
-			if ($el.hasClass('carousel-center-active-item')) {
-				this._updateCenterActive();
-			}
-
-			// autoHeight 
-			if (o.autoHeight) {
-				this._initAutoHeight();
-			}
-
-			// Autoplay
-			if (o.autoplay) {
-				this._startAutoplay();
-			}
-
-			// Sync
-			if ($el.attr('data-sync')) {
-				this._initSync();
-			}
-
-			// Navigate by ID 
-			this.carouselNavigate();
-
-			// Loading classes 
-			$el.removeClass('ts-loading ts-loading');
-			$el.css('height', 'auto');
-
-			// Drag / touch 
-			this._initDrag();
-
-			// Respond to resize 
-			$(window).on('resize.ts-carousel-' + this._uid(), () => {
-				clearTimeout(self._resizeTimer);
-				self._resizeTimer = setTimeout(() => self._onResize(), 200);
-			});
-
-			// Trigger initialized 
-			$el.trigger('initialized.ts.carousel');
-
-			return this;
-		}
-
-		_uid() {
-			if (!this.__uid) this.__uid = Math.random().toString(36).slice(2);
-			return this.__uid;
-		}
-
-		_updateLayout() {
-			const $el  = this.options.wrapper;
-			this._visibleItems = resolveItems(this.options, $(window).width());
-			const pct  = 100 / this._visibleItems;
-			const mar  = this.options.margin || 0;
-
-			this.$items = this.$stage.children('.ts-item, .ts-item');
-			this.$items.css({
-				width: mar ? `calc(${pct}% - ${mar}px)` : `${pct}%`,
-				'margin-right': mar ? `${mar}px` : ''
-			});
-
-			// stage width: items × itemWidth + clones
-			const totalItems   = this.$stage.children('.ts-item, .ts-item').length;
-			const stageWidthPct = (totalItems / this._visibleItems) * 100;
-			this.$stage.css('width', `${stageWidthPct}%`);
-		}
-
-		_loopOffset() {
-			// When looping, clones are prepended; offset so real[0] is visible
-			return this.options.loop && this._realCount > 1 ? this._visibleItems : 0;
-		}
-
-		_setPosition(absIndex, animate) {
-			const $el  = this.options.wrapper;
-			if (!animate) $el.addClass('ts-no-transition');
-
-			const allItems = this.$stage.children('.ts-item, .ts-item');
-			const itemW    = allItems.first().outerWidth(true);
-			const x        = -(absIndex * itemW);
-
-			this.$stage.css('transform', `translate3d(${x}px, 0, 0)`);
-
-			if (!animate) {
-				// Force reflow before removing class
-				this.$stage[0].getBoundingClientRect();
-				$el.removeClass('ts-no-transition');
-			}
-		}
-
-		_getCurrentAbsIndex() {
-			return this._currentIndex + (this.options.loop && this._realCount > 1 ? this._visibleItems : 0);
-		}
-
-		_buildClones() {
-			const o        = this.options;
-			const $realItems = this.$stage.children('.ts-item, .ts-item').not('.ts-clone');
-			const count    = this._visibleItems; // prepend & append visibleItems clones
-
-			// Append clones (end of stage → beginning of logical list)
-			for (let i = 0; i < count; i++) {
-				const $clone = $realItems.eq(i % this._realCount).clone(true).addClass('ts-clone cloned');
-				this.$stage.append($clone);
-				this._clones.push($clone);
-			}
-
-			// Prepend clones (beginning of stage → end of logical list)
-			for (let i = count - 1; i >= 0; i--) {
-				const $clone = $realItems.eq((this._realCount - 1 - (i % this._realCount) + this._realCount) % this._realCount).clone(true).addClass('ts-clone cloned');
-				this.$stage.prepend($clone);
-				this._clones.unshift($clone);
-			}
-
-			// Re-measure items after cloning
-			this.$items = this.$stage.children('.ts-item, .ts-item').not('.ts-clone');
-			this._updateLayout();
-		}
-
-		_onTransitionEnd() {
-			const self = this;
-			const o    = self.options;
-
-			if (!o.loop || this._realCount <= 1) {
-				self._animating = false;
-				self._triggerChanged();
-				return;
-			}
-
-			const absIndex = self._getCurrentAbsIndex();
-			const allItems = self.$stage.children('.ts-item, .ts-item');
-			const total    = allItems.length;
-			const loopOffset = self._visibleItems;
-
-			// Jump from after-clone zone back to real
-			if (absIndex >= loopOffset + self._realCount) {
-				self._currentIndex = absIndex - loopOffset - self._realCount;
-				self._setPosition(self._getCurrentAbsIndex(), false);
-			}
-			// Jump from before-clone zone forward to real
-			else if (absIndex < loopOffset) {
-				self._currentIndex = self._realCount - (loopOffset - absIndex);
-				self._setPosition(self._getCurrentAbsIndex(), false);
-			}
-
-			self._animating = false;
-			self._triggerChanged();
-		}
-
-		_triggerChange() {
-			this.options.wrapper.trigger({
-				type: 'change.ts.carousel',
-				item: { index: this._currentIndex, count: this._realCount }
-			});
-		}
-
-		_triggerChanged() {
-			const self = this;
-			self.options.wrapper.trigger({
-				type: 'changed.ts.carousel',
-				item: { index: self._currentIndex, count: self._realCount },
-				property: { name: 'position', value: self._currentIndex }
-			});
-		}
-
-		_buildNav() {
-			const $el = this.options.wrapper;
-			const o   = this.options;
-
-			// Support pre-existing .ts-nav in markup
-			let $nav = $el.find('.ts-nav, .ts-nav');
-			if (!$nav.length) {
-				$nav = $('<div class="ts-nav ts-nav">');
-				$el.append($nav);
-			}
-
-			// Support pre-existing prev/next
-			let $prev = $nav.find('.ts-prev, .ts-prev');
-			let $next = $nav.find('.ts-next, .ts-next');
-
-			const navText = o.navText && o.navText.length === 2
-				? o.navText
-				: ['<span aria-label="Previous">&#x2039;</span>', '<span aria-label="Next">&#x203a;</span>'];
-
-			if (!$prev.length) {
-				$prev = $('<button class="ts-prev ts-prev" type="button">').html(navText[0]);
-				$nav.prepend($prev);
-			}
-			if (!$next.length) {
-				$next = $('<button class="ts-next ts-next" type="button">').html(navText[1]);
-				$nav.append($next);
-			}
-
-			if (o.nav === false) $nav.hide();
-
-			this.$nav  = $nav;
-			this.$prev = $prev;
-			this.$next = $next;
-
-			const self = this;
-			$prev.on('click.ts-carousel', e => {
-				e.preventDefault();
-				if (o.autoplay && o.autoplayHoverPause) self._stopAutoplay();
-				self.prev();
-			});
-			$next.on('click.ts-carousel', e => {
-				e.preventDefault();
-				if (o.autoplay && o.autoplayHoverPause) self._stopAutoplay();
-				self.next();
-			});
-		}
-
-		_buildDots() {
-			const $el  = this.options.wrapper;
-			const o    = this.options;
-
-			let $dots = $el.find('.ts-dots, .ts-dots');
-			if (!$dots.length) {
-				$dots = $('<div class="ts-dots ts-dots">');
-				$el.append($dots);
-			}
-
-			// Build one dot per real item (or per page if slideBy === 'page')
-			const pages = this._pageCount();
-			$dots.empty();
-			for (let i = 0; i < pages; i++) {
-				const $dot = $('<button class="ts-dot ts-dot" type="button"><span></span></button>');
-				if (o.dotsData) {
-					// pull data-dot content
-					const $realItem = this.$stage.children('.ts-item, .ts-item').not('.ts-clone').eq(i);
-					const dotContent = $realItem.find('[data-dot]').attr('data-dot') || '';
-					$dot.html(dotContent);
-				}
-				$dots.append($dot);
-			}
-
-			this.$dots = $dots;
-			const self = this;
-
-			$dots.on('click.ts-carousel', '.ts-dot, .ts-dot', function () {
-				const idx = $(this).index();
-				if (o.autoplay && o.autoplayHoverPause) self._stopAutoplay();
-				self.to(idx);
-			});
-		}
-
-		_pageCount() {
-			const o = this.options;
-			if (o.slideBy === 'page') {
-				return Math.ceil(this._realCount / this._visibleItems);
-			}
-			return this._realCount;
-		}
-
-		_pageForIndex(idx) {
-			const o = this.options;
-			if (o.slideBy === 'page') {
-				return Math.floor(idx / this._visibleItems);
-			}
-			return idx;
-		}
-
-		_updateNav() {
-			const o   = this.options;
-			if (o.nav === false || !this.$prev) return;
-
-			const atStart = !o.loop && this._currentIndex <= 0;
-			const atEnd   = !o.loop && this._currentIndex >= this._realCount - this._visibleItems;
-			this.$prev.toggleClass('disabled', atStart);
-			this.$next.toggleClass('disabled', atEnd);
-		}
-
-		_updateDots() {
-			if (!this.$dots) return;
-			const page = this._pageForIndex(this._currentIndex);
-			this.$dots.children().removeClass('active');
-			this.$dots.children().eq(page).addClass('active');
-		}
-
-		_updateActive() {
-			const self   = this;
-			const allItems = this.$stage.children('.ts-item, .ts-item');
-			allItems.removeClass('active');
-
-			const offset = this._getCurrentAbsIndex();
-			for (let i = 0; i < this._visibleItems; i++) {
-				allItems.eq(offset + i).addClass('active');
-			}
-		}
-
-		_updateCenterActive() {
-			const $real = this.$stage.children('.ts-item, .ts-item').not('.ts-clone');
-			$real.removeClass('current');
-			const center = this._currentIndex + Math.floor(this._visibleItems / 2);
-			$real.eq(center % this._realCount).addClass('current');
-		}
-
-		next(speed) {
-			if (this._animating) return;
-			const o   = this.options;
-
-			if (!o.loop && this._currentIndex >= this._realCount - this._visibleItems) return;
-
-			this._triggerChange();
-			this._currentIndex++;
-
-			if (!o.loop && this._currentIndex > this._realCount - this._visibleItems) {
-				this._currentIndex = this._realCount - this._visibleItems;
-			}
-
-			this._slide(speed);
-		}
-
-		prev(speed) {
-			if (this._animating) return;
-			const o = this.options;
-
-			if (!o.loop && this._currentIndex <= 0) return;
-
-			this._triggerChange();
-			this._currentIndex--;
-
-			if (!o.loop && this._currentIndex < 0) {
-				this._currentIndex = 0;
-			}
-
-			this._slide(speed);
-		}
-
-		to(index, speed) {
-			if (this._animating) return;
-			index = ((index % this._realCount) + this._realCount) % this._realCount;
-			this._triggerChange();
-			this._currentIndex = index;
-			this._slide(speed);
-		}
-
-		_slide(speed) {
-			const self = this;
-			const o    = self.options;
-
-			self._animating = true;
-
-			const dur = (speed !== undefined ? speed : (o.smartSpeed || 350));
-
-			// Apply transition duration
-			self.$stage.css('transition-duration', `${dur}ms`);
-			self._setPosition(self._getCurrentAbsIndex(), true);
-
-			self._updateActive();
-			self._updateDots();
-			self._updateNav();
-
-			if (o.autoHeight) self._updateAutoHeight();
-
-			if ($('.carousel-center-active-item').length) {
-				self._updateCenterActive();
-			}
-
-			// Trigger change events for animateIn/Out support
-			if (o.animateIn || o.animateOut) {
-				self.options.wrapper.trigger('change.ts.carousel');
-			}
-
-			clearTimeout(self._transitionTimer);
-			self._transitionTimer = setTimeout(() => {
-				self._onTransitionEnd();
-
-				if (o.animateIn || o.animateOut) {
-					self.options.wrapper.trigger('changed.ts.carousel');
-				}
-			}, dur + 50);
-		}
-
-		_startAutoplay() {
-			const self = this;
-			const o    = this.options;
-			self._stopAutoplay();
-			self._autoplayInterval = window.setInterval(() => {
-				self.next();
-			}, o.autoplayTimeout || 5000);
-
-			if (o.autoplayHoverPause) {
-				self.options.wrapper.on('mouseenter.ts-autoplay', () => self._stopAutoplay());
-				self.options.wrapper.on('mouseleave.ts-autoplay', () => self._startAutoplay());
-			}
-		}
-
-		_stopAutoplay() {
-			clearInterval(this._autoplayInterval);
-		}
-
-		_initDrag() {
-			const self  = this;
-			const o     = self.options;
-			const $el   = self.options.wrapper;
-			const $stage = self.$stage;
-			let   drag  = null;
-
-			if (!o.mouseDrag && !o.touchDrag) return;
-
-			function getPointer(e) {
-				const src = e.originalEvent || e;
-				const t   = (src.touches && src.touches[0]) || (src.changedTouches && src.changedTouches[0]) || src;
-				return { x: t.clientX, y: t.clientY };
-			}
-
-			function onStart(e) {
-				if (e.which === 3) return;
-				const p = getPointer(e);
-				drag = {
-					startX: p.x, startY: p.y,
-					currentX: p.x, currentY: p.y,
-					moved: false
-				};
-				$el.addClass('ts-grabbing');
-			}
-
-			function onMove(e) {
-				if (!drag) return;
-				const p   = getPointer(e);
-				const dx  = p.x - drag.startX;
-				const dy  = p.y - drag.startY;
-
-				if (!drag.moved && Math.abs(dy) > Math.abs(dx)) {
-					// vertical scroll — abort drag
-					drag = null;
-					return;
-				}
-
-				drag.moved   = true;
-				drag.currentX = p.x;
-				e.preventDefault();
-			}
-
-			function onEnd() {
-				if (!drag) return;
-				const dx = drag.currentX - drag.startX;
-				$el.removeClass('ts-grabbing');
-
-				if (drag.moved) {
-					if (dx > 30) self.prev();
-					else if (dx < -30) self.next();
-				}
-				drag = null;
-			}
-
-			if (o.mouseDrag) {
-				$stage.on('mousedown.ts-drag', onStart);
-				$(document).on('mousemove.ts-drag-' + self._uid(), onMove);
-				$(document).on('mouseup.ts-drag-' + self._uid(), onEnd);
-				$stage.on('dragstart.ts-drag selectstart.ts-drag', () => false);
-			}
-
-			if (o.touchDrag) {
-				$stage[0].addEventListener('touchstart', e => onStart(e), { passive: true });
-				$stage[0].addEventListener('touchmove',  e => onMove(e),  { passive: false });
-				$stage[0].addEventListener('touchend',   () => onEnd(),    { passive: true });
-			}
-		}
-
-		_initAutoHeight() {
-			$(window).on('load resize', () => this._updateAutoHeight());
-			this._updateAutoHeight();
-		}
-
-		_updateAutoHeight() {
-			const self    = this;
-			const $active = self.$stage.children('.ts-item.active, .ts-item.active');
-			let   maxH    = 0;
-			$active.each(function () { maxH = Math.max(maxH, $(this).outerHeight(true)); });
-			if (maxH) self.$stageOuter.height(maxH);
-		}
-
-		_initSync() {
-			const self    = this;
-			const $el     = self.options.wrapper;
-			const syncSel = $el.attr('data-sync');
-
-			$el.on('change.ts.carousel', ({ item }) => {
-				if (!item) return;
-				const $target = $(syncSel);
-				const inst    = $target.data(instanceName);
-				if (inst) inst.to(item.index);
-			});
-		}
-
-		_initNavOutside() {
-			const self = this;
-			const $el  = self.options.wrapper;
-
-			function update() {
-				if ($(window).width() < 992) {
-					self.options.stagePadding = 40;
-					$el.addClass('ts-stage-margin');
-					self.$stageOuter.css('padding', '0 40px');
-				} else {
-					self.options.stagePadding = 0;
-					$el.removeClass('ts-stage-margin');
-					self.$stageOuter.css('padding', '');
-				}
-				self.navigationOffsets();
-			}
-
-			$(window).on('load resize', update);
-			update();
-		}
-
-		navigationOffsets() {
-			const self = this;
-			const $el  = this.options.wrapper;
-			const o    = this.options;
-
-			const $nav  = $el.find('.ts-nav, .ts-nav');
-			const $dots = $el.find('.ts-dots, .ts-dots');
-
-			function applyOffset($target, h, v) {
-				if (h && v) {
-					$target.css({ transform: `translate3d(${h}, ${v}, 0)` });
-				} else if (h) {
-					$target.css({ transform: `translate3d(${h}, 0, 0)` });
-				} else if (v) {
-					$target.css({ top: `calc(50% - ${v})` });
-				}
-			}
-
-			if ($nav.length) applyOffset($nav, o.navHorizontalOffset, o.navVerticalOffset);
-			if ($dots.length) applyOffset($dots, o.dotsHorizontalOffset, o.dotsVerticalOffset);
-
-			return this;
-		}
-
-		_onResize() {
-			const prevVisible = this._visibleItems;
-			this._visibleItems = resolveItems(this.options, $(window).width());
-
-			// Rebuild clones if visible count changed
-			if (prevVisible !== this._visibleItems && this.options.loop && this._realCount > 1) {
-				// Remove old clones
-				this.$stage.children('.ts-clone').remove();
-				this._clones = [];
-				this._buildClones();
-			}
-
-			this._updateLayout();
-
-			const $el = this.options.wrapper;
-			$el.addClass('ts-no-transition');
-			this._setPosition(this._getCurrentAbsIndex(), false);
-			setTimeout(() => $el.removeClass('ts-no-transition'), 50);
-
-			this._updateActive();
-			this._updateDots();
-			this._updateNav();
-			this.navigationOffsets();
-
-			if (this.options.autoHeight) this._updateAutoHeight();
-		}
-
-		carouselNavigate() {
-			const self    = this;
-			const $el     = this.options.wrapper;
-			const elId    = '#' + $el.attr('id');
-
-			if (!$('[data-carousel-navigate]').length) return;
-
-			$(`[data-carousel-navigate-id="${elId}"]`).each(function () {
-				const $btn    = $(this);
-				const toIndex = parseInt($btn.data('carousel-navigate-to'), 10) - 1;
-
-				if ($($btn.data('carousel-navigate-id')).get(0)) {
-					$btn.on('click.ts-carousel', () => {
-						self.to(toIndex);
-					});
-				}
-			});
-
-			$el.on('change.ts.carousel', () => {
-				$(`[data-carousel-navigate-id="${elId}"]`).removeClass('active');
-			});
-
-			$el.on('changed.ts.carousel', ({ item }) => {
-				if (!item) return;
-				$(`[data-carousel-navigate-id="${elId}"][data-carousel-navigate-to="${item.index + 1}"]`).addClass('active');
-			});
-
-			return this;
-		}
-
-		events() {
-			const self = this;
-			const $el  = this.options.wrapper;
-			const o    = this.options;
-
-			// animateIn / Out
-			if (o.animateIn || o.animateOut) {
-				$el.on('change.ts.carousel', () => {
-					$el.find('[data-appear-animation], [data-plugin-animated-letters]').addClass('d-none');
-					$el.find('[data-plugin-animated-letters]').trigger('animated.letters.destroy');
-					$el.find('.ts-item:not(.active) [data-carousel-onchange-show], .ts-item:not(.active) [data-carousel-onchange-show]').removeClass('d-none');
-				});
-
-				$el.on('changed.ts.carousel', () => {
-					setTimeout(() => {
-						$el.find('[data-appear-animation]').each(function () {
-							const $this = $(this);
-							const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
-							$this.themestrapPluginAnimate(pluginOptions || undefined);
-						});
-
-						$el.find('.ts-item.active [data-appear-animation], .ts-item.active [data-appear-animation]').removeClass('d-none');
-						$el.find('.ts-item.active [data-plugin-animated-letters], .ts-item.active [data-plugin-animated-letters]').removeClass('d-none');
-						$el.find('[data-plugin-animated-letters]').trigger('animated.letters.initialize');
-						$el.find('.ts-item.ts-clone.active [data-plugin-video-background], .ts-item.cloned.active [data-plugin-video-background]').trigger('video.background.initialize');
-					}, 10);
-				});
-			}
-
-			// data-icon clones
-			if ($el.find('[data-icon]').length) {
-				$el.on('change.ts.carousel', () => {
-					$el.find('.ts-clone [data-icon], .cloned [data-icon]').each(function () {
-						const $this = $(this);
-						const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
-						$this.themestrapPluginIcon(pluginOptions || undefined);
-					});
-				});
-			}
-
-			// Video background
-			if ($el.find('[data-plugin-video-background]').get(0)) {
-				$(window).trigger('resize');
-			}
-
-			// Hover pause for autoplay
-			if (o.autoplay && o.autoplayHoverPause) {
-				$el.on('mouseenter.ts-carousel-ap', () => self._stopAutoplay());
-				$el.on('mouseleave.ts-carousel-ap', () => self._startAutoplay());
-			}
-
-			return this;
-		}
-
-		destroy() {
-			const $el  = this.options.wrapper;
-			this._stopAutoplay();
-			clearTimeout(this._transitionTimer);
-			clearTimeout(this._resizeTimer);
-			$(window).off('resize.ts-carousel-' + this._uid());
-			$(document).off('mousemove.ts-drag-' + this._uid());
-			$(document).off('mouseup.ts-drag-' + this._uid());
-			$el.off('.ts-carousel .ts-carousel-ap ts-autoplay');
-			this.$stage.children('.ts-clone').remove();
-			$el.removeClass('ts-carousel ts-carousel-init ts-rtl ts-loading');
-			$el.removeData(instanceName);
-		}
-	}
-
-	PluginCarousel.defaults = {
-		// Core
-		items:       3,
-		loop:        true,
-		center:      false,
-		rewind:      false,
-
-		// Drag
-		mouseDrag:   true,
-		touchDrag:   true,
-		pullDrag:    true,
-
-		// Layout
-		margin:      0,
-		stagePadding: 0,
-		autoWidth:   false,
-		startPosition: 0,
-		rtl:         false,
-
-		// Speed
-		smartSpeed:  350,
-		dragEndSpeed: false,
-
-		// Responsive
-		responsive: {
-			0:    { items: 1 },
-			479:  { items: 1 },
-			768:  { items: 2 },
-			979:  { items: 3 },
-			1199: { items: 4 }
-		},
-
-		// Nav
-		nav:         true,
-		navText:     [],
-		navSpeed:    false,
-		slideBy:     1,
-
-		// Dots
-		dots:        true,
-		dotsEach:    false,
-		dotsData:    false,
-		dotsSpeed:   false,
-
-		// Autoplay
-		autoplay:        false,
-		autoplayTimeout: 5000,
-		autoplayHoverPause: false,
-		autoplaySpeed:   false,
-
-		// Height
-		autoHeight: false,
-
-		// Animate
-		animateIn:  false,
-		animateOut: false,
-
-		// Internal
-		refresh: false
-	};
-
-	$.extend(themestrap, { PluginCarousel });
-
-	$.fn.themestrapPluginCarousel = function (opts) {
-		return this.map(function () {
-			const $this = $(this);
-			if ($this.data(instanceName)) return $this.data(instanceName);
-			return new PluginCarousel($this, opts);
-		});
-	};
-
+    $.extend(themestrap, { PluginCarousel });
+
+    $.fn.themestrapPluginCarousel = function(opts) {
+        return this.map(function() {
+            const $this = $(this);
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            }
+            return new PluginCarousel($this, opts);
+        });
+    };
 })).apply(this, [window.themestrap, jQuery]);

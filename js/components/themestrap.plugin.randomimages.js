@@ -1,290 +1,1253 @@
 // Random Images
-(((themestrap = {}, $) => {
+(((themestrap = {}) => {
+
     const instanceName = '__randomimages';
+    const instances = new WeakMap();
 
     class PluginRandomImages {
-        constructor($el, opts) {
-            return this.initialize($el, opts);
+
+        constructor(el, opts = {}) {
+            return this.initialize(el, opts);
         }
 
-        initialize($el, opts) {
-			this.$el = $el;
-            this.st = '';
-			this.times = 0;
-			this.perImageIndex = 0;
+        initialize(el, opts = {}) {
 
-            if( $el.is('img') && typeof opts.imagesListURL == 'undefined' ) {
+            if (!(el instanceof HTMLElement)) {
                 return false;
             }
 
-            this
-				.setData()
-				.setOptions(opts)
-				.build();
+            if (instances.has(el)) {
+                return instances.get(el);
+            }
 
-			return this;
-		}
+            this.el = el;
+            this.options = this.setOptions(opts);
+
+            this.timer = null;
+            this.stopTimer = null;
+            this.transitionTimer = null;
+
+            this.times = 0;
+            this.lastIndex = -1;
+            this.perImageIndex = -1;
+
+            this.running = false;
+            this.destroyed = false;
+
+            this.isInsideLightbox = false;
+            this.lightbox = null;
+
+            this.images = [];
+            this.currentIndex = -1;
+
+            /*
+             * A single image requires an image list.
+             */
+            if (
+                this.isImage() &&
+                !Array.isArray(this.options.imagesListURL)
+            ) {
+                return false;
+            }
+
+            this.setData();
+
+            if (!this.build()) {
+                this.destroy();
+                return false;
+            }
+
+            return this;
+        }
+
+
+        /*
+         * ---------------------------------------------------------
+         * Core
+         * ---------------------------------------------------------
+         */
+
+        isImage() {
+            return this.el.tagName.toLowerCase() === 'img';
+        }
+
 
         setData() {
-			this.$el.data(instanceName, this);
+            instances.set(this.el, this);
 
-			return this;
-		}
+            /*
+             * Compatibility/debugging reference.
+             */
+            this.el.__themestrapRandomImages = this;
+
+            return this;
+        }
+
 
         setOptions(opts) {
-			this.options = $.extend(true, {}, PluginRandomImages.defaults, opts, {
-				wrapper: this.$el
-			});
+            return {
+                ...PluginRandomImages.defaults,
+                ...(opts || {})
+            };
+        }
 
-			return this;
-		}
 
         build() {
-            const self = this;
-			
-			// Control the screens size we want to have the plugin working
-			if( $(window).width() < self.options.minWindowWidth  ) {
-				return false;
-			}
 
-			// Check if is single image or wrapper with images inside
-            if( self.$el.is('img') ) {
-				
-				// Check it's inside a lightbox
-				self.isInsideLightbox = self.$el.closest('.lightbox').length ? true : false;
+            /*
+             * Don't initialize below the configured width.
+             */
+            if (
+                window.innerWidth <
+                Number(this.options.minWindowWidth)
+            ) {
+                return false;
+            }
 
-				// Push the initial image to lightbox list/array
-				if( self.isInsideLightbox && self.options.lightboxImagesListURL ) {
-					self.options.lightboxImagesListURL.push( self.$el.closest('.lightbox').attr('href') );
-				}
-	
-				// Push the current image src to the array
-				self.options.imagesListURL.push( self.$el.attr('src') );
+            if (this.isImage()) {
+                this.buildImage();
+            } else {
+                this.buildWrapper();
+            }
 
-				// Start with lastIndex as the first image loaded on the page
-				self.lastIndex = self.options.imagesListURL.length - 1;
+            /*
+             * Optional global timeout.
+             */
+            if (
+                this.options.stopAfterFewSeconds &&
+                Number(this.options.stopAfterFewSeconds) > 0
+            ) {
+                this.stopTimer = window.setTimeout(() => {
+                    this.stop();
+                }, Number(this.options.stopAfterFewSeconds));
+            }
 
-				// Identify the last random image element (if has more than one on the page)
-				if( self.options.random == false ) {
-					$('.plugin-random-images').each(function(i){
-						if( i == $('.plugin-random-images').length - 1 ) {
-							$(this).addClass('the-last');
-						}
-					});
-				}
+            return this;
+        }
 
-				// Start the recursive timeout
-				setTimeout(() => {
-					self.recursiveTimeout( 
-						self.perImageTag, 
-						self.options.delay == null ? 3000 : self.options.delay
-					);
-				}, self.options.delay == null ? 300 : self.options.delay / 3);
 
-			} else {
-				
-				// Start the recursive timeout
-				setTimeout( self.recursiveTimeout( 
-					self.perWrapper, 
-					self.options.delay ? self.options.delay : getPerWrapperHighDelay(), 
-					false 
-				), 300);
+        /*
+         * ---------------------------------------------------------
+         * Single image mode
+         * ---------------------------------------------------------
+         */
 
-			}
+        buildImage() {
 
-			// Stop After Few Seconds
-			if( self.options.stopAfterFewSeconds ) {
-				setTimeout(() => {
-					clearTimeout(self.st);
-				}, self.options.stopAfterFewSeconds);
-			}
-			
-			return this;
+            this.lightbox =
+                this.el.closest('.lightbox');
 
-		}
+            this.isInsideLightbox =
+                !!this.lightbox;
+
+            if (!Array.isArray(
+                this.options.imagesListURL
+            )) {
+                this.options.imagesListURL = [];
+            }
+
+            /*
+             * Store the original image.
+             */
+            const currentSrc =
+                this.el.getAttribute('src');
+
+            if (currentSrc) {
+                this.options.imagesListURL.push(
+                    currentSrc
+                );
+            }
+
+            /*
+             * Store the original lightbox target.
+             */
+            if (
+                this.isInsideLightbox &&
+                Array.isArray(
+                    this.options.lightboxImagesListURL
+                )
+            ) {
+                const href =
+                    this.lightbox.getAttribute('href');
+
+                if (href) {
+                    this.options.lightboxImagesListURL.push(
+                        href
+                    );
+                }
+            }
+
+            this.lastIndex =
+                this.options.imagesListURL.length - 1;
+
+            this.currentIndex =
+                this.lastIndex;
+
+            /*
+             * Preserve the old sequential-mode behavior.
+             */
+            if (!this.options.random) {
+                this.markLastImageInstance();
+            }
+
+            const delay =
+                this.options.delay == null
+                    ? 3000
+                    : Number(this.options.delay);
+
+            const initialDelay =
+                this.options.delay == null
+                    ? 300
+                    : Math.max(0, delay / 3);
+
+            window.setTimeout(() => {
+
+                if (this.destroyed) {
+                    return;
+                }
+
+                this.start(
+                    () => this.perImageTag(),
+                    delay
+                );
+
+            }, initialDelay);
+        }
+
 
         perImageTag() {
-			const self = this;
 
-			// Generate a random index to make the images rotate randomly
-			let index = self.options.random ? Math.floor(Math.random() * self.options.imagesListURL.length) : self.lastIndex;
+            if (this.destroyed) {
+                return this;
+            }
 
-			// Avoid repeat the same image
-			if( self.lastIndex !== '' && self.lastIndex == index ) {
-				if( self.options.random ) {
-					while( index == self.lastIndex ) {
-						index = Math.floor(Math.random() * self.options.imagesListURL.length);
-					}
-				} else {
-					index = index - 1;
-					if( index == -1 ) {
-						index = self.options.imagesListURL.length - 1;
-					}
-				}
-			}
+            const images =
+                this.options.imagesListURL;
 
-			// Turn the image ready for animations
-			self.$el.addClass('animated');
+            if (
+                !Array.isArray(images) ||
+                !images.length
+            ) {
+                return this;
+            }
 
-			// Remove the entrance animation class and add the out animation class
-			self.$el.removeClass( self.options.animateIn ).addClass( self.options.animateOut );
-			
-			// Change the image src and add the class for entrance animation
-			setTimeout( () => {
-				self.$el.attr('src', self.options.imagesListURL[index]).removeClass( self.options.animateOut ).addClass(self.options.animateIn);
+            let index;
 
-				if( self.isInsideLightbox && self.options.lightboxImagesListURL ) {
-					self.$el.closest('.lightbox').attr('href', self.options.lightboxImagesListURL[index]);
-				}
-			}, 1000);
-			
-			// Save the last index for future checks
-			self.lastIndex = index;
-			
-			// Increment the times var
-			self.times++;
+            /*
+             * Random selection.
+             */
+            if (this.options.random) {
 
-			// Save the index for stopAtImageIndex option
-			self.perImageIndex = index;
+                index =
+                    this.getRandomIndex(
+                        images.length
+                    );
 
-			return this;
-		}
+            }
 
-        // Iterate the imaes loop and get the higher value
+            /*
+             * Sequential selection.
+             */
+            else {
+
+                index =
+                    this.lastIndex - 1;
+
+                if (index < 0) {
+                    index =
+                        images.length - 1;
+                }
+            }
+
+            /*
+             * Only one possible image.
+             */
+            if (images.length === 1) {
+                index = 0;
+            }
+
+            this.animateSingleImage(index);
+
+            this.lastIndex = index;
+            this.currentIndex = index;
+            this.perImageIndex = index;
+            this.times++;
+
+            return this;
+        }
+
+
+        animateSingleImage(index) {
+
+            this.el.classList.add('animated');
+
+            this.el.classList.remove(
+                this.options.animateIn
+            );
+
+            this.el.classList.add(
+                this.options.animateOut
+            );
+
+            this.clearTransitionTimer();
+
+            this.transitionTimer =
+                window.setTimeout(() => {
+
+                    if (this.destroyed) {
+                        return;
+                    }
+
+                    const src =
+                        this.options.imagesListURL[index];
+
+                    if (src) {
+                        this.el.setAttribute(
+                            'src',
+                            src
+                        );
+                    }
+
+                    this.el.classList.remove(
+                        this.options.animateOut
+                    );
+
+                    this.el.classList.add(
+                        this.options.animateIn
+                    );
+
+                    /*
+                     * Keep associated lightbox URL in sync.
+                     */
+                    if (
+                        this.isInsideLightbox &&
+                        this.lightbox &&
+                        Array.isArray(
+                            this.options.lightboxImagesListURL
+                        )
+                    ) {
+
+                        const href =
+                            this.options
+                                .lightboxImagesListURL[index];
+
+                        if (href) {
+                            this.lightbox.setAttribute(
+                                'href',
+                                href
+                            );
+                        }
+                    }
+
+                }, Number(
+                    this.options.animationDelay
+                ));
+        }
+
+
+        getRandomIndex(length) {
+
+            if (length <= 1) {
+                return 0;
+            }
+
+            let index;
+
+            do {
+                index =
+                    Math.floor(
+                        Math.random() * length
+                    );
+
+            } while (
+                index === this.lastIndex
+            );
+
+            return index;
+        }
+
+
+        /*
+         * ---------------------------------------------------------
+         * Wrapper mode
+         * ---------------------------------------------------------
+         *
+         * IMPORTANT:
+         *
+         * Wrapper mode no longer changes image src values.
+         *
+         * Every image remains loaded in the DOM and is stacked
+         * on top of the previous image. The plugin simply changes
+         * which image is visible.
+         */
+
+        buildWrapper() {
+
+            this.images =
+                Array.from(
+                    this.el.querySelectorAll('img')
+                );
+
+            if (!this.images.length) {
+                return;
+            }
+
+            /*
+             * Prepare the wrapper.
+             */
+            this.el.classList.add(
+                'ts-random-images-wrapper'
+            );
+
+            /*
+             * Prepare each image.
+             */
+            this.images.forEach(
+                (image, index) => {
+
+                    image.classList.add(
+                        'animated'
+                    );
+
+                    image.classList.add(
+                        'ts-random-image'
+                    );
+
+                    /*
+                     * The first image is initially visible.
+                     * All others begin hidden.
+                     */
+                    if (index === 0) {
+
+                        image.classList.add(
+                            'ts-random-image-active'
+                        );
+
+                        image.classList.remove(
+                            this.getAnimateOut(image)
+                        );
+
+                    } else {
+
+                        image.classList.add(
+                            'ts-random-image-hidden'
+                        );
+
+                        image.classList.remove(
+                            this.getAnimateIn(image)
+                        );
+                    }
+                }
+            );
+
+            this.currentIndex = 0;
+            this.lastIndex = 0;
+            this.perImageIndex = 0;
+
+            /*
+             * Optional custom initial image.
+             */
+            if (
+                this.options.startIndex !== false &&
+                Number.isInteger(
+                    Number(this.options.startIndex)
+                )
+            ) {
+
+                const start =
+                    Number(
+                        this.options.startIndex
+                    );
+
+                if (
+                    start >= 0 &&
+                    start < this.images.length
+                ) {
+                    this.showWrapperImage(
+                        start,
+                        false
+                    );
+                }
+            }
+
+            /*
+             * Wrapper mode needs a delay long enough to allow
+             * the longest configured image delay to complete.
+             */
+            const delay =
+                this.options.delay != null
+                    ? Number(this.options.delay)
+                    : this.getPerWrapperHighDelay();
+
+            const actualDelay =
+                delay > 0
+                    ? delay
+                    : 3000;
+
+            window.setTimeout(() => {
+
+                if (this.destroyed) {
+                    return;
+                }
+
+                this.start(
+                    () => this.perWrapper(),
+                    actualDelay
+                );
+
+            }, 300);
+        }
+
+
+        perWrapper() {
+
+            if (
+                this.destroyed ||
+                !this.images.length
+            ) {
+                return this;
+            }
+
+            let index;
+
+            /*
+             * Random wrapper rotation.
+             */
+            if (this.options.random) {
+
+                index =
+                    this.getRandomIndex(
+                        this.images.length
+                    );
+
+            }
+
+            /*
+             * Sequential wrapper rotation.
+             */
+            else {
+
+                index =
+                    this.currentIndex + 1;
+
+                if (
+                    index >= this.images.length
+                ) {
+                    index = 0;
+                }
+            }
+
+            this.showWrapperImage(
+                index,
+                true
+            );
+
+            this.lastIndex =
+                this.currentIndex;
+
+            this.currentIndex = index;
+            this.perImageIndex = index;
+            this.times++;
+
+            return this;
+        }
+
+
+        showWrapperImage(index, animate = true) {
+
+            if (
+                index < 0 ||
+                index >= this.images.length
+            ) {
+                return this;
+            }
+
+            const current =
+                this.images[this.currentIndex];
+
+            const next =
+                this.images[index];
+
+            /*
+             * Nothing to do if we're already displaying
+             * this image.
+             */
+            if (
+                current === next &&
+                this.currentIndex === index
+            ) {
+                return this;
+            }
+
+            const currentOut =
+                current
+                    ? this.getAnimateOut(current)
+                    : this.options.animateOut;
+
+            const nextIn =
+                this.getAnimateIn(next);
+
+            /*
+             * Make the next image visible underneath/over
+             * the current image.
+             */
+            next.classList.remove(
+                'ts-random-image-hidden'
+            );
+
+            next.classList.add(
+                'ts-random-image-active'
+            );
+
+            if (animate) {
+
+                next.classList.add(
+                    nextIn
+                );
+
+                if (current) {
+
+                    current.classList.remove(
+                        this.getAnimateIn(current)
+                    );
+
+                    current.classList.add(
+                        currentOut
+                    );
+                }
+
+                /*
+                 * After the transition, leave the new image
+                 * active and completely hide the old image.
+                 */
+                this.clearTransitionTimer();
+
+                this.transitionTimer =
+                    window.setTimeout(() => {
+
+                        if (this.destroyed) {
+                            return;
+                        }
+
+                        if (current) {
+
+                            current.classList.remove(
+                                currentOut
+                            );
+
+                            current.classList.remove(
+                                'ts-random-image-active'
+                            );
+
+                            current.classList.add(
+                                'ts-random-image-hidden'
+                            );
+                        }
+
+                        next.classList.remove(
+                            nextIn
+                        );
+
+                        next.classList.add(
+                            'ts-random-image-active'
+                        );
+
+                    }, Number(
+                        this.options.animationDelay
+                    ));
+
+            } else {
+
+                /*
+                 * Instant initialization.
+                 */
+                this.images.forEach(
+                    (image, imageIndex) => {
+
+                        image.classList.toggle(
+                            'ts-random-image-active',
+                            imageIndex === index
+                        );
+
+                        image.classList.toggle(
+                            'ts-random-image-hidden',
+                            imageIndex !== index
+                        );
+
+                        image.classList.remove(
+                            this.getAnimateIn(image),
+                            this.getAnimateOut(image)
+                        );
+                    }
+                );
+            }
+
+            return this;
+        }
+
+
+        getAnimateIn(image) {
+
+            return (
+                image.dataset.rimageAnimateIn ||
+                this.options.animateIn
+            );
+        }
+
+
+        getAnimateOut(image) {
+
+            return (
+                image.dataset.rimageAnimateOut ||
+                this.options.animateOut
+            );
+        }
+
+
+        /*
+         * ---------------------------------------------------------
+         * Wrapper delay helpers
+         * ---------------------------------------------------------
+         */
+
         getPerWrapperHighDelay() {
-            const self = this;
-            const $wrapper = self.$el;
+
             let delay = 0;
 
-            $wrapper.find('img').each(function(){
-				const $image = $(this);
-				
-				if( $image.data('rimage-delay') && parseInt( $image.data('rimage-delay') ) > delay ) {
-					delay = parseInt( $image.data('rimage-delay') );
-				}
-			});
+            this.images.forEach(image => {
+
+                const value =
+                    Number(
+                        image.dataset.rimageDelay
+                    );
+
+                if (
+                    Number.isFinite(value) &&
+                    value > delay
+                ) {
+                    delay = value;
+                }
+            });
 
             return delay;
         }
 
-        perWrapper() {
-			const self = this, $wrapper = self.$el;
 
-			// Turns the imageLlistURL into an array
-			self.options.imagesListURL = [];
+        /*
+         * ---------------------------------------------------------
+         * Sequential coordination
+         * ---------------------------------------------------------
+         */
 
-			// Find all images inside the element wrapper and push their sources to image list array
-			$wrapper.find('img').each(function(){
-				const $image = $(this);
-				self.options.imagesListURL.push( $image.attr('src') ); 
-			});
+        markLastImageInstance() {
 
-			// Shuffle the images list array (random effect)
-			self.options.imagesListURL = self.shuffle( self.options.imagesListURL );
+            const elements =
+                document.querySelectorAll(
+                    '.plugin-random-images'
+                );
 
-			// Iterate over each image and make some checks like delay for each image, animations, etc...
-			$wrapper.find('img').each(function(index){
-				const $image = $(this), animateIn  = $image.data('rimage-animate-in') ? $image.data('rimage-animate-in') : self.options.animateIn, animateOut = $image.data('rimage-animate-out') ? $image.data('rimage-animate-out') : self.options.animateOut, delay      = $image.data('rimage-delay') ? $image.data('rimage-delay') : 2000;
+            elements.forEach(
+                (element, index) => {
 
-				$image.addClass('animated');
+                    element.classList.toggle(
+                        'the-last',
+                        index === elements.length - 1
+                    );
+                }
+            );
+        }
 
-				setTimeout( () => {
-					$image.removeClass( animateIn ).addClass( animateOut );
-				}, delay / 2);
 
-				setTimeout( () => {
-					$image.attr('src', self.options.imagesListURL[index]).removeClass( animateOut ).addClass(animateIn);
-				}, delay);
+        /*
+         * ---------------------------------------------------------
+         * Lifecycle
+         * ---------------------------------------------------------
+         */
 
-			});
-			
-			// Increment the times variable
-			self.times++;
+        start(
+            callback = null,
+            delay = 1000
+        ) {
 
-			return this;
-		}
+            this.stopTimerLoop();
 
-        recursiveTimeout(callback, delay) {
-			const self = this;
+            this.running = true;
 
-			const timeout = () => {
+            const timeout = () => {
 
-				if( callback !== null ) {
-					callback.call(self);
-				}
+                if (
+                    this.destroyed ||
+                    !this.running
+                ) {
+                    return;
+                }
 
-				// Recursive
-				self.st = setTimeout(timeout, delay == null ? 1000 : delay);
+                if (
+                    typeof callback === 'function'
+                ) {
+                    callback.call(this);
+                }
 
-				if( self.options.random == false ) {
-					if( self.$el.hasClass('the-last') ) {
-						$('.plugin-random-images').trigger('rimages.start');
-					} else {
-						clearTimeout(self.st);
-					}
-				}
+                /*
+                 * Stop conditions.
+                 */
+                if (this.shouldStop()) {
+                    this.stop();
+                    return;
+                }
 
-				// Stop At Image Index
-				if( self.options.stopAtImageIndex && parseInt(self.options.stopAtImageIndex) == self.perImageIndex ) {
-					clearTimeout(self.st);
-				}
+                /*
+                 * Sequential image coordination.
+                 */
+                if (!this.options.random) {
 
-				// Stop After X Timers
-				if( self.options.stopAfterXTimes == self.times ) {
-					clearTimeout(self.st);
-				}
-			};
-			timeout();
+                    if (
+                        this.el.classList.contains(
+                            'the-last'
+                        )
+                    ) {
 
-			self.$el.on('rimages.start', () => {
-				clearTimeout(self.st);
-				self.st = setTimeout(timeout, delay == null ? 1000 : delay);
-			});
+                        document.dispatchEvent(
+                            new CustomEvent(
+                                'rimages.start',
+                                {
+                                    detail: {
+                                        source: this.el
+                                    }
+                                }
+                            )
+                        );
 
-		}
+                    } else {
+
+                        this.stop();
+                        return;
+                    }
+                }
+
+                this.timer =
+                    window.setTimeout(
+                        timeout,
+                        Number(delay) || 1000
+                    );
+            };
+
+            timeout();
+
+            return this;
+        }
+
+
+        stop() {
+
+            this.running = false;
+
+            this.stopTimerLoop();
+
+            return this;
+        }
+
+
+        stopTimerLoop() {
+
+            if (this.timer !== null) {
+
+                window.clearTimeout(
+                    this.timer
+                );
+
+                this.timer = null;
+            }
+        }
+
+
+        clearTransitionTimer() {
+
+            if (
+                this.transitionTimer !== null
+            ) {
+
+                window.clearTimeout(
+                    this.transitionTimer
+                );
+
+                this.transitionTimer = null;
+            }
+        }
+
+
+        shouldStop() {
+
+            /*
+             * Stop at image index.
+             */
+            if (
+                this.options.stopAtImageIndex !== false &&
+                this.options.stopAtImageIndex !== null &&
+                this.options.stopAtImageIndex !== '' &&
+                Number(
+                    this.options.stopAtImageIndex
+                ) === this.perImageIndex
+            ) {
+                return true;
+            }
+
+            /*
+             * Stop after X rotations.
+             */
+            if (
+                this.options.stopAfterXTimes !== false &&
+                this.options.stopAfterXTimes !== null &&
+                Number(
+                    this.options.stopAfterXTimes
+                ) > 0 &&
+                this.times >= Number(
+                    this.options.stopAfterXTimes
+                )
+            ) {
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /*
+         * ---------------------------------------------------------
+         * Utilities
+         * ---------------------------------------------------------
+         */
 
         shuffle(array) {
-			for (let i = array.length - 1; i > 0; i--) {
-				const j = Math.floor(Math.random() * (i + 1));
-				const temp = array[i];
-				array[i] = array[j];
-				array[j] = temp;
-			}
 
-			return array;
-		}
+            for (
+                let i = array.length - 1;
+                i > 0;
+                i--
+            ) {
+
+                const j =
+                    Math.floor(
+                        Math.random() * (i + 1)
+                    );
+
+                [
+                    array[i],
+                    array[j]
+                ] = [
+                    array[j],
+                    array[i]
+                ];
+            }
+
+            return array;
+        }
+
+
+        /*
+         * ---------------------------------------------------------
+         * Destroy
+         * ---------------------------------------------------------
+         */
+
+        destroy() {
+
+            this.stop();
+
+            if (this.stopTimer !== null) {
+
+                window.clearTimeout(
+                    this.stopTimer
+                );
+
+                this.stopTimer = null;
+            }
+
+            this.clearTransitionTimer();
+
+            /*
+             * Remove plugin-added classes from wrapper images.
+             */
+            if (!this.isImage()) {
+
+                this.images.forEach(
+                    image => {
+
+                        image.classList.remove(
+                            'animated',
+                            'ts-random-image',
+                            'ts-random-image-active',
+                            'ts-random-image-hidden'
+                        );
+                    }
+                );
+
+                this.el.classList.remove(
+                    'ts-random-images-wrapper'
+                );
+            }
+
+            this.destroyed = true;
+
+            instances.delete(this.el);
+
+            delete this.el.__themestrapRandomImages;
+        }
     }
 
+
+    /*
+     * ---------------------------------------------------------
+     * Defaults
+     * ---------------------------------------------------------
+     */
+
     PluginRandomImages.defaults = {
-		minWindowWidth: 0,
-		random: true,
-		imagesListURL: null,
-		lightboxImagesListURL: null,
+
+        minWindowWidth: 0,
+
+        random: true,
+
+        imagesListURL: null,
+
+        lightboxImagesListURL: null,
+
         delay: null,
+
+        /*
+         * Time between changing the animation state.
+         */
+        animationDelay: 1000,
+
         animateIn: 'fadeIn',
-		animateOut: 'fadeOut',
-		stopAtImageIndex: false, // The value shoudl be the index value of array with images as string. Eg: '2' 
-		stopAfterFewSeconds: false, // The value should be in mili-seconds. Eg: 10000 = 10 seconds
-		stopAfterXTimes: false,
-		accY: 0
-	};
 
-    // expose to scope
-    $.extend(themestrap, {
-		PluginRandomImages
-	});
+        animateOut: 'fadeOut',
 
-    // jquery plugin
-    $.fn.themestrapPluginRandomImages = function(opts) {
-		return this.map(function() {
-			const $this = $(this);
+        /*
+         * Optional starting image for wrapper mode.
+         */
+        startIndex: false,
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginRandomImages($this, opts);
-			}
+        /*
+         * Stop when this image index is reached.
+         */
+        stopAtImageIndex: false,
 
-		});
-	}
-})).apply(this, [window.themestrap, jQuery]);
+        /*
+         * Stop after this many milliseconds.
+         */
+        stopAfterFewSeconds: false,
+
+        /*
+         * Stop after this many rotations.
+         */
+        stopAfterXTimes: false,
+
+        accY: 0
+    };
+
+
+    /*
+     * ---------------------------------------------------------
+     * Public API
+     * ---------------------------------------------------------
+     */
+
+    Object.assign(
+        themestrap,
+        {
+            PluginRandomImages
+        }
+    );
+
+
+    /*
+     * Initialize one element.
+     */
+    PluginRandomImages.init = function(
+        element,
+        options = {}
+    ) {
+
+        if (typeof element === 'string') {
+            element =
+                document.querySelector(element);
+        }
+
+        if (!element) {
+            return false;
+        }
+
+        return new PluginRandomImages(
+            element,
+            options
+        );
+    };
+
+
+    /*
+     * Initialize multiple elements.
+     */
+    PluginRandomImages.initAll = function(
+        selector,
+        options = {}
+    ) {
+
+        const elements =
+            typeof selector === 'string'
+                ? document.querySelectorAll(selector)
+                : selector;
+
+        return Array.from(
+            elements || []
+        )
+        .map(element =>
+            new PluginRandomImages(
+                element,
+                options
+            )
+        )
+        .filter(Boolean);
+    };
+
+
+    /*
+     * Retrieve an existing instance.
+     */
+    PluginRandomImages.getInstance =
+        function(element) {
+
+            if (
+                typeof element === 'string'
+            ) {
+                element =
+                    document.querySelector(element);
+            }
+
+            return element
+                ? instances.get(element) || null
+                : null;
+        };
+
+
+    /*
+     * ---------------------------------------------------------
+     * Sequential-mode coordination
+     * ---------------------------------------------------------
+     */
+
+    document.addEventListener(
+        'rimages.start',
+        event => {
+
+            const source =
+                event.detail?.source;
+
+            document
+                .querySelectorAll(
+                    '.plugin-random-images'
+                )
+                .forEach(element => {
+
+                    if (element === source) {
+                        return;
+                    }
+
+                    const instance =
+                        instances.get(element);
+
+                    if (!instance) {
+                        return;
+                    }
+
+                    if (
+                        instance.options.random
+                    ) {
+                        return;
+                    }
+
+                    instance.start(
+                        () => {
+
+                            if (
+                                instance.isImage()
+                            ) {
+                                instance.perImageTag();
+                            } else {
+                                instance.perWrapper();
+                            }
+                        },
+
+                        instance.options.delay == null
+                            ? 3000
+                            : Number(
+                                instance.options.delay
+                            )
+                    );
+                });
+        }
+    );
+
+
+    /*
+     * ---------------------------------------------------------
+     * Wrapper-mode CSS
+     * ---------------------------------------------------------
+     *
+     * Inject only the structural CSS needed by the plugin.
+     * Animation CSS itself remains the responsibility of the
+     * consuming application.
+     */
+
+    const STYLE_ID =
+        'themestrap-random-images-styles';
+
+    if (
+        !document.getElementById(STYLE_ID)
+    ) {
+
+        const style =
+            document.createElement('style');
+
+        style.id = STYLE_ID;
+
+        style.textContent = `
+            .ts-random-images-wrapper {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .ts-random-images-wrapper
+            .ts-random-image {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .ts-random-images-wrapper
+            .ts-random-image:first-child {
+                position: absolute;
+            }
+
+            .ts-random-images-wrapper
+            .ts-random-image-active {
+                z-index: 2;
+                visibility: visible;
+                pointer-events: auto;
+            }
+
+            .ts-random-images-wrapper
+            .ts-random-image-hidden {
+                z-index: 1;
+                visibility: hidden;
+                pointer-events: none;
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
+
+}))(window.themestrap = window.themestrap || {});

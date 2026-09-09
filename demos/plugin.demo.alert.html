@@ -1,301 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PluginAlert | Themestrap</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no">
+  <meta name="description" content="Interactive demos for the Themestrap Alert plugin — alert types, icons, actions, auto-dismiss, countdowns, hover pause, animations, programmatic toasts, callbacks, and lifecycle controls.">
+  <link rel="icon" type="image/png" href="../img/favicon-96x96.png" sizes="96x96">
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
 
-<h2 class="sr-only">Interactive demo of the themestrap Bootstrap alert plugin with Tailwind UI styling</h2>
+  <style>
+    :root {
+      --ts-navy:   #0a1929;
+      --ts-navy2:  #0e2238;
+      --ts-orange: #e8672a;
+      --ts-teal:   #2ab8c8;
+      --text-hi:   #eaf2fb;
+      --text-mid:  #7896b4;
+      --text-lo:   rgba(255,255,255,0.2);
+      --border:    rgba(255,255,255,0.07);
+      --font-serif: Georgia, serif;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
 
-<style>
-  /* ── Tailwind UI-style alert tokens ─────────────────────────────────────── */
-  .alert-ts-info    { --ab: #eff6ff; --al: #3b82f6; --ai: #3b82f6; --at: #1e40af; --ax: #1d4ed8; --ah: #1e40af; --ac: #93c5fd; --ach: #1d4ed8; }
-  .alert-ts-success { --ab: #f0fdf4; --al: #22c55e; --ai: #22c55e; --at: #14532d; --ax: #15803d; --ah: #14532d; --ac: #86efac; --ach: #15803d; }
-  .alert-ts-warning { --ab: #fffbeb; --al: #f59e0b; --ai: #f59e0b; --at: #78350f; --ax: #92400e; --ah: #78350f; --ac: #fcd34d; --ach: #92400e; }
-  .alert-ts-danger  { --ab: #fef2f2; --al: #ef4444; --ai: #ef4444; --at: #7f1d1d; --ax: #991b1b; --ah: #7f1d1d; --ac: #fca5a5; --ach: #991b1b; }
-  .alert-ts-neutral { --ab: #f9fafb; --al: #6b7280; --ai: #6b7280; --at: #111827; --ax: #374151; --ah: #111827; --ac: #d1d5db; --ach: #374151; }
+    body {
+      background: var(--ts-navy);
+      color: #d0dbe8;
+      font-family: var(--font-sans);
+    }
 
-  @media (prefers-color-scheme: dark) {
-    .alert-ts-info    { --ab: #172554; --al: #3b82f6; --ai: #60a5fa; --at: #bfdbfe; --ax: #93c5fd; --ah: #bfdbfe; --ac: #3b82f6; --ach: #bfdbfe; }
-    .alert-ts-success { --ab: #052e16; --al: #22c55e; --ai: #4ade80; --at: #bbf7d0; --ax: #86efac; --ah: #bbf7d0; --ac: #22c55e; --ach: #bbf7d0; }
-    .alert-ts-warning { --ab: #27170a; --al: #f59e0b; --ai: #fbbf24; --at: #fde68a; --ax: #fcd34d; --ah: #fde68a; --ac: #f59e0b; --ach: #fde68a; }
-    .alert-ts-danger  { --ab: #2d0a0a; --al: #ef4444; --ai: #f87171; --at: #fecaca; --ax: #fca5a5; --ah: #fecaca; --ac: #ef4444; --ach: #fecaca; }
-    .alert-ts-neutral { --ab: #111827; --al: #6b7280; --ai: #9ca3af; --at: #f9fafb; --ax: #d1d5db; --ah: #f9fafb; --ac: #6b7280; --ach: #f9fafb; }
+    .demo-header {
+      background: var(--ts-navy2);
+      border-bottom: 2px solid var(--ts-orange);
+      padding: 2rem 0 1.5rem;
+    }
+
+    .demo-header h1 {
+      font-family: var(--font-serif);
+      color: #fff;
+      font-size: 2rem;
+      margin-bottom: .45rem;
+    }
+
+    .demo-header p {
+      color: #8aa5bf;
+      margin: 0;
+      max-width: 900px;
+    }
+
+    .badge-plugin {
+      background: var(--ts-teal);
+      color: #fff;
+      font-size: .7rem;
+      letter-spacing: .08em;
+      padding: .25em .6em;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      vertical-align: middle;
+    }
+
+    .demo-card {
+      background: var(--ts-navy2);
+      border: 1px solid #1a3050;
+      border-radius: 10px;
+      margin-bottom: 1.75rem;
+      overflow: hidden;
+    }
+
+    .demo-card-header {
+      background: #0b1e33;
+      border-bottom: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      color: var(--ts-teal);
+      letter-spacing: .04em;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    .demo-card-header i {
+      color: var(--ts-orange);
+      font-size: 1rem;
+    }
+
+    .demo-card-header .demo-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .demo-stage {
+      padding: 1.5rem 1.25rem;
+    }
+
+    pre.snip {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      margin: 0;
+      padding: 1rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      color: #7ecce0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .demo-log {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      padding: .6rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: .73rem;
+      color: #7896b4;
+      min-height: 2.4rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .demo-log .log-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ts-teal);
+      flex-shrink: 0;
+    }
+
+    .demo-log .hi {
+      color: var(--ts-orange);
+    }
+
+    .section-rule {
+      margin: 20px auto 10px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--text-lo);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-rule::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .alert-stage {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .alert-stage .alert {
+      margin-bottom: .75rem;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: .6rem;
+    }
+
+    .control-btn {
+      font-family: var(--font-mono);
+      font-size: .72rem;
+    }
+
+    .api-panel {
+      background: rgba(255,255,255,.02);
+      border: 1px solid #1a3050;
+      border-radius: 8px;
+      padding: 1rem 1.125rem;
+      height: 100%;
+    }
+
+    .api-panel p.label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 600;
+      color: #5a7898;
+      margin-bottom: .5rem;
+    }
+
+    .value-box {
+      background: #060f1a;
+      border: 1px solid #1a3050;
+      border-radius: 6px;
+      padding: .7rem .8rem;
+      font-family: var(--font-mono);
+      font-size: .75rem;
+      color: #8aa5bf;
+      min-height: 42px;
+      word-break: break-word;
+    }
+
+    code {
+      color: var(--ts-teal);
+      font-family: var(--font-mono);
+      font-size: .82em;
+    }
+
+    .toast-preview {
+      min-height: 70px;
+      border: 1px dashed #1a3050;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .toast-preview:empty::before {
+      content: "The toast stack is created automatically by PluginAlert.create().";
+      display: block;
+      text-align: center;
+      color: #5a7898;
+      font: .72rem var(--font-mono);
+      padding: .5rem;
+    }
+
+    .form-select,
+    .form-control {
+      background-color: #060f1a;
+      color: #d0dbe8;
+      border-color: #1a3050;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+      background-color: #060f1a;
+      color: #fff;
+      border-color: var(--ts-teal);
+      box-shadow: 0 0 0 .2rem rgba(42,184,200,.12);
+    }
+
+    /* Footer */
+    footer {
+        color: var(--muted);
+        text-align: center;
+        padding: 0 0 55px;
+        font-size: .75rem;
+    }
+    footer code { color: var(--teal); }
+
+    @media (max-width: 575.98px) {
+      .demo-card-header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .demo-card-header .demo-badge {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<header class="demo-header">
+  <div class="container">
+    <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:var(--font-mono);">
+      Themestrap · Plugin
+    </div>
+    <h1>Alert <span class="badge-plugin">data-plugin-alert</span></h1>
+    <p>
+      A Bootstrap-compatible alert component with typed skins, optional icons, actions,
+      dismiss controls, auto-dismiss countdowns, hover pause, animations, lifecycle callbacks,
+      and a programmatic toast factory.
+    </p>
+  </div>
+</header>
+
+<br>
+
+<main>
+  <div class="container">
+
+    <div class="section-rule">Static Alerts</div>
+
+    <!-- CARD 1 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-palette"></i>
+        Alert Types &amp; Bootstrap Class Detection
+        <span class="demo-badge" style="background:rgba(42,184,200,.12);color:#2ab8c8;">type auto-detection</span>
+      </div>
+
+      <div class="demo-stage alert-stage">
+
+        <div id="alert-info" class="alert alert-info">
+          This is an informational alert. Its type is detected from <code>.alert-info</code>.
+        </div>
+
+        <div id="alert-success" class="alert alert-success">
+          Your changes were saved successfully.
+        </div>
+
+        <div id="alert-warning" class="alert alert-warning">
+          Your session is about to expire.
+        </div>
+
+        <div id="alert-danger" class="alert alert-danger">
+          The requested operation could not be completed.
+        </div>
+
+        <div id="alert-neutral" class="alert">
+          This neutral alert explicitly supplies <code>type: "neutral"</code>.
+        </div>
+
+      </div>
+
+      <pre class="snip"><code>$('#alert-info').themestrapPluginAlert({
+  showIcon: true,
+  dismissible: true,
+  title: 'Information'
+});
+
+$('#alert-neutral').themestrapPluginAlert({
+  type: 'neutral',
+  showIcon: true,
+  dismissible: true
+});</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot"></span>
+        Bootstrap alert classes can determine the plugin type automatically when <code>type</code> is null.
+      </div>
+    </div>
+
+    <!-- CARD 2 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-card-heading"></i>
+        Titles, Icons &amp; Dismiss Controls
+        <span class="demo-badge" style="background:rgba(232,103,42,.12);color:#e8672a;">showIcon · title · dismissible</span>
+      </div>
+
+      <div class="demo-stage alert-stage">
+        <div id="alert-featured" class="alert alert-primary">
+          A more detailed message can be supplied directly by the original HTML.
+        </div>
+      </div>
+
+      <pre class="snip"><code>$('#alert-featured').themestrapPluginAlert({
+  showIcon: true,
+  dismissible: true,
+  title: 'New software update',
+  type: 'primary'
+});</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot" style="background:var(--ts-orange)"></span>
+        The plugin restructures the existing alert markup and adds its own icon, title, body, and close control.
+      </div>
+    </div>
+
+    <div class="section-rule">Actions &amp; Callbacks</div>
+
+    <!-- CARD 3 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-hand-index"></i>
+        Action Buttons
+        <span class="demo-badge" style="background:rgba(167,139,250,.12);color:#a78bfa;">primary · secondary · link</span>
+      </div>
+
+      <div class="demo-stage alert-stage">
+        <div id="alert-actions" class="alert alert-warning">
+          You have unsaved changes. Choose what you would like to do.
+        </div>
+
+        <div class="api-panel mt-3">
+          <p class="label">Last action</p>
+          <div id="action-value" class="value-box">No action clicked yet.</div>
+        </div>
+      </div>
+
+      <pre class="snip"><code>$('#alert-actions').themestrapPluginAlert({
+  showIcon: true,
+  dismissible: true,
+  title: 'Unsaved changes',
+  actions: [
+    { label: 'Save',    key: 'save',    variant: 'primary' },
+    { label: 'Discard', key: 'discard', variant: 'secondary' },
+    { label: 'Review',  key: 'review',  variant: 'link' }
+  ],
+  onAction(key) {
+    console.log('Action:', key);
   }
+});</code></pre>
 
-  /* ── Base layout ──────────────────────────────────────────────────────── */
-  .a { display:flex; align-items:flex-start; gap:12px; padding:16px 16px 16px 20px; border-radius:8px; border:0; border-left:4px solid var(--al); background:var(--ab); position:relative; overflow:hidden; margin-bottom:12px; }
-  .a-icon { flex-shrink:0; width:20px; height:20px; color:var(--ai); margin-top:1px; }
-  .a-icon svg { display:block; width:100%; height:100%; }
-  .a-body { flex:1 1 auto; min-width:0; }
-  .a-title { font-size:14px; font-weight:600; line-height:1.4; color:var(--at); margin:0 0 4px; }
-  .a-text  { font-size:14px; line-height:1.5; color:var(--ax); margin:0; }
-  .a-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-  .a-btn { display:inline-flex; align-items:center; padding:6px 12px; font-size:13px; font-weight:500; border-radius:6px; border:1.5px solid transparent; cursor:pointer; transition:background .15s,border-color .15s,color .15s; white-space:nowrap; }
-  .a-btn-p { background:var(--ax); border-color:var(--ax); color:#fff; }
-  .a-btn-p:hover { background:var(--ah); border-color:var(--ah); }
-  .a-btn-s { background:transparent; border-color:var(--ax); color:var(--ax); }
-  .a-btn-s:hover { background:var(--ax); color:#fff; }
-  .a-btn-l { background:none; border-color:transparent; color:var(--ax); padding-left:0; padding-right:0; }
-  .a-btn-l:hover { color:var(--ah); text-decoration:underline; }
-  .a-close { flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; padding:0; margin-left:auto; background:none; border:none; border-radius:6px; color:var(--ac); cursor:pointer; transition:color .15s,background .15s; }
-  .a-close svg { display:block; width:20px; height:20px; }
-  .a-close:hover { color:var(--ach); background:color-mix(in srgb, var(--al) 14%, transparent); }
-  .a-bar { position:absolute; bottom:0; left:0; width:100%; height:3px; background:var(--al); opacity:.4; transform:scaleX(1); transform-origin:left center; transition:transform linear; }
-
-  /* ── Demo chrome ──────────────────────────────────────────────────────── */
-  .section-label { font-size:11px; font-weight:500; color:var(--color-text-secondary); letter-spacing:.07em; text-transform:uppercase; margin:20px 0 8px; }
-  .section-label:first-child { margin-top:0; }
-  .divider { border:none; border-top:.5px solid var(--color-border-tertiary); margin:20px 0; }
-  .spawn-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:0; }
-  .spawn-btn { font-size:13px; padding:6px 14px; border-radius:6px; border:.5px solid var(--color-border-secondary); background:var(--color-background-primary); color:var(--color-text-primary); cursor:pointer; transition:background .12s; }
-  .spawn-btn:hover { background:var(--color-background-secondary); }
-  .toast-area { border:.5px dashed var(--color-border-secondary); border-radius:8px; padding:12px; min-height:60px; display:flex; flex-direction:column; gap:8px; }
-  .toast-empty { font-size:13px; color:var(--color-text-secondary); text-align:center; padding:8px 0; }
-</style>
-
-<!-- ── STATIC VARIANTS ────────────────────────────────────────────────────── -->
-<p class="section-label">Alert types</p>
-
-<div class="a alert-ts-info" id="s-info">
-  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg></span>
-  <div class="a-body"><p class="a-title">A new software update is available</p><p class="a-text">Version 3.1.4 is ready to install. Review the changelog before updating.</p></div>
-  <button class="a-close" onclick="dismiss('s-info')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
-</div>
-
-<div class="a alert-ts-success" id="s-success">
-  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg></span>
-  <div class="a-body"><p class="a-title">Payment successful</p><p class="a-text">Your order #2048 has been confirmed. A receipt has been sent to your email.</p></div>
-  <button class="a-close" onclick="dismiss('s-success')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
-</div>
-
-<div class="a alert-ts-warning" id="s-warning">
-  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg></span>
-  <div class="a-body">
-    <p class="a-title">Your storage is almost full</p>
-    <p class="a-text">You're using 4.8 GB of 5 GB. Delete files or upgrade your plan to continue.</p>
-    <div class="a-actions">
-      <button class="a-btn a-btn-p">Upgrade plan</button>
-      <button class="a-btn a-btn-s" onclick="dismiss('s-warning')">Dismiss</button>
+      <div class="demo-log">
+        <span class="log-dot" style="background:#a78bfa"></span>
+        Action buttons expose their configured <code>key</code> through the <code>onAction</code> callback and <code>action.alert</code> event.
+      </div>
     </div>
-  </div>
-  <button class="a-close" onclick="dismiss('s-warning')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
-</div>
 
-<div class="a alert-ts-danger" id="s-danger">
-  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg></span>
-  <div class="a-body">
-    <p class="a-title">There were 3 errors with your submission</p>
-    <p class="a-text">First name is required · Email is invalid · Password must be 8+ characters</p>
-  </div>
-  <button class="a-close" onclick="dismiss('s-danger')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
-</div>
+    <div class="section-rule">Automatic Dismissal</div>
 
-<div class="a alert-ts-neutral" id="s-neutral">
-  <span class="a-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg></span>
-  <div class="a-body">
-    <p class="a-text">Scheduled maintenance on Saturday 3 AM – 5 AM UTC. Service may be briefly interrupted.</p>
-    <div class="a-actions">
-      <button class="a-btn a-btn-l">View status page</button>
+    <!-- CARD 4 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-hourglass-split"></i>
+        Countdown &amp; Hover Pause
+        <span class="demo-badge" style="background:rgba(42,184,200,.12);color:#2ab8c8;">autoDismiss · delay · pauseOnHover</span>
+      </div>
+
+      <div class="demo-stage alert-stage">
+        <div id="alert-countdown" class="alert alert-info">
+          This alert automatically disappears after 8 seconds. Hover over it to pause the timer.
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-sm btn-outline-info control-btn" id="restart-countdown">
+            Restart countdown
+          </button>
+        </div>
+      </div>
+
+      <pre class="snip"><code>$('#alert-countdown').themestrapPluginAlert({
+  showIcon: true,
+  dismissible: true,
+  autoDismiss: true,
+  delay: 8000,
+  pauseOnHover: true,
+  showCountdown: true
+});</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot" style="background:#2ab8c8"></span>
+        The bottom progress bar follows the timer and is recalculated when the alert is hovered.
+      </div>
     </div>
+
+    <div class="section-rule">Animation</div>
+
+    <!-- CARD 5 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-magic"></i>
+        Fade vs. Slide Dismissal
+        <span class="demo-badge" style="background:rgba(229,192,123,.12);color:#e5c07b;">animation</span>
+      </div>
+
+      <div class="demo-stage alert-stage">
+        <div class="control-grid mb-3">
+          <button class="btn btn-sm btn-outline-warning control-btn" onclick="spawnAnimated('fade')">
+            Spawn fade alert
+          </button>
+          <button class="btn btn-sm btn-outline-warning control-btn" onclick="spawnAnimated('slide')">
+            Spawn slide alert
+          </button>
+        </div>
+
+        <div id="animation-slot"></div>
+      </div>
+
+      <pre class="snip"><code>$('#my-alert').themestrapPluginAlert({
+  animation: 'fade',   // or 'slide'
+  animationDuration: 400,
+  dismissible: true
+});</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot" style="background:#e5c07b"></span>
+        <code>slide</code> animates height, opacity, margins, and padding; <code>fade</code> only fades the alert.
+      </div>
+    </div>
+
+    <div class="section-rule">Programmatic Toasts</div>
+
+    <!-- CARD 6 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-bell"></i>
+        Toast Factory
+        <span class="demo-badge" style="background:rgba(232,103,42,.12);color:#e8672a;">PluginAlert.create()</span>
+      </div>
+
+      <div class="demo-stage">
+        <div class="control-grid">
+          <button class="btn btn-sm btn-outline-info control-btn" onclick="spawnToast('info')">Info toast</button>
+          <button class="btn btn-sm btn-outline-success control-btn" onclick="spawnToast('success')">Success toast</button>
+          <button class="btn btn-sm btn-outline-warning control-btn" onclick="spawnToast('warning')">Warning toast</button>
+          <button class="btn btn-sm btn-outline-danger control-btn" onclick="spawnToast('danger')">Danger toast</button>
+          <button class="btn btn-sm btn-outline-secondary control-btn" onclick="spawnToast('neutral')">Neutral toast</button>
+        </div>
+
+        <div class="toast-preview mt-3" id="toast-preview"></div>
+      </div>
+
+      <pre class="snip"><code>themestrap.PluginAlert.create({
+  type: 'success',
+  title: 'Changes saved',
+  message: 'Your profile has been updated successfully.',
+  showIcon: true,
+  dismissible: true,
+  autoDismiss: true,
+  delay: 5000
+});</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot" style="background:#e8672a"></span>
+        With no container supplied, <code>PluginAlert.create()</code> creates a shared <code>.alert-toast-stack</code> on <code>&lt;body&gt;</code>.
+      </div>
+    </div>
+
+    <div class="section-rule">Custom Containers</div>
+
+    <!-- CARD 7 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-layout-sidebar"></i>
+        Injecting Alerts into a Container
+        <span class="demo-badge" style="background:rgba(97,175,239,.12);color:#61afef;">create(container, options)</span>
+      </div>
+
+      <div class="demo-stage">
+        <div class="alert-stage">
+          <div id="custom-container" class="p-3 rounded" style="border:1px dashed #1a3050;">
+            <div class="text-center" style="color:#5a7898;font: .72rem var(--font-mono);">
+              Custom alert container
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-sm btn-outline-primary control-btn mt-3" onclick="spawnInContainer()">
+          Create alert here
+        </button>
+      </div>
+
+      <pre class="snip"><code>themestrap.PluginAlert.create('#custom-container', {
+  type: 'success',
+  title: 'Saved',
+  message: 'The alert was injected into this container.',
+  showIcon: true,
+  dismissible: true
+});</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot" style="background:#61afef"></span>
+        Supplying a selector makes the plugin append the alert there instead of using the shared toast stack.
+      </div>
+    </div>
+
+    <div class="section-rule">Lifecycle &amp; API</div>
+
+    <!-- CARD 8 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-terminal"></i>
+        Instance API &amp; Lifecycle
+        <span class="demo-badge" style="background:rgba(42,184,200,.12);color:#2ab8c8;">dismiss · destroy · data()</span>
+      </div>
+
+      <div class="demo-stage">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div id="api-alert" class="alert alert-success">
+              This alert can be controlled through the plugin instance.
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="api-panel">
+              <p class="label">Controls</p>
+              <div class="d-grid gap-2">
+                <button class="btn btn-sm btn-outline-success control-btn" onclick="apiDismiss()">instance.dismiss()</button>
+                <button class="btn btn-sm btn-outline-secondary control-btn" onclick="apiDestroy()">instance.destroy()</button>
+                <button class="btn btn-sm btn-outline-info control-btn" onclick="apiReinit()">reinitialize</button>
+              </div>
+
+              <p class="label mt-3">Lifecycle log</p>
+              <div id="api-value" class="value-box">Waiting for an API operation.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <pre class="snip"><code>const alert = $('#api-alert').data('__pluginAlert');
+
+alert.dismiss();
+alert.destroy();
+
+$('#api-alert').themestrapPluginAlert({
+  type: 'success',
+  showIcon: true,
+  dismissible: true
+});</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot"></span>
+        Every initialized alert stores its instance under <code>__pluginAlert</code> and exposes <code>dismiss()</code> and <code>destroy()</code>.
+      </div>
+    </div>
+
+    <!-- CARD 9 -->
+    <div class="demo-card">
+      <div class="demo-card-header">
+        <i class="bi bi-broadcast"></i>
+        Bootstrap Compatibility &amp; Events
+        <span class="demo-badge" style="background:rgba(198,120,221,.12);color:#c678dd;">close.bs.alert · closed.bs.alert</span>
+      </div>
+
+      <div class="demo-stage">
+        <div id="event-alert" class="alert alert-warning">
+          Dismiss this alert and watch the event stream below.
+        </div>
+
+        <div class="api-panel mt-3">
+          <p class="label">Event stream</p>
+          <div id="event-list" class="value-box">Waiting for close.bs.alert / closed.bs.alert…</div>
+        </div>
+      </div>
+
+      <pre class="snip"><code>$('#event-alert')
+  .on('close.bs.alert', function () {
+    console.log('closing');
+  })
+  .on('closed.bs.alert', function () {
+    console.log('closed');
+  });</code></pre>
+
+      <div class="demo-log">
+        <span class="log-dot" style="background:#c678dd"></span>
+        The plugin fires Bootstrap-compatible <code>close.bs.alert</code> and <code>closed.bs.alert</code> lifecycle events.
+      </div>
+    </div>
+
   </div>
-  <button class="a-close" onclick="dismiss('s-neutral')"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg></button>
-</div>
+</main>
 
-<hr class="divider">
+<footer>
+    Themestrap · multiple components demo · part of the <a href="https://github.com/daemondevin/Themestrap" target="_blank">Themestrap component library</a>
+</footer>
 
-<!-- ── AUTO-DISMISS WITH COUNTDOWN ───────────────────────────────────────── -->
-<p class="section-label">Auto-dismiss with countdown bar (6 s, hover to pause)</p>
-<div id="countdown-slot"></div>
-<button class="spawn-btn" id="cd-btn" onclick="spawnCountdown()">Spawn auto-dismiss alert</button>
-
-<hr class="divider">
-
-<!-- ── TOAST FACTORY ──────────────────────────────────────────────────────── -->
-<p class="section-label">Toast factory — <code style="font-size:12px;">PluginAlert.create()</code></p>
-<div class="spawn-row">
-  <button class="spawn-btn" onclick="spawnToast('info')">Info toast</button>
-  <button class="spawn-btn" onclick="spawnToast('success')">Success toast</button>
-  <button class="spawn-btn" onclick="spawnToast('warning')">Warning toast</button>
-  <button class="spawn-btn" onclick="spawnToast('danger')">Danger toast</button>
-</div>
-<div style="margin-top:10px;">
-  <div class="toast-area" id="toast-area">
-    <p class="toast-empty" id="toast-empty">Toasts appear here</p>
-  </div>
-</div>
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.alert.js"></script>
 
 <script>
-const ICONS = {
-  info:    `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/></svg>`,
-  success: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>`,
-  warning: `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>`,
-  danger:  `<svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>`,
-};
-const CLOSE = `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>`;
+$(function () {
 
-function dismiss(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const h = el.offsetHeight;
-  el.style.cssText += `overflow:hidden;transition:max-height .35s ease,opacity .35s ease,margin .35s ease,padding .35s ease;max-height:${h}px`;
-  setTimeout(() => {
-    el.style.maxHeight = '0';
-    el.style.opacity   = '0';
-    el.style.marginBottom = '0';
-    el.style.paddingTop   = '0';
-    el.style.paddingBottom= '0';
-    setTimeout(() => el.remove(), 360);
-  }, 20);
-}
-
-/* ── countdown ────────────────────────────────────────────────── */
-let cdActive = false;
-
-function spawnCountdown() {
-  if (cdActive) return;
-  cdActive = true;
-  const btn  = document.getElementById('cd-btn');
-  const slot = document.getElementById('countdown-slot');
-  const delay = 6000;
-  const uid   = 'cd-' + Date.now();
-
-  const el = document.createElement('div');
-  el.className = 'a alert-ts-info';
-  el.id = uid;
-  el.innerHTML = `
-    <span class="a-icon">${ICONS.info}</span>
-    <div class="a-body">
-      <p class="a-title">Session expiring soon</p>
-      <p class="a-text">Your session will expire in 6 seconds. Hover over this alert to pause.</p>
-    </div>
-    <button class="a-close" onclick="clearCountdown('${uid}')"><svg viewBox="0 0 20 20" fill="currentColor">${CLOSE}</svg></button>
-    <div class="a-bar" id="bar-${uid}"></div>`;
-  slot.appendChild(el);
-  btn.disabled = true;
-  btn.style.opacity = '.45';
-
-  const bar  = document.getElementById(`bar-${uid}`);
-  let remaining = delay;
-  let startTime = null;
-  let rafId  = null;
-  let timer  = null;
-  let paused = false;
-
-  function startBar() {
-    bar.style.transitionDuration = `${remaining}ms`;
-    requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
-  }
-
-  function startTimer() {
-    startTime = Date.now();
-    timer = setTimeout(() => { clearCountdown(uid, true); }, remaining);
-  }
-
-  el.addEventListener('mouseenter', () => {
-    if (paused || !timer) return;
-    paused = true;
-    clearTimeout(timer);
-    timer = null;
-    remaining -= Date.now() - startTime;
-    const ratio = Math.max(0, remaining / delay);
-    bar.style.transitionDuration = '0ms';
-    bar.style.transform = `scaleX(${ratio})`;
+  // Static examples
+  $('#alert-info').themestrapPluginAlert({
+    showIcon: true,
+    dismissible: true,
+    title: 'Information'
   });
 
-  el.addEventListener('mouseleave', () => {
-    if (!paused) return;
-    paused = false;
-    startTimer();
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      bar.style.transitionDuration = `${remaining}ms`;
-      bar.style.transform = 'scaleX(0)';
-    }));
+  $('#alert-success').themestrapPluginAlert({
+    showIcon: true,
+    dismissible: true,
+    title: 'Payment successful'
   });
 
-  startBar();
-  startTimer();
+  $('#alert-warning').themestrapPluginAlert({
+    showIcon: true,
+    dismissible: true,
+    title: 'Session warning'
+  });
+
+  $('#alert-danger').themestrapPluginAlert({
+    showIcon: true,
+    dismissible: true,
+    title: 'Operation failed'
+  });
+
+  $('#alert-neutral').themestrapPluginAlert({
+    type: 'neutral',
+    showIcon: true,
+    dismissible: true,
+    title: 'Scheduled maintenance'
+  });
+
+  $('#alert-featured').themestrapPluginAlert({
+    type: 'primary',
+    showIcon: true,
+    dismissible: true,
+    title: 'New software update'
+  });
+
+  // Actions
+  $('#alert-actions')
+    .on('action.alert', function (e, key) {
+      $('#action-value').html(
+        'Event received: <span style="color:var(--ts-orange)">' + key + '</span>'
+      );
+    })
+    .themestrapPluginAlert({
+      showIcon: true,
+      dismissible: true,
+      title: 'Unsaved changes',
+      actions: [
+        { label: 'Save', key: 'save', variant: 'primary' },
+        { label: 'Discard', key: 'discard', variant: 'secondary' },
+        { label: 'Review', key: 'review', variant: 'link' }
+      ],
+      onAction: function (key) {
+        $('#action-value').html(
+          'Callback received: <span style="color:var(--ts-teal)">' + key + '</span>'
+        );
+      }
+    });
+
+  // Countdown
+  function initCountdown() {
+    $('#alert-countdown').themestrapPluginAlert({
+      showIcon: true,
+      dismissible: true,
+      autoDismiss: true,
+      delay: 8000,
+      pauseOnHover: true,
+      showCountdown: true,
+      animation: 'slide',
+      onDismiss: function () {
+        $('#restart-countdown').prop('disabled', false);
+      }
+    });
+
+    $('#restart-countdown').prop('disabled', true);
+  }
+
+  initCountdown();
+
+  $('#restart-countdown').on('click', function () {
+    $('#alert-countdown').remove();
+
+    $('<div>', {
+      id: 'alert-countdown',
+      class: 'alert alert-info',
+      text: 'This alert automatically disappears after 8 seconds. Hover over it to pause the timer.'
+    }).prependTo('.alert-stage').first();
+
+    // Re-select the newly-created element and initialize it.
+    $('#alert-countdown').themestrapPluginAlert({
+      showIcon: true,
+      dismissible: true,
+      autoDismiss: true,
+      delay: 8000,
+      pauseOnHover: true,
+      showCountdown: true,
+      animation: 'slide',
+      onDismiss: function () {
+        $('#restart-countdown').prop('disabled', false);
+      }
+    });
+
+    $('#restart-countdown').prop('disabled', true);
+  });
+
+  
+  // Bootstrap-compatible events
+    $('#event-alert')
+    .on('close.bs.alert', function () {
+      $('#event-list').text('close.bs.alert fired — the alert is beginning its dismissal animation.');
+    })
+    .on('closed.bs.alert', function () {
+      $('#event-list').text('closed.bs.alert fired — the alert has finished dismissing.');
+    })
+    .themestrapPluginAlert({
+      showIcon: true,
+      dismissible: true,
+      title: 'Event demo'
+    });
+
+  
+  // API
+    initApiAlert();
+});
+
+function initApiAlert() {
+  $('#api-alert').themestrapPluginAlert({
+    type: 'success',
+    showIcon: true,
+    dismissible: true,
+    title: 'API-controlled alert'
+  });
+
+  $('#api-value').text('Initialized.');
 }
 
-function clearCountdown(uid, auto) {
-  const el  = document.getElementById(uid);
-  const btn = document.getElementById('cd-btn');
-  if (!el) return;
-  dismiss(uid);
-  setTimeout(() => {
-    cdActive = false;
-    btn.disabled = false;
-    btn.style.opacity = '';
-  }, 400);
+function apiDismiss() {
+  const instance = $('#api-alert').data('__pluginAlert');
+
+  if (!instance) {
+    $('#api-value').text('No active instance — reinitialize it first.');
+    return;
+  }
+
+  instance.dismiss();
+  $('#api-value').text('instance.dismiss() called.');
 }
 
-/* ── toast factory ────────────────────────────────────────────── */
-const TOAST_DATA = {
-  info    : { title: 'New message', text: 'You have an unread message from the team.' },
-  success : { title: 'Changes saved', text: 'Your profile has been updated successfully.' },
-  warning : { title: 'Unsaved changes', text: 'Leave without saving? Your edits will be lost.', actions: [{l:'Save',p:true},{l:'Discard',p:false}] },
-  danger  : { title: 'Delete failed', text: 'The file could not be deleted. You may not have permission.' },
+function apiDestroy() {
+  const instance = $('#api-alert').data('__pluginAlert');
+
+  if (!instance) {
+    $('#api-value').text('No active instance.');
+    return;
+  }
+
+  instance.destroy();
+  $('#api-value').text('instance.destroy() called. Original markup restored.');
+}
+
+function apiReinit() {
+  $('#api-alert').themestrapPluginAlert({
+    type: 'success',
+    showIcon: true,
+    dismissible: true,
+    title: 'API-controlled alert'
+  });
+
+  $('#api-value').text('Reinitialized.');
+}
+
+function spawnAnimated(animation) {
+  const $slot = $('#animation-slot');
+
+  const $alert = $('<div>', {
+    class: 'alert alert-primary',
+    text: animation === 'slide'
+      ? 'This alert uses the slide dismissal animation.'
+      : 'This alert uses the fade dismissal animation.'
+  }).appendTo($slot);
+
+  $alert.themestrapPluginAlert({
+    type: 'primary',
+    showIcon: true,
+    dismissible: true,
+    title: animation === 'slide' ? 'Slide animation' : 'Fade animation',
+    animation: animation,
+    animationDuration: 500
+  });
+}
+
+const toastData = {
+  info: {
+    title: 'New message',
+    message: 'You have an unread message from the team.'
+  },
+  success: {
+    title: 'Changes saved',
+    message: 'Your profile has been updated successfully.'
+  },
+  warning: {
+    title: 'Unsaved changes',
+    message: 'Leave without saving? Your edits will be lost.'
+  },
+  danger: {
+    title: 'Delete failed',
+    message: 'The file could not be deleted. You may not have permission.'
+  },
+  neutral: {
+    title: 'Scheduled maintenance',
+    message: 'The service may be briefly unavailable during maintenance.'
+  }
 };
 
 function spawnToast(type) {
-  const area  = document.getElementById('toast-area');
-  const empty = document.getElementById('toast-empty');
-  if (empty) empty.remove();
+  const d = toastData[type];
 
-  const d   = TOAST_DATA[type];
-  const uid = 'toast-' + Date.now();
-  const el  = document.createElement('div');
-  el.className = `a alert-ts-${type}`;
-  el.id = uid;
-  el.style.cssText = 'opacity:0;transform:translateX(1.5rem);transition:opacity .28s,transform .28s;margin-bottom:0';
+  const instance = themestrap.PluginAlert.create({
+    type: type,
+    title: d.title,
+    message: d.message,
+    showIcon: true,
+    dismissible: true,
+    autoDismiss: true,
+    delay: type === 'warning' ? 8000 : 5000,
+    pauseOnHover: true,
+    animation: 'slide',
+    actions: type === 'warning'
+      ? [
+          { label: 'Save', key: 'save', variant: 'primary' },
+          { label: 'Discard', key: 'discard', variant: 'secondary' }
+        ]
+      : [],
+    onAction: function (key) {
+      $('#toast-preview').attr(
+        'data-last-action',
+        key
+      );
+    }
+  });
 
-  let actHTML = '';
-  if (d.actions) {
-    actHTML = `<div class="a-actions">${d.actions.map(a =>
-      `<button class="a-btn ${a.p ? 'a-btn-p' : 'a-btn-s'}" onclick="dismissToast('${uid}')">${a.l}</button>`
-    ).join('')}</div>`;
-  }
-
-  el.innerHTML = `
-    <span class="a-icon">${ICONS[type]}</span>
-    <div class="a-body">
-      <p class="a-title">${d.title}</p>
-      <p class="a-text">${d.text}</p>
-      ${actHTML}
-    </div>
-    <button class="a-close" onclick="dismissToast('${uid}')">${CLOSE}</button>
-    <div class="a-bar" id="tbar-${uid}"></div>`;
-  area.appendChild(el);
-
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    el.style.opacity   = '1';
-    el.style.transform = 'translateX(0)';
-  }));
-
-  const bar   = document.getElementById(`tbar-${uid}`);
-  const delay = 5000;
-  bar.style.transitionDuration = `${delay}ms`;
-  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.transform = 'scaleX(0)'; }));
-  setTimeout(() => dismissToast(uid), delay);
+  $('#toast-preview').text(
+    'Toast created: ' + type + ' · instance available via PluginAlert.create()'
+  );
 }
 
-function dismissToast(uid) {
-  const el = document.getElementById(uid);
-  if (!el) return;
-  el.style.transition = 'opacity .25s,max-height .3s ease,margin .3s ease,padding .3s ease';
-  el.style.overflow   = 'hidden';
-  el.style.maxHeight  = el.offsetHeight + 'px';
-  setTimeout(() => {
-    el.style.opacity      = '0';
-    el.style.maxHeight    = '0';
-    el.style.marginBottom = '0';
-    el.style.paddingTop   = '0';
-    el.style.paddingBottom= '0';
-    setTimeout(() => {
-      el.remove();
-      const area = document.getElementById('toast-area');
-      if (area && !area.querySelector('.a')) {
-        const emp = document.createElement('p');
-        emp.className = 'toast-empty';
-        emp.id = 'toast-empty';
-        emp.textContent = 'Toasts appear here';
-        area.appendChild(emp);
-      }
-    }, 320);
-  }, 20);
+function spawnInContainer() {
+  themestrap.PluginAlert.create('#custom-container', {
+    type: 'success',
+    title: 'Alert created',
+    message: 'This alert was inserted into the custom container.',
+    showIcon: true,
+    dismissible: true,
+    animation: 'slide'
+  });
 }
 </script>
+
+</body>
+</html>

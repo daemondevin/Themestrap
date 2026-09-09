@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Themestrap — Random Images</title>
+
+    <link rel="stylesheet" href="../css/themestrap.css">
+
+    <link rel="stylesheet" href="../vendor/animate/animate.css">
+
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-2: #21262d;
+            --border: rgba(255, 255, 255, .10);
+            --text: #f0f6fc;
+            --muted: #8b949e;
+            --accent: #58a6ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        .demo-header {
+            max-width: 1200px;
+            margin: auto;
+            padding: 72px 24px 40px;
+        }
+
+        .eyebrow {
+            margin-bottom: 14px;
+            color: var(--accent);
+            font-size: .8rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .demo-header h1 {
+            max-width: 800px;
+            margin: 0;
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            line-height: .95;
+            letter-spacing: -.045em;
+        }
+
+        .demo-header p {
+            max-width: 720px;
+            margin: 24px 0 0;
+            color: var(--muted);
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 24px 100px;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 560px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: #000;
+        }
+
+        .hero .plugin-random-images {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero .plugin-random-images img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            background:
+                linear-gradient(90deg,
+                    rgba(0, 0, 0, .78),
+                    rgba(0, 0, 0, .20) 65%,
+                    rgba(0, 0, 0, .05));
+        }
+
+        .hero-content {
+            position: absolute;
+            z-index: 5;
+            left: 48px;
+            bottom: 48px;
+            width: min(600px, calc(100% - 96px));
+        }
+
+        .hero-content h2 {
+            margin: 0 0 14px;
+            font-size: clamp(2rem, 5vw, 4rem);
+            line-height: 1;
+        }
+
+        .hero-content p {
+            margin: 0;
+            color: rgba(255, 255, 255, .75);
+            line-height: 1.7;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            margin-bottom: 16px;
+            padding: 6px 10px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            border-radius: 999px;
+            background: rgba(0, 0, 0, .3);
+            backdrop-filter: blur(10px);
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        button {
+            appearance: none;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 15px;
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            font: inherit;
+        }
+
+        button:hover {
+            background: var(--surface-2);
+        }
+
+        button.primary {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #000;
+        }
+
+        button.primary:hover {
+            filter: brightness(1.08);
+        }
+
+        .section {
+            margin-top: 80px;
+        }
+
+        .section-heading {
+            margin-bottom: 24px;
+        }
+
+        .section-heading h2 {
+            margin: 0 0 8px;
+            font-size: 2rem;
+        }
+
+        .section-heading p {
+            margin: 0;
+            max-width: 700px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--surface);
+        }
+
+        .card-media {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 16 / 10;
+            background: #000;
+        }
+
+        .card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 22px;
+        }
+
+        .card-body h3 {
+            margin: 0 0 8px;
+            font-size: 1.2rem;
+        }
+
+        .card-body p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .status-item {
+            padding: 5px 9px;
+            border-radius: 6px;
+            background: var(--surface-2);
+            color: var(--muted);
+            font-family: monospace;
+            font-size: .75rem;
+        }
+
+        .showcase {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 21 / 9;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #000;
+        }
+
+        .showcase img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .showcase-caption {
+            position: absolute;
+            z-index: 5;
+            left: 28px;
+            bottom: 28px;
+            padding: 10px 14px;
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, .45);
+            backdrop-filter: blur(10px);
+            font-size: .85rem;
+        }
+
+        pre {
+            overflow-x: auto;
+            margin: 18px 0 0;
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #010409;
+            color: #c9d1d9;
+            font-family:
+                ui-monospace,
+                SFMono-Regular,
+                Menlo,
+                Monaco,
+                Consolas,
+                monospace;
+            font-size: .78rem;
+            line-height: 1.7;
+        }
+
+        footer {
+            padding-top: 40px;
+            color: var(--muted);
+            text-align: center;
+            font-size: .8rem;
+        }
+
+        @media (max-width: 700px) {
+
+            .demo-header {
+                padding-top: 42px;
+            }
+
+            main {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .hero {
+                min-height: 500px;
+            }
+
+            .hero-content {
+                left: 24px;
+                bottom: 24px;
+                width: calc(100% - 48px);
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .showcase {
+                aspect-ratio: 4 / 3;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+    <header class="demo-header">
+
+        <div class="eyebrow">
+            Themestrap Plugin
+        </div>
+
+        <h1>
+            Random Images
+        </h1>
+
+        <p>
+            A lightweight image rotation plugin with random
+            selection, sequential playback, custom animations,
+            per-image timing, stopping conditions, and a
+            dependency-free wrapper slideshow.
+        </p>
+
+    </header>
+
+
+    <main>
+
+        <section class="hero">
+
+            <div id="hero-slider" class="plugin-random-images">
+
+                <img src="https://picsum.photos/id/1015/1600/900" alt="" data-rimage-animate-in="fadeIn"
+                    data-rimage-animate-out="fadeOut">
+
+                <img src="https://picsum.photos/id/1016/1600/900" alt="" data-rimage-animate-in="zoomIn"
+                    data-rimage-animate-out="zoomOut">
+
+                <img src="https://picsum.photos/id/1020/1600/900" alt="" data-rimage-animate-in="fadeIn"
+                    data-rimage-animate-out="fadeOut">
+
+                <img src="https://picsum.photos/id/1024/1600/900" alt="" data-rimage-animate-in="slideInRight"
+                    data-rimage-animate-out="slideOutLeft">
+
+                <img src="https://picsum.photos/id/1035/1600/900" alt="" data-rimage-animate-in="fadeIn"
+                    data-rimage-animate-out="fadeOut">
+
+            </div>
+
+
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    Wrapper Mode
+                </div>
+
+                <h2>
+                    Images that stay loaded.
+                </h2>
+
+                <p>
+                    The wrapper implementation keeps every image
+                    in the DOM and simply transitions between them.
+                    No repeated <code>src</code> swapping.
+                </p>
+
+                <div class="controls">
+
+                    <button class="primary" id="hero-start">
+                        Start
+                    </button>
+
+                    <button id="hero-stop">
+                        Stop
+                    </button>
+
+                    <button id="hero-next">
+                        Next
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="section">
+
+            <div class="section-heading">
+
+                <h2>
+                    Two ways to rotate
+                </h2>
+
+                <p>
+                    A single image can pull from an external image
+                    list, while wrapper mode can work directly with
+                    a collection of existing images.
+                </p>
+
+            </div>
+
+
+            <div class="grid">
+
+
+                <!-- Random -->
+
+                <article class="card">
+
+                    <div class="card-media">
+
+                        <img id="random-demo" class="plugin-random-images" src="https://picsum.photos/id/1040/900/560"
+                            alt="Random mode">
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <h3>
+                            Random selection
+                        </h3>
+
+                        <p>
+                            A new image is selected randomly while
+                            avoiding an immediate repeat.
+                        </p>
+
+                        <div class="status">
+
+                            <span class="status-item">
+                                random: true
+                            </span>
+
+                            <span class="status-item">
+                                delay: 2500
+                            </span>
+
+                        </div>
+
+                        <div class="controls">
+
+                            <button class="primary" id="random-start">
+                                Start
+                            </button>
+
+                            <button id="random-stop">
+                                Stop
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Sequential -->
+
+                <article class="card">
+
+                    <div class="card-media">
+
+                        <img id="sequence-demo" class="plugin-random-images" src="https://picsum.photos/id/1050/900/560"
+                            alt="Sequential mode">
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <h3>
+                            Sequential selection
+                        </h3>
+
+                        <p>
+                            Images are presented in a predictable
+                            sequence rather than randomly.
+                        </p>
+
+                        <div class="status">
+
+                            <span class="status-item">
+                                random: false
+                            </span>
+
+                            <span class="status-item">
+                                delay: 2500
+                            </span>
+
+                        </div>
+
+                        <div class="controls">
+
+                            <button class="primary" id="sequence-start">
+                                Start
+                            </button>
+
+                            <button id="sequence-stop">
+                                Stop
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+        <section class="section">
+
+            <div class="section-heading">
+
+                <h2>
+                    Per-image animation
+                </h2>
+
+                <p>
+                    Wrapper images can define their own entrance
+                    and exit animations using data attributes.
+                </p>
+
+            </div>
+
+
+            <div id="animation-showcase" class="showcase plugin-random-images">
+
+                <img src="https://picsum.photos/id/1060/1400/600" alt="" data-rimage-animate-in="fadeIn"
+                    data-rimage-animate-out="fadeOut">
+
+                <img src="https://picsum.photos/id/1061/1400/600" alt="" data-rimage-animate-in="zoomIn"
+                    data-rimage-animate-out="zoomOut">
+
+                <img src="https://picsum.photos/id/1062/1400/600" alt="" data-rimage-animate-in="slideInRight"
+                    data-rimage-animate-out="slideOutLeft">
+
+                <img src="https://picsum.photos/id/1063/1400/600" alt="" data-rimage-animate-in="fadeInUp"
+                    data-rimage-animate-out="fadeOutDown">
+
+                <div class="showcase-caption">
+                    Each image controls its own transition.
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="section">
+
+            <div class="section-heading">
+
+                <h2>
+                    Per-image timing
+                </h2>
+
+                <p>
+                    Individual images can specify how long their
+                    transition should take with
+                    <code>data-rimage-delay</code>.
+                </p>
+
+            </div>
+
+
+            <div id="timed-showcase" class="showcase plugin-random-images">
+
+                <img src="https://picsum.photos/id/1065/1400/600" alt="" data-rimage-delay="1500">
+
+                <img src="https://picsum.photos/id/1066/1400/600" alt="" data-rimage-delay="3000">
+
+                <img src="https://picsum.photos/id/1067/1400/600" alt="" data-rimage-delay="5000">
+
+                <img src="https://picsum.photos/id/1068/1400/600" alt="" data-rimage-delay="2000">
+
+            </div>
+
+            <pre><code>&lt;img
+    src="image.jpg"
+    data-rimage-delay="3000"
+&gt;</code></pre>
+
+        </section>
+
+        <section class="section">
+
+            <div class="section-heading">
+
+                <h2>
+                    Automatic stopping
+                </h2>
+
+                <p>
+                    Random Images can stop automatically after a
+                    specific number of rotations or when a particular
+                    image index is reached.
+                </p>
+
+            </div>
+
+
+            <div class="grid">
+
+
+                <article class="card">
+
+                    <div class="card-media">
+
+                        <img id="three-times" class="plugin-random-images" src="https://picsum.photos/id/1070/900/560"
+                            alt="">
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <h3>
+                            Three rotations
+                        </h3>
+
+                        <p>
+                            Automatically stops after three changes.
+                        </p>
+
+                        <pre><code>stopAfterXTimes: 3</code></pre>
+
+                    </div>
+
+                </article>
+
+
+                <article class="card">
+
+                    <div class="card-media">
+
+                        <img id="stop-index" class="plugin-random-images" src="https://picsum.photos/id/1075/900/560"
+                            alt="">
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <h3>
+                            Stop at index 2
+                        </h3>
+
+                        <p>
+                            Automatically stops when image index
+                            <code>2</code> is displayed.
+                        </p>
+
+                        <pre><code>stopAtImageIndex: 2</code></pre>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+        <section class="section">
+
+            <div class="section-heading">
+
+                <h2>
+                    JavaScript API
+                </h2>
+
+                <p>
+                    The plugin exposes a small dependency-free API
+                    for controlling individual instances.
+                </p>
+
+            </div>
+
+            <pre><code>const instance =
+    themestrap.PluginRandomImages.init(
+        element,
+        options
+    );
+
+instance.start();
+instance.stop();
+instance.destroy();
+
+const existing =
+    themestrap.PluginRandomImages.getInstance(
+        element
+    );
+
+themestrap.PluginRandomImages.initAll(
+    '.plugin-random-images'
+);</code></pre>
+
+        </section>
+
+
+        <footer>
+            Themestrap · PluginRandomImages
+        </footer>
+
+    </main>
+
+
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/themestrap.js"></script>
+    <script src="../js/components/themestrap.plugin.randomimages.js"></script>
+
+
+    <script>
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            () => {
+
+                const images = [
+                    'https://picsum.photos/id/1040/900/560',
+                    'https://picsum.photos/id/1041/900/560',
+                    'https://picsum.photos/id/1042/900/560',
+                    'https://picsum.photos/id/1043/900/560',
+                    'https://picsum.photos/id/1044/900/560',
+                    'https://picsum.photos/id/1045/900/560'
+                ];
+
+                const hero =
+                    themestrap.PluginRandomImages.init(
+                        '#hero-slider',
+                        {
+                            random: true,
+                            delay: 3500,
+                            animationDelay: 1000
+                        }
+                    );
+
+
+                document
+                    .querySelector('#hero-start')
+                    .addEventListener(
+                        'click',
+                        () => {
+
+                            hero.start(
+                                () => hero.perWrapper(),
+                                3500
+                            );
+
+                        }
+                    );
+
+
+                document
+                    .querySelector('#hero-stop')
+                    .addEventListener(
+                        'click',
+                        () => {
+
+                            hero.stop();
+
+                        }
+                    );
+
+
+                document
+                    .querySelector('#hero-next')
+                    .addEventListener(
+                        'click',
+                        () => {
+
+                            hero.stop();
+                            hero.perWrapper();
+
+                        }
+                    );
+
+                const random =
+                    themestrap.PluginRandomImages.init(
+                        '#random-demo',
+                        {
+                            imagesListURL: [
+                                ...images
+                            ],
+                            random: true,
+                            delay: 2500,
+                            animateIn: 'fadeIn',
+                            animateOut: 'fadeOut'
+                        }
+                    );
+
+
+                document
+                    .querySelector('#random-start')
+                    .addEventListener(
+                        'click',
+                        () => {
+
+                            random.start(
+                                () => random.perImageTag(),
+                                2500
+                            );
+
+                        }
+                    );
+
+
+                document
+                    .querySelector('#random-stop')
+                    .addEventListener(
+                        'click',
+                        () => {
+
+                            random.stop();
+
+                        }
+                    );
+
+                const sequence =
+                    themestrap.PluginRandomImages.init(
+                        '#sequence-demo',
+                        {
+                            imagesListURL: [
+                                ...images
+                            ],
+                            random: false,
+                            delay: 2500,
+                            animateIn: 'fadeIn',
+                            animateOut: 'fadeOut'
+                        }
+                    );
+
+
+                document
+                    .querySelector('#sequence-start')
+                    .addEventListener(
+                        'click',
+                        () => {
+
+                            sequence.start(
+                                () => sequence.perImageTag(),
+                                2500
+                            );
+
+                        }
+                    );
+
+
+                document
+                    .querySelector('#sequence-stop')
+                    .addEventListener(
+                        'click',
+                        () => {
+
+                            sequence.stop();
+
+                        }
+                    );
+
+                themestrap.PluginRandomImages.init(
+                    '#animation-showcase',
+                    {
+                        random: true,
+                        delay: 3500,
+                        animationDelay: 1000
+                    }
+                );
+
+                themestrap.PluginRandomImages.init(
+                    '#timed-showcase',
+                    {
+                        random: true,
+                        delay: 3000,
+                        animationDelay: 1000
+                    }
+                );
+
+                themestrap.PluginRandomImages.init(
+                    '#three-times',
+                    {
+                        imagesListURL: [
+                            ...images
+                        ],
+                        random: true,
+                        delay: 1800,
+                        stopAfterXTimes: 3
+                    }
+                );
+
+                themestrap.PluginRandomImages.init(
+                    '#stop-index',
+                    {
+                        imagesListURL: [
+                            ...images
+                        ],
+                        random: false,
+                        delay: 1800,
+                        stopAtImageIndex: 2
+                    }
+                );
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

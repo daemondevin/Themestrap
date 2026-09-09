@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Themestrap — Uncommon Components Demo</title>
+<link rel="icon" type="image/png" href="../img/favicon-96x96.png" sizes="96x96">
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+
+<style>
+:root {
+    --ink: #172033;
+    --muted: #64748b;
+    --paper: #f5f7fa;
+    --card: #ffffff;
+    --line: #dfe5ec;
+    --navy: #0b1728;
+    --navy-2: #10243b;
+    --orange: #e8672a;
+    --teal: #22a6b3;
+    --purple: #7567d9;
+    --shadow: 0 16px 45px rgba(11,23,40,.08);
+}
+
+html { scroll-behavior: smooth; }
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    transition: background .25s ease, color .25s ease;
+}
+body::selection { background: rgba(232,103,42,.25); }
+
+html.dark body {
+    --ink: #e7edf5;
+    --muted: #9aa9bb;
+    --paper: #07111e;
+    --card: #0d1b2c;
+    --line: #203249;
+    --navy: #050d17;
+    --navy-2: #0b1b2d;
+    --shadow: 0 16px 45px rgba(0,0,0,.28);
+}
+
+.demo-hero {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 82% 25%, rgba(34,166,179,.25), transparent 25%),
+        radial-gradient(circle at 15% 80%, rgba(117,103,217,.22), transparent 30%),
+        linear-gradient(135deg, var(--navy), var(--navy-2));
+    color: #fff;
+    padding: 74px 0 68px;
+    border-bottom: 3px solid var(--orange);
+}
+.demo-hero::after {
+    content: "";
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 50%;
+    right: -120px;
+    top: -160px;
+}
+.eyebrow {
+    font: 600 .72rem/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #65d3dc;
+}
+.demo-hero h1 {
+    max-width: 900px;
+    margin: 12px 0 14px;
+    font-family: Georgia, serif;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+}
+.demo-hero p {
+    max-width: 740px;
+    margin: 0;
+    color: #aebed0;
+    font-size: 1.02rem;
+    line-height: 1.7;
+}
+.hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 26px;
+}
+.hero-pills span {
+    padding: 7px 11px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 999px;
+    background: rgba(255,255,255,.055);
+    color: #d7e2ee;
+    font: 500 .72rem ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(245,247,250,.9);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+}
+html.dark .toolbar { background: rgba(7,17,30,.88); }
+.toolbar .inner {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+.toolbar .brand {
+    font: 700 .8rem ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: var(--ink);
+}
+.toolbar nav {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+}
+.toolbar nav a {
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--muted);
+    padding: 7px 9px;
+    border-radius: 7px;
+    font-size: .78rem;
+}
+.toolbar nav a:hover { background: rgba(100,116,139,.1); color: var(--ink); }
+
+main { padding: 52px 0 90px; }
+
+.intro {
+    max-width: 760px;
+    margin-bottom: 34px;
+}
+.intro h2 {
+    font-family: Georgia, serif;
+    font-size: 2rem;
+    margin: 0 0 8px;
+}
+.intro p { color: var(--muted); line-height: 1.7; }
+
+.demo-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+.card-head {
+    padding: 19px 23px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.card-head h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 750;
+}
+.plugin-name {
+    margin-left: auto;
+    padding: 4px 8px;
+    border-radius: 5px;
+    background: rgba(34,166,179,.1);
+    color: var(--teal);
+    font: 600 .66rem ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.card-body { padding: 25px; }
+.card-copy {
+    color: var(--muted);
+    font-size: .9rem;
+    line-height: 1.65;
+}
+.demo-label {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font: 700 .64rem ui-monospace, SFMono-Regular, Consolas, monospace;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.stage {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(100,116,139,.035);
+    padding: 22px;
+}
+pre.code {
+    margin: 18px 0 0;
+    padding: 15px 17px;
+    overflow: auto;
+    border-radius: 10px;
+    background: #081321;
+    color: #b9d0e6;
+    font: 12px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+pre.code .tag { color: #75d4dc; }
+pre.code .str { color: #b9df91; }
+pre.code .key { color: #f4c47a; }
+
+[data-plugin-highlight] {
+    position: relative;
+    border-radius: 10px;
+    margin: 18px 0 0;
+    font: 12px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+html.dark pre[data-plugin-highlight] code {
+    background: #081321;
+}
+
+[data-plugin-darkmode] {
+    border: 1px solid rgba(0, 0, 0, .16);
+    background: rgba(0, 0, 0, .08);
+    color: #64748b;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-size: .8rem;
+}
+
+[data-plugin-darkmode]:hover {
+    background: var(--bs-dark);
+    color: var(--bs-body-bg);
+}
+
+html.dark [data-plugin-darkmode] {
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    border-radius: 9px;
+    padding: 8px 11px;
+    font-size: .8rem;
+}
+
+html.dark [data-plugin-darkmode]:hover {
+    background: var(--bs-body-color);
+    color: var(--bs-dark);
+}
+
+/* Animate plugin demo */
+.appear-animation {
+    opacity: 0;
+}
+.appear-animation-visible.ts-rise {
+    animation: tsRise .75s cubic-bezier(.2,.75,.25,1) forwards;
+}
+@keyframes tsRise {
+    from { opacity: 0; transform: translateY(26px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.animate-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.animate-tile {
+    min-height: 125px;
+    border-radius: 11px;
+    padding: 17px;
+    background: linear-gradient(145deg, rgba(34,166,179,.12), rgba(117,103,217,.1));
+    border: 1px solid var(--line);
+}
+.animate-tile strong { display: block; margin-bottom: 7px; }
+.animate-tile small { color: var(--muted); line-height: 1.5; }
+@media (max-width: 700px) { .animate-grid { grid-template-columns: 1fr; } }
+
+/* Hover effect */
+.magnetic-zone {
+    min-height: 190px;
+    display: grid;
+    place-items: center;
+}
+.magnetic-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 999px;
+    padding: 15px 24px;
+    background: var(--navy);
+    color: #fff;
+    box-shadow: 0 14px 30px rgba(11,23,40,.18);
+    cursor: pointer;
+    transition: transform .18s ease;
+}
+
+/* Read more */
+.readmore-demo {
+    position: relative;
+    max-width: 720px;
+    padding: 18px 18px 48px;
+    border-radius: 11px;
+    background: rgba(100,116,139,.045);
+}
+.readmore-demo p { line-height: 1.72; color: var(--muted); }
+.readmore-button-wrapper a {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 7px;
+    background: var(--orange);
+    color: #fff;
+    text-decoration: none;
+    font-size: .78rem;
+}
+
+/* Scroll shadow */
+.scroll-box {
+    height: 235px;
+    overflow: auto;
+    border-radius: 11px;
+    background: var(--navy);
+    color: #d7e4f0;
+    padding: 16px;
+}
+.logline {
+    padding: 10px 12px;
+    margin-bottom: 7px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,.035);
+    font: 12px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.logline b { color: #65d3dc; font-weight: 500; }
+
+/* Random images */
+.random-frame {
+    position: relative;
+    max-width: 650px;
+    height: 285px;
+    margin: auto;
+    overflow: hidden;
+    border-radius: 14px;
+    background: #091524;
+}
+.random-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.random-caption {
+    position: absolute;
+    left: 18px;
+    bottom: 17px;
+    z-index: 2;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: #fff;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(8px);
+    font-size: .78rem;
+}
+
+/* RandomImages supplies animateIn/animateOut class names; these keep the demo
+   self-contained instead of depending on animate.css. */
+.animated { backface-visibility: hidden; }
+.fadeIn { animation: tsFadeIn 1s ease forwards; }
+.fadeOut { animation: tsFadeOut 1s ease forwards; }
+@keyframes tsFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tsFadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* Loading overlay */
+.overlay-stage {
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    border: 1px dashed var(--line);
+    background: rgba(100,116,139,.04);
+}
+.overlay-content { text-align: center; }
+.overlay-content strong { display:block; margin-bottom: 5px; }
+.overlay-content span { color: var(--muted); font-size: .82rem; }
+
+/* Toast controls */
+.toast-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Footer */
+footer {
+    color: var(--muted);
+    text-align: center;
+    padding: 0 0 55px;
+    font-size: .75rem;
+}
+footer code { color: var(--teal); }
+
+/* Dark mode polish for Bootstrap-ish controls */
+html.dark .btn-outline-dark { color: #dbe7f2; border-color: #415269; }
+html.dark .btn-light { background: #17283c; border-color: #2b4058; color: #dbe7f2; }
+</style>
+</head>
+
+<body>
+
+<header class="demo-hero">
+    <div class="container">
+        <div class="eyebrow">Themestrap · Components</div>
+        <h1>The uncommon stuff.</h1>
+        <p>
+            A page built specifically to showcase some of the more uncommon components
+            that are easy to overlook: motion, magnetic interaction, scroll affordances,
+            progressive disclosure, randomized imagery, runtime overlays, toasts and
+            persistent dark mode.
+        </p>
+        <div class="hero-pills">
+            <span>zero build</span>
+            <span>jQuery</span>
+            <span>Bootstrap 5</span>
+            <span>lazy CSS</span>
+            <span>destroy / re-init friendly</span>
+        </div>
+    </div>
+</header>
+
+<div class="toolbar">
+    <div class="container inner">
+        <div class="brand">MULTIPLE COMPONENT DEMO</div>
+        <nav aria-label="Demo sections">
+            <a href="#readmore">Read More</a>
+            <a href="#hover">Magnetic</a>
+            <a href="#motion">Motion</a>
+            <a href="#scroll">Scroll Shadow</a>
+            <a href="#random">Random Images</a>
+            <a href="#overlay">Overlay</a>
+            <a href="#toast">Toast</a>
+        </nav>
+        <button id="theme-toggle" data-plugin-darkmode></button>
+    </div>
+</div>
+
+<main>
+<div class="container">
+
+    <div class="intro">
+        <h2>A practical component sampler</h2>
+        <p>
+            These aren't isolated widgets. Each example is placed in a small piece of
+            interface so the plugin is doing something useful rather than merely
+            displaying a button with a label.
+        </p>
+    </div>
+
+    <!-- Read More -->
+    <section id="readmore" class="demo-card">
+        <div class="card-head">
+            <h3>Progressive disclosure</h3>
+            <span class="plugin-name">PluginReadMore</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                ReadMore turns a long block into a compact card while preserving the
+                original content in the DOM. The gradient overlay and toggle are created
+                by the plugin.
+            </p>
+            <div class="stage">
+                <p class="demo-label">Live article</p>
+                <div class="readmore-demo" id="readmore-demo" data-plugin-read-more
+                     data-plugin-options='{"overlayColor":"#ffffff","darkOverlayColor":"#111e2f","maxHeight":135,"overlayHeight":125,"enableToggle":true,"buttonOpenLabel":"Read full article ↓","buttonCloseLabel":"Collapse article ↑","align":"center"}'>
+                    <p>
+                        Themestrap began with a simple premise: common interface behavior 
+                        should be reusable without forcing a project into a build system, 
+                        application framework, or large runtime. A website should be able 
+                        to adopt the pieces of interaction it actually needs without 
+                        having to restructure the entire project around them.
+                    </p>
+                    <p>
+                        That makes small components surprisingly important. A tooltip can 
+                        explain an unfamiliar control. A scroll affordance can make a long 
+                        page easier to navigate. A loading overlay can provide feedback 
+                        while an operation is taking place. A notification can confirm that 
+                        an action succeeded. None of these features is particularly large 
+                        on its own, but together they can transform an interface from 
+                        something that merely functions into something that feels 
+                        polished and intentional by design.
+                    </p>
+                    <p>
+                        The less obvious benefit is composability. Themestrap components 
+                        are designed to exist independently while still working naturally 
+                        alongside one another. A component can be initialized from markup, 
+                        configured through data attributes, and exposed through JavaScript 
+                        when an application needs direct control. The same component can 
+                        therefore live comfortably in a static HTML page, a CMS template, 
+                        a server-rendered application, or a dynamically inserted fragment.
+                    </p>
+                    <p>
+                        This approach also keeps responsibility where it belongs. A 
+                        tooltip does not need to understand the application that contains 
+                        it. A carousel does not need to manage the page around it. A 
+                        loading indicator does not need to know how an API request is 
+                        implemented. Each component provides a focused piece of behavior 
+                        while leaving the surrounding application in control.
+                    </p>
+                    <p>
+                        This demo deliberately combines the quieter components rather 
+                        than presenting a gallery of conventional accordions, tabs, and 
+                        modals. The intention is to demonstrate something closer to how 
+                        these components are actually useful in a project: not as 
+                        isolated attractions, but as small pieces that work together.
+                    </p>
+                    <p>
+                        The result is an ordinary interface enhanced by a collection of 
+                        purposeful details. Tooltips provide context, loading states 
+                        communicate progress, scroll controls improve navigation, and 
+                        other supporting components respond to the user's actions without 
+                        demanding attention for themselves.
+                    </p>
+                    <p>
+                        That is the role Themestrap is intended to fill. It is not 
+                        necessary to turn every website into a full application simply 
+                        because it needs a little interaction. Sometimes all a project 
+                        needs are a handful of well-contained components that can be 
+                        dropped into existing markup, configured when necessary, and 
+                        controlled directly when the application calls for it.
+                    </p>
+                    <p>
+                        The individual components may be small. Their ability to work 
+                        together is what makes them useful.
+                    </p>
+                    <div class="readmore-button-wrapper d-none">
+                        <a href="#"></a>
+                    </div>
+                </div>
+            </div>
+            <pre data-plugin-highlight="html"
+                data-plugin-options='{"lineNumbers": true, "showCopy": true}'><code>&lt;div data-plugin-read-more
+    data-plugin-options='{"overlayColor":"#ffffff","darkOverlayColor":"#111e2f","align":"center"}'&gt;
+    &lt;p&gt;...content...&lt;/p&gt;
+&lt;/div&gt;
+            </code></pre>
+        </div>
+    </section>
+
+    <!-- Hover Effect -->
+    <section id="hover" class="demo-card">
+        <div class="card-head">
+            <h3>Magnetic controls</h3>
+            <span class="plugin-name">PluginHoverEffect</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                HoverEffect's magnetic mode needs no third-party hover library. Move the
+                pointer around the control and the button follows the cursor slightly,
+                then settles back when the pointer leaves.
+            </p>
+            <div class="stage magnetic-zone">
+                <button id="magnetic-button"
+                        class="magnetic-button"
+                        type="button"
+                        data-plugin-hover-effect
+                        data-plugin-options='{"effect":"magnetic","magneticMx":0.12}'>
+                    <i class="bi bi-magnet"></i>
+                    Magnetic action
+                </button>
+            </div>
+            <pre data-plugin-highlight="html"
+                data-plugin-options='{"lineNumbers": true, "showCopy": true}'><code>&lt;button data-plugin-hover-effect 
+    data-plugin-options='{"effect":"magnetic","magneticMx":0.12}'&gt;
+    Magnetic action
+&lt;/button&gt;
+            </code></pre>
+        </div>
+    </section>
+
+    <!-- Animate -->
+    <section id="motion" class="demo-card">
+        <div class="card-head">
+            <h3>Motion that waits for the page</h3>
+            <span class="plugin-name">PluginAnimate</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                The Animate plugin adds the requested animation class and can coordinate
+                with the loading overlay. This example uses a custom <code>ts-rise</code>
+                animation so the plugin itself supplies the lifecycle while the page
+                supplies the visual style.
+            </p>
+            <div class="stage">
+                <p class="demo-label">Live</p>
+                <div class="animate-grid">
+                    <div class="animate-tile appear-animation"
+                         data-plugin-animate
+                         data-appear-animation="ts-rise"
+                         data-plugin-options='{"delay":300,"forceAnimation":true}'>
+                        <strong>Observe</strong>
+                        <small>Animation classes are applied by Themestrap.</small>
+                    </div>
+                    <div class="animate-tile appear-animation"
+                         data-plugin-animate
+                         data-appear-animation="ts-rise"
+                         data-appear-animation-delay="600"
+                         data-plugin-options='{"forceAnimation":true}'>
+                        <strong>Delay</strong>
+                        <small>A second element can use its own delay attribute.</small>
+                    </div>
+                    <div class="animate-tile appear-animation"
+                         data-plugin-animate
+                         data-appear-animation="ts-rise"
+                         data-appear-animation-delay="900"
+                         data-plugin-options='{"forceAnimation":true}'>
+                        <strong>Compose</strong>
+                        <small>The component does not need a framework-specific animation system.</small>
+                    </div>
+                </div>
+            </div>
+            <pre data-plugin-highlight="html"
+                data-plugin-options='{"lineNumbers": true, "showCopy": true}'><code>&lt;div data-plugin-animate
+     data-appear-animation="ts-rise"
+     data-plugin-options='{"forceAnimation":true}'>
+    Content
+&lt;/div&gt;
+            </code></pre>
+        </div>
+    </section>
+
+    <!-- Scroll Shadow -->
+    <section id="scroll" class="demo-card">
+        <div class="card-head">
+            <h3>Scroll affordance</h3>
+            <span class="plugin-name">PluginScrollShadow</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                The mask tells the user there is more content above or below the visible
+                area. Scroll inside the log and watch the edges change.
+            </p>
+            <div class="stage">
+                <p class="demo-label">Scrollable activity stream</p>
+                <div class="scroll-box" data-plugin-scroll-shadow
+                     data-plugin-options='{"size":"42px","color":"#0b1728"}'>
+                    <div class="logline"><b>09:41:02</b> module manifest loaded</div>
+                    <div class="logline"><b>09:41:03</b> dependency graph resolved</div>
+                    <div class="logline"><b>09:41:04</b> PluginTooltip registered</div>
+                    <div class="logline"><b>09:41:05</b> PluginReadMore registered</div>
+                    <div class="logline"><b>09:41:06</b> observer attached to viewport</div>
+                    <div class="logline"><b>09:41:07</b> lazy component initialized</div>
+                    <div class="logline"><b>09:41:08</b> stylesheet injected</div>
+                    <div class="logline"><b>09:41:09</b> scroll shadow state: bottom</div>
+                    <div class="logline"><b>09:41:10</b> user interaction detected</div>
+                    <div class="logline"><b>09:41:11</b> toast notification queued</div>
+                    <div class="logline"><b>09:41:12</b> theme preference checked</div>
+                    <div class="logline"><b>09:41:13</b> component state stable</div>
+                    <div class="logline"><b>09:41:14</b> background work complete</div>
+                    <div class="logline"><b>09:41:15</b> awaiting next event</div>
+                </div>
+            </div>
+            <pre data-plugin-highlight="html"
+                data-plugin-options='{"lineNumbers": true, "showCopy": true}'><code>&lt;div data-plugin-scroll-shadow
+    data-plugin-options='{"size":"42px","color":"#0b1728"}'>
+    Scrollable content
+&lt;/div&gt;
+            </code></pre>
+        </div>
+    </section>
+
+    <!-- Random Images -->
+    <section id="random" class="demo-card">
+        <div class="card-head">
+            <h3>Randomized visual feed</h3>
+            <span class="plugin-name">PluginRandomImages</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                A wrapper can contain several images and RandomImages will rotate them.
+                The demo uses inline SVG data images, so it remains self-contained and
+                doesn't depend on an image CDN.
+            </p>
+            <div class="stage">
+                <p class="demo-label">Rotating palette</p>
+                <div id="random-gallery"
+                     class="random-frame"
+                     data-plugin-random-images
+                     data-plugin-options='{"delay":2600,"random":true,"stopAfterFewSeconds":false}'>
+                    <img alt="Abstract blue landscape"
+                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 420'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%230a1929'/%3E%3Cstop offset='1' stop-color='%232ab8c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='900' height='420' fill='url(%23g)'/%3E%3Ccircle cx='710' cy='120' r='82' fill='%23ffffff' opacity='.16'/%3E%3Cpath d='M0 330L220 190l120 70 170-150 390 220v90H0z' fill='%2306121f' opacity='.75'/%3E%3C/svg%3E">
+                    <img alt="Abstract orange landscape"
+                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 420'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop stop-color='%237b2d12'/%3E%3Cstop offset='1' stop-color='%23e8672a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='900' height='420' fill='url(%23g)'/%3E%3Ccircle cx='180' cy='100' r='65' fill='%23ffe2c9' opacity='.55'/%3E%3Cpath d='M0 350L170 220l120 80 210-170 400 240v50H0z' fill='%23431911' opacity='.7'/%3E%3C/svg%3E">
+                    <img alt="Abstract purple landscape"
+                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 420'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%23271a5c'/%3E%3Cstop offset='1' stop-color='%237567d9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='900' height='420' fill='url(%23g)'/%3E%3Ccircle cx='650' cy='100' r='75' fill='%23fff' opacity='.15'/%3E%3Cpath d='M0 340L200 210l135 90 170-175 395 250v45H0z' fill='%23150e31' opacity='.72'/%3E%3C/svg%3E">
+                    <div class="random-caption">
+                        <i class="bi bi-shuffle me-1"></i> rotating every 2.6 seconds
+                    </div>
+                </div>
+            </div>
+            <pre data-plugin-highlight="html"
+                data-plugin-options='{"lineNumbers": true, "showCopy": true}'><code>&lt;div data-plugin-random-images
+    data-plugin-options='{"delay":2600,"random":true}'>
+    &lt;img ... /&gt;
+    &lt;img ... /&gt;
+&lt;/div&gt;
+            </code></pre>
+        </div>
+    </section>
+
+    <!-- Loading overlay -->
+    <section id="overlay" class="demo-card">
+        <div class="card-head">
+            <h3>Runtime loading overlay</h3>
+            <span class="plugin-name">LoadingOverlay</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                This component can be shown and hidden around an asynchronous-looking
+                operation. The demo intentionally waits two seconds so the overlay is
+                easy to inspect.
+            </p>
+            <div class="stage">
+                <div id="overlay-stage" class="overlay-stage">
+                    <div class="overlay-content">
+                        <strong>Project synchronization</strong>
+                        <span>Ready to simulate a network operation.</span>
+                        <div class="mt-3">
+                            <button id="run-overlay" class="btn btn-primary btn-sm" type="button">
+                                <i class="bi bi-cloud-arrow-down me-1"></i> Run sync
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <pre class="code"><span class="tag">const</span> overlay = $(<span class="str">'#overlay-stage'</span>).data(<span class="str">'loadingOverlay'</span>);
+overlay.show();
+<span class="tag">setTimeout</span>(() =&gt; overlay.hide(), <span class="str">2000</span>);</pre>
+        </div>
+    </section>
+
+    <!-- Toast -->
+    <section id="toast" class="demo-card">
+        <div class="card-head">
+            <h3>Application notifications</h3>
+            <span class="plugin-name">PluginToast</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                Toast is useful as a fire-and-forget component: no permanent DOM node is
+                required. Choose a message type below and Themestrap creates the
+                appropriate container and Bootstrap toast instance.
+            </p>
+            <div class="stage">
+                <p class="demo-label">Try each variant</p>
+                <div class="toast-controls">
+                    <button class="btn btn-sm btn-success toast-demo" data-type="success">Success</button>
+                    <button class="btn btn-sm btn-info toast-demo" data-type="info">Info</button>
+                    <button class="btn btn-sm btn-warning toast-demo" data-type="warning">Warning</button>
+                    <button class="btn btn-sm btn-danger toast-demo" data-type="danger">Danger</button>
+                    <button class="btn btn-sm btn-dark toast-demo" data-type="dark">Dark</button>
+                </div>
+            </div>
+            <pre class="code">themestrap.PluginToast.show({
+    title: <span class="str">'Synchronization complete'</span>,
+    body: <span class="str">'All field-kit modules are up to date.'</span>,
+    type: <span class="str">'success'</span>,
+    position: <span class="str">'top-end'</span>
+});</pre>
+        </div>
+    </section>
+
+    <!-- Tooltip -->
+    <section class="demo-card">
+        <div class="card-head">
+            <h3>Contextual microcopy</h3>
+            <span class="plugin-name">PluginTooltip</span>
+        </div>
+        <div class="card-body">
+            <p class="card-copy">
+                Tooltip supports positioning, variants, delays and live content. Hover
+                or focus the controls to see the plugin handle the presentation.
+            </p>
+            <div class="stage text-center">
+                <button class="btn btn-outline-primary mx-1"
+                        type="button"
+                        data-plugin-tooltip="This tooltip is supplied directly by the data attribute."
+                        data-plugin-options='{"type":"primary","location":"top"}'>
+                    <i class="bi bi-info-circle me-1"></i> Attribute tooltip
+                </button>
+                <button class="btn btn-outline-dark mx-1"
+                        type="button"
+                        data-plugin-tooltip=""
+                        data-plugin-options='{"content":"<strong>HTML tooltip</strong><br>Useful for richer microcopy.","html":true,"type":"light","location":"bottom"}'>
+                    <i class="bi bi-code-slash me-1"></i> HTML tooltip
+                </button>
+            </div>
+        </div>
+    </section>
+
+</div>
+</main>
+
+<footer>
+    Themestrap · multiple components demo · part of the <a href="https://github.com/daemondevin/Themestrap" target="_blank">Themestrap component library</a>
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Uncommon component set -->
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script src="../js/components/themestrap.plugin.animate.js"></script>
+<script src="../js/components/themestrap.plugin.hovereffect.js"></script>
+<script src="../js/components/themestrap.plugin.readmore.js"></script>
+<script src="../js/components/themestrap.plugin.scrollshadow.js"></script>
+<script src="../js/components/themestrap.plugin.randomimages.js"></script>
+<script src="../js/components/themestrap.plugin.loadingoverlay.js"></script>
+<script src="../js/components/themestrap.plugin.toast.js"></script>
+<script src="../js/components/themestrap.plugin.tooltip.js"></script>
+<script src="../js/components/themestrap.plugin.darkmode.js"></script>
+
+<script>
+$(function () {
+
+    if ($.isFunction($.fn['themestrapPluginHighlight']) && $('[data-plugin-highlight]').length) {
+        themestrap.fn.intObsInit('[data-plugin-highlight]:not(.manual)', 'themestrapPluginHighlight');
+    }
+
+    /* Dark mode: the plugin itself handles persistence and document attributes. */
+    $('[data-plugin-darkmode]').each(function () {
+        $(this).themestrapPluginDarkMode();
+    });
+
+    /* Explicit initialization keeps this demo independent of init.js. */
+    $('[data-plugin-animate]').each(function () {
+        const $el = $(this);
+        const opts = themestrap.fn.getOptions($el.data('plugin-options')) || {};
+        $el.themestrapPluginAnimate(opts);
+    });
+
+    $('[data-plugin-hover-effect]').each(function () {
+        const $el = $(this);
+        const opts = themestrap.fn.getOptions($el.data('plugin-options')) || {};
+        $el.themestrapPluginHoverEffect(opts);
+    });
+
+    $('[data-plugin-read-more]').each(function () {
+        const $el = $(this);
+        const opts = themestrap.fn.getOptions($el.data('plugin-options')) || {};
+        $el.themestrapPluginReadMore(opts);
+    });
+
+    $('[data-plugin-scroll-shadow]').each(function () {
+        const $el = $(this);
+        const opts = themestrap.fn.getOptions($el.data('plugin-options')) || {};
+        $el.themestrapPluginScrollShadow(opts);
+    });
+
+    $('[data-plugin-random-images]').each(function () {
+        const $el = $(this);
+        const opts = themestrap.fn.getOptions($el.data('plugin-options')) || {};
+        $el.themestrapPluginRandomImages(opts);
+    });
+
+    /* LoadingOverlay uses its own jQuery plugin name and instance key. */
+    $('#overlay-stage').loadingOverlay({
+        effect: 'pulse',
+        hideDelay: 250
+    });
+
+    $('#run-overlay').on('click', function () {
+        const $stage = $('#overlay-stage');
+        const overlay = $stage.data('loadingOverlay');
+        overlay.show();
+        $(this).prop('disabled', true);
+
+        setTimeout(function () {
+            overlay.hide();
+            $('#run-overlay').prop('disabled', false);
+            themestrap.PluginToast.show({
+                title: 'Sync complete',
+                body: 'The simulated operation finished successfully.',
+                type: 'success',
+                position: 'top-end',
+                delay: 3200
+            });
+        }, 2000);
+    });
+
+    /* Toast is intentionally demonstrated through the static API. */
+    $('.toast-demo').on('click', function () {
+        const type = $(this).data('type');
+        const messages = {
+            success: ['Success', 'Everything completed normally.'],
+            info:    ['Information', 'The field kit is running entirely in the browser.'],
+            warning: ['Warning', 'This is a demonstration notification.'],
+            danger:  ['Attention', 'The demo deliberately has no destructive operation.'],
+            dark:    ['Dark notice', 'This toast uses the dark variant.']
+        };
+
+        themestrap.PluginToast.show({
+            title: messages[type][0],
+            body: messages[type][1],
+            type: type,
+            position: 'bottom-end',
+            delay: 3600,
+            timestamp: 'just now'
+        });
+    });
+});
+</script>
+
+</body>
+</html>

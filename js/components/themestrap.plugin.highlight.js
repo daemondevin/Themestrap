@@ -1,3 +1,4 @@
+
 /**
  * Themestrap Syntax Highlight Plugin
  * Wraps highlight.js core with lazy ESM loading, language aliases, promise
@@ -45,6 +46,56 @@
  *   - After a hard core failure the loader backs off for a cooldown window to
  *     avoid hammering a down CDN, then transparently retries later.
  *
+ * CSS CUSTOM PROPERTIES
+ * All visual properties are exposed as --ts-highlight-* CSS custom properties,
+ * defined on :root. Override globally or scope to any ancestor element.
+ *
+ *   Code block
+ *     --ts-highlight-bg              Background of the <code> block.
+ *     --ts-highlight-color           Base text color inside the block.
+ *     --ts-highlight-border-radius   Border radius on bare <pre> elements.
+ *     --ts-highlight-padding         Padding inside <pre code.hljs>.
+ *
+ *   Header strip
+ *     --ts-highlight-header-bg       Background of .code-highlight-header.
+ *
+ *   Text selection
+ *     --ts-highlight-selection-bg    ::selection background inside a block.
+ *     --ts-highlight-selection-color ::selection text color inside a block.
+ *
+ *   Line-number gutter
+ *     --ts-highlight-ln-opacity      Opacity of line-number labels.
+ *     --ts-highlight-ln-gap          Right-margin / padding of the gutter.
+ *     --ts-highlight-ln-border-color Color of the gutter's right border.
+ *
+ *   Pre-marked / highlighted lines (data-plugin-highlight-lines)
+ *     --ts-highlight-marked-bg           Background tint on a marked code line.
+ *     --ts-highlight-marked-border-width Width of the left accent bar.
+ *     --ts-highlight-marked-border-color Color of the left accent bar.
+ *     --ts-highlight-marked-num-color    Number label color on a marked line.
+ *     --ts-highlight-marked-num-bg       Number label background on a marked line.
+ *
+ *   Copy button
+ *     --ts-highlight-copy-opacity        Resting opacity of the Copy button.
+ *     --ts-highlight-copy-hover-opacity  Hover opacity of the Copy button.
+ *     --ts-highlight-copy-top            Top offset of the Copy button.
+ *     --ts-highlight-copy-right          Right offset of the Copy button.
+ *     --ts-highlight-copy-success        Color used on "Copied!" confirmation.
+ *
+ *   Syntax token colours
+ *   (comment and tag swap in dark mode; the rest are mode-independent)
+ *     --ts-highlight-token-comment
+ *     --ts-highlight-token-tag
+ *     --ts-highlight-token-operator
+ *     --ts-highlight-token-variable
+ *     --ts-highlight-token-number
+ *     --ts-highlight-token-title
+ *     --ts-highlight-token-string
+ *     --ts-highlight-token-builtin
+ *     --ts-highlight-token-function
+ *     --ts-highlight-token-keyword
+ *     --ts-highlight-token-meta
+ *
  * USAGE
  *   <pre id="ex1"
  *        data-plugin-highlight="javascript"
@@ -66,461 +117,438 @@
 // Syntax Highlight
 (((themestrap = {}, $) => {
     const instanceName = '__highlight';
-
+ 
     // Resilience tuning
     // CDN endpoints (extracted so they can be swapped / mirrored in one place).
     const HLJS_CORE_URL  = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11-stable/build/es/core.js';
     const HLJS_LANG_BASE = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/es/languages/';
-    const MODX_LANG_URL  = 'https://nskiag6l.modx.dev/assets/components/themestrap/js/modx.js';
-
+    const MODX_LANG_URL  = 'https://cdn.jsdelivr.net/gh/daemondevin/cdn@main/highlighjs/languages/modx.js';
+ 
     const LOAD_TIMEOUT_MS  = 10000;  // per-attempt ceiling for a single import()
     const LOAD_RETRIES     = 2;      // extra attempts after the first (so 3 total)
     const RETRY_BASE_MS    = 400;    // exponential backoff base between attempts
     const CORE_COOLDOWN_MS = 15000;  // back-off window after a hard core failure
-
+ 
     // Syntax Highlight stylesheet — injected lazily on first init (see
     // injectStyles), so merely loading this script never adds CSS to pages
-    // that don't actually use the this plugin.
+    // that don't actually use this plugin.
     const STYLE_ID = 'ts-syntax-highlight-styles';
-    const CSS_TEXT = `            /** 
-             *  Themestrap Syntax Highlight — Styles
-             */
-            /* Code Block */
-            .code-highlight {
-                
-            }
-            
-            .code-highlight-header {
-                background-color: var(--dark--300);
-                width: 100%;
-                text-align: right;
-                border-radius: var(--border-radius);
-            }
-            
-            html.dark .code-highlight-header {
-                background-color: var(--dark-100);
-            }
-
-            .code-highlight .code-highlight-caption {
-                font-size: smaller;
-                float: left;
-                margin-left: 12px;
-                margin-top: 9px;
-                color: var(--light-200);
-            }
-
-            .code-highlight .topfix {
-                background-color: var(--dark--300);
-                width: 100%;
-                height: 1em;
-                margin-top: -1em;
-                border-bottom: 1px var(--light-rgba-10) solid;
-            }
-
-            html.dark .code-highlight .topfix {
-                background-color: var(--dark-100);
-            }
-
-            .code-highlight .buttons {
-                height: 35px;
-                margin-right: 5px;
-                border: 0;
-                outline: 0;
-                display: flex;
-                transition: 0.2s;
-                flex-direction: row;
-                flex-wrap: nowrap;
-                justify-content: flex-end;
-                align-items: center;
-            }
-
-            .code-highlight .buttons .badge {
-                margin-right:20px;
-            }
-
-            .code-highlight .button svg path, 
-            .code-highlight .button svg rect, 
-            .code-highlight .button svg polygon {
-              fill: var(--light-200);
-            }
-
-            .code-highlight .button svg {
-                width: 10px;
-                height: 10px;
-                margin: 0 8px;
-            }
-            
-            /* Light Mode - Inspired by Base16 */
-            pre code.hljs {
-                display: block;
-                overflow-x: auto;
-                padding: 1em
-            }
-
-            code.hljs {
-                padding: 3px 5px
-            }
-
-            .hljs {
-                background: var(--light-100);
-                color: var(--dark--300);
-            }
-
-            .hljs ::-moz-selection,
-            .hljs::-moz-selection {
-                background-color: var(--light-inverse);
-                color: var(--dark-inverse)
-            }
-
-            .hljs ::selection,
-            .hljs::selection {
-                background-color: var(--light-inverse);
-                color: var(--dark-inverse)
-            }
-
-            .hljs-comment {
-                color: #b8b8b8
-            }
-
-            .hljs-tag {
-                color: #585858
-            }
-
-            .hljs-operator,
-            .hljs-punctuation,
-            .hljs-subst {
-                color: #383838
-            }
-
-            .hljs-operator {
-                opacity: .7
-            }
-
-            .hljs-bullet,
-            .hljs-deletion,
-            .hljs-name,
-            .hljs-selector-tag,
-            .hljs-template-variable,
-            .hljs-variable {
-                color: #ab4642
-            }
-
-            .hljs-attr,
-            .hljs-link,
-            .hljs-literal,
-            .hljs-number,
-            .hljs-symbol,
-            .hljs-variable.constant_ {
-                color: #dc9656
-            }
-
-            .hljs-class .hljs-title,
-            .hljs-title,
-            .hljs-title.class_ {
-                color: #f7ca88
-            }
-
-            .hljs-strong {
-                font-weight: 700;
-                color: #f7ca88
-            }
-
-            .hljs-addition,
-            .hljs-code,
-            .hljs-string,
-            .hljs-title.class_.inherited__ {
-                color: #a1b56c
-            }
-
-            .hljs-built_in,
-            .hljs-doctag,
-            .hljs-keyword.hljs-atrule,
-            .hljs-quote,
-            .hljs-regexp {
-                color: #86c1b9
-            }
-
-            .hljs-attribute,
-            .hljs-function .hljs-title,
-            .hljs-section,
-            .hljs-title.function_,
-            .ruby .hljs-property {
-                color: #7cafc2
-            }
-
-            .diff .hljs-meta,
-            .hljs-keyword,
-            .hljs-template-tag,
-            .hljs-type {
-                color: #ba8baf
-            }
-
-            .hljs-emphasis {
-                color: #ba8baf;
-                font-style: italic
-            }
-
-            .hljs-meta,
-            .hljs-meta .hljs-keyword,
-            .hljs-meta .hljs-string {
-                color: #a16946
-            }
-
-            .hljs-meta .hljs-keyword,
-            .hljs-meta-keyword {
-                font-weight: 700
-            }
-            
-            /* Dark Mode - Inspired by Base16 */
-            html.dark pre code.hljs {
-                display: block;
-                overflow-x: auto;
-                padding: 1em
-            }
-
-            html.dark code.hljs {
-                padding: 3px 5px
-            }
-
-            html.dark .hljs {
-                color: #d8d8d8;
-                background: #181818
-            }
-
-            html.dark .hljs ::-moz-selection,
-            html.dark .hljs::-moz-selection {
-                background-color: #383838;
-                color: #d8d8d8
-            }
-
-            html.dark .hljs ::selection,
-            html.dark .hljs::selection {
-                background-color: #383838;
-                color: #d8d8d8
-            }
-
-            html.dark .hljs-comment {
-                color: #585858
-            }
-
-            html.dark .hljs-tag {
-                color: #b8b8b8
-            }
-
-            html.dark .hljs-operator,
-            html.dark .hljs-punctuation,
-            html.dark .hljs-subst {
-                color: #d8d8d8
-            }
-
-            html.dark .hljs-operator {
-                opacity: .7
-            }
-
-            html.dark .hljs-bullet,
-            html.dark .hljs-deletion,
-            html.dark .hljs-name,
-            html.dark .hljs-selector-tag,
-            html.dark .hljs-template-variable,
-            html.dark .hljs-variable {
-                color: #ab4642
-            }
-
-            html.dark .hljs-attr,
-            html.dark .hljs-link,
-            html.dark .hljs-literal,
-            html.dark .hljs-number,
-            html.dark .hljs-symbol,
-            html.dark .hljs-variable.constant_ {
-                color: #dc9656
-            }
-
-            html.dark .hljs-class .hljs-title,
-            html.dark .hljs-title,
-            html.dark .hljs-title.class_ {
-                color: #f7ca88
-            }
-
-            html.dark .hljs-strong {
-                font-weight: 700;
-                color: #f7ca88
-            }
-
-            html.dark .hljs-addition,
-            html.dark .hljs-code,
-            html.dark .hljs-string,
-            html.dark .hljs-title.class_.inherited__ {
-                color: #a1b56c
-            }
-
-            html.dark .hljs-built_in,
-            html.dark .hljs-doctag,
-            html.dark .hljs-keyword.hljs-atrule,
-            html.dark .hljs-quote,
-            html.dark .hljs-regexp {
-                color: #86c1b9
-            }
-
-            html.dark .hljs-attribute,
-            html.dark .hljs-function .hljs-title,
-            html.dark .hljs-section,
-            html.dark .hljs-title.function_,
-            html.dark .ruby .hljs-property {
-                color: #7cafc2
-            }
-
-            html.dark .diff .hljs-meta,
-            html.dark .hljs-keyword,
-            html.dark .hljs-template-tag,
-            html.dark .hljs-type {
-                color: #ba8baf
-            }
-
-            html.dark .hljs-emphasis {
-                color: #ba8baf;
-                font-style: italic
-            }
-
-            html.dark .hljs-meta,
-            html.dark .hljs-meta .hljs-keyword,
-            html.dark .hljs-meta .hljs-string {
-                color: #a16946
-            }
-
-            html.dark .hljs-meta .hljs-keyword,
-            html.dark .hljs-meta-keyword {
-                font-weight: 700
-            }
-
-            html.dark .hljs-ln-highlight-line {
-                background: rgba(229,192,123,.12); 
-                border-left: 2px solid #e5c07b; 
-                padding-left: 2px;
-            }
-
-            .hljs-ln-highlight-line {
-                background: rgba(229,192,123,.3); 
-                border-left: 2px solid #cfa85e; 
-                padding-left: 2px;
-            }
-
-            .hljs-ln-highlight-num {
-                color: #e5c07b; 
-                background: rgba(229,192,123,.12);
-            }
-
-            pre:not([data-plugin-highlight]) {
-                border-radius: 0.5em;
-            }
-
-            pre code, pre code.hljs {
-              display: block;
-              overflow-x: auto;
-              padding: 1em
-            }
-
-            .hljs-ts-json.attr_ {
-               color: var(--secondary);
-            }
-            .hljs-ts-json.string_ {
-               color: var(--primary--300);
-            }
-            .hljs-ts-json.number_ {
-               color: #0288d1;
-            }
-            .hljs-ts-json.literal_ {
-               color: blue;
-            }
-            .hljs-ts-json.punctuation_ {
-               color: #607d8b;
-            }
-
-            .hljs-ln-wrapper {
-                display: flex;
-                width: 100%;
-            }
-
-            .hljs-ln-numbers {
-                text-align: right;
-                margin-right: 10px;
-                padding-right: 10px;
-                border-right: 1px solid rgba(255,255,255,0.1);
-                user-select: none;
-            }
-
-            .hljs-ln-number {
-                opacity: 0.5;
-                padding: 0 5px;
-            }
-
-            .hljs-ln-code {
-                flex: 1;
-            }
-
-            .hljs-ln-line {
-                position: relative;
-                white-space: pre;
-            }
-
-            .hljs-ln-copy {
-                position: absolute;
-                left: -220px;
-                top: -20px;
-                opacity: 0;
-                cursor: pointer;
-                font-size: 12px;
-                transition: 0.2s;
-            }
-
-            .hljs-ln-copy img {
-                width: 16px;
-                height: 16px;
-            }
-
-            .hljs-ln-line:hover .hljs-ln-copy {
-                opacity: 1;
-            }
-
-            .hljs-ln-line:hover .hljs-ln-copy {
-                opacity: 1;
-            }
-
-            .hljs-ln-copy.copied {
-                color: #4caf50;
-            }
-
-            .hljs-copy-corner {
-                position: absolute;
-                z-index: 3;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .hljs-copy-btn {
-                box-shadow:inset 0px 1px 0px 0px #ffffff;
-                background:linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
-                background-color:#ffffff;
-                border-radius:8px;
-                border:1px solid #dcdcdc;
-                display:inline-block;
-                cursor:pointer;
-                color:#666666;
-                padding:3px 10px;
-                text-decoration:none;
-                text-shadow:0px 1px 0px #ffffff;
-                top: 12px;
-                right: 10px;
-                opacity: .15;
-                align-items: flex-end;
-                background-color: var(--light-rgba-20) !important;
-            }
-            
-            .hljs-copy-btn:hover {
-                background:linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
-                background-color:#f6f6f6;
-                opacity: 0.75;
-            }
-        `;
+    const CSS_TEXT = `
+        /**
+         * Themestrap Syntax Highlight — Styles
+         *
+         * All visual knobs are available as --ts-highlight-* CSS custom
+         * properties. Override them on :root (global), on any ancestor element
+         * (scoped), or inside a media query (responsive).
+         *
+         * Example — dark background everywhere:
+         *   :root { --ts-highlight-bg: #1e1e1e; }
+         *
+         * Example — amber accent on one block only:
+         *   #my-block { --ts-highlight-marked-border-color: #f59e0b; }
+         */
+ 
+        /* Custom Property Definitions */
+        :root {
+            /* Code block */
+            --ts-highlight-bg:             var(--light-100, #f2f2f2);
+            --ts-highlight-color:          var(--dark--300, #383f45);
+            --ts-highlight-border-radius:  0.5em;
+            --ts-highlight-padding:        1em;
+ 
+            /* Header strip (.code-highlight-header / .topfix) */
+            --ts-highlight-header-bg:      var(--dark--300, #383f45);
+ 
+            /* Text selection inside a block */
+            --ts-highlight-selection-bg:    var(--light-inverse, #777);
+            --ts-highlight-selection-color: var(--dark-inverse, #fff);
+ 
+            /* Line-number gutter */
+            --ts-highlight-ln-opacity:      0.5;
+            --ts-highlight-ln-gap:          10px;
+            --ts-highlight-ln-border-color: rgba(255,255,255,0.1);
+ 
+            /* Pre-marked lines (data-plugin-highlight-lines) */
+            --ts-highlight-marked-bg:           rgba(229,192,123,.3);
+            --ts-highlight-marked-border-width: 2px;
+            --ts-highlight-marked-border-color: #cfa85e;
+            --ts-highlight-marked-num-color:    #e5c07b;
+            --ts-highlight-marked-num-bg:       rgba(229,192,123,.12);
+ 
+            /* Copy button */
+            --ts-highlight-copy-opacity:        0.15;
+            --ts-highlight-copy-hover-opacity:  0.75;
+            --ts-highlight-copy-top:            12px;
+            --ts-highlight-copy-right:          10px;
+            --ts-highlight-copy-success:        #4caf50;
+ 
+            /* Syntax token colours — light-mode defaults.
+               Only comment, tag, and operator differ in dark mode;
+               the remaining eight are identical across both themes. */
+            --ts-highlight-token-comment:  #b8b8b8;
+            --ts-highlight-token-tag:      #585858;
+            --ts-highlight-token-operator: #383838;
+            --ts-highlight-token-variable: #ab4642;
+            --ts-highlight-token-number:   #dc9656;
+            --ts-highlight-token-title:    #f7ca88;
+            --ts-highlight-token-string:   #a1b56c;
+            --ts-highlight-token-builtin:  #86c1b9;
+            --ts-highlight-token-function: #7cafc2;
+            --ts-highlight-token-keyword:  #ba8baf;
+            --ts-highlight-token-meta:     #a16946;
+        }
+ 
+        /* Dark mode — system preference */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --ts-highlight-bg:              #181818;
+                --ts-highlight-color:           #d8d8d8;
+                --ts-highlight-header-bg:       var(--dark-100, #16181b);
+                --ts-highlight-selection-bg:    #383838;
+                --ts-highlight-selection-color: #d8d8d8;
+                --ts-highlight-marked-bg:       rgba(229,192,123,.12);
+                --ts-highlight-marked-border-color: #e5c07b;
+                --ts-highlight-token-comment:   #585858;
+                --ts-highlight-token-tag:       #b8b8b8;
+                --ts-highlight-token-operator:  #d8d8d8;
+            }
+        }
+ 
+        /* Dark mode — explicit Bootstrap / Themestrap theme attribute */
+        html.dark,
+        [data-bs-theme="dark"] {
+            --ts-highlight-bg:              #181818;
+            --ts-highlight-color:           #d8d8d8;
+            --ts-highlight-header-bg:       var(--dark-100, #16181b);
+            --ts-highlight-selection-bg:    #383838;
+            --ts-highlight-selection-color: #d8d8d8;
+            --ts-highlight-marked-bg:       rgba(229,192,123,.12);
+            --ts-highlight-marked-border-color: #e5c07b;
+            --ts-highlight-token-comment:   #585858;
+            --ts-highlight-token-tag:       #b8b8b8;
+            --ts-highlight-token-operator:  #d8d8d8;
+        }
+ 
+        /* Explicit light override — restores :root defaults even inside a
+           dark ancestor (e.g. a light card inside a dark page shell). */
+        [data-bs-theme="light"] {
+            --ts-highlight-bg:              var(--light-100, #f2f2f2);
+            --ts-highlight-color:           var(--dark--300, #383f45);
+            --ts-highlight-header-bg:       var(--dark--300, #383f45);
+            --ts-highlight-selection-bg:    var(--light-inverse, #777);
+            --ts-highlight-selection-color: var(--dark-inverse, #fff);
+            --ts-highlight-marked-bg:       rgba(229,192,123,.3);
+            --ts-highlight-marked-border-color: #cfa85e;
+            --ts-highlight-token-comment:   #b8b8b8;
+            --ts-highlight-token-tag:       #585858;
+            --ts-highlight-token-operator:  #383838;
+        }
+ 
+        /* === Code Block === */
+ 
+        .code-highlight-header {
+            background-color: var(--ts-highlight-header-bg);
+            width: 100%;
+            text-align: right;
+            border-radius: var(--border-radius, 4px);
+        }
+ 
+        .code-highlight .code-highlight-caption {
+            font-size: smaller;
+            float: left;
+            margin-left: 12px;
+            margin-top: 9px;
+            color: var(--light-200, #ececec);
+        }
+ 
+        .code-highlight .topfix {
+            background-color: var(--ts-highlight-header-bg);
+            width: 100%;
+            height: 1em;
+            margin-top: -1em;
+            border-bottom: 1px var(--light-rgba-10, rgba(255, 255, 255, 0.1)) solid;
+        }
+ 
+        .code-highlight .buttons {
+            height: 35px;
+            margin-right: 5px;
+            border: 0;
+            outline: 0;
+            display: flex;
+            transition: 0.2s;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: flex-end;
+            align-items: center;
+        }
+ 
+        .code-highlight .buttons .badge {
+            margin-right: 20px;
+        }
+ 
+        .code-highlight .button svg path,
+        .code-highlight .button svg rect,
+        .code-highlight .button svg polygon {
+            fill: var(--light-200, #ececec);
+        }
+ 
+        .code-highlight .button svg {
+            width: 10px;
+            height: 10px;
+            margin: 0 8px;
+        }
+ 
+        /* === Base hljs Styles === */
+ 
+        pre code.hljs {
+            display: block;
+            overflow-x: auto;
+            padding: var(--ts-highlight-padding);
+        }
+ 
+        code.hljs {
+            padding: 3px 5px;
+        }
+ 
+        .hljs {
+            background: var(--ts-highlight-bg);
+            color: var(--ts-highlight-color);
+        }
+ 
+        .hljs ::-moz-selection,
+        .hljs::-moz-selection {
+            background-color: var(--ts-highlight-selection-bg);
+            color: var(--ts-highlight-selection-color);
+        }
+ 
+        .hljs ::selection,
+        .hljs::selection {
+            background-color: var(--ts-highlight-selection-bg);
+            color: var(--ts-highlight-selection-color);
+        }
+ 
+        /* === Syntax Token Colours ===
+           Written once; dark-mode overrides are handled via var() above. */
+ 
+        .hljs-comment {
+            color: var(--ts-highlight-token-comment);
+        }
+ 
+        .hljs-tag {
+            color: var(--ts-highlight-token-tag);
+        }
+ 
+        .hljs-operator,
+        .hljs-punctuation,
+        .hljs-subst {
+            color: var(--ts-highlight-token-operator);
+        }
+ 
+        .hljs-operator {
+            opacity: .7;
+        }
+ 
+        .hljs-bullet,
+        .hljs-deletion,
+        .hljs-name,
+        .hljs-selector-tag,
+        .hljs-template-variable,
+        .hljs-variable {
+            color: var(--ts-highlight-token-variable);
+        }
+ 
+        .hljs-attr,
+        .hljs-link,
+        .hljs-literal,
+        .hljs-number,
+        .hljs-symbol,
+        .hljs-variable.constant_ {
+            color: var(--ts-highlight-token-number);
+        }
+ 
+        .hljs-class .hljs-title,
+        .hljs-title,
+        .hljs-title.class_ {
+            color: var(--ts-highlight-token-title);
+        }
+ 
+        .hljs-strong {
+            font-weight: 700;
+            color: var(--ts-highlight-token-title);
+        }
+ 
+        .hljs-addition,
+        .hljs-code,
+        .hljs-string,
+        .hljs-title.class_.inherited__ {
+            color: var(--ts-highlight-token-string);
+        }
+ 
+        .hljs-built_in,
+        .hljs-doctag,
+        .hljs-keyword.hljs-atrule,
+        .hljs-quote,
+        .hljs-regexp {
+            color: var(--ts-highlight-token-builtin);
+        }
+ 
+        .hljs-attribute,
+        .hljs-function .hljs-title,
+        .hljs-section,
+        .hljs-title.function_,
+        .ruby .hljs-property {
+            color: var(--ts-highlight-token-function);
+        }
+ 
+        .diff .hljs-meta,
+        .hljs-keyword,
+        .hljs-template-tag,
+        .hljs-type {
+            color: var(--ts-highlight-token-keyword);
+        }
+ 
+        .hljs-emphasis {
+            color: var(--ts-highlight-token-keyword);
+            font-style: italic;
+        }
+ 
+        .hljs-meta,
+        .hljs-meta .hljs-keyword,
+        .hljs-meta .hljs-string {
+            color: var(--ts-highlight-token-meta);
+        }
+ 
+        .hljs-meta .hljs-keyword,
+        .hljs-meta-keyword {
+            font-weight: 700;
+        }
+ 
+        /* Pre-marked / Highlighted Lines */
+        .hljs-ln-highlight-line {
+            background: var(--ts-highlight-marked-bg);
+            border-left: var(--ts-highlight-marked-border-width) solid var(--ts-highlight-marked-border-color);
+            padding-left: 2px;
+        }
+ 
+        .hljs-ln-highlight-num {
+            color: var(--ts-highlight-marked-num-color);
+            background: var(--ts-highlight-marked-num-bg);
+        }
+ 
+        /* === Bare <pre> (no plugin) === */
+ 
+        pre:not([data-plugin-highlight]) {
+            border-radius: var(--ts-highlight-border-radius);
+        }
+ 
+        pre code,
+        pre code.hljs {
+            display: block;
+            overflow-x: auto;
+            padding: var(--ts-highlight-padding);
+        }
+ 
+        /* Inline JSON / MODX Coloring */
+        .hljs-ts-json.attr_ {
+            color: var(--secondary, #e36159);
+        }
+        .hljs-ts-json.string_ {
+            color: var(--primary--300, #00aaff);
+        }
+        .hljs-ts-json.number_ {
+            color: #0288d1;
+        }
+        .hljs-ts-json.literal_ {
+            color: blue;
+        }
+        .hljs-ts-json.punctuation_ {
+            color: #607d8b;
+        }
+ 
+        /* Line Numbers */
+        .hljs-ln-wrapper {
+            display: flex;
+            width: 100%;
+        }
+ 
+        .hljs-ln-numbers {
+            text-align: right;
+            margin-right: var(--ts-highlight-ln-gap);
+            padding-right: var(--ts-highlight-ln-gap);
+            border-right: 1px solid var(--ts-highlight-ln-border-color);
+            user-select: none;
+        }
+ 
+        .hljs-ln-number {
+            opacity: var(--ts-highlight-ln-opacity);
+            padding: 0 5px;
+        }
+ 
+        .hljs-ln-code {
+            flex: 1;
+        }
+ 
+        .hljs-ln-line {
+            position: relative;
+            white-space: pre;
+        }
+ 
+        .hljs-ln-copy {
+            position: absolute;
+            left: -220px;
+            top: -20px;
+            opacity: 0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+ 
+        .hljs-ln-copy img {
+            width: 16px;
+            height: 16px;
+        }
+ 
+        .hljs-ln-line:hover .hljs-ln-copy {
+            opacity: 1;
+        }
+ 
+        .hljs-ln-copy.copied {
+            color: var(--ts-highlight-copy-success);
+        }
+ 
+        /* Copy Button */
+        .hljs-copy-corner {
+            position: absolute;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+        }
+ 
+        .hljs-copy-btn {
+            box-shadow: inset 0px 1px 0px 0px #ffffff;
+            background: linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dcdcdc;
+            display: inline-block;
+            cursor: pointer;
+            color: #666666;
+            padding: 3px 10px;
+            text-decoration: none;
+            text-shadow: 0px 1px 0px #ffffff;
+            top: var(--ts-highlight-copy-top);
+            right: var(--ts-highlight-copy-right);
+            opacity: var(--ts-highlight-copy-opacity);
+            align-items: flex-end;
+            background-color: var(--light-rgba-20, rgba(255, 255, 255, 0.2)) !important;
+        }
+ 
+        .hljs-copy-btn:hover {
+            background: linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
+            background-color: #f6f6f6;
+            opacity: var(--ts-highlight-copy-hover-opacity);
+        }
+    `;
 
     // Inject the stylesheet only when the plugin is actually used (called from
     // build()). Keeps the CSS out of pages that merely load the script.
@@ -989,17 +1017,17 @@
 
             // Copy button
             if (this.options.showCopy) {
-                const $copyBtn = $('<button class="btn btn-modern btn-light btn-outline btn-xs btn-effect-1 hljs-copy-corner hljs-copy-btn">Copy</button>');
+                const $copyBtn = $('<button class="btn btn-modern btn-light btn-outline btn-xs btn-effect-1 hljs-copy-corner hljs-copy-btn">' + this.options.copyIcon + '</button>');
 
                 $copyBtn.on('click', async () => {
                     const ok = await this.copy(rawText);
-                    $copyBtn.text(ok ? 'Copied!' : 'Copy failed');
+                    $copyBtn.html(ok ?  this.options.copySuccessIcon : this.options.copyFailureIcon);
                     if (ok) {
                         setTimeout(() => {
-                            themestrap.PluginToast?.show({ type: 'success', body: 'Copied!' });
+                            themestrap.PluginToast?.show({ type: 'success', title: 'Copy successful', body: 'Content copied to clipboard!' });
                         }, this.options.copyTimeout);
                     }
-                    setTimeout(() => $copyBtn.text('Copy'), this.options.copyTimeout);
+                    setTimeout(() => $copyBtn.html(this.options.copyIcon), this.options.copyTimeout);
                 });
 
                 $(elem).css('position', 'relative').append($copyBtn);
@@ -1023,7 +1051,7 @@
                         const ok = await this.copy(text);
                         if (ok) {
                             setTimeout(() => {
-                                themestrap.PluginToast?.show({ type: 'success', body: 'Copied!' });
+                                themestrap.PluginToast?.show({ type: 'success', title: 'Copy successful', body: 'Content copied to clipboard!' });
                             }, this.options.copyTimeout);
                         }
                     }
@@ -1170,6 +1198,9 @@
         theme:       'atom-one-dark',
         lineNumbers: true,
         showCopy:    true,
+        copyIcon:    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="#777"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></g></svg>',
+        copySuccessIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="#198754"><path fill="none" stroke="#198754" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.45 8.23l3.56 4.45 7.56-9.34"></path></g></svg>',
+        copyFailureIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><g fill="#dc3545"><path fill="none" stroke="#dc3545" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12.46 3.56l-8.9 8.9"></path><path fill="none" stroke="#dc3545" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.56 3.56l8.9 8.9"></path></g></svg>',
         copyTimeout: 800,
     };
 

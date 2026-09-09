@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PluginReadMore — Themestrap Demo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --page-bg:         #07090f;
+      --card-bg:         #0e1420;
+      --card-border:     #1c2535;
+      --header-bg:       #0a1018;
+      --text:            #c4cfe0;
+      --muted:           #4e5f74;
+      --accent:          #4f9cf9;
+      --accent-soft:     rgba(79,156,249,.12);
+      --accent-border:   rgba(79,156,249,.28);
+      --green:           #4ade80;
+      --amber:           #f2cc60;
+      --violet:          #a78bfa;
+      --mono-bg:         #060810;
+      --stage-light:     #ffffff;
+      --stage-gray:      #f0f4f8;
+      --stage-dark:      #1a1f35;
+      --rm-light-text:   #374151;
+      --rm-dark-text:    #94a3b8;
+      --font-display:    'Fraunces', Georgia, serif;
+      --font-ui:         'Syne', system-ui, sans-serif;
+      --font-body:       'DM Sans', system-ui, sans-serif;
+      --font-mono:       'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--page-bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* Page header */
+    .demo-header {
+      padding: 72px 0 56px;
+      text-align: center;
+    }
+    .demo-header .chip {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      border-radius: 4px;
+      padding: 4px 10px;
+      margin-bottom: 22px;
+    }
+    .demo-header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.12;
+      margin-bottom: 14px;
+    }
+    .demo-header p {
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      font-size: 15px;
+    }
+
+    /* Section label */
+    .section-label {
+      font-family: var(--font-ui);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* Demo card */
+    .demo-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 36px;
+    }
+    .demo-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 24px;
+      font-family: var(--font-ui);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .04em;
+    }
+    .demo-card-header .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .demo-card-header .badge {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: .1em;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    /* Stages */
+    .demo-stage {
+      padding: 40px 32px;
+      background: var(--stage-light);
+    }
+    .demo-stage--gray { background: var(--stage-gray); }
+    .demo-stage--dark { background: var(--stage-dark); }
+    .demo-stage--bare { background: transparent; padding: 0; }
+
+    /* Code snippet */
+    pre.snip {
+      margin: 0;
+      background: var(--mono-bg);
+      border-top: 1px solid var(--card-border);
+      padding: 20px 26px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.8;
+      color: #4e5f74;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    pre.snip .kw  { color: #ff7b72; }
+    pre.snip .fn  { color: #d2a8ff; }
+    pre.snip .str { color: #a5d6ff; }
+    pre.snip .num { color: #f2cc60; }
+    pre.snip .cm  { color: #364152; font-style: italic; }
+    pre.snip .tag { color: #7ee787; }
+    pre.snip .at  { color: #79c0ff; }
+    pre.snip .val { color: #a5d6ff; }
+    pre.snip .pn  { color: #e6edf3; }
+
+    /* Controls panel */
+    .demo-controls {
+      border-top: 1px solid var(--card-border);
+      background: var(--header-bg);
+      padding: 24px 28px;
+    }
+    .ctrl-label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .ctrl-val {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--accent);
+      margin-left: 5px;
+    }
+    .form-range { accent-color: var(--accent); }
+    .ctrl-select, .ctrl-color {
+      width: 100%;
+      background: #060a12;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .ctrl-select:focus, .ctrl-color:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,156,249,.15);
+    }
+    .ctrl-color { padding: 4px; height: 36px; cursor: pointer; }
+    .ctrl-check-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 4px;
+    }
+    .ctrl-check-wrap input[type="checkbox"] {
+      width: 15px; height: 15px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .ctrl-check-wrap label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .ctrl-btn {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      color: #000;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: opacity .15s;
+      letter-spacing: .03em;
+    }
+    .ctrl-btn:hover { opacity: .88; }
+    .ctrl-btn-outline {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .ctrl-btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Dark mode toggle pill (demo 2) */
+    .dm-toggle-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 12px 20px 0;
+    }
+    .dm-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .dm-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .dm-toggle .dm-icon { font-size: 12px; }
+
+    /* Demo 2 surface — the part that changes when dark mode is toggled */
+    .dm-surface {
+      padding: 40px 32px;
+      background: var(--stage-light);
+      transition: background 0.35s ease;
+    }
+    .dm-surface[data-bs-theme="dark"] {
+      background: var(--stage-dark);
+    }
+
+    /* Event log */
+    .demo-log {
+      border-top: 1px solid var(--card-border);
+      background: var(--mono-bg);
+      padding: 14px 26px;
+      min-height: 78px;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .demo-log .log-hd {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .log-entry {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,.03);
+    }
+    .log-entry:last-child { border-bottom: none; }
+    .log-ts    { color: var(--muted); margin-right: 10px; }
+    .log-open  { color: var(--green); }
+    .log-close { color: var(--amber); }
+    .log-init  { color: var(--accent); }
+    .log-empty { font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-style: italic; }
+
+    /* Readmore content typography */
+    .rm-prose {
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.78;
+    }
+    .rm-prose--light { color: var(--rm-light-text); }
+    .rm-prose--gray  { color: #374151; }
+    .rm-prose--dark  { color: var(--rm-dark-text); }
+    .rm-prose h5 {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .rm-prose--light h5, .rm-prose--gray h5 { color: #111827; }
+    .rm-prose--dark  h5 { color: #e2e8f0; }
+    .rm-prose p + p    { margin-top: 14px; }
+
+    /* Readmore button overrides scoped to demos */
+    .demo-stage .readmore-button-wrapper a,
+    .dm-surface .readmore-button-wrapper a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 10px 0 14px;
+      letter-spacing: .04em;
+      transition: color .15s, opacity .15s;
+    }
+    .demo-stage--dark .readmore-button-wrapper a,
+    .dm-surface[data-bs-theme="dark"] .readmore-button-wrapper a { color: var(--violet); }
+    .demo-stage--dark .readmore-button-wrapper a:hover,
+    .dm-surface[data-bs-theme="dark"] .readmore-button-wrapper a:hover { color: #fff; }
+    .demo-stage .readmore-button-wrapper a { color: var(--accent); }
+    .demo-stage .readmore-button-wrapper a:hover { color: #2563eb; }
+    .demo-stage--gray .readmore-button-wrapper a { color: #6366f1; }
+    .demo-stage--gray .readmore-button-wrapper a:hover { color: #4338ca; }
+    .dm-surface .readmore-button-wrapper a { color: var(--accent); }
+    .dm-surface .readmore-button-wrapper a:hover { color: #2563eb; }
+  </style>
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="chip">Themestrap &middot; Plugin</div>
+  <h1>Read More</h1>
+  <p>Animated content reveal with a gradient fade overlay. Dark mode support via CSS custom properties — no JS listeners.</p>
+</header>
+
+<main class="container" style="max-width: 860px; padding-bottom: 96px;">
+
+  <!-- 01 Default -->
+  <p class="section-label">01 &mdash; Default</p>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="dot" style="background: var(--accent);"></span>
+      White background &middot; default options
+    </div>
+    <div class="demo-stage">
+      <div id="rm-01">
+        <div class="rm-prose rm-prose--light">
+          <h5>The Golden Ratio in Typography</h5>
+          <p>The golden ratio, approximately 1.618, has been a cornerstone of aesthetic composition for centuries. In typography, designers apply it to determine the relationship between body text size and leading, between column width and gutter, and between headline size and body copy.</p>
+          <p>Robert Bringhurst, in <em>The Elements of Typographic Style</em>, argues that typography at its finest is invisible — the reader should be transported by the words, not distracted by the letterforms. Achieving this requires meticulous attention to proportion, rhythm, and texture.</p>
+          <p>When working with long-form editorial content, the measure — the length of a line of text — is paramount. A line of 45–75 characters is generally considered the comfortable reading range. Beyond this, the eye struggles to track from the end of one line to the start of the next without losing its place.</p>
+          <p>Modular scales, borrowed from classical composition, allow designers to establish a harmonious progression of sizes. Rather than choosing type sizes arbitrarily, a scale based on a musical interval or the golden ratio ensures that each step in the hierarchy feels natural and inevitable.</p>
+        </div>
+        <div class="readmore-button-wrapper d-none"><a href="#"></a></div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="str">'#rm-01'</span>).<span class="fn">themestrapPluginReadMore</span>({
+  <span class="at">overlayColor</span><span class="pn">:</span> <span class="str">'#ffffff'</span><span class="pn">,</span>
+  <span class="at">maxHeight</span><span class="pn">:</span>    <span class="num">110</span><span class="pn">,</span>
+<span class="pn">});</span></pre>
+  </div>
+
+  <!-- 02 Dark Mode -->
+  <p class="section-label">02 &mdash; Dark Mode</p>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="dot" style="background: var(--violet);"></span>
+      Automatic light / dark switching &middot; no JS listeners
+      <span class="badge">CSS custom props</span>
+    </div>
+
+    <div class="dm-toggle-wrap" style="background: var(--header-bg); border-bottom: 1px solid var(--card-border); padding: 10px 20px;">
+      <button class="dm-toggle" id="dm-toggle">
+        <span class="dm-icon"><i class="fas fa-moon"></i></span>
+        <span id="dm-label">Enable dark mode</span>
+      </button>
+    </div>
+
+    <div class="dm-surface" id="dm-surface">
+      <div id="rm-02">
+        <div class="rm-prose rm-prose--light" id="rm-02-prose">
+          <h5>Grid Systems &amp; Spatial Rhythm</h5>
+          <p>A grid is not a cage — it is a scaffold. The Swiss International Typographic Style, pioneered by designers like Josef Müller-Brockmann, elevated the grid from a production aid to a philosophical stance: that visual communication is most powerful when it is orderly, consistent, and purposeful.</p>
+          <p>Müller-Brockmann's grids were not rigid impositions but frameworks for decision-making. By establishing a clear hierarchy of columns, rows, and modules, the designer could allocate space with precision, ensuring that each element — image, caption, headline, body copy — occupied its correct proportion of the surface.</p>
+          <p>Contemporary digital design inherits this tradition. CSS Grid and Flexbox give web designers more expressive layout tools than their print predecessors ever had. Yet the principles remain the same: establish a spatial system early, apply it consistently, and let the content breathe within it.</p>
+          <p>The 8-point grid system, popularised through product design at companies like Google and Airbnb, is a practical application of this principle. All spacing, sizing, and layout decisions snap to multiples of 8px, creating an implicit rhythm that users feel without consciously perceiving it.</p>
+        </div>
+        <div class="readmore-button-wrapper d-none"><a href="#"></a></div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="cm">// One init — the CSS handles both modes automatically</span>
+$(<span class="str">'#rm-02'</span>).<span class="fn">themestrapPluginReadMore</span>({
+  <span class="at">overlayColor</span><span class="pn">:</span>     <span class="str">'#ffffff'</span><span class="pn">,</span>  <span class="cm">// light surface</span>
+  <span class="at">darkOverlayColor</span><span class="pn">:</span> <span class="str">'#1a1f35'</span><span class="pn">,</span>  <span class="cm">// dark surface</span>
+<span class="pn">});</span>
+
+<span class="cm">// Toggle by setting data-bs-theme on any ancestor element</span>
+<span class="fn">document</span><span class="pn">.</span><span class="fn">getElementById</span><span class="pn">(</span><span class="str">'dm-surface'</span><span class="pn">).</span><span class="fn">setAttribute</span><span class="pn">(</span><span class="str">'data-bs-theme'</span><span class="pn">,</span> <span class="str">'dark'</span><span class="pn">);</span></pre>
+  </div>
+
+  <!-- 03 Custom Gradient -->
+  <p class="section-label">03 &mdash; Custom Gradient</p>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="dot" style="background: var(--green);"></span>
+      Gray background &middot; spring easing &middot; centred button
+    </div>
+    <div class="demo-stage demo-stage--gray">
+      <div id="rm-03">
+        <div class="rm-prose rm-prose--gray">
+          <h5>Colour Theory for Digital Interfaces</h5>
+          <p>Colour in digital interfaces is never static. A brand colour specified as #3B82F6 on a white background will read differently against dark grey, against ivory, or alongside a warm amber. Designers who ignore context produce colour palettes that feel inconsistent across the product surface.</p>
+          <p>The HSL model — hue, saturation, lightness — is often a more intuitive workspace than hex or RGB. Adjusting lightness while holding hue and saturation constant produces tints and shades that feel cohesive. Building a scale of ten or twelve steps from a single hue gives a designer a flexible colour vocabulary.</p>
+          <p>Contrast ratios, mandated by WCAG 2.1, impose a useful discipline. A 4.5:1 ratio for body text forces designers to choose colours that are readable for users with low vision or colour deficiencies. Far from being a constraint, this often surfaces combinations that are simply better — more legible, more elegant, more considered.</p>
+          <p>Dark mode is not simply an inversion of the light palette. A surface that is pure white in light mode should not become pure black. A dark surface in the #1a1f35 range, with text in the #e2e8f0 range, produces a softer, more sustainable reading environment that reduces eye strain significantly.</p>
+        </div>
+        <div class="readmore-button-wrapper d-none"><a href="#"></a></div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="str">'#rm-03'</span>).<span class="fn">themestrapPluginReadMore</span>({
+  <span class="at">overlayColor</span><span class="pn">:</span>     <span class="str">'#f0f4f8'</span><span class="pn">,</span>      <span class="cm">// matches gray stage background</span>
+  <span class="at">darkOverlayColor</span><span class="pn">:</span> <span class="str">'#1a1f35'</span><span class="pn">,</span>
+  <span class="at">overlayHeight</span><span class="pn">:</span>    <span class="num">120</span><span class="pn">,</span>
+  <span class="at">maxHeight</span><span class="pn">:</span>        <span class="num">120</span><span class="pn">,</span>
+  <span class="at">align</span><span class="pn">:</span>            <span class="str">'center'</span><span class="pn">,</span>
+  <span class="at">animDuration</span><span class="pn">:</span>     <span class="num">650</span><span class="pn">,</span>
+  <span class="at">animEasing</span><span class="pn">:</span>       <span class="str">'cubic-bezier(0.34, 1.56, 0.64, 1)'</span><span class="pn">,</span>
+  <span class="at">buttonOpenLabel</span><span class="pn">:</span>  <span class="str">'Expand &lt;i class="fas fa-chevron-down ms-1"&gt;&lt;/i&gt;'</span><span class="pn">,</span>
+  <span class="at">buttonCloseLabel</span><span class="pn">:</span> <span class="str">'Collapse &lt;i class="fas fa-chevron-up ms-1"&gt;&lt;/i&gt;'</span><span class="pn">,</span>
+<span class="pn">});</span></pre>
+  </div>
+
+  <!-- 04 Playground -->
+  <p class="section-label">04 &mdash; Playground</p>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span class="dot" style="background: var(--amber);"></span>
+      Interactive controls &middot; destroy &amp; re-init &middot; live event log
+    </div>
+
+    <div class="demo-stage" id="pg-stage" style="background: var(--stage-light); transition: background 0.3s ease;">
+      <div id="rm-pg">
+        <div class="rm-prose rm-prose--light" id="pg-prose">
+          <h5>Visual Hierarchy &amp; Progressive Disclosure</h5>
+          <p>Visual hierarchy is the art of arranging elements so that the eye travels through a composition in the order the designer intends. Size, weight, colour, contrast, spacing, and position all contribute. A headline larger than body copy signals primacy; a button with high contrast demands attention; a muted caption recedes.</p>
+          <p>Information architecture — the structural organisation of content — operates at a higher level of abstraction. Where visual hierarchy governs how a single screen is read, information architecture governs how an entire product is navigated. The two disciplines are deeply interdependent: a well-architected product that is poorly presented will confuse users; a beautifully presented product that is poorly organised will frustrate them.</p>
+          <p>Card-based layouts offer a compelling pattern for content-heavy products. Cards create clear boundaries between discrete units of information, allow for variable content height within a consistent grid, and transfer well across screen sizes. Their limitation is density: when many cards occupy the same view, the result can feel undifferentiated.</p>
+          <p>Progressive disclosure — revealing information only as the user signals readiness — is one solution. Rather than presenting the full depth of a content hierarchy at once, the designer exposes just enough to orient the user and then provides clear affordances for deeper exploration. This readmore component is a micro-expression of that principle.</p>
+        </div>
+        <div class="readmore-button-wrapper d-none"><a href="#"></a></div>
+      </div>
+    </div>
+
+    <div class="demo-controls">
+      <div class="row g-3 align-items-end">
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">maxHeight <span class="ctrl-val" id="lbl-max">110</span>px</label>
+          <input type="range" class="form-range" id="ctrl-max" min="60" max="300" step="10" value="110">
+        </div>
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">overlayHeight <span class="ctrl-val" id="lbl-oh">100</span>px</label>
+          <input type="range" class="form-range" id="ctrl-oh" min="40" max="200" step="10" value="100">
+        </div>
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">animDuration <span class="ctrl-val" id="lbl-dur">400</span>ms</label>
+          <input type="range" class="form-range" id="ctrl-dur" min="100" max="1200" step="50" value="400">
+        </div>
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">animEasing</label>
+          <select class="ctrl-select" id="ctrl-ease">
+            <option value="ease" selected>ease</option>
+            <option value="ease-in-out">ease-in-out</option>
+            <option value="linear">linear</option>
+            <option value="cubic-bezier(0.34, 1.56, 0.64, 1)">spring</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">overlayColor (light)</label>
+          <input type="color" class="ctrl-color" id="ctrl-light-color" value="#ffffff">
+        </div>
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">darkOverlayColor</label>
+          <input type="color" class="ctrl-color" id="ctrl-dark-color" value="#0f1117">
+        </div>
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">align</label>
+          <select class="ctrl-select" id="ctrl-align">
+            <option value="start" selected>start</option>
+            <option value="center">center</option>
+            <option value="end">end</option>
+          </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <label class="ctrl-label">&nbsp;</label>
+          <div class="ctrl-check-wrap" style="margin-bottom: 4px;">
+            <input type="checkbox" id="ctrl-toggle" checked>
+            <label for="ctrl-toggle">enableToggle</label>
+          </div>
+          <div class="ctrl-check-wrap">
+            <input type="checkbox" id="ctrl-dark-mode">
+            <label for="ctrl-dark-mode">Force dark mode</label>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-12 d-flex gap-2 pt-1">
+          <button class="ctrl-btn" id="ctrl-apply" style="max-width: 180px;">
+            <i class="fas fa-rotate-right me-1"></i> Apply &amp; re-init
+          </button>
+          <button class="ctrl-btn-outline" id="ctrl-open">open()</button>
+          <button class="ctrl-btn-outline" id="ctrl-close">close()</button>
+          <button class="ctrl-btn-outline" id="ctrl-toggle-btn">toggle()</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="demo-log" id="pg-log">
+      <div class="log-hd">Event Log</div>
+      <div class="log-empty">Events will appear here&hellip;</div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.readmore.js"></script>
+
+<script>
+$(function() {
+
+  /* Demo 01 — Default */
+  $('#rm-01').themestrapPluginReadMore({
+    overlayColor: '#ffffff',
+    maxHeight:    110,
+  });
+
+  /* Demo 02 — Dark Mode */
+  $('#rm-02').themestrapPluginReadMore({
+    overlayColor:     '#ffffff',
+    darkOverlayColor: '#1a1f35',
+    maxHeight:        120,
+  });
+
+  /* Dark mode toggle for demo 02 */
+  let dm02Dark = false;
+  $('#dm-toggle').on('click', function() {
+    dm02Dark = !dm02Dark;
+    const $surface  = $('#dm-surface');
+    const $prose    = $('#rm-02-prose');
+    const $icon     = $(this).find('.dm-icon i');
+    const $lbl      = $('#dm-label');
+
+    if (dm02Dark) {
+      $surface.attr('data-bs-theme', 'dark');
+      $prose.removeClass('rm-prose--light').addClass('rm-prose--dark');
+      $icon.removeClass('fa-moon').addClass('fa-sun');
+      $lbl.text('Disable dark mode');
+    } else {
+      $surface.removeAttr('data-bs-theme');
+      $prose.removeClass('rm-prose--dark').addClass('rm-prose--light');
+      $icon.removeClass('fa-sun').addClass('fa-moon');
+      $lbl.text('Enable dark mode');
+    }
+  });
+
+  /* Demo 03 — Custom gradient + spring easing */
+  $('#rm-03').themestrapPluginReadMore({
+    overlayColor:     '#f0f4f8',
+    darkOverlayColor: '#1a1f35',
+    overlayHeight:    120,
+    maxHeight:        120,
+    align:            'center',
+    animDuration:     650,
+    animEasing:       'cubic-bezier(0.34, 1.56, 0.64, 1)',
+    buttonOpenLabel:  'Expand <i class="fas fa-chevron-down ms-1"></i>',
+    buttonCloseLabel: 'Collapse <i class="fas fa-chevron-up ms-1"></i>',
+  });
+
+  /* Playground */
+  const pgLog = (type, msg) => {
+    const $log = $('#pg-log');
+    $log.find('.log-empty').remove();
+    const ts  = new Date().toTimeString().slice(0, 8);
+    const cls = type === 'open' ? 'log-open' : type === 'close' ? 'log-close' : 'log-init';
+    $log.append(
+      `<div class="log-entry"><span class="log-ts">${ts}</span><span class="${cls}">${msg}</span></div>`
+    );
+    $log[0].scrollTop = $log[0].scrollHeight;
+  };
+
+  const pgInit = () => {
+    const darkMode = $('#ctrl-dark-mode').is(':checked');
+
+    const opts = {
+      maxHeight:        parseInt($('#ctrl-max').val()),
+      overlayHeight:    parseInt($('#ctrl-oh').val()),
+      animDuration:     parseInt($('#ctrl-dur').val()),
+      animEasing:       $('#ctrl-ease').val(),
+      overlayColor:     $('#ctrl-light-color').val(),
+      darkOverlayColor: $('#ctrl-dark-color').val(),
+      align:            $('#ctrl-align').val(),
+      enableToggle:     $('#ctrl-toggle').is(':checked'),
+    };
+
+    const $stage = $('#pg-stage');
+    const $prose = $('#pg-prose');
+
+    if (darkMode) {
+      $stage.css('background', opts.darkOverlayColor);
+      $stage.attr('data-bs-theme', 'dark');
+      $prose.removeClass('rm-prose--light').addClass('rm-prose--dark');
+    } else {
+      $stage.css('background', opts.overlayColor);
+      $stage.removeAttr('data-bs-theme');
+      $prose.removeClass('rm-prose--dark').addClass('rm-prose--light');
+    }
+
+    $('#rm-pg').themestrapPluginReadMore(opts);
+    pgLog('init', `Initialized — maxHeight:${opts.maxHeight}  dur:${opts.animDuration}ms  dark:${darkMode}`);
+  };
+
+  /* Range label sync */
+  $('#ctrl-max').on('input', function() { $('#lbl-max').text(this.value); });
+  $('#ctrl-oh' ).on('input', function() { $('#lbl-oh' ).text(this.value); });
+  $('#ctrl-dur' ).on('input', function() { $('#lbl-dur' ).text(this.value); });
+
+  /* Apply — destroy then re-init */
+  $('#ctrl-apply').on('click', () => {
+    const inst = $('#rm-pg').data('__readmore');
+    if (inst) inst.destroy();
+    pgInit();
+  });
+
+  /* Inline API buttons */
+  $('#ctrl-open'      ).on('click', () => { const i = $('#rm-pg').data('__readmore'); if (i) i.open();   });
+  $('#ctrl-close'     ).on('click', () => { const i = $('#rm-pg').data('__readmore'); if (i) i.close();  });
+  $('#ctrl-toggle-btn').on('click', () => { const i = $('#rm-pg').data('__readmore'); if (i) i.toggle(); });
+
+  /* Event listeners on the playground element */
+  document.getElementById('rm-pg').addEventListener('ts.readmore.open',  () => pgLog('open',  'ts.readmore.open'));
+  document.getElementById('rm-pg').addEventListener('ts.readmore.close', () => pgLog('close', 'ts.readmore.close'));
+
+  pgInit();
+
+});
+</script>
+
+</body>
+</html>
