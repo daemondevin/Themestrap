@@ -41,7 +41,7 @@ body {
 a { color: var(--teal); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* ── Hero ── */
+/* Hero */
 .demo-hero {
     padding: 90px 24px 72px;
     background:
@@ -86,7 +86,7 @@ a:hover { text-decoration: underline; }
     line-height: 1.65;
 }
 
-/* ── Hero live example ── */
+/* Hero live example */
 .hero-live {
     display: inline-flex;
     align-items: center;
@@ -109,7 +109,7 @@ a:hover { text-decoration: underline; }
     color: rgba(245,241,234,0.35);
 }
 
-/* ── Sections ── */
+/* Sections */
 .demo-section {
     padding: 72px 24px;
     border-top: 1px solid rgba(255,255,255,0.06);
@@ -134,7 +134,7 @@ a:hover { text-decoration: underline; }
     line-height: 1.65;
 }
 
-/* ── Demo cards grid ── */
+/* Demo cards grid */
 .demo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
@@ -204,7 +204,7 @@ a:hover { text-decoration: underline; }
     line-height: 1.5;
 }
 
-/* ── Playground card (full-width) ── */
+/* Playground card (full-width) */
 .demo-card.full { grid-column: 1 / -1; }
 
 .playground-inner {
@@ -299,7 +299,7 @@ a:hover { text-decoration: underline; }
     border-radius: 10px;
 }
 
-/* ── Four sides grid ── */
+/* Four sides grid */
 .sides-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -323,7 +323,7 @@ a:hover { text-decoration: underline; }
     padding: 4px 18px;
 }
 
-/* ── Inline text demo ── */
+/* Inline text demo */
 .inline-text-demo {
     font-size: 16px;
     line-height: 2.4;
@@ -331,7 +331,7 @@ a:hover { text-decoration: underline; }
     padding: 28px;
 }
 
-/* ── Tag / handle link style ── */
+/* Tag / handle link style */
 .hc-link {
     color: var(--teal);
     text-decoration: underline;
@@ -341,7 +341,7 @@ a:hover { text-decoration: underline; }
 }
 .hc-link:hover { color: #5dd6e4; text-decoration: none; }
 
-/* ── Trigger buttons ── */
+/* Trigger buttons */
 .trigger-btn {
     display: inline-flex;
     align-items: center;
@@ -380,7 +380,7 @@ a:hover { text-decoration: underline; }
     flex-shrink: 0;
 }
 
-/* ── Side label badges ── */
+/* Side label badges */
 .side-badge {
     font-family: var(--mono);
     font-size: 10px;
@@ -395,7 +395,7 @@ a:hover { text-decoration: underline; }
     border: 1px solid rgba(232,103,42,0.2);
 }
 
-/* ── API demo section ── */
+/* API demo section */
 .api-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -454,7 +454,7 @@ a:hover { text-decoration: underline; }
 }
 .api-status .status-val { color: var(--teal); }
 
-/* ── Event log ── */
+/* Event log */
 .event-log-wrap {
     background: rgba(0,0,0,0.3);
     border: 1px solid rgba(255,255,255,0.08);
@@ -510,7 +510,7 @@ a:hover { text-decoration: underline; }
 .log-api  { color: #c084fc; }
 .log-detail { color: rgba(245,241,234,0.4); font-size: 11px; }
 
-/* ── HoverCard content overrides for dark demo bg ── */
+/* HoverCard content overrides for dark demo bg */
 [data-hovercard-content] {
     background: #132232 !important;
     border-color: rgba(255,255,255,0.1) !important;
@@ -533,7 +533,7 @@ a:hover { text-decoration: underline; }
 .hc-bio { color: rgba(245,241,234,0.65) !important; }
 .hc-divider { border-top-color: rgba(255,255,255,0.08) !important; }
 
-/* ── Footer ── */
+/* Footer */
 .demo-footer {
     padding: 40px 24px;
     border-top: 1px solid rgba(255,255,255,0.06);
@@ -545,9 +545,6 @@ a:hover { text-decoration: underline; }
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
-     HERO
-═══════════════════════════════════════════════════ -->
 <section class="demo-hero">
     <div class="demo-hero-inner">
         <div class="eyebrow">
@@ -564,14 +561,14 @@ a:hover { text-decoration: underline; }
             <span style="color:rgba(245,241,234,0.5);">Written by</span>
 
             <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"center"}' class="manual" id="hero-card">
-                <span data-hovercard-trigger class="hc-link" tabindex="0">@daemon_devin</span>
+                <span data-hovercard-trigger class="hc-link" tabindex="0">@daemon.devin</span>
                 <div data-hovercard-content>
                     <div class="hc-avatar">
                         <img src="https://ui-avatars.com/api/?name=Daemon+Devin&background=0e2a3d&color=2ab8c8&size=96&bold=true" alt="daemon.devin">
                     </div>
                     <div class="hc-name">daemon.devin</div>
-                    <div class="hc-handle">@daemon_devin</div>
-                    <p class="hc-bio">Building Themestrap — a zero-build jQuery plugin ecosystem for MODX 3.</p>
+                    <div class="hc-handle">@daemon.devin</div>
+                    <p class="hc-bio">Building Themestrap — a zero-build jQuery plugin ecosystem.</p>
                     <hr class="hc-divider">
                     <div class="hc-meta">
                         <span>128 <span class="hc-meta-label">Following</span></span>
@@ -587,11 +584,10 @@ a:hover { text-decoration: underline; }
                 <div data-hovercard-content>
                     <div class="hc-name">Themestrap</div>
                     <div class="hc-handle">themestrap.dev</div>
-                    <p class="hc-bio">A zero-build jQuery + Bootstrap 5 component library for MODX 3. 60+ plugins, no React, no build step.</p>
+                    <p class="hc-bio">A zero-build jQuery + Bootstrap 5 component library. 75+ plugins, no React, no build step.</p>
                     <hr class="hc-divider">
                     <div class="hc-meta">
-                        <span>60+ <span class="hc-meta-label">Plugins</span></span>
-                        <span>MODX 3 <span class="hc-meta-label">Platform</span></span>
+                        <span>75+ <span class="hc-meta-label">Plugins</span></span>
                     </div>
                 </div>
             </span>
@@ -601,10 +597,6 @@ a:hover { text-decoration: underline; }
     </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════════════════
-     DEMOS
-═══════════════════════════════════════════════════ -->
 <section class="demo-section">
     <div class="demo-section-inner">
         <h2>Six <em>demos</em>, one plugin.</h2>
@@ -720,11 +712,11 @@ a:hover { text-decoration: underline; }
                 <div class="inline-text-demo">
                     The Themestrap project was conceived by
                     <span data-plugin-hovercard data-plugin-options='{"side":"bottom","align":"start"}' class="manual">
-                        <span data-hovercard-trigger class="hc-link" tabindex="0">@daemon_devin</span>
+                        <span data-hovercard-trigger class="hc-link" tabindex="0">@daemon.devin</span>
                         <div data-hovercard-content>
                             <div class="hc-avatar"><img src="https://ui-avatars.com/api/?name=Daemon+Devin&background=0e2a3d&color=2ab8c8&size=96&bold=true" alt=""></div>
-                            <div class="hc-name">daemon.devin</div><div class="hc-handle">@daemon_devin</div>
-                            <p class="hc-bio">Building Themestrap — zero-build jQuery plugins for MODX 3.</p>
+                            <div class="hc-name">daemon.devin</div><div class="hc-handle">@daemon.devin</div>
+                            <p class="hc-bio">Building Themestrap — zero-build jQuery plugins.</p>
                             <div class="hc-meta"><span>128 <span class="hc-meta-label">Following</span></span><span>4.2k <span class="hc-meta-label">Followers</span></span></div>
                         </div>
                     </span>
@@ -759,10 +751,6 @@ a:hover { text-decoration: underline; }
     </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════════════════
-     FOUR SIDES
-═══════════════════════════════════════════════════ -->
 <section class="demo-section">
     <div class="demo-section-inner">
         <h2>Four <em>sides</em>, one rule.</h2>
@@ -818,10 +806,6 @@ a:hover { text-decoration: underline; }
     </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════════════════
-     DELAY PLAYGROUND
-═══════════════════════════════════════════════════ -->
 <section class="demo-section">
     <div class="demo-section-inner">
         <h2>Dial in the <em>delay.</em></h2>
@@ -874,10 +858,6 @@ a:hover { text-decoration: underline; }
     </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════════════════
-     JS API
-═══════════════════════════════════════════════════ -->
 <section class="demo-section">
     <div class="demo-section-inner">
         <h2>Full <em>API</em> control.</h2>
@@ -927,10 +907,6 @@ a:hover { text-decoration: underline; }
     </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════════════════
-     EVENT LOG
-═══════════════════════════════════════════════════ -->
 <section class="demo-section">
     <div class="demo-section-inner">
         <h2>Event <em>visibility.</em></h2>
@@ -948,18 +924,10 @@ a:hover { text-decoration: underline; }
     </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════════════════ -->
 <footer class="demo-footer">
     <p>Themestrap MODX 3 · <code>PluginHoverCard</code> · <a href="plugin-hovercard.html">Full documentation</a></p>
 </footer>
 
-
-<!-- ═══════════════════════════════════════════════════
-     SCRIPTS
-═══════════════════════════════════════════════════ -->
 
 <!-- Minimal Themestrap namespace shim -->
 <script>
@@ -988,7 +956,7 @@ $(function () {
     });
 
 
-    /* ── Event log ─────────────────────────────────────────────── */
+    /* Event log */
     const $log      = $('#event-log');
     const $logEmpty = $('#log-empty');
     let logCount    = 0;
@@ -1029,7 +997,7 @@ $(function () {
     });
 
 
-    /* ── Delay playground ──────────────────────────────────────── */
+    /* Delay playground */
     const $pg          = $('#playground-card');
     let pgOpenDelay    = 200;
     let pgCloseDelay   = 300;
@@ -1069,7 +1037,7 @@ $(function () {
     });
 
 
-    /* ── JS API demo ───────────────────────────────────────────── */
+    /* JS API demo */
     const $apiCard   = $('#api-card');
     const $apiStatus = $('#api-status-text');
 

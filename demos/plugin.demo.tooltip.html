@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginTooltip — Live Demo | Themestrap</title>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+<style>
+/* Themestrap design tokens */
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+}
+code {
+    background: rgba(10,25,41,.06);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+a { color: var(--ts-teal); }
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 680px; margin: 0; line-height: 1.6; }
+.badge-orange {
+    background: var(--ts-orange); color: #fff; font-weight: 600;
+    letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase;
+    font-size: 11px; border-radius: 4px;
+}
+.demo-hero code { background: rgba(255,255,255,.12); color: #ffd9c7; padding: 2px 7px; border-radius: 4px; }
+
+/* Cards */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+    overflow: visible;
+}
+.demo-card .card-body { padding: 24px 28px 28px; }
+.demo-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ts-teal); margin: 0 0 6px;
+}
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 4px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 20px; line-height: 1.5; }
+
+/* Demo stage */
+.demo-stage {
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    padding: 32px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    min-height: 120px;
+    margin-bottom: 16px;
+    overflow: visible;
+}
+.demo-stage.center { justify-content: center; align-items: center; }
+.demo-stage.space-between { justify-content: space-between; align-items: center; }
+.demo-stage.padded-v { padding-top: 64px; padding-bottom: 64px; }
+
+/* Code snippet */
+pre.snip {
+    background: #0e2238; color: #e1eaf3;
+    padding: 14px 18px; border-radius: 8px;
+    margin: 0; font-size: 12.5px; line-height: 1.65;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    overflow-x: auto;
+}
+pre.snip .c1  { color: #6c8bab; font-style: italic; }
+pre.snip .tag { color: #ff9d6c; }
+pre.snip .attr { color: #f9c98c; }
+pre.snip .val { color: #a8e1ff; }
+pre.snip .kw  { color: #c084fc; }
+pre.snip .fn  { color: #67e8f9; }
+
+/* Controls row */
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+}
+.controls-row label {
+    font-size: 12px; font-weight: 600; color: #54657a;
+    margin: 0; text-transform: uppercase; letter-spacing: .04em;
+}
+
+/* Tip */
+.tip {
+    background: #e8f7f9;
+    border-left: 4px solid var(--ts-teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px; font-size: 13px; color: #1f4348; margin-bottom: 24px;
+}
+.tip i { color: var(--ts-teal); }
+
+/* Variant swatch grid */
+.variant-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Event log */
+.event-log {
+    height: 120px; overflow-y: auto;
+    background: #0e2238; color: #a8c8e8;
+    font-family: monospace; font-size: 12px; line-height: 1.6;
+    border-radius: 8px; padding: 10px 14px;
+}
+.event-log .ev-show  { color: #6ee7b7; }
+.event-log .ev-hide  { color: #fca5a5; }
+.event-log .ev-empty { color: #4c6a85; font-style: italic; }
+
+/* Status badge */
+.status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 600;
+}
+.status-badge.open    { background: #d1fae5; color: #065f46; }
+.status-badge.closed  { background: #f3f4f6; color: #6b7280; }
+.status-badge.destroyed { background: #fee2e2; color: #991b1b; }
+
+/* Two-col grid */
+.demo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+@media (max-width: 767px) { .demo-grid-2 { grid-template-columns: 1fr; } }
+
+/* Inline text demo */
+.demo-prose {
+    font-size: 15px; line-height: 1.8; color: #374151;
+    max-width: 520px;
+}
+.demo-prose [data-plugin-tooltip] {
+    border-bottom: 1px dashed var(--ts-teal);
+    cursor: help;
+    color: var(--ts-teal);
+    text-decoration: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · Component</span>
+    <h1 class="mt-3">PluginTooltip — Live Demo</h1>
+    <p class="lead mt-2">
+      Lightweight, accessible tooltips with CSS-variable theming, four-side auto-flip positioning,
+      eleven color variants, HTML content support, and full keyboard + touch support.
+      Zero build step, zero vendor dependencies.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-xl-10">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        Every tooltip below is a live <code>PluginTooltip</code> instance running in your browser.
+        Hover (or focus) any trigger to see it in action.
+      </div>
+
+
+      <!-- 1. Basic -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Minimal markup · attribute value as content</p>
+          <h3>Basic tooltip</h3>
+          <p class="lead-sm">
+            The simplest form: add <code>data-plugin-tooltip</code> to any element and set its value to
+            the tooltip text. The plugin handles ARIA, positioning, and keyboard focus automatically.
+          </p>
+
+          <div class="demo-stage center">
+            <button class="btn btn-primary"
+                    data-plugin-tooltip="Save your work before continuing.">
+              <i class="fas fa-floppy-disk me-1"></i> Save
+            </button>
+            <button class="btn btn-outline-secondary"
+                    data-plugin-tooltip="Discard all unsaved changes and return to the list.">
+              Cancel
+            </button>
+            <a href="#" data-plugin-tooltip="Opens the official documentation in a new tab.">
+              <i class="fas fa-circle-question"></i> Help
+            </a>
+          </div>
+
+<pre class="snip"><span class="c1">&lt;!-- The attribute value is used as tooltip content --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">data-plugin-tooltip</span>=<span class="val">"Save your work before continuing."</span><span class="tag">&gt;</span>
+  Save
+<span class="tag">&lt;/button&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 2. Four positions + auto-flip -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">location option · top / bottom / left / right · auto-flip</p>
+          <h3>Four-side positioning</h3>
+          <p class="lead-sm">
+            Set <code>location</code> in <code>data-plugin-options</code> to control which side the tooltip
+            appears on. When there isn't enough room the plugin automatically flips to the opposite side — no
+            extra configuration needed.
+          </p>
+
+          <div class="demo-stage center padded-v" style="gap:24px">
+            <button class="btn btn-outline-primary"
+                    data-plugin-tooltip="Tooltip above"
+                    data-plugin-options='{"location":"top"}'>
+              Top
+            </button>
+            <button class="btn btn-outline-primary"
+                    data-plugin-tooltip="Tooltip below"
+                    data-plugin-options='{"location":"bottom"}'>
+              Bottom
+            </button>
+            <button class="btn btn-outline-primary"
+                    data-plugin-tooltip="Tooltip to the left"
+                    data-plugin-options='{"location":"left"}'>
+              Left
+            </button>
+            <button class="btn btn-outline-primary"
+                    data-plugin-tooltip="Tooltip to the right"
+                    data-plugin-options='{"location":"right"}'>
+              Right
+            </button>
+          </div>
+
+<pre class="snip"><span class="tag">&lt;button</span> <span class="attr">data-plugin-tooltip</span>=<span class="val">"Tooltip to the left"</span>
+        <span class="attr">data-plugin-options</span>=<span class="val">'{"location":"left"}'</span><span class="tag">&gt;</span>
+  Left
+<span class="tag">&lt;/button&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 3. Variants -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">type option · 11 color variants</p>
+          <h3>Color variants</h3>
+          <p class="lead-sm">
+            The <code>type</code> option sets the color scheme via CSS custom properties.
+            All colors are fully overridable with <code>--ts-tt-bg</code> and <code>--ts-tt-color</code>.
+          </p>
+
+          <div class="demo-stage center" style="padding-top: 40px; padding-bottom: 40px;">
+            <div class="variant-grid">
+              <button class="btn btn-secondary btn-sm"
+                      data-plugin-tooltip="This is the default variant"
+                      data-plugin-options='{"type":"default","location":"top"}'>
+                Default
+              </button>
+              <button class="btn btn-primary btn-sm"
+                      data-plugin-tooltip="Primary — uses your orange brand colour"
+                      data-plugin-options='{"type":"primary","location":"top"}'>
+                Primary
+              </button>
+              <button class="btn btn-info btn-sm"
+                      data-plugin-tooltip="Secondary — teal accent"
+                      data-plugin-options='{"type":"secondary","location":"top"}'>
+                Secondary
+              </button>
+              <button class="btn btn-outline-primary btn-sm"
+                      data-plugin-tooltip="Tertiary — steel blue"
+                      data-plugin-options='{"type":"tertiary","location":"top"}'>
+                Tertiary
+              </button>
+              <button class="btn btn-outline-secondary btn-sm"
+                      data-plugin-tooltip="Quaternary — soft purple"
+                      data-plugin-options='{"type":"quaternary","location":"top"}'>
+                Quaternary
+              </button>
+              <button class="btn btn-dark btn-sm"
+                      data-plugin-tooltip="Dark — deep navy"
+                      data-plugin-options='{"type":"dark","location":"bottom"}'>
+                Dark
+              </button>
+              <button class="btn btn-light btn-sm border"
+                      data-plugin-tooltip="Light — white panel, dark text"
+                      data-plugin-options='{"type":"light","location":"bottom"}'>
+                Light
+              </button>
+              <button class="btn btn-success btn-sm"
+                      data-plugin-tooltip="Success — action completed"
+                      data-plugin-options='{"type":"success","location":"bottom"}'>
+                Success
+              </button>
+              <button class="btn btn-warning btn-sm"
+                      data-plugin-tooltip="Warning — proceed with care"
+                      data-plugin-options='{"type":"warning","location":"bottom"}'>
+                Warning
+              </button>
+              <button class="btn btn-danger btn-sm"
+                      data-plugin-tooltip="Danger — this cannot be undone"
+                      data-plugin-options='{"type":"danger","location":"bottom"}'>
+                Danger
+              </button>
+              <button class="btn btn-outline-info btn-sm"
+                      data-plugin-tooltip="Info — additional context"
+                      data-plugin-options='{"type":"info","location":"bottom"}'>
+                Info
+              </button>
+            </div>
+          </div>
+
+<pre class="snip"><span class="tag">&lt;button</span> <span class="attr">data-plugin-tooltip</span>=<span class="val">"Action completed"</span>
+        <span class="attr">data-plugin-options</span>=<span class="val">'{"type":"success","location":"top"}'</span><span class="tag">&gt;</span>
+  Success
+<span class="tag">&lt;/button&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 4. HTML content -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">html: true · rich content via options.content</p>
+          <h3>HTML content</h3>
+          <p class="lead-sm">
+            When <code>html: true</code> is set, the <code>content</code> option is injected as HTML.
+            Sanitize any user-supplied content server-side before passing it to the plugin.
+          </p>
+
+          <div class="demo-stage center padded-v">
+            <button class="btn btn-outline-primary"
+                    data-plugin-tooltip=""
+                    data-plugin-options='{"html":true,"content":"<strong>Keyboard shortcut</strong><br><kbd style=\"background:#fff;color:#0a1929;padding:1px 5px;border-radius:3px;font-size:11px\">Ctrl</kbd> + <kbd style=\"background:#fff;color:#0a1929;padding:1px 5px;border-radius:3px;font-size:11px\">S</kbd>","location":"right","type":"dark","maxWidth":180}'>
+              <i class="fas fa-keyboard me-1"></i> Keyboard shortcut
+            </button>
+
+            <button class="btn btn-outline-secondary"
+                    data-plugin-tooltip=""
+                    data-plugin-options='{"html":true,"content":"<div style=\"display:flex;align-items:center;gap:8px\"><span style=\"display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e\"></span><strong>Server online</strong></div><div style=\"font-size:11px;color:#d1fae5;margin-top:4px\">Latency 18 ms · 99.9% uptime</div>","location":"top","type":"dark","maxWidth":200}'>
+              <i class="fas fa-server me-1"></i> Server status
+            </button>
+
+            <button class="btn btn-outline-danger"
+                    data-plugin-tooltip=""
+                    data-plugin-options='{"html":true,"content":"<strong>Delete account</strong><br><span style=\"font-size:12px;opacity:.85\">This action is permanent and cannot be reversed. All your data will be removed.</span>","location":"top","type":"danger","maxWidth":240}'>
+              <i class="fas fa-trash me-1"></i> Delete
+            </button>
+          </div>
+
+<pre class="snip"><span class="tag">&lt;button</span>
+  <span class="attr">data-plugin-tooltip</span>=<span class="val">""</span>
+  <span class="attr">data-plugin-options</span>=<span class="val">'{"html":true,
+    "content":"&lt;strong&gt;Bold&lt;/strong&gt; tip",
+    "type":"dark",
+    "location":"right"}'</span><span class="tag">&gt;</span>
+  Hover me
+<span class="tag">&lt;/button&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 5. Arrow toggle + maxWidth -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">arrow: false · maxWidth · offset</p>
+          <h3>Arrow, width &amp; offset</h3>
+          <p class="lead-sm">
+            Disable the arrow for a floating-label look, increase <code>maxWidth</code> for
+            longer descriptions, or use <code>offset</code> to control the gap between the
+            tooltip and its trigger.
+          </p>
+
+          <div class="demo-stage center" style="gap: 24px; padding-top: 48px; padding-bottom: 48px;">
+            <button class="btn btn-outline-primary"
+                    data-plugin-tooltip="No arrow — clean floating label style."
+                    data-plugin-options='{"arrow":false,"location":"top"}'>
+              No arrow
+            </button>
+            <button class="btn btn-outline-secondary"
+                    data-plugin-tooltip="This tooltip has a much wider maximum width to allow longer descriptive content to flow naturally without wrapping too aggressively."
+                    data-plugin-options='{"maxWidth":340,"location":"top"}'>
+              Wide (340 px)
+            </button>
+            <button class="btn btn-outline-secondary"
+                    data-plugin-tooltip="Large offset — 24 px gap from the trigger."
+                    data-plugin-options='{"offset":24,"location":"top"}'>
+              Offset 24 px
+            </button>
+          </div>
+
+<pre class="snip"><span class="c1">&lt;!-- No arrow --&gt;</span>
+<span class="attr">data-plugin-options</span>=<span class="val">'{"arrow":false}'</span>
+
+<span class="c1">&lt;!-- Custom max-width --&gt;</span>
+<span class="attr">data-plugin-options</span>=<span class="val">'{"maxWidth":340}'</span>
+
+<span class="c1">&lt;!-- Custom offset gap --&gt;</span>
+<span class="attr">data-plugin-options</span>=<span class="val">'{"offset":24}'</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 6. Delay -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">delay option · [showMs, hideMs]</p>
+          <h3>Show &amp; hide delay</h3>
+          <p class="lead-sm">
+            <code>delay</code> accepts <code>[showMs, hideMs]</code> or a single number that applies
+            to both. Useful for preventing flicker on fast cursor passes, or for keeping the tooltip
+            visible briefly after the cursor leaves.
+          </p>
+
+          <div class="demo-stage center" style="gap: 24px;">
+            <button class="btn btn-outline-primary"
+                    data-plugin-tooltip="Default: 100 ms show, 0 ms hide."
+                    data-plugin-options='{"delay":[100,0]}'>
+              Default (100, 0)
+            </button>
+            <button class="btn btn-outline-secondary"
+                    data-plugin-tooltip="Appears after 500 ms — ignores quick passes."
+                    data-plugin-options='{"delay":[500,0]}'>
+              Slow show (500 ms)
+            </button>
+            <button class="btn btn-outline-secondary"
+                    data-plugin-tooltip="Lingers for 400 ms after your cursor leaves."
+                    data-plugin-options='{"delay":[100,400]}'>
+              Slow hide (400 ms)
+            </button>
+            <button class="btn btn-outline-secondary"
+                    data-plugin-tooltip="Both show and hide are instant."
+                    data-plugin-options='{"delay":0}'>
+              Instant (0)
+            </button>
+          </div>
+
+<pre class="snip"><span class="c1">&lt;!-- [showMs, hideMs] --&gt;</span>
+<span class="attr">data-plugin-options</span>=<span class="val">'{"delay":[500, 0]}'</span>
+
+<span class="c1">&lt;!-- Single number applies to both --&gt;</span>
+<span class="attr">data-plugin-options</span>=<span class="val">'{"delay": 0}'</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 7. Inline prose usage -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Inline contextual help · non-button triggers</p>
+          <h3>Inline text tooltips</h3>
+          <p class="lead-sm">
+            Any element can be a tooltip trigger — not just buttons. Wrapping a term in a
+            <code>&lt;span&gt;</code> or <code>&lt;abbr&gt;</code> with a dashed underline is a
+            familiar pattern for in-context glossary definitions.
+          </p>
+
+          <div class="demo-stage center">
+            <p class="demo-prose">
+              The Themestrap component library uses a
+              <span data-plugin-tooltip="An IIFE — Immediately Invoked Function Expression — scopes variables so they don't pollute the global namespace."
+                    data-plugin-options='{"type":"dark","location":"top","maxWidth":280}'>triple-paren IIFE</span>
+              pattern for every plugin. Each plugin stores its instance at
+              <span data-plugin-tooltip="The double-underscore prefix marks internal Themestrap data keys to avoid collisions with third-party $.data() calls."
+                    data-plugin-options='{"type":"dark","location":"bottom","maxWidth":300}'>$el.data('__pluginName')</span>
+              and fires native
+              <span data-plugin-tooltip="CustomEvent lets us dispatch DOM events without going through jQuery's internal event queue, preventing re-entrant scroll handlers."
+                    data-plugin-options='{"type":"secondary","location":"top","maxWidth":310}'>CustomEvents</span>
+              rather than jQuery events for lifecycle hooks.
+            </p>
+          </div>
+
+<pre class="snip"><span class="tag">&lt;span</span>
+  <span class="attr">data-plugin-tooltip</span>=<span class="val">"Tooltip text here"</span>
+  <span class="attr">data-plugin-options</span>=<span class="val">'{"type":"dark","location":"top"}'</span><span class="tag">&gt;</span>
+  technical term
+<span class="tag">&lt;/span&gt;</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 8. Playground -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Interactive · type + location + arrow switcher</p>
+          <h3>Live playground</h3>
+          <p class="lead-sm">
+            Change <code>type</code>, <code>location</code>, and <code>arrow</code> options live.
+            The tooltip instance is destroyed and re-initialised on each change.
+          </p>
+
+          <div class="controls-row mb-2">
+            <label class="me-1">Type:</label>
+            <div class="btn-group btn-group-sm" id="pg-type-group">
+              <button class="btn btn-outline-secondary active" data-type="default">default</button>
+              <button class="btn btn-outline-secondary" data-type="primary">primary</button>
+              <button class="btn btn-outline-secondary" data-type="secondary">secondary</button>
+              <button class="btn btn-outline-secondary" data-type="dark">dark</button>
+              <button class="btn btn-outline-secondary" data-type="success">success</button>
+              <button class="btn btn-outline-secondary" data-type="danger">danger</button>
+              <button class="btn btn-outline-secondary" data-type="warning">warning</button>
+            </div>
+          </div>
+
+          <div class="controls-row mb-3">
+            <label class="me-1">Location:</label>
+            <div class="btn-group btn-group-sm" id="pg-loc-group">
+              <button class="btn btn-outline-secondary active" data-loc="top">top</button>
+              <button class="btn btn-outline-secondary" data-loc="bottom">bottom</button>
+              <button class="btn btn-outline-secondary" data-loc="left">left</button>
+              <button class="btn btn-outline-secondary" data-loc="right">right</button>
+            </div>
+            <label class="ms-3 me-1">Arrow:</label>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="pg-arrow-toggle" checked>
+            </div>
+          </div>
+
+          <div class="demo-stage center padded-v" id="pg-stage">
+            <button class="btn btn-primary" id="pg-trigger"
+                    data-plugin-tooltip="Playground tooltip — change the controls above!"
+                    data-plugin-options='{"type":"default","location":"top"}'>
+              <i class="fas fa-sliders me-1"></i> Hover me
+            </button>
+          </div>
+
+          <p class="text-muted mb-0" style="font-size:12px">
+            Current:
+            <code>type="<span id="pg-type-label">default</span>"</code>
+            <code>location="<span id="pg-loc-label">top</span>"</code>
+            <code>arrow=<span id="pg-arrow-label">true</span></code>
+          </p>
+        </div>
+      </div>
+
+
+      <!-- 9. setContent API -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Public API · setContent(text)</p>
+          <h3>Live content update</h3>
+          <p class="lead-sm">
+            <code>instance.setContent()</code> replaces the tooltip text at runtime without
+            destroying and re-creating the element. Useful for dynamic data like copy-link feedback.
+          </p>
+
+          <div class="demo-stage center" style="gap: 24px; flex-direction: column;">
+            <button class="btn btn-outline-primary" id="copy-btn"
+                    data-plugin-tooltip="Copy link to clipboard"
+                    data-plugin-options='{"location":"top","type":"default"}'>
+              <i class="fas fa-link me-1"></i> Copy link
+            </button>
+            <p class="text-muted mb-0" style="font-size:13px">
+              Click the button to see <code>setContent()</code> swap the tooltip text in place.
+            </p>
+          </div>
+
+<pre class="snip"><span class="c1">// Get the instance, then call setContent() at any time</span>
+<span class="kw">const</span> inst = $(<span class="val">'#copy-btn'</span>).data(<span class="val">'__pluginTooltip'</span>);
+inst.<span class="fn">setContent</span>(<span class="val">'Link copied!'</span>);</pre>
+        </div>
+      </div>
+
+
+      <!-- 10. Event log -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Events · tooltip:show / tooltip:hide</p>
+          <h3>Event log</h3>
+          <p class="lead-sm">
+            Both events fire on the trigger element. Listen from the trigger itself or delegate
+            from a parent container. The log below captures events from the two triggers in this card.
+          </p>
+
+          <div class="demo-grid-2 align-items-start">
+            <div>
+              <div class="demo-stage center" style="flex-direction:column; gap: 12px;">
+                <button class="btn btn-primary" id="ev-btn-a"
+                        data-plugin-tooltip="Hover to fire tooltip:show"
+                        data-plugin-options='{"location":"top"}'>
+                  Trigger A
+                </button>
+                <button class="btn btn-outline-secondary" id="ev-btn-b"
+                        data-plugin-tooltip="A different trigger — same log"
+                        data-plugin-options='{"location":"bottom","type":"secondary"}'>
+                  Trigger B
+                </button>
+              </div>
+            </div>
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span style="font-size:12px;font-weight:600;color:#54657a">Event log</span>
+                <button class="btn btn-sm btn-outline-secondary py-0" id="clear-log" style="font-size:11px">Clear</button>
+              </div>
+              <div class="event-log" id="event-log">
+                <span class="ev-empty">No events yet — hover a trigger.</span>
+              </div>
+            </div>
+          </div>
+
+<pre class="snip mt-3"><span class="c1">// Listening for events on the trigger element</span>
+$(<span class="val">'#my-trigger'</span>)
+  .on(<span class="val">'tooltip:show'</span>, (e, inst) =&gt; <span class="fn">console</span>.log(<span class="val">'shown'</span>, inst))
+  .on(<span class="val">'tooltip:hide'</span>, (e, inst) =&gt; <span class="fn">console</span>.log(<span class="val">'hidden'</span>, inst));</pre>
+        </div>
+      </div>
+
+
+      <!-- 11. Programmatic API -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Public API · show() / hide() / toggle() / update() / destroy()</p>
+          <h3>Programmatic control</h3>
+          <p class="lead-sm">
+            Every instance exposes <code>show()</code>, <code>hide()</code>, <code>toggle()</code>,
+            <code>update()</code>, and <code>destroy()</code>. After destroy, re-initialising brings
+            it back with fresh options.
+          </p>
+
+          <div class="demo-stage center" style="flex-direction:column; gap: 20px;">
+            <button class="btn btn-dark" id="api-trigger"
+                    data-plugin-tooltip="I'm being controlled programmatically"
+                    data-plugin-options='{"location":"top","type":"default"}'>
+              Target tooltip
+            </button>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+              <button class="btn btn-sm btn-outline-primary" id="api-show">show()</button>
+              <button class="btn btn-sm btn-outline-primary" id="api-hide">hide()</button>
+              <button class="btn btn-sm btn-outline-primary" id="api-toggle">toggle()</button>
+              <button class="btn btn-sm btn-outline-secondary" id="api-update">update()</button>
+              <button class="btn btn-sm btn-outline-danger" id="api-destroy">destroy()</button>
+              <button class="btn btn-sm btn-outline-success d-none" id="api-reinit">re-init</button>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <span style="font-size:12px;color:#54657a">State:</span>
+              <span class="status-badge closed" id="api-status">
+                <i class="fas fa-circle" style="font-size:7px"></i> closed
+              </span>
+            </div>
+          </div>
+
+<pre class="snip"><span class="kw">const</span> inst = $(<span class="val">'#my-tooltip'</span>).data(<span class="val">'__pluginTooltip'</span>);
+inst.<span class="fn">show</span>();
+inst.<span class="fn">hide</span>();
+inst.<span class="fn">toggle</span>();
+inst.<span class="fn">update</span>();    <span class="c1">// reposition after layout changes</span>
+inst.<span class="fn">destroy</span>();  <span class="c1">// full teardown</span></pre>
+        </div>
+      </div>
+
+
+      <p class="text-center mt-4 mb-5" style="color:var(--ts-muted);font-size:12.5px">
+        Themestrap · PluginTooltip · part of the <a href="https://github.com/daemondevin/Themestrap" target="_blank">Themestrap component library</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugin -->
+<script src="../js/components/themestrap.plugin.tooltip.js"></script>
+
+<!-- Demo wiring -->
+<script>
+$(function () {
+
+    /* Auto-init every [data-plugin-tooltip] on the page */
+    $('[data-plugin-tooltip]:not(.manual)').each(function () {
+        const $el  = $(this);
+        const opts = themestrap.fn.getOptions($el.data('plugin-options')) || undefined;
+        $el.themestrapPluginTooltip(opts);
+    });
+
+
+    /* 8. Playground */
+    let pgType  = 'default';
+    let pgLoc   = 'top';
+    let pgArrow = true;
+
+    function reinitPlayground() {
+        const $btn = $('#pg-trigger');
+        const inst = $btn.data('__pluginTooltip');
+        if (inst) inst.destroy();
+        $btn.themestrapPluginTooltip({ type: pgType, location: pgLoc, arrow: pgArrow });
+        $('#pg-type-label').text(pgType);
+        $('#pg-loc-label').text(pgLoc);
+        $('#pg-arrow-label').text(pgArrow);
+    }
+
+    $('#pg-type-group [data-type]').on('click', function () {
+        pgType = $(this).data('type');
+        $('#pg-type-group .btn').removeClass('active');
+        $(this).addClass('active');
+        reinitPlayground();
+    });
+
+    $('#pg-loc-group [data-loc]').on('click', function () {
+        pgLoc = $(this).data('loc');
+        $('#pg-loc-group .btn').removeClass('active');
+        $(this).addClass('active');
+        reinitPlayground();
+    });
+
+    $('#pg-arrow-toggle').on('change', function () {
+        pgArrow = this.checked;
+        reinitPlayground();
+    });
+
+
+    /* 9. setContent — copy link demo */
+    let copyTimer = null;
+
+    $('#copy-btn').on('click', function () {
+        const inst = $('#copy-btn').data('__pluginTooltip');
+        if (!inst) return;
+
+        clearTimeout(copyTimer);
+        inst.setContent('Link copied!');
+        inst.show();
+
+        copyTimer = setTimeout(function () {
+            inst.setContent('Copy link to clipboard');
+            inst.hide();
+        }, 2000);
+    });
+
+
+    /* 10. Event log */
+    let logEmpty = true;
+
+    function logEvent(msg, cls) {
+        const $log = $('#event-log');
+        if (logEmpty) { $log.empty(); logEmpty = false; }
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $log.append($('<div>').addClass(cls).text('[' + time + '] ' + msg));
+        $log[0].scrollTop = $log[0].scrollHeight;
+    }
+
+    $('#ev-btn-a, #ev-btn-b').on('tooltip:show', function (e, inst) {
+        const id = this.id === 'ev-btn-a' ? 'A' : 'B';
+        logEvent('tooltip:show — Trigger ' + id, 'ev-show');
+    });
+
+    $('#ev-btn-a, #ev-btn-b').on('tooltip:hide', function (e, inst) {
+        const id = this.id === 'ev-btn-a' ? 'A' : 'B';
+        logEvent('tooltip:hide — Trigger ' + id, 'ev-hide');
+    });
+
+    $('#clear-log').on('click', function () {
+        $('#event-log').html('<span class="ev-empty">Log cleared.</span>');
+        logEmpty = false;
+    });
+
+
+    /* 11. Programmatic API */
+    function getApiInst() {
+        return $('#api-trigger').data('__pluginTooltip');
+    }
+
+    function updateStatus() {
+        const inst = getApiInst();
+        const $badge = $('#api-status');
+
+        if (!inst) {
+            $badge.removeClass('open closed').addClass('destroyed')
+                  .html('<i class="fas fa-circle" style="font-size:7px"></i> destroyed');
+            return;
+        }
+
+        const visible = inst._visible;
+        $badge.removeClass('open closed destroyed')
+              .addClass(visible ? 'open' : 'closed')
+              .html('<i class="fas fa-circle" style="font-size:7px"></i> ' + (visible ? 'open' : 'closed'));
+    }
+
+    $('#api-trigger').on('tooltip:show tooltip:hide', updateStatus);
+
+    $('#api-show').on('click', function () {
+        getApiInst()?.show();
+        updateStatus();
+    });
+
+    $('#api-hide').on('click', function () {
+        getApiInst()?.hide();
+        updateStatus();
+    });
+
+    $('#api-toggle').on('click', function () {
+        getApiInst()?.toggle();
+        updateStatus();
+    });
+
+    $('#api-update').on('click', function () {
+        getApiInst()?.update();
+    });
+
+    $('#api-destroy').on('click', function () {
+        getApiInst()?.destroy();
+        $('#api-destroy').addClass('d-none');
+        $('#api-reinit').removeClass('d-none');
+        updateStatus();
+    });
+
+    $('#api-reinit').on('click', function () {
+        $('#api-trigger').themestrapPluginTooltip({ location: 'top', type: 'default' });
+        $('#api-destroy').removeClass('d-none');
+        $('#api-reinit').addClass('d-none');
+        updateStatus();
+    });
+
+});
+</script>
+
+</body>
+</html>

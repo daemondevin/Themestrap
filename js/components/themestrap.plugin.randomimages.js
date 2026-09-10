@@ -1,27 +1,28 @@
 // Random Images
-(((themestrap = {}) => {
+(((themestrap = {}, $) => {
 
-    const instanceName = '__randomimages';
-    const instances = new WeakMap();
+    const instanceName = '__randomImages';
+
+    let styleRefCount = 0;
+    const STYLE_ID = 'themestrap-random-images-styles';
 
     class PluginRandomImages {
 
-        constructor(el, opts = {}) {
-            return this.initialize(el, opts);
+        constructor($el, opts) {
+            return this.initialize($el, opts);
         }
 
-        initialize(el, opts = {}) {
+        initialize($el, opts) {
 
-            if (!(el instanceof HTMLElement)) {
+            if (!$el || !$el.length) {
                 return false;
             }
 
-            if (instances.has(el)) {
-                return instances.get(el);
+            if ($el.data(instanceName)) {
+                return $el.data(instanceName);
             }
 
-            this.el = el;
-            this.options = this.setOptions(opts);
+            this.$el = $el;
 
             this.timer = null;
             this.stopTimer = null;
@@ -40,6 +41,10 @@
             this.images = [];
             this.currentIndex = -1;
 
+            this
+                .setData()
+                .setOptions(opts);
+
             /*
              * A single image requires an image list.
              */
@@ -47,10 +52,9 @@
                 this.isImage() &&
                 !Array.isArray(this.options.imagesListURL)
             ) {
+                this.destroy();
                 return false;
             }
-
-            this.setData();
 
             if (!this.build()) {
                 this.destroy();
@@ -62,33 +66,36 @@
 
 
         /*
-         * ---------------------------------------------------------
          * Core
-         * ---------------------------------------------------------
          */
 
         isImage() {
-            return this.el.tagName.toLowerCase() === 'img';
+            return this.$el[0].tagName.toLowerCase() === 'img';
         }
 
 
         setData() {
-            instances.set(this.el, this);
+            this.$el.data(instanceName, this);
 
             /*
              * Compatibility/debugging reference.
              */
-            this.el.__themestrapRandomImages = this;
+            this.$el[0].__themestrapRandomImages = this;
 
             return this;
         }
 
 
         setOptions(opts) {
-            return {
-                ...PluginRandomImages.defaults,
-                ...(opts || {})
-            };
+            this.options = $.extend(
+                true,
+                {},
+                PluginRandomImages.defaults,
+                opts,
+                { wrapper: this.$el }
+            );
+
+            return this;
         }
 
 
@@ -126,23 +133,24 @@
         }
 
 
+        events() {
+            return this;
+        }
+
+
         /*
-         * ---------------------------------------------------------
          * Single image mode
-         * ---------------------------------------------------------
          */
 
         buildImage() {
 
             this.lightbox =
-                this.el.closest('.lightbox');
+                this.$el[0].closest('.lightbox');
 
             this.isInsideLightbox =
                 !!this.lightbox;
 
-            if (!Array.isArray(
-                this.options.imagesListURL
-            )) {
+            if (!Array.isArray(this.options.imagesListURL)) {
                 this.options.imagesListURL = [];
             }
 
@@ -150,12 +158,10 @@
              * Store the original image.
              */
             const currentSrc =
-                this.el.getAttribute('src');
+                this.$el[0].getAttribute('src');
 
             if (currentSrc) {
-                this.options.imagesListURL.push(
-                    currentSrc
-                );
+                this.options.imagesListURL.push(currentSrc);
             }
 
             /*
@@ -163,17 +169,13 @@
              */
             if (
                 this.isInsideLightbox &&
-                Array.isArray(
-                    this.options.lightboxImagesListURL
-                )
+                Array.isArray(this.options.lightboxImagesListURL)
             ) {
                 const href =
                     this.lightbox.getAttribute('href');
 
                 if (href) {
-                    this.options.lightboxImagesListURL.push(
-                        href
-                    );
+                    this.options.lightboxImagesListURL.push(href);
                 }
             }
 
@@ -202,9 +204,7 @@
 
             window.setTimeout(() => {
 
-                if (this.destroyed) {
-                    return;
-                }
+                if (this.destroyed) { return; }
 
                 this.start(
                     () => this.perImageTag(),
@@ -217,17 +217,11 @@
 
         perImageTag() {
 
-            if (this.destroyed) {
-                return this;
-            }
+            if (this.destroyed) { return this; }
 
-            const images =
-                this.options.imagesListURL;
+            const images = this.options.imagesListURL;
 
-            if (
-                !Array.isArray(images) ||
-                !images.length
-            ) {
+            if (!Array.isArray(images) || !images.length) {
                 return this;
             }
 
@@ -237,12 +231,7 @@
              * Random selection.
              */
             if (this.options.random) {
-
-                index =
-                    this.getRandomIndex(
-                        images.length
-                    );
-
+                index = this.getRandomIndex(images.length);
             }
 
             /*
@@ -250,21 +239,17 @@
              */
             else {
 
-                index =
-                    this.lastIndex - 1;
+                index = this.lastIndex - 1;
 
                 if (index < 0) {
-                    index =
-                        images.length - 1;
+                    index = images.length - 1;
                 }
             }
 
             /*
              * Only one possible image.
              */
-            if (images.length === 1) {
-                index = 0;
-            }
+            if (images.length === 1) { index = 0; }
 
             this.animateSingleImage(index);
 
@@ -279,98 +264,60 @@
 
         animateSingleImage(index) {
 
-            this.el.classList.add('animated');
+            const el = this.$el[0];
 
-            this.el.classList.remove(
-                this.options.animateIn
-            );
-
-            this.el.classList.add(
-                this.options.animateOut
-            );
+            el.classList.add('animated');
+            el.classList.remove(this.options.animateIn);
+            el.classList.add(this.options.animateOut);
 
             this.clearTransitionTimer();
 
-            this.transitionTimer =
-                window.setTimeout(() => {
+            this.transitionTimer = window.setTimeout(() => {
 
-                    if (this.destroyed) {
-                        return;
+                if (this.destroyed) { return; }
+
+                const src = this.options.imagesListURL[index];
+                if (src) { el.setAttribute('src', src); }
+
+                el.classList.remove(this.options.animateOut);
+                el.classList.add(this.options.animateIn);
+
+                /*
+                 * Keep associated lightbox URL in sync.
+                 */
+                if (
+                    this.isInsideLightbox &&
+                    this.lightbox &&
+                    Array.isArray(this.options.lightboxImagesListURL)
+                ) {
+                    const href =
+                        this.options.lightboxImagesListURL[index];
+
+                    if (href) {
+                        this.lightbox.setAttribute('href', href);
                     }
+                }
 
-                    const src =
-                        this.options.imagesListURL[index];
-
-                    if (src) {
-                        this.el.setAttribute(
-                            'src',
-                            src
-                        );
-                    }
-
-                    this.el.classList.remove(
-                        this.options.animateOut
-                    );
-
-                    this.el.classList.add(
-                        this.options.animateIn
-                    );
-
-                    /*
-                     * Keep associated lightbox URL in sync.
-                     */
-                    if (
-                        this.isInsideLightbox &&
-                        this.lightbox &&
-                        Array.isArray(
-                            this.options.lightboxImagesListURL
-                        )
-                    ) {
-
-                        const href =
-                            this.options
-                                .lightboxImagesListURL[index];
-
-                        if (href) {
-                            this.lightbox.setAttribute(
-                                'href',
-                                href
-                            );
-                        }
-                    }
-
-                }, Number(
-                    this.options.animationDelay
-                ));
+            }, Number(this.options.animationDelay));
         }
 
 
         getRandomIndex(length) {
 
-            if (length <= 1) {
-                return 0;
-            }
+            if (length <= 1) { return 0; }
 
             let index;
 
             do {
-                index =
-                    Math.floor(
-                        Math.random() * length
-                    );
-
-            } while (
-                index === this.lastIndex
-            );
+                index = Math.floor(Math.random() * length);
+            } while (index === this.lastIndex);
 
             return index;
         }
 
 
         /*
-         * ---------------------------------------------------------
          * Wrapper mode
-         * ---------------------------------------------------------
          *
          * IMPORTANT:
          *
@@ -383,62 +330,44 @@
 
         buildWrapper() {
 
-            this.images =
-                Array.from(
-                    this.el.querySelectorAll('img')
-                );
+            this.images = Array.from(
+                this.$el[0].querySelectorAll('img')
+            );
 
-            if (!this.images.length) {
-                return;
-            }
+            if (!this.images.length) { return; }
+
+            /*
+             * Inject structural CSS lazily.
+             */
+            this.injectStyles();
 
             /*
              * Prepare the wrapper.
              */
-            this.el.classList.add(
-                'ts-random-images-wrapper'
-            );
+            this.$el[0].classList.add('ts-random-images-wrapper');
 
             /*
              * Prepare each image.
              */
-            this.images.forEach(
-                (image, index) => {
+            this.images.forEach((image, index) => {
 
-                    image.classList.add(
-                        'animated'
-                    );
+                image.classList.add('animated', 'ts-random-image');
 
-                    image.classList.add(
-                        'ts-random-image'
-                    );
+                /*
+                 * The first image is initially visible.
+                 * All others begin hidden.
+                 */
+                if (index === 0) {
 
-                    /*
-                     * The first image is initially visible.
-                     * All others begin hidden.
-                     */
-                    if (index === 0) {
+                    image.classList.add('ts-random-image-active');
+                    image.classList.remove(this.getAnimateOut(image));
 
-                        image.classList.add(
-                            'ts-random-image-active'
-                        );
+                } else {
 
-                        image.classList.remove(
-                            this.getAnimateOut(image)
-                        );
-
-                    } else {
-
-                        image.classList.add(
-                            'ts-random-image-hidden'
-                        );
-
-                        image.classList.remove(
-                            this.getAnimateIn(image)
-                        );
-                    }
+                    image.classList.add('ts-random-image-hidden');
+                    image.classList.remove(this.getAnimateIn(image));
                 }
-            );
+            });
 
             this.currentIndex = 0;
             this.lastIndex = 0;
@@ -449,24 +378,12 @@
              */
             if (
                 this.options.startIndex !== false &&
-                Number.isInteger(
-                    Number(this.options.startIndex)
-                )
+                Number.isInteger(Number(this.options.startIndex))
             ) {
+                const start = Number(this.options.startIndex);
 
-                const start =
-                    Number(
-                        this.options.startIndex
-                    );
-
-                if (
-                    start >= 0 &&
-                    start < this.images.length
-                ) {
-                    this.showWrapperImage(
-                        start,
-                        false
-                    );
+                if (start >= 0 && start < this.images.length) {
+                    this.showWrapperImage(start, false);
                 }
             }
 
@@ -479,21 +396,13 @@
                     ? Number(this.options.delay)
                     : this.getPerWrapperHighDelay();
 
-            const actualDelay =
-                delay > 0
-                    ? delay
-                    : 3000;
+            const actualDelay = delay > 0 ? delay : 3000;
 
             window.setTimeout(() => {
 
-                if (this.destroyed) {
-                    return;
-                }
+                if (this.destroyed) { return; }
 
-                this.start(
-                    () => this.perWrapper(),
-                    actualDelay
-                );
+                this.start(() => this.perWrapper(), actualDelay);
 
             }, 300);
         }
@@ -501,10 +410,7 @@
 
         perWrapper() {
 
-            if (
-                this.destroyed ||
-                !this.images.length
-            ) {
+            if (this.destroyed || !this.images.length) {
                 return this;
             }
 
@@ -514,12 +420,7 @@
              * Random wrapper rotation.
              */
             if (this.options.random) {
-
-                index =
-                    this.getRandomIndex(
-                        this.images.length
-                    );
-
+                index = this.getRandomIndex(this.images.length);
             }
 
             /*
@@ -527,24 +428,14 @@
              */
             else {
 
-                index =
-                    this.currentIndex + 1;
+                index = this.currentIndex + 1;
 
-                if (
-                    index >= this.images.length
-                ) {
-                    index = 0;
-                }
+                if (index >= this.images.length) { index = 0; }
             }
 
-            this.showWrapperImage(
-                index,
-                true
-            );
+            this.showWrapperImage(index, true);
 
-            this.lastIndex =
-                this.currentIndex;
-
+            this.lastIndex = this.currentIndex;
             this.currentIndex = index;
             this.perImageIndex = index;
             this.times++;
@@ -555,131 +446,84 @@
 
         showWrapperImage(index, animate = true) {
 
-            if (
-                index < 0 ||
-                index >= this.images.length
-            ) {
+            if (index < 0 || index >= this.images.length) {
                 return this;
             }
 
-            const current =
-                this.images[this.currentIndex];
-
-            const next =
-                this.images[index];
+            const current = this.images[this.currentIndex];
+            const next = this.images[index];
 
             /*
-             * Nothing to do if we're already displaying
-             * this image.
+             * Nothing to do if we're already displaying this image.
              */
-            if (
-                current === next &&
-                this.currentIndex === index
-            ) {
+            if (current === next && this.currentIndex === index) {
                 return this;
             }
 
-            const currentOut =
-                current
-                    ? this.getAnimateOut(current)
-                    : this.options.animateOut;
+            const currentOut = current
+                ? this.getAnimateOut(current)
+                : this.options.animateOut;
 
-            const nextIn =
-                this.getAnimateIn(next);
+            const nextIn = this.getAnimateIn(next);
 
             /*
-             * Make the next image visible underneath/over
-             * the current image.
+             * Make the next image visible underneath/over the current image.
              */
-            next.classList.remove(
-                'ts-random-image-hidden'
-            );
-
-            next.classList.add(
-                'ts-random-image-active'
-            );
+            next.classList.remove('ts-random-image-hidden');
+            next.classList.add('ts-random-image-active');
 
             if (animate) {
 
-                next.classList.add(
-                    nextIn
-                );
+                next.classList.add(nextIn);
 
                 if (current) {
-
-                    current.classList.remove(
-                        this.getAnimateIn(current)
-                    );
-
-                    current.classList.add(
-                        currentOut
-                    );
+                    current.classList.remove(this.getAnimateIn(current));
+                    current.classList.add(currentOut);
                 }
 
                 /*
-                 * After the transition, leave the new image
-                 * active and completely hide the old image.
+                 * After the transition, leave the new image active
+                 * and completely hide the old image.
                  */
                 this.clearTransitionTimer();
 
-                this.transitionTimer =
-                    window.setTimeout(() => {
+                this.transitionTimer = window.setTimeout(() => {
 
-                        if (this.destroyed) {
-                            return;
-                        }
+                    if (this.destroyed) { return; }
 
-                        if (current) {
+                    if (current) {
+                        current.classList.remove(currentOut);
+                        current.classList.remove('ts-random-image-active');
+                        current.classList.add('ts-random-image-hidden');
+                    }
 
-                            current.classList.remove(
-                                currentOut
-                            );
+                    next.classList.remove(nextIn);
+                    next.classList.add('ts-random-image-active');
 
-                            current.classList.remove(
-                                'ts-random-image-active'
-                            );
-
-                            current.classList.add(
-                                'ts-random-image-hidden'
-                            );
-                        }
-
-                        next.classList.remove(
-                            nextIn
-                        );
-
-                        next.classList.add(
-                            'ts-random-image-active'
-                        );
-
-                    }, Number(
-                        this.options.animationDelay
-                    ));
+                }, Number(this.options.animationDelay));
 
             } else {
 
                 /*
                  * Instant initialization.
                  */
-                this.images.forEach(
-                    (image, imageIndex) => {
+                this.images.forEach((image, imageIndex) => {
 
-                        image.classList.toggle(
-                            'ts-random-image-active',
-                            imageIndex === index
-                        );
+                    image.classList.toggle(
+                        'ts-random-image-active',
+                        imageIndex === index
+                    );
 
-                        image.classList.toggle(
-                            'ts-random-image-hidden',
-                            imageIndex !== index
-                        );
+                    image.classList.toggle(
+                        'ts-random-image-hidden',
+                        imageIndex !== index
+                    );
 
-                        image.classList.remove(
-                            this.getAnimateIn(image),
-                            this.getAnimateOut(image)
-                        );
-                    }
-                );
+                    image.classList.remove(
+                        this.getAnimateIn(image),
+                        this.getAnimateOut(image)
+                    );
+                });
             }
 
             return this;
@@ -687,7 +531,6 @@
 
 
         getAnimateIn(image) {
-
             return (
                 image.dataset.rimageAnimateIn ||
                 this.options.animateIn
@@ -696,7 +539,6 @@
 
 
         getAnimateOut(image) {
-
             return (
                 image.dataset.rimageAnimateOut ||
                 this.options.animateOut
@@ -705,9 +547,7 @@
 
 
         /*
-         * ---------------------------------------------------------
          * Wrapper delay helpers
-         * ---------------------------------------------------------
          */
 
         getPerWrapperHighDelay() {
@@ -716,15 +556,9 @@
 
             this.images.forEach(image => {
 
-                const value =
-                    Number(
-                        image.dataset.rimageDelay
-                    );
+                const value = Number(image.dataset.rimageDelay);
 
-                if (
-                    Number.isFinite(value) &&
-                    value > delay
-                ) {
+                if (Number.isFinite(value) && value > delay) {
                     delay = value;
                 }
             });
@@ -734,40 +568,104 @@
 
 
         /*
-         * ---------------------------------------------------------
          * Sequential coordination
-         * ---------------------------------------------------------
          */
 
         markLastImageInstance() {
 
             const elements =
-                document.querySelectorAll(
-                    '.plugin-random-images'
+                document.querySelectorAll('.plugin-random-images');
+
+            elements.forEach((element, index) => {
+                element.classList.toggle(
+                    'the-last',
+                    index === elements.length - 1
                 );
-
-            elements.forEach(
-                (element, index) => {
-
-                    element.classList.toggle(
-                        'the-last',
-                        index === elements.length - 1
-                    );
-                }
-            );
+            });
         }
 
 
         /*
-         * ---------------------------------------------------------
-         * Lifecycle
-         * ---------------------------------------------------------
+         * CSS injection
+         *
+         * Inject structural CSS lazily from build() rather than
+         * at script parse time. A ref-count ensures the stylesheet
+         * is removed only when the last wrapper-mode instance is
+         * destroyed.
          */
 
-        start(
-            callback = null,
-            delay = 1000
-        ) {
+        injectStyles() {
+
+            if (!document.getElementById(STYLE_ID)) {
+
+                const style = document.createElement('style');
+
+                style.id = STYLE_ID;
+
+                style.textContent = `
+                    .ts-random-images-wrapper {
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .ts-random-images-wrapper
+                    .ts-random-image {
+                        position: absolute;
+                        inset: 0;
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+
+                    .ts-random-images-wrapper
+                    .ts-random-image:first-child {
+                        position: absolute;
+                    }
+
+                    .ts-random-images-wrapper
+                    .ts-random-image-active {
+                        z-index: 2;
+                        visibility: visible;
+                        pointer-events: auto;
+                    }
+
+                    .ts-random-images-wrapper
+                    .ts-random-image-hidden {
+                        z-index: 1;
+                        visibility: hidden;
+                        pointer-events: none;
+                    }
+                `;
+
+                document.head.appendChild(style);
+            }
+
+            styleRefCount++;
+
+            return this;
+        }
+
+
+        removeStyles() {
+
+            styleRefCount = Math.max(0, styleRefCount - 1);
+
+            if (styleRefCount === 0) {
+
+                const style = document.getElementById(STYLE_ID);
+
+                if (style) { style.remove(); }
+            }
+
+            return this;
+        }
+
+
+        /*
+         * Lifecycle
+         */
+
+        start(callback = null, delay = 1000) {
 
             this.stopTimerLoop();
 
@@ -775,16 +673,9 @@
 
             const timeout = () => {
 
-                if (
-                    this.destroyed ||
-                    !this.running
-                ) {
-                    return;
-                }
+                if (this.destroyed || !this.running) { return; }
 
-                if (
-                    typeof callback === 'function'
-                ) {
+                if (typeof callback === 'function') {
                     callback.call(this);
                 }
 
@@ -802,34 +693,24 @@
                 if (!this.options.random) {
 
                     if (
-                        this.el.classList.contains(
-                            'the-last'
-                        )
+                        this.$el[0].classList.contains('the-last')
                     ) {
-
                         document.dispatchEvent(
-                            new CustomEvent(
-                                'rimages.start',
-                                {
-                                    detail: {
-                                        source: this.el
-                                    }
-                                }
-                            )
+                            new CustomEvent('rimages.start', {
+                                detail: { source: this.$el[0] }
+                            })
                         );
 
                     } else {
-
                         this.stop();
                         return;
                     }
                 }
 
-                this.timer =
-                    window.setTimeout(
-                        timeout,
-                        Number(delay) || 1000
-                    );
+                this.timer = window.setTimeout(
+                    timeout,
+                    Number(delay) || 1000
+                );
             };
 
             timeout();
@@ -839,11 +720,8 @@
 
 
         stop() {
-
             this.running = false;
-
             this.stopTimerLoop();
-
             return this;
         }
 
@@ -851,28 +729,22 @@
         stopTimerLoop() {
 
             if (this.timer !== null) {
-
-                window.clearTimeout(
-                    this.timer
-                );
-
+                window.clearTimeout(this.timer);
                 this.timer = null;
             }
+
+            return this;
         }
 
 
         clearTransitionTimer() {
 
-            if (
-                this.transitionTimer !== null
-            ) {
-
-                window.clearTimeout(
-                    this.transitionTimer
-                );
-
+            if (this.transitionTimer !== null) {
+                window.clearTimeout(this.transitionTimer);
                 this.transitionTimer = null;
             }
+
+            return this;
         }
 
 
@@ -885,9 +757,7 @@
                 this.options.stopAtImageIndex !== false &&
                 this.options.stopAtImageIndex !== null &&
                 this.options.stopAtImageIndex !== '' &&
-                Number(
-                    this.options.stopAtImageIndex
-                ) === this.perImageIndex
+                Number(this.options.stopAtImageIndex) === this.perImageIndex
             ) {
                 return true;
             }
@@ -898,12 +768,8 @@
             if (
                 this.options.stopAfterXTimes !== false &&
                 this.options.stopAfterXTimes !== null &&
-                Number(
-                    this.options.stopAfterXTimes
-                ) > 0 &&
-                this.times >= Number(
-                    this.options.stopAfterXTimes
-                )
+                Number(this.options.stopAfterXTimes) > 0 &&
+                this.times >= Number(this.options.stopAfterXTimes)
             ) {
                 return true;
             }
@@ -913,31 +779,16 @@
 
 
         /*
-         * ---------------------------------------------------------
          * Utilities
-         * ---------------------------------------------------------
          */
 
         shuffle(array) {
 
-            for (
-                let i = array.length - 1;
-                i > 0;
-                i--
-            ) {
+            for (let i = array.length - 1; i > 0; i--) {
 
-                const j =
-                    Math.floor(
-                        Math.random() * (i + 1)
-                    );
+                const j = Math.floor(Math.random() * (i + 1));
 
-                [
-                    array[i],
-                    array[j]
-                ] = [
-                    array[j],
-                    array[i]
-                ];
+                [array[i], array[j]] = [array[j], array[i]];
             }
 
             return array;
@@ -945,9 +796,7 @@
 
 
         /*
-         * ---------------------------------------------------------
          * Destroy
-         * ---------------------------------------------------------
          */
 
         destroy() {
@@ -955,51 +804,47 @@
             this.stop();
 
             if (this.stopTimer !== null) {
-
-                window.clearTimeout(
-                    this.stopTimer
-                );
-
+                window.clearTimeout(this.stopTimer);
                 this.stopTimer = null;
             }
 
             this.clearTransitionTimer();
 
             /*
-             * Remove plugin-added classes from wrapper images.
+             * Remove plugin-added classes from wrapper images
+             * and decrement the stylesheet ref-count.
              */
             if (!this.isImage()) {
 
-                this.images.forEach(
-                    image => {
+                this.images.forEach(image => {
+                    image.classList.remove(
+                        'animated',
+                        'ts-random-image',
+                        'ts-random-image-active',
+                        'ts-random-image-hidden'
+                    );
+                });
 
-                        image.classList.remove(
-                            'animated',
-                            'ts-random-image',
-                            'ts-random-image-active',
-                            'ts-random-image-hidden'
-                        );
-                    }
-                );
-
-                this.el.classList.remove(
+                this.$el[0].classList.remove(
                     'ts-random-images-wrapper'
                 );
+
+                this.removeStyles();
             }
 
             this.destroyed = true;
 
-            instances.delete(this.el);
+            this.$el.removeData(instanceName);
 
-            delete this.el.__themestrapRandomImages;
+            delete this.$el[0].__themestrapRandomImages;
+
+            return this;
         }
     }
 
 
     /*
-     * ---------------------------------------------------------
      * Defaults
-     * ---------------------------------------------------------
      */
 
     PluginRandomImages.defaults = {
@@ -1014,33 +859,23 @@
 
         delay: null,
 
-        /*
-         * Time between changing the animation state.
-         */
+        /* Time between changing the animation state. */
         animationDelay: 1000,
 
         animateIn: 'fadeIn',
 
         animateOut: 'fadeOut',
 
-        /*
-         * Optional starting image for wrapper mode.
-         */
+        /* Optional starting image for wrapper mode. */
         startIndex: false,
 
-        /*
-         * Stop when this image index is reached.
-         */
+        /* Stop when this image index is reached. */
         stopAtImageIndex: false,
 
-        /*
-         * Stop after this many milliseconds.
-         */
+        /* Stop after this many milliseconds. */
         stopAfterFewSeconds: false,
 
-        /*
-         * Stop after this many rotations.
-         */
+        /* Stop after this many rotations. */
         stopAfterXTimes: false,
 
         accY: 0
@@ -1048,206 +883,88 @@
 
 
     /*
-     * ---------------------------------------------------------
-     * Public API
-     * ---------------------------------------------------------
+     * Expose on themestrap namespace
      */
 
-    Object.assign(
-        themestrap,
-        {
-            PluginRandomImages
-        }
-    );
+    $.extend(themestrap, {
+        PluginRandomImages
+    });
 
 
     /*
-     * Initialize one element.
+     * jQuery bridge
      */
-    PluginRandomImages.init = function(
-        element,
-        options = {}
-    ) {
 
-        if (typeof element === 'string') {
-            element =
-                document.querySelector(element);
-        }
+    $.fn.themestrapPluginRandomImages = function(opts) {
+        return this.map(function() {
+            const $this = $(this);
 
-        if (!element) {
-            return false;
-        }
-
-        return new PluginRandomImages(
-            element,
-            options
-        );
-    };
-
-
-    /*
-     * Initialize multiple elements.
-     */
-    PluginRandomImages.initAll = function(
-        selector,
-        options = {}
-    ) {
-
-        const elements =
-            typeof selector === 'string'
-                ? document.querySelectorAll(selector)
-                : selector;
-
-        return Array.from(
-            elements || []
-        )
-        .map(element =>
-            new PluginRandomImages(
-                element,
-                options
-            )
-        )
-        .filter(Boolean);
-    };
-
-
-    /*
-     * Retrieve an existing instance.
-     */
-    PluginRandomImages.getInstance =
-        function(element) {
-
-            if (
-                typeof element === 'string'
-            ) {
-                element =
-                    document.querySelector(element);
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
             }
 
-            return element
-                ? instances.get(element) || null
-                : null;
-        };
+            return new PluginRandomImages($this, opts);
+        });
+    };
 
 
     /*
-     * ---------------------------------------------------------
+     * Static helpers
+     */
+
+    PluginRandomImages.init = function(element, options = {}) {
+        const $el = $(element);
+        if (!$el.length) { return false; }
+        return new PluginRandomImages($el, options);
+    };
+
+
+    PluginRandomImages.initAll = function(selector, options = {}) {
+        return $(selector)
+            .toArray()
+            .map(el => new PluginRandomImages($(el), options))
+            .filter(Boolean);
+    };
+
+
+    PluginRandomImages.getInstance = function(element) {
+        const $el = $(element);
+        return $el.length ? ($el.data(instanceName) || null) : null;
+    };
+
+
+    /*
      * Sequential-mode coordination
-     * ---------------------------------------------------------
      */
 
-    document.addEventListener(
-        'rimages.start',
-        event => {
+    document.addEventListener('rimages.start', event => {
 
-            const source =
-                event.detail?.source;
+        const source = event.detail?.source;
 
-            document
-                .querySelectorAll(
-                    '.plugin-random-images'
-                )
-                .forEach(element => {
+        document
+            .querySelectorAll('.plugin-random-images')
+            .forEach(element => {
 
-                    if (element === source) {
-                        return;
-                    }
+                if (element === source) { return; }
 
-                    const instance =
-                        instances.get(element);
+                const instance = $(element).data(instanceName);
 
-                    if (!instance) {
-                        return;
-                    }
+                if (!instance || instance.options.random) { return; }
 
-                    if (
-                        instance.options.random
-                    ) {
-                        return;
-                    }
-
-                    instance.start(
-                        () => {
-
-                            if (
-                                instance.isImage()
-                            ) {
-                                instance.perImageTag();
-                            } else {
-                                instance.perWrapper();
-                            }
-                        },
-
-                        instance.options.delay == null
-                            ? 3000
-                            : Number(
-                                instance.options.delay
-                            )
-                    );
-                });
-        }
-    );
+                instance.start(
+                    () => {
+                        if (instance.isImage()) {
+                            instance.perImageTag();
+                        } else {
+                            instance.perWrapper();
+                        }
+                    },
+                    instance.options.delay == null
+                        ? 3000
+                        : Number(instance.options.delay)
+                );
+            });
+    });
 
 
-    /*
-     * ---------------------------------------------------------
-     * Wrapper-mode CSS
-     * ---------------------------------------------------------
-     *
-     * Inject only the structural CSS needed by the plugin.
-     * Animation CSS itself remains the responsibility of the
-     * consuming application.
-     */
-
-    const STYLE_ID =
-        'themestrap-random-images-styles';
-
-    if (
-        !document.getElementById(STYLE_ID)
-    ) {
-
-        const style =
-            document.createElement('style');
-
-        style.id = STYLE_ID;
-
-        style.textContent = `
-            .ts-random-images-wrapper {
-                position: relative;
-                overflow: hidden;
-            }
-
-            .ts-random-images-wrapper
-            .ts-random-image {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-            .ts-random-images-wrapper
-            .ts-random-image:first-child {
-                position: absolute;
-            }
-
-            .ts-random-images-wrapper
-            .ts-random-image-active {
-                z-index: 2;
-                visibility: visible;
-                pointer-events: auto;
-            }
-
-            .ts-random-images-wrapper
-            .ts-random-image-hidden {
-                z-index: 1;
-                visibility: hidden;
-                pointer-events: none;
-            }
-        `;
-
-        document.head.appendChild(style);
-    }
-
-
-}))(window.themestrap = window.themestrap || {});
+})).apply(this, [window.themestrap, jQuery]);
