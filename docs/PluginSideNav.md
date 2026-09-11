@@ -18,7 +18,6 @@ In collapsed (icon-only) mode, each item's label is hidden. If `Bootstrap.Toolti
 
 When `activeOnLoad: true` the plugin compares `window.location.pathname` against each leaf item's `href`. The first match receives `[data-sidenav-active]` and its parent group is opened automatically.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -61,7 +60,6 @@ When `activeOnLoad: true` the plugin compares `window.location.pathname` against
 </aside>
 ```
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -93,7 +91,6 @@ When `activeOnLoad: true` the plugin compares `window.location.pathname` against
 }
 ```
 
----
 
 ## [Instance **API**](#instance-api)
 
@@ -120,7 +117,6 @@ When `activeOnLoad: true` the plugin compares `window.location.pathname` against
 | `subitem.ts.sidenav` | `({$item, href})` | After a sub-item click. |
 | `group-toggle.ts.sidenav` | `({$item, open})` | After a group drawer toggles. |
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

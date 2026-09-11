@@ -4,7 +4,6 @@ A fully self-contained GitHub Flavored Markdown renderer — no `marked.js`, no 
 
 When PluginHighlight is also loaded on the page, fenced code blocks are automatically passed to it for syntax highlighting — no extra markup required. The integration is opt-out: set `highlight: false` to disable it, or pass `highlightOptions` to control line numbers, copy buttons, and theme per Markdown element.
 
----
 
 ## How It Works
 
@@ -37,7 +36,6 @@ The renderer walks the token array and emits HTML. Block tokens call `renderInli
 > [!NOTE]
 > The bundled GFM parser is intentionally minimal — it covers the GFM spec features actually used in documentation and README files. It does not support definition lists, footnotes, custom containers, or LaTeX math blocks. For those, swap `GFM.parse()` for `marked.parse()` and keep the plugin wrapper unchanged.
 
----
 
 ## Quick Start
 
@@ -105,7 +103,6 @@ md.setSource('/api/docs/intro.md');
 > [!TIP]
 > The jQuery method returns the instance on every call — first call creates, subsequent calls return the existing instance without reinitializing. Use `$el.data('__pluginMarkdown')` to retrieve the instance programmatically at any time after init.
 
----
 
 ## Syntax Highlighting
 
@@ -202,7 +199,6 @@ All keys from `PluginHighlight.defaults` are valid. The Markdown plugin applies 
 
 Any other PluginHighlight option (`tabSize`, `wrapLines`, etc.) passes through unchanged.
 
----
 
 ## GFM Support
 
@@ -242,7 +238,6 @@ The bundled parser covers the GitHub Flavored Markdown spec features commonly fo
 > [!NOTE]
 > Heading IDs are generated from the heading text — lowercased, with non-word characters replaced by hyphens. `# Hello World` -> `id="hello-world"`. These IDs are used by the TOC sidebar when rendering inside the Guide chrome.
 
----
 
 ## Configuration Options
 
@@ -312,7 +307,6 @@ All visual tokens are exposed as custom properties on `.ts-markdown`. Override g
 | `--ts-md-hr` | `rgba(0,0,0,.15)` | Horizontal rule colour |
 | `--ts-md-heading-mt` | `1.5em` | Top margin on all headings |
 
----
 
 ## Public API
 
@@ -365,7 +359,6 @@ const html = themestrap.PluginMarkdown.GFM?.parse(markdownStr, {
 inst.render(md).getHtml();
 ```
 
----
 
 ## Recipe Cookbook
 
@@ -505,7 +498,6 @@ $('#docs')
 </div>
 ```
 
----
 
 ## Common Pitfalls
 

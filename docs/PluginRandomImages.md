@@ -2,7 +2,6 @@
 
 Cycles through a list of images in place with Animate.css transitions. Works in two modes: **single-image** (swaps the `src` of one `<img>`) and **wrapper** (cycles `src` values across all `<img>` children of a container). The loop can be random or sequential, and stops on any of three independent stop conditions.
 
----
 
 ## Quick Start
 
@@ -64,7 +63,6 @@ const inst = themestrap.PluginRandomImages.init(
 );
 ```
 
----
 
 ## Options
 
@@ -89,7 +87,6 @@ Options go in a single-quoted attribute with double-quoted JSON keys — `themes
 data-plugin-options="{'delay': 2500, 'animateIn': 'bounceIn', 'animateOut': 'bounceOut'}"
 ```
 
----
 
 ## Per-element Data Attributes (wrapper mode)
 
@@ -101,7 +98,6 @@ In wrapper mode these attributes on individual `<img>` children override the glo
 | `data-rimage-animate-in` | Animate.css class for this image's entrance. Falls back to the global `animateIn`. |
 | `data-rimage-animate-out` | Animate.css class for this image's exit. Falls back to the global `animateOut`. |
 
----
 
 ## Public API
 
@@ -192,7 +188,6 @@ $('#my-img').themestrapPluginRandomImages();       // init OR return existing
 > [!WARNING]
 > **Pitfall:** Chaining `.data('__randomimages')` off the bridge init call returns `undefined` because `.data()` reads from the jQuery object returned by `.map()`, not from the DOM element. Always retrieve the instance on a separate `$(selector)` call, or use `PluginRandomImages.getInstance()`.
 
----
 
 ## Events
 
@@ -208,7 +203,6 @@ document.addEventListener('rimages.start', function (e) {
 });
 ```
 
----
 
 ## Modes in Detail
 
@@ -234,7 +228,6 @@ The outer loop interval (`delay` option) controls how often the entire shuffle-a
 
 Sequential mode only applies to single-image instances. Images cycle in reverse order through the pool (descending index). Multiple sequential instances on the same page coordinate via the `rimages.start` document event: the "last" instance (the one with `.the-last`) drives the loop and broadcasts to the others, which restart themselves on receipt.
 
----
 
 ## Recipes
 
@@ -351,7 +344,6 @@ Only rotate on viewports wider than 768 px:
      alt="">
 ```
 
----
 
 ## Common Pitfalls
 

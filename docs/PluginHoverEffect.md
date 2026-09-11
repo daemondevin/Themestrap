@@ -11,7 +11,6 @@ PluginHoverEffect supports two modes:
 
 The mode is auto-detected from the `effect` option or from the `.hover-effect-3d` class on the element.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -28,7 +27,6 @@ The mode is auto-detected from the `effect` option or from the `.hover-effect-3d
 </div>
 ```
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -41,4 +39,3 @@ The mode is auto-detected from the `effect` option or from the `.hover-effect-3d
 | `selector` | string | `'.thumb-info, .hover-effect-3d-wrapper'` | Target selector for the 3D effect. |
 | `sensitivity` | number | `20` | 3D tilt sensitivity. |
 
----

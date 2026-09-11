@@ -6,7 +6,6 @@ Themestrap's cookie consent bar — shows a configurable cookie bar after a dela
 
 PluginGDPR checks for a `themestrap-gdpr-preferences` cookie on init. If absent, it shows `#gdpr-cookie-bar` after `cookieBarShowDelay` ms. Users can agree to all (writes a cookie for all categories) or open the preferences popup to accept/reject individual categories. On preference change the plugin calls `$.fn.themestrapPluginGDPRWrapper()` on any wrappers on the page.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -30,7 +29,6 @@ PluginGDPR checks for a `themestrap-gdpr-preferences` cookie on init. If absent,
 </div>
 ```
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -39,7 +37,6 @@ PluginGDPR checks for a `themestrap-gdpr-preferences` cookie on init. If absent,
 | `cookieBarShowDelay` | number | `3000` | Delay in ms before showing the cookie bar. |
 | `expires` | number | `365` | Cookie expiry in days. |
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 
@@ -47,4 +44,3 @@ PluginGDPR checks for a `themestrap-gdpr-preferences` cookie on init. If absent,
 
 **Cookie name is fixed.** Preferences are always stored as `themestrap-gdpr-preferences`. If you need a different key, modify the plugin source.
 
----

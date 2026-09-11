@@ -51,7 +51,6 @@ Any element can be a toggle button:
 > [!NOTE]  
 > The plugin injects a sun SVG (in light mode) or moon SVG (in dark mode) into the element. Set `renderIcon: false` to suppress icon injection and render your own content.
 
----
 
 ## Resolution **Order**
 
@@ -61,7 +60,6 @@ On every page load the plugin resolves the initial theme in this priority:
 > 2. `window.matchMedia('(prefers-color-scheme: dark)')` — the OS preference
 > 3. `'light'` — the default fallback
 
----
 
 ## Configuration **Options**
 

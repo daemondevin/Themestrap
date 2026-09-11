@@ -2,7 +2,6 @@
 
 An accessible menubar that provides top-level menus with dropdown panels, checkbox items, radio groups, nested sub-menus, and complete WAI-ARIA Menubar keyboard navigation; all driven by `data-*` attributes with zero external dependencies beyond jQuery.
 
----
 
 ## Quick Start
 
@@ -28,7 +27,6 @@ $('[data-plugin-menubar]').themestrapPluginMenubar();
 </script>
 ```
 
----
 
 ## Markup Reference
 
@@ -157,7 +155,6 @@ $('[data-menubar-type="checkbox"]').attr('aria-checked'); // "true" | "false"
 - Viewport edge detection flips the panel to the left when it would overflow.
 - Sub-menus may **not** be nested further (one level only).
 
----
 
 ## Options
 
@@ -198,7 +195,6 @@ $('[data-plugin-menubar]').themestrapPluginMenubar({
 }
 ```
 
----
 
 ## Keyboard Navigation
 
@@ -234,7 +230,6 @@ $('[data-plugin-menubar]').themestrapPluginMenubar({
 | `→` / `Enter` | Open the sub-menu when focus is on a sub-trigger. |
 | `←` / `Escape` | Close the sub-menu; return focus to the sub-trigger. |
 
----
 
 ## Public API
 
@@ -247,7 +242,6 @@ mb.getActiveMenu();  // Returns open menu index, or -1
 mb.destroy();        // Full teardown — removes ARIA, events, and CSS classes
 ```
 
----
 
 ## Events
 
@@ -270,7 +264,6 @@ $('#my-menubar').on('menubar:select', function(e) {
 | `menubar:close` | `{ index, instance }` | A top-level menu closes. |
 | `menubar:select` | `{ $item, payload, instance }` | Any item is activated (click or keyboard). |
 
----
 
 ## Theming with CSS Variables
 
@@ -309,7 +302,6 @@ Dark mode is applied automatically when `html.dark` is present (set by PluginDar
 | `--ts-mb-content-radius` | `8px` | Dropdown border-radius. |
 | `--ts-mb-z` | `1050` | Dropdown z-index. |
 
----
 
 ## Init.js Wiring
 
@@ -333,7 +325,6 @@ Opt out of auto-init for a specific instance with the `.manual` class and initia
 $('#my-menubar').themestrapPluginMenubar({ loop: false });
 ```
 
----
 
 ## MODX Snippet
 

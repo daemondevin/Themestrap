@@ -4,7 +4,6 @@ Themestrap's scroll-triggered CSS custom-property animator — interpolates any 
 
 A declarative way to animate elements based on scroll position. Write a single `data-scroll-fx` attribute and the plugin writes a `--scroll-fx-{property}` CSS custom property to the element as the user scrolls, interpolated linearly between two values across a viewport range you define. Use the variable in any CSS rule to drive parallax, fade, blur, rotation, color shifts — anything that can read a custom property.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -44,7 +43,6 @@ el.style.setProperty('--scroll-fx-' + property, value);
 
 > With `startPercent: 100` and `endPercent: 0`, the animation runs from _just below the viewport_ to _just above it_ — the most common range. Flip the values to run the animation in reverse.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -92,7 +90,6 @@ $('.parallax-section').themestrapPluginScrollFx();
 
 > **Tip:** Use `dynIntObsInit` (dynamic) over `intObsInit` for ScrollFx — it re-evaluates the selector on DOM mutations, so dynamically-injected elements get animated too.
 
----
 
 ## [Attribute **Reference**](#options)
 
@@ -119,7 +116,6 @@ By default, scroll position is read from `window`. To track horizontal scroll wi
 
 > **Warning:** The plugin reads from `scrollLeft`/`clientWidth` on the named scrollable element. It must be a real scroll container — `overflow-x: scroll` (or `auto`) with a fixed width.
 
----
 
 ## [Recipe **Cookbook**](#recipes)
 
@@ -188,7 +184,6 @@ By default, scroll position is read from `window`. To track horizontal scroll wi
 </style>
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

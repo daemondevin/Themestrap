@@ -54,33 +54,6 @@
 (((themestrap = {}, $) => {
     const instanceName = '__pluginDialog';
 
-    // Scrollbar width measurement
-    // Runs once when the plugin file loads. Measures the native scrollbar width
-    // and stores it as --dialog-scrollbar-width on <html> so that
-    // body.dialog-scroll-lock { padding-right: var(--dialog-scrollbar-width) }
-    // can compensate exactly, preventing any layout shift when the dialog opens.
-    //
-    // Wrapped in a DOMContentLoaded guard so the script is safe to load from
-    // <head> as well as before </body>.
-    (function measureScrollbarWidth() {
-        function measure() {
-            const outer = document.createElement('div');
-            outer.style.cssText = 'visibility:hidden;overflow:scroll;position:absolute;width:100px';
-            document.body.appendChild(outer);
-            const width = outer.offsetWidth - outer.clientWidth;
-            document.body.removeChild(outer);
-            document.documentElement.style.setProperty('--dialog-scrollbar-width', width + 'px');
-        }
-
-        if (document.body) {
-            // Body is already available (script loaded before </body> as normal)
-            measure();
-        } else {
-            // Script loaded in <head> — defer until the body exists
-            document.addEventListener('DOMContentLoaded', measure, { once: true });
-        }
-    })();
-
     // Focusable selector (ARIA-compliant set)
     const FOCUSABLE = [
         'a[href]',
@@ -189,10 +162,10 @@
     line-height: 1.5;
 }
 
-body.dialog-scroll-lock {
+body.ts-scroll-lock {
     overflow: hidden;
     /* Prevent layout shift from scrollbar disappearing */
-    padding-right: var(--dialog-scrollbar-width, 0px);
+    padding-right: var(--ts-scrollbar-width, 0px);
 }
 
 /* The plugin adds these classes to [data-dialog-panel].
@@ -473,10 +446,10 @@ body.dialog-scroll-lock {
             self.$previousFocus = $(document.activeElement);
 
             // Scroll lock: add class to <body>.
-            // CSS rule:  body.dialog-scroll-lock { overflow: hidden; padding-right: var(--dialog-scrollbar-width, 0px); }
+            // CSS rule:  body.ts-scroll-lock { overflow: hidden; padding-right: var(--ts-scrollbar-width, 0px); }
             // The padding-right compensates for the scrollbar disappearing, preventing layout shift.
             if (opts.scrollLock) {
-                $('body').addClass('dialog-scroll-lock');
+                $('body').addClass('ts-scroll-lock');
             }
 
             // Reveal
@@ -564,7 +537,7 @@ body.dialog-scroll-lock {
                 .attr('aria-hidden', 'true');
 
             if (opts.scrollLock) {
-                $('body').removeClass('dialog-scroll-lock');
+                $('body').removeClass('ts-scroll-lock');
             }
 
             // Restore focus to the element that opened the dialog
@@ -637,7 +610,7 @@ body.dialog-scroll-lock {
         animationIn      : 'fadeIn',        // CSS animation class applied to [data-dialog-panel]
         animationOut     : 'fadeOut',       // CSS animation class applied on close
         animationDuration: 300,             // ms — fallback if animationend never fires
-        scrollLock       : true,    // add .dialog-scroll-lock to <body> while open
+        scrollLock       : true,    // add .ts-scroll-lock to <body> while open
         onOpen           : null,    // function(dialogElement) {}
         onClose          : null,    // function(dialogElement) {}
     };

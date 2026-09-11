@@ -2,7 +2,6 @@
 
 > **No external dependency.** The rewritten plugin ships its own slide engine, clone-loop, drag/touch handling, and injected CSS. ts Carousel 2 is no longer required.
 
----
 
 ## How It Works
 
@@ -26,7 +25,6 @@ When `loop: true`, the plugin prepends and appends `visibleItems` clones of the 
 
 Option `responsive` is a breakpoint -> `{items}` map identical to ts's format. On each resize the plugin recalculates `visibleItems`, rebuilds clones if the count changed, and re-applies item widths via `calc()`.
 
----
 
 ## Quick Start
 
@@ -59,7 +57,6 @@ Add the `manual` class to opt out of auto-init.
 $('.ts-carousel').themestrapPluginCarousel({ items: 3, loop: true });
 ```
 
----
 
 ## Configuration Options
 
@@ -96,7 +93,6 @@ $('.ts-carousel').themestrapPluginCarousel({ items: 3, loop: true });
 > [!TIP]
 > Every option can be set globally by modifying `PluginCarousel.defaults`, or per-element via `data-plugin-options`.
 
----
 
 ## Instance API
 
@@ -131,7 +127,6 @@ Bind with jQuery `.on()` on the carousel element:
 | `change.ts.carousel` | `{ item: { index, count } }` | A slide transition is about to start. |
 | `changed.ts.carousel` | `{ item: { index, count }, property: { name, value } }` | Transition complete (after `smartSpeed + 50 ms`). |
 
----
 
 ## Modifier Classes
 
@@ -212,7 +207,6 @@ Bind with jQuery `.on()` on the carousel element:
 | `carousel-bottom-inside-shadow` | Gradient shadow at stage bottom. |
 | `carousel-right-side-nav` | Stage narrowed 55 px; next button positioned outside right. |
 
----
 
 ## Recipes
 
@@ -312,7 +306,6 @@ $el.on('changed.ts.carousel', (e) => {
 inst.destroy();
 ```
 
----
 
 ## Common Pitfalls
 

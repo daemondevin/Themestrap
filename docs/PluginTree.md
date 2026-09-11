@@ -2,7 +2,6 @@
 
 A self-contained jQuery tree widget with no external dependencies — JSON or inline HTML data sources, animated expand/collapse, single/multi-select, cascading checkboxes, full keyboard navigation, and fuzzy search, all in one file.
 
----
 
 ## Installation
 
@@ -16,7 +15,6 @@ Include the plugin file after `themestrap.js` and jQuery:
 
 The plugin injects its own stylesheet on first use and removes it when the last instance is destroyed — no separate CSS file required.
 
----
 
 ## Quick Start
 
@@ -75,7 +73,6 @@ if ($.isFunction($.fn['themestrapPluginTree']) && $('[data-plugin-tree]').length
 }
 ```
 
----
 
 ## Data Sources
 
@@ -141,7 +138,6 @@ When `data` is `null` (the default), the plugin reads a `<ul>` directly inside t
 
 The `data-node-id` attribute is used as the node's identifier throughout the API. If omitted, the plugin falls back to the element's `id` attribute, then to the node's trimmed text content.
 
----
 
 ## Options Reference
 
@@ -187,7 +183,6 @@ $('#my-tree').themestrapPluginTree({
 | `onOpen` | `Function\|null` | `null` | Callback invoked after a folder is opened. Receives `(nodeData, $li)`. |
 | `onClose` | `Function\|null` | `null` | Callback invoked after a folder is closed. Receives `(nodeData, $li)`. |
 
----
 
 ## JSON Node Schema
 
@@ -217,7 +212,6 @@ Each item in the `data` array (and each item in a node's `children` array) follo
 | `state.disabled` | `boolean` | No | Renders the node at 38% opacity with `pointer-events: none`. Disabled nodes cannot be selected or toggled. |
 | `children` | `Array` | No | Array of child node objects following the same schema. Omitting `children` (or passing an empty array) makes the node a leaf. |
 
----
 
 ## Public API
 
@@ -286,7 +280,6 @@ const selected = tree.getSelected();
 const ids = tree.getSelected().map(s => s.id);
 ```
 
----
 
 ## Events
 
@@ -333,7 +326,6 @@ $(document).on('ts.tree.select', '#my-tree', function(e) {
 
 Callbacks (`onSelect`, `onDeselect`, `onOpen`, `onClose`) are called with `(nodeData, $li)` and fire at the same point as their corresponding events. Use callbacks for simple inline handling; use events when you need to decouple listeners from the initialization call or listen across multiple trees.
 
----
 
 ## Keyboard Navigation
 
@@ -352,7 +344,6 @@ The plugin implements the [WAI-ARIA Treeview pattern](https://www.w3.org/WAI/ARI
 
 Focus is never trapped inside the tree — `Tab` and `Shift+Tab` follow standard browser behaviour.
 
----
 
 ## Checkbox Mode
 
@@ -393,7 +384,6 @@ const checked = tree.getSelected().map(s => s.id);
 // ['read', 'write']
 ```
 
----
 
 ## Search & Filter
 
@@ -440,7 +430,6 @@ document.getElementById('my-tree').addEventListener('ts.tree.search', function(e
 });
 ```
 
----
 
 ## Custom Icons
 
@@ -483,7 +472,6 @@ For inline HTML trees, add the icon markup yourself before calling the plugin �
 </li>
 ```
 
----
 
 ## Styling & CSS Variables
 
@@ -538,7 +526,6 @@ The plugin uses the standard Themestrap CSS custom properties. Override any of t
 | `.ts-tree-search` | `<div>` | Search bar wrapper (when `search.enabled: true`) |
 | `.ts-tree-no-results` | `<div>` | "No results" message shown during a zero-match search |
 
----
 
 ## init.js Wiring
 
@@ -564,7 +551,6 @@ $('#my-tree').themestrapPluginTree({ multiSelect: false });
 </script>
 ```
 
----
 
 ## Accessibility
 
@@ -580,7 +566,6 @@ The plugin follows the [ARIA Treeview pattern](https://www.w3.org/WAI/ARIA/apg/p
 - Every node inner element is focusable (`tabindex="0"`) and handles the full set of keyboard interactions described in [Keyboard Navigation](#keyboard-navigation).
 - Search match highlights use `<mark>` elements, which are announced by screen readers as highlighted text.
 
----
 
 ## Recipes
 

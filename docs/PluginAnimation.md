@@ -6,7 +6,7 @@ Themestrap's viewport-triggered CSS animation plugin — adds Animate.css entran
 
 PluginAnimate watches an element with an IntersectionObserver. When the element crosses the configured threshold, the plugin adds the `animated` class and the configured animation class name, then removes them after the animation completes. A `delay` and `duration` can be set per-element via data attributes or plugin options.
 
----
+
 
 ## [Quick **Start**](#quick-start)
 
@@ -30,12 +30,12 @@ if ($.isFunction($.fn['themestrapPluginAnimate'])
 }
 ```
 
----
+
 
 ## [Configuration **Options**](#options)
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
+|--|||-|
 | `accX` | number | `0` | IntersectionObserver horizontal offset. |
 | `accY` | number | `-80` | IntersectionObserver vertical offset (negative = trigger earlier). |
 | `delay` | number | `100` | Default animation delay in ms. |
@@ -48,12 +48,12 @@ if ($.isFunction($.fn['themestrapPluginAnimate'])
 ### Per-element data attributes
 
 | Attribute | Description |
-|-----------|-------------|
+|--|-|
 | `data-appear-animation` | The animation class name (e.g. `'fadeInUp'`). |
 | `data-appear-animation-delay` | Override delay in ms for this element. |
 | `data-appear-animation-duration` | Override duration (any CSS time string). |
 
----
+
 
 ## [Common **Pitfalls**](#pitfalls)
 

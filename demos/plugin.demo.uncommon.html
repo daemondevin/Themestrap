@@ -731,9 +731,9 @@ html.dark .btn-light { background: #17283c; border-color: #2b4058; color: #dbe7f
                     </div>
                 </div>
             </div>
-            <pre class="code"><span class="tag">const</span> overlay = $(<span class="str">'#overlay-stage'</span>).data(<span class="str">'loadingOverlay'</span>);
+            <pre class="code"><span class="tag">const</span> overlay = $(<span class="str">'#overlay-stage'</span>).data(<span class="str">'__pluginLoadingOverlay'</span>);
 overlay.show();
-<span class="tag">setTimeout</span>(() =&gt; overlay.hide(), <span class="str">2000</span>);</pre>
+<span class="tag">setTimeout</span>(() =&gt; overlay.hide(), <span class="str">2500</span>);</pre>
         </div>
     </section>
 
@@ -768,33 +768,6 @@ overlay.show();
         </div>
     </section>
 
-    <!-- Tooltip -->
-    <section class="demo-card">
-        <div class="card-head">
-            <h3>Contextual microcopy</h3>
-            <span class="plugin-name">PluginTooltip</span>
-        </div>
-        <div class="card-body">
-            <p class="card-copy">
-                Tooltip supports positioning, variants, delays and live content. Hover
-                or focus the controls to see the plugin handle the presentation.
-            </p>
-            <div class="stage text-center">
-                <button class="btn btn-outline-primary mx-1"
-                        type="button"
-                        data-plugin-tooltip="This tooltip is supplied directly by the data attribute."
-                        data-plugin-options='{"type":"primary","location":"top"}'>
-                    <i class="bi bi-info-circle me-1"></i> Attribute tooltip
-                </button>
-                <button class="btn btn-outline-dark mx-1"
-                        type="button"
-                        data-plugin-tooltip=""
-                        data-plugin-options='{"content":"<strong>HTML tooltip</strong><br>Useful for richer microcopy.","html":true,"type":"light","location":"bottom"}'>
-                    <i class="bi bi-code-slash me-1"></i> HTML tooltip
-                </button>
-            </div>
-        </div>
-    </section>
 
 </div>
 </main>
@@ -818,7 +791,6 @@ overlay.show();
 <script src="../js/components/themestrap.plugin.randomimages.js"></script>
 <script src="../js/components/themestrap.plugin.loadingoverlay.js"></script>
 <script src="../js/components/themestrap.plugin.toast.js"></script>
-<script src="../js/components/themestrap.plugin.tooltip.js"></script>
 <script src="../js/components/themestrap.plugin.darkmode.js"></script>
 
 <script>
@@ -865,14 +837,14 @@ $(function () {
     });
 
     /* LoadingOverlay uses its own jQuery plugin name and instance key. */
-    $('#overlay-stage').loadingOverlay({
-        effect: 'pulse',
-        hideDelay: 250
+    $('#overlay-stage').themestrapPluginLoadingOverlay({
+        type: 'ring',
+        autoHide: 2500
     });
 
     $('#run-overlay').on('click', function () {
         const $stage = $('#overlay-stage');
-        const overlay = $stage.data('loadingOverlay');
+        const overlay = $stage.data('__pluginLoadingOverlay');
         overlay.show();
         $(this).prop('disabled', true);
 

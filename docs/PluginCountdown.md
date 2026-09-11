@@ -6,13 +6,11 @@
 **Init strategy:** `intObsInit` via `themestrap.init.js`  
 **Dependency:** [jQuery Countdown](https://hilios.github.io/jQuery.countdown/) (`$.fn.countdown`)
 
----
 
 ## Overview
 
 PluginCountdown wraps the jQuery Countdown plugin with Themestrap's standard options lifecycle. It renders a live days / hours / minutes / seconds display that updates once per second, with configurable unit labels, an optional number class for styling the digit spans, and optional wrapper classes on each unit block.
 
----
 
 ## Markup
 
@@ -49,7 +47,6 @@ PluginCountdown wraps the jQuery Countdown plugin with Themestrap's standard opt
      }'></div>
 ```
 
----
 
 ## Output HTML
 
@@ -73,7 +70,6 @@ The plugin generates the following structure on each tick:
 
 `insertHTMLbefore` is prepended before `.days`; `insertHTMLafter` is appended after `.seconds`.
 
----
 
 ## Options
 
@@ -90,7 +86,6 @@ The plugin generates the following structure on each tick:
 | `insertHTMLbefore` | `string` | `''` | Raw HTML injected before the first unit span on every tick. |
 | `insertHTMLafter` | `string` | `''` | Raw HTML injected after the last unit span on every tick. |
 
----
 
 ## Styling Tips
 
@@ -120,7 +115,6 @@ Target the generated spans by their fixed class names:
 
 Or use `wrapperClass` and `numberClass` to inject any Bootstrap or Themestrap utility classes directly.
 
----
 
 ## Auto-init (init.js)
 

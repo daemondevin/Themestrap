@@ -6,7 +6,6 @@ All inner DOM — backdrop, card, clock, avatar, OTP input, buttons, attempt ind
 
 > **Dependency:** `themestrap.plugin.otp.js` must be loaded before `themestrap.plugin.lockscreen.js`.
 
----
 
 ## Quick Start
 
@@ -56,7 +55,6 @@ if ($.isFunction($.fn['themestrapPluginLockscreen']) && $('[data-plugin-lockscre
 }
 ```
 
----
 
 ## Options
 
@@ -101,7 +99,6 @@ All options are merged as: `PluginLockscreen.defaults → JS opts argument → d
 | `idleTimeout` | number | `0` | Seconds of inactivity (no mouse, keyboard, or touch events) before the screen locks automatically. `0` disables the watcher entirely. |
 | `showIdleBadge` | bool | `true` | Show a countdown pill fixed to the bottom-right corner of the viewport when the idle timer is active and 30 or fewer seconds remain. |
 
----
 
 ## Public API
 
@@ -124,7 +121,6 @@ const ls = $('#page-lock').data('__pluginLockscreen');
 | `resetAttempts()` | `this` | Clear the failed-attempt counter and the blocked state. Re-enables the OTP input and Unlock button. |
 | `destroy()` | `this` | Full teardown — removes all generated DOM, clears intervals, removes the idle event listeners, restores body scroll, and removes the data key. |
 
----
 
 ## Events
 
@@ -158,7 +154,6 @@ $lock.on('ts.lockscreen.blocked', function (e) {
 });
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -199,7 +194,6 @@ The embedded OTP input inherits all `--ts-otp-*` tokens. Override them alongside
 }
 ```
 
----
 
 ## Keyboard Navigation
 
@@ -213,7 +207,6 @@ The embedded OTP input inherits all `--ts-otp-*` tokens. Override them alongside
 | `Escape` | Anywhere while locked | No-op — the lockscreen does not close on Escape. |
 | `Tab` | While locked | Body scroll is locked; focus is contained within the lockscreen card by the browser's natural tab order through the rendered inputs and buttons. |
 
----
 
 ## ARIA Wiring
 
@@ -227,7 +220,6 @@ The embedded OTP input inherits all `--ts-otp-*` tokens. Override them alongside
 | Each OTP `<input>` | `aria-label` | `"Digit N of M"` |
 | Blocked message | — | Rendered as visible text; the OTP error `aria-live="polite"` region is used for attempt failure messages |
 
----
 
 ## Recipes
 
@@ -327,7 +319,6 @@ $(document).on('keydown', function (e) {
 });
 ```
 
----
 
 ## Common Pitfalls
 

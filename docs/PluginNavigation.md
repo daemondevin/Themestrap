@@ -10,7 +10,6 @@ Switch between modes with a single option:
 | `"panel"` | Fixed-width vertical nav panel with depth-indented children, metadata column, section headings, accordion mode, and Morningstar-style active indicator. |
 | `"megamenu"` | Horizontal or vertical mega-menu bar with hover or click opening, animated content panels, viewport portal, mutual exclusion, and full keyboard navigation. |
 
----
 
 ## Quick Start
 
@@ -149,7 +148,6 @@ if ($.isFunction($.fn['themestrapPluginNavigation']) &&
 
 > `forceInit: true` is set in defaults, so `dynIntObsInit` initialises immediately without waiting for the element to enter the viewport — correct for layout-critical navigation.
 
----
 
 ## Data Attributes
 
@@ -195,7 +193,6 @@ if ($.isFunction($.fn['themestrapPluginNavigation']) &&
 | `data-nav-list-item-title` | Inside list item | Bold title line. |
 | `data-nav-list-item-desc` | `<p>` inside list item | Muted description paragraph. |
 
----
 
 ## Options
 
@@ -259,7 +256,6 @@ All options are merged as: `PluginNavigation.defaults → JS opts argument → d
 | `forceInit` | bool | `true` | Skip IntersectionObserver — navigation is layout-critical and should init immediately. |
 | `accY` | number | `0` | IntersectionObserver root-margin offset. Unused when `forceInit` is true. |
 
----
 
 ## Active Indicator Styles
 
@@ -272,7 +268,6 @@ The `activeIndicator` option adds a modifier class and targets CSS accordingly.
 | `"both"` | Left bar + caret-right simultaneously | High-contrast needs |
 | `"none"` | Colour/weight change only | Minimal or custom-styled nav |
 
----
 
 ## Public API
 
@@ -324,7 +319,6 @@ const nav = $('#myNav').data('__pluginNavigation');
 | `togglePanel(index)` | `this` | Open if closed; close if the same index is already active. |
 | `getActivePanel()` | `number` | Index of the open panel, or `-1` if none. |
 
----
 
 ## Events
 
@@ -354,7 +348,6 @@ document.querySelector('#myNav').addEventListener('panel.open.ts.navigation', (e
 });
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -404,7 +397,6 @@ All colour values in the injected stylesheet are written as `var(--ts-nav-*, fal
 | `--ts-nav-muted-text` | Description text in list items | `rgba(0,0,0,.55)` |
 | `--ts-nav-focus-ring` | Focus outline colour | `var(--ts-nav-accent)` |
 
----
 
 ## Keyboard Navigation
 
@@ -426,7 +418,6 @@ All colour values in the injected stylesheet are written as `var(--ts-nav-*, fal
 | `↓` | Trigger, horizontal, panel open | Move focus to the first focusable element inside the panel. |
 | `→` | Trigger, vertical, panel open | Move focus to the first focusable element inside the panel. |
 
----
 
 ## Recipes
 
@@ -546,7 +537,6 @@ $nav.on('panel.open.ts.navigation',  (e, d) => console.log('panel', d.index, 'op
 $nav.on('panel.close.ts.navigation', (e, d) => console.log('panel', d.index, 'closed'));
 ```
 
----
 
 ## ARIA Wiring
 
@@ -573,7 +563,6 @@ The plugin sets and updates ARIA attributes automatically. Do not set these manu
 | `[data-nav-content]` | `role` | `"region"`. |
 | `[data-nav-content]` | `aria-labelledby` | `id` of the associated trigger. |
 
----
 
 ## Common Pitfalls
 

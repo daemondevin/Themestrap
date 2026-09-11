@@ -162,6 +162,12 @@
                                           0 4px 12px -4px rgba(0, 0, 0, 0.4);
             }
 
+            body.ts-scroll-lock {
+                overflow: hidden;
+                /* Prevent layout shift from scrollbar disappearing */
+                padding-right: var(--ts-scrollbar-width, 0px);
+            }
+
             /* Root container */
             .command-menu {
                 position: fixed;
@@ -618,14 +624,14 @@
     // If PluginDialog has already set --dialog-scrollbar-width we leave it alone.
     function measureScrollbarWidth() {
         function measure() {
-            if (document.documentElement.style.getPropertyValue('--dialog-scrollbar-width')) return;
+            if (document.documentElement.style.getPropertyValue('--ts-scrollbar-width')) return;
 
             const outer = document.createElement('div');
             outer.style.cssText = 'visibility:hidden;overflow:scroll;position:absolute;width:100px';
             document.body.appendChild(outer);
             const width = outer.offsetWidth - outer.clientWidth;
             document.body.removeChild(outer);
-            document.documentElement.style.setProperty('--dialog-scrollbar-width', width + 'px');
+            document.documentElement.style.setProperty('--ts-scrollbar-width', width + 'px');
         }
 
         if (document.body) {
@@ -753,10 +759,7 @@
             const $el  = self.$el;
             const opts = self.options;
 
-            // Lazily inject CSS + measure the scrollbar the first time a menu is
-            // actually built — never on bare script load.
             injectStyles();
-            measureScrollbarWidth();
 
             // ARIA scaffolding — dialog wrapping a combobox over a listbox.
             $el
@@ -933,7 +936,7 @@
             self.$previousFocus = $(document.activeElement);
 
             if (opts.scrollLock) {
-                $('body').addClass('dialog-scroll-lock');
+                $('body').addClass('ts-scroll-lock');
             }
 
             $el
@@ -1086,7 +1089,7 @@
             }
 
             if (opts.scrollLock) {
-                $('body').removeClass('dialog-scroll-lock');
+                $('body').removeClass('ts-scroll-lock');
             }
 
             if (self.$previousFocus && self.$previousFocus.length) {
@@ -1469,7 +1472,7 @@
 
         // Backdrop & scroll-lock
         backdrop         : true,
-        scrollLock       : true,
+        scrollLock       : true,    // add .ts-scroll-lock to <body> while open
 
         // Animation classes applied to [data-command-panel] (falls back to root).
         animationIn      : 'fadeIn',

@@ -1,116 +1,989 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PluginRating — Themestrap Demo</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginRating — Live Demo | Themestrap</title>
 
-    <!-- Bootstrap 5 -->
-    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
 
 <style>
-.rating-wrap { display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem 0; }
-.demo-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem 1.5rem; }
-.demo-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: .06em; text-transform: uppercase; margin: 0 0 .75rem; }
-.stars { display: inline-flex; gap: 6px; align-items: center; }
-.stars .icon { font-style: normal; cursor: pointer; font-size: 24px; line-height: 1; color: var(--color-border-secondary); transition: color .12s, transform .1s; user-select: none; }
-.stars .icon::before { content: '★'; }
-.stars .icon.active { color: #E9A820; }
-.stars .icon.selected { color: #F0C050; transform: scale(1.15); }
-.stars .icon.partial { position: relative; overflow: hidden; }
-.stars.disabled .icon { cursor: default; }
-.stars.disabled .icon.selected { transform: none; }
-.feedback { font-size: 14px; color: var(--color-text-secondary); margin: .75rem 0 0; min-height: 1.4em; }
-.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: .75rem; }
-.btn-row button { font-size: 13px; }
-.api-output { font-size: 13px; font-family: var(--font-mono); color: var(--color-text-info); margin-top: .75rem; min-height: 1.4em; }
-.section-title { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 .35rem; }
-.row-inline { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+/* Themestrap design tokens */
+:root {
+    --ts-navy:    #0a1929;
+    --ts-navy-2:  #0e2238;
+    --ts-orange:  #e8672a;
+    --ts-orange-2:#d2541b;
+    --ts-teal:    #2ab8c8;
+    --ts-text:    #1f2d3d;
+    --ts-bg:      #f4f6f9;
+    --ts-border:  #e4e9f0;
+    --ts-muted:   #8190a3;
+
+    /* Rating colour tokens — override to re-theme any widget on the page */
+    --ts-rating-empty:   #d1d5db;
+    --ts-rating-filled:  #f59e0b;
+    --ts-rating-hover:   #fbbf24;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    background: var(--ts-bg);
+    color: var(--ts-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+}
+code {
+    background: rgba(10,25,41,.06);
+    color: #c83a8c;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: .87em;
+}
+
+/* Hero */
+.demo-hero {
+    background: linear-gradient(135deg, var(--ts-navy) 0%, var(--ts-navy-2) 100%);
+    color: #fff;
+    padding: 56px 0 48px;
+}
+.demo-hero h1 { font-weight: 700; letter-spacing: -.5px; margin: 0 0 8px; }
+.demo-hero .lead { color: #b9c6d6; max-width: 680px; margin: 0; line-height: 1.6; }
+.badge-orange {
+    background: var(--ts-orange); color: #fff; font-weight: 600;
+    letter-spacing: .04em; padding: 6px 12px; text-transform: uppercase;
+    font-size: 11px; border-radius: 4px;
+}
+
+/* Cards */
+.demo-card {
+    background: #fff;
+    border: 1px solid var(--ts-border);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(10,25,41,.05);
+    margin-bottom: 28px;
+    overflow: hidden;
+}
+.demo-card .card-body { padding: 24px 28px 28px; }
+.demo-section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ts-teal); margin: 0 0 6px;
+}
+.demo-card h3 { font-size: 19px; font-weight: 700; color: var(--ts-navy); margin: 0 0 4px; }
+.demo-card p.lead-sm { color: #54657a; font-size: 14px; margin: 0 0 20px; line-height: 1.5; }
+
+/* Demo stage */
+.demo-stage {
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 10px;
+    padding: 28px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    min-height: 100px;
+    margin-bottom: 16px;
+}
+.demo-stage.col { flex-direction: column; align-items: flex-start; }
+.demo-stage.center { justify-content: center; }
+.demo-stage.center.col { align-items: center; }
+
+/* Code snippet */
+pre.snip {
+    background: #0e2238; color: #e1eaf3;
+    padding: 14px 18px; border-radius: 8px;
+    margin: 0; font-size: 12.5px; line-height: 1.65;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    overflow-x: auto;
+}
+pre.snip .c1  { color: #6c8bab; font-style: italic; }
+pre.snip .kw  { color: #c084fc; }
+pre.snip .fn  { color: #67e8f9; }
+pre.snip .val { color: #a8e1ff; }
+pre.snip .num { color: #fca5a5; }
+
+/* Tip */
+.tip {
+    background: #e8f7f9;
+    border-left: 4px solid var(--ts-teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px; font-size: 13px; color: #1f4348; margin-bottom: 24px;
+}
+.tip i { color: var(--ts-teal); }
+
+/* Two-col grid */
+.demo-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+@media (max-width: 767px) { .demo-grid-2 { grid-template-columns: 1fr; } }
+
+/* Event log */
+.event-log {
+    height: 130px; overflow-y: auto;
+    background: #0e2238; color: #a8c8e8;
+    font-family: monospace; font-size: 12px; line-height: 1.6;
+    border-radius: 8px; padding: 10px 14px;
+}
+.event-log .ev-rate  { color: #fcd34d; }
+.event-log .ev-clear { color: #fca5a5; }
+.event-log .ev-empty { color: #4c6a85; font-style: italic; }
+
+/* Status badge */
+.status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 600;
+}
+.status-badge.active    { background: #d1fae5; color: #065f46; }
+.status-badge.disabled  { background: #f3f4f6; color: #6b7280; }
+.status-badge.destroyed { background: #fee2e2; color: #991b1b; }
+
+/* Controls row */
+.controls-row {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid var(--ts-border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 12px; color: #54657a;
+}
+.controls-row strong { font-weight: 600; color: var(--ts-navy); }
+
+/* Feedback line */
+.fb { font-size: 13.5px; color: #54657a; min-height: 1.4em; margin-top: 10px; }
+.fb strong { color: var(--ts-navy); }
+
+/* Review-form recipe */
+.review-form { background: #fff; border: 1px solid var(--ts-border); border-radius: 10px; overflow: hidden; }
+.review-form-header { background: var(--ts-navy); color: #fff; padding: 16px 20px; }
+.review-form-header h5 { font-size: 15px; font-weight: 700; margin: 0; }
+.review-form-header p { font-size: 12px; color: #8faabf; margin: 2px 0 0; }
+.review-form-body { padding: 20px; }
+.review-criterion {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--ts-border);
+}
+.review-criterion:last-child { border-bottom: none; }
+.review-criterion-label { font-size: 13.5px; font-weight: 600; color: var(--ts-text); }
+.review-criterion-sublabel { font-size: 11.5px; color: var(--ts-muted); }
+.review-summary {
+    background: #f8fafc; border-top: 1px solid var(--ts-border);
+    padding: 14px 20px; font-size: 13px; color: #54657a; display: none;
+}
+.review-summary strong { color: var(--ts-navy); }
+.review-summary .overall-score { font-size: 22px; font-weight: 700; color: var(--ts-orange); }
+
+/* Rating widget CSS — required by PluginRating */
+.ts-rating {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    line-height: 1;
+}
+
+/* Each icon — empty state */
+.ts-rating .icon {
+    cursor: pointer;
+    font-style: normal;
+    color: var(--ts-rating-empty);
+    transition: color .12s, transform .12s;
+    user-select: none;
+    display: inline-block;
+    font-size: 24px;
+}
+
+/* Filled / active state */
+.ts-rating .icon.active {
+    color: var(--ts-rating-filled);
+}
+
+/* Hover / sweep state */
+.ts-rating .icon.selected {
+    color: var(--ts-rating-hover);
+    transform: scale(1.2);
+}
+
+/* Partial fill — uses --full CSS variable set by the plugin.
+   background-clip:text clips a left-to-right gradient to the glyph shape,
+   giving a precise fractional fill without any extra DOM nodes. */
+.ts-rating .icon.partial {
+    background: linear-gradient(
+        to right,
+        var(--ts-rating-filled) var(--full, 50%),
+        var(--ts-rating-empty)  var(--full, 50%)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    transform: none !important;
+}
+
+/* Disabled / read-only state */
+.ts-rating.disabled .icon {
+    cursor: default;
+}
+.ts-rating.disabled .icon.selected {
+    transform: none;
+}
+
+/* Size modifiers — detected by the plugin via hasClass('rating-{size}')
+   and applied to the generated FA icon via fa-{size} class.
+   The wrapper font-size anchors the overall scale. */
+.ts-rating.rating-xs { font-size: 13px; gap: 2px; }
+.ts-rating.rating-sm { font-size: 18px; gap: 3px; }
+.ts-rating.rating-md { font-size: 24px; gap: 4px; }
+.ts-rating.rating-lg { font-size: 32px; gap: 5px; }
+.ts-rating.rating-xl { font-size: 42px; gap: 6px; }
+
+/* Colour-theme variants used in the theme demo */
+.ts-rating.theme-hearts   { --ts-rating-filled: #ef4444; --ts-rating-hover: #f87171; }
+.ts-rating.theme-thumbs   { --ts-rating-filled: #3b82f6; --ts-rating-hover: #60a5fa; }
+.ts-rating.theme-bolts    { --ts-rating-filled: #a855f7; --ts-rating-hover: #c084fc; }
+.ts-rating.theme-teal     { --ts-rating-filled: #2ab8c8; --ts-rating-hover: #55cfd9; }
+.ts-rating.theme-orange   { --ts-rating-filled: #e8672a; --ts-rating-hover: #f58050; }
 </style>
 </head>
 <body>
-<div class="rating-wrap">
 
-  <div class="demo-card">
-    <p class="section-title">Interactive rating</p>
-    <p class="demo-label">Click or hover to rate</p>
-    <div id="r-basic" class="stars"></div>
-    <p class="feedback" id="r-basic-fb">No rating yet — click a star.</p>
+<!-- Hero -->
+<div class="demo-hero">
+  <div class="container">
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · Component</span>
+    <h1 class="mt-3">PluginRating — Live Demo</h1>
+    <p class="lead mt-2">
+      Flexible star (or any-icon) rating widget with partial-fill display, custom icons via Font Awesome
+      class strings or inline SVG, five sizes, clearable logic, and a full programmatic API.
+      Zero build step, zero vendor dependencies beyond jQuery.
+    </p>
   </div>
-
-  <div class="demo-card">
-    <p class="section-title">Read-only display</p>
-    <p class="demo-label">Non-interactive, pre-set to 3.5</p>
-    <div id="r-readonly" class="stars"></div>
-  </div>
-
-  <div class="demo-card">
-    <p class="section-title">Ten-star scale</p>
-    <p class="demo-label">maxRating: 10, initialRating: 7</p>
-    <div id="r-ten" class="stars"></div>
-    <p class="feedback" id="r-ten-fb">Rated 7 / 10</p>
-  </div>
-
-  <div class="demo-card">
-    <p class="section-title">API controls</p>
-    <p class="demo-label">Calling public methods on the instance</p>
-    <div id="r-api" class="stars"></div>
-    <div class="btn-row">
-      <button id="btn-set2">setRating(2)</button>
-      <button id="btn-set4">setRating(4)</button>
-      <button id="btn-clear">clearRating()</button>
-      <button id="btn-get">getRating()</button>
-      <button id="btn-disable">disable()</button>
-      <button id="btn-enable">enable()</button>
-    </div>
-    <p class="api-output" id="api-out"></p>
-  </div>
-
 </div>
-<!-- jQuery + Bootstrap 5 JS -->
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-xl-10">
+
+      <div class="tip">
+        <i class="fas fa-circle-info me-1"></i>
+        Every rating widget below is a live <code>PluginRating</code> instance.
+        Instances are retrieved via <code>$el.data('__rating')</code> — the jQuery bridge
+        does <strong>not</strong> support string method dispatch.
+      </div>
+
+
+      <!-- 1. Basic interactive -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">JS init · onRate callback · clearable</p>
+          <h3>Basic interactive rating</h3>
+          <p class="lead-sm">
+            The default configuration gives you a five-star, click-to-rate widget.
+            Click the currently active star again to clear — this is <code>clearable: 'auto'</code>
+            behaviour when <code>maxRating</code> is 1; for five-star widgets you need
+            <code>clearable: true</code> explicitly.
+          </p>
+
+          <div class="demo-stage center col">
+            <div id="r-basic" class="ts-rating rating-md"></div>
+            <p class="fb mb-0" id="r-basic-fb">No rating yet — click a star.</p>
+          </div>
+
+<pre class="snip"><span class="c1">// Minimal init — all defaults applied</span>
+$(<span class="val">'#r-basic'</span>).<span class="fn">themestrapPluginRating</span>({
+    clearable: <span class="kw">true</span>,
+    onRate: <span class="kw">function</span>(rating) {
+        <span class="kw">const</span> msg = rating === <span class="num">0</span>
+            ? <span class="val">'Cleared — pick a star.'</span>
+            : <span class="val">`You rated ${rating} out of 5`</span>;
+        $(<span class="val">'#r-basic-fb'</span>).text(msg);
+    }
+});</pre>
+        </div>
+      </div>
+
+
+      <!-- 2. Read-only / display -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">interactive: false · initialRating · partial fill</p>
+          <h3>Read-only display ratings</h3>
+          <p class="lead-sm">
+            Set <code>interactive: false</code> for display-only widgets. Fractional
+            <code>initialRating</code> values (e.g. <code>3.7</code>) render a partially filled
+            star using a CSS <code>linear-gradient</code> clipped to the glyph via
+            <code>background-clip: text</code> and the <code>--full</code> variable the plugin injects.
+          </p>
+
+          <div class="demo-stage col" style="gap: 14px;">
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-ro-5"   class="ts-rating rating-sm"></div>
+              <span style="font-size:13px;color:#374151;font-weight:600">5.0</span>
+              <span style="font-size:12px;color:var(--ts-muted)">Perfect score · 2,841 reviews</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-ro-43"  class="ts-rating rating-sm"></div>
+              <span style="font-size:13px;color:#374151;font-weight:600">4.3</span>
+              <span style="font-size:12px;color:var(--ts-muted)">Excellent · 1,204 reviews</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-ro-37"  class="ts-rating rating-sm"></div>
+              <span style="font-size:13px;color:#374151;font-weight:600">3.7</span>
+              <span style="font-size:12px;color:var(--ts-muted)">Good · 587 reviews</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-ro-22"  class="ts-rating rating-sm"></div>
+              <span style="font-size:13px;color:#374151;font-weight:600">2.2</span>
+              <span style="font-size:12px;color:var(--ts-muted)">Below average · 93 reviews</span>
+            </div>
+          </div>
+
+<pre class="snip"><span class="c1">// Read-only — fractional initialRating renders partial star</span>
+$(<span class="val">'#r-ro-37'</span>).<span class="fn">themestrapPluginRating</span>({
+    interactive:   <span class="kw">false</span>,
+    initialRating: <span class="num">3.7</span>
+});</pre>
+        </div>
+      </div>
+
+
+      <!-- 3. Sizes -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">size · xs / sm / md / lg / xl</p>
+          <h3>Five sizes</h3>
+          <p class="lead-sm">
+            Size is detected from a <code>rating-{size}</code> class on the wrapper element.
+            The plugin appends the matching <code>fa-{size}</code> class to each Font Awesome icon.
+            The wrapper's <code>font-size</code> provides an additional visual anchor.
+          </p>
+
+          <div class="demo-stage col" style="gap: 18px;">
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-xs" class="ts-rating rating-xs"></div>
+              <code style="font-size:11px">rating-xs</code>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-sm" class="ts-rating rating-sm"></div>
+              <code style="font-size:11px">rating-sm</code>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-md" class="ts-rating rating-md"></div>
+              <code style="font-size:11px">rating-md (default)</code>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-lg" class="ts-rating rating-lg"></div>
+              <code style="font-size:11px">rating-lg</code>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-xl" class="ts-rating rating-xl"></div>
+              <code style="font-size:11px">rating-xl</code>
+            </div>
+          </div>
+
+<pre class="snip"><span class="c1">// Size class on the wrapper — plugin reads it automatically</span>
+<span class="c1">// &lt;div id="r-lg" class="ts-rating rating-lg"&gt;&lt;/div&gt;</span>
+$(<span class="val">'#r-lg'</span>).<span class="fn">themestrapPluginRating</span>({ initialRating: <span class="num">4</span> });</pre>
+        </div>
+      </div>
+
+
+      <!-- 4. Custom icons -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">icon option · any FA class string</p>
+          <h3>Custom icons</h3>
+          <p class="lead-sm">
+            The <code>icon</code> option accepts any Font Awesome class string or an inline
+            SVG string. Colour theming is handled entirely through CSS custom properties on the
+            wrapper — set <code>--ts-rating-filled</code> and <code>--ts-rating-hover</code>
+            to match your palette.
+          </p>
+
+          <div class="demo-stage col" style="gap: 20px;">
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-hearts" class="ts-rating rating-md theme-hearts"></div>
+              <span style="font-size:13px;color:#54657a"><code>fa-solid fa-heart</code> · red</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-thumbs" class="ts-rating rating-md theme-thumbs"></div>
+              <span style="font-size:13px;color:#54657a"><code>fa-solid fa-thumbs-up</code> · blue</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-bolts" class="ts-rating rating-md theme-bolts"></div>
+              <span style="font-size:13px;color:#54657a"><code>fa-solid fa-bolt</code> · purple</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-teal" class="ts-rating rating-md theme-teal"></div>
+              <span style="font-size:13px;color:#54657a"><code>fa-solid fa-circle</code> · teal</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+              <div id="r-inline-svg" class="ts-rating rating-md theme-orange"></div>
+              <span style="font-size:13px;color:#54657a">Inline SVG diamond · <code>currentColor: true</code></span>
+            </div>
+          </div>
+
+<pre class="snip"><span class="c1">// FA class string — any valid FA icon</span>
+$(<span class="val">'#r-hearts'</span>).<span class="fn">themestrapPluginRating</span>({
+    icon: <span class="val">'fa-solid fa-heart'</span>,
+    initialRating: <span class="num">3</span>
+});
+
+<span class="c1">// Inline SVG — set currentColor:true to normalize fill/stroke</span>
+$(<span class="val">'#r-inline-svg'</span>).<span class="fn">themestrapPluginRating</span>({
+    icon: <span class="val">'&lt;svg viewBox="0 0 24 24" width="1em" height="1em"&gt;...&lt;/svg&gt;'</span>,
+    currentColor: <span class="kw">true</span>,
+    initialRating: <span class="num">4</span>
+});</pre>
+        </div>
+      </div>
+
+
+      <!-- 5. Extended scale -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">maxRating · 3-point / 10-point scales</p>
+          <h3>Extended &amp; compact scales</h3>
+          <p class="lead-sm">
+            <code>maxRating</code> is not limited to five. A three-point scale works well for
+            quick sentiment captures; a ten-point scale matches the NPS-style numeric range
+            some audiences expect.
+          </p>
+
+          <div class="demo-stage col" style="gap: 20px;">
+            <div>
+              <p style="font-size:12px;font-weight:600;color:var(--ts-muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px">3-star (compact)</p>
+              <div id="r-three" class="ts-rating rating-md"></div>
+              <p class="fb" id="r-three-fb">Not rated</p>
+            </div>
+            <div>
+              <p style="font-size:12px;font-weight:600;color:var(--ts-muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px">10-star (extended)</p>
+              <div id="r-ten" class="ts-rating rating-sm"></div>
+              <p class="fb" id="r-ten-fb">Not rated</p>
+            </div>
+          </div>
+
+<pre class="snip"><span class="c1">// 3-point scale</span>
+$(<span class="val">'#r-three'</span>).<span class="fn">themestrapPluginRating</span>({
+    maxRating: <span class="num">3</span>,
+    onRate: (r) => $(<span class="val">'#r-three-fb'</span>).text(r + <span class="val">' / 3'</span>)
+});
+
+<span class="c1">// 10-point scale</span>
+$(<span class="val">'#r-ten'</span>).<span class="fn">themestrapPluginRating</span>({
+    maxRating: <span class="num">10</span>,
+    initialRating: <span class="num">7</span>,
+    onRate: (r) => $(<span class="val">'#r-ten-fb'</span>).text(r + <span class="val">' / 10'</span>)
+});</pre>
+        </div>
+      </div>
+
+
+      <!-- 6. Clearable -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">clearable · true / false / 'auto'</p>
+          <h3>Clearable behaviour</h3>
+          <p class="lead-sm">
+            <code>clearable: true</code> lets users click the active star to reset to zero.
+            <code>clearable: false</code> locks the first choice in permanently.
+            <code>clearable: 'auto'</code> (the default) only enables clearing when
+            <code>maxRating</code> is <code>1</code> — a binary on/off toggle.
+          </p>
+
+          <div class="demo-stage col" style="gap: 20px;">
+            <div>
+              <p style="font-size:12px;font-weight:600;color:var(--ts-muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px">
+                clearable: true — click the active star to reset
+              </p>
+              <div id="r-clr-true" class="ts-rating rating-md"></div>
+              <p class="fb" id="r-clr-true-fb">Not rated</p>
+            </div>
+            <div>
+              <p style="font-size:12px;font-weight:600;color:var(--ts-muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px">
+                clearable: false — first click locks permanently
+              </p>
+              <div id="r-clr-false" class="ts-rating rating-md"></div>
+              <p class="fb" id="r-clr-false-fb">Not rated</p>
+            </div>
+            <div>
+              <p style="font-size:12px;font-weight:600;color:var(--ts-muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px">
+                clearable: 'auto' with maxRating: 1 — like a favourite toggle
+              </p>
+              <div id="r-clr-auto" class="ts-rating rating-md theme-hearts"></div>
+              <p class="fb" id="r-clr-auto-fb">Not favourited</p>
+            </div>
+          </div>
+
+<pre class="snip"><span class="c1">// Favourite toggle — auto clearable applies when maxRating is 1</span>
+$(<span class="val">'#r-clr-auto'</span>).<span class="fn">themestrapPluginRating</span>({
+    icon:      <span class="val">'fa-solid fa-heart'</span>,
+    maxRating: <span class="num">1</span>,
+    clearable: <span class="val">'auto'</span>,
+    onRate: (r) => $(<span class="val">'#r-clr-auto-fb'</span>).text(r ? <span class="val">'Favourited!'</span> : <span class="val">'Not favourited'</span>)
+});</pre>
+        </div>
+      </div>
+
+
+      <!-- 7. Review-form recipe -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Recipe · multi-criterion rating form</p>
+          <h3>Review form</h3>
+          <p class="lead-sm">
+            A practical pattern: one independent <code>PluginRating</code> instance per criterion,
+            all read at submit time via <code>getRating()</code>.
+          </p>
+
+          <div class="review-form">
+            <div class="review-form-header">
+              <h5><i class="fas fa-store me-2"></i>Rate your order</h5>
+              <p>Share your experience with other customers</p>
+            </div>
+            <div class="review-form-body">
+              <div class="review-criterion">
+                <div>
+                  <div class="review-criterion-label">Product quality</div>
+                  <div class="review-criterion-sublabel">Condition and accuracy of description</div>
+                </div>
+                <div id="rf-quality" class="ts-rating rating-sm"></div>
+              </div>
+              <div class="review-criterion">
+                <div>
+                  <div class="review-criterion-label">Value for money</div>
+                  <div class="review-criterion-sublabel">Price vs what you received</div>
+                </div>
+                <div id="rf-value" class="ts-rating rating-sm"></div>
+              </div>
+              <div class="review-criterion">
+                <div>
+                  <div class="review-criterion-label">Shipping speed</div>
+                  <div class="review-criterion-sublabel">How quickly your order arrived</div>
+                </div>
+                <div id="rf-shipping" class="ts-rating rating-sm"></div>
+              </div>
+              <div class="review-criterion">
+                <div>
+                  <div class="review-criterion-label">Customer service</div>
+                  <div class="review-criterion-sublabel">Responsiveness and helpfulness</div>
+                </div>
+                <div id="rf-service" class="ts-rating rating-sm"></div>
+              </div>
+
+              <div class="mt-3">
+                <textarea class="form-control form-control-sm" rows="2"
+                          placeholder="Tell us more (optional)…" id="rf-comment"></textarea>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <button class="btn btn-primary btn-sm" id="rf-submit">Submit review</button>
+                <button class="btn btn-outline-secondary btn-sm" id="rf-reset">Reset</button>
+              </div>
+            </div>
+            <div class="review-summary" id="rf-summary"></div>
+          </div>
+
+          <pre class="snip mt-3"><span class="c1">// Read all ratings at submit time</span>
+<span class="kw">const</span> ratings = {
+    quality:  $(<span class="val">'#rf-quality'</span>).data(<span class="val">'__rating'</span>).<span class="fn">getRating</span>(),
+    value:    $(<span class="val">'#rf-value'</span>).data(<span class="val">'__rating'</span>).<span class="fn">getRating</span>(),
+    shipping: $(<span class="val">'#rf-shipping'</span>).data(<span class="val">'__rating'</span>).<span class="fn">getRating</span>(),
+    service:  $(<span class="val">'#rf-service'</span>).data(<span class="val">'__rating'</span>).<span class="fn">getRating</span>(),
+};
+<span class="kw">const</span> avg = Object.<span class="fn">values</span>(ratings).<span class="fn">reduce</span>((a, b) => a + b, <span class="num">0</span>) / <span class="num">4</span>;</pre>
+        </div>
+      </div>
+
+
+      <!-- 8. onRate callback + hover label -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">onRate callback · dynamic label</p>
+          <h3>Descriptive labels</h3>
+          <p class="lead-sm">
+            Use <code>onRate</code> to map the numeric value to human-readable copy — a common
+            pattern for survey-style widgets where the numeric rating needs narrative context.
+          </p>
+
+          <div class="demo-stage center col" style="gap: 14px; min-height: 140px;">
+            <div id="r-label" class="ts-rating rating-lg"></div>
+            <div id="r-label-text" style="font-size:18px;font-weight:700;color:var(--ts-navy);min-height:1.4em;text-align:center"></div>
+            <div id="r-label-sub" style="font-size:13px;color:var(--ts-muted);text-align:center;min-height:1.2em"></div>
+          </div>
+
+<pre class="snip"><span class="kw">const</span> labels = [<span class="val">''</span>, <span class="val">'Terrible'</span>, <span class="val">'Poor'</span>, <span class="val">'Okay'</span>, <span class="val">'Good'</span>, <span class="val">'Excellent!'</span>];
+<span class="kw">const</span> subs   = [<span class="val">''</span>, <span class="val">'Really not happy'</span>, <span class="val">'Room for improvement'</span>,
+                <span class="val">'Could be better'</span>, <span class="val">'Happy with this'</span>, <span class="val">'Absolutely loved it'</span>];
+
+$(<span class="val">'#r-label'</span>).<span class="fn">themestrapPluginRating</span>({
+    clearable: <span class="kw">true</span>,
+    onRate: <span class="kw">function</span>(r) {
+        $(<span class="val">'#r-label-text'</span>).text(labels[r] || <span class="val">'Pick a rating'</span>);
+        $(<span class="val">'#r-label-sub'</span>).text(subs[r] || <span class="val">''</span>);
+    }
+});</pre>
+        </div>
+      </div>
+
+
+      <!-- 9. Programmatic API -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">Public API · setRating / getRating / clearRating / enable / disable / destroy</p>
+          <h3>Programmatic control</h3>
+          <p class="lead-sm">
+            Every instance exposes the full public API. Retrieve the instance with
+            <code>$el.data('__rating')</code> — the jQuery bridge returns the instance when the
+            element is already initialized, but does not accept string method names.
+          </p>
+
+          <div class="demo-grid-2 align-items-start">
+            <div>
+              <div class="demo-stage center col" style="gap: 14px;">
+                <div id="r-api" class="ts-rating rating-md"></div>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span style="font-size:12px;color:#54657a">State:</span>
+                  <span class="status-badge active" id="api-status">
+                    <i class="fas fa-circle" style="font-size:7px"></i> active
+                  </span>
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm btn-outline-primary"  id="btn-set1">setRating(1)</button>
+                <button class="btn btn-sm btn-outline-primary"  id="btn-set3">setRating(3)</button>
+                <button class="btn btn-sm btn-outline-primary"  id="btn-set5">setRating(5)</button>
+                <button class="btn btn-sm btn-outline-secondary" id="btn-get">getRating()</button>
+                <button class="btn btn-sm btn-outline-secondary" id="btn-clear">clearRating()</button>
+                <button class="btn btn-sm btn-outline-warning"  id="btn-disable">disable()</button>
+                <button class="btn btn-sm btn-outline-success"  id="btn-enable">enable()</button>
+                <button class="btn btn-sm btn-outline-danger"   id="btn-destroy">destroy()</button>
+                <button class="btn btn-sm btn-outline-success d-none" id="btn-reinit">re-init</button>
+              </div>
+            </div>
+
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span style="font-size:12px;font-weight:600;color:#54657a">Method log</span>
+                <button class="btn btn-sm btn-outline-secondary py-0" id="clear-api-log" style="font-size:11px">Clear</button>
+              </div>
+              <div class="event-log" id="api-log">
+                <span class="ev-empty">No API calls yet — use the buttons.</span>
+              </div>
+            </div>
+          </div>
+
+<pre class="snip mt-3"><span class="c1">// Always retrieve instance before calling methods</span>
+<span class="kw">const</span> inst = $(<span class="val">'#r-api'</span>).data(<span class="val">'__rating'</span>);
+
+inst.<span class="fn">setRating</span>(<span class="num">3</span>);        <span class="c1">// set value (fires onRate)</span>
+inst.<span class="fn">setRating</span>(<span class="num">3</span>, <span class="kw">true</span>);   <span class="c1">// set silently (skips onRate)</span>
+inst.<span class="fn">getRating</span>();          <span class="c1">// returns current integer value</span>
+inst.<span class="fn">clearRating</span>();        <span class="c1">// equivalent to setRating(0)</span>
+inst.<span class="fn">disable</span>();           <span class="c1">// adds .disabled, unbinds events</span>
+inst.<span class="fn">enable</span>();            <span class="c1">// removes .disabled, rebinds events</span>
+inst.<span class="fn">destroy</span>();           <span class="c1">// full teardown — removes __rating data</span></pre>
+        </div>
+      </div>
+
+
+      <!-- 10. onRate event log across all cards -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">onRate · live activity across all interactive widgets</p>
+          <h3>Rating activity log</h3>
+          <p class="lead-sm">
+            The log below captures every <code>onRate</code> callback fired by the interactive
+            widgets on this page. This is wired centrally at init time — each widget's
+            <code>onRate</code> handler reports to the shared log alongside its own local feedback.
+          </p>
+
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span style="font-size:12px;font-weight:600;color:#54657a">Activity log</span>
+            <button class="btn btn-sm btn-outline-secondary py-0" id="clear-global-log" style="font-size:11px">Clear</button>
+          </div>
+          <div class="event-log" id="global-log">
+            <span class="ev-empty">Interact with any rating widget on this page to see activity here.</span>
+          </div>
+        </div>
+      </div>
+
+
+      <p class="text-center mt-4 mb-5" style="color:var(--ts-muted);font-size:12.5px">
+        Themestrap · PluginRating demo · all widgets run live in your browser
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- jQuery + Bootstrap 5 -->
 <script src="../vendor/jquery/jquery.min.js"></script>
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-<!-- Themestrap core (must come first; path relative to your install) -->
+<!-- Themestrap core -->
 <script src="../js/themestrap.js"></script>
-
 <!-- Plugin -->
 <script src="../js/components/themestrap.plugin.rating.js"></script>
+
 <script>
-$(function() {
-  $('#r-basic').themestrapPluginRating({
-    maxRating: 5,
-    onRate: function(r) {
-      $('#r-basic-fb').text(r === 0 ? 'Cleared — pick a star.' : `You rated ${r} out of 5.`);
+$(function () {
+
+    /* Shared global activity log */
+    let globalLogEmpty = true;
+
+    function logGlobal(msg, cls) {
+        const $log = $('#global-log');
+        if (globalLogEmpty) { $log.empty(); globalLogEmpty = false; }
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $log.append($('<div>').addClass(cls || 'ev-rate').text('[' + time + '] ' + msg));
+        $log[0].scrollTop = $log[0].scrollHeight;
     }
-  });
 
-  $('#r-readonly').themestrapPluginRating({
-    maxRating: 5,
-    initialRating: 3.5,
-    interactive: false
-  });
+    $('#clear-global-log').on('click', function () {
+        $('#global-log').html('<span class="ev-empty">Log cleared.</span>');
+        globalLogEmpty = false;
+    });
 
-  $('#r-ten').themestrapPluginRating({
-    maxRating: 10,
-    initialRating: 7,
-    onRate: function(r) {
-      $('#r-ten-fb').text(r === 0 ? 'Cleared.' : `Rated ${r} / 10`);
+    /* Labels for the descriptive callback demo */
+    const descLabels = ['', 'Terrible', 'Poor', 'Okay', 'Good', 'Excellent!'];
+    const descSubs   = ['', 'Really not happy', 'Room for improvement', 'Could be better', 'Happy with this', 'Absolutely loved it'];
+
+
+    /* 1. Basic interactive */
+    $('#r-basic').themestrapPluginRating({
+        clearable: true,
+        onRate: function (r) {
+            $('#r-basic-fb').text(r === 0 ? 'Cleared — pick a star.' : 'You rated ' + r + ' out of 5.');
+            logGlobal('Basic: rated ' + r + ' / 5', r === 0 ? 'ev-clear' : 'ev-rate');
+        }
+    });
+
+
+    /* 2. Read-only displays */
+    $('#r-ro-5').themestrapPluginRating({ interactive: false, initialRating: 5 });
+    $('#r-ro-43').themestrapPluginRating({ interactive: false, initialRating: 4.3 });
+    $('#r-ro-37').themestrapPluginRating({ interactive: false, initialRating: 3.7 });
+    $('#r-ro-22').themestrapPluginRating({ interactive: false, initialRating: 2.2 });
+
+
+    /* 3. Sizes */
+    $('#r-xs').themestrapPluginRating({ initialRating: 4 });
+    $('#r-sm').themestrapPluginRating({ initialRating: 4 });
+    $('#r-md').themestrapPluginRating({ initialRating: 4 });
+    $('#r-lg').themestrapPluginRating({ initialRating: 4 });
+    $('#r-xl').themestrapPluginRating({ initialRating: 4 });
+
+
+    /* 4. Custom icons */
+    $('#r-hearts').themestrapPluginRating({ icon: 'fa-solid fa-heart',    initialRating: 4 });
+    $('#r-thumbs').themestrapPluginRating({ icon: 'fa-solid fa-thumbs-up', initialRating: 3 });
+    $('#r-bolts').themestrapPluginRating({  icon: 'fa-solid fa-bolt',      initialRating: 5 });
+    $('#r-teal').themestrapPluginRating({   icon: 'fa-solid fa-circle',    initialRating: 3 });
+
+    /* Inline SVG diamond with currentColor normalization */
+    const svgDiamond = '<svg viewBox="0 0 24 24" width="1em" height="1em" xmlns="http://www.w3.org/2000/svg"><polygon points="12,2 22,12 12,22 2,12" fill="#000000" stroke="none"/></svg>';
+    $('#r-inline-svg').themestrapPluginRating({ icon: svgDiamond, currentColor: true, initialRating: 4 });
+
+
+    /* 5. Extended / compact scales */
+    $('#r-three').themestrapPluginRating({
+        maxRating: 3,
+        clearable: true,
+        onRate: function (r) {
+            const labels = { 0: 'Not rated', 1: 'Not great', 2: 'Pretty good', 3: 'Loved it!' };
+            $('#r-three-fb').text(labels[r]);
+            logGlobal('3-star: rated ' + r + ' / 3', r === 0 ? 'ev-clear' : 'ev-rate');
+        }
+    });
+
+    $('#r-ten').themestrapPluginRating({
+        maxRating: 10,
+        initialRating: 7,
+        onRate: function (r) {
+            $('#r-ten-fb').text(r === 0 ? 'Not rated' : r + ' / 10');
+            logGlobal('10-star: rated ' + r + ' / 10', r === 0 ? 'ev-clear' : 'ev-rate');
+        }
+    });
+
+
+    /* 6. Clearable variations */
+    $('#r-clr-true').themestrapPluginRating({
+        clearable: true,
+        onRate: function (r) {
+            $('#r-clr-true-fb').text(r === 0 ? 'Cleared.' : 'Rated ' + r + ' / 5');
+        }
+    });
+
+    $('#r-clr-false').themestrapPluginRating({
+        clearable: false,
+        onRate: function (r) {
+            $('#r-clr-false-fb').text('Locked at ' + r + ' / 5 — cannot clear.');
+        }
+    });
+
+    $('#r-clr-auto').themestrapPluginRating({
+        icon:      'fa-solid fa-heart',
+        maxRating: 1,
+        clearable: 'auto',
+        onRate: function (r) {
+            $('#r-clr-auto-fb').text(r ? 'Favourited!' : 'Not favourited');
+            logGlobal('Favourite toggle: ' + (r ? 'on' : 'off'), r ? 'ev-rate' : 'ev-clear');
+        }
+    });
+
+
+    /* 7. Review form */
+    ['#rf-quality', '#rf-value', '#rf-shipping', '#rf-service'].forEach(function (sel) {
+        $(sel).themestrapPluginRating({ clearable: true });
+    });
+
+    $('#rf-submit').on('click', function () {
+        const quality  = $('#rf-quality').data('__rating').getRating();
+        const value    = $('#rf-value').data('__rating').getRating();
+        const shipping = $('#rf-shipping').data('__rating').getRating();
+        const service  = $('#rf-service').data('__rating').getRating();
+        const comment  = $('#rf-comment').val().trim();
+
+        if (!quality && !value && !shipping && !service) {
+            alert('Please rate at least one criterion before submitting.');
+            return;
+        }
+
+        const rated   = [quality, value, shipping, service].filter(r => r > 0);
+        const avg     = rated.length ? (rated.reduce((a, b) => a + b, 0) / rated.length).toFixed(1) : '—';
+        const $summary = $('#rf-summary');
+
+        $summary.html(
+            '<div class="d-flex align-items-center gap-3 flex-wrap">' +
+            '<span class="overall-score">' + avg + '</span>' +
+            '<span style="font-size:13px;color:#54657a">Overall average &nbsp;·&nbsp; ' +
+            'Quality <strong>' + (quality || '—') + '</strong> &nbsp; ' +
+            'Value <strong>' + (value || '—') + '</strong> &nbsp; ' +
+            'Shipping <strong>' + (shipping || '—') + '</strong> &nbsp; ' +
+            'Service <strong>' + (service || '—') + '</strong>' +
+            (comment ? '&nbsp;·&nbsp; <em>"' + comment + '"</em>' : '') +
+            '</span></div>'
+        ).show();
+
+        logGlobal('Review submitted — avg ' + avg + ' / 5', 'ev-rate');
+    });
+
+    $('#rf-reset').on('click', function () {
+        ['#rf-quality', '#rf-value', '#rf-shipping', '#rf-service'].forEach(function (sel) {
+            $(sel).data('__rating').clearRating();
+        });
+        $('#rf-comment').val('');
+        $('#rf-summary').hide();
+    });
+
+
+    /* 8. Descriptive labels */
+    $('#r-label').themestrapPluginRating({
+        clearable: true,
+        onRate: function (r) {
+            $('#r-label-text').text(descLabels[r] || 'Pick a rating');
+            $('#r-label-sub').text(descSubs[r] || '');
+            if (r > 0) logGlobal('Label widget: "' + descLabels[r] + '" (' + r + '/5)', 'ev-rate');
+        }
+    });
+    /* Seed the placeholder text */
+    $('#r-label-text').text('Pick a rating');
+
+
+    /* 9. Programmatic API */
+    let apiLogEmpty = true;
+
+    function logApi(msg, cls) {
+        const $log = $('#api-log');
+        if (apiLogEmpty) { $log.empty(); apiLogEmpty = false; }
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $log.append($('<div>').addClass(cls || 'ev-rate').text('[' + time + '] ' + msg));
+        $log[0].scrollTop = $log[0].scrollHeight;
     }
-  });
 
-  $('#r-api').themestrapPluginRating({ maxRating: 5, initialRating: 3 });
+    $('#clear-api-log').on('click', function () {
+        $('#api-log').html('<span class="ev-empty">Log cleared.</span>');
+        apiLogEmpty = false;
+    });
 
-  const log = (msg) => $('#api-out').text('→ ' + msg);
+    $('#r-api').themestrapPluginRating({ initialRating: 3, clearable: true });
 
-  $('#btn-set2').on('click', () => { $('#r-api').themestrapPluginRating('setRating', 2); log('setRating(2) called'); });
-  $('#btn-set4').on('click', () => { $('#r-api').themestrapPluginRating('setRating', 4); log('setRating(4) called'); });
-  $('#btn-clear').on('click', () => { $('#r-api').themestrapPluginRating('clearRating'); log('clearRating() called'); });
-  $('#btn-get').on('click', () => { const v = $('#r-api').themestrapPluginRating('getRating'); log(`getRating() returned ${v}`); });
-  $('#btn-disable').on('click', () => { $('#r-api').themestrapPluginRating('disable'); log('disable() called — events unbound'); });
-  $('#btn-enable').on('click', () => { $('#r-api').themestrapPluginRating('enable'); log('enable() called — events restored'); });
+    function getApiInst() { return $('#r-api').data('__rating'); }
+
+    function updateApiStatus() {
+        const inst = getApiInst();
+        const $badge = $('#api-status');
+        if (!inst) {
+            $badge.removeClass('active disabled').addClass('destroyed')
+                  .html('<i class="fas fa-circle" style="font-size:7px"></i> destroyed');
+            return;
+        }
+        const isDisabled = $('#r-api').hasClass('disabled');
+        $badge.removeClass('active disabled destroyed')
+              .addClass(isDisabled ? 'disabled' : 'active')
+              .html('<i class="fas fa-circle" style="font-size:7px"></i> ' + (isDisabled ? 'disabled' : 'active'));
+    }
+
+    $('#btn-set1').on('click', function () {
+        getApiInst()?.setRating(1);
+        logApi('setRating(1) — current: ' + getApiInst()?.getRating());
+        logGlobal('API widget: setRating(1)', 'ev-rate');
+    });
+
+    $('#btn-set3').on('click', function () {
+        getApiInst()?.setRating(3);
+        logApi('setRating(3) — current: ' + getApiInst()?.getRating());
+        logGlobal('API widget: setRating(3)', 'ev-rate');
+    });
+
+    $('#btn-set5').on('click', function () {
+        getApiInst()?.setRating(5);
+        logApi('setRating(5) — current: ' + getApiInst()?.getRating());
+        logGlobal('API widget: setRating(5)', 'ev-rate');
+    });
+
+    $('#btn-get').on('click', function () {
+        const v = getApiInst()?.getRating();
+        logApi('getRating() → ' + v);
+    });
+
+    $('#btn-clear').on('click', function () {
+        getApiInst()?.clearRating();
+        logApi('clearRating()', 'ev-clear');
+        logGlobal('API widget: clearRating()', 'ev-clear');
+    });
+
+    $('#btn-disable').on('click', function () {
+        getApiInst()?.disable();
+        updateApiStatus();
+        logApi('disable()');
+    });
+
+    $('#btn-enable').on('click', function () {
+        getApiInst()?.enable();
+        updateApiStatus();
+        logApi('enable()');
+    });
+
+    $('#btn-destroy').on('click', function () {
+        getApiInst()?.destroy();
+        $('#btn-destroy').addClass('d-none');
+        $('#btn-reinit').removeClass('d-none');
+        updateApiStatus();
+        logApi('destroy() — instance removed', 'ev-clear');
+    });
+
+    $('#btn-reinit').on('click', function () {
+        $('#r-api').themestrapPluginRating({ initialRating: 3, clearable: true });
+        $('#btn-destroy').removeClass('d-none');
+        $('#btn-reinit').addClass('d-none');
+        updateApiStatus();
+        logApi('re-init — new instance created', 'ev-rate');
+    });
+
 });
 </script>
 

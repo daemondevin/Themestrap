@@ -2,7 +2,6 @@
 
 Syntax highlighting for the Themestrap component library. Wraps [highlight.js](https://highlightjs.org/) with lazy ESM loading, language aliases, promise coalescing, line numbers, pre-marked lines, clipboard copy, and 31 CSS custom properties for full visual theming.
 
----
 
 ## Quick Start
 
@@ -50,7 +49,6 @@ $('#my-block').themestrapPluginHighlight();
 const instance = $('#my-block').data('__highlight');
 ```
 
----
 
 ## Attribute API
 
@@ -87,7 +85,6 @@ Any language not in the known-language list produces a `console.warn` before the
 > [!TIP]  
 > The custom `modx` grammar is loaded from jsDelivr via a personal CDN found on a GitHub repository that is located [here](https://github.com/daemondevin/cdn). When loaded, it automatically pre-registers the `xml` and `json` grammars as dependencies.
 
----
 
 ## Options
 
@@ -120,7 +117,6 @@ $('#my-block').themestrapPluginHighlight({
 });
 ```
 
----
 
 ## Public API
 
@@ -178,7 +174,6 @@ Removes event listeners (`mouseup.highlight`, `hashchange.highlight`) and clears
 instance.destroy();
 ```
 
----
 
 ## Events
 
@@ -213,7 +208,6 @@ themestrap.PluginToast = {
 };
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -327,7 +321,6 @@ Eight of the eleven token groups share the same value in both light and dark mod
 }
 ```
 
----
 
 ## Resilience and CDN Behavior
 
@@ -359,7 +352,6 @@ A failed in-flight promise is removed from `themestrap._hljsLoading` immediately
 
 When core loading fails (or a language grammar fails), affected blocks render as **escaped plaintext** — `textContent` is HTML-escaped before being written to `innerHTML`. Line numbers and the copy button still function normally. No raw HTML injection occurs in either the highlight or the fallback path.
 
----
 
 ## Recipes
 
@@ -436,7 +428,6 @@ $pre.attr('data-plugin-highlight', 'javascript');
 $pre.themestrapPluginHighlight();
 ```
 
----
 
 ## Keyboard Navigation
 
@@ -448,7 +439,6 @@ $pre.themestrapPluginHighlight();
 
 There is no keyboard shortcut for line selection. The copy button is a standard `<button>` element and is reachable via `Tab`.
 
----
 
 ## ARIA Wiring
 
@@ -456,7 +446,6 @@ Each line number div carries `role="button"` and `tabindex="0"` to signal intera
 
 The copy button is a standard `<button>` with visible text that updates to `Copied!` / `Copy failed` — no `aria-live` region is used, so screen readers will not announce the state change unless the user is focused on the button.
 
----
 
 ## Common Pitfalls
 

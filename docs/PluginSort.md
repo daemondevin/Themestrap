@@ -6,7 +6,6 @@ Themestrap's Isotope filter/sort grid — filter buttons drive a destination gri
 
 PluginSort wires filter control elements to an Isotope grid via a shared `data-sort-id`. Clicking a filter button (`data-option-value="*"` for all, `".category"` for filtered) runs `isotope('filter', value)` on the destination grid. URL hash is synced when `useHash: true`.
 
----
 
 ## [Quick **Start**](#quick-start)
 

@@ -6,7 +6,6 @@ Themestrap's viewport-state style toggle — applies different CSS styles and cl
 
 PluginInViewportStyle uses the `observeElementInViewport` helper to watch an element. When the element enters the viewport, `styleIn` / `classIn` are applied; when it exits, `styleOut` / `classOut` are applied instead.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -23,7 +22,6 @@ PluginInViewportStyle uses the `observeElementInViewport` helper to watch an ele
 </div>
 ```
 
----
 
 ## [Configuration **Options**](#options)
 

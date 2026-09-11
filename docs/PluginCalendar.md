@@ -2,7 +2,6 @@
 
 A dependency-free date picker built for Themestrap. Supports single, multiple, and range selection; disabled date rules via arrays, bounds, or a predicate function; and full keyboard navigation using the ARIA grid pattern. Styles are injected once on first use and removed when the last instance is destroyed.
 
----
 
 ## Quick Start
 
@@ -63,7 +62,6 @@ if (typeof $.fn['themestrapPluginCalendar'] === 'function'
 
 > Add `.manual` to any element to opt out of auto-init and initialize it manually via the jQuery bridge.
 
----
 
 ## Options
 
@@ -83,7 +81,6 @@ All options merge as: `PluginCalendar.defaults → JS opts argument → data-plu
 | `showFooter` | boolean | `false` | Render a "Today" button beneath the grid that navigates the view back to the current month. |
 | `onSelect` | function \| null | `null` | Callback fired after a selection is committed. Receives the same value shape as `selected`. |
 
----
 
 ## Selection Modes
 
@@ -135,7 +132,6 @@ $('#my-calendar').themestrapPluginCalendar({
 
 `selected` accepts `{ from: Date|null, to: Date|null }`. `onSelect` receives the same shape with both properties as `Date` objects.
 
----
 
 ## Disabled Dates
 
@@ -178,7 +174,6 @@ $('#my-calendar').themestrapPluginCalendar({
 });
 ```
 
----
 
 ## Public API
 
@@ -233,7 +228,6 @@ inst.destroy();
 $('#my-calendar').themestrapPluginCalendar({ mode: 'range' });
 ```
 
----
 
 ## Events
 
@@ -261,7 +255,6 @@ $('#my-calendar').on('ts.calendar.select', function(e) {
 });
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -298,7 +291,6 @@ The injected stylesheet reads from CSS custom properties before falling back to 
 }
 ```
 
----
 
 ## Keyboard Navigation
 
@@ -319,7 +311,6 @@ The calendar implements the WAI-ARIA grid pattern with a roving tabindex — onl
 
 When keyboard navigation crosses a month boundary, the view re-renders automatically and focus is placed on the target day.
 
----
 
 ## ARIA Wiring
 
@@ -340,7 +331,6 @@ The plugin sets and manages the following ARIA attributes. Do not set them manua
 | `button.ts-cal-prev` | `aria-label` | `"Previous month"` |
 | `button.ts-cal-next` | `aria-label` | `"Next month"` |
 
----
 
 ## Recipes
 
@@ -445,7 +435,6 @@ $el.data('__pluginCalendar').destroy();
 $el.themestrapPluginCalendar({ mode: 'multiple', weekStartsOn: 1 });
 ```
 
----
 
 ## Common Pitfalls
 

@@ -37,7 +37,6 @@ PluginDialog manages a single modal instance. It handles the full accessibility 
 
 A stack of open dialogs is maintained. Opening a second dialog while one is open pushes the first to the background stack. Closing the top-most dialog pops the stack and restores focus to the previous one.
 
----
 
 ## Quick **Start**
 
@@ -119,7 +118,6 @@ A stack of open dialogs is maintained. Opening a second dialog while one is open
 | `data-dialog-open="<id>"` | Trigger button. Calls `open()` on the dialog with the matching `id`. |
 | `data-dialog-close` | Any close trigger inside the panel. |
 
----
 
 ## Size **Modifiers**
 

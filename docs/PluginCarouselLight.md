@@ -6,7 +6,6 @@ Themestrap's dependency-free lightweight carousel — drives pre-built Owl Carou
 
 PluginCarouselLight works with the _same markup structure_ as Owl Carousel (`owl-item`, `owl-next`, `owl-prev`, `owl-dot`) but drives transitions itself using CSS `fadeIn`/`fadeOut` classes. The Owl Carousel JS library is not required. One slide is visible at a time. Autoplay advances on a timer; swipe events (via jQuery.swipe if available) and dot/arrow clicks navigate manually.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -35,7 +34,6 @@ PluginCarouselLight works with the _same markup structure_ as Owl Carousel (`owl
 </div>
 ```
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -46,7 +44,6 @@ PluginCarouselLight works with the _same markup structure_ as Owl Carousel (`owl
 | `disableAutoPlayOnClick` | bool | `true` | Stop autoplay when the user interacts. |
 | `swipeEvents` | bool | `true` | Enable swipe navigation (requires jQuery.swipe). |
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 
@@ -54,4 +51,3 @@ PluginCarouselLight works with the _same markup structure_ as Owl Carousel (`owl
 
 **Only one item visible at a time.** This is a single-item fade carousel. For multi-item sliders use PluginCarousel (Owl Carousel 2).
 
----

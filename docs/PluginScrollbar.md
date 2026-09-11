@@ -2,7 +2,6 @@
 
 A self-contained Themestrap scrollbar plugin with zero vendor JS dependencies — mouse wheel, pointer drag, touch momentum, and keyboard navigation are all implemented from scratch using native browser APIs.
 
----
 
 ## Overview
 
@@ -16,7 +15,6 @@ Dependency    jQuery only (already a Themestrap hard dependency)
 ```
 
 
----
 
 ## init.js Wiring
 
@@ -35,7 +33,6 @@ if ($.isFunction($.fn['themestrapPluginScrollbar']) && $('[data-plugin-scrollbar
 
 `dynIntObsInit` is used because `PluginScrollbar.defaults` contains `forceInit: true`, which tells the observer to initialize immediately rather than waiting for the element to enter the viewport. Scrollable panels are typically always visible — sidebars, content areas, chat windows — so lazy init adds latency without any benefit. Panels that genuinely are off-screen on load can override with `data-plugin-options='{"forceInit":false}'`.
 
----
 
 ## HTML Auto-Init
 
@@ -94,7 +91,6 @@ Add `class="manual"` to skip the IntersectionObserver wiring and initialize manu
 $('#mySidebar').themestrapPluginScrollbar({ theme: 'dark', scrollInertia: 800 });
 ```
 
----
 
 ## Programmatic Init
 
@@ -116,7 +112,6 @@ const sb = $('#myPanel').data('__scrollbar');
 sb.scrollTo('bottom').stop();
 ```
 
----
 
 ## Options Reference
 
@@ -172,7 +167,6 @@ All options can be passed as an object to `$.fn.themestrapPluginScrollbar()` or 
 | `callbacks.onTotalScrollBack` | `function \| null` | `null` | Called when scroll returns to the start (within `onTotalScrollBackOffset` px). |
 | `callbacks.onTotalScrollBackOffset` | `number` | `0` | How many px from the start counts as "back at the top". |
 
----
 
 ## scrollTo() Targets
 
@@ -205,7 +199,6 @@ sb.scrollTo('bottom', {
 });
 ```
 
----
 
 ## Public API
 
@@ -271,7 +264,6 @@ sb.destroy();
 $('#myPanel').themestrapPluginScrollbar({ theme: 'dark' });
 ```
 
----
 
 ## Callbacks
 
@@ -340,7 +332,6 @@ onTotalScrollBack: function() {
 onTotalScrollBackOffset: 0,
 ```
 
----
 
 ## Themes
 
@@ -380,7 +371,6 @@ The `scrollButtons` arrows are drawn with pure CSS — no sprite sheet or image 
 - All other themes → white arrows (`rgba(255,255,255,0.9)`)
 - The `inset`, `inset-2`, and `inset-3` light variants also use dark arrows (overridden explicitly)
 
----
 
 ## CSS Classes Reference
 
@@ -415,7 +405,6 @@ These classes are added to the DOM by the plugin. You can hook into them for add
 | `.ts-scrollbox-dragger-onDrag` | Thumb element | While being dragged |
 | `.ts-scrollbox-scrollTools-onDrag` | Track div | While thumb is being dragged |
 
----
 
 ## Browser Support
 

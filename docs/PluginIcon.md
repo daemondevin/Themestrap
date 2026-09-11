@@ -6,7 +6,6 @@ Themestrap's SVG icon inliner — fetches SVG files via AJAX, inlines them into 
 
 PluginIcon replaces an `<img>` tag with an inline `<svg>` by fetching the image source via AJAX. After injection, it optionally applies a fill color via CSS class, fades the SVG in, and runs a [Vivus](https://maxwallstudio.com/vivus) stroke or fill animation. Inside carousels, it re-runs on cloned slides after the `translated.owl.carousel` event.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -17,7 +16,6 @@ PluginIcon replaces an `<img>` tag with an inline `<svg>` by fetching the image 
      width="64" height="64" alt="Star icon">
 ```
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -35,7 +33,6 @@ PluginIcon replaces an `<img>` tag with an inline `<svg>` by fetching the image 
 | `extraClass` | string | `''` | Extra class on the SVG wrapper. |
 | `accY` | number | `0` | IntersectionObserver Y offset. |
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 
@@ -43,4 +40,3 @@ PluginIcon replaces an `<img>` tag with an inline `<svg>` by fetching the image 
 
 **Vivus must be loaded separately.** The plugin checks for `window.Vivus` before animating. If Vivus is absent, the SVG is inlined without animation.
 
----

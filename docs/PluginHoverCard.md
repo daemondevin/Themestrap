@@ -4,7 +4,6 @@ A hover-triggered preview card that appears after a configurable delay, stays op
 
 HoverCard is for **non-blocking, glanceable context**: user profiles, link previews, document teasers, quick-reference definitions. For interactive, click-triggered panels use [PluginPopover](plugin-popover.html) instead.
 
----
 
 ## Quick Start
 
@@ -56,7 +55,6 @@ if ($.isFunction($.fn['themestrapPluginHoverCard']) && $('[data-plugin-hovercard
 }
 ```
 
----
 
 ## Markup Anatomy
 
@@ -115,7 +113,6 @@ The trigger and wrapper can live in different DOM positions. Set the `id` on the
 
 The plugin uses `$('[data-hovercard-trigger="author-card"]')` to locate the trigger; hover events are attached to that element and positioning is computed relative to it.
 
----
 
 ## Convenience Layout Classes
 
@@ -134,7 +131,6 @@ The plugin injects styles for a set of optional layout helpers. The card content
 
 All helpers adapt to dark mode automatically when `html.dark` is present (set by PluginDarkMode).
 
----
 
 ## Options
 
@@ -153,7 +149,6 @@ Pass as a JSON object on `data-plugin-options` or as a JS object to the jQuery m
 | `onShow` | function | `null` | Callback fired after the card becomes visible. Called with the plugin instance as `this`. |
 | `onHide` | function | `null` | Callback fired after the card is hidden. Same signature as `onShow`. |
 
----
 
 ## Public API
 
@@ -177,7 +172,6 @@ $('#my-card').themestrapPluginHoverCard('destroy');
 | `hc.update()` | `this` | Recompute position without changing visibility. Call after dynamic layout changes — accordion expand, tab switch, scroll-into-view, etc. |
 | `hc.destroy()` | `this` | Full teardown: removes all namespaced event listeners, clears ARIA attributes set by the plugin, restores portaled content to its original parent, removes `tabindex` if one was injected, and removes the instance from `.data()`. DOM content is otherwise left intact. |
 
----
 
 ## Events
 
@@ -214,7 +208,6 @@ $('#my-card').themestrapPluginHoverCard({
 });
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -244,7 +237,6 @@ The injected stylesheet uses CSS custom properties for colours and sizes. Overri
 
 Dark mode is applied automatically when `html.dark` is present via selector overrides in the injected stylesheet. No extra configuration is needed.
 
----
 
 ## Keyboard Navigation
 
@@ -259,7 +251,6 @@ Non-focusable triggers (a plain `<span>` that is not an `<a>`, `<button>`, or el
 
 The card itself is not keyboard-navigable — it is informational and not interactive at the dialog level. If the card content contains links or buttons that users need keyboard access to, consider PluginPopover with `modal: false` instead.
 
----
 
 ## ARIA Wiring
 
@@ -273,7 +264,6 @@ The plugin sets and updates ARIA attributes automatically. Do not set these manu
 | `[data-hovercard-content]` | `aria-label` | Value of the `ariaLabel` option (`"Hover card"` by default). |
 | Non-focusable trigger | `tabindex` | `"0"` — injected when the trigger is not natively focusable. |
 
----
 
 ## Recipes
 
@@ -415,7 +405,6 @@ $('#my-card')[0].addEventListener('ts.hovercard.hide', function() {
 });
 ```
 
----
 
 ## Common Pitfalls
 
@@ -450,7 +439,6 @@ The external trigger pattern requires the wrapper to have an `id` and the trigge
 - Is any ancestor of the wrapper using `overflow: hidden`? If so, enable `portaling: true`.
 - On the external trigger pattern: does the `id` on the wrapper exactly match the `data-hovercard-trigger` attribute value on the trigger element?
 
----
 
 ## HoverCard vs Popover
 

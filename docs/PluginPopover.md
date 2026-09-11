@@ -4,7 +4,6 @@ Themestrap's anchor-positioned popover plugin — accessible, CSS-arrow-decorate
 
 A lightweight, accessible popover primitive. Wrap a trigger and a content panel in `[data-plugin-popover]`, and the plugin handles positioning (with viewport-flip fallback), a CSS arrow, focus trapping, Escape dismissal, click-outside closing, and mutual exclusion so only one popover can be open at a time. An optional portal mode moves the content panel to `<body>` at open time so `overflow: hidden` ancestors can't clip it.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -38,7 +37,6 @@ Only one popover may be open at a time. The plugin dispatches a `ts-popover-open
 
 When `portaling: true` and the popover opens, the content panel is detached from its original parent and appended to `<body>`. Its original parent is cached in `_$originalParent`. When the popover closes the panel is restored. This lets the popover escape any ancestor with `overflow: hidden` or a clipping stacking context.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -86,7 +84,6 @@ if ($.isFunction($.fn['themestrapPluginPopover']) &&
 > [!TIP]
 >  The plugin injects one stylesheet per page (`<style id="ts-popover-styles">`). Colors, shadow, and border-radius are all `--ts-pop-*` CSS custom properties — override them on the root element or globally rather than modifying the injected sheet.
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -127,7 +124,6 @@ if ($.isFunction($.fn['themestrapPluginPopover']) &&
 }
 ```
 
----
 
 ## [Placement **System**](#placement)
 
@@ -155,7 +151,6 @@ The flip is silent — no class is added, no event fires. It recalculates on eve
 
 When the browser supports `CSS.supports('anchor-name', '--x')`, the plugin uses CSS `anchor()` for positioning — zero JavaScript layout math, sub-pixel accurate, reflows automatically when the trigger moves. On unsupported browsers it falls back to manual `getBoundingClientRect()` calculations.
 
----
 
 ## [Portal **Mode**](#portal)
 
@@ -184,7 +179,6 @@ Use portal mode whenever an ancestor of the popover root has `overflow: hidden`,
 > [!WARNING]
 >  Restoring the panel to `_$originalParent` on close is what prevents orphaned DOM nodes. Always call `destroy()` before removing the popover root from the DOM — `destroy()` calls `close()` first, which restores the panel before the root is gone.
 
----
 
 ## [Instance **API**](#instance-api)
 
@@ -220,7 +214,6 @@ $('[data-plugin-popover]')
 | `popover:open` | `(e, instance)` | After the panel is positioned and the entrance animation starts. |
 | `popover:close` | `(e, instance)` | After the exit animation completes and the panel is hidden. |
 
----
 
 ## [Mutual **Exclusion**](#mutual-exclusion)
 
@@ -240,7 +233,6 @@ document.addEventListener('ts-popover-opened', (e) => {
 });
 ```
 
----
 
 ## [Focus **Management**](#focus)
 
@@ -254,7 +246,6 @@ The plugin applies a minimal focus trap while a popover is open.
 > [!NOTE]
 > Hover cards and decorative popovers that should _not_ trap focus can opt out by adding `data-popover-no-trap` to the content panel. Focus then moves freely even while the popover is open.
 
----
 
 ## [Recipe **Cookbook**](#recipes)
 
@@ -338,7 +329,6 @@ $('[data-plugin-popover]')
   });
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

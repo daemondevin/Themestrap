@@ -4,7 +4,6 @@ Themestrap's native custom-scrollbar plugin. A from-scratch, dependency-free alt
 
 A custom scrollbar you can actually style. PluginScroller hides the platform scrollbar on a scrollable container and renders its own track and thumb on top. Also themable through CSS custom properties, draggable, click-to-page, and auto-hiding by default. Unlike `PluginScrollable`, which delegates to the external nanoScroller library, this plugin owns all of its geometry, dragging and reflow logic, so it ships with **no third-party JavaScript**.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -35,7 +34,6 @@ Both give you a styled scrollbar, but they are not the same component:
 - **PluginScroller** — native, zero-dependency, vertical custom scrollbar. Themable via CSS custom properties. This plugin.
 - **PluginScrollable** — a thin wrapper that delegates to the external `nanoScroller` jQuery library. Use it only if you already ship nanoScroller for other reasons.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -86,7 +84,6 @@ themestrap.fn.intObsInit(
 > [!WARNING]
 > The host needs a height for there to be anything to scroll. Set one in CSS, or pass `height` (fixed) or `maxHeight` (grow-then-cap) as an option. Without a constraint the content fits, no overflow exists, and — correctly — no scrollbar appears.
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -127,7 +124,6 @@ Appearance is driven entirely by CSS custom properties on the host:
 }
 ```
 
----
 
 ## [Instance **API**](#instance-api)
 
@@ -178,7 +174,6 @@ Geometry is re-evaluated automatically when:
 > [!TIP]
 > The one case that needs a manual `update()` is a scroller built while hidden — e.g. inside an inactive tab or a `display:none` panel — because its viewport measures zero height. Call `update()` when the container becomes visible.
 
----
 
 ## [Recipe **Cookbook**](#recipes)
 
@@ -242,7 +237,6 @@ $('[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
 });
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

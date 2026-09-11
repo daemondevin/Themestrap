@@ -91,7 +91,6 @@ cr.refresh();
 
 Disconnects the `IntersectionObserver`, removes the `resize` listener, restores original markup, and cleans up `$.data`.
 
----
 
 ## Events
 
@@ -108,7 +107,6 @@ $('[data-plugin-code-rail]').on('coderail:change', (e, cr, id, $panel) => {
 });
 ```
 
----
 
 ## Layout **Modes**
 

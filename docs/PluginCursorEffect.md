@@ -6,7 +6,6 @@ Themestrap's custom cursor visual effect plugin — applies a custom cursor visu
 
 PluginCursorEffect creates a custom cursor follower element and tracks `mousemove` events on the target element (or `document`). The visual implementation is driven entirely by `data-plugin-options`. No defaults are defined in the plugin source — all configuration is per-instance.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -17,7 +16,6 @@ PluginCursorEffect creates a custom cursor follower element and tracks `mousemov
 </div>
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 
@@ -25,4 +23,3 @@ PluginCursorEffect creates a custom cursor follower element and tracks `mousemov
 
 **Touch devices.** The cursor follower only activates on pointer devices. On touch-only screens the plugin is inert.
 
----

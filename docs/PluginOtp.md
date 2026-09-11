@@ -4,7 +4,6 @@ A digit-segmented one-time password and PIN input. Each character occupies its o
 
 CSS is injected lazily on first use via a `<style id="ts-otp-styles">` guard — no separate stylesheet import is required.
 
----
 
 ## Quick Start
 
@@ -46,7 +45,6 @@ if ($.isFunction($.fn['themestrapPluginOtp']) && $('[data-plugin-otp]').length) 
 }
 ```
 
----
 
 ## Options
 
@@ -65,7 +63,6 @@ All options are merged as: `PluginOtp.defaults → JS opts argument → data-plu
 | `size` | string | `""` | Box size modifier. `""` (default) · `"sm"` · `"lg"`. |
 | `theme` | string | `""` | `""` (dark) · `"light"`. Light swaps the CSS variable set for use on bright backgrounds. |
 
----
 
 ## Public API
 
@@ -90,7 +87,6 @@ const otp = $('#my-otp').data('__pluginOtp');
 | `disable(state)` | `this` | Pass `true` to disable all inputs; `false` to re-enable. |
 | `destroy()` | `this` | Remove all generated DOM, event handlers, classes, and the data key. The wrapper element is left empty. |
 
----
 
 ## Events
 
@@ -122,7 +118,6 @@ $el.on('ts.otp.submit', function (e) {
 });
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -154,7 +149,6 @@ Override tokens on the wrapper element or any ancestor.
 | `--ts-otp-label-color` | Label text colour | `rgba(255,255,255,.7)` |
 | `--ts-otp-hint-color` | Hint text colour | `rgba(255,255,255,.38)` |
 
----
 
 ## Keyboard Navigation
 
@@ -168,7 +162,6 @@ Override tokens on the wrapper element or any ancestor.
 | `Home` | Move focus to the first box. |
 | `End` | Move focus to the last box. |
 
----
 
 ## ARIA Wiring
 
@@ -182,7 +175,6 @@ Override tokens on the wrapper element or any ancestor.
 | Error `<p>` | `aria-live` | `"polite"` — error message is announced to screen readers. |
 | Error `<p>` | `role` | `"alert"` |
 
----
 
 ## Recipes
 
@@ -264,7 +256,6 @@ if (code) {
 }
 ```
 
----
 
 ## Common Pitfalls
 

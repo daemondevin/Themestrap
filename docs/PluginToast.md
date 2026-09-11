@@ -37,7 +37,6 @@ Positions are written as `"y-x"` where _y_ is one of `top`, `middle`, `bottom` a
 > [!NOTE]  
 > **Default position is `top-end`.** Override per-call or globally via `PluginToast.defaults.position`.
 
----
 
 ## Quick **Start**
 
@@ -83,7 +82,6 @@ $('#welcomeToast').themestrapPluginToast();
 > [!Tip]  
 > Static `show()` is preferred for most cases. Use the element form when the toast's content is rendered server-side and you don't want to re-marshal it through JS.
 
----
 
 ## Configuration **Options**
 
@@ -117,7 +115,6 @@ Options merge in this order (later wins): `PluginToast.defaults → opts arg →
 | `data-plugin-toast-progress` | `true` / `false` | Show the animated countdown bar. Requires `autohide: true`. |
 | `data-plugin-toast-icon` | URL to image | Custom 16×16 image source. Falls back to the type's SVG icon when omitted. |
 
----
 
 ## Static **API**
 
@@ -147,7 +144,6 @@ themestrap.PluginToast.defaults.position = 'bottom-end';
 themestrap.PluginToast.defaults.progress = true;
 ```
 
----
 
 ## Instance **API**
 ### Accessing the instance
@@ -184,7 +180,6 @@ themestrap.PluginToast.show({
 });
 ```
 
----
 
 ## Hover Pause & Container Behavior
 
@@ -215,7 +210,6 @@ Position containers are created lazily on first use and removed when the last to
 2. **Container hit** — subsequent calls to the same position retrieve the cached container and append the new toast inside it.
 3. **Container cleanup** — when a toast fires `hidden.bs.toast` and the container has no more children, the container is removed from the DOM and de-registered.
 
----
 
 ## Recipe **Cookbook**
 
@@ -293,7 +287,6 @@ themestrap.PluginToast.show({
 </script>
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

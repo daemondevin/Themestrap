@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Themestrap — Loading Overlay Demo</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #0088CC;
+        --secondary: #e36159;
+        --dark: #212529;
+        --light: #f2f2f2;
+    }
+
+    body {
+        background: #f8f9fa;
+        color: var(--dark);
+    }
+
+    .demo-header {
+        background: linear-gradient(
+            135deg,
+            #212529,
+            #343a40
+        );
+        color: #fff;
+        padding: 4rem 1rem;
+        margin-bottom: 3rem;
+    }
+
+    .demo-header h1 {
+        font-weight: 700;
+    }
+
+    .demo-header .lead {
+        color: rgba(255,255,255,.75);
+        max-width: 800px;
+    }
+
+    .demo-section {
+        margin-bottom: 4rem;
+    }
+
+    .demo-section-title {
+        font-weight: 700;
+        margin-bottom: .5rem;
+    }
+
+    .demo-section-description {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+        max-width: 850px;
+    }
+
+    .demo-card {
+        height: 100%;
+        padding: 1.5rem;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,.1);
+        border-radius: .75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+
+    .demo-card h5 {
+        margin-bottom: .5rem;
+    }
+
+    .demo-card p {
+        color: #6c757d;
+    }
+
+    .loading-target {
+        position: relative;
+        min-height: 240px;
+        padding: 2rem;
+        overflow: hidden;
+        background:
+            linear-gradient(
+                135deg,
+                rgba(0,136,204,.08),
+                rgba(227,97,89,.08)
+            ),
+            #fff;
+        border: 1px solid rgba(0,0,0,.1);
+        border-radius: .75rem;
+    }
+
+    .fake-lines {
+        display: grid;
+        gap: .75rem;
+        margin-top: 1.5rem;
+    }
+
+    .fake-line {
+        width: 100%;
+        height: 12px;
+        background: #dee2e6;
+        border-radius: 20px;
+    }
+
+    .fake-line:nth-child(2) {
+        width: 85%;
+    }
+
+    .fake-line:nth-child(3) {
+        width: 70%;
+    }
+
+    .fake-line:nth-child(4) {
+        width: 92%;
+    }
+
+    .api-output {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        padding: .75rem 1rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: .5rem;
+        font-family: monospace;
+        font-size: .875rem;
+    }
+
+    .event-log {
+        height: 150px;
+        padding: 1rem;
+        overflow-y: auto;
+        background: #212529;
+        color: #adb5bd;
+        border-radius: .5rem;
+        font-family: monospace;
+        font-size: .8rem;
+    }
+
+    .event-log div {
+        margin-bottom: .25rem;
+    }
+
+    .code-block {
+        margin-top: 1rem;
+        padding: 1rem 1.25rem;
+        overflow-x: auto;
+        background: #212529;
+        color: #f8f9fa;
+        border-radius: .5rem;
+        font-size: .875rem;
+    }
+
+    .code-block code {
+        color: inherit;
+    }
+
+    .footer {
+        margin-top: 5rem;
+        padding: 3rem 1rem;
+        background: #212529;
+        color: rgba(255,255,255,.7);
+        text-align: center;
+    }
+
+    .footer strong {
+        color: #fff;
+    }
+
+    @media (max-width: 767.98px) {
+        .demo-header {
+            padding: 3rem 1rem;
+        }
+
+        .demo-section {
+            margin-bottom: 3rem;
+        }
+
+        .loading-target {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<header class="demo-header">
+    <div class="container">
+
+
+    <div class="row">
+        <div class="col-lg-9">
+
+            <div class="text-uppercase small fw-bold mb-2 opacity-75">
+                Themestrap Plugin
+            </div>
+
+            <h1 class="display-4">
+                Loading Overlay
+            </h1>
+
+            <p class="lead mb-4">
+                A flexible loading overlay supporting seven built-in
+                animation styles, progress indicators, messages,
+                runtime controls, backdrop customization, blur,
+                automatic hiding, accessibility attributes, and
+                dark-mode aware backgrounds.
+            </p>
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="demo-page-loading">
+                Show Page Overlay
+            </button>
+
+        </div>
+    </div>
+
+</div>
+
+
+</header>
+
+<main class="container">
+
+
+<!-- Animation Types -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Animation Types
+    </h2>
+
+    <p class="demo-section-description">
+        PluginLoadingOverlay provides seven built-in animation types.
+        The buttons below all reuse the same page-level overlay instance,
+        changing its animation at runtime.
+    </p>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="demo-card">
+                <h5>Spinner</h5>
+                <p>
+                    A classic rotating spinner.
+                </p>
+
+                <button
+                    class="btn btn-primary w-100 animation-button"
+                    data-type="spinner">
+                    Preview Spinner
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="demo-card">
+                <h5>Ring</h5>
+                <p>
+                    A rotating dual-arc ring.
+                </p>
+
+                <button
+                    class="btn btn-primary w-100 animation-button"
+                    data-type="ring">
+                    Preview Ring
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="demo-card">
+                <h5>Pulse</h5>
+                <p>
+                    A circular loader that expands and contracts.
+                </p>
+
+                <button
+                    class="btn btn-primary w-100 animation-button"
+                    data-type="pulse">
+                    Preview Pulse
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="demo-card">
+                <h5>Ripple</h5>
+                <p>
+                    Two expanding rings create a ripple effect.
+                </p>
+
+                <button
+                    class="btn btn-primary w-100 animation-button"
+                    data-type="ripple">
+                    Preview Ripple
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="demo-card">
+                <h5>Dots</h5>
+                <p>
+                    Three independently bouncing dots.
+                </p>
+
+                <button
+                    class="btn btn-primary w-100 animation-button"
+                    data-type="dots">
+                    Preview Dots
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="demo-card">
+                <h5>Bars</h5>
+                <p>
+                    Five animated equalizer-style bars.
+                </p>
+
+                <button
+                    class="btn btn-primary w-100 animation-button"
+                    data-type="bars">
+                    Preview Bars
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="demo-card">
+                <h5>Orbit</h5>
+                <p>
+                    Two dots orbit around a shared axis.
+                </p>
+
+                <button
+                    class="btn btn-primary w-100 animation-button"
+                    data-type="orbit">
+                    Preview Orbit
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Element Overlay -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Element Overlay
+    </h2>
+
+    <p class="demo-section-description">
+        An overlay does not have to cover the entire page. Attach it
+        directly to a component to indicate that only that portion of
+        the interface is busy.
+    </p>
+
+    <div
+        class="loading-target"
+        id="content-loader">
+
+        <h4>
+            Example Content Panel
+        </h4>
+
+        <p class="text-muted">
+            This panel has its own LoadingOverlay instance. Showing
+            this overlay does not interfere with the page-level loader.
+        </p>
+
+        <div class="fake-lines">
+            <div class="fake-line"></div>
+            <div class="fake-line"></div>
+            <div class="fake-line"></div>
+            <div class="fake-line"></div>
+        </div>
+
+    </div>
+
+    <div class="mt-3 d-flex flex-wrap gap-2">
+
+        <button
+            class="btn btn-primary"
+            id="show-element-loader">
+            Show Element Overlay
+        </button>
+
+        <button
+            class="btn btn-outline-secondary"
+            id="toggle-element-loader">
+            Toggle
+        </button>
+
+    </div>
+
+    <div class="code-block">
+        <code>const loader = $('#content-loader')
+.themestrapPluginLoadingOverlay({
+    type: 'ring',
+    message: 'Loading content...'
+})
+.data('__pluginLoadingOverlay');
+
+
+loader.show();</code> </div>
+
+
+</section>
+
+
+<!-- Messages -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Messages
+    </h2>
+
+    <p class="demo-section-description">
+        Messages can be supplied during initialization or changed
+        dynamically with <code>setMessage()</code>.
+    </p>
+
+    <div class="row g-4">
+
+        <div class="col-md-6">
+
+            <div class="demo-card">
+
+                <h5>
+                    Static Message
+                </h5>
+
+                <p>
+                    The message is supplied when the shared page loader
+                    is configured for this demonstration.
+                </p>
+
+                <button
+                    class="btn btn-primary"
+                    id="static-message-demo">
+                    Show Static Message
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="demo-card">
+
+                <h5>
+                    Runtime Message
+                </h5>
+
+                <p>
+                    The same overlay can change its message while it
+                    remains visible.
+                </p>
+
+                <button
+                    class="btn btn-primary"
+                    id="runtime-message-demo">
+                    Start Operation
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- Progress -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Progress Overlay
+    </h2>
+
+    <p class="demo-section-description">
+        The progress option adds a built-in progress bar. Its value can
+        be updated at runtime with <code>setProgress()</code>.
+    </p>
+
+    <div
+        class="loading-target"
+        id="progress-loader">
+
+        <h4>
+            Processing Data
+        </h4>
+
+        <p class="text-muted">
+            This element has an independent progress-enabled overlay.
+        </p>
+
+        <div class="progress mt-4">
+            <div
+                class="progress-bar"
+                id="external-progress"
+                style="width: 0%">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-3">
+
+        <button
+            class="btn btn-primary"
+            id="progress-demo-button">
+            Start Progress
+        </button>
+
+    </div>
+
+    <div class="code-block">
+        <code>const loader = $('#progress-loader')
+.themestrapPluginLoadingOverlay({
+    type: 'bars',
+    message: 'Processing...',
+    progress: true,
+    progressValue: 0
+})
+.data('__pluginLoadingOverlay');
+
+
+loader.setProgress(50);</code> </div>
+
+
+</section>
+
+
+<!-- Appearance -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Appearance &amp; Customization
+    </h2>
+
+    <p class="demo-section-description">
+        Loader color, backdrop color, size, animation duration, and
+        backdrop blur can all be customized.
+    </p>
+
+    <div class="row g-4">
+
+        <div class="col-md-6">
+
+            <div class="demo-card">
+
+                <h5>
+                    Custom Appearance
+                </h5>
+
+                <p>
+                    Large loader with a custom color and dark backdrop.
+                </p>
+
+                <button
+                    class="btn btn-primary"
+                    id="custom-loader">
+                    Show Custom Loader
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="demo-card">
+
+                <h5>
+                    Blurred Backdrop
+                </h5>
+
+                <p>
+                    Uses the CSS <code>backdrop-filter</code> feature
+                    through the plugin's <code>blur</code> option.
+                </p>
+
+                <button
+                    class="btn btn-primary"
+                    id="blur-loader">
+                    Show Blurred Overlay
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="code-block">
+        <code>loader
+.setSize('lg')
+.setColor('#0088CC')
+.setBackdrop('rgba(0,0,0,.78)');</code>
+    </div>
+
+</section>
+
+
+<!-- Runtime API -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Runtime API
+    </h2>
+
+    <p class="demo-section-description">
+        The plugin instance provides methods for controlling visibility,
+        animation type, size, message, color, backdrop, and progress
+        without rebuilding the overlay.
+    </p>
+
+    <div class="row g-4">
+
+        <div class="col-lg-6">
+
+            <div class="demo-card">
+
+                <h5>
+                    Visibility
+                </h5>
+
+                <div class="d-flex flex-wrap gap-2 mb-4">
+
+                    <button
+                        class="btn btn-primary"
+                        id="api-show">
+                        Show
+                    </button>
+
+                    <button
+                        class="btn btn-outline-primary"
+                        id="api-hide">
+                        Hide
+                    </button>
+
+                    <button
+                        class="btn btn-outline-primary"
+                        id="api-toggle">
+                        Toggle
+                    </button>
+
+                </div>
+
+                <h5>
+                    Animation
+                </h5>
+
+                <div class="d-flex flex-wrap gap-2 mb-4">
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-type="spinner">
+                        Spinner
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-type="ring">
+                        Ring
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-type="dots">
+                        Dots
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-type="bars">
+                        Bars
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-type="orbit">
+                        Orbit
+                    </button>
+
+                </div>
+
+                <h5>
+                    Size
+                </h5>
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-size="sm">
+                        Small
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-size="md">
+                        Medium
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        data-api-size="lg">
+                        Large
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="demo-card">
+
+                <h5>
+                    Current State
+                </h5>
+
+                <p>
+                    The <code>isVisible()</code> method reports the
+                    current visibility state.
+                </p>
+
+                <div
+                    class="api-output"
+                    id="api-status">
+                    Visible: false
+                </div>
+
+                <h5 class="mt-4">
+                    Runtime Message
+                </h5>
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        id="api-message-one">
+                        Loading...
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        id="api-message-two">
+                        Almost Done...
+                    </button>
+
+                    <button
+                        class="btn btn-outline-secondary"
+                        id="api-message-clear">
+                        Clear Message
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="code-block">
+        <code>loader.show();
+
+
+loader.hide();
+loader.toggle();
+
+loader.setMessage('Almost finished...');
+loader.setProgress(75);
+loader.setType('dots');
+loader.setSize('lg');
+loader.setColor('#0088CC');
+loader.setBackdrop('rgba(0,0,0,.8)');
+
+loader.isVisible();</code> </div>
+
+
+</section>
+
+
+<!-- Automatic Behavior -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Automatic Behavior
+    </h2>
+
+    <p class="demo-section-description">
+        The <code>autoHide</code> option can automatically hide an
+        overlay after a specified number of milliseconds.
+    </p>
+
+    <button
+        class="btn btn-primary"
+        id="auto-demo">
+        Show 2.5 Second Overlay
+    </button>
+
+    <div class="code-block">
+        <code>loader
+.setType('pulse')
+.setMessage('Please wait...')
+.show();
+
+
+setTimeout(function () {
+loader.hide();
+}, 2500);</code> </div>
+
+
+</section>
+
+
+<!-- Lifecycle Events -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Lifecycle Events
+    </h2>
+
+    <p class="demo-section-description">
+        LoadingOverlay emits native custom events when showing and
+        hiding. This example monitors all four lifecycle events.
+    </p>
+
+    <div class="event-log" id="event-log">
+        <div>Waiting for LoadingOverlay events...</div>
+    </div>
+
+    <div class="mt-3">
+
+        <button
+            class="btn btn-primary"
+            id="event-demo">
+            Trigger Events
+        </button>
+
+        <button
+            class="btn btn-outline-secondary"
+            id="clear-events">
+            Clear Log
+        </button>
+
+    </div>
+
+    <div class="code-block">
+        <code>$('body').on(
+'show.ts.loadingoverlay',
+function () {
+    console.log('show');
+}
+
+
+);
+
+$('body').on(
+'shown.ts.loadingoverlay',
+function () {
+console.log('shown');
+}
+);
+
+$('body').on(
+'hide.ts.loadingoverlay',
+function () {
+console.log('hide');
+}
+);
+
+$('body').on(
+'hidden.ts.loadingoverlay',
+function () {
+console.log('hidden');
+}
+);</code> </div>
+
+
+</section>
+
+
+<!-- Configuration -->
+
+<section class="demo-section">
+
+    <h2 class="demo-section-title">
+        Configuration
+    </h2>
+
+    <p class="demo-section-description">
+        Available initialization options exposed by the plugin.
+    </p>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-striped align-middle bg-white">
+
+            <thead>
+                <tr>
+                    <th>Option</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td><code>type</code></td>
+                    <td><code>'spinner'</code></td>
+                    <td>
+                        spinner, ring, pulse, ripple, dots, bars, or orbit.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>message</code></td>
+                    <td><code>''</code></td>
+                    <td>
+                        Text displayed beneath the loader.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>ariaLabel</code></td>
+                    <td><code>'Loading'</code></td>
+                    <td>
+                        Accessible label applied to the overlay.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>backdrop</code></td>
+                    <td><code>null</code></td>
+                    <td>
+                        Custom CSS background color.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>color</code></td>
+                    <td><code>null</code></td>
+                    <td>
+                        Loader and message color.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>size</code></td>
+                    <td><code>'md'</code></td>
+                    <td>
+                        sm, md, lg, or any CSS length.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>duration</code></td>
+                    <td><code>800</code></td>
+                    <td>
+                        Animation cycle duration in milliseconds.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>fadeDuration</code></td>
+                    <td><code>200</code></td>
+                    <td>
+                        Fade transition duration in milliseconds.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>blur</code></td>
+                    <td><code>0</code></td>
+                    <td>
+                        Backdrop blur amount in pixels.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>autoShow</code></td>
+                    <td><code>false</code></td>
+                    <td>
+                        Automatically show after initialization.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>autoHide</code></td>
+                    <td><code>0</code></td>
+                    <td>
+                        Automatically hide after the specified duration.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>progress</code></td>
+                    <td><code>false</code></td>
+                    <td>
+                        Enable the built-in progress bar.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>progressValue</code></td>
+                    <td><code>0</code></td>
+                    <td>
+                        Initial progress value from 0–100.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>lockScroll</code></td>
+                    <td><code>true</code></td>
+                    <td>
+                        Prevent body scrolling during body-level overlays.
+                    </td>
+                </tr>
+
+                <tr>
+                    <td><code>zIndex</code></td>
+                    <td><code>9000</code></td>
+                    <td>
+                        CSS z-index applied to the overlay.
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+</main>
+
+<!-- Footer -->
+
+<footer class="footer">
+
+<div class="mt-2">
+    Themestrap · PluginLoadingOverlay demo · part of the <a href="https://github.com/daemondevin/Themestrap" target="_blank">Themestrap component library</a>
+</div>
+
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.loadingoverlay.js"></script>
+
+<script>
+
+$(function () {
+
+    'use strict';
+
+    function updateApiStatus(loader) {
+
+        $('#api-status').text(
+            'Visible: ' + loader.isVisible()
+        );
+
+    }
+
+
+    function logEvent(message) {
+
+        const $log = $('#event-log');
+
+        const time = new Date().toLocaleTimeString();
+
+        $('<div>')
+            .text('[' + time + '] ' + message)
+            .appendTo($log);
+
+        $log.scrollTop(
+            $log[0].scrollHeight
+        );
+
+    }
+
+
+    // Every page-level demonstration reuses this instance.
+    const $body = $('body');
+
+const pageLoader = $('body')
+    .themestrapPluginLoadingOverlay({
+        type: 'spinner',
+        message: '',
+        lockScroll: true
+    })
+    .get(0);
+
+
+const contentLoader = $('#content-loader')
+    .themestrapPluginLoadingOverlay({
+        type: 'ring',
+        message: 'Loading content...',
+        color: '#0088CC',
+        backdrop: 'rgba(255,255,255,.90)',
+        blur: 2
+    })
+    .get(0);
+
+
+const progressLoader = $('#progress-loader')
+    .themestrapPluginLoadingOverlay({
+        type: 'bars',
+        message: 'Processing...',
+        progress: true,
+        progressValue: 0,
+        color: '#0088CC'
+    })
+    .get(0);
+
+
+    // Basic demonstration
+    $('#demo-page-loading').on('click', function () {
+
+        pageLoader
+            .setType('spinner')
+            .setSize('md')
+            .setColor(null)
+            .setBackdrop(null)
+            .setMessage('Loading page...')
+            .show();
+
+        setTimeout(function () {
+
+            pageLoader
+                .setMessage('Page loaded.');
+
+            setTimeout(function () {
+                pageLoader.hide();
+            }, 500);
+
+        }, 1500);
+
+    });
+
+
+    // All seven demonstrations reuse pageLoader.
+    $('.animation-button').on('click', function () {
+
+        const type = $(this).data('type');
+
+        const label =
+            type.charAt(0).toUpperCase() +
+            type.slice(1);
+
+        pageLoader
+            .setType(type)
+            .setSize('md')
+            .setColor(null)
+            .setBackdrop(null)
+            .setMessage(label + ' loader')
+            .show();
+
+        setTimeout(function () {
+            pageLoader.hide();
+        }, 1800);
+
+    });
+
+
+    // ELEMENT LOADER 
+    $('#show-element-loader').on('click', function () {
+
+        contentLoader
+            .setType('ring')
+            .setMessage('Loading content...')
+            .show();
+
+        setTimeout(function () {
+
+            contentLoader
+                .setMessage('Content loaded!');
+
+            setTimeout(function () {
+                contentLoader.hide();
+            }, 600);
+
+        }, 1600);
+
+    });
+
+
+    $('#toggle-element-loader').on('click', function () {
+
+        contentLoader.toggle();
+
+    });
+
+
+    // STATIC MESSAGE
+
+    $('#static-message-demo').on('click', function () {
+
+        pageLoader
+            .setType('dots')
+            .setMessage(
+                'Please wait while we complete your request.'
+            )
+            .show();
+
+        setTimeout(function () {
+            pageLoader.hide();
+        }, 2400);
+
+    });
+
+
+    // RUNTIME MESSAGE
+
+    let runtimeMessageTimer = null;
+
+    $('#runtime-message-demo').on('click', function () {
+
+        clearTimeout(runtimeMessageTimer);
+
+        pageLoader
+            .setType('bars')
+            .setMessage('Connecting...')
+            .show();
+
+        runtimeMessageTimer = setTimeout(function () {
+
+            pageLoader.setMessage(
+                'Downloading data...'
+            );
+
+        }, 800);
+
+        runtimeMessageTimer = setTimeout(function () {
+
+            pageLoader.setMessage(
+                'Processing...'
+            );
+
+        }, 1600);
+
+        runtimeMessageTimer = setTimeout(function () {
+
+            pageLoader.setMessage(
+                'Complete!'
+            );
+
+        }, 2400);
+
+        runtimeMessageTimer = setTimeout(function () {
+
+            pageLoader.hide();
+
+        }, 3000);
+
+    });
+
+
+    // PROGRESS DEMO
+    let progressTimer = null;
+
+    $('#progress-demo-button').on('click', function () {
+
+        if (progressLoader.isVisible()) {
+            return;
+        }
+
+        clearInterval(progressTimer);
+
+        let progress = 0;
+
+        $('#external-progress')
+            .css('width', '0%');
+
+        progressLoader
+            .setType('bars')
+            .setMessage('Processing...')
+            .setProgress(0)
+            .show();
+
+        progressTimer = setInterval(function () {
+
+            progress +=
+                Math.floor(Math.random() * 9) + 4;
+
+            if (progress >= 100) {
+                progress = 100;
+            }
+
+            progressLoader
+                .setProgress(progress);
+
+            $('#external-progress')
+                .css('width', progress + '%');
+
+            if (progress >= 100) {
+
+                clearInterval(progressTimer);
+
+                progressLoader
+                    .setMessage('Complete!');
+
+                setTimeout(function () {
+                    progressLoader.hide();
+                }, 700);
+
+            }
+
+        }, 300);
+
+    });
+
+
+    // CUSTOM APPEARANCE
+    $('#custom-loader').on('click', function () {
+
+        pageLoader
+            .setType('ring')
+            .setSize('lg')
+            .setColor('#0088CC')
+            .setBackdrop('rgba(0,0,0,.78)')
+            .setMessage('Custom appearance')
+            .show();
+
+        setTimeout(function () {
+            pageLoader.hide();
+        }, 2200);
+
+    });
+
+
+    // LURRED BACKDROP
+    $('#blur-loader').on('click', function () {
+
+        /**
+         * blur is an initialization option, not a public runtime
+         * setter. Therefore the shared page loader cannot change
+         * blur dynamically through the public API.
+         *
+         * Instead, this demonstration temporarily applies the
+         * effect directly to the overlay element.
+         */
+        pageLoader
+            .setType('orbit')
+            .setSize('md')
+            .setColor('#e36159')
+            .setBackdrop('rgba(255,255,255,.65)')
+            .setMessage('Blurred backdrop');
+
+        pageLoader.$overlay.css({
+            'backdrop-filter': 'blur(8px)',
+            '-webkit-backdrop-filter': 'blur(8px)'
+        });
+
+        pageLoader.show();
+
+        setTimeout(function () {
+
+            pageLoader.hide();
+
+            /**
+             * Restore the overlay to its normal state so later
+             * demonstrations are unaffected.
+             */
+            setTimeout(function () {
+
+                pageLoader.$overlay.css({
+                    'backdrop-filter': '',
+                    '-webkit-backdrop-filter': ''
+                });
+
+                pageLoader
+                    .setColor(null)
+                    .setBackdrop(null)
+                    .setSize('md');
+
+            }, pageLoader.options.fadeDuration);
+
+        }, 2200);
+
+    });
+
+
+    // RUNTIME API
+    $('#api-show').on('click', function () {
+
+        pageLoader
+            .setMessage('Runtime API')
+            .show();
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    $('#api-hide').on('click', function () {
+
+        pageLoader.hide();
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    $('#api-toggle').on('click', function () {
+
+        pageLoader.toggle();
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    $('[data-api-type]').on('click', function () {
+
+        pageLoader.setType(
+            $(this).data('api-type')
+        );
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    $('[data-api-size]').on('click', function () {
+
+        pageLoader.setSize(
+            $(this).data('api-size')
+        );
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    $('#api-message-one').on('click', function () {
+
+        pageLoader
+            .setMessage('Loading...')
+            .show();
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    $('#api-message-two').on('click', function () {
+
+        pageLoader
+            .setMessage('Almost done...')
+            .show();
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    $('#api-message-clear').on('click', function () {
+
+        pageLoader.setMessage('');
+
+        updateApiStatus(pageLoader);
+
+    });
+
+
+    // AUTOMATIC BEHAVIOR
+
+    $('#auto-demo').on('click', function () {
+
+        /**
+         * autoHide is configured during initialization. Since the
+         * demo intentionally reuses one persistent instance, we
+         * reproduce the same behavior through the public API.
+         */
+        pageLoader
+            .setType('pulse')
+            .setMessage('Please wait...')
+            .show();
+
+        setTimeout(function () {
+            pageLoader.hide();
+        }, 2500);
+
+    });
+
+
+    // LIFECYCLE EVENTS
+    $body.on(
+        'show.ts.loadingoverlay',
+        function () {
+            logEvent('show.ts.loadingoverlay');
+            updateApiStatus(pageLoader);
+        }
+    );
+
+
+    $body.on(
+        'shown.ts.loadingoverlay',
+        function () {
+            logEvent('shown.ts.loadingoverlay');
+            updateApiStatus(pageLoader);
+        }
+    );
+
+
+    $body.on(
+        'hide.ts.loadingoverlay',
+        function () {
+            logEvent('hide.ts.loadingoverlay');
+            updateApiStatus(pageLoader);
+        }
+    );
+
+
+    $body.on(
+        'hidden.ts.loadingoverlay',
+        function () {
+            logEvent('hidden.ts.loadingoverlay');
+            updateApiStatus(pageLoader);
+        }
+    );
+
+
+    $('#event-demo').on('click', function () {
+
+        pageLoader
+            .setType('spinner')
+            .setMessage('Event demonstration')
+            .show();
+
+        setTimeout(function () {
+            pageLoader.hide();
+        }, 1400);
+
+    });
+
+
+    $('#clear-events').on('click', function () {
+
+        $('#event-log').empty();
+
+    });
+
+
+    // INITIAL STATE
+    updateApiStatus(pageLoader);
+
+});
+
+</script>
+
+</body>
+</html>

@@ -6,7 +6,7 @@ Themestrap's header account flyout singleton — switches between sign-in, sign-
 
 `themestrap.Account` is a singleton that manages a set of named panels inside a flyout container (default `#headerAccount`). Clicking trigger elements by ID switches visibility using CSS class toggling (`signin`, `signup`, `recover`). Auto-focuses the first input in each panel. Subsequent calls to `initialize()` are no-ops.
 
----
+
 
 ## [Quick **Start**](#quick-start)
 
@@ -35,10 +35,10 @@ themestrap.Account.initialize();
 ### Trigger IDs
 
 | ID | Action |
-|----|--------|
+|-|--|
 | `#headerSignUp` | Switch to sign-up panel |
 | `#headerSignIn` | Switch to sign-in panel |
 | `#headerRecover` | Switch to recover panel |
 | `#headerRecoverCancel` | Return to sign-in from recover |
 
----
+

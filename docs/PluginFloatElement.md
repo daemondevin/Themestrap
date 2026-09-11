@@ -6,7 +6,6 @@ Themestrap's scroll-driven floating animation — creates a bobbing or parallax-
 
 PluginFloatElement listens to the `scroll` event and applies a `translateY` (or `translateX`) CSS transform to the element proportional to its scroll offset. The speed multiplier controls how far the element drifts relative to the scroll distance.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -17,7 +16,6 @@ PluginFloatElement listens to the `scroll` event and applies a `translateY` (or 
 </div>
 ```
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -32,4 +30,3 @@ PluginFloatElement listens to the `scroll` event and applies a `translateY` (or 
 | `transitionDuration` | number | `500` | CSS transition duration in ms. |
 | `minWindowWidth` | number | `991` | Minimum viewport width to activate. |
 
----

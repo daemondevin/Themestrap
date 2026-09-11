@@ -4,7 +4,6 @@ Themestrap's gradient-mask scroll-shadow plugin — automatic edge shadows on an
 
 A subtle UX cue that solves the "is there more content?" problem on scrollable elements. Attach the plugin to any container with `overflow` and it overlays gradient masks on the edges that _only_ appear when there's content beyond the current scroll position. Scroll to the bottom — the bottom shadow vanishes. Scroll back up — it re-appears. Built on CSS `mask-image` for crisp rendering on any background.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -30,7 +29,6 @@ When the container scrolls, the plugin reads `scrollTop`, `scrollHeight`, `clien
 - **horizontal** — shadows on left & right edges. Used for horizontal scrollers, carousels.
 - **both** — shadows on all four edges. Used when content scrolls in two dimensions. Uses two layered `mask-image` gradients with `mask-composite: intersect`.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -64,7 +62,6 @@ themestrap.fn.intObsInit(
 
 > **Tip:** The plugin injects a stylesheet once per page. Look for `<style id="ts-scroll-shadow-styles">` in `<head>` — it contains every mask-image rule for all orientations. You don't need to add CSS yourself; just initialise the plugin.
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -95,7 +92,6 @@ The plugin reads its options into CSS custom properties on the container, so you
 
 > **Warning:** Setting `color` programmatically and `--ts-ss-color` via CSS together — the CSS value wins. The plugin uses CSS custom properties as the source of truth so cascade rules apply normally.
 
----
 
 ## [Instance **API**](#instance-api)
 
@@ -131,7 +127,6 @@ The plugin sets up a `ResizeObserver` on the container _and_ a `MutationObserver
 
 > No need to call `update()` after content injection — the MutationObserver handles it. The only time you need a manual `update()` is after programmatically scrolling (which doesn't fire a scroll event in some edge cases) or changing options.
 
----
 
 ## [Recipe **Cookbook**](#recipes)
 
@@ -185,7 +180,6 @@ The plugin sets up a `ResizeObserver` on the container _and_ a `MutationObserver
 </style>
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

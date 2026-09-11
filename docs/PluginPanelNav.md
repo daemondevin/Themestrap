@@ -4,7 +4,6 @@ Themestrap's vertical navigation panel. A list-group rail with a caret-right act
 
 A vertical navigation panel. Mark up a plain nested list with `data-panelnav-*` attributes and the plugin decorates it into a polished rail: a caret-right indicator slides in on the active item, parent rows become animated disclosure drawers, and the active branch auto-expands on load.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -37,7 +36,6 @@ The `activeIndicator` option controls how the current item is flagged:
 > [!NOTE]
 > The drawer open/close animation reuses the proven Themestrap height technique from PluginCollapsible: animate `0 → scrollHeight` px, then clear the inline height so the CSS `height:auto` open rule takes over. That keeps nested drawers from clipping when their own children expand.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -120,7 +118,6 @@ $('[data-plugin-panel-nav]:not(.manual)').each(function () {
 > [!TIP]
 > The plugin injects a stylesheet once per page. Look for `<style id="ts-panel-nav-styles">` in `<head>` — it carries every rule plus the `--ts-pn-*` custom properties. You theme the panel by overriding those variables, not by editing the injected sheet.
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -167,7 +164,6 @@ Every color and dimension is a `--ts-pn-*` custom property on the root:
 > [!WARNING]
 > `activeOnLoad` matches the current page URL against each leaf's real `href` (origin + normalised path). Parent rows use `href="#"` by design — they are disclosure toggles, not links — so they are never matched as the active leaf. Pre-mark a parent branch with `data-panelnav-active` if you need it highlighted.
 
----
 
 ## [Rail **Collapse**](#collapse)
 
@@ -215,7 +211,6 @@ $('#appNav').on('collapse.ts.panelnav', (e, d) => {
 > [!TIP]
 > All of mini mode is driven by a single `ts-panel-nav--collapsed` class on the root — the JS only toggles that one class, and the injected stylesheet does the rest.
 
----
 
 ## [Instance **API**](#instance-api)
 
@@ -271,7 +266,6 @@ $nav.on('drawer-toggle.ts.panelnav', (e, d) => {
 > [!NOTE]
 > Leaf clicks on real anchors with a valid `href` are _not_ prevented — the browser still navigates. The event fires first so you can hook analytics or a SPA router. For SPA use, call `e.preventDefault()` in your `item.ts.panelnav` handler and route via `d.href` yourself.
 
----
 
 ## [Recipe **Cookbook**](#recipes)
 
@@ -326,7 +320,6 @@ $('#nav-inbox')
   .text(unreadCount);
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

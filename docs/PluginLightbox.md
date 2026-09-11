@@ -2,7 +2,6 @@
 
 A zero-dependency, fully self-contained lightbox for the Themestrap framework. Supports images, HTML5 video, YouTube, Vimeo, and arbitrary iframes — with galleries, captions, keyboard and swipe navigation, and a complete programmatic API. No external libraries required beyond jQuery.
 
----
 
 ## Installation
 
@@ -16,7 +15,6 @@ Place `themestrap.plugin.lightbox.js` after `themestrap.js` on any page that use
 
 The plugin injects its own CSS at first initialization via a guarded `<style>` tag (`id="themestrap-lightbox-css"`). No separate stylesheet is needed.
 
----
 
 ## Auto-Initialization
 
@@ -47,7 +45,6 @@ if ($.isFunction($.fn['themestrapPluginLightbox']) && $('[data-plugin-lightbox]'
 
 Add `.manual` to any trigger to opt out of auto-init and initialize it yourself.
 
----
 
 ## Media Types
 
@@ -69,7 +66,6 @@ Override auto-detection:
    data-type="iframe">Embedded page</a>
 ```
 
----
 
 ## Galleries
 
@@ -89,7 +85,6 @@ Link multiple triggers into a gallery by giving them the same `data-lightbox-gro
 
 When a group has more than one item, previous/next arrow buttons and an item counter (`1 / 3`) appear automatically. All navigation methods become active.
 
----
 
 ## Captions
 
@@ -112,7 +107,6 @@ Captions are resolved from three sources in priority order:
 </a>
 ```
 
----
 
 ## Media URL Resolution
 
@@ -131,7 +125,6 @@ The source URL is read from, in order:
 <span   data-plugin-lightbox data-src="photo.jpg">Open</span>
 ```
 
----
 
 ## Navigation
 
@@ -148,7 +141,6 @@ Inside an open lightbox:
 | Click backdrop | Close (if `closeOnBackdrop: true`) |
 | Click `×` button | Always closes |
 
----
 
 ## Options
 
@@ -175,7 +167,6 @@ Options can be set via `data-plugin-options` (single-quoted attribute, double-qu
 | `onClose` | `function\|null` | `null` | Callback fired when the overlay closes. No arguments. |
 | `onItemLoad` | `function\|null` | `null` | Callback fired when a media item finishes loading. Receives `(item, index)`. |
 
----
 
 ## Programmatic API
 
@@ -218,7 +209,6 @@ const lb = $('#my-trigger').data('__pluginLightbox');
 | `.isOpen()` | `boolean` | Returns `true` if the overlay is currently visible. |
 | `.destroy()` | `this` | Remove event bindings, ARIA attributes, and the instance data key. |
 
----
 
 ## Callback item object
 
@@ -233,7 +223,6 @@ The `item` argument passed to `onOpen` and `onItemLoad` has this shape:
 }
 ```
 
----
 
 ## YouTube / Vimeo
 
@@ -262,7 +251,6 @@ Control the player dimensions with `iframeWidth` and `iframeHeight`:
 </a>
 ```
 
----
 
 ## HTML5 Video
 
@@ -277,13 +265,11 @@ Control the player dimensions with `iframeWidth` and `iframeHeight`:
 
 `<video>` elements are rendered with native browser controls. Set `videoAutoplay: true` to start playback immediately on open.
 
----
 
 ## Keyboard Accessibility
 
 Every trigger receives `role="button"` and `tabindex="0"` automatically (unless `tabindex` is already set). The lightbox dialog receives focus on open and responds to all keyboard navigation listed above. The close button and arrow buttons are proper `<button>` elements with `aria-label` attributes.
 
----
 
 ## Recipes
 
@@ -347,7 +333,6 @@ $('#trigger').themestrapPluginLightbox({
 });
 ```
 
----
 
 ## Diagnostics
 

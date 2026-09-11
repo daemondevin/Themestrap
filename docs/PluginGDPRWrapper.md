@@ -6,7 +6,6 @@ Themestrap's GDPR-conditional content loader — conditionally loads AJAX conten
 
 PluginGDPRWrapper checks `$.cookie('themestrap-gdpr-preferences')` for the presence of the `checkCookie` value. If the consent is given, it fetches `ajaxURL` and injects the response into the wrapper element. If not, the wrapper is shown with its default placeholder content.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -20,7 +19,6 @@ PluginGDPRWrapper checks `$.cookie('themestrap-gdpr-preferences')` for the prese
 </div>
 ```
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -29,4 +27,3 @@ PluginGDPRWrapper checks `$.cookie('themestrap-gdpr-preferences')` for the prese
 | `ajaxURL` | string | — | URL to fetch content from when consent is given. |
 | `checkCookie` | string | — | Cookie category value to check (e.g. `'marketing'`, `'analytics'`). |
 
----

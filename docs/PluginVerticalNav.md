@@ -4,7 +4,6 @@ Themestrap's vertical sidebar navigation plugin — full sidebar with collapsibl
 
 A complete sidebar navigation primitive. Build a hierarchical menu with expandable groups, icon + text dual-mode rendering, automatic active-state tracking based on URL or hash, and a mini-mode collapse that shrinks the sidebar to icon-only and converts labels into tooltips. All Bootstrap 5-compatible, fully keyboard-accessible, and observable via events.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -39,7 +38,6 @@ Sidebar collapses to icon-only. Text labels are visually hidden but remain in th
 > [!NOTE]
 > On `destroy()`, the plugin reverses all four steps in order: tooltips disposed, document listeners removed, event handlers unbound, then DOM state cleared and the instance dropped from `$el.data()`.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -109,7 +107,6 @@ themestrap.fn.intObsInit('.ts-vn', 'themestrapPluginVerticalNav');
 > [!TIP]
 > Each child of an icon-bearing element needs the `ts-vn-icon` and `ts-vn-text` classes split out. Mini mode works by hiding `.ts-vn-text` via CSS — the icons stay because they have `.ts-vn-icon`. Mixing them up will cause icons to disappear when collapsed.
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -140,7 +137,6 @@ Visual tuning happens via CSS variables on the root `.ts-vn` element:
 }
 ```
 
----
 
 ## [Instance **API**](#instance-api)
 
@@ -177,7 +173,6 @@ When `tooltips: true` and the sidebar is in mini mode, each `.ts-vn-link` gets a
 
 All tooltips are disposed when the sidebar expands again — no leftover popper instances.
 
----
 
 ## [Recipe **Cookbook**](#recipes)
 
@@ -258,7 +253,6 @@ myRouter.on('navigate', route => {
 });
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

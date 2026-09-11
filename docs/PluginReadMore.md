@@ -2,7 +2,6 @@
 
 Collapses long content blocks to a configurable height and reveals them with an animated gradient fade and a configurable toggle button. CSS transitions drive all animation; no jQuery `.animate()` is used. Dark mode is handled entirely in CSS via custom properties — no JavaScript listeners required.
 
----
 
 ## Quick Start
 
@@ -43,7 +42,6 @@ Or declaratively via `data-plugin-options`:
 </div>
 ```
 
----
 
 ## Options
 
@@ -96,7 +94,6 @@ Mirrors the same three-level hierarchy as the light overlay. Falls back to the l
 | `onOpen` | function \| null | `null` | Fires when expansion begins; receives `$wrapper` as the first argument |
 | `onClose` | function \| null | `null` | Fires when collapse begins; receives `$wrapper` as the first argument |
 
----
 
 ## Public API
 
@@ -128,7 +125,6 @@ $('.my-content').themestrapPluginReadMore('destroy');
 | `toggle()` | instance | Flips between expanded and collapsed |
 | `destroy()` | instance | Full teardown — removes injected DOM, classes, custom properties, and event listeners |
 
----
 
 ## Events
 
@@ -149,7 +145,6 @@ document.querySelector('.my-content').addEventListener('ts.readmore.close', () =
 });
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -170,7 +165,6 @@ All per-instance values are set as custom properties on the wrapper element. Ove
 }
 ```
 
----
 
 ## CSS Classes
 
@@ -183,7 +177,6 @@ All per-instance values are set as custom properties on the wrapper element. Ove
 | `.ts-readmore-btn-wrap` | Button wrapper | Absolutely positioned at wrapper bottom, z-index 2 |
 | `.ts-readmore-btn-wrap.align-{start\|center\|end}` | Button wrapper | Text alignment variant |
 
----
 
 ## Dark Mode
 
@@ -250,7 +243,6 @@ The same three-level hierarchy applies:
 { darkOverlayColor: '#0f1117' }
 ```
 
----
 
 ## Overlay Gradient Control
 
@@ -269,7 +261,6 @@ The same three-level hierarchy applies:
 
 > Auto-derivation of the transparent start colour only works for 3- and 6-digit hex strings (`#fff`, `#f0f4f8`). For `rgb()`, `hsl()`, or CSS custom properties, always provide `overlayStartColor` explicitly.
 
----
 
 ## Recipes
 
@@ -344,7 +335,6 @@ $('.content').themestrapPluginReadMore({
 });
 ```
 
----
 
 ## Common Pitfalls
 
@@ -359,7 +349,6 @@ The plugin does not create `.readmore-button-wrapper` — it must already be a d
     </div>
 ```
 
----
 
 **Gradient seam visible**
 
@@ -377,7 +366,6 @@ $(el).themestrapPluginReadMore({
 
 The same applies to `darkOverlayColor` and `darkOverlayStartColor`.
 
----
 
 **Non-hex colour produces a transparent-start mismatch**
 
@@ -391,7 +379,6 @@ Auto-derivation of the start colour supports only 3- and 6-digit hex strings. An
 { overlayColor: 'rgb(240, 244, 248)', overlayStartColor: 'rgba(240, 244, 248, 0)' }
 ```
 
----
 
 **Dark mode activates even with an explicit light theme**
 
@@ -406,7 +393,6 @@ toggleBtn.addEventListener('click', () => {
 });
 ```
 
----
 
 **Content taller after lazy images load**
 
@@ -417,7 +403,6 @@ const rm = $('#content').data('__readmore');
 $('#content img').on('load', () => { rm.close(); rm.open(); });
 ```
 
----
 
 **Plugin initialized inside a hidden parent**
 

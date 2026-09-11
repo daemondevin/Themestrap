@@ -4,7 +4,6 @@ Themestrap's zero-build navigation menu plugin with hover or click opening, anim
 
 Wrap top-level items in `[data-navmenu-item]`, add a `[data-navmenu-trigger]` and a `[data-navmenu-content]`, and the plugin handles hover/click opening, animated panel transitions, keyboard arrow navigation, Escape dismissal, mutual exclusion, edge-alignment correction, optional viewport portaling, and complete ARIA wiring.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -38,7 +37,6 @@ On `build()` and on every `resize` (debounced 100 ms) the plugin checks whether 
 
 When `useViewport: true`, all content panels are moved into a `[data-navmenu-viewport]` sibling element at `build()` time. The viewport is positioned absolutely and its `left` and `width` transition smoothly as the active item changes — this is the animated "sliding underline" panel effect from shadcn's desktop NavigationMenu. Panels are restored to their original parents on `destroy()`.
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -95,7 +93,6 @@ if ($.isFunction($.fn['themestrapPluginNavmenu']) && $('[data-plugin-navmenu]').
 > [!NOTE]
 > **No stylesheet to import.** The plugin injects its CSS once per page via a `<style id="ts-navmenu-styles">` tag. You do not need a separate `.css` file.
 
----
 
 ## [Markup **Reference**](#markup)
 
@@ -163,7 +160,6 @@ if ($.isFunction($.fn['themestrapPluginNavmenu']) && $('[data-plugin-navmenu]').
 | `[data-navmenu-content]` | `role` | `"region"` |
 | `[data-navmenu-content]` | `aria-labelledby` | ID of the associated trigger |
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -211,7 +207,6 @@ Options merge: `PluginNavmenu.defaults -> opts argument -> data-plugin-options J
 | `onOpen` | function | `null` | Called after a panel opens. Receives `(itemRecord, instance)`. |
 | `onClose` | function | `null` | Called after a panel finishes closing. Same arguments as `onOpen`. |
 
----
 
 ## [Public **API**](#api)
 
@@ -267,7 +262,6 @@ document.querySelector('[data-plugin-navmenu]')
 | `⏷` | On a trigger (horizontal, panel open) | Move focus to the first focusable element inside the open panel |
 | `⏵` | On a trigger (vertical, panel open) | Move focus to the first focusable element inside the open panel |
 
----
 
 ## [Orientation **Modes**](#orientation)
 
@@ -289,7 +283,6 @@ Items stack top-to-bottom in a flex column. Panels appear to the right of their 
      data-plugin-options='{"orientation":"vertical"}'>
 ```
 
----
 
 ## [Viewport **Portal Mode**](#viewport)
 
@@ -318,7 +311,6 @@ All content panels live inside a single positioned container that moves and resi
 > [!NOTE]
 > The viewport element needs a CSS transition for the sliding effect. The plugin's injected CSS includes: `[data-navmenu-viewport] { transition: left .2s ease, width .2s ease; }`
 
----
 
 ## [Recipe **Cookbook**](#recipes)
 
@@ -395,7 +387,6 @@ setTimeout(() => nav.close(), 3000);   // close after 3 seconds
 $('#help-btn').on('click', () => nav.toggle(2));
 ```
 
----
 
 ## [Common **Pitfalls**](#pitfalls)
 

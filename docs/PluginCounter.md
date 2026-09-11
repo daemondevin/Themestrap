@@ -5,13 +5,11 @@
 **Instance key:** `__pluginCounter`  
 **Data attribute:** `data-plugin-counter`
 
----
 
 ## Overview
 
 Animates a number from a start value to a target value over a configurable duration. No external dependencies — the counter runs entirely on `requestAnimationFrame` with an ease-in-out-quad easing curve. Affix strings (prepend/append) are applied after the animation completes.
 
----
 
 ## Quick Start
 
@@ -36,7 +34,6 @@ $('#my-counter').themestrapPluginCounter({
 });
 ```
 
----
 
 ## Data Attributes
 
@@ -52,7 +49,6 @@ $('#my-counter').themestrapPluginCounter({
 
 `data-to`, `data-from`, and `data-speed` take precedence over their `data-plugin-options` equivalents when both are present.
 
----
 
 ## Options
 
@@ -71,7 +67,6 @@ $('#my-counter').themestrapPluginCounter({
 | `onUpdate` | function/null | `null` | Called each refresh tick with the current `value` |
 | `onComplete` | function/null | `null` | Called once when the animation ends with the final `value` |
 
----
 
 ## Methods
 
@@ -89,7 +84,6 @@ const inst = $('#my-counter').data('__pluginCounter');
 inst.replay();
 ```
 
----
 
 ## Examples
 
@@ -180,7 +174,6 @@ inst.setValue(0);     // reset display instantly
 inst.replay();        // animate from 0 to original target
 ```
 
----
 
 ## init.js Wiring
 
@@ -190,7 +183,6 @@ if ($.isFunction($.fn['themestrapPluginCounter']) && ($('[data-plugin-counter]')
     themestrap.fn.dynIntObsInit('[data-plugin-counter]:not(.manual), .counters [data-to]', 'themestrapPluginCounter', themestrap.PluginCounter.defaults);
 }
 ```
----
 
 ## Easing
 
@@ -203,14 +195,12 @@ t ≥ 0.5  ->  -1 + (4 - 2t)t
 
 There is no option to change the easing curve. Pass a custom `formatter` or drive the animation externally via `setValue()` on a `requestAnimationFrame` loop if a different curve is needed.
 
----
 
 ## Accessibility
 
 - The counter element updates its text content on every tick. Screen readers in live-region mode will announce each change, which is noisy. Wrap the counter in a `role="status"` `aria-live="polite"` container and put only the static label inside `aria-live` — not the animating number — or add `aria-hidden="true"` to the counter element and provide a visually-hidden final value via `onComplete`.
 - Counters respect `prefers-reduced-motion` if you add a guard in the `speed` option: pass `speed: 0` (instant) when the media query matches, then call `setValue(to)` directly.
 
----
 
 ## Diagnostics
 

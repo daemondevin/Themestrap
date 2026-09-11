@@ -2,7 +2,6 @@
 
 An accessible toolbar that provides a `role="toolbar"` container with roving-tabindex keyboard navigation, `type="single"` and `type="multiple"` toggle groups, separator elements, link items, RTL support, size modifiers, and a dark theme — all driven by `data-*` attributes with zero external dependencies beyond jQuery.
 
----
 
 ## Quick Start
 
@@ -32,7 +31,6 @@ $('[data-plugin-toolbar]').themestrapPluginToolbar();
 </script>
 ```
 
----
 
 ## Markup Reference
 
@@ -132,7 +130,6 @@ Add the class `ts-tb-icon` to collapse padding and produce a square button:
 
 Always supply a `title` or `aria-label` on icon-only items for accessibility.
 
----
 
 ## Options
 
@@ -163,7 +160,6 @@ $('[data-plugin-toolbar]').themestrapPluginToolbar({
 | `onButton` | Function | `null` | `fn(value, buttonEl)` — called when a regular button is clicked. |
 | `onLink` | Function | `null` | `fn(value, linkEl)` — called when a link item is clicked. |
 
----
 
 ## Keyboard Navigation
 
@@ -184,7 +180,6 @@ The plugin implements the [WAI-ARIA Toolbar Pattern](https://www.w3.org/WAI/ARIA
 
 Disabled items are excluded from the navigation cycle. In RTL mode (`dir: "rtl"`), ← and → are swapped.
 
----
 
 ## Public API
 
@@ -207,7 +202,6 @@ const tb = $('#my-toolbar').data('__pluginToolbar');
 | `focus()` | `this` | Move browser focus to the current roving-tabindex item in the toolbar. |
 | `destroy()` | `this` | Full teardown. Restores original inner HTML, removes all event handlers, clears instance data, and removes the injected stylesheet when no other toolbar instances remain on the page. |
 
----
 
 ## Events
 
@@ -243,7 +237,6 @@ document.getElementById('my-toolbar').addEventListener('toolbar:toggle', (e) => 
 | `toolbar:button` | `value, $btn, instance` | `value, button, instance` | A `data-toolbar-button` is clicked. |
 | `toolbar:link` | `value, $link, instance` | `value, link, instance` | A `data-toolbar-link` is clicked. |
 
----
 
 ## Theming with CSS Variables
 
@@ -292,13 +285,11 @@ All visual properties are exposed as CSS custom properties on the root element. 
 
 Dark mode overrides all color tokens automatically when `html.dark` is present. Force the dark palette with `.ts-toolbar--dark` on the root element or `dark: true` in options. Opt a specific toolbar out of auto-dark with `.ts-toolbar--light`.
 
----
 
 ## Stylesheet Lifecycle
 
 The plugin injects its `<style id="ts-toolbar-styles">` tag lazily on first `build()` call. It tracks active instances via `PluginToolbar.instances`. When `destroy()` brings the count to zero the stylesheet is removed from the `<head>` automatically — important for single-page applications where the toolbar may be mounted and unmounted repeatedly.
 
----
 
 ## Init.js Wiring
 
@@ -320,7 +311,6 @@ Add `.manual` to any toolbar that should be initialized by hand:
 $('#my-tb').themestrapPluginToolbar({ ariaLabel: 'Custom toolbar', dark: true });
 ```
 
----
 
 ## MODX Snippet
 
@@ -423,7 +413,6 @@ Call in a template or chunk:
 ]]
 ```
 
----
 
 ## Recipes
 
@@ -488,7 +477,6 @@ $('#my-toolbar').on('toolbar:toggle', function(e, value, pressed, $item, $group)
 });
 ```
 
----
 
 ## Common Pitfalls
 

@@ -4,7 +4,7 @@
     const instanceName = '__randomImages';
 
     let styleRefCount = 0;
-    const STYLE_ID = 'themestrap-random-images-styles';
+    const STYLE_ID = 'ts-random-images-styles';
 
     class PluginRandomImages {
 
@@ -45,7 +45,7 @@
                 .setData()
                 .setOptions(opts);
 
-            /*
+            /**
              * A single image requires an image list.
              */
             if (
@@ -65,7 +65,7 @@
         }
 
 
-        /*
+        /**
          * Core
          */
 
@@ -77,7 +77,7 @@
         setData() {
             this.$el.data(instanceName, this);
 
-            /*
+            /**
              * Compatibility/debugging reference.
              */
             this.$el[0].__themestrapRandomImages = this;
@@ -101,7 +101,7 @@
 
         build() {
 
-            /*
+            /**
              * Don't initialize below the configured width.
              */
             if (
@@ -117,7 +117,7 @@
                 this.buildWrapper();
             }
 
-            /*
+            /**
              * Optional global timeout.
              */
             if (
@@ -138,7 +138,7 @@
         }
 
 
-        /*
+        /**
          * Single image mode
          */
 
@@ -154,7 +154,7 @@
                 this.options.imagesListURL = [];
             }
 
-            /*
+            /**
              * Store the original image.
              */
             const currentSrc =
@@ -164,7 +164,7 @@
                 this.options.imagesListURL.push(currentSrc);
             }
 
-            /*
+            /**
              * Store the original lightbox target.
              */
             if (
@@ -185,7 +185,7 @@
             this.currentIndex =
                 this.lastIndex;
 
-            /*
+            /**
              * Preserve the old sequential-mode behavior.
              */
             if (!this.options.random) {
@@ -227,14 +227,14 @@
 
             let index;
 
-            /*
+            /**
              * Random selection.
              */
             if (this.options.random) {
                 index = this.getRandomIndex(images.length);
             }
 
-            /*
+            /**
              * Sequential selection.
              */
             else {
@@ -246,7 +246,7 @@
                 }
             }
 
-            /*
+            /**
              * Only one possible image.
              */
             if (images.length === 1) { index = 0; }
@@ -282,7 +282,7 @@
                 el.classList.remove(this.options.animateOut);
                 el.classList.add(this.options.animateIn);
 
-                /*
+                /**
                  * Keep associated lightbox URL in sync.
                  */
                 if (
@@ -316,7 +316,7 @@
         }
 
 
-        /*
+        /**
          * Wrapper mode
          *
          * IMPORTANT:
@@ -336,24 +336,24 @@
 
             if (!this.images.length) { return; }
 
-            /*
+            /**
              * Inject structural CSS lazily.
              */
             this.injectStyles();
 
-            /*
+            /**
              * Prepare the wrapper.
              */
             this.$el[0].classList.add('ts-random-images-wrapper');
 
-            /*
+            /**
              * Prepare each image.
              */
             this.images.forEach((image, index) => {
 
                 image.classList.add('animated', 'ts-random-image');
 
-                /*
+                /**
                  * The first image is initially visible.
                  * All others begin hidden.
                  */
@@ -373,7 +373,7 @@
             this.lastIndex = 0;
             this.perImageIndex = 0;
 
-            /*
+            /**
              * Optional custom initial image.
              */
             if (
@@ -387,7 +387,7 @@
                 }
             }
 
-            /*
+            /**
              * Wrapper mode needs a delay long enough to allow
              * the longest configured image delay to complete.
              */
@@ -416,14 +416,14 @@
 
             let index;
 
-            /*
+            /**
              * Random wrapper rotation.
              */
             if (this.options.random) {
                 index = this.getRandomIndex(this.images.length);
             }
 
-            /*
+            /**
              * Sequential wrapper rotation.
              */
             else {
@@ -453,7 +453,7 @@
             const current = this.images[this.currentIndex];
             const next = this.images[index];
 
-            /*
+            /**
              * Nothing to do if we're already displaying this image.
              */
             if (current === next && this.currentIndex === index) {
@@ -466,7 +466,7 @@
 
             const nextIn = this.getAnimateIn(next);
 
-            /*
+            /**
              * Make the next image visible underneath/over the current image.
              */
             next.classList.remove('ts-random-image-hidden');
@@ -481,7 +481,7 @@
                     current.classList.add(currentOut);
                 }
 
-                /*
+                /**
                  * After the transition, leave the new image active
                  * and completely hide the old image.
                  */
@@ -504,7 +504,7 @@
 
             } else {
 
-                /*
+                /**
                  * Instant initialization.
                  */
                 this.images.forEach((image, imageIndex) => {
@@ -546,7 +546,7 @@
         }
 
 
-        /*
+        /**
          * Wrapper delay helpers
          */
 
@@ -567,7 +567,7 @@
         }
 
 
-        /*
+        /**
          * Sequential coordination
          */
 
@@ -585,7 +585,7 @@
         }
 
 
-        /*
+        /**
          * CSS injection
          *
          * Inject structural CSS lazily from build() rather than
@@ -661,7 +661,7 @@
         }
 
 
-        /*
+        /**
          * Lifecycle
          */
 
@@ -679,7 +679,7 @@
                     callback.call(this);
                 }
 
-                /*
+                /**
                  * Stop conditions.
                  */
                 if (this.shouldStop()) {
@@ -687,7 +687,7 @@
                     return;
                 }
 
-                /*
+                /**
                  * Sequential image coordination.
                  */
                 if (!this.options.random) {
@@ -750,7 +750,7 @@
 
         shouldStop() {
 
-            /*
+            /**
              * Stop at image index.
              */
             if (
@@ -762,7 +762,7 @@
                 return true;
             }
 
-            /*
+            /**
              * Stop after X rotations.
              */
             if (
@@ -778,7 +778,7 @@
         }
 
 
-        /*
+        /**
          * Utilities
          */
 
@@ -795,7 +795,7 @@
         }
 
 
-        /*
+        /**
          * Destroy
          */
 
@@ -810,7 +810,7 @@
 
             this.clearTransitionTimer();
 
-            /*
+            /**
              * Remove plugin-added classes from wrapper images
              * and decrement the stylesheet ref-count.
              */
@@ -843,7 +843,7 @@
     }
 
 
-    /*
+    /**
      * Defaults
      */
 
@@ -859,30 +859,30 @@
 
         delay: null,
 
-        /* Time between changing the animation state. */
+        /** Time between changing the animation state. */
         animationDelay: 1000,
 
         animateIn: 'fadeIn',
 
         animateOut: 'fadeOut',
 
-        /* Optional starting image for wrapper mode. */
+        /** Optional starting image for wrapper mode. */
         startIndex: false,
 
-        /* Stop when this image index is reached. */
+        /** Stop when this image index is reached. */
         stopAtImageIndex: false,
 
-        /* Stop after this many milliseconds. */
+        /** Stop after this many milliseconds. */
         stopAfterFewSeconds: false,
 
-        /* Stop after this many rotations. */
+        /** Stop after this many rotations. */
         stopAfterXTimes: false,
 
         accY: 0
     };
 
 
-    /*
+    /**
      * Expose on themestrap namespace
      */
 
@@ -891,12 +891,12 @@
     });
 
 
-    /*
+    /**
      * jQuery bridge
      */
 
-    $.fn.themestrapPluginRandomImages = function(opts) {
-        return this.map(function() {
+    $.fn.themestrapPluginRandomImages = function (opts) {
+        return this.map(function () {
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -908,18 +908,18 @@
     };
 
 
-    /*
+    /**
      * Static helpers
      */
 
-    PluginRandomImages.init = function(element, options = {}) {
+    PluginRandomImages.init = function (element, options = {}) {
         const $el = $(element);
         if (!$el.length) { return false; }
         return new PluginRandomImages($el, options);
     };
 
 
-    PluginRandomImages.initAll = function(selector, options = {}) {
+    PluginRandomImages.initAll = function (selector, options = {}) {
         return $(selector)
             .toArray()
             .map(el => new PluginRandomImages($(el), options))
@@ -927,13 +927,13 @@
     };
 
 
-    PluginRandomImages.getInstance = function(element) {
+    PluginRandomImages.getInstance = function (element) {
         const $el = $(element);
         return $el.length ? ($el.data(instanceName) || null) : null;
     };
 
 
-    /*
+    /**
      * Sequential-mode coordination
      */
 

@@ -2,7 +2,6 @@
 
 > The most configurable plugin in the suite. At its simplest it gives a section a slow-scrolling background image; with more options it can scrub any CSS property as you scroll, react to the mouse, scale the image, and switch behavior below a width breakpoint.
 
----
 
 ## How It Works
 
@@ -43,7 +42,6 @@ On first init the plugin lazily injects a `<style id="themestrap-parallax-styles
 
 The guard prevents duplicate injection across multiple instances.
 
----
 
 ## Quick Start
 
@@ -80,7 +78,6 @@ $('#mySection').themestrapPluginParallax({
 });
 ```
 
----
 
 ## Configuration Options
 
@@ -112,7 +109,6 @@ Per-element overrides go in a single-quoted `data-plugin-options` attribute with
          data-plugin-options='{"speed":2,"parallaxDirection":"bottom"}'>
 ```
 
----
 
 ## Instance API
 
@@ -139,7 +135,6 @@ The jQuery bridge is idempotent: calling `themestrapPluginParallax()` a second t
 |---|---|
 | `scroll.parallax` | The plugin recalculates the layer position on each window scroll tick (background + scrollable modes). |
 
----
 
 ## Modes In Depth
 
@@ -179,7 +174,6 @@ transform: translateX({x}px) translateY({y}px)
 
 Negative `data-value` inverts the axis, creating a sense of depth when mixing positive and negative layers.
 
----
 
 ## Recipe Cookbook
 
@@ -289,7 +283,6 @@ inst.destroy();
 $('#hero').themestrapPluginParallax({ speed: 1, parallaxDirection: 'bottom' });
 ```
 
----
 
 ## init.js Wiring
 
@@ -304,7 +297,6 @@ if ($.isFunction($.fn['themestrapPluginParallax']) && $('[data-plugin-parallax]'
 
 `intObsInit` is the correct strategy here because the plugin reads only `data-plugin-options` for its configuration — no `forceInit` / `accY` merging is needed, so `dynIntObsInit` is not required.
 
----
 
 ## Common Pitfalls
 

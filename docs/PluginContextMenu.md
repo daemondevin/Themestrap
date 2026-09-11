@@ -7,7 +7,6 @@ A right-click context menu with nested sub-menus, separators, group labels, keyb
 **Instance key:** `__pluginContextMenu`  
 **Data attribute:** `data-plugin-context-menu`  
 
----
 
 ## Overview
 
@@ -20,7 +19,6 @@ A right-click context menu with nested sub-menus, separators, group labels, keyb
 - Sub-menus open on hover or `⏵`; close on `⏴` or mouse-out (with 120 ms grace delay for mouse travel).
 - CSS injected lazily once per page via `STYLE_ID` guard.
 
----
 
 ## Quick Start
 
@@ -45,7 +43,6 @@ $('#my-area').themestrapPluginContextMenu({
 </script>
 ```
 
----
 
 ## HTML / Data-attribute Usage
 
@@ -69,7 +66,6 @@ When `themestrap.init.js` is loaded, elements with `data-plugin-context-menu` ar
 > [!NOTE]  
 > `action` callbacks cannot be serialised in HTML data attributes. Use the JavaScript API when you need click handlers. For data-attribute-only usage, listen for the `ts-ctx-open` jQuery event on the element and wire up your logic there.
 
----
 
 ## Options
 
@@ -84,7 +80,6 @@ When `themestrap.init.js` is loaded, elements with `data-plugin-context-menu` ar
 | `onOpen` | Function \| null | `null` | Callback fired when menu opens. Receives `(instance)`. `this` is the trigger element. |
 | `onClose` | Function \| null | `null` | Callback fired when menu closes for any reason. Receives `(instance)`. |
 
----
 
 ## Item Schema
 
@@ -128,7 +123,6 @@ A chevron arrow (`›`) is added automatically to any item that has a nested `it
 { type: 'label', text: 'File Actions' }
 ```
 
----
 
 ## Sub-menus
 
@@ -153,7 +147,6 @@ $('#el').themestrapPluginContextMenu({
 
 Sub-menus flip to the left side if they would overflow the right edge of the viewport.
 
----
 
 ## Dark Mode
 
@@ -181,7 +174,6 @@ $(document).on('ts-dark-mode-changed', function(e, isDark) {
 });
 ```
 
----
 
 ## Dynamic Items
 
@@ -198,7 +190,6 @@ inst.setItems(editItems);
 
 Use this for context-sensitive menus that change based on selection state, user permissions, or application mode.
 
----
 
 ## Keyboard Navigation
 
@@ -213,7 +204,6 @@ Use this for context-sensitive menus that change based on selection state, user 
 
 Focus is automatically moved to the first enabled item when the menu opens.
 
----
 
 ## jQuery Events
 
@@ -233,7 +223,6 @@ $('#el')
 
 You can also pass `onOpen` and `onClose` as option callbacks — see [Options](#options).
 
----
 
 ## Public API
 
@@ -255,7 +244,6 @@ inst.setItems([{ label: 'New', action: () => {} }]);  // swap items
 inst.destroy();                            // full teardown
 ```
 
----
 
 ## Init.js Wiring
 
@@ -272,7 +260,6 @@ if ($.isFunction($.fn['themestrapPluginContextMenu'])
 }
 ```
 
----
 
 ## Accessibility
 

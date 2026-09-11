@@ -4,7 +4,6 @@ Themestrap's image comparison slider — a lightweight, self-contained before/af
 
 Unlike the original BeforeAfter guide, this implementation **does not depend on TwentyTwenty or any other comparison-slider library**. The plugin builds and controls the comparison interface itself.
 
----
 
 ## [How It **Works**](#how-it-works)
 
@@ -24,7 +23,6 @@ The default position is `0.5`, placing the divider in the center.
 
 The plugin automatically determines the container's aspect ratio from the first image's natural dimensions and uses that ratio to maintain the comparison area's proportions. 
 
----
 
 ## [Quick **Start**](#quick-start)
 
@@ -52,7 +50,6 @@ Then provide two images:
 
 The plugin expects at least two images. The first image is treated as Before and the second as After. If fewer than two images are present, the plugin does not build the comparison interface. 
 
----
 
 ## [Configuration **Options**](#options)
 
@@ -72,7 +69,6 @@ These are the actual defaults defined by `PluginBeforeAfter`.
 
 > **Note:** `forceInit` currently exists in the configuration defaults but is not referenced by the plugin's initialization logic. The current implementation initializes the comparison when the first image is already loaded, or after that image fires its `load` event. 
 
----
 
 ## [Slider **Position**](#slider-position)
 
@@ -108,7 +104,6 @@ places it at the end.
 
 The plugin converts this value into a percentage and applies it to the divider, handle, and After-layer clipping. 
 
----
 
 ## [Horizontal **Orientation**](#horizontal-orientation)
 
@@ -133,7 +128,6 @@ The comparison handle moves from left to right.
 
 The After layer is clipped from the left, exposing the Before image on the left side and the After image on the right. 
 
----
 
 ## [Vertical **Orientation**](#vertical-orientation)
 
@@ -160,7 +154,6 @@ The divider becomes horizontal and the handle moves vertically.
 
 In vertical mode, the After layer is clipped from the top, leaving Before above the divider and After below it. 
 
----
 
 ## [Image **Requirements**](#image-requirements)
 
@@ -199,7 +192,6 @@ padding-bottom = naturalHeight / naturalWidth × 100%
 
 This allows the comparison area to maintain the source image's proportions without requiring a fixed height. 
 
----
 
 ## [Labels and **Overlay**](#labels-and-overlay)
 
@@ -238,7 +230,6 @@ $('#comparison').themestrapPluginBeforeAfter({
 
 No label elements are created when `no_overlay` is enabled. 
 
----
 
 ## [Dragging](#dragging)
 
@@ -269,7 +260,6 @@ The plugin listens for:
 
 The document-level move/end handlers are namespaced per instance. 
 
----
 
 ## [Dragging the **Entire Slider Area**](#dragging-the-entire-slider-area)
 
@@ -289,7 +279,6 @@ $('#comparison').themestrapPluginBeforeAfter({
 
 With this setting, clicking/touching the comparison area begins dragging from that location. 
 
----
 
 ## [Move on **Hover**](#move-on-hover)
 
@@ -313,7 +302,6 @@ Dragging still takes precedence; hover movement is ignored while an active drag 
 
 This option is particularly useful for desktop image comparisons where continuous dragging is not desired.
 
----
 
 ## [Click to **Move**](#click-to-move)
 
@@ -343,7 +331,6 @@ $('#comparison').themestrapPluginBeforeAfter({
 });
 ```
 
----
 
 ## [Keyboard **Controls**](#keyboard-controls)
 
@@ -384,7 +371,6 @@ Holding `Shift` changes the step to **10%**.
 
 For horizontal comparisons, left/right arrows are the natural controls. For vertical comparisons, up/down arrows provide the corresponding movement.
 
----
 
 ## [Touch **Support**](#touch-support)
 
@@ -400,7 +386,6 @@ and the plugin handles `touchstart`, `touchmove`, and `touchend` events.
 
 This allows the same comparison interface to work with touchscreen devices as well as conventional mouse input.
 
----
 
 ## [Themestrap **Data Attributes**](#themestrap-data-attributes)
 
@@ -435,7 +420,6 @@ JavaScript options
 
 JavaScript options therefore override equivalent values supplied through the data attribute.
 
----
 
 ## [JavaScript **Initialization**](#javascript-initialization)
 
@@ -469,7 +453,6 @@ $.fn.themestrapPluginBeforeAfter
 
 
 
----
 
 ## [Programmatic **Access**](#programmatic-access)
 
@@ -502,7 +485,6 @@ means the slider is positioned at 50%.
 
 The internal position setter is `_setPosition()`, but it is an internal implementation method rather than a documented public API method. 
 
----
 
 ## [Destroying an **Instance**](#destroying-an-instance)
 
@@ -525,7 +507,6 @@ to remove the active comparison.
 
 The original markup is preserved when the plugin is initialized specifically so it can be restored during destruction.  
 
----
 
 ## [Complete **Example**](#complete-example)
 
@@ -563,7 +544,6 @@ $('#comparison').themestrapPluginBeforeAfter({
 });
 ```
 
----
 
 ## [Configuration **Examples**](#configuration-examples)
 
@@ -646,7 +626,6 @@ $('#comparison').themestrapPluginBeforeAfter({
 });
 ```
 
----
 
 ## [Options **Summary**](#options-summary)
 
@@ -664,7 +643,6 @@ $('#comparison').themestrapPluginBeforeAfter({
 
 All of these values come from the current `PluginBeforeAfter.defaults` definition. 
 
----
 
 ## [Implementation **Notes**](#implementation-notes)
 
@@ -724,7 +702,6 @@ greater than 1 → 1
 
 This applies both to the initial position and subsequent movements. 
 
----
 
 ## [API **Summary**](#api-summary)
 
@@ -738,7 +715,6 @@ This applies both to the initial position and subsequent movements.
 
 The current source exposes `destroy()` as the explicit lifecycle method. `_setPosition()` and `_pctFromEvent()` are internal implementation methods and should not be treated as public API.  
 
----
 
 ## [Option **Reference**](#option-reference)
 

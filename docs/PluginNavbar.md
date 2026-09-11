@@ -5,7 +5,6 @@
 **Instance key:** `__navbar`  
 **Init strategy:** `intObsInit` via `themestrap.init.js`
 
----
 
 ## Over**view**
 
@@ -13,7 +12,6 @@ PluginNavbar is a secondary navigation bar that sits below a primary nav. It pro
 
 All styles are self-contained and injected once into a `<style id="ts-navbar-styles">` tag on script load.
 
----
 
 ## Mark**up**
 
@@ -103,7 +101,6 @@ All styles are self-contained and injected once into a `<style id="ts-navbar-sty
 </div>
 ```
 
----
 
 ## Class **Reference**
 
@@ -132,7 +129,6 @@ All styles are self-contained and injected once into a `<style id="ts-navbar-sty
 | `.ts-navbar__btn--primary` | Filled CTA button |
 | `.ts-navbar__btn--ghost` | Outlined CTA button |
 
----
 
 ## Configuration **Options**
 
@@ -147,7 +143,6 @@ All styles are self-contained and injected once into a `<style id="ts-navbar-sty
 | `keyboardNav` | `boolean` | `true` | Arrow, Home, End, Enter, and Space key navigation across top-level items and dropdowns. |
 | `oneOpen` | `boolean` | `true` | Enforce one open dropdown at a time. |
 
----
 
 ## Programmatic **API**
 
@@ -184,7 +179,6 @@ Returns a jQuery object of `.ts-navbar__link--current` elements.
 
 Removes all event listeners, the sticky sentinel, the `IntersectionObserver`, and all plugin classes.
 
----
 
 ## Events
 
@@ -195,7 +189,6 @@ Removes all event listeners, the sticky sentinel, the `IntersectionObserver`, an
 | `menuopen.tsnavbar` | Navbar root | Mobile menu opens |
 | `menuclose.tsnavbar` | Navbar root | Mobile menu closes |
 
----
 
 ## State **Classes**
 

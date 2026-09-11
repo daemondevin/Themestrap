@@ -6,7 +6,7 @@ Themestrap's text animation plugin — animates element content letter-by-letter
 
 PluginAnimatedContent splits the element's text content into individual characters (`letter` mode) or words (`word` mode), wraps each in a `<span>`, then staggers the animation class application with a timer. In `letter` mode with `animationName: 'typeWriter'`, letters appear sequentially with a blinking caret. In `word` mode, each word span is handed to PluginAnimate for Animate.css-style entrance effects.
 
----
+
 
 ## [Quick **Start**](#quick-start)
 
@@ -24,12 +24,12 @@ PluginAnimatedContent splits the element's text content into individual characte
 </h2>
 ```
 
----
+
 
 ## [Configuration **Options**](#options)
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
+|--|||-|
 | `contentType` | string | `'letter'` | `'letter'` or `'word'`. |
 | `animationName` | string | `'fadeIn'` | CSS animation class. Use `'typeWriter'` for the letter-mode typewriter effect. |
 | `animationSpeed` | number | `50` | Delay between each letter/word in ms. |
@@ -52,4 +52,4 @@ $('[data-plugin-animated-content]')
   .trigger('animated.letters.destroy');
 ```
 
----
+

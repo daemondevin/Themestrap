@@ -2,7 +2,6 @@
 
 A self-contained multi-step wizard / form stepper for Themestrap. It provides accessible, animated step-by-step navigation with a validation gate, progress tracking, localStorage persistence, and a clean programmatic API — all driven from declarative markup with no extra dependencies beyond jQuery and the Themestrap core.
 
----
 
 ## How It Works
 
@@ -33,7 +32,6 @@ next() called
                                └─ wizard:change
 ```
 
----
 
 ## Quick Start
 
@@ -115,7 +113,6 @@ if ($.isFunction($.fn['themestrapPluginWizard']) && $('[data-plugin-wizard]').le
 }
 ```
 
----
 
 ## Markup Reference
 
@@ -166,7 +163,6 @@ Any element anywhere in the document can jump to a step:
 
 `data-wizard-id` is optional when only one wizard is on the page.
 
----
 
 ## Configuration Options
 
@@ -199,7 +195,6 @@ $('#my-wizard').themestrapPluginWizard({
 });
 ```
 
----
 
 ## CSS Custom Properties
 
@@ -226,7 +221,6 @@ The wizard's appearance is controlled entirely through CSS custom properties on 
 </div>
 ```
 
----
 
 ## Public API
 
@@ -249,7 +243,6 @@ const wiz = $('#signup-wizard').data('__pluginWizard');
 | `wiz.reset()` | `this` | Return to step 1 and clear all completion flags. Clears field values and validation state. |
 | `wiz.destroy()` | `this` | Detach all listeners and remove instance data. |
 
----
 
 ## Events
 
@@ -283,7 +276,6 @@ $('#signup-wizard')
     });
 ```
 
----
 
 ## Accessibility
 
@@ -294,7 +286,6 @@ $('#signup-wizard')
 - **Keyboard shortcuts**: `Alt+->` / `Alt+<-` advance and retreat steps from anywhere inside the wizard.
 - **Reduced motion**: slide animations are disabled entirely when `prefers-reduced-motion: reduce` is active.
 
----
 
 ## Recipes
 
@@ -311,7 +302,6 @@ $('#signup-wizard')
 
 When `submitForm: true` (the default) and the last step passes validation, the plugin calls `form.submit()` on the nearest ancestor `<form>`.
 
----
 
 ### Disable form submission, handle via `wizard:complete`
 
@@ -329,7 +319,6 @@ $('#signup-wizard').on('wizard:complete', async function (e, inst) {
 });
 ```
 
----
 
 ### Block a specific transition with `wizard:beforechange`
 
@@ -343,7 +332,6 @@ $('#onboarding').on('wizard:beforechange', function (e, inst, from, to) {
 });
 ```
 
----
 
 ### Resume a multi-page onboarding flow
 
@@ -357,7 +345,6 @@ $('#onboarding').on('wizard:beforechange', function (e, inst, from, to) {
 
 On each page load the wizard opens at the last-visited step. All earlier steps are automatically marked complete so the indicator strip reflects progress correctly.
 
----
 
 ### Per-instance colour accent
 
@@ -372,7 +359,6 @@ On each page load the wizard opens at the last-visited step. All earlier steps a
 <div data-plugin-wizard id="wiz-upgrade" style="--wizard-accent:#7c3aed">…</div>
 ```
 
----
 
 ### Programmatic jump from an external button
 
@@ -384,7 +370,6 @@ On each page load the wizard opens at the last-visited step. All earlier steps a
 
 The plugin validates every skipped step before jumping. If step 1 or 2 fails validation, the jump is blocked and `wizard:invalid` fires.
 
----
 
 ## Diagnostic Checklist
 

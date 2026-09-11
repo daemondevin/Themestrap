@@ -46,7 +46,7 @@ On the first `build()` the plugin appends a single `<style id="ts-accordion-styl
 Resolution is forgiving — the plugin falls back through several selectors so existing markup usually works untouched.
 
 | Hook                       | Resolved from                                                                       | Notes                                                    |
-|----------------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------|
+|-|-|-|
 | `[data-accordion-item]`    | Direct children of the wrapper                                                      | One per row. Extra classes are preserved.                |
 | `[data-accordion-trigger]` | Falls back to the first `<button>`, `<a>`, or `[data-accordion-header]` in the item | Non-button triggers get `role="button"` + `tabindex`.    |
 | `[data-accordion-panel]`   | Falls back to `[data-accordion-content]`, else the trigger's next sibling           | Wrapped in a measuring shell for the height transition.  |
@@ -61,7 +61,7 @@ Triggers receive `aria-expanded` and `aria-controls`; panels get `role="region"`
 Set options via the `data-plugin-options` JSON attribute on the wrapper, or as the argument to the jQuery method. The `tsAccordion` snippet emits only the non-default values it was given.
 
 | Property      | Type                  | Default                         | Description                                                                             |
-|---------------|-----------------------|---------------------------------|-----------------------------------------------------------------------------------------|
+||--||--|
 | `exclusive`   | bool                  | `true`                          | Only one panel open at a time. Set `false` for an independent multi-toggle.             |
 | `collapsible` | bool                  | `true`                          | In exclusive mode, allow the open panel to be closed so all rows can be shut.           |
 | `openIndex`   | number\|array\|string | `0`                             | Which item(s) start open: a 0-based index, an array like `[0,2]`, `'all'`, or `'none'`. |
@@ -76,7 +76,7 @@ Set options via the `data-plugin-options` JSON attribute on the wrapper, or as t
 Every initialized accordion exposes its instance under `$el.data('__accordion')`.
 
 | Method              | Returns   | Description                                                        |
-|---------------------|-----------|--------------------------------------------------------------------|
+||--|--|
 | `open(i)`           | this      | Open item `i`. In exclusive mode, closes whichever panel was open. |
 | `close(i)`          | this      | Close item `i`.                                                    |
 | `toggle(i)`         | this      | Invert the state of item `i`.                                      |
@@ -102,7 +102,7 @@ acc.refresh();            // after injecting new rows
 All events are namespaced `.ts.accordion` and bubble from the wrapper. The `open`/`close` pair fire as the animation starts; `opened`/`closed` fire after it finishes.
 
 | Event                 | Arguments                   | Fires                                                                  |
-|-----------------------|-----------------------------|------------------------------------------------------------------------|
+|--|--||
 | `ready.ts.accordion`  | `(e, instance)`             | Once, after init.                                                      |
 | `open.ts.accordion`   | `(e, index, $item)`         | An open animation begins.                                              |
 | `opened.ts.accordion` | `(e, index, $item)`         | The open animation completes.                                          |
@@ -129,7 +129,7 @@ $('#faq')
 Common configurations. The first three are pure markup; the last drives the plugin from your own state.
 
 #### Exclusive FAQ (default)
----
+
 ```ini
 [[tsAccordion?
   &items=`[
@@ -142,7 +142,6 @@ Common configurations. The first three are pure markup; the last drives the plug
 
 #### Independent multi-open, all closed
 
-* * *
 
 ```ini
 [[tsAccordion?
@@ -154,7 +153,7 @@ Common configurations. The first three are pure markup; the last drives the plug
 
 #### Flush, edge-to-edge
 
-* * *
+
 
 ```imi
 [[tsAccordion?
@@ -165,7 +164,7 @@ Common configurations. The first three are pure markup; the last drives the plug
 
 #### Drive it from your own UI
 
-* * *
+
 
 External controls
 

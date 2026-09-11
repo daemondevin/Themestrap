@@ -40,7 +40,7 @@
  *         backend: "auto"
  *     });
  */
-// StorageBin 
+// StorageBin
 const StorageBin = (() => {
     "use strict";
  
@@ -267,19 +267,23 @@ const StorageBin = (() => {
 // Themestrap
 window.themestrap = {};
 
+// Module-scoped dedup set for getScripts — persists across calls within the page session
+const _loadedScripts = new Set();
+
 // Themestrap Common Functions
 window.themestrap.fn = {
 
+	// [#9] strict equality, no parens on typeof, null guard, global semicolon strip
 	getOptions(opts) {
 
-		if (typeof(opts) == 'object') {
+		if (opts !== null && typeof opts === 'object') {
 
 			return opts;
 
-		} else if (typeof(opts) == 'string') {
+		} else if (typeof opts === 'string') {
 
 			try {
-				return JSON.parse(opts.replace(/'/g, '"').replace(';', ''));
+				return JSON.parse(opts.replace(/'/g, '"').replace(/;/g, ''));
 			} catch (e) {
 				return {};
 			}
@@ -292,8 +296,8 @@ window.themestrap.fn = {
 
 	},
 
-	execPluginFunction(functionName, context) {
-		const args = Array.prototype.slice.call(arguments, 2);
+	// [#18] rest parameters replace arguments object
+	execPluginFunction(functionName, context, ...args) {
 		const namespaces = functionName.split(".");
 		const func = namespaces.pop();
 
@@ -304,8 +308,12 @@ window.themestrap.fn = {
 		return context[func](...args);
 	},
 
-	intObs(selector, functionName, intObsOptions, alwaysObserve) {
-		const $el = document.querySelectorAll(selector);
+	// [#1] dead string-function branch removed — callback must be a function
+	// [#12] querySelectorAll NodeList iterated with forEach, not $().each()
+	// [#13] observer.observe(node) — no $(this)[0] round-trip
+	// [#14] entry.isIntersecting replaces entry.intersectionRatio > 0
+	intObs(selector, callback, intObsOptions, alwaysObserve) {
+		const el = document.querySelectorAll(selector);
 		let intersectionObserverOptions = {
 			rootMargin: '0px 0px 200px 0px'
 		};
@@ -316,69 +324,48 @@ window.themestrap.fn = {
 
 		const observer = new IntersectionObserver(entries => {
             for (const entry of entries) {
-                if (entry.intersectionRatio > 0) {
-					if (typeof functionName === 'string') {
-						const func = Function('return ' + functionName)();
-					} else {
-						const callback = functionName;
+                if (entry.isIntersecting) {
+					callback.call($(entry.target));
 
-						callback.call($(entry.target));
-					}
-
-					// Unobserve
 					if (!alwaysObserve) {
 						observer.unobserve(entry.target);
 					}
-
 				}
             }
         }, intersectionObserverOptions);
 
-		$($el).each(function() {
-			observer.observe($(this)[0]);
-		});
+		el.forEach(node => observer.observe(node));
 	},
 
+	// [#12][#13][#14][#15] NodeList forEach, isIntersecting, direct opts assignment
 	intObsInit(selector, functionName) {
-		const $el = document.querySelectorAll(selector);
+		const el = document.querySelectorAll(selector);
 		const intersectionObserverOptions = {
 			rootMargin: '200px'
 		};
 
 		const observer = new IntersectionObserver(entries => {
             for (const entry of entries) {
-                if (entry.intersectionRatio > 0) {
+                if (entry.isIntersecting) {
                     const $this = $(entry.target);
-                    let opts;
-
-                    const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
-                    if (pluginOptions)
-						opts = pluginOptions;
+                    const opts = themestrap.fn.getOptions($this.data('plugin-options'));
 
                     themestrap.fn.execPluginFunction(functionName, $this, opts);
-
-                    // Unobserve
                     observer.unobserve(entry.target);
                 }
             }
         }, intersectionObserverOptions);
 
-		$($el).each(function() {
-			observer.observe($(this)[0]);
-		});
+		el.forEach(node => observer.observe(node));
 	},
 
+	// [#12][#13][#14][#15] NodeList forEach, isIntersecting, direct opts assignment
 	dynIntObsInit(selector, functionName, pluginDefaults) {
-		const $el = document.querySelectorAll(selector);
+		const el = document.querySelectorAll(selector);
 
-		$($el).each(function() {
-            const $this = $(this);
-            let opts;
-
-            const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
-            if (pluginOptions)
-				opts = pluginOptions;
-
+		el.forEach(node => {
+            const $this = $(node);
+            const opts = themestrap.fn.getOptions($this.data('plugin-options'));
             const mergedPluginDefaults = themestrap.fn.mergeOptions(pluginDefaults, opts);
 
             const intersectionObserverOptions = {
@@ -390,16 +377,14 @@ window.themestrap.fn = {
 
 				const observer = new IntersectionObserver(entries => {
                     for (const entry of entries) {
-                        if (entry.intersectionRatio > 0) {
+                        if (entry.isIntersecting) {
 							themestrap.fn.execPluginFunction(functionName, $this, mergedPluginDefaults);
-
-							// Unobserve
 							observer.unobserve(entry.target);
 						}
                     }
                 }, intersectionObserverOptions);
 
-				observer.observe($this[0]);
+				observer.observe(node);
 
 			} else {
 				themestrap.fn.execPluginFunction(functionName, $this, mergedPluginDefaults);
@@ -407,56 +392,27 @@ window.themestrap.fn = {
         });
 	},
 
+	// [#10] all switch cases were identical to default — collapsed to single expression
 	getRootMargin(plugin, {accY}) {
-		switch (plugin) {
-			case 'themestrapPluginCounter':
-				return accY ? `0px 0px ${accY}px 0px` : '0px 0px 200px 0px';
-				break;
-
-			case 'themestrapPluginAnimate':
-				return accY ? `0px 0px ${accY}px 0px` : '0px 0px 200px 0px';
-				break;
-
-			case 'themestrapPluginIcon':
-				return accY ? `0px 0px ${accY}px 0px` : '0px 0px 200px 0px';
-				break;
-
-			case 'themestrapPluginRandomImages':
-				return accY ? `0px 0px ${accY}px 0px` : '0px 0px 200px 0px';
-				break;
-
-			default:
-				return '0px 0px 200px 0px';
-				break;
-		}
+		return accY ? `0px 0px ${accY}px 0px` : '0px 0px 200px 0px';
 	},
 
+	// [#8] for..in loops with var replaced by Object.assign
 	mergeOptions(obj1, obj2) {
-		const obj3 = {};
-
-		for (var attrname in obj1) {
-			obj3[attrname] = obj1[attrname];
-		}
-		for (var attrname in obj2) {
-			obj3[attrname] = obj2[attrname];
-		}
-
-		return obj3;
+		return Object.assign({}, obj1, obj2);
 	},
 
-	execOnceThroughEvent($el, event, callback) {
+	// [#17] merged with execOnceThroughWindowEvent via withContext flag
+	execOnceThroughEvent($el, event, callback, withContext = true) {
 		const self = this, dataName = self.formatDataName(event);
 
 		$($el).on(event, function() {
 			if (!$(this).data(dataName)) {
 
-				// Exec Callback Function
-				callback.call($(this));
+				withContext ? callback.call($(this)) : callback();
 
-				// Add data name 
 				$(this).data(dataName, true);
 
-				// Unbind event
 				$(this).off(event);
 			}
 		});
@@ -464,24 +420,9 @@ window.themestrap.fn = {
 		return this;
 	},
 
+	// [#17] now delegates to execOnceThroughEvent with withContext = false
 	execOnceThroughWindowEvent($el, event, callback) {
-		const self = this, dataName = self.formatDataName(event);
-
-		$($el).on(event, function() {
-			if (!$(this).data(dataName)) {
-
-				// Exec Callback Function
-				callback();
-
-				// Add data name 
-				$(this).data(dataName, true);
-
-				// Unbind event
-				$(this).off(event);
-			}
-		});
-
-		return this;
+		return this.execOnceThroughEvent($el, event, callback, false);
 	},
 
 	formatDataName(name) {
@@ -497,17 +438,17 @@ window.themestrap.fn = {
 		);
 	},
 
+	// [#16] uses module-scoped _loadedScripts — dedup now survives across calls
     getScripts(arr, path = '') {
-        const loadedScripts = new Set();
         const requests = arr.map(src => {
             const fullPath = path + src;
     
-            if (loadedScripts.has(fullPath)) {
+            if (_loadedScripts.has(fullPath)) {
                 return $.Deferred().resolve();
             }
     
             return $.getScript(fullPath).done(() => {
-                loadedScripts.add(fullPath);
+                _loadedScripts.add(fullPath);
             });
         });
     
@@ -524,6 +465,7 @@ window.themestrap.fn = {
 		return new StorageBin(options);
 	},
 
+	// [#5] var re-declaration fixed — two distinct const names
 	showErrorMessage(title, content) {
 
 		if ($('html').hasClass('disable-error-warning')) {
@@ -533,18 +475,18 @@ window.themestrap.fn = {
 		$('.modalThemestrapErrorMessage').remove();
 		$('body').append('<div class="modal fade" id="modalThemestrapErrorMessage"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">' + title + '</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">' + content + '</div><div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button></div></div></div></div>');
 
-		var modalThemestrapErrorMessage = document.getElementById('modalThemestrapErrorMessage');
-		var modalThemestrapErrorMessage = bootstrap.Modal.getOrCreateInstance(modalThemestrapErrorMessage);
-		modalThemestrapErrorMessage.show();
+		const errorEl    = document.getElementById('modalThemestrapErrorMessage');
+		const errorModal = bootstrap.Modal.getOrCreateInstance(errorEl);
+		errorModal.show();
 
 	}
 
 };
 
 (((themestrap = {}, $) => {
-	/*
-	Browser Selector
-	*/
+	/**
+	 * Browser Selector
+	 */
 	$.extend({
 
 		browserSelector() {
@@ -557,7 +499,8 @@ window.themestrap.fn = {
 
 			const u = navigator.userAgent, ua = u.toLowerCase(), is = t => ua.includes(t), g = 'gecko', w = 'webkit', s = 'safari', o = 'opera', h = document.documentElement, b = [(!(/opera|webtv/i.test(ua)) && /msie\s(\d)/.test(ua)) ? (`ie ie${parseFloat(navigator.appVersion.split("MSIE")[1])}`) : is('firefox/2') ? `${g} ff2` : is('firefox/3.5') ? `${g} ff3 ff3_5` : is('firefox/3') ? `${g} ff3` : is('gecko/') ? g : is('opera') ? o + (/version\/(\d+)/.test(ua) ? ` ${o}${RegExp.jQuery1}` : (/opera(\s|\/)(\d+)/.test(ua) ? ` ${o}${RegExp.jQuery2}` : '')) : is('konqueror') ? 'konqueror' : is('chrome') ? `${w} chrome` : is('iron') ? `${w} iron` : is('applewebkit/') ? `${w} ${s}${/version\/(\d+)/.test(ua) ? ` ${s}${RegExp.jQuery1}` : ''}` : is('mozilla/') ? g : '', is('j2me') ? 'mobile' : is('iphone') ? 'iphone' : is('ipod') ? 'ipod' : is('mac') ? 'mac' : is('darwin') ? 'mac' : is('webtv') ? 'webtv' : is('win') ? 'win' : is('freebsd') ? 'freebsd' : (is('x11') || is('linux')) ? 'linux' : '', 'js'];
 
-			c = b.join(' ');
+			// [#6] c was an implicit global — now correctly declared with let (mutated below)
+			let c = b.join(' ');
 
 			if ($.browser.mobile) {
 				c += ' mobile';
@@ -591,9 +534,9 @@ window.themestrap.fn = {
 
 	$.browserSelector();
 
-	/*
-	Browser Workarounds
-	*/
+	/**
+	 * Browser Workarounds
+	 */
 	if (/iPad|iPhone|iPod/.test(navigator.platform)) {
 
 		// iPad/Iphone/iPod Hover Workaround
@@ -602,10 +545,6 @@ window.themestrap.fn = {
 		});
 	}
 
-	/*
-	Lazy Load Bacground Images
-	*/
-
 	// Check for IntersectionObserver support
 	if ('IntersectionObserver' in window) {
 		document.addEventListener("DOMContentLoaded", function() {
@@ -613,10 +552,9 @@ window.themestrap.fn = {
 			function handleIntersection(entries) {
 				entries.map((entry) => {
 					if (entry.isIntersecting) {
-						// Item has crossed our observation
-						// threshold - load src from data-src
+						// Item has crossed our observation threshold — load src from data-src
 						entry.target.style.backgroundImage = "url('" + entry.target.dataset.bgSrc + "')";
-						// Job done for this item - no need to watch it!
+						// Job done for this item — no need to watch it
 						observer.unobserve(entry.target);
 					}
 				});
@@ -631,16 +569,43 @@ window.themestrap.fn = {
 			lazyLoadElements.forEach(lazyLoadEl => observer.observe(lazyLoadEl));
 		});
 	} else {
-		// No interaction support? Load all background images automatically
+		// No IntersectionObserver support — load all background images immediately
 		const lazyLoadElements = document.querySelectorAll('.lazyload');
 		lazyLoadElements.forEach(lazyLoadEl => {
 			lazyLoadEl.style.backgroundImage = "url('" + lazyLoadEl.dataset.bgSrc + "')";
 		});
 	}
 
-	/*
-	Tabs
-	*/
+    // Scrollbar width measurement
+    // Measures the native scrollbar width and stores it as --ts-scrollbar-width
+	// on <html> so that body.ts-scroll-lock { padding-right: var(--ts-scrollbar-width) }
+    // can compensate exactly, preventing layout shift when a dialog, overlay, modal, or
+	// backdrop opens.
+    //
+    // Wrapped in a DOMContentLoaded guard so the script is safe to load from
+    // <head> as well as before </body>.
+    (function measureScrollbarWidth() {
+        function measure() {
+            const outer = document.createElement('div');
+            outer.style.cssText = 'visibility:hidden;overflow:scroll;position:absolute;width:100px';
+            document.body.appendChild(outer);
+            const width = outer.offsetWidth - outer.clientWidth;
+            document.body.removeChild(outer);
+            document.documentElement.style.setProperty('--ts-scrollbar-width', width + 'px');
+        }
+
+        if (document.body) {
+            // Body is already available (script loaded before </body> as normal)
+            measure();
+        } else {
+            // Script loaded in <head> — defer until the body exists
+            document.addEventListener('DOMContentLoaded', measure, { once: true });
+        }
+    })();
+
+	/**
+	 * Tabs
+	 */
 	if( $('a[data-bs-toggle="tab"]').length ) {
 		$('a[data-bs-toggle="tab"]').on('shown.bs.tab', function({target}) {
 			const $tabPane = $($(target).attr('href'));
@@ -653,7 +618,7 @@ window.themestrap.fn = {
 			// Change Active Class
 			$(this).parents('.nav-tabs').find('.active').removeClass('active');
 			$(this).addClass('active').parent().addClass('active');
-		});	
+		});
 
 		if( window.location.hash ) {
 			$(window).on('load', () => {
@@ -664,9 +629,9 @@ window.themestrap.fn = {
 		}
 	}
 
-	/*
-	On Load Scroll
-	*/
+	/**
+	 * On Load Scroll
+	 */
 	if( !$('html').hasClass('disable-onload-scroll') && window.location.hash && !['#*'].includes( window.location.hash ) ) {
 
 		window.scrollTo(0, 0);
@@ -701,9 +666,9 @@ window.themestrap.fn = {
 		});
 	}
 
-	/*
-	* Text Rotator
-	*/
+	/**
+	 * Text Rotator
+	 */
 	$.fn.extend({
 		textRotator(options) {
 
@@ -713,40 +678,47 @@ window.themestrap.fn = {
 				child: null
 			};
 
-			var options = $.extend(defaults, options);
+			// [#2] $.extend no longer mutates defaults — target is now a fresh {}
+			// [#7] var options shadowing parameter replaced with const opts;
+			//      var next double-declaration replaced with single let next
+			const opts = $.extend({}, defaults, options);
 
 			return this.each(function() {
-				const o = options;
+				const o = opts;
 				const obj = $(this);
 				const items = $(obj.children(), obj);
 				items.each(function() {
 					$(this).hide();
-				})
+				});
+
+				let next;
 				if (!o.child) {
-					var next = $(obj).children(':first');
+					next = $(obj).children(':first');
 				} else {
-					var next = o.child;
+					next = o.child;
 				}
+
 				$(next).fadeIn(o.fadeSpeed, () => {
 					$(next).delay(o.pauseSpeed).fadeOut(o.fadeSpeed, function() {
-						let next = $(this).next();
-						if (next.length == 0) {
-							next = $(obj).children(':first');
+						// nextEl avoids shadowing the outer next
+						let nextEl = $(this).next();
+						if (nextEl.length == 0) {
+							nextEl = $(obj).children(':first');
 						}
 						$(obj).textRotator({
-							child: next,
+							child: nextEl,
 							fadeSpeed: o.fadeSpeed,
 							pauseSpeed: o.pauseSpeed
 						});
-					})
+					});
 				});
 			});
 		}
 	});
 
-	/*
-	* Notice Top bar
-	*/
+	/**
+	 * Notice Top bar
+	 */
 	const $noticeTopBar = {
 		$wrapper: $('.notice-top-bar'),
 		$closeBtn: $('.notice-top-bar-close'),
@@ -826,16 +798,9 @@ window.themestrap.fn = {
 
 			return this;
 		},
+		// [#11] unreachable `return this` removed; simplified to single expression
 		checkCookie() {
-			const self = this;
-
-			if( $.cookie('themestrapNoticeTopBarClose') ) {
-				return true;
-			} else {
-				return false;
-			}
-
-			return this;
+			return !!$.cookie('themestrapNoticeTopBarClose');
 		},
 		saveCookie() {
 			const self = this;
@@ -850,24 +815,25 @@ window.themestrap.fn = {
 		$noticeTopBar.init();
 	}
 
-	/*
-	* Image Hotspots
-	*/
+	/**
+	 * Image Hotspots
+	 */
 	if( $('.image-hotspot').length ) {
 		$('.image-hotspot')
 			.append('<span class="ring"></span>')
 			.append('<span class="circle"></span>');
 	}
 
-	/*
-	* Reading Progress
-	*/
+	/**
+	 * Reading Progress
+	 */
 	if( $('.progress-reading').length ) {
 
+		// [#3] pageHeight and progress were implicit globals — now correctly declared
 		function updateScrollProgress() {
-			const pixels = $(document).scrollTop();
-				pageHeight = $(document).height() - $(window).height()
-				progress = 100 * pixels / pageHeight;
+			const pixels     = $(document).scrollTop();
+			const pageHeight = $(document).height() - $(window).height();
+			const progress   = 100 * pixels / pageHeight;
 
 			$('.progress-reading .progress-bar').width(parseInt(progress) + "%");
 		}
@@ -884,9 +850,9 @@ window.themestrap.fn = {
 
 	}
 
-	/*
-	* Page Transition
-	*/
+	/**
+	 * Page Transition
+	 */
 	if( $('body[data-plugin-page-transition]').length ) {
 		
 		let link_click = false;
@@ -895,11 +861,12 @@ window.themestrap.fn = {
 			link_click = $(this);
 		});
 
+		// [#4] href guarded against undefined before calling .indexOf()
 		$(window).on("beforeunload", e => {
 			if( typeof link_click === 'object' ) {
 				const href = link_click.attr('href');
 
-				if( href.indexOf('mailto:') != 0 && href.indexOf('tel:') != 0 && !link_click.data('rm-from-transition') ) {
+				if( href && href.indexOf('mailto:') != 0 && href.indexOf('tel:') != 0 && !link_click.data('rm-from-transition') ) {
 					$('body').addClass('page-transition-active');
 				}
 			}
@@ -916,9 +883,9 @@ window.themestrap.fn = {
 		});
 	}
 
-	/*
-	* Clone Element
-	*/
+	/**
+	 * Clone Element
+	 */
 	if( $('[data-clone-element]').length ) {
 
 		$('[data-clone-element]').each(function() {
@@ -947,9 +914,9 @@ window.themestrap.fn = {
 
 	}
 
-	/*
-	* Thumb Info Floating Caption
-	*/
+	/**
+	 * Thumb Info Floating Caption
+	 */
 	$('.thumb-info-floating-caption').each(function() {
 
 		$(this)
@@ -970,9 +937,9 @@ window.themestrap.fn = {
 
 	});
 
-	/*
-	* Thumb Info Floating Element
-	*/
+	/**
+	 * Thumb Info Floating Element
+	 */
 	if( $('.thumb-info-floating-element-wrapper').length ) {
 
 		if (typeof gsap !== 'undefined') {
@@ -1030,9 +997,9 @@ window.themestrap.fn = {
 
 	}
 
-	/*
-	* Thumb Info Direction Aware
-	*/
+	/**
+	 * Thumb Info Direction Aware
+	 */
 	$(window).on('load', () => {
 		$('.thumb-info-wrapper-direction-aware').each( function() {
 			$(this).hoverdir({
@@ -1045,9 +1012,9 @@ window.themestrap.fn = {
 		});
 	});
 
-	/*
-	* Thumb Info Container Full
-	*/
+	/**
+	 * Thumb Info Container Full
+	 */
 	$('.thumb-info-container-full-img').each(function() {
 
 		const $container = $(this);
@@ -1066,27 +1033,27 @@ window.themestrap.fn = {
 
 	});
 
-	/*
-	* Toggle Text Click
-	*/
+	/**
+	 * Toggle Text Click
+	 */
 	$('[data-toggle-text-click]').on('click', function () {
 		$(this).text(function(i, text){
 			return text === $(this).attr('data-toggle-text-click') ? $(this).attr('data-toggle-text-click-alt') : $(this).attr('data-toggle-text-click');
 		});
 	});
 
-	/*
-	* Toggle Class
-	*/
+	/**
+	 * Toggle Class
+	 */
 	$('[data-toggle-class]').on('click', function (e) {
 		e.preventDefault();
 
 		$(this).toggleClass( $(this).data('toggle-class') );
 	});
 
-	/*
-	* Shape Divider Aspect Ratio
-	*/
+	/**
+	 * Shape Divider Aspect Ratio
+	 */
 	if( $('.shape-divider').length ) {
 		aspectRatioSVG();
 		$(window).on('resize', () => {
@@ -1094,24 +1061,24 @@ window.themestrap.fn = {
 		});
 	}
 
-	/*
-	* Shape Divider Animated
-	*/
+	/**
+	 * Shape Divider Animated
+	 */
 	if( $('.shape-divider-horizontal-animation').length ) {
 		themestrap.fn.intObs('.shape-divider-horizontal-animation', function(){
 			for( let i = 0; i <= 1; i++ ) {
 				const svgClone = $(this).find('svg:nth-child(1)').clone();
 
-				$(this).append( svgClone )
+				$(this).append( svgClone );
 			}
 
 			$(this).addClass('start');
 		}, {});
 	}
 
-	/*
-	* Shape Divider - SVG Aspect Ratio
-	*/
+	/**
+	 * Shape Divider - SVG Aspect Ratio
+	 */
 	function aspectRatioSVG() {
 		if( $(window).width() < 1950 ) {
 			$('.shape-divider svg[preserveAspectRatio]').each(function(){
@@ -1128,9 +1095,9 @@ window.themestrap.fn = {
 		}
 	}
 
-	/*
-	* Content Switcher
-	*/
+	/**
+	 * Content Switcher
+	 */
 	$('[data-content-switcher]').on('change', function(e, v) {
 		const switcherRel = ($(this).is(':checked') ? '1' : '2' ), switcherId = $(this).attr('data-content-switcher-content-id');
 
@@ -1145,9 +1112,9 @@ window.themestrap.fn = {
 
 	$('[data-content-switcher]').trigger('change');
 
-	/*
-	* Dynamic Height
-	*/
+	/**
+	 * Dynamic Height
+	 */
 	const $window = $(window);
 	$window.on('resize dynamic.height.resize', () => {
 		$('[data-dynamic-height]').each(function(){
@@ -1173,7 +1140,7 @@ window.themestrap.fn = {
 				$this.height( values[1] );
 			}
 
-			// XS
+			// XL
 			if( $window.width() > 1199 ) {
 				$this.height( values[0] );
 			}
@@ -1185,9 +1152,9 @@ window.themestrap.fn = {
 		$window.trigger('dynamic.height.resize');
 	}
 
-	/*
-	* Video - Trigger Play
-	*/
+	/**
+	 * Video - Trigger Play
+	 */
 	if( $('[data-trigger-play-video]').length ) {
 		themestrap.fn.execOnceThroughEvent( '[data-trigger-play-video]', 'mouseover.trigger.play.video', function(){
 			const $video = $( $(this).data('trigger-play-video') );
@@ -1212,9 +1179,9 @@ window.themestrap.fn = {
 		});
 	}
 
-	/*
-	* Video - Auto Play
-	*/
+	/**
+	 * Video - Auto Play
+	 */
 	if( $('video[data-auto-play]').length ) {
 		$(window).on('load', () => {
 			$('video[data-auto-play]').each(function(){
@@ -1242,9 +1209,9 @@ window.themestrap.fn = {
 		});
 	}
 
-	/*
-	* Remove min height after the load of page
-	*/
+	/**
+	 * Remove min height after the load of page
+	 */
 	if( $('[data-remove-min-height]').length ) {
 		$(window).on('load', () => {
 			$('[data-remove-min-height]').each(function(){
@@ -1255,9 +1222,9 @@ window.themestrap.fn = {
 		});
 	}
 
-	/*
-	* Title Border
-	*/
+	/**
+	 * Title Border
+	 */
 	if($('[data-title-border]').length) {
 
 		const $pageHeaderTitleBorder = $('<span class="page-header-title-border"></span>'), $pageHeaderTitle = $('[data-title-border]'), $window = $(window);
@@ -1277,9 +1244,9 @@ window.themestrap.fn = {
 		$pageHeaderTitleBorder.addClass('visible');
 	}
 
-	/*
-	* Footer Reveal
-	*/
+	/**
+	 * Footer Reveal
+	 */
 	($ => {
 		const $footerReveal = {
 			$wrapper: $('.footer-reveal'),
@@ -1317,9 +1284,9 @@ window.themestrap.fn = {
 		}
 	})(jQuery);
 
-	/*
-	* Re-Init Plugin
-	*/
+	/**
+	 * Re-Init Plugin
+	 */
 	if( $('[data-reinit-plugin]').length ) {
 		$('[data-reinit-plugin]').on('click', function(e) {
 			e.preventDefault();
@@ -1329,15 +1296,15 @@ window.themestrap.fn = {
 			$( pluginElement ).data( pluginInstance ).destroy();
 
 			setTimeout(() => {
-				themestrap.fn.execPluginFunction(pluginFunction, $( pluginElement ), pluginOptions);	
+				themestrap.fn.execPluginFunction(pluginFunction, $( pluginElement ), pluginOptions);
 			}, 1000);
 
 		});
 	}
 
-	/*
-	* Simple Copy To Clipboard
-	*/
+	/**
+	 * Simple Copy To Clipboard
+	 */
 	if( $('[data-copy-to-clipboard]').length ) {
 		themestrap.fn.intObs( '[data-copy-to-clipboard]', function(){
 			const $this = $(this);
@@ -1347,26 +1314,29 @@ window.themestrap.fn = {
 			const $copyButton = $('<a href="#" class="btn btn-primary btn-px-2 py-1 text-0 position-absolute top-8 right-8">COPY</a>');
 			$this.parent().prepend( $copyButton );
 
+			// [#20] navigator.clipboard.writeText() replaces deprecated document.execCommand('copy')
+			//       with execCommand retained as fallback for non-secure contexts
 			$copyButton.on('click', function(e){
 				e.preventDefault();
 
-				const $btn       = $(this), $temp = $('<textarea class="d-block opacity-0" style="height: 0;">');
+				const $btn = $(this);
+				const text = $this.text();
 
-				$btn.parent().append( $temp );
-
-				$temp.val( $this.text() );
-					
-				$temp[0].select();
-				$temp[0].setSelectionRange(0, 99999);
-
-				document.execCommand("copy");
-
-				$btn.addClass('copied');
-				setTimeout(() => {
-					$btn.removeClass('copied');
-				}, 1000);
-
-				$temp.remove();
+				if (navigator.clipboard && window.isSecureContext) {
+					navigator.clipboard.writeText(text).then(() => {
+						$btn.addClass('copied');
+						setTimeout(() => $btn.removeClass('copied'), 1000);
+					});
+				} else {
+					const $temp = $('<textarea class="d-block opacity-0" style="height: 0;">');
+					$btn.parent().append($temp);
+					$temp.val(text)[0].select();
+					$temp[0].setSelectionRange(0, 99999);
+					document.execCommand('copy');
+					$temp.remove();
+					$btn.addClass('copied');
+					setTimeout(() => $btn.removeClass('copied'), 1000);
+				}
 			});
 		}, {
 			rootMargin: '0px 0px 0px 0px'
@@ -1376,7 +1346,8 @@ window.themestrap.fn = {
 	/**
 	 * Marquee
 	 */
-	if( $('.marquee').length && $.isFunction($.fn.marquee) ) {
+	// [#19] $.isFunction removed in jQuery 4 — replaced with typeof check
+	if( $('.marquee').length && typeof $.fn.marquee === 'function' ) {
 		$('.marquee').marquee({
 			duration: 5000,
 			gap: 0,

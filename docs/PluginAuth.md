@@ -12,7 +12,7 @@ PluginAuth wraps any HTML auth form (MODX Login extra or custom) without replaci
 
 Set the action via `data-auth-action` on the `<form>`.
 
----
+
 
 ## [Quick **Start**](#quick-start)
 
@@ -49,12 +49,12 @@ Set the action via `data-auth-action` on the `<form>`.
 </form>
 ```
 
----
+
 
 ## [Configuration **Options**](#options)
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
+|--|||-|
 | `ajax` | bool | `false` | Submit via XHR and handle JSON response. |
 | `redirect` | string | `''` | URL to redirect to after AJAX success. |
 | `toasts` | bool | `true` | Emit PluginToast notifications on success/error. |
@@ -68,7 +68,7 @@ Set the action via `data-auth-action` on the `<form>`.
 | `messages.minlength` | string | `'Must be at least %s characters.'` | Min-length message (`%s` = length). |
 | `messages.match` | string | `'Values do not match.'` | Field match message. |
 
----
+
 
 ## [Public **API**](#api)
 
@@ -84,10 +84,10 @@ auth.destroy();
 ### Events
 
 | Event | Arguments | Description |
-|-------|-----------|-------------|
+|-|--|-|
 | `auth:validate` | `(instance, isValid)` | After client-side validation runs. |
 | `auth:submit` | `(instance, formData)` | Before submission (AJAX or native). |
 | `auth:success` | `(instance, response)` | After successful AJAX response. |
 | `auth:error` | `(instance, error)` | After AJAX error or network failure. |
 
----
+

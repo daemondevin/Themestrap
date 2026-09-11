@@ -2,7 +2,6 @@
 
 A fully self-contained Pinterest-style grid engine. Packs children into responsive columns using native absolute positioning — **no Isotope, no waitForImages, no external dependencies**. Images are waited on natively and a loader overlay is shown until the grid is fully settled.
 
----
 
 ## How It Works
 
@@ -19,7 +18,6 @@ A debounced `resize` handler (200 ms) re-runs the layout whenever the viewport c
 
 On first init the plugin injects a single `<style id="themestrap-masonry-styles">` into `<head>`. Only two rules are written: `position: relative` on the container and `box-sizing: border-box` on its children. A guard prevents duplicate injection across multiple instances on the same page.
 
----
 
 ## Quick Start
 
@@ -56,7 +54,6 @@ $('#myGrid').themestrapPluginMasonry({
 });
 ```
 
----
 
 ## Configuration Options
 
@@ -85,7 +82,6 @@ responsive: {
 
 The plugin sorts breakpoint keys descending and walks them to find the first whose minimum width is ≤ the current viewport. You can override individual breakpoints without replacing the whole map.
 
----
 
 ## Instance API
 
@@ -123,7 +119,6 @@ These are not part of the public API but useful for debugging:
 - `_injectStyles()` — one-time CSS injection guarded by `STYLE_ID`.
 - `_uid()` — stable random string used to namespace the resize event per instance.
 
----
 
 ## Loading Overlay
 
@@ -145,7 +140,6 @@ Classes managed on the `.masonry-loader` element:
 
 A 3-second safety timeout calls `_removeLoader()` in case any images fail to fire events. The layout still runs regardless.
 
----
 
 ## Recipes
 
@@ -205,7 +199,6 @@ $('[data-bs-toggle="tab"]').on('shown.bs.tab', () => {
 });
 ```
 
----
 
 ## Common Pitfalls
 
@@ -227,7 +220,6 @@ Unlike the old Isotope-based version, this plugin waits for images natively befo
 
 PluginMasonry only lays out items — it doesn't filter, sort, or animate item additions. For filterable grids pair it with `PluginSort` (which uses Isotope), or implement your own filter logic that calls `instance.layout()` after toggling item visibility.
 
----
 
 ## Upgrading from the Isotope-based version
 

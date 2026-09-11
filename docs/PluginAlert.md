@@ -2,7 +2,7 @@
 
 Enhances Bootstrap `.alert` elements with semantic icon injection, optional auto-dismiss with a countdown progress bar, pause-on-hover, configurable action buttons, smooth slide or fade dismissal animations, and a `create()` factory for programmatic toast alerts — all without touching Bootstrap's existing markup contract.
 
----
+
 
 ## How It Works
 
@@ -34,7 +34,7 @@ When `pauseOnHover: true`, `mouseenter` calls `_pauseTimer()`: clears the `setTi
 
 After the animation, `_afterDismiss()` fires `closed.bs.alert`, calls `onDismiss`, and either removes the element from the DOM (`remove: true`) or sets `display:none`.
 
----
+
 
 ## Quick Start
 
@@ -101,7 +101,7 @@ $('.my-alert').themestrapPluginAlert({
 </div>
 ```
 
----
+
 
 ## Markup Reference
 
@@ -148,12 +148,12 @@ Any `.alert` element may be the plugin root. The plugin reads Bootstrap variant 
 Action objects in the `actions` array accept a `variant` key:
 
 | Variant | Class added | Appearance |
-|:--------|:------------|:-----------|
+|:--|:|:--|
 | `'primary'` (default) | `alert-ts-action-primary` | Filled, token-coloured background |
 | `'secondary'` | `alert-ts-action-secondary` | Ghost / outlined |
 | `'link'` | `alert-ts-action-link` | Text-only, no border |
 
----
+
 
 ## Configuration Options
 
@@ -162,7 +162,7 @@ Options merge: `PluginAlert.defaults → opts argument → data-plugin-options J
 ### Layout / content
 
 | Option | Type | Default | Description |
-|:-------|:-----|:--------|:------------|
+|:-|:--|:--|:|
 | `type` | `string\|null` | `null` | Alert variant: `'info'`, `'success'`, `'warning'`, `'danger'`, `'neutral'`, `'primary'`, `'secondary'`, `'tertiary'`, `'quaternary'`, `'light'`, `'dark'`. When `null`, auto-detected from Bootstrap class names. |
 | `showIcon` | bool | `false` | Inject an SVG icon matching the type (icons for `info`, `success`, `warning`, `danger`, `neutral`; falls back to `info` icon for theme variants). |
 | `dismissible` | bool | `false` | Render a dismiss (×) button. |
@@ -173,7 +173,7 @@ Options merge: `PluginAlert.defaults → opts argument → data-plugin-options J
 ### Behaviour
 
 | Option | Type | Default | Description |
-|:-------|:-----|:--------|:------------|
+|:-|:--|:--|:|
 | `autoDismiss` | bool | `false` | Automatically dismiss the alert after `delay` ms. |
 | `delay` | number | `5000` | Auto-dismiss delay in milliseconds. |
 | `pauseOnHover` | bool | `true` | Pause the auto-dismiss timer while the cursor is over the alert. |
@@ -182,7 +182,7 @@ Options merge: `PluginAlert.defaults → opts argument → data-plugin-options J
 ### Animation
 
 | Option | Type | Default | Description |
-|:-------|:-----|:--------|:------------|
+|:-|:--|:--|:|
 | `animation` | string | `'fade'` | Exit animation: `'fade'` (opacity) or `'slide'` (max-height collapse). |
 | `animationDuration` | number | `400` | Exit animation duration in milliseconds. |
 | `showCountdown` | bool | `true` | Show a shrinking progress bar along the bottom edge when `autoDismiss` is enabled. |
@@ -190,11 +190,11 @@ Options merge: `PluginAlert.defaults → opts argument → data-plugin-options J
 ### Callbacks
 
 | Option | Type | Default | Description |
-|:-------|:-----|:--------|:------------|
+|:-|:--|:--|:|
 | `onDismiss` | `function\|null` | `null` | Called after the alert is removed/hidden. Invoked as `fn.call(instance)`. |
 | `onAction` | `function\|null` | `null` | Called when an action button is clicked. Signature: `fn.call(instance, key)`. Equivalent to listening for the `action.alert` jQuery event. |
 
----
+
 
 ## Public API
 
@@ -207,7 +207,7 @@ const alert = $('.my-alert').data('__pluginAlert');
 ### Instance methods
 
 | Method | Returns | Description |
-|:-------|:--------|:------------|
+|:-|:--|:|
 | `dismiss()` | `this` | Animate the alert out, then remove or hide it per the `remove` option. Fires `close.bs.alert` before animation and `closed.bs.alert` after. |
 | `destroy()` | `this` | Remove all `.pluginalert` namespaced event listeners, restore the original `innerHTML`, strip `alert-ts-*` classes and inline styles, clear any pending timer, and remove the instance from `$el.data()`. |
 
@@ -221,7 +221,7 @@ $('.my-alert').themestrapPluginAlert('destroy');
 ### jQuery events
 
 | Event | When | Extra args |
-|:------|:-----|:-----------|
+|:|:--|:--|
 | `close.bs.alert` | Immediately on `dismiss()` call, before animation | — |
 | `closed.bs.alert` | After the exit animation completes | — |
 | `action.alert` | When an action button is clicked | `[key, instance]` |
@@ -235,7 +235,7 @@ $('.my-alert')
   });
 ```
 
----
+
 
 ## `PluginAlert.create()`
 
@@ -246,13 +246,13 @@ PluginAlert.create([container], opts)
 ```
 
 | Argument | Type | Description |
-|:---------|:-----|:------------|
+|:|:--|:|
 | `container` | `string\|jQuery\|null` | Selector or jQuery object to append into. Omit for the default toast stack. |
 | `opts` | object | Any `PluginAlert` options. `message` is required. |
 
 Returns the `PluginAlert` instance.
 
----
+
 
 ## Recipe Cookbook
 
@@ -385,7 +385,7 @@ To toggle dark mode:
 document.documentElement.classList.toggle('dark');
 ```
 
----
+
 
 ## Common Pitfalls
 

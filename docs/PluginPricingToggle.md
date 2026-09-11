@@ -2,7 +2,6 @@
 
 Drives a billing-period switcher (e.g. Monthly ↔ Annual) that animates a pill/thumb inside a track between two positions, broadcasts namespaced jQuery events so any number of page listeners can react (price spans, feature lists, badge visibility), and exposes a clean programmatic API with full ARIA semantics. Integrates with PluginCounter so animated price figures recount when the period switches, and fires CSS custom-property updates on the host element so pure-CSS themes can react without any JavaScript of their own.
 
----
 
 ## How It Works
 
@@ -26,7 +25,6 @@ The thumb position is handled entirely by CSS: when `[data-pt-track][aria-presse
 
 On `build()`, the plugin writes all geometry and colour options as CSS custom properties directly onto the host element's inline style. This means pure-CSS themes can override them at any cascade level (`[data-plugin-pricingtoggle]`, a class, or `:root`) and the plugin values act as per-instance defaults, not globals.
 
----
 
 ## Quick Start
 
@@ -99,7 +97,6 @@ $('[data-plugin-pricingtoggle]').themestrapPluginPricingToggle({
 </div>
 ```
 
----
 
 ## Markup Reference
 
@@ -148,7 +145,6 @@ Set `aria-pressed="true"` on `[data-pt-track]` before the plugin initialises —
 </button>
 ```
 
----
 
 ## Configuration Options
 
@@ -226,7 +222,6 @@ Since all options are written as CSS custom properties on the host element, you 
 <div data-plugin-pricingtoggle style="--pt-track-bg: #2ab8c8">…</div>
 ```
 
----
 
 ## Public API
 
@@ -278,7 +273,6 @@ $('[data-plugin-pricingtoggle]')
   });
 ```
 
----
 
 ## Recipe Cookbook
 
@@ -415,7 +409,6 @@ $('[data-plugin-pricingtoggle]')
   .themestrapPluginPricingToggle();
 ```
 
----
 
 ## Common Pitfalls
 
