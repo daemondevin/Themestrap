@@ -21,7 +21,6 @@
  *   - Prevents duplicate initialization
  *   - Works with dynamically sized elements
  */
-
 // Hover Effect
 (((themestrap = {}, $) => {
 

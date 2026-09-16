@@ -1,34 +1,24 @@
 // Carousel
 (((themestrap = {}, $) => {
     const instanceName = '__carousel';
-    const STYLE_ID = 'ts-carousel-styles';
+    const STYLE_ID    = 'ts-carousel-styles';
+
+    const SVG_PREV = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+    const SVG_NEXT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+    const SVG_UP   = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+    const SVG_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
     class PluginCarousel {
+
         constructor($el, opts) {
             return this.initialize($el, opts);
         }
 
         initialize($el, opts) {
-            if ($el.data(instanceName)) {
-                return this;
-            }
-
-            this.$el = $el;
+            if ($el.data(instanceName)) { return this; }
+            this.$el        = $el;
             this.initialHTML = $el.html();
-            this._uid = ++PluginCarousel._uidCounter;
-
-            // Defer init until icon plugin has rendered its icons to prevent flicker
-            if ($el.find('[data-icon]').get(0)) {
-                const self = this;
-                $(window).on('icon.rendered', function() {
-                    if ($el.data(instanceName)) return;
-                    setTimeout(() => {
-                        self.setData().setOptions(opts).build().events();
-                    }, 1000);
-                });
-                return this;
-            }
-
+            this._uid       = ++PluginCarousel._uidCounter;
             this.setData().setOptions(opts).build().events();
             return this;
         }
@@ -47,537 +37,874 @@
         }
 
         build() {
-            // Lazy CSS injection — only once, ref-counted for destroy
             if (!document.getElementById(STYLE_ID)) {
                 const style = document.createElement('style');
-                style.id = STYLE_ID;
+                style.id          = STYLE_ID;
                 style.textContent = PluginCarousel.css;
                 document.head.appendChild(style);
             }
 
-            const self = this;
-            const $el = this.options.wrapper;
+            const $el  = this.$el;
             const opts = this.options;
 
-            // RTL: inherit from html[dir] when not explicitly set
             if ($('html').attr('dir') === 'rtl') opts.rtl = true;
 
-            // Collect and count original items before mutating the DOM
-            const $originalItems = $el.children();
-            const itemCount = $originalItems.length;
-            if (itemCount === 0) return this;
+            // Non-slide transitions only support a single visible item
+            if (opts.transition !== 'slide') opts.items = 1;
 
-            this.itemCount = itemCount;
+            const $originals = $el.children();
+            const count      = $originals.length;
+            if (count === 0) return this;
+
+            // State
+            this.slideCount   = count;
             this.currentIndex = 0;
+            this.realIndex    = 0;
             this.clonedBefore = 0;
-            this.clonedAfter = 0;
-            this.autoplayTimer = null;
+            this.clonedAfter  = 0;
+            this.autoplayTimer  = null;
+            this.isPlaying      = false;
+            this._hovering      = false;
+            this._focused       = false;
+            this._docHidden     = false;
+            this._transitioning = false;
+            this.isDragging     = false;
 
-            // Single-item shortcut: ignore responsive breakpoints
-            if (opts.items === 1) opts.responsive = {};
+            // Build the DOM skeleton
+            this.$trackOuter = $('<div class="tsc-track-outer"></div>');
+            this.$track      = $('<div class="tsc-track" role="presentation"></div>');
+            this.$trackOuter.append(this.$track);
 
-            // Items beyond default 4: ensure a 1199px breakpoint entry
-            if (opts.items > 4) {
-                opts.responsive = $.extend(true, {}, opts.responsive, {
-                    1199: { items: opts.items }
-                });
+            this.$nav      = this._buildNav();
+            this.$dots     = this._buildDots(count);
+            this.$counter  = opts.counter     ? this._buildCounter(count) : null;
+            this.$progress = opts.progressBar ? this._buildProgress()     : null;
+            this.$thumbs   = (opts.thumbs || opts.thumbsEl) ? this._buildThumbs($originals, count) : null;
+            this.$progressBar = null; // set inside _buildProgress
+
+            // Re-wire progressBar ref after build
+            if (this.$progress) {
+                this.$progressBar = this.$progress.find('.tsc-progress-bar');
             }
 
-            // Resolve visible item count for the current viewport width
-            this.getItemsCount = () => {
-                const resp = opts.responsive;
-                if (!resp || Object.keys(resp).length === 0) return Math.max(opts.items || 1, 1);
-                const w = window.innerWidth;
-                const bps = Object.keys(resp).map(Number).sort((a, b) => a - b);
-                let count = Math.max(opts.items || 1, 1);
-                for (const bp of bps) {
-                    if (w >= bp && resp[bp].items !== undefined) count = resp[bp].items;
-                }
-                return Math.max(count, 1);
-            };
+            // Populate track with items (plus loop clones)
+            this._populateTrack($originals, count);
 
-            // Build stage structure
-            const $stageOuter = $('<div class="owl-stage-outer"></div>');
-            const $stage = $('<div class="owl-stage"></div>');
-            $stageOuter.append($stage);
+            // Assemble into element
+            $el.empty();
+            if (opts.progressBar && opts.progressPosition === 'top') $el.append(this.$progress);
+            $el.append(this.$trackOuter, this.$nav, this.$dots);
+            if (this.$counter)  $el.append(this.$counter);
+            if (opts.progressBar && opts.progressPosition !== 'top') $el.append(this.$progress);
 
-            // Wrap every original child in an .owl-item; keep a reference array for cloning
-            const $realItems = [];
-            $originalItems.each(function() {
-                const $item = $('<div class="owl-item"></div>').append($(this).clone(true, true));
-                $stage.append($item);
-                $realItems.push($item[0]);
+            // Stage padding (peekaboo / reveal-adjacent)
+            const sp = opts.stagePadding || 0;
+            if (sp > 0) {
+                this.$trackOuter.css(opts.vertical
+                    ? { paddingTop: sp + 'px', paddingBottom: sp + 'px' }
+                    : { paddingLeft: sp + 'px', paddingRight: sp + 'px' }
+                );
+                this.$trackOuter.css('overflow', 'visible');
+                $el.css('overflow', 'hidden');
+            }
+
+            // Propagate speed + easing to CSS so transitions can pick them up
+            $el[0].style.setProperty('--tsc-speed', opts.speed + 'ms');
+            $el[0].style.setProperty('--tsc-easing', opts.easing);
+            if (opts.gap) $el[0].style.setProperty('--tsc-gap', opts.gap + 'px');
+
+            // ARIA on root
+            $el.attr({
+                role:                 'region',
+                'aria-roledescription': 'carousel',
+                'aria-label':           opts.ariaLabel || 'Carousel'
             });
 
-            // Clone items for seamless looping
-            if (opts.loop && itemCount > 1) {
-                // Clone count: enough to cover one full page-worth of visible items
-                const cloneCount = Math.min(Math.max(this.getItemsCount(), 2), itemCount);
+            // Root classes
+            $el.addClass(`tsc-carousel tsc-trans-${opts.transition}`);
+            if (opts.vertical)           $el.addClass('tsc-vertical');
+            if (opts.rtl)                $el.addClass('tsc-rtl');
+            if (opts.dotType === 'line') $el.addClass('tsc-dots-line');
+            if (opts.dotType === 'number') $el.addClass('tsc-dots-number');
+            if (!opts.loop)              $el.addClass('tsc-no-loop');
 
-                // Prepend clones of the tail of the real items (enables backward loop)
-                for (let i = cloneCount - 1; i >= 0; i--) {
-                    const idx = ((itemCount - cloneCount + i) % itemCount + itemCount) % itemCount;
-                    $($realItems[idx]).clone(true, true).addClass('cloned').prependTo($stage);
-                    this.clonedBefore++;
-                }
-
-                // Append clones of the head of the real items (enables forward loop)
-                for (let i = 0; i < cloneCount; i++) {
-                    $($realItems[i % itemCount]).clone(true, true).addClass('cloned').appendTo($stage);
-                    this.clonedAfter++;
-                }
-
-                // Start positioned at the first real item
-                this.currentIndex = this.clonedBefore;
+            // Initial layout
+            if (opts.transition === 'slide') {
+                this._layout(false);
+            } else {
+                this._layoutStack();
             }
 
-            // Build navigation
-            const $nav = $('<div class="owl-nav"></div>');
-            const $prev = $('<button type="button" role="button" class="owl-prev"></button>');
-            const $next = $('<button type="button" role="button" class="owl-next"></button>');
-            opts.rtl ? $nav.append($next).append($prev) : $nav.append($prev).append($next);
+            this._updateActive();
+            this._updateDots();
+            this._updateNavState();
+            if (this.$counter) this._updateCounter();
+            if (this.$thumbs)  this._updateThumbs();
+            if (opts.lazyLoad) this._lazyLoad(0);
 
-            // Build dots
-            const $dots = $('<div class="owl-dots"></div>');
-            for (let i = 0; i < itemCount; i++) {
-                $dots.append($('<button type="button" role="button" class="owl-dot"><span></span></button>'));
+            $el.addClass('tsc-loaded');
+
+            // Attach thumbnail strip
+            this._attachThumbs();
+
+            // Start autoplay
+            if (opts.autoplay) {
+                this.isPlaying = true;
+                this.$track.attr('aria-live', 'off');
+                this._applyPlayState();
+            } else {
+                this.$track.attr('aria-live', 'polite');
             }
-
-            // Replace carousel content with generated structure
-            $el.empty().append($stageOuter).append($nav).append($dots);
-
-            // Honour explicit nav/dots suppression
-            if (opts.nav === false) $nav.addClass('disabled');
-            if (opts.dots === false) $dots.addClass('disabled');
-
-            // SVG arrow icons injected per-button for nav-svg-arrows-1
-            if ($el.hasClass('nav-svg-arrows-1')) {
-                const svg = '<svg version="1.1" viewBox="0 0 15.698 8.706" width="17" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><polygon stroke="#212121" stroke-width="0.1" fill="#212121" points="11.354,0 10.646,0.706 13.786,3.853 0,3.853 0,4.853 13.786,4.853 10.646,8 11.354,8.706 15.698,4.353"/></svg>';
-                $prev.append(svg);
-                $next.append(svg);
-            }
-
-            // Store DOM refs
-            this.$stage = $stage;
-            this.$stageOuter = $stageOuter;
-            this.$nav = $nav;
-            this.$prev = $prev;
-            this.$next = $next;
-            this.$dots = $dots;
-
-            $el.addClass('owl-themestrap owl-drag');
-
-            // Initial layout — no transition
-            this._layout(false);
-
-            // Mark as fully loaded
-            $el.addClass('owl-loaded').removeClass('owl-loading');
-            $el.css('height', 'auto');
-
-            if ($el.prev().hasClass('owl-carousel-loader')) $el.prev().remove();
-
-            if ($el.closest('.owl-carousel-wrapper').get(0)) {
-                setTimeout(() => $el.closest('.owl-carousel-wrapper').css({ height: '' }), 500);
-            }
-
-            if ($el.hasClass('nav-outside')) self._handleNavOutside();
-
-            self.navigationOffsets();
-            self.carouselNavigate();
-
-            if (opts.autoHeight) self._applyAutoHeight();
-            if (opts.autoplay) self._startAutoplay();
-            if ($el.attr('data-sync')) self._setupSync();
-            if ($el.hasClass('carousel-center-active-item')) self._updateCenterActive();
-
-            if ($el.find('[data-plugin-video-background]').get(0)) $(window).trigger('resize');
 
             return this;
         }
 
-        // Measure stage, size all items, and position at currentIndex without animation
-        _layout(animate) {
-            const opts = this.options;
-            const visCount = this.getItemsCount();
-            const $allItems = this.$stage.children();
-            const stageW = this.$stageOuter[0].offsetWidth;
-            const itemW = stageW / visCount;
-
-            $allItems.css({
-                width: itemW + 'px',
-                float: opts.rtl ? 'right' : 'left'
-            });
-
-            this.$stage.css({ width: ($allItems.length * itemW) + 'px' });
-            this._moveTo(this.currentIndex, animate !== false);
-        }
-
-        // Apply a CSS transform to the stage for the given slide index
-        _moveTo(index, animate) {
-            const opts = this.options;
-            const visCount = this.getItemsCount();
-            const itemW = this.$stageOuter[0].offsetWidth / visCount;
-
-            this.$stage.css({
-                transition: animate ? `transform ${opts.smartSpeed}ms ease` : 'none',
-                transform: `translate3d(${-(index * itemW)}px, 0, 0)`
-            });
-        }
-
-        // Public: navigate to a real item by 0-based index
-        to(index) {
-            const realIdx = ((index % this.itemCount) + this.itemCount) % this.itemCount;
-            this._slide(this.clonedBefore + realIdx, true);
-        }
-
-        // Public proxy methods
-        next() { this._next(); return this; }
-        prev() { this._prev(); return this; }
-
-        _next() { this._slide(this.currentIndex + 1, true); }
-        _prev() { this._slide(this.currentIndex - 1, true); }
-
-        // Core slide: fires events, moves the stage, handles loop-jump after transition
-        _slide(targetIndex, animate) {
+        _populateTrack($originals, count) {
             const self = this;
             const opts = this.options;
-            const clonedBefore = this.clonedBefore;
-            const itemCount = this.itemCount;
-            const realIdx = ((targetIndex - clonedBefore) % itemCount + itemCount) % itemCount;
+            const isSlideTrans = opts.transition === 'slide';
+            const $realItems   = [];
+
+            $originals.each(function(i) {
+                const $item = $('<div class="tsc-item"></div>').attr({
+                    role:                  'group',
+                    'aria-roledescription': 'slide',
+                    'aria-label':           `${i + 1} of ${count}`,
+                    'aria-hidden':          'true',
+                    tabindex:              '-1',
+                    'data-tsc-real':       i
+                }).append($(this).clone(true, true));
+
+                self.$track.append($item);
+                $realItems.push($item[0]);
+            });
+
+            // Clone items for seamless looping (slide mode only)
+            if (isSlideTrans && opts.loop && count > 1) {
+                const visCount    = self._getItemsCount();
+                const cloneCount  = Math.min(Math.max(visCount, 2), count);
+
+                // Prepend tail clones so backward navigation wraps smoothly
+                for (let i = cloneCount - 1; i >= 0; i--) {
+                    const idx = ((count - cloneCount + i) % count + count) % count;
+                    $($realItems[idx]).clone(true, true)
+                        .addClass('tsc-clone')
+                        .attr('aria-hidden', 'true')
+                        .prependTo(self.$track);
+                    self.clonedBefore++;
+                }
+
+                // Append head clones so forward navigation wraps smoothly
+                for (let i = 0; i < cloneCount; i++) {
+                    $($realItems[i % count]).clone(true, true)
+                        .addClass('tsc-clone')
+                        .attr('aria-hidden', 'true')
+                        .appendTo(self.$track);
+                    self.clonedAfter++;
+                }
+
+                self.currentIndex = self.clonedBefore;
+            }
+        }
+
+        _buildNav() {
+            const opts = this.options;
+            const vert = opts.vertical;
+            const $nav = $('<div class="tsc-nav" aria-hidden="true"></div>');
+
+            const prevIcon = Array.isArray(opts.navText) && opts.navText[0]
+                ? opts.navText[0] : (vert ? SVG_UP   : SVG_PREV);
+            const nextIcon = Array.isArray(opts.navText) && opts.navText[1]
+                ? opts.navText[1] : (vert ? SVG_DOWN : SVG_NEXT);
+
+            this.$prev = $(`<button type="button" class="tsc-btn tsc-prev">${prevIcon}</button>`)
+                .attr('aria-label', vert ? 'Previous slide (up)' : 'Previous slide');
+            this.$next = $(`<button type="button" class="tsc-btn tsc-next">${nextIcon}</button>`)
+                .attr('aria-label', vert ? 'Next slide (down)' : 'Next slide');
+
+            opts.rtl
+                ? $nav.append(this.$next, this.$prev)
+                : $nav.append(this.$prev, this.$next);
+
+            if (!opts.nav) $nav.addClass('tsc-hidden');
+            return $nav;
+        }
+
+        _buildDots(count) {
+            const opts  = this.options;
+            const $dots = $('<div class="tsc-dots" role="tablist" aria-label="Slide navigation"></div>');
+
+            for (let i = 0; i < count; i++) {
+                const $dot = $('<button type="button" class="tsc-dot" role="tab"></button>').attr({
+                    'aria-label':    `Go to slide ${i + 1}`,
+                    'aria-selected': 'false',
+                    tabindex:        '-1'
+                });
+
+                if (opts.dotType === 'number') {
+                    $dot.append(`<span class="tsc-dot-label">${i + 1}</span>`);
+                } else {
+                    $dot.append('<span class="tsc-dot-pip"></span>');
+                }
+
+                $dots.append($dot);
+            }
+
+            if (!opts.dots) $dots.addClass('tsc-hidden');
+            return $dots;
+        }
+
+        _buildCounter(count) {
+            const total = String(count).padStart(2, '0');
+            const $c    = $('<div class="tsc-counter" aria-live="polite" aria-atomic="true"></div>');
+            this.$cN     = $('<span class="tsc-counter-n">01</span>');
+            this.$cTotal = $(`<span class="tsc-counter-total">${total}</span>`);
+            $c.append(this.$cN, '<span class="tsc-counter-sep"> / </span>', this.$cTotal);
+            return $c;
+        }
+
+        _buildProgress() {
+            const $p = $('<div class="tsc-progress" role="presentation" aria-hidden="true"></div>');
+            $p.append('<div class="tsc-progress-bar"></div>');
+            return $p;
+        }
+
+        _buildThumbs($originals, count) {
+            const self  = this;
+            const $wrap = $('<div class="tsc-thumbs" role="tablist" aria-label="Slide thumbnails"></div>');
+
+            $originals.each(function(i) {
+                const $src = $(this);
+                const img  = $src.attr('data-thumb') || $src.find('img').first().attr('src') || '';
+                const $th  = $('<button type="button" class="tsc-thumb" role="tab"></button>').attr({
+                    'aria-label':    `Go to slide ${i + 1}`,
+                    'aria-selected': 'false',
+                    tabindex:        '-1'
+                });
+
+                if (img) {
+                    $th.append(`<img src="${img}" alt="" loading="lazy" aria-hidden="true">`);
+                } else {
+                    $th.append(`<span class="tsc-thumb-idx">${i + 1}</span>`);
+                }
+
+                $wrap.append($th);
+            });
+
+            return $wrap;
+        }
+
+        _attachThumbs() {
+            const opts = this.options;
+            if (!this.$thumbs) return;
+
+            if (opts.thumbsEl) {
+                const $ext = $(opts.thumbsEl).empty();
+                this.$thumbs.children().each(function() {
+                    $ext.append($(this).clone(true, true));
+                });
+                // Point $thumbs at the external container so _updateThumbs targets it
+                this.$thumbs = $ext;
+            } else {
+                this.$el.after(this.$thumbs);
+            }
+        }
+
+        _getItemsCount() {
+            const opts = this.options;
+            if (opts.transition !== 'slide') return 1;
+            const resp = opts.responsive;
+            if (!resp || !Object.keys(resp).length) return Math.max(opts.items || 1, 1);
+            const w   = window.innerWidth;
+            const bps = Object.keys(resp).map(Number).sort((a, b) => a - b);
+            let n     = Math.max(opts.items || 1, 1);
+            for (const bp of bps) {
+                if (w >= bp && resp[bp].items !== undefined) n = resp[bp].items;
+            }
+            return Math.max(n, 1);
+        }
+
+        _layout(animate) {
+            const opts     = this.options;
+            const $all     = this.$track.children();
+            const n        = $all.length;
+            const gap      = opts.gap || 0;
+            const visCount = this._getItemsCount();
+
+            if (opts.vertical) {
+                const wrapH = this.$trackOuter[0].clientHeight
+                    || this.$el[0].clientHeight
+                    || 400;
+                const itemH = (wrapH - gap * (visCount - 1)) / visCount;
+                this.$track.css({
+                    flexDirection: 'column',
+                    width:         '100%',
+                    gap:           gap + 'px',
+                    height:        (n * (itemH + gap) - gap) + 'px'
+                });
+                $all.css({ width: '100%', height: itemH + 'px', flexShrink: 0 });
+            } else {
+                const stageW = this.$trackOuter[0].clientWidth;
+                const itemW  = (stageW - gap * (visCount - 1)) / visCount;
+                const totalW = n * (itemW + gap) - gap;
+                this.$track.css({
+                    flexDirection: 'row',
+                    gap:           gap + 'px',
+                    width:         totalW + 'px',
+                    height:        ''
+                });
+                $all.css({ width: itemW + 'px', height: '', flexShrink: 0 });
+            }
+
+            this._moveTo(this.currentIndex, animate !== false);
+            if (opts.autoHeight) this._applyAutoHeight();
+        }
+
+        _layoutStack() {
+            const self = this;
+            const $all = this.$track.children('.tsc-item');
+
+            this.$track.css({ position: 'relative', width: '100%' });
+            $all.css({ position: 'absolute', top: 0, left: 0, right: 0, width: '100%' });
+
+            // Attempt to auto-size the track outer if no height is set yet
+            requestAnimationFrame(() => {
+                if (self.$trackOuter[0].offsetHeight > 0) return;
+                let max = 0;
+                $all.each(function() { max = Math.max(max, this.scrollHeight); });
+                if (max > 0) self.$trackOuter.css('min-height', max + 'px');
+            });
+        }
+
+        _moveTo(index, animate) {
+            const opts  = this.options;
+            const gap   = opts.gap || 0;
+            const speed = animate !== false ? opts.speed : 0;
+            const ease  = opts.easing;
+            let tf;
+
+            if (opts.vertical) {
+                const itemH = this.$track.children().first().outerHeight() || 0;
+                tf = `translate3d(0, ${-(index * (itemH + gap))}px, 0)`;
+            } else {
+                const visCount = this._getItemsCount();
+                const stageW   = this.$trackOuter[0].clientWidth;
+                const itemW    = (stageW - gap * (visCount - 1)) / visCount;
+                const offset   = index * (itemW + gap);
+                tf = opts.rtl
+                    ? `translate3d(${offset}px, 0, 0)`
+                    : `translate3d(${-offset}px, 0, 0)`;
+            }
+
+            this.$track.css({
+                transition: speed > 0 ? `transform ${speed}ms ${ease}` : 'none',
+                transform:  tf
+            });
+        }
+
+        _navigate(dir) {
+            const opts  = this.options;
+            const count = this.slideCount;
+            const group = Math.max(opts.group || 1, 1);
+
+            if (this._transitioning) return;
+
+            if (opts.progressBar) this._resetProgress();
+
+            if (opts.transition !== 'slide') {
+                let target = this.realIndex + dir * group;
+                if (opts.loop) {
+                    target = ((target % count) + count) % count;
+                } else {
+                    target = Math.max(0, Math.min(target, count - 1));
+                    if (target === this.realIndex) return;
+                }
+                this._slideFade(target, true);
+            } else {
+                let target = this.currentIndex + dir * group;
+                if (!opts.loop) {
+                    const visCount = this._getItemsCount();
+                    const minIdx   = this.clonedBefore;
+                    const maxIdx   = this.clonedBefore + count - visCount;
+                    target = Math.max(minIdx, Math.min(target, maxIdx));
+                    if (target === this.currentIndex) return;
+                }
+                this._slide(target, true);
+            }
+
+            if (opts.autoplay && this.isPlaying && opts.progressBar) {
+                this._startProgress();
+            }
+        }
+
+        _slide(targetIndex, animate) {
+            const self    = this;
+            const opts    = this.options;
+            const cb      = this.clonedBefore;
+            const count   = this.slideCount;
+            const realIdx = ((targetIndex - cb) % count + count) % count;
+
+            this._transitioning = true;
 
             this.$el[0].dispatchEvent(new CustomEvent('ts.carousel.change', {
-                detail: { property: { name: 'position', value: realIdx } },
+                detail: { index: realIdx, total: count },
                 bubbles: true
             }));
 
             this._moveTo(targetIndex, animate);
             this.currentIndex = targetIndex;
+            this.realIndex    = realIdx;
 
-            const afterSlide = () => {
-                // Silent jump when we've slid into the clone region
+            this._updateActive();
+            this._updateDots();
+            this._updateNavState();
+            if (this.$counter) this._updateCounter();
+            if (this.$thumbs)  this._updateThumbs();
+            if (opts.lazyLoad) this._lazyLoad(realIdx);
+            if (opts.pauseMedia) this._pauseMedia();
+
+            const delay = animate ? opts.speed + 50 : 0;
+
+            setTimeout(() => {
+                // Silent loop jump when inside the clone region
                 if (opts.loop) {
-                    if (self.currentIndex >= clonedBefore + itemCount) {
-                        self.currentIndex = clonedBefore;
+                    if (self.currentIndex >= cb + count) {
+                        self.currentIndex -= count;
                         self._moveTo(self.currentIndex, false);
-                    } else if (self.currentIndex < clonedBefore) {
-                        self.currentIndex = clonedBefore + itemCount - 1;
+                    } else if (self.currentIndex < cb) {
+                        self.currentIndex += count;
                         self._moveTo(self.currentIndex, false);
                     }
                 }
 
-                self._updateActive();
-                self._updateDots();
-                if (self.$el.hasClass('carousel-center-active-item')) self._updateCenterActive();
+                self._transitioning = false;
 
-                const finalIdx = ((self.currentIndex - clonedBefore) % itemCount + itemCount) % itemCount;
                 self.$el[0].dispatchEvent(new CustomEvent('ts.carousel.changed', {
-                    detail: { item: { index: finalIdx, count: itemCount } },
+                    detail: { index: self.realIndex, total: count },
                     bubbles: true
                 }));
-            };
-
-            animate ? setTimeout(afterSlide, opts.smartSpeed + 50) : afterSlide();
+            }, delay);
         }
 
-        // Mark visCount items starting at currentIndex as .active
+        _slideFade(targetIdx, animate) {
+            const self  = this;
+            const opts  = this.options;
+            const count = this.slideCount;
+            const $items = this.$track.children('.tsc-item');
+
+            if (targetIdx === this.realIndex) return;
+
+            this._transitioning = true;
+
+            this.$el[0].dispatchEvent(new CustomEvent('ts.carousel.change', {
+                detail: { index: targetIdx, total: count },
+                bubbles: true
+            }));
+
+            const $cur = $items.eq(this.realIndex);
+            const $nxt = $items.eq(targetIdx);
+            const tr   = opts.transition;
+
+            if (!animate || opts.speed === 0) {
+                $cur.removeClass('tsc-active');
+                $nxt.addClass('tsc-active');
+                this.realIndex    = targetIdx;
+                this.currentIndex = targetIdx;
+                this._updateDots();
+                this._updateNavState();
+                if (this.$counter) this._updateCounter();
+                if (this.$thumbs)  this._updateThumbs();
+                this._transitioning = false;
+                this.$el[0].dispatchEvent(new CustomEvent('ts.carousel.changed', {
+                    detail: { index: targetIdx, total: count },
+                    bubbles: true
+                }));
+                return;
+            }
+
+            // Apply leave animation to the outgoing slide
+            $cur.addClass(`tsc-${tr}-leave`);
+            // For zoom: add enter animation class to incoming slide before active is set
+            if (tr === 'zoom') $nxt.addClass('tsc-zoom-enter');
+
+            // Update state and active classes
+            this.realIndex    = targetIdx;
+            this.currentIndex = targetIdx;
+            this._updateActive();
+            this._updateNavState();
+            if (opts.lazyLoad) this._lazyLoad(targetIdx);
+            if (opts.pauseMedia) this._pauseMedia();
+
+            setTimeout(() => {
+                $cur.removeClass(`tsc-${tr}-leave`);
+                $nxt.removeClass('tsc-zoom-enter');
+                self._updateDots();
+                if (self.$counter) self._updateCounter();
+                if (self.$thumbs)  self._updateThumbs();
+                self._transitioning = false;
+                self.$el[0].dispatchEvent(new CustomEvent('ts.carousel.changed', {
+                    detail: { index: targetIdx, total: count },
+                    bubbles: true
+                }));
+            }, opts.speed + 20);
+        }
+
         _updateActive() {
-            const visCount = this.getItemsCount();
-            const $allItems = this.$stage.children();
-            $allItems.removeClass('active');
+            const opts     = this.options;
+            const visCount = this._getItemsCount();
+
+            if (opts.transition !== 'slide') {
+                const $real = this.$track.children('.tsc-item');
+                $real.removeClass('tsc-active').attr({ 'aria-hidden': 'true', tabindex: '-1' });
+                $real.eq(this.realIndex)
+                    .addClass('tsc-active')
+                    .attr({ 'aria-hidden': 'false', tabindex: '0' });
+                return;
+            }
+
+            const $all = this.$track.children();
+            $all.removeClass('tsc-active').attr({ 'aria-hidden': 'true', tabindex: '-1' });
             for (let i = 0; i < visCount; i++) {
-                $allItems.eq(this.currentIndex + i).addClass('active');
+                $all.eq(this.currentIndex + i)
+                    .addClass('tsc-active')
+                    .attr({ 'aria-hidden': 'false', tabindex: '0' });
             }
         }
 
-        // Sync dot state to real item index
         _updateDots() {
-            const realIdx = ((this.currentIndex - this.clonedBefore) % this.itemCount + this.itemCount) % this.itemCount;
-            this.$dots.children().removeClass('active').eq(realIdx).addClass('active');
+            const $dots = this.$dots.children('.tsc-dot');
+            $dots.removeClass('tsc-dot-active').attr({ 'aria-selected': 'false', tabindex: '-1' });
+            $dots.eq(this.realIndex)
+                .addClass('tsc-dot-active')
+                .attr({ 'aria-selected': 'true', tabindex: '0' });
         }
 
-        // Add .current to the middle visible item for carousel-center-active-item
-        _updateCenterActive() {
-            const $actives = this.$stage.children('.active');
-            const midIdx = Math.floor(($actives.length - 1) / 2);
-            this.$stage.children().removeClass('current');
-            $actives.eq(midIdx).addClass('current');
-        }
+        _updateNavState() {
+            if (this.options.loop) {
+                this.$prev.prop('disabled', false).removeClass('tsc-btn-disabled');
+                this.$next.prop('disabled', false).removeClass('tsc-btn-disabled');
+                return;
+            }
 
-        _applyAutoHeight() {
-            const self = this;
-            const measure = () => {
-                const heights = [];
-                self.$stage.children('.active').each(function() {
-                    heights.push($(this).outerHeight());
-                });
-                if (heights.length) self.$stageOuter.height(Math.max(...heights));
-            };
-            const ns = `.carousel-${this._uid}`;
-            $(window).on(`load${ns} resize${ns}`, measure);
-            measure();
-        }
+            const cb       = this.clonedBefore;
+            const count    = this.slideCount;
+            const visCount = this._getItemsCount();
 
-        _startAutoplay() {
-            this._stopAutoplay();
-            this.autoplayTimer = setInterval(() => this._next(), this.options.autoplayTimeout);
-        }
-
-        _stopAutoplay() {
-            if (this.autoplayTimer) {
-                clearInterval(this.autoplayTimer);
-                this.autoplayTimer = null;
+            if (this.options.transition !== 'slide') {
+                this.$prev.prop('disabled', this.realIndex === 0)
+                    .toggleClass('tsc-btn-disabled', this.realIndex === 0);
+                this.$next.prop('disabled', this.realIndex === count - 1)
+                    .toggleClass('tsc-btn-disabled', this.realIndex === count - 1);
+            } else {
+                const atStart = this.currentIndex <= cb;
+                const atEnd   = this.currentIndex >= cb + count - visCount;
+                this.$prev.prop('disabled', atStart).toggleClass('tsc-btn-disabled', atStart);
+                this.$next.prop('disabled', atEnd).toggleClass('tsc-btn-disabled', atEnd);
             }
         }
 
-        _setupSync() {
-            const syncSel = this.$el.attr('data-sync');
-            this.$el[0].addEventListener('ts.carousel.changed', (e) => {
-                const syncInst = $(syncSel).data(instanceName);
-                if (syncInst) syncInst.to(e.detail.item.index);
+        _updateCounter() {
+            if (!this.$cN) return;
+            this.$cN.text(String(this.realIndex + 1).padStart(2, '0'));
+        }
+
+        _updateThumbs() {
+            if (!this.$thumbs) return;
+            this.$thumbs.children('.tsc-thumb')
+                .removeClass('tsc-thumb-active')
+                .attr({ 'aria-selected': 'false', tabindex: '-1' });
+            this.$thumbs.children('.tsc-thumb').eq(this.realIndex)
+                .addClass('tsc-thumb-active')
+                .attr({ 'aria-selected': 'true', tabindex: '0' });
+        }
+
+        _lazyLoad(realIdx) {
+            const count  = this.slideCount;
+            const $real  = this.$track.children('.tsc-item:not(.tsc-clone)');
+            const load   = [realIdx, (realIdx + 1) % count, (realIdx - 1 + count) % count];
+            load.forEach(i => {
+                $real.eq(i).find('[data-lazy-src]').each(function() {
+                    const $img = $(this);
+                    $img.attr('src', $img.attr('data-lazy-src')).removeAttr('data-lazy-src');
+                });
             });
         }
 
-        _handleNavOutside() {
-            const self = this;
-            const $el = this.$el;
-            const opts = this.options;
-            const ns = `.carousel-${this._uid}`;
+        _pauseMedia() {
+            this.$track.children('.tsc-item:not(.tsc-active)')
+                .find('video, audio')
+                .each(function() { this.pause(); });
 
-            const update = () => {
-                if ($(window).width() < 992) {
-                    opts.stagePadding = 40;
-                    $el.addClass('stage-margin');
-                } else {
-                    opts.stagePadding = 0;
-                    $el.removeClass('stage-margin');
-                }
-                self.$stageOuter.css('padding', opts.stagePadding ? `0 ${opts.stagePadding}px` : '');
-                self._layout(false);
-                self.navigationOffsets();
-            };
-
-            $(window).on(`load${ns} resize${ns}`, update);
-            update();
+            this.$track.children('.tsc-item.tsc-active')
+                .find('[data-autoplay]')
+                .each(function() { if (this.play) this.play().catch(() => {}); });
         }
 
-        // Pointer/touch drag on the stage
+        _applyAutoHeight() {
+            let max = 0;
+            this.$track.children('.tsc-active').each(function() {
+                max = Math.max(max, $(this).outerHeight());
+            });
+            if (max > 0) this.$trackOuter.css('height', max + 'px');
+        }
+
+        _applyPlayState() {
+            const opts      = this.options;
+            const shouldRun = this.isPlaying && !this._hovering && !this._focused && !this._docHidden;
+
+            if (shouldRun && !this.autoplayTimer) {
+                this.autoplayTimer = setInterval(() => this._navigate(1), opts.autoplaySpeed);
+                this.$track.attr('aria-live', 'off');
+                if (opts.progressBar) this._startProgress();
+            } else if (!shouldRun && this.autoplayTimer) {
+                clearInterval(this.autoplayTimer);
+                this.autoplayTimer = null;
+                this.$track.attr('aria-live', 'polite');
+                if (opts.progressBar) this._stopProgress();
+            }
+        }
+
+        _startProgress() {
+            if (!this.$progressBar || !this.$progressBar.length) return;
+            const dur = this.options.autoplaySpeed;
+            this.$progressBar.css({ transition: 'none', width: '0%' });
+            void this.$progressBar[0].offsetWidth; // force reflow
+            this.$progressBar.css({ transition: `width ${dur}ms linear`, width: '100%' });
+        }
+
+        _stopProgress() {
+            if (!this.$progressBar || !this.$progressBar.length) return;
+            const cur = this.$progressBar[0].offsetWidth;
+            const par = this.$progressBar.parent()[0].offsetWidth;
+            const pct = par > 0 ? (cur / par * 100) : 0;
+            this.$progressBar.css({ transition: 'none', width: pct.toFixed(1) + '%' });
+        }
+
+        _resetProgress() {
+            if (!this.$progressBar || !this.$progressBar.length) return;
+            this.$progressBar.css({ transition: 'none', width: '0%' });
+        }
+
         _setupDrag() {
-            const self = this;
-            const opts = this.options;
-            const stage = this.$stage[0];
+            const self    = this;
+            const opts    = this.options;
+            const trackEl = this.$track[0];
 
-            let startX = 0, startY = 0, dragging = false, delta = 0, startTranslate = 0;
+            // Dragging only meaningful in slide transition mode
+            if (opts.transition !== 'slide') return;
 
-            const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
-            const getY = (e) => e.touches ? e.touches[0].clientY : e.clientY;
+            let startX   = 0, startY = 0, delta = 0;
+            let dragging = false, startTranslate = 0, startTime = 0;
+            let dirLocked = null;
 
-            const onStart = (e) => {
-                startX = getX(e);
-                startY = getY(e);
-                dragging = true;
-                delta = 0;
-                const mat = new DOMMatrix(getComputedStyle(stage).transform);
-                startTranslate = mat.m41;
-                self.$stage.css('transition', 'none');
-                self._stopAutoplay();
+            const getX = e => e.touches ? e.touches[0].clientX : e.clientX;
+            const getY = e => e.touches ? e.touches[0].clientY : e.clientY;
+
+            const getTranslate = () => {
+                const m = new DOMMatrix(getComputedStyle(trackEl).transform);
+                return opts.vertical ? m.m42 : m.m41;
             };
 
-            const onMove = (e) => {
+            const onStart = e => {
+                if (self._transitioning) return;
+                startX         = getX(e);
+                startY         = getY(e);
+                delta          = 0;
+                dirLocked      = null;
+                startTranslate = getTranslate();
+                startTime      = Date.now();
+                dragging       = true;
+                self.$track.css('transition', 'none');
+                // Suspend autoplay while dragging
+                if (self.autoplayTimer) {
+                    clearInterval(self.autoplayTimer);
+                    self.autoplayTimer = null;
+                    if (opts.progressBar) self._stopProgress();
+                }
+            };
+
+            const onMove = e => {
                 if (!dragging) return;
                 const dx = getX(e) - startX;
                 const dy = getY(e) - startY;
-                // Cancel drag if motion is primarily vertical before a horizontal threshold
-                if (!delta && Math.abs(dy) > Math.abs(dx)) { dragging = false; return; }
+
+                // Lock direction on first meaningful movement
+                if (!dirLocked) {
+                    if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return;
+                    dirLocked = Math.abs(dx) >= Math.abs(dy) ? 'h' : 'v';
+                    if (!opts.vertical && dirLocked === 'v') { dragging = false; return; }
+                    if ( opts.vertical && dirLocked === 'h') { dragging = false; return; }
+                }
+
                 e.preventDefault();
-                delta = dx;
-                self.$stage.css('transform', `translate3d(${startTranslate + dx}px, 0, 0)`);
+                delta = opts.vertical ? dy : dx;
+                self.isDragging = true;
+
+                const tf = opts.vertical
+                    ? `translate3d(0, ${startTranslate + dy}px, 0)`
+                    : `translate3d(${startTranslate + dx}px, 0, 0)`;
+                self.$track.css('transform', tf);
             };
 
             const onEnd = () => {
                 if (!dragging) return;
-                dragging = false;
-                const visCount = self.getItemsCount();
-                const itemW = self.$stageOuter[0].offsetWidth / visCount;
-                const threshold = itemW * 0.2;
-                if (delta < -threshold) {
-                    self._next();
-                } else if (delta > threshold) {
-                    self._prev();
+                dragging        = false;
+                self.isDragging = false;
+
+                const elapsed  = Math.max(Date.now() - startTime, 1);
+                const velocity = Math.abs(delta) / elapsed;
+                const visCount = self._getItemsCount();
+                const itemSize = opts.vertical
+                    ? (self.$track.children().first().outerHeight() || 100)
+                    : (self.$trackOuter[0].clientWidth / visCount);
+
+                const threshold = itemSize * 0.2;
+                const fastSwipe = velocity > 0.3;
+
+                if ((Math.abs(delta) > threshold || fastSwipe) && delta < 0) {
+                    self._navigate(1);
+                } else if ((Math.abs(delta) > threshold || fastSwipe) && delta > 0) {
+                    self._navigate(-1);
                 } else {
+                    // Snap back to current position
                     self._moveTo(self.currentIndex, true);
                 }
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+
+                // Restore autoplay after drag
+                if (self.isPlaying && !self._hovering && !self._focused && !self._docHidden) {
+                    self._applyPlayState();
+                }
             };
 
             if (opts.mouseDrag !== false) {
-                stage.addEventListener('mousedown', onStart);
-                this._mouseMoveHandler = onMove;
-                this._mouseUpHandler = onEnd;
+                trackEl.addEventListener('mousedown', onStart);
+                this._onDocMove = onMove;
+                this._onDocUp   = onEnd;
                 document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onEnd);
+                document.addEventListener('mouseup',   onEnd);
+                trackEl.style.cursor = 'grab';
             }
 
             if (opts.touchDrag !== false) {
-                stage.addEventListener('touchstart', onStart, { passive: true });
-                stage.addEventListener('touchmove', onMove, { passive: false });
-                stage.addEventListener('touchend', onEnd);
+                trackEl.addEventListener('touchstart', onStart, { passive: true });
+                trackEl.addEventListener('touchmove',  onMove,  { passive: false });
+                trackEl.addEventListener('touchend',   onEnd);
             }
-        }
-
-        navigationOffsets() {
-            const opts = this.options;
-            const $el = this.options.wrapper;
-            const $navEl = $el.find('.owl-nav');
-            const $dotsEl = $el.find('.owl-dots');
-            const navHasTransform = $navEl.css('transform') !== 'none';
-            const dotsHasTransform = $dotsEl.css('transform') !== 'none';
-
-            if (opts.navHorizontalOffset && !opts.navVerticalOffset) {
-                navHasTransform
-                    ? $navEl.css({ left: opts.navHorizontalOffset })
-                    : $navEl.css({ transform: `translate3d(${opts.navHorizontalOffset}, 0, 0)` });
-            }
-
-            if (opts.navVerticalOffset && !opts.navHorizontalOffset) {
-                navHasTransform
-                    ? $navEl.css({ top: `calc(50% - ${opts.navVerticalOffset})` })
-                    : $navEl.css({ transform: `translate3d(0, ${opts.navVerticalOffset}, 0)` });
-            }
-
-            if (opts.navVerticalOffset && opts.navHorizontalOffset) {
-                navHasTransform
-                    ? $navEl.css({ top: `calc(50% - ${opts.navVerticalOffset})`, left: opts.navHorizontalOffset })
-                    : $navEl.css({ transform: `translate3d(${opts.navHorizontalOffset}, ${opts.navVerticalOffset}, 0)` });
-            }
-
-            if (opts.dotsHorizontalOffset && !opts.dotsVerticalOffset) {
-                $dotsEl.css({ transform: `translate3d(${opts.dotsHorizontalOffset}, 0, 0)` });
-            }
-
-            if (opts.dotsVerticalOffset && !opts.dotsHorizontalOffset) {
-                dotsHasTransform
-                    ? $dotsEl.css({ top: `calc(50% - ${opts.dotsVerticalOffset})` })
-                    : $dotsEl.css({ transform: `translate3d(0, ${opts.dotsVerticalOffset}, 0)` });
-            }
-
-            if (opts.dotsVerticalOffset && opts.dotsHorizontalOffset) {
-                $dotsEl.css({ transform: `translate3d(${opts.dotsHorizontalOffset}, ${opts.dotsVerticalOffset}, 0)` });
-            }
-
-            return this;
-        }
-
-        carouselNavigate() {
-            const self = this;
-            const $el = this.options.wrapper;
-            const id = $el.attr('id');
-            if (!id || !$('[data-carousel-navigate]').get(0)) return this;
-
-            const navSel = `[data-carousel-navigate-id="#${id}"]`;
-
-            $(navSel).each(function() {
-                const $this = $(this);
-                const toIdx = parseInt($this.data('carousel-navigate-to'), 10) - 1;
-                $this.on('click.carousel', () => self.to(toIdx));
-            });
-
-            $el[0].addEventListener('ts.carousel.change', () => $(navSel).removeClass('active'));
-            $el[0].addEventListener('ts.carousel.changed', (e) => {
-                $(`${navSel}[data-carousel-navigate-to="${e.detail.item.index + 1}"]`).addClass('active');
-            });
-
-            return this;
         }
 
         events() {
             const self = this;
-            const $el = this.$el;
+            const $el  = this.$el;
             const opts = this.options;
-            const ns = `.carousel-${this._uid}`;
+            const ns   = `.tsc-${this._uid}`;
 
-            this.$prev.on(`click${ns}`, (e) => {
+            // Prev / next buttons
+            this.$prev.on(`click${ns}`, e => {
                 e.preventDefault();
-                self._stopAutoplay();
-                self._prev();
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+                self._navigate(-1);
+            });
+            this.$next.on(`click${ns}`, e => {
+                e.preventDefault();
+                self._navigate(1);
             });
 
-            this.$next.on(`click${ns}`, (e) => {
-                e.preventDefault();
-                self._stopAutoplay();
-                self._next();
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
-            });
-
-            this.$dots.on(`click${ns}`, '.owl-dot', function() {
-                self._stopAutoplay();
+            // Dot clicks
+            this.$dots.on(`click${ns}`, '.tsc-dot', function() {
                 self.to($(this).index());
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
             });
 
+            // Thumbnail clicks (both inline and external containers use the same $thumbs ref)
+            if (this.$thumbs) {
+                this.$thumbs.on(`click${ns}`, '.tsc-thumb', function() {
+                    self.to($(this).index());
+                });
+            }
+
+            // Keyboard navigation
+            if (opts.keyboard) {
+                $el.attr('tabindex', '0');
+                $el.on(`keydown${ns}`, e => {
+                    const k     = e.key;
+                    const vert  = opts.vertical;
+                    const prev  = vert ? 'ArrowUp'   : 'ArrowLeft';
+                    const next  = vert ? 'ArrowDown'  : 'ArrowRight';
+                    if (k === prev)   { e.preventDefault(); self._navigate(-1); }
+                    if (k === next)   { e.preventDefault(); self._navigate(1);  }
+                    if (k === 'Home') { e.preventDefault(); self.to(0); }
+                    if (k === 'End')  { e.preventDefault(); self.to(self.slideCount - 1); }
+                });
+            }
+
+            // Hover pause
+            if (opts.autoplay && opts.pauseOnHover) {
+                $el.on(`mouseenter${ns}`, () => { self._hovering = true;  self._applyPlayState(); });
+                $el.on(`mouseleave${ns}`, () => { self._hovering = false; self._applyPlayState(); });
+            }
+
+            // Focus pause (helps keyboard users)
+            if (opts.autoplay && opts.pauseOnFocus) {
+                $el.on(`focusin${ns}`,  () => { self._focused = true;  self._applyPlayState(); });
+                $el.on(`focusout${ns}`, () => { self._focused = false; self._applyPlayState(); });
+            }
+
+            // Page Visibility API pause
+            if (opts.autoplay && opts.pauseOnVisibility) {
+                this._onVisChange = () => {
+                    self._docHidden = document.hidden;
+                    self._applyPlayState();
+                };
+                document.addEventListener('visibilitychange', this._onVisChange);
+            }
+
+            // Drag / swipe
             this._setupDrag();
 
-            if (opts.keyboard) {
-                $(document).on(`keydown${ns}`, (e) => {
-                    if (e.key === 'ArrowLeft') self._prev();
-                    if (e.key === 'ArrowRight') self._next();
-                });
-            }
-
-            if (opts.autoplayHoverPause && opts.autoplay) {
-                $el.on(`mouseenter${ns}`, () => self._stopAutoplay());
-                $el.on(`mouseleave${ns}`, () => self._startAutoplay());
-            }
-
-            // Responsive relayout via ResizeObserver; fallback to debounced window resize
+            // Responsive relayout via ResizeObserver
             if (window.ResizeObserver) {
                 this._resizeObs = new ResizeObserver(() => {
-                    self._layout(false);
-                    self._updateActive();
-                    self._updateDots();
+                    if (opts.transition === 'slide') {
+                        self._layout(false);
+                        self._updateActive();
+                        self._updateNavState();
+                    }
                 });
-                this._resizeObs.observe(this.$stageOuter[0]);
+                this._resizeObs.observe(this.$trackOuter[0]);
             } else {
                 let resizeTimer;
                 $(window).on(`resize${ns}`, () => {
                     clearTimeout(resizeTimer);
                     resizeTimer = setTimeout(() => {
-                        self._layout(false);
-                        self._updateActive();
-                        self._updateDots();
+                        if (opts.transition === 'slide') {
+                            self._layout(false);
+                            self._updateActive();
+                            self._updateNavState();
+                        }
                     }, 150);
                 });
             }
 
-            // AnimateIn/AnimateOut support for appear-animation plugins inside the carousel
+            // PluginAnimate integration: re-trigger appear animations on active slides
             if (opts.animateIn || opts.animateOut) {
-                $el[0].addEventListener('ts.carousel.change', () => {
-                    $el.find('[data-appear-animation], [data-plugin-animated-letters]').addClass('d-none');
-                    $el.find('[data-plugin-animated-letters]').trigger('animated.letters.destroy');
-                    $el.find('.owl-item:not(.active) [data-carousel-onchange-show]').removeClass('d-none');
-                });
-
                 $el[0].addEventListener('ts.carousel.changed', () => {
-                    setTimeout(() => {
-                        $el.find('[data-appear-animation]').each(function() {
-                            const $this = $(this);
-                            const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+                    $el.find('.tsc-item.tsc-active [data-appear-animation]').each(function() {
+                        const $this      = $(this);
+                        const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+                        if (typeof $.fn.themestrapPluginAnimate === 'function') {
                             $this.themestrapPluginAnimate(pluginOpts);
-                        });
-                        $el.find('.owl-item.active [data-appear-animation], .owl-item.active [data-plugin-animated-letters]').removeClass('d-none');
-                        $el.find('.owl-item.active [data-plugin-animated-letters]').trigger('animated.letters.initialize');
-                        $el.find('.owl-item.cloned.active [data-plugin-video-background]').trigger('video.background.initialize');
-                    }, 10);
+                        }
+                    });
                 });
             }
 
-            // Re-run icon plugin on cloned items when they become active
+            // Re-run PluginIcon on cloned items when they activate
             if ($el.find('[data-icon]').length) {
-                $el[0].addEventListener('ts.carousel.change', () => {
-                    $el.find('.owl-item.cloned [data-icon]').each(function() {
-                        const $this = $(this);
+                $el[0].addEventListener('ts.carousel.changed', () => {
+                    $el.find('.tsc-clone.tsc-active [data-icon]').each(function() {
+                        const $this      = $(this);
                         const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
-                        if (typeof $.fn.themestrapPluginIcon === 'function') $this.themestrapPluginIcon(pluginOpts);
+                        if (typeof $.fn.themestrapPluginIcon === 'function') {
+                            $this.themestrapPluginIcon(pluginOpts);
+                        }
                     });
                 });
             }
@@ -585,25 +912,67 @@
             return this;
         }
 
+        // Public: navigate to a specific 0-based real slide index
+        to(index) {
+            const opts    = this.options;
+            const count   = this.slideCount;
+            const realIdx = ((index % count) + count) % count;
+
+            if (opts.transition !== 'slide') {
+                this._slideFade(realIdx, true);
+            } else {
+                this._slide(this.clonedBefore + realIdx, true);
+            }
+
+            if (opts.progressBar) this._resetProgress();
+            if (opts.autoplay && this.isPlaying) this._startProgress();
+            return this;
+        }
+
+        next()  { this._navigate(1);  return this; }
+        prev()  { this._navigate(-1); return this; }
+
+        play() {
+            this.isPlaying = true;
+            this.$track.attr('aria-live', 'off');
+            this._applyPlayState();
+            return this;
+        }
+
+        pause() {
+            this.isPlaying = false;
+            this.$track.attr('aria-live', 'polite');
+            this._applyPlayState();
+            return this;
+        }
+
         destroy() {
-            const ns = `.carousel-${this._uid}`;
+            const ns = `.tsc-${this._uid}`;
 
-            this._stopAutoplay();
-
-            if (this._resizeObs) this._resizeObs.disconnect();
-            if (this._mouseMoveHandler) document.removeEventListener('mousemove', this._mouseMoveHandler);
-            if (this._mouseUpHandler) document.removeEventListener('mouseup', this._mouseUpHandler);
+            if (this.autoplayTimer) clearInterval(this.autoplayTimer);
+            if (this._resizeObs)   this._resizeObs.disconnect();
+            if (this._onVisChange) document.removeEventListener('visibilitychange', this._onVisChange);
+            if (this._onDocMove)   document.removeEventListener('mousemove', this._onDocMove);
+            if (this._onDocUp)     document.removeEventListener('mouseup',   this._onDocUp);
 
             $(window).off(ns);
-            $(document).off(ns);
             this.$el.off(ns);
-            $('[data-carousel-navigate]').off('.carousel');
+            if (this.$thumbs) this.$thumbs.off(ns);
+
+            // Remove inline thumbnail strip from DOM
+            if (this.$thumbs && !this.options.thumbsEl) {
+                this.$thumbs.remove();
+            }
 
             this.$el.html(this.initialHTML);
-            this.$el.removeClass('owl-themestrap owl-loaded owl-loading owl-carousel-init owl-drag');
-            this.$el.removeData(instanceName);
+            this.$el
+                .removeClass('tsc-carousel tsc-loaded tsc-vertical tsc-rtl tsc-no-loop tsc-dots-line tsc-dots-number')
+                .removeAttr('role aria-roledescription aria-label tabindex style')
+                .css({ overflow: '' })
+                .removeData(instanceName);
 
             PluginCarousel.instances = Math.max(0, PluginCarousel.instances - 1);
+
             if (PluginCarousel.instances === 0) {
                 const styleEl = document.getElementById(STYLE_ID);
                 if (styleEl) styleEl.remove();
@@ -613,778 +982,444 @@
         }
     }
 
-    PluginCarousel.instances = 0;
+    PluginCarousel.instances   = 0;
     PluginCarousel._uidCounter = 0;
 
     PluginCarousel.defaults = {
-        items: 4,
-        loop: true,
-        responsive: {
-            0:    { items: 1 },
-            479:  { items: 1 },
-            768:  { items: 2 },
-            979:  { items: 3 },
-            1199: { items: 4 }
-        },
-        nav: true,
-        navText: [],
-        dots: true,
-        smartSpeed: 250,
-        autoplay: false,
-        autoplayTimeout: 5000,
-        autoplayHoverPause: false,
-        mouseDrag: true,
+        // Core
+        items:      1,
+        loop:       true,
+        transition: 'slide',   // 'slide' | 'fade' | 'zoom'
+        speed:      500,
+        easing:     'cubic-bezier(0.4, 0, 0.2, 1)',
+        group:      1,         // slides to advance per interaction
+
+        // Responsive breakpoints (slide mode only)
+        responsive: {},
+
+        // Autoplay
+        autoplay:           false,
+        autoplaySpeed:      5000,
+        pauseOnHover:       true,
+        pauseOnFocus:       true,
+        pauseOnVisibility:  true,
+
+        // Navigation
+        nav:              true,
+        navText:          [],
+        dots:             true,
+        dotType:          'default',  // 'default' | 'line' | 'number'
+        counter:          false,
+        progressBar:      false,
+        progressPosition: 'bottom',   // 'top' | 'bottom'
+
+        // Thumbnails
+        thumbs:   false,
+        thumbsEl: null,   // CSS selector for an external thumbnail container
+
+        // Interaction
         touchDrag: true,
+        mouseDrag: true,
+        keyboard:  true,
+
+        // Layout
+        rtl:          false,
+        vertical:     false,
         stagePadding: 0,
-        autoHeight: false,
-        rtl: false,
-        animateIn: null,
+        gap:          0,
+        autoHeight:   false,
+
+        // Media
+        lazyLoad:   true,
+        pauseMedia: false,
+
+        // PluginAnimate compatibility
+        animateIn:  null,
         animateOut: null,
-        keyboard: false,
-        refresh: false
+
+        // ARIA
+        ariaLabel: 'Carousel',
+
+        // Init system
+        forceInit: false,
+        accY:      0
     };
 
     PluginCarousel.css = `
-/* Carousel */
-.owl-carousel {
+.tsc-carousel {
+    --tsc-speed:               500ms;
+    --tsc-easing:              cubic-bezier(0.4, 0, 0.2, 1);
+    --tsc-nav-size:            46px;
+    --tsc-nav-offset:          -23px;
+    --tsc-nav-bg:              rgba(0,0,0,.5);
+    --tsc-nav-bg-hover:        rgba(0,0,0,.78);
+    --tsc-nav-color:           #fff;
+    --tsc-nav-radius:          50%;
+    --tsc-nav-icon:            20px;
+    --tsc-nav-border:          none;
+    --tsc-nav-shadow:          0 2px 8px rgba(0,0,0,.25);
+    --tsc-dot-size:            8px;
+    --tsc-dot-gap:             8px;
+    --tsc-dot-color:           rgba(0,0,0,.22);
+    --tsc-dot-active-color:    var(--primary, #0d6efd);
+    --tsc-dot-line-w:          22px;
+    --tsc-dot-line-h:          3px;
+    --tsc-dot-num-size:        28px;
+    --tsc-progress-h:          3px;
+    --tsc-progress-bg:         rgba(0,0,0,.1);
+    --tsc-progress-color:      var(--primary, #0d6efd);
+    --tsc-counter-color:       var(--grey-600, #6c757d);
+    --tsc-thumb-size:          72px;
+    --tsc-thumb-gap:           6px;
+    --tsc-thumb-radius:        6px;
+    --tsc-thumb-opacity:       .5;
+    --tsc-thumb-opacity-hover: 1;
+    --tsc-thumb-border:        2px solid transparent;
+    --tsc-thumb-border-active: 2px solid var(--primary, #0d6efd);
+    --tsc-gap:                 0px;
+
     position: relative;
     z-index: 1;
-    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
     touch-action: pan-y;
-}
-.owl-carousel .owl-stage {
-    position: relative;
-    will-change: transform;
-}
-.owl-carousel .owl-stage::after {
-    content: "";
-    display: block;
-    clear: both;
-}
-.owl-carousel .owl-stage-outer {
-    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
     overflow: hidden;
 }
-.owl-carousel .owl-item {
+.tsc-carousel.tsc-loaded {
+    opacity: 1;
+    transition: opacity .25s ease;
+}
+.tsc-carousel.tsc-vertical {
+    touch-action: pan-x;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+.tsc-carousel.tsc-vertical .tsc-track-outer {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+}
+.tsc-carousel.tsc-vertical .tsc-item {
+    overflow: hidden;
+}
+
+.tsc-track-outer {
     position: relative;
-    float: left;
-    min-height: 1px;
+    overflow: hidden;
+    width: 100%;
+}
+.tsc-track {
+    display: flex;
+    will-change: transform;
     backface-visibility: hidden;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
+}
+.tsc-item {
+    flex-shrink: 0;
+    position: relative;
     box-sizing: border-box;
+    -webkit-touch-callout: none;
+    outline: none;
 }
-.owl-carousel .owl-nav .owl-prev,
-.owl-carousel .owl-nav .owl-next,
-.owl-carousel .owl-dots .owl-dot {
+.tsc-item img {
+    max-width: 100%;
+    height: auto;
+    pointer-events: none;
+}
+.tsc-item:focus-visible {
+    outline: 2px solid var(--primary, #0d6efd);
+    outline-offset: -2px;
+}
+.tsc-carousel.tsc-no-loop .tsc-clone {
+    display: none;
+}
+
+/* Navigation */
+.tsc-nav {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+.tsc-btn {
+    pointer-events: all;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tsc-nav-size);
+    height: var(--tsc-nav-size);
+    border-radius: var(--tsc-nav-radius);
+    background: var(--tsc-nav-bg);
+    border: var(--tsc-nav-border);
+    color: var(--tsc-nav-color);
+    box-shadow: var(--tsc-nav-shadow);
     cursor: pointer;
-    user-select: none;
+    padding: 0;
+    line-height: 1;
+    transition: background .2s ease, box-shadow .2s ease, opacity .2s ease;
+    outline: none;
 }
-.owl-carousel .owl-nav button.owl-prev,
-.owl-carousel .owl-nav button.owl-next,
-.owl-carousel .owl-dots button.owl-dot {
+.tsc-btn:hover {
+    background: var(--tsc-nav-bg-hover);
+}
+.tsc-btn:focus-visible {
+    outline: 2px solid var(--tsc-nav-color);
+    outline-offset: 2px;
+}
+.tsc-btn.tsc-btn-disabled {
+    opacity: .3;
+    pointer-events: none;
+}
+.tsc-btn svg {
+    width: var(--tsc-nav-icon);
+    height: var(--tsc-nav-icon);
+    pointer-events: none;
+    display: block;
+}
+.tsc-prev { left:  var(--tsc-nav-offset); }
+.tsc-next { right: var(--tsc-nav-offset); }
+
+.tsc-carousel.tsc-rtl .tsc-prev { left: auto; right: var(--tsc-nav-offset); }
+.tsc-carousel.tsc-rtl .tsc-next { right: auto; left: var(--tsc-nav-offset); }
+
+.tsc-carousel.tsc-vertical .tsc-nav {
+    /* Constrain the absolute overlay to the trackOuter, not the whole carousel */
+    bottom: auto;
+    height: 100%;
+}
+.tsc-carousel.tsc-vertical .tsc-btn {
+    left: 50%;
+    right: auto;
+    top: auto;
+    transform: translateX(-50%);
+}
+/* Buttons sit just inside the track edges rather than outside */
+.tsc-carousel.tsc-vertical .tsc-prev { top: 10px; }
+.tsc-carousel.tsc-vertical .tsc-next { bottom: 10px; }
+
+/* Dots */
+.tsc-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--tsc-dot-gap);
+    padding: 14px 0 4px;
+}
+.tsc-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
-    padding: 0 !important;
-    font: inherit;
+    padding: 4px;
     cursor: pointer;
     outline: none;
 }
-.owl-carousel .owl-nav.disabled,
-.owl-carousel .owl-dots.disabled {
-    display: none;
+.tsc-dot:focus-visible {
+    outline: 2px solid var(--primary, #0d6efd);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
-.owl-carousel .owl-dots .owl-dot span {
+.tsc-dot-pip {
     display: block;
-    background: #d6d6d6;
-    border-radius: 30px;
-    transition: background 200ms ease;
-}
-.owl-carousel.owl-rtl .owl-item { float: right; }
-.owl-carousel.owl-drag .owl-item { touch-action: none; user-select: none; }
-
-/* Carousel — Themestrap skin */
-.owl-carousel {
-    display: block;
-    margin-bottom: 20px;
-    opacity: 0;
-}
-.owl-carousel.owl-loaded {
-    opacity: 1;
-}
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) > div,
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) span {
-    display: none;
-}
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) > div:first-child,
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) span:first-child {
-    display: block;
-}
-.owl-carousel .owl-item img {
-    transform-style: unset;
-}
-.owl-carousel .owl-item img[data-icon] {
-    display: inline;
-}
-.owl-carousel .thumbnail {
-    margin-right: 1px;
-}
-.owl-carousel .item-video {
-    height: 300px;
-}
-.owl-carousel .owl-nav {
-    top: 50%;
-    position: absolute;
-    width: 100%;
-    margin-top: 0;
-    transform: translate3d(0, -50%, 0);
-}
-.owl-carousel .owl-nav button.owl-prev,
-.owl-carousel .owl-nav button.owl-next {
-    display: inline-block;
-    position: absolute;
-    top: 50%;
-    width: 30px;
-    height: 30px;
-    outline: 0;
-    margin: 0;
-    transform: translate3d(0, -50%, 0);
-}
-.owl-carousel .owl-nav button.owl-prev {
-    left: 0;
-}
-.owl-carousel .owl-nav button.owl-prev:before {
-    font-family: 'Font Awesome 7 Free';
-    font-weight: 900;
-    font-size: 11.2px;
-    font-size: 0.7rem;
-    content: "\f053";
-    position: relative;
-    left: -1px;
-    top: -1px;
-}
-.owl-carousel .owl-nav button.owl-next {
-    right: 0;
-}
-.owl-carousel .owl-nav button.owl-next:before {
-    font-family: 'Font Awesome 7 Free';
-    font-weight: 900;
-    font-size: 11.2px;
-    font-size: 0.7rem;
-    content: "\f054";
-    position: relative;
-    left: 1px;
-    top: -1px;
-}
-.owl-carousel.stage-margin .owl-stage-outer {
-    margin-left: 40px !important;
-    margin-right: 40px !important;
-}
-.owl-carousel.stage-margin .owl-stage-outer .owl-stage {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-.owl-carousel.stage-margin.stage-margin-sm .owl-stage-outer {
-    margin-left: 50px !important;
-    margin-right: 50px !important;
-}
-.owl-carousel.stage-margin.stage-margin-md .owl-stage-outer {
-    margin-left: 75px !important;
-    margin-right: 75px !important;
-}
-.owl-carousel.stage-margin.stage-margin-lg .owl-stage-outer {
-    margin-left: 100px !important;
-    margin-right: 100px !important;
-}
-.owl-carousel.top-border {
-    border-top: 1px solid #eaeaea;
-    padding-top: 18px;
-}
-.owl-carousel.nav-remove-prev .owl-nav .owl-prev { display: none; }
-.owl-carousel.nav-remove-next .owl-nav .owl-next { display: none; }
-.owl-carousel.nav-full-height .owl-stage-outer { z-index: 1; }
-.owl-carousel.nav-full-height .owl-nav { height: 100%; }
-.owl-carousel.nav-full-height .owl-nav .owl-next,
-.owl-carousel.nav-full-height .owl-nav .owl-prev { height: 100% !important; }
-.owl-carousel.show-nav-hover .owl-nav {
-    opacity: 0;
-    transition: all 0.2s ease-in-out;
-}
-.owl-carousel.show-nav-hover .owl-nav button.owl-prev {
-    left: 0;
-    transition: all 0.2s ease-in-out;
-}
-.owl-carousel.show-nav-hover .owl-nav button.owl-next {
-    right: 0;
-    transition: all 0.2s ease-in-out;
-}
-.owl-carousel.show-nav-hover:hover .owl-nav { opacity: 1; }
-.owl-carousel.show-nav-hover:hover .owl-nav button.owl-prev { left: -40px; }
-.owl-carousel.show-nav-hover:hover .owl-nav button.owl-next { right: -40px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2:hover .owl-nav button.owl-prev { left: -15px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2:hover .owl-nav button.owl-next { right: -15px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .owl-nav button.owl-prev { left: -20px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .owl-nav button.owl-next { right: -20px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-3:hover .owl-nav button.owl-prev { left: 10px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-3:hover .owl-nav button.owl-next { right: 10px; }
-.owl-carousel.show-nav-title .owl-nav {
-    top: 0;
-    right: 0;
-    margin-top: -25px;
-    width: auto;
-}
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"],
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:active {
-    font-size: 18px;
-    background: transparent !important;
-    width: 18px;
-}
-.owl-carousel.show-nav-title .owl-nav button.owl-prev { left: -40px; }
-.owl-carousel.show-nav-title .owl-nav button.owl-prev:before,
-.owl-carousel.show-nav-title .owl-nav button.owl-prev:after,
-.owl-carousel.show-nav-title .owl-nav button.owl-next:before,
-.owl-carousel.show-nav-title .owl-nav button.owl-next:after { font-size: inherit; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides .owl-nav { width: 100%; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides button.owl-prev { left: 0; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides button.owl-next { right: 0; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides-style-2 .owl-nav { margin-top: 15px; }
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"] {
-    padding: 3px 7px;
+    width: var(--tsc-dot-size);
+    height: var(--tsc-dot-size);
     border-radius: 50%;
-    background: transparent;
-    border: 1px solid #999;
-    color: #999;
+    background: var(--tsc-dot-color);
+    transition: background .25s ease, transform .25s ease, width .25s ease;
 }
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"].hover {
-    background: transparent;
-    border: 1px solid #a1a1a1;
-    color: #a1a1a1;
+.tsc-dot.tsc-dot-active .tsc-dot-pip,
+.tsc-dot:hover .tsc-dot-pip {
+    background: var(--tsc-dot-active-color);
 }
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"]:active,
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"].active {
-    background: transparent;
-    border: 1px solid #666;
-    color: #666;
+.tsc-dot.tsc-dot-active .tsc-dot-pip {
+    transform: scale(1.4);
 }
-.owl-carousel.nav-bottom .owl-stage-outer { margin-bottom: 10px; }
-.owl-carousel.nav-bottom .owl-nav {
-    position: static;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    transform: none;
+
+/* Dot type: line */
+.tsc-dots-line .tsc-dot-pip {
+    width: var(--tsc-dot-line-w);
+    height: var(--tsc-dot-line-h);
+    border-radius: 2px;
+    transform: none !important;
 }
-.owl-carousel.nav-bottom .owl-nav button.owl-prev,
-.owl-carousel.nav-bottom .owl-nav button.owl-next {
-    position: static;
-    transform: none;
+.tsc-dots-line .tsc-dot.tsc-dot-active .tsc-dot-pip {
+    width: calc(var(--tsc-dot-line-w) * 2);
 }
-.owl-carousel.nav-bottom .owl-nav button.owl-prev { margin-right: 5px; }
-.owl-carousel.nav-bottom .owl-nav button.owl-next { margin-left: 5px; }
-.owl-carousel.nav-bottom.nav-bottom-align-left .owl-nav { text-align: left; }
-.owl-carousel.nav-bottom.nav-bottom-align-right .owl-nav { text-align: right; }
-.owl-carousel.nav-bottom-inside .owl-nav {
-    position: relative;
-    margin: -68.8px 0 0 0;
-    margin: -4.3rem 0 0 0;
-    padding: 0;
-    width: auto;
-}
-.owl-carousel.nav-bottom-inside .owl-nav button.owl-prev,
-.owl-carousel.nav-bottom-inside .owl-nav button.owl-next { position: static; }
-.owl-carousel.nav-inside .owl-nav button.owl-prev { left: 15px; }
-.owl-carousel.nav-inside .owl-nav button.owl-next { right: 15px; left: auto; }
-.owl-carousel.nav-inside.nav-inside-edge .owl-nav button.owl-prev { left: 0; }
-.owl-carousel.nav-inside.nav-inside-edge .owl-nav button.owl-next { right: 0; left: auto; }
-.owl-carousel.nav-inside.nav-inside-plus .owl-nav button.owl-prev { left: 30px; }
-.owl-carousel.nav-inside.nav-inside-plus .owl-nav button.owl-next { right: 30px; left: auto; }
-.owl-carousel.nav-inside.nav-bottom .owl-nav {
-    position: absolute;
-    top: auto;
-    bottom: 40px;
-    width: 100%;
-}
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-prev,
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-next { position: relative; }
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-prev { left: 0; }
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-next { right: 0; }
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav { top: auto; bottom: 60px; }
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev,
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next {
-    transform: none;
-    width: 60px !important;
-    height: 60px !important;
-}
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev:before,
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next:before {
-    font-size: 12.8px;
-    font-size: 0.8rem;
-    left: 0;
-    top: 0;
-}
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev { left: -60px; top: -61px; }
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next { left: -60px; }
-@media (max-width: 991px) {
-    .owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev { left: 0; }
-    .owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next { left: 0; }
-}
-.owl-carousel.nav-outside .owl-nav button.owl-prev { left: 0; }
-.owl-carousel.nav-outside .owl-nav button.owl-next { right: 0; }
-@media (min-width: 992px) {
-    .owl-carousel.nav-outside .owl-nav button.owl-prev { left: -50px; }
-    .owl-carousel.nav-outside .owl-nav button.owl-next { right: -50px; }
-}
-.owl-carousel.nav-position-1 .owl-nav button.owl-prev { left: 20px; }
-.owl-carousel.nav-position-1 .owl-nav button.owl-next { right: 20px; }
-.owl-carousel.nav-icon-1 .owl-nav .owl-next:before { content: "\f061"; }
-.owl-carousel.nav-icon-1 .owl-nav .owl-prev:before { content: "\f060"; }
-.owl-carousel.nav-size-md .owl-nav .owl-next,
-.owl-carousel.nav-size-md .owl-nav .owl-prev { width: 40px; height: 40px; }
-.owl-carousel.nav-size-md .owl-nav .owl-next:before,
-.owl-carousel.nav-size-md .owl-nav .owl-prev:before { top: 0; font-size: 12px; font-size: 0.75rem; }
-.owl-carousel.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev {
-    width: 20px;
-    background: transparent !important;
-    color: #000;
-}
-.owl-carousel.nav-style-1 .owl-nav .owl-next:hover,
-.owl-carousel.nav-style-1 .owl-nav .owl-next:active,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:hover,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:active { color: var(--grey-500); }
-.owl-carousel.nav-style-1 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-1 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:after { font-size: inherit; }
-.owl-carousel.nav-style-2 .owl-nav .owl-next,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev { background: transparent !important; }
-.owl-carousel.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:before {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 1px;
-    width: 1.3em;
-    height: 1.3em;
-    border-top: 2px solid var(--grey-500);
-    border-left: 2px solid var(--grey-500);
-    font-size: inherit;
-    transform: translate3d(0, -50%, 0) rotate(-45deg);
-}
-.owl-carousel.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:after {
-    content: '';
-    display: block;
-    border-top: 3px solid var(--grey-500);
-    width: 2.5em;
-    position: absolute;
-    top: 50%;
-    font-size: inherit;
-    transform: translate3d(0, -50%, 0);
-}
-.owl-carousel.nav-style-2 .owl-nav .owl-next {
-    transform: rotate(180deg) !important;
-    transform-origin: 15px 8px;
-}
-.owl-carousel.nav-style-2.nav-bottom.nav-inside .owl-nav .owl-next { transform-origin: 15px; }
-.owl-carousel.nav-style-3 .owl-nav { top: 25%; }
-.owl-carousel.nav-style-3 .owl-nav .owl-next,
-.owl-carousel.nav-style-3 .owl-nav .owl-prev {
-    width: 30px;
-    background: transparent !important;
-    color: var(--grey-500);
-}
-.owl-carousel.nav-style-3 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-3 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-3 .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-3 .owl-nav .owl-prev:after { font-size: 1.5em; }
-.owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 75px; }
-@media (max-width: 991px) { .owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 40px; } }
-@media (max-width: 767px) { .owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 13px; } }
-.owl-carousel.nav-style-4 .owl-nav .owl-next { right: 75px; }
-@media (max-width: 991px) { .owl-carousel.nav-style-4 .owl-nav .owl-next { right: 40px; } }
-@media (max-width: 767px) { .owl-carousel.nav-style-4 .owl-nav .owl-next { right: 13px; } }
-.owl-carousel.nav-style-4 .owl-nav .owl-prev,
-.owl-carousel.nav-style-4 .owl-nav .owl-next {
-    background: var(--light);
-    font-size: 11.2px;
-    font-size: 0.7rem;
-    width: 40px;
-    height: 40px;
-    color: #000;
-    border-radius: 100%;
-    box-shadow: 0px 0px 40px -10px rgba(0, 0, 0, 0.3);
-}
-.owl-carousel.nav-style-4 .owl-nav .owl-prev:hover,
-.owl-carousel.nav-style-4 .owl-nav .owl-next:hover { color: var(--light); }
-.owl-carousel.nav-style-4.nav-style-4-pos-2 .owl-nav .owl-prev { left: 0px; }
-.owl-carousel.nav-style-4.nav-style-4-pos-2 .owl-nav .owl-next { right: 0px; }
-.owl-carousel.nav-style-diamond .owl-nav .owl-prev,
-.owl-carousel.nav-style-diamond .owl-nav .owl-next {
-    transform: rotate(45deg);
-    transform-origin: 100% 0%;
-}
-.owl-carousel.nav-style-diamond .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-diamond .owl-nav .owl-next:before {
-    display: block;
-    transform: rotate(-45deg);
-    transform-origin: 60% 50%;
-}
-.owl-carousel.nav-style-diamond .owl-nav .owl-next:before { transform-origin: 50%; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next { width: 35px; height: 35px; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev:before,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next:before { content: none; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg { width: 2em; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg polygon { fill: #FFF; stroke: #FFF; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg { transform: rotate(180deg); }
-.owl-carousel.nav-arrows-1 .owl-nav .owl-prev,
-.owl-carousel.nav-arrows-1 .owl-nav .owl-next {
-    width: 35px;
-    height: 35px;
-    font-size: 19.2px;
-    font-size: 1.2rem;
-    background: transparent;
-}
-.owl-carousel.nav-arrows-1 .owl-nav .owl-next:before { content: '\f061'; font-size: inherit; }
-.owl-carousel.nav-arrows-1 .owl-nav .owl-prev:before { content: '\f060'; font-size: inherit; }
-.owl-carousel.nav-arrows-2 .owl-nav .owl-prev,
-.owl-carousel.nav-arrows-2 .owl-nav .owl-next {
-    width: 35px;
-    height: 35px;
-    font-size: 19.2px;
-    font-size: 1.2rem;
-    background: transparent;
-}
-.owl-carousel.nav-arrows-2 .owl-nav .owl-next:before { content: '\f101'; font-size: inherit; }
-.owl-carousel.nav-arrows-2 .owl-nav .owl-prev:before { content: '\f100'; font-size: inherit; }
-.owl-carousel.nav-arrows-thin .owl-nav .owl-prev:before,
-.owl-carousel.nav-arrows-thin .owl-nav .owl-next:before {
-    font-family: simple-line-icons;
-    speak: none;
-    font-style: normal;
-    font-weight: 700;
-    font-variant: normal;
-    text-transform: none;
+
+/* Dot type: number */
+.tsc-dots-number .tsc-dot {
+    width: var(--tsc-dot-num-size);
+    height: var(--tsc-dot-num-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--tsc-dot-color);
+    color: var(--tsc-dot-color);
+    font-size: .7rem;
+    font-weight: 600;
     line-height: 1;
-    -webkit-font-smoothing: antialiased;
+    padding: 0;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
 }
-.owl-carousel.nav-arrows-thin .owl-nav .owl-next:before { content: "\e606"; font-size: inherit; }
-.owl-carousel.nav-arrows-thin .owl-nav .owl-prev:before { content: "\e605"; font-size: inherit; }
-.owl-carousel.nav-center-images-only .owl-nav { top: 37%; }
-.owl-carousel.nav-center-outside .owl-nav {
-    width: calc(100% + 90px);
-    left: 49.9%;
-    transform: translate3d(-50%, 0, 0);
+.tsc-dots-number .tsc-dot.tsc-dot-active {
+    background: var(--tsc-dot-active-color);
+    border-color: var(--tsc-dot-active-color);
+    color: #fff;
 }
-.owl-carousel.full-width .owl-nav button[class*="owl-"],
-.owl-carousel.full-width .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.big-nav .owl-nav button[class*="owl-"],
-.owl-carousel.big-nav .owl-nav button[class*="owl-"]:hover { height: auto; padding: 20px 0 !important; }
-.owl-carousel.full-width .owl-nav button.owl-prev,
-.owl-carousel.big-nav .owl-nav button.owl-prev { border-radius: 0 4px 4px 0; }
-.owl-carousel.full-width .owl-nav button.owl-next,
-.owl-carousel.big-nav .owl-nav button.owl-next { border-radius: 4px 0 0 4px; }
-.owl-carousel.nav-squared .owl-nav button[class*="owl-"] { border-radius: 0; }
-.owl-carousel.nav-rounded .owl-nav button[class*="owl-"] { border-radius: 50%; }
-.owl-carousel.nav-sm .owl-nav button.owl-prev,
-.owl-carousel.nav-sm .owl-nav button.owl-next { width: 30px !important; height: 30px !important; }
-.owl-carousel.nav-md .owl-nav button.owl-prev,
-.owl-carousel.nav-md .owl-nav button.owl-next { width: 40px; height: 40px; }
-.owl-carousel.nav-lg .owl-nav button.owl-prev,
-.owl-carousel.nav-lg .owl-nav button.owl-next { width: 45px; height: 60px; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev,
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next { width: 55px; height: 55px; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev:before,
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next:before { font-size: 14.4px; font-size: 0.9rem; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev:before { top: -1px; left: -1px; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next:before { top: -1px; left: 1px; }
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-next { font-size: 10px; }
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-next:before { font-size: inherit; }
-.owl-carousel.nav-font-size-md .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-md .owl-nav button.owl-next { font-size: 14px; }
-.owl-carousel.nav-font-size-md .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-md .owl-nav button.owl-next:before { font-size: inherit; }
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-next { font-size: 19px; }
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-next:before { font-size: inherit; left: 2px; }
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-next { font-size: 25px; }
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-next:before { font-size: inherit; left: 2px; }
-.owl-carousel.nav-transparent .owl-nav button[class*="owl-"] {
-    background-color: transparent !important;
-    color: var(--dark) !important;
+
+/* Counter */
+.tsc-counter {
+    text-align: center;
+    padding: 8px 0 4px;
+    font-size: .82rem;
+    color: var(--tsc-counter-color);
+    letter-spacing: .06em;
+    line-height: 1;
 }
-.owl-carousel.nav-transparent .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.nav-transparent .owl-nav button[class*="owl-"]:active {
-    background-color: transparent !important;
-    border-color: transparent !important;
-}
-.owl-carousel.nav-borders .owl-nav button[class*="owl-"] { border-color: var(--dark-rgba-10) !important; }
-.owl-carousel.nav-borders .owl-nav button[class*="owl-"]:hover { border-color: var(--dark-rgba-10) !important; }
-.owl-carousel.nav-borders .owl-nav button[class*="owl-"]:active { border-color: var(--dark-rgba-30) !important; }
-.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"] { border-color: var(--light-rgba-20) !important; }
-.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"]:hover { border-color: var(--light-rgba-20) !important; }
-.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"]:active { border-color: var(--light-rgba-30) !important; }
-.owl-carousel.nav-arrow-light .owl-nav .owl-next:before,
-.owl-carousel.nav-arrow-light .owl-nav .owl-next:after,
-.owl-carousel.nav-arrow-light .owl-nav .owl-prev:before,
-.owl-carousel.nav-arrow-light .owl-nav .owl-prev:after { color: var(--light) !important; }
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"] {
-    background-color: var(--grey-100) !important;
-    border-color: var(--grey-100) !important;
-    color: var(--dark) !important;
-}
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"]:hover {
-    background-color: var(--light) !important;
-    border-color: var(--light) !important;
-}
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"]:active {
-    background-color: var(--grey-200) !important;
-    border-color: var(--grey-200) !important;
-}
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav button[class*="owl-"] {
-    width: 35px;
-    height: 45px;
-    background-color: var(--dark-rgba-10) !important;
-    border-color: transparent !important;
-}
-.owl-carousel.nav-light.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-light.nav-style-1 .owl-nav .owl-prev { color: var(--light) !important; }
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-prev:before,
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--light) !important; }
-.owl-carousel.nav-light.nav-style-3 .owl-nav .owl-next,
-.owl-carousel.nav-light.nav-style-3 .owl-nav .owl-prev { color: var(--light) !important; }
-.owl-carousel.nav-light.nav-svg-arrows-1 .owl-nav .owl-next svg polygon,
-.owl-carousel.nav-light.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon { fill: #FFF !important; stroke: #FFF !important; }
-.owl-carousel.nav-light.nav-arrows-1 .owl-nav .owl-next,
-.owl-carousel.nav-light.nav-arrows-1 .owl-nav .owl-prev { color: var(--light) !important; }
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev {
-    background-color: var(--dark--100) !important;
-    border-color: var(--dark--100) var(--dark--100) var(--dark--100) !important;
-    color: var(--light) !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next:hover,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev:hover {
-    background-color: var(--dark--100) !important;
-    border-color: var(--dark--100) !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next:active,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev:active {
-    background-color: var(--dark) !important;
-    border-color: var(--dark) !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-next,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-prev {
-    width: 35px;
-    height: 45px;
-    background-color: rgba(var(--dark--100), 0.4) !important;
-    border-color: transparent !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-next:hover,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-prev:hover {
-    background-color: rgba(var(--dark--100), 1) !important;
-}
-.owl-carousel.nav-dark.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-dark.nav-style-1 .owl-nav .owl-prev { color: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-prev:before,
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-style-3 .owl-nav .owl-next,
-.owl-carousel.nav-dark.nav-style-3 .owl-nav .owl-prev { color: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-svg-arrows-1 .owl-nav .owl-next svg polygon,
-.owl-carousel.nav-dark.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon { fill: var(--dark) !important; stroke: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-arrows-1 .owl-nav .owl-next,
-.owl-carousel.nav-dark.nav-arrows-1 .owl-nav .owl-prev { color: var(--dark) !important; }
-.owl-carousel .owl-dots .owl-dot { outline: 0; }
-.owl-carousel .owl-dots .owl-dot span { width: 8px; height: 8px; margin: 5px 4px; }
-.owl-carousel.dots-inside .owl-dots { position: absolute; bottom: 2px; right: 10px; margin-top: 0; }
-.owl-carousel.dots-title .owl-dots { position: absolute; margin-top: 0 !important; top: -51px; left: 155px; }
-.owl-carousel.dots-title .owl-dots .owl-dot span { width: 8px; height: 8px; margin: 5px 4px; }
-.owl-carousel.dots-title.dots-title-pos-2 .owl-dots { left: 235px; }
-.owl-carousel.dots-light .owl-dots .owl-dot span { background: rgba(255, 255, 255, 0.6); }
-.owl-carousel.dots-light .owl-dots .owl-dot.active span,
-.owl-carousel.dots-light .owl-dots .owl-dot:hover span { background: #FFF !important; }
-.owl-carousel.dots-dark .owl-dots .owl-dot span { background: rgba(33, 33, 33, 0.6); }
-.owl-carousel.dots-dark .owl-dots .owl-dot.active span,
-.owl-carousel.dots-dark .owl-dots .owl-dot:hover span { background: #212121 !important; }
-.owl-carousel.dots-morphing .owl-dots .owl-dot span { width: 20px; height: 6px; transition: ease width 300ms; }
-.owl-carousel.dots-morphing .owl-dots .owl-dot.active span,
-.owl-carousel.dots-morphing .owl-dots .owl-dot:hover span { width: 40px; }
-.owl-carousel.dots-modern .owl-dots { display: flex; align-items: center; justify-content: center; }
-.owl-carousel.dots-modern .owl-dots .owl-dot { display: flex; align-items: center; justify-content: center; margin: 0 2px; }
-.owl-carousel.dots-modern .owl-dots .owl-dot span { width: 4px; height: 4px; transition: ease all 300ms 300ms; }
-.owl-carousel.dots-modern .owl-dots .owl-dot.active span { transition: ease all 300ms; transform: scale(2); }
-.owl-carousel.dots-modern.dots-modern-lg .owl-dots .owl-dot { margin: 0 3px; }
-.owl-carousel.dots-modern.dots-modern-lg .owl-dots .owl-dot span { width: 6px; height: 6px; }
-.owl-carousel.dots-orientation-portrait .owl-dots { display: flex; flex-direction: column; margin-left: 15px !important; margin-right: 15px !important; }
-.owl-carousel.dots-align-left .owl-dots { text-align: left; justify-content: flex-start; }
-.owl-carousel.dots-align-right .owl-dots { text-align: left; }
-.owl-carousel.dots-horizontal-center .owl-dots { left: 0; right: 0; width: 100%; }
-.owl-carousel.dots-vertical-center .owl-dots { top: 50%; bottom: auto; margin: 0; transform: translate3d(0, -50%, 0); }
-@media (max-width: 575px) {
-    .owl-carousel.show-dots-xs .owl-dots { opacity: 1 !important; visibility: visible !important; }
-}
-@media (min-width: 576px) and (max-width: 767px) {
-    .owl-carousel.show-dots-sm .owl-dots { opacity: 1 !important; visibility: visible !important; }
-}
-@media (min-width: 768px) and (max-width: 991px) {
-    .owl-carousel.show-dots-md .owl-dots { opacity: 1 !important; visibility: visible !important; }
-}
-.owl-carousel.show-dots-hover .owl-dots { opacity: 0; visibility: hidden; transition: ease opacity 300ms; }
-.owl-carousel.show-dots-hover:hover .owl-dots { opacity: 1; visibility: visible; }
-.owl-carousel.carousel-shadow-1 { position: relative; }
-.owl-carousel.carousel-shadow-1:before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 65%;
-    height: 0px;
-    box-shadow: 0 0 110px 180px rgba(0, 0, 0, 0.04);
-    transform: translate3d(-50%, -50%, 0);
-    z-index: 0;
-}
-.owl-carousel.carousel-shadow-1.carousel-shadow-1-bold:before { box-shadow: 0 0 110px 230px rgba(0, 0, 0, 0.04); }
-.owl-carousel .img-thumbnail.img-thumbnail-hover-icon { display: block; }
-.owl-carousel.carousel-right-side-nav { width: calc(100% - 55px); }
-.owl-carousel.carousel-right-side-nav .owl-nav .owl-next { width: 55px; transform: translate3d(100%, -50%, 0); }
-.owl-carousel.carousel-bottom-inside-shadow .owl-stage-outer:after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 35%;
+.tsc-counter-n { font-weight: 700; }
+.tsc-counter-sep,
+.tsc-counter-total { opacity: .55; }
+
+/* Progress bar */
+.tsc-progress {
     width: 100%;
-    background-image: linear-gradient(360deg, var(--grey-500) 0%, transparent 100%);
+    height: var(--tsc-progress-h);
+    background: var(--tsc-progress-bg);
+    overflow: hidden;
+    flex-shrink: 0;
 }
-.owl-carousel [class*="opacity-"]:not([class*="opacity-hover"]) { transition: ease opacity 300ms; }
-.owl-carousel [class*="opacity-"]:not([class*="opacity-hover"]):hover { opacity: 1 !important; }
-@media (min-width: 576px) {
-    .owl-carousel.carousel-sync-style-1 {
-        position: absolute;
-        top: 50%;
-        left: -30px;
-        max-width: 355px;
-        transform: translate3d(0, -50%, 0);
-    }
+.tsc-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--tsc-progress-color);
 }
-.owl-carousel-spaced { margin-left: -5px; }
-.owl-carousel-spaced .owl-item > div { margin: 5px; }
-.owl-carousel.testimonials img { display: inline-block; height: 70px; width: 70px; }
-@media (max-width: 575px) { .owl-carousel-spaced { margin-left: 0; } }
-.carousel-half-full-width-wrapper > .owl-carousel { width: 100%; }
-@media (min-width: 576px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 540px) / 2)); } }
-@media (min-width: 768px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 720px) / 2)); } }
-@media (min-width: 992px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 960px) / 2)); } }
-@media (min-width: 1200px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 1140px) / 2)); } }
-.carousel-half-full-width-wrapper > .owl-carousel .owl-stage-outer { margin-bottom: 20px; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left { direction: rtl; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav { display: flex; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav .owl-prev { order: 2; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav .owl-next { order: 1; }
-.carousel-areas {
-    background: #f2f2f2;
-    background: linear-gradient(to bottom, #f2f2f2 0%, rgba(33, 37, 41, 0.5) 100%);
-    margin-bottom: -10px;
-    padding: 8px 8px 0 8px;
-    border-radius: 6px 6px 0 0;
-    box-shadow: 0px 0px 50px 20px rgba(0, 0, 0, 0.07);
+
+/* Thumbnail strip */
+.tsc-thumbs {
+    display: flex;
+    gap: var(--tsc-thumb-gap);
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 8px 0 0;
 }
-.carousel-areas .owl-carousel { box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2); }
-.carousel-areas .owl-carousel .owl-nav button.owl-prev { left: -55px; }
-.carousel-areas .owl-carousel .owl-nav button.owl-next { right: -55px; }
-.carousel-areas .owl-carousel:first-child img { border-radius: 6px 6px 0 0; }
-@media (max-width: 991px) { .carousel-areas .owl-carousel .owl-nav { display: none; } }
-.owl-carousel.carousel-center-active-item .owl-item { opacity: 0.2; transition: ease opacity 300ms; }
-.owl-carousel.carousel-center-active-item .owl-item.current { opacity: 1 !important; }
-.owl-carousel.carousel-center-active-item.carousel-center-active-item-style-2 .owl-item { opacity: 0.7; }
-.owl-carousel.carousel-center-active-item-2 .owl-stage-outer { overflow: visible; }
-.owl-carousel.carousel-center-active-item-2 .owl-item > div {
-    width: 66.6666%;
-    margin-left: auto;
-    padding: 48px;
-    padding: 3rem;
-    background: var(--light);
-    border-radius: 7px;
-    box-shadow: 0px 0px 70px -40px rgba(0, 0, 0, 0.2);
+.tsc-thumb {
+    flex: 0 0 var(--tsc-thumb-size);
+    width: var(--tsc-thumb-size);
+    height: var(--tsc-thumb-size);
+    border-radius: var(--tsc-thumb-radius);
+    border: var(--tsc-thumb-border);
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
+    opacity: var(--tsc-thumb-opacity);
+    background: var(--grey-200, #e9ecef);
+    transition: opacity .2s ease, border-color .2s ease;
+    outline: none;
 }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active > div { margin-right: auto; }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active > div * { color: var(--light) !important; }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active + .owl-item > div { margin-right: auto; margin-left: 0; }
-.owl-carousel.carousel-center-active-item-3 .owl-stage-outer { overflow: visible; }
-.owl-carousel.carousel-center-active-item-3 .owl-item > div { width: 100%; margin-left: auto; transition: ease opacity 300ms; }
-.owl-carousel.carousel-center-active-item-3 .owl-item.active > div { margin-right: auto; }
-.owl-carousel.carousel-center-active-item-3 .owl-item.active + .owl-item > div { margin-right: auto; margin-left: 0; }
-.owl-carousel-light.owl-carousel-light-init-fadeIn { transition: ease opacity 300ms; }
-.owl-carousel-light .owl-stage-outer,
-.owl-carousel-light .owl-stage { height: 100%; }
-.owl-carousel-light .owl-item {
-    display: none;
-    visibility: hidden;
-    opacity: 0;
-    position: absolute !important;
+.tsc-thumb:hover { opacity: var(--tsc-thumb-opacity-hover); }
+.tsc-thumb:focus-visible {
+    outline: 2px solid var(--primary, #0d6efd);
+    outline-offset: 2px;
+}
+.tsc-thumb.tsc-thumb-active {
+    opacity: var(--tsc-thumb-opacity-hover);
+    border: var(--tsc-thumb-border-active);
+}
+.tsc-thumb img {
     width: 100%;
     height: 100%;
-    top: 0;
-    transition: ease opacity 300ms;
+    object-fit: cover;
+    pointer-events: none;
 }
-.owl-carousel-light .owl-item.active { display: block; visibility: visible; opacity: 1; }
-.owl-carousel-light .owl-dots .owl-dot span { margin: 5px 2px; }
-.horizontal-scroller { padding: 32px 0; padding: 2rem 0; height: 100vh; position: relative; }
-.horizontal-scroller-scroll { position: relative; overflow: hidden; padding: 32px; padding: 2rem; }
-.horizontal-scroller-images { height: 100%; display: flex; align-items: center; }
-.horizontal-scroller-item { height: 100%; display: flex; justify-content: center; flex: 0 0 auto; padding: 0 32px; padding: 0 2rem; }
-.horizontal-scroller-image { object-fit: fill; margin: 0 auto; max-height: 80vh; padding-top: 10vh; }
+.tsc-thumb-idx {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    color: var(--grey-600, #6c757d);
+}
 
-/* Carousel — skin (primary colour bindings) */
-.owl-carousel .owl-dots .owl-dot.active span,
-.owl-carousel .owl-dots .owl-dot:hover span { background-color: var(--primary-100); }
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"],
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"].hover { color: var(--primary); }
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"] {
-    background-color: var(--primary);
-    border-color: var(--primary) var(--primary) var(--primary-300);
-    color: var(--primary-inverse);
+/* Fade transition */
+.tsc-trans-fade .tsc-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity var(--tsc-speed) var(--tsc-easing);
 }
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"]:hover,
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"].hover {
-    background-color: var(--primary--100);
-    border-color: var(--primary--300) var(--primary--300) var(--primary);
+.tsc-trans-fade .tsc-item.tsc-active {
+    opacity: 1;
+    z-index: 1;
 }
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"]:active,
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"].active {
-    background-color: var(--primary-300);
-    background-image: none;
-    border-color: var(--primary-300) var(--primary-300) var(--primary-300);
+.tsc-trans-fade .tsc-item.tsc-fade-leave {
+    opacity: 0;
+    z-index: 2;
+    transition: opacity var(--tsc-speed) var(--tsc-easing);
 }
-.owl-carousel.nav-with-transparency:not(.nav-style-1):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"] { background-color: var(--primary-rgba-35); }
-.owl-carousel.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev { color: var(--primary) !important; }
-.owl-carousel.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--primary); }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg polygon { fill: var(--primary); stroke: var(--primary); }
-.owl-carousel.nav-arrows-1 .owl-nav .owl-prev,
-.owl-carousel.nav-arrows-1 .owl-nav .owl-next { color: var(--primary); }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active > div { background: var(--primary); }
-.owl-carousel.carousel-bottom-inside-shadow .owl-stage-outer:after { background-image: linear-gradient(360deg, var(--primary) 0%, transparent 100%); }
+
+/* Zoom transition */
+.tsc-trans-zoom .tsc-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    opacity: 0;
+    z-index: 0;
+    transform: scale(1);
+    transition: opacity var(--tsc-speed) var(--tsc-easing),
+                transform var(--tsc-speed) var(--tsc-easing);
+}
+.tsc-trans-zoom .tsc-item.tsc-active {
+    opacity: 1;
+    z-index: 1;
+    transform: scale(1);
+}
+.tsc-trans-zoom .tsc-item.tsc-zoom-leave {
+    opacity: 0;
+    z-index: 2;
+    transform: scale(.96);
+}
+.tsc-trans-zoom .tsc-item.tsc-zoom-enter {
+    animation: tsc-zoom-enter-kf var(--tsc-speed) var(--tsc-easing) both;
+    z-index: 1;
+}
+@keyframes tsc-zoom-enter-kf {
+    from { opacity: 0; transform: scale(1.04); }
+    to   { opacity: 1; transform: scale(1);    }
+}
+
+/* Utility */
+.tsc-hidden { display: none !important; }
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .tsc-carousel {
+        --tsc-dot-color:        rgba(255,255,255,.28);
+        --tsc-dot-active-color: var(--primary, #6ea8fe);
+        --tsc-progress-bg:      rgba(255,255,255,.12);
+        --tsc-counter-color:    rgba(255,255,255,.5);
+    }
+}
+html.dark .tsc-carousel,
+[data-bs-theme="dark"] .tsc-carousel {
+    --tsc-dot-color:        rgba(255,255,255,.28);
+    --tsc-dot-active-color: var(--primary, #6ea8fe);
+    --tsc-progress-bg:      rgba(255,255,255,.12);
+    --tsc-counter-color:    rgba(255,255,255,.5);
+}
+[data-bs-theme="light"] .tsc-carousel {
+    --tsc-dot-color:        rgba(0,0,0,.22);
+    --tsc-dot-active-color: var(--primary, #0d6efd);
+    --tsc-progress-bg:      rgba(0,0,0,.1);
+    --tsc-counter-color:    var(--grey-600, #6c757d);
+}
 `;
 
     $.extend(themestrap, { PluginCarousel });
@@ -1392,10 +1427,16 @@
     $.fn.themestrapPluginCarousel = function(opts) {
         return this.map(function() {
             const $this = $(this);
-            if ($this.data(instanceName)) {
-                return $this.data(instanceName);
+            const inst  = $this.data(instanceName);
+
+            if (inst) {
+                if (typeof opts === 'string' && typeof inst[opts] === 'function') {
+                    inst[opts]();
+                }
+                return inst;
             }
-            return new PluginCarousel($this, opts);
+
+            return new PluginCarousel($this, typeof opts === 'object' ? opts : {});
         });
     };
 })).apply(this, [window.themestrap, jQuery]);

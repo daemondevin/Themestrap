@@ -87,6 +87,7 @@
  *       themestrap.fn.intObsInit('[data-plugin-accordion]:not(.manual)', 'themestrapPluginAccordion');
  *   }
  */
+// Accordion
 (((themestrap = {}, $) => {
 
     const instanceName = '__accordion';

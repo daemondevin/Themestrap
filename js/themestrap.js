@@ -273,7 +273,6 @@ const _loadedScripts = new Set();
 // Themestrap Common Functions
 window.themestrap.fn = {
 
-	// [#9] strict equality, no parens on typeof, null guard, global semicolon strip
 	getOptions(opts) {
 
 		if (opts !== null && typeof opts === 'object') {
@@ -296,7 +295,6 @@ window.themestrap.fn = {
 
 	},
 
-	// [#18] rest parameters replace arguments object
 	execPluginFunction(functionName, context, ...args) {
 		const namespaces = functionName.split(".");
 		const func = namespaces.pop();
@@ -308,10 +306,6 @@ window.themestrap.fn = {
 		return context[func](...args);
 	},
 
-	// [#1] dead string-function branch removed — callback must be a function
-	// [#12] querySelectorAll NodeList iterated with forEach, not $().each()
-	// [#13] observer.observe(node) — no $(this)[0] round-trip
-	// [#14] entry.isIntersecting replaces entry.intersectionRatio > 0
 	intObs(selector, callback, intObsOptions, alwaysObserve) {
 		const el = document.querySelectorAll(selector);
 		let intersectionObserverOptions = {
@@ -337,7 +331,6 @@ window.themestrap.fn = {
 		el.forEach(node => observer.observe(node));
 	},
 
-	// [#12][#13][#14][#15] NodeList forEach, isIntersecting, direct opts assignment
 	intObsInit(selector, functionName) {
 		const el = document.querySelectorAll(selector);
 		const intersectionObserverOptions = {
@@ -359,7 +352,6 @@ window.themestrap.fn = {
 		el.forEach(node => observer.observe(node));
 	},
 
-	// [#12][#13][#14][#15] NodeList forEach, isIntersecting, direct opts assignment
 	dynIntObsInit(selector, functionName, pluginDefaults) {
 		const el = document.querySelectorAll(selector);
 
@@ -392,17 +384,14 @@ window.themestrap.fn = {
         });
 	},
 
-	// [#10] all switch cases were identical to default — collapsed to single expression
 	getRootMargin(plugin, {accY}) {
 		return accY ? `0px 0px ${accY}px 0px` : '0px 0px 200px 0px';
 	},
 
-	// [#8] for..in loops with var replaced by Object.assign
 	mergeOptions(obj1, obj2) {
 		return Object.assign({}, obj1, obj2);
 	},
 
-	// [#17] merged with execOnceThroughWindowEvent via withContext flag
 	execOnceThroughEvent($el, event, callback, withContext = true) {
 		const self = this, dataName = self.formatDataName(event);
 
@@ -420,7 +409,6 @@ window.themestrap.fn = {
 		return this;
 	},
 
-	// [#17] now delegates to execOnceThroughEvent with withContext = false
 	execOnceThroughWindowEvent($el, event, callback) {
 		return this.execOnceThroughEvent($el, event, callback, false);
 	},
@@ -438,7 +426,6 @@ window.themestrap.fn = {
 		);
 	},
 
-	// [#16] uses module-scoped _loadedScripts — dedup now survives across calls
     getScripts(arr, path = '') {
         const requests = arr.map(src => {
             const fullPath = path + src;
@@ -465,12 +452,7 @@ window.themestrap.fn = {
 		return new StorageBin(options);
 	},
 
-	// [#5] var re-declaration fixed — two distinct const names
 	showErrorMessage(title, content) {
-
-		if ($('html').hasClass('disable-error-warning')) {
-			return;
-		}
 
 		$('.modalThemestrapErrorMessage').remove();
 		$('body').append('<div class="modal fade" id="modalThemestrapErrorMessage"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">' + title + '</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body">' + content + '</div><div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button></div></div></div></div>');

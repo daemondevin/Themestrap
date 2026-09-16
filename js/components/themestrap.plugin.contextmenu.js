@@ -1,4 +1,4 @@
-// Plugin Context Menu
+// Context Menu
 (((themestrap = {}, $) => {
     const instanceName = '__pluginContextMenu';
     const STYLE_ID     = 'ts-contextmenu-styles';

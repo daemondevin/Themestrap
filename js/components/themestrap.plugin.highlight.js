@@ -1,4 +1,3 @@
-
 /**
  * Themestrap Syntax Highlight Plugin
  * Wraps highlight.js core with lazy ESM loading, language aliases, promise

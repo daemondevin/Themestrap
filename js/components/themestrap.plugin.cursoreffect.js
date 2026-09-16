@@ -214,12 +214,10 @@
 
 	}
 
-    // expose to scope
     $.extend(themestrap, {
 		PluginCursorEffect
 	});
 
-    // jquery plugin
     $.fn.themestrapPluginCursorEffect = function(opts) {
 		return this.map(function() {
 			const $this = $(this);

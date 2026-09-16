@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PluginCarousel — Demo | Themestrap</title>
 
-  <!-- Bootstrap 5 -->
   <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
@@ -17,7 +15,6 @@
       --ts-navy:     #0a1929;
       --ts-navy-2:   #0e2238;
       --ts-orange:   #e8672a;
-      --ts-orange-2: #d2541b;
       --ts-teal:     #2ab8c8;
       --ts-cream:    #f5f0e8;
       --ts-font-serif:   'Fraunces', Georgia, serif;
@@ -30,646 +27,563 @@
 
     body {
       font-family: var(--ts-font-body);
-      background: var(--ts-navy-2);
-      color: #1a2332;
+      background: var(--ts-navy);
+      color: #c8d8e8;
       margin: 0;
     }
 
     /* Page header */
     .demo-header {
-      background: var(--ts-navy);
-      color: #fff;
-      padding: 2.5rem 2rem 2rem;
+      background: #060f1a;
       border-bottom: 3px solid var(--ts-orange);
+      padding: 2rem 2rem 1.5rem;
     }
     .demo-header h1 {
       font-family: var(--ts-font-display);
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 700;
-      margin: 0 0 .25rem;
+      color: #fff;
+      margin: 0 0 .3rem;
       letter-spacing: -.02em;
     }
-    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
-    .demo-header .badge-pill {
+    .demo-header p { margin: 0; color: #6a90b0; font-size: .9rem; }
+    .badge-tag {
       display: inline-block;
-      background: var(--ts-orange);
-      color: #fff;
-      font-family: var(--ts-font-mono);
-      font-size: .7rem;
-      padding: .2em .6em;
-      border-radius: 99px;
-      margin-left: .5rem;
-      vertical-align: middle;
-    }
-    .demo-header .badge-nodep {
-      display: inline-block;
-      background: transparent;
-      color: var(--ts-teal);
-      font-family: var(--ts-font-mono);
-      font-size: .7rem;
-      padding: .2em .6em;
-      border-radius: 99px;
-      border: 1px solid var(--ts-teal);
-      margin-left: .4rem;
-      vertical-align: middle;
-    }
-
-    /* Nav strip */
-    .demo-nav {
-      background: var(--ts-navy-2);
-      padding: .6rem 2rem;
-      display: flex;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-      border-bottom: 1px solid rgba(255,255,255,.07);
-    }
-    .demo-nav a {
-      color: rgba(255,255,255,.55);
-      text-decoration: none;
-      font-size: .8rem;
-      font-family: var(--ts-font-mono);
-      transition: color .15s;
-      white-space: nowrap;
-    }
-    .demo-nav a:hover  { color: var(--ts-teal); }
-    .demo-nav a.active { color: var(--ts-orange); }
-
-    /* Layout */
-    .demo-body {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 2rem 1rem 5rem;
-    }
-
-    /* Demo cards */
-    .demo-card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 14px rgba(0,0,0,.09);
-      margin-bottom: 2rem;
-      overflow: hidden;
-    }
-    .demo-card-header {
-      background: var(--ts-navy);
-      color: #fff;
-      padding: .75rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: .75rem;
-    }
-    .demo-card-header h2 {
-      font-family: var(--ts-font-display);
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 0;
-      letter-spacing: .02em;
-    }
-    .demo-card-header .card-num {
-      font-family: var(--ts-font-mono);
-      font-size: .75rem;
-      color: var(--ts-teal);
-      border: 1px solid var(--ts-teal);
-      border-radius: 4px;
-      padding: .1em .45em;
-      flex-shrink: 0;
-    }
-    .demo-card-header .card-tag {
       font-family: var(--ts-font-mono);
       font-size: .65rem;
-      color: rgba(255,255,255,.4);
-      margin-left: auto;
+      padding: .2em .55em;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-left: .4rem;
     }
+    .badge-tag.orange { background: var(--ts-orange); color: #fff; }
+    .badge-tag.teal   { background: transparent; color: var(--ts-teal); border: 1px solid var(--ts-teal); }
 
-    /* Demo stage */
-    .demo-stage {
-      padding: 2.5rem 1.75rem;
-      background: var(--ts-cream);
-      border-bottom: 1px solid #e8e0d4;
-    }
-    .demo-stage.dark-stage {
-      background: var(--ts-navy);
-    }
+    /* Layout */
+    .demo-main { max-width: 1040px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
-    /* Snippet block */
-    pre.snip {
-      margin: 0;
-      padding: 1.1rem 1.5rem;
-      background: #0d1b2a;
-      color: #c9d1d9;
+    /* Section label */
+    .demo-section-label {
       font-family: var(--ts-font-mono);
-      font-size: .77rem;
-      line-height: 1.65;
-      overflow-x: auto;
-      border-top: 1px solid rgba(255,255,255,.05);
-    }
-    pre.snip .hl-attr { color: #79c0ff; }
-    pre.snip .hl-val  { color: #a5d6a7; }
-    pre.snip .hl-tag  { color: #ff7b72; }
-    pre.snip .hl-cmt  { color: #6a737d; }
-    pre.snip .hl-kw   { color: #c792ea; }
-    pre.snip .hl-fn   { color: #82aaff; }
-    pre.snip .hl-str  { color: #c3e88d; }
-
-    /* Log bar */
-    .demo-log {
-      font-family: var(--ts-font-mono);
-      font-size: .77rem;
-      padding: .65rem 1.5rem;
-      background: #0d1b2a;
-      color: #8b949e;
-      border-top: 1px solid rgba(255,255,255,.05);
-      min-height: 2.4rem;
+      font-size: .7rem;
+      color: var(--ts-teal);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin: 2.5rem 0 .75rem;
       display: flex;
       align-items: center;
+      gap: .6rem;
     }
-    .demo-log .log-entry { color: var(--ts-teal); }
-    .demo-log .log-warn  { color: var(--ts-orange); }
+    .demo-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #1a3050;
+    }
 
-    /* Controls bar */
+    /* Demo card */
+    .demo-card {
+      background: var(--ts-navy-2);
+      border: 1px solid #1a3050;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .demo-card-header {
+      background: #060f1a;
+      border-bottom: 1px solid #1a3050;
+      padding: .55rem 1.1rem;
+      font-family: var(--ts-font-mono);
+      font-size: .74rem;
+      color: var(--ts-teal);
+      letter-spacing: .04em;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .demo-card-header .chip {
+      font-size: .62rem;
+      padding: .15em .5em;
+      border-radius: 3px;
+      background: var(--ts-orange);
+      color: #fff;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+    .demo-stage { padding: 1.5rem 1.25rem; }
+    .demo-stage.flush { padding: 0; }
+
+    pre.snip {
+      background: #060f1a;
+      border-top: 1px solid #1a3050;
+      margin: 0;
+      padding: .9rem 1.1rem;
+      font-family: var(--ts-font-mono);
+      font-size: .74rem;
+      color: #7ecce0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
     .demo-controls {
-      padding: .9rem 1.5rem;
-      background: #f0f2f5;
-      border-top: 1px solid #e2e5ea;
+      border-top: 1px solid #1a3050;
+      padding: .65rem 1.1rem;
       display: flex;
       flex-wrap: wrap;
       gap: .5rem;
       align-items: center;
     }
-    .btn-ts {
+    .demo-controls button {
       font-family: var(--ts-font-mono);
-      font-size: .76rem;
-      padding: .3rem .85rem;
+      font-size: .72rem;
+      padding: .3rem .7rem;
       border-radius: 5px;
-      border: none;
+      border: 1px solid #2a4060;
+      background: #0d1f33;
+      color: #9cc;
       cursor: pointer;
-      transition: background .15s, transform .1s;
-      line-height: 1.4;
+      transition: background .15s, color .15s;
     }
-    .btn-ts:active { transform: scale(.97); }
-    .btn-primary-ts { background: var(--ts-orange); color: #fff; }
-    .btn-primary-ts:hover { background: var(--ts-orange-2); }
-    .btn-teal-ts  { background: var(--ts-teal); color: #fff; }
-    .btn-teal-ts:hover { background: #22a0af; }
-    .btn-navy-ts  { background: var(--ts-navy); color: #fff; }
-    .btn-navy-ts:hover { background: #0e2238; }
-    .btn-ghost-ts { background: transparent; color: var(--ts-navy); border: 1px solid #bfc5cc; }
-    .btn-ghost-ts:hover { background: #e8ecf0; }
-    .btn-ts:disabled { opacity: .4; cursor: default; }
+    .demo-controls button:hover { background: #1a3050; color: var(--ts-teal); }
 
-    /* Slide boxes */
+    .demo-log {
+      border-top: 1px solid #1a3050;
+      background: #060f1a;
+      padding: .5rem 1.1rem;
+      font-family: var(--ts-font-mono);
+      font-size: .7rem;
+      color: #5a9;
+      min-height: 2.2rem;
+      display: flex;
+      align-items: center;
+    }
+    .demo-log span { opacity: .5; }
+    .demo-log .evt { color: var(--ts-teal); }
+
+    /* Slide content helpers */
     .slide-box {
-      border-radius: 6px;
-      padding: 32px 16px;
-      text-align: center;
-      color: #fff;
-      font-family: var(--ts-font-display);
-      font-weight: 700;
-      font-size: 1.05rem;
-      min-height: 110px;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-      user-select: none;
-      letter-spacing: .01em;
-    }
-    .slide-box small {
-      font-size: .65rem;
-      font-weight: 400;
-      font-family: var(--ts-font-mono);
-      opacity: .7;
-      margin-top: 5px;
-    }
-    .slide-box.c1 { background: linear-gradient(135deg, #e8672a, #c9531a); }
-    .slide-box.c2 { background: linear-gradient(135deg, #2ab8c8, #1d9dab); }
-    .slide-box.c3 { background: linear-gradient(135deg, #0a1929, #0e2238); }
-    .slide-box.c4 { background: linear-gradient(135deg, #6f42c1, #5a33a6); }
-    .slide-box.c5 { background: linear-gradient(135deg, #198754, #146c43); }
-    .slide-box.c6 { background: linear-gradient(135deg, #dc3545, #b02a37); }
-
-    /* Center-active scale */
-    .ts-carousel.carousel-center-active-item .ts-item.current .slide-box,
-    .ts-carousel.carousel-center-active-item .owl-item.current .slide-box {
-      transform: scale(1.09);
-      transition: transform .35s ease;
-      box-shadow: 0 8px 28px rgba(0,0,0,.22);
-    }
-
-    /* External nav buttons */
-    .ext-nav-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
-    }
-    .ext-nav-row .btn-ts.active {
-      background: var(--ts-orange);
-      color: #fff;
-    }
-
-    /* Section heading in demo body */
-    .demo-section-label {
+      height: 220px;
+      border-radius: 8px;
       font-family: var(--ts-font-display);
-      font-size: .68rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--ts-teal);
-      margin: 0 0 1.5rem;
+      color: rgba(255,255,255,.9);
+      user-select: none;
+    }
+    .slide-box.s1 { background: linear-gradient(135deg, #1e3a5f, #2ab8c8); }
+    .slide-box.s2 { background: linear-gradient(135deg, #3d1f00, #e8672a); }
+    .slide-box.s3 { background: linear-gradient(135deg, #1a1a3a, #7c5cbf); }
+    .slide-box.s4 { background: linear-gradient(135deg, #003322, #1fa86e); }
+    .slide-box.s5 { background: linear-gradient(135deg, #3a0f0f, #d64a4a); }
+
+    .slide-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .slide-caption {
+      padding: 1.25rem;
+      background: rgba(0,0,0,.5);
+    }
+    .slide-caption h4 { color: #fff; margin: 0 0 .25rem; font-family: var(--ts-font-serif); }
+    .slide-caption p  { color: rgba(255,255,255,.7); margin: 0; font-size: .88rem; }
+
+    /* Fade/zoom stage needs explicit height */
+    .tscp-stage-fixed .tscp-track-outer { height: 280px; }
+
+    /* External thumbs row */
+    #ext-thumbs-target {
+      display: flex;
+      gap: 6px;
+      padding: 8px 0 0;
+      justify-content: center;
+      flex-wrap: wrap;
     }
   </style>
 </head>
 <body>
 
-<div class="demo-header">
-  <h1>PluginCarousel <span class="badge-pill">plugin</span><span class="badge-nodep">no Owl Carousel</span></h1>
-  <p>Native translate3d slide engine with clone-loop, responsive breakpoints, and drag/touch.</p>
-</div>
+<header class="demo-header">
+  <div style="max-width:1040px;margin:0 auto;">
+    <h1>
+      PluginCarousel
+      <span class="badge-tag orange">New</span>
+      <span class="badge-tag teal">Zero deps</span>
+    </h1>
+    <p>High-end native carousel — slide, fade &amp; zoom transitions · thumbnails · progress bar · counter · vertical mode · full ARIA</p>
+  </div>
+</header>
 
-<div class="demo-nav">
-  <a href="#card-responsive"   class="active">Responsive</a>
-  <a href="#card-autoplay">Autoplay</a>
-  <a href="#card-noloop">No Loop</a>
-  <a href="#card-external-nav">External Nav</a>
-  <a href="#card-center">Center Active</a>
-  <a href="#card-nav-offset">Nav Offset</a>
-  <a href="#card-stage-padding">Stage Padding</a>
-  <a href="#card-api">API Control</a>
-</div>
+<main class="demo-main">
 
-<div class="demo-body">
-
-
-  <!-- 01 RESPONSIVE -->
-  <div class="demo-card" id="card-responsive">
+  <!-- ═══ 1. Basic Slide ═══ -->
+  <div class="demo-section-label">01 — Slide transition · responsive</div>
+  <div class="demo-card">
     <div class="demo-card-header">
-      <span class="card-num">01</span>
-      <h2>Responsive multi-item — 1 -> 4 items across breakpoints</h2>
-      <span class="card-tag">default breakpoint ramp</span>
+      <span>1 → 2 → 3 → 4 items across breakpoints</span>
+      <span class="chip">slide</span>
     </div>
     <div class="demo-stage">
-      <div class="ts-carousel" data-plugin-carousel
-           data-plugin-options='{"items":4,"loop":true,"margin":12,"nav":true,"dots":true}'>
-        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/01.png"></div>
-        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/02.png"></div>
-        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/03.png"></div>
-        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/04.png"></div>
-        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/05.png"></div>
-        <div><img alt="" class="img-fluid rounded" src="../img/demos/scapes/06.png"></div>
+      <div id="cp-basic" data-plugin-carousel-pro data-plugin-options='{"items":4,"loop":true,"gap":12,"responsive":{"0":{"items":1},"576":{"items":2},"768":{"items":3},"1024":{"items":4}}}'>
+        <div><div class="slide-box s1">One</div></div>
+        <div><div class="slide-box s2">Two</div></div>
+        <div><div class="slide-box s3">Three</div></div>
+        <div><div class="slide-box s4">Four</div></div>
+        <div><div class="slide-box s5">Five</div></div>
       </div>
     </div>
-
-<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
-     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":4,"loop":true,"margin":12,"nav":true,"dots":true}'</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>...slide...<span class="hl-tag">&lt;/div&gt;</span>
-  <span class="hl-cmt">&lt;!-- repeat --&gt;</span>
-<span class="hl-tag">&lt;/div&gt;</span></pre>
-
-    <div class="demo-log" id="log-01">
-      <span class="log-entry">// resize the window to watch item count update live</span>
-    </div>
-  </div>
-
-
-  <!-- 02 AUTOPLAY -->
-  <div class="demo-card" id="card-autoplay">
-    <div class="demo-card-header">
-      <span class="card-num">02</span>
-      <h2>Autoplay single-item hero — hover to pause</h2>
-      <span class="card-tag">autoplayHoverPause · smartSpeed:600</span>
-    </div>
-
-    <div class="demo-stage dark-stage">
-      <div class="ts-carousel"
-           data-plugin-options='{"items":1,"loop":true,"autoplay":true,"autoplayTimeout":3000,"autoplayHoverPause":true,"nav":false,"dots":true,"smartSpeed":600,"responsive":{}}'>
-        <div><div class="slide-box c1" style="min-height:160px;font-size:1.3rem">Hero Slide 1<small>autoplayTimeout:3000</small></div></div>
-        <div><div class="slide-box c3" style="min-height:160px;font-size:1.3rem">Hero Slide 2<small>smartSpeed:600</small></div></div>
-        <div><div class="slide-box c4" style="min-height:160px;font-size:1.3rem">Hero Slide 3<small>hover to pause</small></div></div>
-      </div>
-    </div>
-
-<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
-     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,
-       "autoplay":true,"autoplayTimeout":3000,
-       "autoplayHoverPause":true,
-       "nav":false,"dots":true,"smartSpeed":600,
-       "responsive":{}}'</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>...slide...<span class="hl-tag">&lt;/div&gt;</span>
-<span class="hl-tag">&lt;/div&gt;</span></pre>
-
-    <div class="demo-log" id="log-02">
-      <span class="log-entry">// autoplay advances every 3 s — hover over the stage to pause</span>
-    </div>
-  </div>
-
-
-  <!-- 03 NO LOOP -->
-  <div class="demo-card" id="card-noloop">
-    <div class="demo-card-header">
-      <span class="card-num">03</span>
-      <h2>No loop, two items — bounded navigation</h2>
-      <span class="card-tag">loop:false · responsive:{}</span>
-    </div>
-
-    <div class="demo-stage">
-      <div class="ts-carousel"
-           data-plugin-options='{"items":2,"loop":false,"margin":16,"nav":true,"dots":true,"responsive":{}}'>
-        <div><div class="slide-box c2">Alpha</div></div>
-        <div><div class="slide-box c5">Beta</div></div>
-        <div><div class="slide-box c1">Gamma</div></div>
-        <div><div class="slide-box c6">Delta</div></div>
-        <div><div class="slide-box c4">Epsilon</div></div>
-      </div>
-    </div>
-
-<pre class="snip"><span class="hl-cmt">&lt;!-- responsive:{} locks items:2 at every breakpoint --&gt;</span>
-<span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
-     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":2,"loop":false,"margin":16,
-       "nav":true,"dots":true,"responsive":{}}'</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
-<span class="hl-tag">&lt;/div&gt;</span></pre>
-
-    <div class="demo-log" id="log-03">
-      <span class="log-entry">// prev/next buttons gain .disabled class at first and last positions</span>
-    </div>
-  </div>
-
-
-  <!-- 04 EXTERNAL NAV -->
-  <div class="demo-card" id="card-external-nav">
-    <div class="demo-card-header">
-      <span class="card-num">04</span>
-      <h2>External navigation — data-carousel-navigate-*</h2>
-      <span class="card-tag">active state tracks current slide</span>
-    </div>
-
-    <div class="demo-stage">
-      <div class="ext-nav-row" data-carousel-navigate>
-        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="1">Slide 1</button>
-        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="2">Slide 2</button>
-        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="3">Slide 3</button>
-        <button class="btn-ts btn-ghost-ts" data-carousel-navigate-id="#ext-carousel" data-carousel-navigate-to="4">Slide 4</button>
-      </div>
-
-      <div id="ext-carousel" class="ts-carousel"
-           data-plugin-options='{"items":1,"loop":true,"nav":false,"dots":false,"responsive":{}}'>
-        <div><div class="slide-box c1" style="min-height:130px">Slide 1</div></div>
-        <div><div class="slide-box c2" style="min-height:130px">Slide 2</div></div>
-        <div><div class="slide-box c3" style="min-height:130px">Slide 3</div></div>
-        <div><div class="slide-box c4" style="min-height:130px">Slide 4</div></div>
-      </div>
-    </div>
-
-<pre class="snip"><span class="hl-tag">&lt;button</span> <span class="hl-attr">data-carousel-navigate-to</span>=<span class="hl-val">"2"</span>
-        <span class="hl-attr">data-carousel-navigate-id</span>=<span class="hl-val">"#my-carousel"</span><span class="hl-tag">&gt;</span>Go to slide 2<span class="hl-tag">&lt;/button&gt;</span>
-
-<span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"my-carousel"</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
-     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,"nav":false,"dots":false,"responsive":{}}'</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
-<span class="hl-tag">&lt;/div&gt;</span></pre>
-
-    <div class="demo-log" id="log-04">
-      <span class="log-entry">// click a button above to jump directly to that slide</span>
-    </div>
-  </div>
-
-
-  <!-- 05 CENTER ACTIVE -->
-  <div class="demo-card" id="card-center">
-    <div class="demo-card-header">
-      <span class="card-num">05</span>
-      <h2>Center active item — .carousel-center-active-item</h2>
-      <span class="card-tag">.current class on middle visible slide</span>
-    </div>
-
-    <div class="demo-stage">
-      <div class="ts-carousel carousel-center-active-item"
-           data-plugin-options='{"items":3,"loop":true,"margin":12,"nav":true,"dots":true,"responsive":{}}'>
-        <div><div class="slide-box c5">Slide A</div></div>
-        <div><div class="slide-box c1">Slide B</div></div>
-        <div><div class="slide-box c2">Slide C</div></div>
-        <div><div class="slide-box c6">Slide D</div></div>
-        <div><div class="slide-box c4">Slide E</div></div>
-      </div>
-    </div>
-
-<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel carousel-center-active-item"</span>
-     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":3,"loop":true,"margin":12}'</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
-<span class="hl-tag">&lt;/div&gt;</span>
-
-<span class="hl-cmt">/* Style the .current item in your own CSS */</span>
-<span class="hl-fn">.carousel-center-active-item</span> <span class="hl-fn">.ts-item.current</span> <span class="hl-fn">.my-slide</span> {
-  <span class="hl-attr">transform</span>: <span class="hl-val">scale(1.1)</span>;
-  <span class="hl-attr">box-shadow</span>: <span class="hl-val">0 8px 24px rgba(0,0,0,.2)</span>;
-}</pre>
-
-    <div class="demo-log" id="log-05">
-      <span class="log-entry">// center item receives .current — scale applied above in demo CSS</span>
-    </div>
-  </div>
-
-
-  <!-- 06 NAV OFFSET -->
-  <div class="demo-card" id="card-nav-offset">
-    <div class="demo-card-header">
-      <span class="card-num">06</span>
-      <h2>Nav offset — navVerticalOffset</h2>
-      <span class="card-tag">arrows shifted 40 px below centre</span>
-    </div>
-
-    <div class="demo-stage dark-stage">
-      <div class="ts-carousel"
-           data-plugin-options='{"items":1,"loop":true,"nav":true,"dots":false,"navVerticalOffset":"40px","smartSpeed":400,"responsive":{}}'>
-        <div><div class="slide-box c3" style="min-height:180px;font-size:1.2rem">Image Slide 1<small>navVerticalOffset: "40px"</small></div></div>
-        <div><div class="slide-box c1" style="min-height:180px;font-size:1.2rem">Image Slide 2</div></div>
-        <div><div class="slide-box c4" style="min-height:180px;font-size:1.2rem">Image Slide 3</div></div>
-      </div>
-    </div>
-
-<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
-     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,"nav":true,
-       "navVerticalOffset":"40px"}'</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
-<span class="hl-tag">&lt;/div&gt;</span>
-
-<span class="hl-cmt">// Also available: navHorizontalOffset, dotsVerticalOffset, dotsHorizontalOffset</span></pre>
-
-    <div class="demo-log" id="log-06">
-      <span class="log-entry">// navigationOffsets() re-applies offsets after layout changes</span>
-    </div>
-  </div>
-
-
-  <!-- 07 STAGE PADDING -->
-  <div class="demo-card" id="card-stage-padding">
-    <div class="demo-card-header">
-      <span class="card-num">07</span>
-      <h2>Stage padding — peek effect</h2>
-      <span class="card-tag">stagePadding:40 reveals adjacent slides</span>
-    </div>
-
-    <div class="demo-stage" style="overflow:hidden;">
-      <div class="ts-carousel"
-           data-plugin-options='{"items":1,"loop":true,"nav":true,"dots":true,"stagePadding":40,"margin":16,"responsive":{}}'>
-        <div><div class="slide-box c2" style="min-height:130px">Peek A<small>stagePadding:40</small></div></div>
-        <div><div class="slide-box c5" style="min-height:130px">Peek B</div></div>
-        <div><div class="slide-box c1" style="min-height:130px">Peek C</div></div>
-      </div>
-    </div>
-
-<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"ts-carousel"</span>
-     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"items":1,"loop":true,
-       "stagePadding":40,"margin":16,"responsive":{}}'</span><span class="hl-tag">&gt;</span>
-  <span class="hl-tag">&lt;div&gt;</span>...<span class="hl-tag">&lt;/div&gt;</span>
-<span class="hl-tag">&lt;/div&gt;</span></pre>
-
-    <div class="demo-log" id="log-07">
-      <span class="log-entry">// .ts-stage-padding class added to host; overflow:visible on .ts-stage-outer</span>
-    </div>
-  </div>
-
-
-  <!-- 08 PROGRAMMATIC -->
-  <div class="demo-card" id="card-api">
-    <div class="demo-card-header">
-      <span class="card-num">08</span>
-      <h2>Programmatic API — next / prev / to / destroy</h2>
-      <span class="card-tag">.manual class — no auto-init</span>
-    </div>
-
-    <div class="demo-stage dark-stage">
-      <div id="api-carousel" class="ts-carousel manual"
-           data-plugin-options='{"items":3,"loop":true,"margin":12,"nav":false,"dots":false}'>
-        <div><div class="slide-box c1">One</div></div>
-        <div><div class="slide-box c2">Two</div></div>
-        <div><div class="slide-box c3">Three</div></div>
-        <div><div class="slide-box c4">Four</div></div>
-        <div><div class="slide-box c5">Five</div></div>
-      </div>
-    </div>
-
+    <pre class="snip">&lt;div data-plugin-carousel-pro
+     data-plugin-options='{"items":4,"loop":true,"gap":12,
+       "responsive":{"0":{"items":1},"576":{"items":2},"768":{"items":3},"1024":{"items":4}}}'&gt;
+  &lt;div&gt;…&lt;/div&gt;
+&lt;/div&gt;</pre>
     <div class="demo-controls">
-      <button class="btn-ts btn-ghost-ts"   id="api-prev"><- prev()</button>
-      <button class="btn-ts btn-ghost-ts"   id="api-next">next() -></button>
-      <button class="btn-ts btn-teal-ts"    id="api-to2">to(2)</button>
-      <button class="btn-ts btn-teal-ts"    id="api-to4">to(4)</button>
-      <button class="btn-ts btn-primary-ts" id="api-destroy">destroy()</button>
-      <button class="btn-ts btn-navy-ts"    id="api-reinit" disabled>re-init</button>
+      <button onclick="$('#cp-basic').data('__carousel').prev()">← Prev</button>
+      <button onclick="$('#cp-basic').data('__carousel').next()">Next →</button>
+      <button onclick="$('#cp-basic').data('__carousel').to(0)">to(0)</button>
+      <button onclick="$('#cp-basic').data('__carousel').to(4)">to(4)</button>
     </div>
-
-<pre class="snip"><span class="hl-cmt">// .manual skips auto-init; call themestrapPluginCarousel() yourself</span>
-<span class="hl-kw">const</span> <span class="hl-fn">$el</span>   = $(<span class="hl-str">'#api-carousel'</span>).<span class="hl-fn">themestrapPluginCarousel</span>();
-<span class="hl-kw">const</span> <span class="hl-fn">inst</span>  = <span class="hl-fn">$el</span>.data(<span class="hl-str">'__carousel'</span>);
-
-inst.<span class="hl-fn">prev</span>();
-inst.<span class="hl-fn">next</span>();
-inst.<span class="hl-fn">to</span>(<span class="hl-str">2</span>);          <span class="hl-cmt">// zero-based index</span>
-inst.<span class="hl-fn">destroy</span>();     <span class="hl-cmt">// removes clones, unbinds, clears data</span>
-
-<span class="hl-fn">$el</span>.on(<span class="hl-str">'changed.owl.carousel'</span>, <span class="hl-kw">e</span> =&gt; {
-  console.<span class="hl-fn">log</span>(<span class="hl-str">'slide'</span>, e.item.index);
-});</pre>
-
-    <div class="demo-log" id="log-08">
-      <span class="log-entry">// click a button above — changed.owl.carousel events logged here</span>
-    </div>
+    <div class="demo-log" id="log-basic"><span>— awaiting events —</span></div>
   </div>
 
+  <!-- ═══ 2. Autoplay + Progress bar + Counter ═══ -->
+  <div class="demo-section-label">02 — Autoplay · progress bar · counter</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Hover to pause · progress bar top · counter</span>
+      <span class="chip">autoplay</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-autoplay" data-plugin-carousel-pro data-plugin-options='{"loop":true,"autoplay":true,"autoplaySpeed":3000,"pauseOnHover":true,"progressBar":true,"progressPosition":"top","counter":true,"dots":true}'
+           style="--tscp-progress-color:#e8672a;">
+        <div><div class="slide-box s1">Slide 1</div></div>
+        <div><div class="slide-box s2">Slide 2</div></div>
+        <div><div class="slide-box s3">Slide 3</div></div>
+        <div><div class="slide-box s4">Slide 4</div></div>
+      </div>
+    </div>
+    <pre class="snip">&lt;div data-plugin-carousel-pro style="--tscp-progress-color:#e8672a;"
+     data-plugin-options='{"autoplay":true,"autoplaySpeed":3000,
+       "pauseOnHover":true,"progressBar":true,"progressPosition":"top","counter":true}'&gt;</pre>
+    <div class="demo-controls">
+      <button onclick="$('#cp-autoplay').data('__carousel').play()">▶ Play</button>
+      <button onclick="$('#cp-autoplay').data('__carousel').pause()">⏸ Pause</button>
+    </div>
+    <div class="demo-log" id="log-autoplay"><span>— awaiting events —</span></div>
+  </div>
 
-</div>
+  <!-- ═══ 3. Fade transition ═══ -->
+  <div class="demo-section-label">03 — Fade transition</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Cross-fade · stacked items · needs explicit height</span>
+      <span class="chip">fade</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-fade" class="tscp-stage-fixed" data-plugin-carousel-pro
+           data-plugin-options='{"transition":"fade","speed":600,"loop":true,"dots":true,"dotType":"line"}'>
+        <div>
+          <div class="slide-box s3" style="height:280px;">Fade &mdash; One</div>
+        </div>
+        <div>
+          <div class="slide-box s1" style="height:280px;">Fade &mdash; Two</div>
+        </div>
+        <div>
+          <div class="slide-box s2" style="height:280px;">Fade &mdash; Three</div>
+        </div>
+      </div>
+    </div>
+    <pre class="snip">&lt;div class="tscp-stage-fixed" data-plugin-carousel-pro
+     data-plugin-options='{"transition":"fade","speed":600,"dotType":"line"}'&gt;
+  /* .tscp-stage-fixed { } .tscp-track-outer { height: 280px; } */</pre>
+    <div class="demo-controls">
+      <button onclick="$('#cp-fade').data('__carousel').prev()">← Prev</button>
+      <button onclick="$('#cp-fade').data('__carousel').next()">Next →</button>
+    </div>
+    <div class="demo-log" id="log-fade"><span>— awaiting events —</span></div>
+  </div>
 
+  <!-- ═══ 4. Zoom transition ═══ -->
+  <div class="demo-section-label">04 — Zoom transition</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Scale-in on enter · scale-out on leave</span>
+      <span class="chip">zoom</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-zoom" class="tscp-stage-fixed" data-plugin-carousel-pro
+           data-plugin-options='{"transition":"zoom","speed":500,"loop":true,"dotType":"number","autoplay":true,"autoplaySpeed":2500,"pauseOnHover":true}'>
+        <div><div class="slide-box s4" style="height:280px;">Zoom &mdash; One</div></div>
+        <div><div class="slide-box s5" style="height:280px;">Zoom &mdash; Two</div></div>
+        <div><div class="slide-box s1" style="height:280px;">Zoom &mdash; Three</div></div>
+        <div><div class="slide-box s2" style="height:280px;">Zoom &mdash; Four</div></div>
+      </div>
+    </div>
+    <pre class="snip">&lt;div data-plugin-carousel-pro
+     data-plugin-options='{"transition":"zoom","speed":500,"dotType":"number",
+       "autoplay":true,"autoplaySpeed":2500,"pauseOnHover":true}'&gt;</pre>
+    <div class="demo-controls">
+      <button onclick="$('#cp-zoom').data('__carousel').prev()">← Prev</button>
+      <button onclick="$('#cp-zoom').data('__carousel').next()">Next →</button>
+    </div>
+    <div class="demo-log" id="log-zoom"><span>— awaiting events —</span></div>
+  </div>
+
+  <!-- ═══ 5. Thumbnail strip ═══ -->
+  <div class="demo-section-label">05 — Thumbnail navigation strip</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Auto-extracted from first &lt;img&gt; · inline strip</span>
+      <span class="chip">thumbs</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-thumbs" data-plugin-carousel-pro
+           data-plugin-options='{"loop":true,"thumbs":true,"dots":false,"nav":true,"speed":400}'
+           style="--tscp-thumb-size:60px;--tscp-thumb-radius:4px;">
+        <div data-thumb="https://picsum.photos/seed/a/600/300">
+          <img src="https://picsum.photos/seed/a/600/300" alt="Landscape A" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+        <div data-thumb="https://picsum.photos/seed/b/600/300">
+          <img src="https://picsum.photos/seed/b/600/300" alt="Landscape B" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+        <div data-thumb="https://picsum.photos/seed/c/600/300">
+          <img src="https://picsum.photos/seed/c/600/300" alt="Landscape C" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+        <div data-thumb="https://picsum.photos/seed/d/600/300">
+          <img src="https://picsum.photos/seed/d/600/300" alt="Landscape D" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+      </div>
+    </div>
+    <pre class="snip">&lt;div data-plugin-carousel-pro data-plugin-options='{"thumbs":true,"dots":false}'
+     style="--tscp-thumb-size:60px;"&gt;
+  &lt;div data-thumb="path/to/thumb.jpg"&gt;…full slide…&lt;/div&gt;
+&lt;/div&gt;</pre>
+    <div class="demo-log" id="log-thumbs"><span>— awaiting events —</span></div>
+  </div>
+
+  <!-- ═══ 6. Stage padding / peekaboo ═══ -->
+  <div class="demo-section-label">06 — Stage padding (peekaboo)</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Adjacent slides bleed into view via stagePadding</span>
+      <span class="chip">stagePadding</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-peek" data-plugin-carousel-pro
+           data-plugin-options='{"items":1,"loop":true,"stagePadding":60,"gap":20,"speed":350}'>
+        <div><div class="slide-box s1" style="height:200px;">Peek — One</div></div>
+        <div><div class="slide-box s2" style="height:200px;">Peek — Two</div></div>
+        <div><div class="slide-box s3" style="height:200px;">Peek — Three</div></div>
+        <div><div class="slide-box s4" style="height:200px;">Peek — Four</div></div>
+      </div>
+    </div>
+    <pre class="snip">data-plugin-options='{"items":1,"loop":true,"stagePadding":60,"gap":20}'</pre>
+    <div class="demo-log" id="log-peek"><span>— awaiting events —</span></div>
+  </div>
+
+  <!-- ═══ 7. No-loop + disabled nav state ═══ -->
+  <div class="demo-section-label">07 — Loop disabled · nav state</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Prev/next buttons disable at the edges when loop is off</span>
+      <span class="chip">no-loop</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-noloop" data-plugin-carousel-pro
+           data-plugin-options='{"items":2,"loop":false,"gap":12,"dots":true,"dotType":"line"}'>
+        <div><div class="slide-box s5">Alpha</div></div>
+        <div><div class="slide-box s1">Beta</div></div>
+        <div><div class="slide-box s2">Gamma</div></div>
+        <div><div class="slide-box s3">Delta</div></div>
+        <div><div class="slide-box s4">Epsilon</div></div>
+      </div>
+    </div>
+    <pre class="snip">data-plugin-options='{"items":2,"loop":false,"gap":12,"dotType":"line"}'</pre>
+    <div class="demo-controls">
+      <button onclick="$('#cp-noloop').data('__carousel').prev()">← Prev</button>
+      <button onclick="$('#cp-noloop').data('__carousel').next()">Next →</button>
+    </div>
+    <div class="demo-log" id="log-noloop"><span>— awaiting events —</span></div>
+  </div>
+
+  <!-- ═══ 8. Vertical ═══ -->
+  <div class="demo-section-label">08 — Vertical slide</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Vertical axis · touch + keyboard aware</span>
+      <span class="chip">vertical</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-vert" data-plugin-carousel-pro
+           data-plugin-options='{"vertical":true,"loop":true,"speed":400,"dots":true}'
+           style="height:300px;">
+        <div><div class="slide-box s2" style="height:100%;">↕ Vertical One</div></div>
+        <div><div class="slide-box s3" style="height:100%;">↕ Vertical Two</div></div>
+        <div><div class="slide-box s4" style="height:100%;">↕ Vertical Three</div></div>
+      </div>
+    </div>
+    <pre class="snip">&lt;!-- Set height on the carousel; slide content uses height:100% --&gt;
+&lt;div data-plugin-carousel-pro style="height:300px;"
+     data-plugin-options='{"vertical":true,"loop":true}'&gt;
+  &lt;div&gt;&lt;div style="height:100%;"&gt;…&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+    <div class="demo-controls">
+      <button onclick="$('#cp-vert').data('__carousel').prev()">↑ Prev</button>
+      <button onclick="$('#cp-vert').data('__carousel').next()">↓ Next</button>
+    </div>
+    <div class="demo-log" id="log-vert"><span>— awaiting events —</span></div>
+  </div>
+
+  <!-- ═══ 9. Custom nav + external thumbs ═══ -->
+  <div class="demo-section-label">09 — External thumbnail target · custom nav CSS vars</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>thumbsEl points to a container outside the carousel</span>
+      <span class="chip">external thumbs</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-ext" data-plugin-carousel-pro
+           data-plugin-options='{"loop":true,"thumbsEl":"#ext-thumbs-target","counter":true,"nav":true,"speed":380}'
+           style="--tscp-nav-bg:rgba(232,103,42,.8);--tscp-nav-bg-hover:rgba(232,103,42,1);--tscp-nav-radius:6px;--tscp-nav-size:38px;">
+        <div data-thumb="https://picsum.photos/seed/e/600/280">
+          <img src="https://picsum.photos/seed/e/600/280" alt="" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+        <div data-thumb="https://picsum.photos/seed/f/600/280">
+          <img src="https://picsum.photos/seed/f/600/280" alt="" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+        <div data-thumb="https://picsum.photos/seed/g/600/280">
+          <img src="https://picsum.photos/seed/g/600/280" alt="" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+        <div data-thumb="https://picsum.photos/seed/h/600/280">
+          <img src="https://picsum.photos/seed/h/600/280" alt="" style="width:100%;height:260px;object-fit:cover;display:block;border-radius:6px;">
+        </div>
+      </div>
+      <div id="ext-thumbs-target" style="--tscp-thumb-size:80px;"></div>
+    </div>
+    <pre class="snip">data-plugin-options='{"thumbsEl":"#ext-thumbs-target","counter":true}'
+style="--tscp-nav-bg:rgba(232,103,42,.8); --tscp-nav-radius:6px;"
+
+&lt;div id="ext-thumbs-target"&gt;&lt;/div&gt;</pre>
+    <div class="demo-log" id="log-ext"><span>— awaiting events —</span></div>
+  </div>
+
+  <!-- ═══ 10. Programmatic API ═══ -->
+  <div class="demo-section-label">10 — Programmatic API</div>
+  <div class="demo-card">
+    <div class="demo-card-header">
+      <span>Manual init · full API surface</span>
+      <span class="chip">manual</span>
+    </div>
+    <div class="demo-stage">
+      <div id="cp-api" class="manual" style="--tscp-dot-active-color:#2ab8c8;">
+        <div><div class="slide-box s1">API — 1</div></div>
+        <div><div class="slide-box s2">API — 2</div></div>
+        <div><div class="slide-box s3">API — 3</div></div>
+        <div><div class="slide-box s4">API — 4</div></div>
+        <div><div class="slide-box s5">API — 5</div></div>
+      </div>
+    </div>
+    <pre class="snip">const inst = $('#cp-api').themestrapPluginCarousel({
+  items: 1, loop: true, speed: 400, dots: true, dotType: 'number'
+});
+
+inst.next();        // advance one
+inst.prev();        // go back one
+inst.to(2);         // jump to slide index 2
+inst.play();        // start autoplay
+inst.pause();       // stop autoplay
+inst.destroy();     // full teardown</pre>
+    <div class="demo-controls">
+      <button id="api-init">Init</button>
+      <button id="api-prev">← Prev</button>
+      <button id="api-next">Next →</button>
+      <button id="api-to2">to(2)</button>
+      <button id="api-play">▶ Play</button>
+      <button id="api-pause">⏸ Pause</button>
+      <button id="api-destroy">✕ Destroy</button>
+    </div>
+    <div class="demo-log" id="log-api"><span>— use Init first —</span></div>
+  </div>
+
+</main>
+
+<!-- Themestrap deps -->
 <script src="../vendor/jquery/jquery.min.js"></script>
 <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="../js/themestrap.js"></script>
+
+<!-- Carousel plugin -->
 <script src="../js/components/themestrap.plugin.carousel.js"></script>
-<script src="../js/themestrap.init.js"></script>
 
 <script>
-	if ($.isFunction($.fn['themestrapPluginCarousel']) && $('[data-plugin-carousel]:not(.manual), .ts-carousel:not(.manual)').length) {
-		themestrap.fn.intObsInit( '[data-plugin-carousel]:not(.manual), .ts-carousel:not(.manual)', 'themestrapPluginCarousel' );
-	}
+  // Auto-init all non-.manual carousels
+  $(function() {
+    if ($.isFunction($.fn.themestrapPluginCarousel) && $('[data-plugin-carousel-pro]').length) {
+      $('[data-plugin-carousel-pro]:not(.manual)').each(function() {
+        const $el   = $(this);
+        const opts  = themestrap.fn.getOptions($el.data('plugin-options')) || {};
+        $el.themestrapPluginCarousel(opts);
+      });
+    }
 
-(function ($) {
+    // Event logging helpers
+    const logEvent = (logId, msg) => {
+      const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
+      $(`#${logId}`).html(`<span class="evt">${ts}</span> &nbsp; ${msg}`);
+    };
 
-  /* log helper */
-  function log(id, msg, type) {
-    const cls = type === 'warn' ? 'log-warn' : 'log-entry';
-    $('#' + id).html('<span class="' + cls + '">' + msg + '</span>');
-  }
+    const wireLog = (carouselId, logId) => {
+      document.getElementById(carouselId).addEventListener('ts.carousel.changed', e => {
+        logEvent(logId, `changed → slide <strong>${e.detail.index + 1}</strong> / ${e.detail.total}`);
+      });
+    };
 
-  /* wire change events for auto-init carousels */
-  $(document).on('changed.owl.carousel', '#card-responsive .ts-carousel', function (e) {
-    if (e.item) log('log-01', '// changed -> slide ' + (e.item.index + 1) + ' of ' + e.item.count);
-  });
+    wireLog('cp-basic',   'log-basic');
+    wireLog('cp-autoplay','log-autoplay');
+    wireLog('cp-fade',    'log-fade');
+    wireLog('cp-zoom',    'log-zoom');
+    wireLog('cp-thumbs',  'log-thumbs');
+    wireLog('cp-peek',    'log-peek');
+    wireLog('cp-noloop',  'log-noloop');
+    wireLog('cp-vert',    'log-vert');
+    wireLog('cp-ext',     'log-ext');
+    wireLog('cp-api',     'log-api');
 
-  $(document).on('changed.owl.carousel', '#card-autoplay .ts-carousel', function (e) {
-    if (e.item) log('log-02', '// autoplay -> slide ' + (e.item.index + 1));
-  });
+    // Manual API demo
+    let apiInst = null;
 
-  $(document).on('changed.owl.carousel', '#card-noloop .ts-carousel', function (e) {
-    if (e.item) log('log-03', '// navigated -> slide ' + (e.item.index + 1) + ' of ' + e.item.count);
-  });
+    $('#api-init').on('click', function() {
+      if ($('#cp-api').data('__carousel')) {
+        logEvent('log-api', 'already initialized');
+        return;
+      }
+      apiInst = $('#cp-api').themestrapPluginCarousel({
+        items: 1, loop: true, speed: 400,
+        dots: true, dotType: 'number',
+        autoplay: false, progressBar: true
+      })[0];
+      logEvent('log-api', 'initialized');
+    });
 
-  $(document).on('changed.owl.carousel', '#ext-carousel', function (e) {
-    if (e.item) log('log-04', '// jumped to slide ' + (e.item.index + 1));
-  });
-
-  $(document).on('changed.owl.carousel', '#card-center .ts-carousel', function (e) {
-    if (e.item) log('log-05', '// center-active updated — current slide ' + (e.item.index + 1));
-  });
-
-  /* Card 08 — manual API carousel */
-  const $apiEl = $('#api-carousel').themestrapPluginCarousel();
-  let   destroyed = false;
-
-  $apiEl.on('changed.owl.carousel', function (e) {
-    if (e.item) log('log-08', '// changed.owl.carousel -> index ' + e.item.index);
-  });
-
-  $('#api-prev').on('click', function () {
-    if (destroyed) return log('log-08', '// not initialized — click re-init first', 'warn');
-    $apiEl.data('__carousel').prev();
-  });
-
-  $('#api-next').on('click', function () {
-    if (destroyed) return log('log-08', '// not initialized — click re-init first', 'warn');
-    $apiEl.data('__carousel').next();
-  });
-
-  $('#api-to2').on('click', function () {
-    if (destroyed) return log('log-08', '// not initialized', 'warn');
-    $apiEl.data('__carousel').to(2);
-  });
-
-  $('#api-to4').on('click', function () {
-    if (destroyed) return log('log-08', '// not initialized', 'warn');
-    $apiEl.data('__carousel').to(4);
-  });
-
-  $('#api-destroy').on('click', function () {
-    if (destroyed) return log('log-08', '// already destroyed', 'warn');
-    $apiEl.data('__carousel').destroy();
-    destroyed = true;
-    log('log-08', '// destroy() called — DOM restored to pre-init state');
-    $(this).prop('disabled', true);
-    $('#api-reinit').prop('disabled', false);
-  });
-
-  $('#api-reinit').on('click', function () {
-    if (!destroyed) return log('log-08', '// already initialized', 'warn');
-    $apiEl.themestrapPluginCarousel();
-    destroyed = false;
-    log('log-08', '// re-init complete');
-    $(this).prop('disabled', true);
-    $('#api-destroy').prop('disabled', false);
-
-    $apiEl.on('changed.owl.carousel', function (e) {
-      if (e.item) log('log-08', '// changed.owl.carousel -> index ' + e.item.index);
+    $('#api-prev').on('click',    () => apiInst && apiInst.prev());
+    $('#api-next').on('click',    () => apiInst && apiInst.next());
+    $('#api-to2').on('click',     () => apiInst && apiInst.to(2));
+    $('#api-play').on('click',    () => { if (apiInst) { apiInst.options.autoplay = true; apiInst.play(); } });
+    $('#api-pause').on('click',   () => apiInst && apiInst.pause());
+    $('#api-destroy').on('click', () => {
+      if (apiInst) {
+        apiInst.destroy();
+        apiInst = null;
+        logEvent('log-api', 'destroyed — use Init to restart');
+      }
     });
   });
-
-}(jQuery));
 </script>
 </body>
 </html>

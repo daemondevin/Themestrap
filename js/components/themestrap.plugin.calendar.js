@@ -1,4 +1,3 @@
-
 // Calendar
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCalendar';

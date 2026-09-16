@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GDPR Plugin — Demo | Themestrap</title>
+
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  <style>
+    :root {
+      --ts-navy:        #0a1929;
+      --ts-navy-2:      #0e2238;
+      --ts-orange:      #e8672a;
+      --ts-orange-2:    #d2541b;
+      --ts-teal:        #2ab8c8;
+      --ts-cream:       #f5f0e8;
+      --ts-font-serif:  'Fraunces', Georgia, serif;
+      --ts-font-display:'Syne', sans-serif;
+      --ts-font-body:   'DM Sans', system-ui, sans-serif;
+      --ts-font-mono:   'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: var(--ts-font-body);
+      background: var(--ts-navy-2);
+      color: #1a2332;
+      margin: 0;
+      padding-bottom: 80px;
+    }
+
+    .demo-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 3px solid var(--ts-orange);
+    }
+    .demo-header h1 {
+      font-family: var(--ts-font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0 0 .25rem;
+      letter-spacing: -.02em;
+    }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill {
+      display: inline-block;
+      background: var(--ts-orange);
+      color: #fff;
+      font-family: var(--ts-font-mono);
+      font-size: .7rem;
+      padding: .2em .6em;
+      border-radius: 99px;
+      margin-left: .5rem;
+      vertical-align: middle;
+    }
+
+    .demo-nav {
+      background: var(--ts-navy-2);
+      padding: .6rem 2rem;
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .demo-nav a {
+      color: rgba(255,255,255,.6);
+      text-decoration: none;
+      font-size: .82rem;
+      font-family: var(--ts-font-mono);
+      transition: color .15s;
+    }
+    .demo-nav a:hover { color: var(--ts-teal); }
+
+    .demo-body {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .demo-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .demo-card-header {
+      background: var(--ts-navy);
+      color: #fff;
+      padding: .75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+    .demo-card-header h2 {
+      font-family: var(--ts-font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: .02em;
+    }
+    .demo-card-header .card-num {
+      font-family: var(--ts-font-mono);
+      font-size: .75rem;
+      color: var(--ts-teal);
+      border: 1px solid var(--ts-teal);
+      border-radius: 4px;
+      padding: .1em .45em;
+    }
+    .demo-card-header .card-tag {
+      margin-left: auto;
+      font-family: var(--ts-font-mono);
+      font-size: .65rem;
+      color: rgba(255,255,255,.4);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 4px;
+      padding: .15em .5em;
+    }
+
+    .demo-stage {
+      padding: 2rem;
+      background: var(--ts-cream);
+      border-bottom: 1px solid #e8e0d4;
+      min-height: 120px;
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    pre.snip {
+      margin: 0;
+      padding: 1.25rem 1.5rem;
+      background: #0d1b2a;
+      color: #c9d1d9;
+      font-family: var(--ts-font-mono);
+      font-size: .78rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    pre.snip .hl-attr { color: #79c0ff; }
+    pre.snip .hl-val  { color: #a5d6a7; }
+    pre.snip .hl-tag  { color: #ff7b72; }
+    pre.snip .hl-cmt  { color: #6a737d; }
+    pre.snip .hl-kw   { color: #d2a8ff; }
+    pre.snip .hl-str  { color: #a5d6a7; }
+    pre.snip .hl-fn   { color: #e3b341; }
+
+    .demo-log {
+      font-family: var(--ts-font-mono);
+      font-size: .78rem;
+      padding: .75rem 1.5rem;
+      background: #0d1b2a;
+      color: #8b949e;
+      border-top: 1px solid rgba(255,255,255,.05);
+      min-height: 2.5rem;
+    }
+    .demo-log .log-entry { color: var(--ts-teal); }
+    .demo-log .log-warn  { color: var(--ts-orange); }
+
+    .demo-controls {
+      padding: 1rem 1.5rem;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      align-items: center;
+    }
+
+    .btn-ts {
+      font-family: var(--ts-font-mono);
+      font-size: .78rem;
+      padding: .3rem .85rem;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .btn-ts:active { transform: scale(.97); }
+    .btn-primary-ts { background: var(--ts-orange);  color: #fff; }
+    .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts    { background: var(--ts-teal);    color: #fff; }
+    .btn-teal-ts:hover { background: #22a0af; }
+    .btn-navy-ts    { background: var(--ts-navy);    color: #fff; }
+    .btn-navy-ts:hover { background: var(--ts-navy-2); }
+    .btn-ghost-ts   { background: transparent; color: #333; border: 1px solid #ccc; }
+    .btn-ghost-ts:hover { background: #f0f2f5; }
+
+    .state-panel {
+      background: var(--ts-navy);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      color: #c8d8e8;
+      font-family: var(--ts-font-mono);
+      font-size: .8rem;
+      line-height: 2;
+      width: 100%;
+    }
+    .state-panel .sk  { color: var(--ts-teal); display: inline-block; width: 10ch; }
+    .state-panel .sv  { color: #6bcf7f; }
+    .state-panel .sn  { color: var(--ts-orange); opacity: .7; }
+
+    .bar-preview {
+      background: #0a1929;
+      border-top: 2px solid #2ab8c8;
+      border-radius: 8px;
+      padding: .875rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .75rem;
+      color: #c8d8e8;
+      font-size: .85rem;
+      width: 100%;
+    }
+    .bar-preview .bbtns { display: flex; gap: .5rem; }
+    .bar-preview .bbtn  {
+      background: #2ab8c8;
+      color: #0a1929;
+      border: none;
+      border-radius: 4px;
+      padding: .3rem .85rem;
+      font-family: var(--ts-font-mono);
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: default;
+    }
+    .bar-preview .bbtn.outline {
+      background: transparent;
+      color: #2ab8c8;
+      border: 1px solid #2ab8c8;
+    }
+
+    .gdpr-placeholder {
+      background: #fff3cd;
+      border: 2px dashed #ffc107;
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+      color: #856404;
+      font-size: .85rem;
+    }
+    .gdpr-placeholder strong { display: block; margin-bottom: .25rem; }
+
+    .consent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .consent-grid .cg-label {
+      font-family: var(--ts-font-mono);
+      font-size: .72rem;
+      color: #888;
+      margin: 0 0 .4rem;
+    }
+
+    @media (max-width: 600px) {
+      .consent-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>GDPR <span class="badge-pill">plugin</span></h1>
+  <p>Consent bar, preferences popup, and consent-gated content.</p>
+</div>
+
+<div class="demo-nav">
+  <a href="#card-live">Live Bar</a>
+  <a href="#card-bar-markup">Bar Markup</a>
+  <a href="#card-popup-markup">Popup Markup</a>
+  <a href="#card-wrapper">Wrapper</a>
+  <a href="#card-api">API</a>
+</div>
+
+<div class="demo-body">
+
+  <!-- Card 01: Live bar state -->
+  <div class="demo-card" id="card-live">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Live Consent Bar</h2>
+      <span class="card-tag">PluginGDPR</span>
+    </div>
+
+    <div class="demo-stage">
+      <p style="font-size:.875rem; color:#555; margin:0;">The bar at the bottom of this page is the live plugin. Current consent state:</p>
+      <div class="state-panel" id="state-panel">
+        <span class="sk">bar</span> &mdash;<br>
+        <span class="sk">prefs</span> &mdash;<br>
+        <span class="sk">cats</span> &mdash;
+      </div>
+    </div>
+
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="clearAndShow()">Clear cookies &amp; show bar</button>
+      <button class="btn-ts btn-teal-ts"    onclick="openPopup()">Open preferences popup</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="refreshState()">Refresh state</button>
+    </div>
+
+    <div class="demo-log" id="log-live">
+      <span class="log-entry">// ts.gdpr.consent fires on window whenever preferences are saved</span>
+    </div>
+  </div>
+
+
+  <!-- Card 02: Bar markup -->
+  <div class="demo-card" id="card-bar-markup">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Bar Markup</h2>
+      <span class="card-tag">data-plugin-gdpr</span>
+    </div>
+
+    <div class="demo-stage">
+      <p style="font-size:.8rem; color:#666; margin:0;">Place the bar element anywhere in <code>&lt;body&gt;</code> — the plugin positions it fixed to the bottom edge.</p>
+      <div class="bar-preview">
+        <span>&#x1F36A; We use cookies to improve your experience.</span>
+        <div class="bbtns">
+          <button class="bbtn">Accept All</button>
+          <button class="bbtn outline">Preferences</button>
+        </div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-cmt">&lt;!-- Bar: place once in &lt;body&gt; --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-gdpr</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"cookieBarShowDelay": 3000, "expires": 365}'</span><span class="hl-tag">&gt;</span>
+
+  <span class="hl-tag">&lt;p&gt;</span>&#x1F36A; We use cookies to improve your experience.<span class="hl-tag">&lt;/p&gt;</span>
+
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"d-flex gap-2"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-agree-trigger btn btn-sm btn-primary"</span><span class="hl-tag">&gt;</span>Accept All<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-preferences-trigger btn btn-sm btn-outline-light"</span><span class="hl-tag">&gt;</span>Preferences<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">&lt;!-- Re-open popup from a footer link --&gt;</span>
+<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"#"</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-open-preferences"</span><span class="hl-tag">&gt;</span>Manage Cookies<span class="hl-tag">&lt;/a&gt;</span></pre>
+  </div>
+
+
+  <!-- Card 03: Popup markup -->
+  <div class="demo-card" id="card-popup-markup">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Preferences Popup Markup</h2>
+      <span class="card-tag">.gdpr-preferences-popup</span>
+    </div>
+
+    <div class="demo-stage">
+      <p style="font-size:.8rem; color:#666; margin:0;">One popup per page. Place it outside any <code>transform</code> or <code>overflow:hidden</code> container so the fixed overlay renders correctly.</p>
+      <button class="btn-ts btn-teal-ts" onclick="openPopup()">&#9654; Open live popup</button>
+    </div>
+
+<pre class="snip"><span class="hl-cmt">&lt;!-- Popup: place once, near the end of &lt;body&gt; --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-preferences-popup"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-preferences-popup-content"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;h5&gt;</span>Cookie Preferences<span class="hl-tag">&lt;/h5&gt;</span>
+
+    <span class="hl-tag">&lt;form</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-preferences-form"</span><span class="hl-tag">&gt;</span>
+      <span class="hl-cmt">&lt;!-- Hidden inputs are always included --&gt;</span>
+      <span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"hidden"</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-input"</span> <span class="hl-attr">value</span>=<span class="hl-val">"necessary"</span> <span class="hl-tag">/&gt;</span>
+
+      <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"form-check"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;input</span> <span class="hl-attr">class</span>=<span class="hl-val">"form-check-input gdpr-input"</span>
+               <span class="hl-attr">type</span>=<span class="hl-val">"checkbox"</span> <span class="hl-attr">value</span>=<span class="hl-val">"analytics"</span> <span class="hl-tag">/&gt;</span>
+        <span class="hl-tag">&lt;label</span> <span class="hl-attr">class</span>=<span class="hl-val">"form-check-label"</span><span class="hl-tag">&gt;</span>Analytics<span class="hl-tag">&lt;/label&gt;</span>
+      <span class="hl-tag">&lt;/div&gt;</span>
+
+      <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"form-check"</span><span class="hl-tag">&gt;</span>
+        <span class="hl-tag">&lt;input</span> <span class="hl-attr">class</span>=<span class="hl-val">"form-check-input gdpr-input"</span>
+               <span class="hl-attr">type</span>=<span class="hl-val">"checkbox"</span> <span class="hl-attr">value</span>=<span class="hl-val">"marketing"</span> <span class="hl-tag">/&gt;</span>
+        <span class="hl-tag">&lt;label</span> <span class="hl-attr">class</span>=<span class="hl-val">"form-check-label"</span><span class="hl-tag">&gt;</span>Marketing<span class="hl-tag">&lt;/label&gt;</span>
+      <span class="hl-tag">&lt;/div&gt;</span>
+
+      <span class="hl-tag">&lt;button</span> <span class="hl-attr">type</span>=<span class="hl-val">"submit"</span> <span class="hl-attr">class</span>=<span class="hl-val">"btn btn-primary mt-3"</span><span class="hl-tag">&gt;</span>SAVE PREFERENCES<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;/form&gt;</span>
+
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">class</span>=<span class="hl-val">"gdpr-close-popup btn btn-link btn-sm mt-2"</span><span class="hl-tag">&gt;</span>Close<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+  </div>
+
+
+  <!-- Card 04: GDPRWrapper -->
+  <div class="demo-card" id="card-wrapper">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Consent-Gated Content</h2>
+      <span class="card-tag">PluginGDPRWrapper</span>
+    </div>
+
+    <div class="demo-stage">
+      <p style="font-size:.8rem; color:#666; margin:0;">Two wrappers — each guards content behind a different consent category. Save preferences above to see them update live.</p>
+      <div class="consent-grid">
+        <div>
+          <p class="cg-label">checkCookie: "analytics"</p>
+          <div data-plugin-gdpr-wrapper data-plugin-options='{"checkCookie": "analytics"}' class="manual">
+            <div class="gdpr-placeholder">
+              <strong>&#x1F512; Analytics Content</strong>
+              Accept analytics cookies to reveal this block.
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="cg-label">checkCookie: "marketing"</p>
+          <div data-plugin-gdpr-wrapper data-plugin-options='{"checkCookie": "marketing"}' class="manual">
+            <div class="gdpr-placeholder">
+              <strong>&#x1F512; Marketing Content</strong>
+              Accept marketing cookies to reveal this block.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-cmt">&lt;!-- Show existing DOM content only when 'analytics' consent is present --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-gdpr-wrapper</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"checkCookie": "analytics"}'</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;p&gt;</span>Placeholder — shown until consent is granted.<span class="hl-tag">&lt;/p&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">&lt;!-- Replace content via AJAX once 'marketing' consent is present --&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-gdpr-wrapper</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"checkCookie":"marketing","ajaxURL":"/partials/ad.html","loadDelay":800}'</span><span class="hl-tag">&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span></pre>
+
+    <div class="demo-log" id="log-wrapper">
+      <span class="log-entry">// wrapper states update when preferences change</span>
+    </div>
+  </div>
+
+
+  <!-- Card 05: JS API -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">05</span>
+      <h2>JavaScript API</h2>
+      <span class="card-tag">public methods</span>
+    </div>
+
+    <div class="demo-stage">
+      <p style="font-size:.8rem; color:#666; margin:0;">Public methods available on the <code>PluginGDPR</code> instance and the <code>ts.gdpr.consent</code> window event:</p>
+      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+        <button class="btn-ts btn-ghost-ts" onclick="apiRemoveBar()">removeCookieBar()</button>
+        <button class="btn-ts btn-ghost-ts" onclick="apiClearCookies()">clearCookies()</button>
+        <button class="btn-ts btn-ghost-ts" onclick="apiDestroy()">destroy()</button>
+      </div>
+    </div>
+
+<pre class="snip"><span class="hl-cmt">// Retrieve the PluginGDPR instance</span>
+<span class="hl-kw">const</span> gdpr = $(<span class="hl-str">'[data-plugin-gdpr]'</span>).data(<span class="hl-str">'__gdpr'</span>);
+
+gdpr.<span class="hl-fn">removeCookieBar</span>();   <span class="hl-cmt">// transition bar out without writing a cookie</span>
+gdpr.<span class="hl-fn">clearCookies</span>();     <span class="hl-cmt">// remove themestrap-privacy-bar and themestrap-gdpr-preferences</span>
+gdpr.<span class="hl-fn">destroy</span>();          <span class="hl-cmt">// full teardown — unbind all .gdpr events, remove injected CSS</span>
+
+<span class="hl-cmt">// Listen for consent changes on the window</span>
+window.<span class="hl-fn">addEventListener</span>(<span class="hl-str">'ts.gdpr.consent'</span>, e => {
+  console.<span class="hl-fn">log</span>(e.detail.categories); <span class="hl-cmt">// e.g. ['necessary', 'analytics']</span>
+});
+
+<span class="hl-cmt">// Retrieve the PluginGDPRWrapper instance</span>
+<span class="hl-kw">const</span> wrapper = $(<span class="hl-str">'[data-plugin-gdpr-wrapper]'</span>).data(<span class="hl-str">'__gdprwrapper'</span>);
+wrapper.<span class="hl-fn">destroy</span>();  <span class="hl-cmt">// empties wrapper content and removes instance data</span></pre>
+
+    <div class="demo-log" id="log-api">
+      <span class="log-entry">// click a button above to test</span>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Preferences popup: one per page, near end of body -->
+<div class="gdpr-preferences-popup">
+  <div class="gdpr-preferences-popup-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <h5 style="margin:0; font-family:var(--ts-font-display);">&#x1F36A; Cookie Preferences</h5>
+      <button class="gdpr-close-popup btn-close" aria-label="Close"></button>
+    </div>
+    <p style="font-size:.875rem; color:#555; margin-bottom:1.5rem;">
+      Choose which categories of cookies you allow. Necessary cookies are always active and cannot be disabled.
+    </p>
+
+    <form class="gdpr-preferences-form">
+      <input type="hidden" class="gdpr-input" value="necessary" />
+
+      <div class="mb-2 p-3 rounded" style="background:#f8f9fa; border:1px solid #e9ecef;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <strong style="font-size:.875rem;">Necessary</strong>
+            <p style="font-size:.8rem; color:#666; margin:.2rem 0 0;">Always active — required for the site to function.</p>
+          </div>
+          <span class="badge bg-secondary" style="font-size:.7rem;">Always On</span>
+        </div>
+      </div>
+
+      <div class="mb-2 p-3 rounded" style="background:#f8f9fa; border:1px solid #e9ecef;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <strong style="font-size:.875rem;">Analytics</strong>
+            <p style="font-size:.8rem; color:#666; margin:.2rem 0 0;">Helps us understand how visitors interact with the site.</p>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input gdpr-input" type="checkbox" value="analytics" id="pref-analytics" />
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3 p-3 rounded" style="background:#f8f9fa; border:1px solid #e9ecef;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <strong style="font-size:.875rem;">Marketing</strong>
+            <p style="font-size:.8rem; color:#666; margin:.2rem 0 0;">Used for personalised ads and campaign tracking.</p>
+          </div>
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input gdpr-input" type="checkbox" value="marketing" id="pref-marketing" />
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm flex-grow-1">SAVE PREFERENCES</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm gdpr-agree-trigger">Accept All</button>
+      </div>
+      <div class="mt-2">
+        <button type="button" class="gdpr-reset-cookies btn btn-link btn-sm p-0" style="font-size:.75rem; color:#dc3545;">
+          Clear all cookies &amp; reset
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Live GDPR consent bar -->
+<div data-plugin-gdpr data-plugin-options='{"cookieBarShowDelay": 1500, "expires": 365}'
+     style="font-size:.875rem;">
+  <span>&#x1F36A; This demo page uses cookies. Click &ldquo;Accept All&rdquo; or set your preferences.</span>
+  <div class="d-flex gap-2">
+    <button class="gdpr-agree-trigger btn btn-sm btn-primary"
+            style="font-family:var(--ts-font-mono); font-size:.78rem;">Accept All</button>
+    <button class="gdpr-preferences-trigger btn btn-sm btn-outline-light"
+            style="font-family:var(--ts-font-mono); font-size:.78rem;">Preferences</button>
+  </div>
+</div>
+
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/jquery.cookie/jquery.cookie.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.gdpr.js"></script>
+
+<script>
+$(function() {
+
+  // Auto-init the GDPR bar
+  $('[data-plugin-gdpr]:not(.manual)').each(function() {
+    const $this = $(this);
+    const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+    $this.themestrapPluginGDPR(opts);
+  });
+
+  // Manual init of wrapper demos
+  $('[data-plugin-gdpr-wrapper].manual').each(function() {
+    const $this = $(this);
+    const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+    $this.themestrapPluginGDPRWrapper(opts);
+  });
+
+  refreshState();
+  refreshWrapperLog();
+
+  window.addEventListener('ts.gdpr.consent', function(e) {
+    log('log-live', '// ts.gdpr.consent \u2192 [' + e.detail.categories.join(', ') + ']');
+    refreshState();
+    refreshWrapperLog();
+  });
+
+});
+
+function refreshState() {
+  var bar  = $.cookie('themestrap-privacy-bar');
+  var pref = $.cookie('themestrap-gdpr-preferences');
+  var cats = pref ? pref.split(',') : [];
+
+  var html = [
+    '<span class="sk">bar</span>   ' + (bar  ? '<span class="sv">set \u2713</span>' : '<span class="sn">not set</span>'),
+    '<span class="sk">prefs</span> ' + (pref ? '<span class="sv">' + pref + '</span>'  : '<span class="sn">not set</span>'),
+    '<span class="sk">cats</span>  ' + (cats.length ? cats.map(function(c) { return '<span class="sv">' + c + '</span>'; }).join(', ') : '<span class="sn">none</span>'),
+  ].join('<br>');
+
+  $('#state-panel').html(html);
+}
+
+function refreshWrapperLog() {
+  var pref = $.cookie('themestrap-gdpr-preferences');
+  var cats = pref ? pref.split(',') : [];
+  log('log-wrapper',
+    '// analytics: ' + (cats.indexOf('analytics') > -1 ? '\u2713 revealed' : '\u2717 placeholder') +
+    '  |  marketing: ' + (cats.indexOf('marketing') > -1 ? '\u2713 revealed' : '\u2717 placeholder')
+  );
+}
+
+function clearAndShow() {
+  $.removeCookie('themestrap-privacy-bar');
+  $.removeCookie('themestrap-gdpr-preferences');
+  location.reload();
+}
+
+function openPopup() {
+  $('.gdpr-preferences-popup').addClass('show');
+}
+
+function apiRemoveBar() {
+  var inst = $('[data-plugin-gdpr]').data('__gdpr');
+  if (!inst) { log('log-api', '// no instance — bar already destroyed', 'warn'); return; }
+  inst.removeCookieBar();
+  log('log-api', '// removeCookieBar() \u2014 bar sliding out');
+}
+
+function apiClearCookies() {
+  var inst = $('[data-plugin-gdpr]').data('__gdpr');
+  if (!inst) { log('log-api', '// no instance found', 'warn'); return; }
+  inst.clearCookies();
+  log('log-api', '// clearCookies() \u2014 both GDPR cookies removed');
+  refreshState();
+}
+
+function apiDestroy() {
+  var inst = $('[data-plugin-gdpr]').data('__gdpr');
+  if (!inst) { log('log-api', '// already destroyed', 'warn'); return; }
+  inst.destroy();
+  log('log-api', '// destroy() \u2014 all .gdpr events unbound, styles removed');
+}
+
+function log(id, msg, type) {
+  var cls = type === 'warn' ? 'log-warn' : 'log-entry';
+  $('#' + id).html('<span class="' + cls + '">' + msg + '</span>');
+}
+</script>
+
+</body>
+</html>
