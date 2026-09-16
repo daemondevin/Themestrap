@@ -4,6 +4,20 @@ All notable changes to Themestrap are documented here.
 
 This repository does not currently include semantic version tags or package metadata, so the version sequence below is inferred from the project’s actual Git commit history beginning with the initial repository import and continuing through the current main branch state.
 
+## [1.0.1] - 2026-09-15
+
+### Added
+- Minor demo improvements and accessibility tweaks
+
+### Changed
+- Updated documentation and clarified initialization examples
+
+### Fixed
+- Fixed a plugin initialization race condition under certain load scenarios
+- Corrected typos and small inaccuracies across documentation and demos
+
+
+
 ## [1.0.0] - 2026-09-08
 
 This release represents the current repository state as of the latest commit history, following 128 commits since the project first appeared in Git on 2026-07-14.
@@ -29,7 +43,7 @@ This release represents the current repository state as of the latest commit his
 - Fixed outdated documentation and dependency references
 - Cleaned up inconsistent patterns and refactored code for better maintainability
 
----
+
 
 ## [0.5.0] - 2026-08
 
@@ -44,7 +58,7 @@ This release represents the current repository state as of the latest commit his
 - Refined readme content and project examples to match evolving functionality
 - Improved demo coverage and showcase polish
 
----
+
 
 ## [0.4.0] - 2026-07-16
 
@@ -61,7 +75,7 @@ This release represents the current repository state as of the latest commit his
 ### Fixed
 - Corrected clarity issues and outdated descriptions across early documentation
 
----
+
 
 ## [0.3.0] - 2026-07-15
 
@@ -74,7 +88,7 @@ This release represents the current repository state as of the latest commit his
 - Broadened documentation coverage for the initial component inventory
 - Increased the depth of README content and project explanation
 
----
+
 
 ## [0.2.0] - 2026-07-14
 
@@ -86,7 +100,7 @@ This release represents the current repository state as of the latest commit his
 ### Changed
 - Established the initial project structure for documentation and shared assets
 
----
+
 
 ## [0.1.0] - 2026-07-14
 
