@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accordion Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:    #0a1929;
+      --ts-navy-2:  #0e2238;
+      --ts-orange:  #e8672a;
+      --ts-orange-2:#d2541b;
+      --ts-teal:    #2ab8c8;
+      --ts-cream:   #f5f0e8;
+      --ts-font-serif:  'Fraunces', Georgia, serif;
+      --ts-font-display:'Syne', sans-serif;
+      --ts-font-body:   'DM Sans', system-ui, sans-serif;
+      --ts-font-mono:   'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; letter-spacing: -.02em; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .demo-header .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-nav a.active { color: var(--ts-orange); }
+
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; letter-spacing: .02em; }
+    .demo-card-header .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .demo-card-header .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    .demo-stage--dark { background: var(--ts-navy); }
+
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; border-top: 1px solid rgba(255,255,255,.05); }
+    pre.snip .hl-attr  { color: #79c0ff; }
+    pre.snip .hl-val   { color: #a5d6a7; }
+    pre.snip .hl-tag   { color: #ff7b72; }
+    pre.snip .hl-cmt   { color: #6a737d; }
+    pre.snip .hl-kw    { color: #c792ea; }
+
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .demo-controls label { font-size: .8rem; font-family: var(--ts-font-mono); color: #555; }
+    .demo-controls .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s, transform .1s; }
+    .demo-controls .btn-ts:active { transform: scale(.97); }
+    .btn-primary-ts  { background: var(--ts-orange); color: #fff; }
+    .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts     { background: var(--ts-teal); color: #fff; }
+    .btn-teal-ts:hover { background: #22a0af; }
+    .btn-navy-ts     { background: var(--ts-navy); color: #fff; }
+    .btn-navy-ts:hover { background: #06101d; }
+    .btn-ghost-ts    { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; }
+    .btn-ghost-ts:hover { background: #f0f2f5; }
+
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+    .demo-log .log-warn  { color: var(--ts-orange); }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Accordion <span class="badge-pill">plugin</span></h1>
+  <p>Multi-item disclosure group — exclusive or multi-open, keyboard navigation, CSS-drawn chevron, Venom palette</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-default" class="active">Default</a>
+  <a href="#card-multi">Multi-open</a>
+  <a href="#card-flush">Flush</a>
+  <a href="#card-api">API</a>
+  <a href="#card-events">Events</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Default exclusive -->
+  <div class="demo-card" id="card-default">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Default — exclusive, first item open</h2>
+      <span class="card-tag">exclusive: true · openIndex: 0</span>
+    </div>
+    <div class="demo-stage">
+      <div id="acc-default">
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>What is Themestrap?</button>
+          <div data-accordion-panel>
+            <p>Themestrap is a zero-build jQuery + Bootstrap 5 component library for MODX 3. Every plugin follows the same architectural pattern — IIFE wrapper, class lifecycle, lazy CSS injection, and a jQuery bridge — so the library is consistent and predictable.</p>
+          </div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>How are panels animated?</button>
+          <div data-accordion-panel>
+            <p>Each panel animates between <code>0 px</code> and its measured <code>scrollHeight</code> using a CSS transition on the clipping shell. After the transition ends the inline style is removed and a <code>height: auto</code> CSS rule takes over, so the panel can grow with its content without needing a re-measurement.</p>
+          </div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Can I nest accordions?</button>
+          <div data-accordion-panel>
+            <p>Yes. The plugin only scans <em>direct</em> children with <code>[data-accordion-item]</code> so a nested accordion does not bleed into the outer one. Each gets its own sequential UID for ARIA wiring.</p>
+          </div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>What keyboard shortcuts are supported?</button>
+          <div data-accordion-panel>
+            <p><kbd>↑</kbd> / <kbd>↓</kbd> move focus between triggers, <kbd>Home</kbd> / <kbd>End</kbd> jump to the first or last. <kbd>Space</kbd> and <kbd>Enter</kbd> activate the focused trigger (native on <code>&lt;button&gt;</code>, polyfilled on other elements).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"my-faq"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-accordion-item</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">type</span>=<span class="hl-val">"button"</span> <span class="hl-attr">data-accordion-trigger</span><span class="hl-tag">&gt;</span>Question<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-accordion-panel</span><span class="hl-tag">&gt;&lt;p&gt;</span>Answer.<span class="hl-tag">&lt;/p&gt;&lt;/div&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+  <span class="hl-cmt">&lt;!-- repeat… --&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+$(<span class="hl-val">'#my-faq'</span>).themestrapPluginAccordion({
+  exclusive:  <span class="hl-kw">true</span>,   <span class="hl-cmt">// one panel open at a time</span>
+  openIndex:  0,      <span class="hl-cmt">// first item starts open</span>
+});</pre>
+    <div class="demo-log" id="log-default"><span class="log-entry">// ready</span></div>
+  </div>
+
+
+  <!-- Card 02: Non-exclusive / multi-open -->
+  <div class="demo-card" id="card-multi">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Multi-open — exclusive: false, openIndex: [0, 2]</h2>
+      <span class="card-tag">exclusive: false</span>
+    </div>
+    <div class="demo-stage">
+      <div id="acc-multi" class="manual">
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Typography foundations</button>
+          <div data-accordion-panel><p>Line length, leading, and scale — the three pillars of readable type. A comfortable measure sits between 45 and 75 characters. Leading of 1.4–1.6× the font size works for body copy.</p></div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Grid systems</button>
+          <div data-accordion-panel><p>A grid is a scaffold, not a cage. Establishing a spatial system early lets every element — image, caption, headline, copy — occupy its correct proportion of the surface.</p></div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Colour theory</button>
+          <div data-accordion-panel><p>HSL is often the more intuitive workspace. Adjusting lightness while holding hue and saturation constant produces tints and shades that feel cohesive across a product surface.</p></div>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#acc-multi'</span>).themestrapPluginAccordion({
+  exclusive:  <span class="hl-kw">false</span>,       <span class="hl-cmt">// all panels can be open</span>
+  openIndex:  [0, 2],     <span class="hl-cmt">// items 0 and 2 start open</span>
+});</pre>
+    <div class="demo-log" id="log-multi"><span class="log-entry">// items 0 and 2 open on load</span></div>
+  </div>
+
+
+  <!-- Card 03: Flush -->
+  <div class="demo-card" id="card-flush">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Flush — edge-to-edge, no outer border</h2>
+      <span class="card-tag">flush: true</span>
+    </div>
+    <div class="demo-stage demo-stage--dark">
+      <div id="acc-flush" class="manual">
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Account settings</button>
+          <div data-accordion-panel><p style="color:#aaa;margin:0">Update your display name, email address, and profile picture from the Account tab. Changes take effect immediately.</p></div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Privacy controls</button>
+          <div data-accordion-panel><p style="color:#aaa;margin:0">Choose who can see your activity, manage connected apps, and download your data archive. We never sell your information.</p></div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Notification preferences</button>
+          <div data-accordion-panel><p style="color:#aaa;margin:0">Configure email digests, push notifications, and in-app banners. You can mute any channel without losing your subscription.</p></div>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#acc-flush'</span>).themestrapPluginAccordion({
+  flush:      <span class="hl-kw">true</span>,   <span class="hl-cmt">// no outer border / border-radius</span>
+  openIndex: <span class="hl-val">'none'</span>, <span class="hl-cmt">// all collapsed on load</span>
+  duration:   <span class="hl-val">'250ms'</span>,
+});</pre>
+    <div class="demo-log" id="log-flush"><span class="log-entry">// flush variant — no outer card</span></div>
+  </div>
+
+
+  <!-- Card 04: Programmatic API -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Programmatic API</h2>
+      <span class="card-tag">open · close · toggle · openAll · closeAll · disable</span>
+    </div>
+    <div class="demo-stage">
+      <div id="acc-api" class="manual">
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Item A</button>
+          <div data-accordion-panel><p>Content for item A. Use the buttons below to control this accordion programmatically.</p></div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Item B</button>
+          <div data-accordion-panel><p>Content for item B. Each button calls a method on the retrieved instance.</p></div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Item C</button>
+          <div data-accordion-panel><p>Content for item C. <code>openedIndexes()</code> returns the array of currently open item indices.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts"  onclick="apiCmd('open',0)">open(0)</button>
+      <button class="btn-ts btn-primary-ts"  onclick="apiCmd('open',1)">open(1)</button>
+      <button class="btn-ts btn-primary-ts"  onclick="apiCmd('open',2)">open(2)</button>
+      <button class="btn-ts btn-teal-ts"     onclick="apiCmd('toggle',0)">toggle(0)</button>
+      <button class="btn-ts btn-navy-ts"     onclick="apiCmd('close',0)">close(0)</button>
+      <button class="btn-ts btn-navy-ts"     onclick="apiCmd('closeAll')">closeAll()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="apiCmd('openedIndexes')">openedIndexes()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="apiToggleDisabled()">toggleDisabled()</button>
+    </div>
+<pre class="snip"><span class="hl-kw">const</span> acc = $(<span class="hl-val">'#acc-api'</span>).data(<span class="hl-val">'__accordion'</span>);
+
+acc.open(0);             <span class="hl-cmt">// open item 0</span>
+acc.close(1);            <span class="hl-cmt">// close item 1</span>
+acc.toggle(2);           <span class="hl-cmt">// flip item 2</span>
+acc.openAll();           <span class="hl-cmt">// no-op in exclusive mode beyond first</span>
+acc.closeAll();
+acc.openedIndexes();     <span class="hl-cmt">// → [0, 2]</span>
+acc.setDisabled(true);   <span class="hl-cmt">// entire accordion inert</span>
+acc.refresh();           <span class="hl-cmt">// re-scan after DOM mutations</span>
+acc.destroy();</pre>
+    <div class="demo-log" id="log-api"><span class="log-entry">// click a button above</span></div>
+  </div>
+
+
+  <!-- Card 05: Events -->
+  <div class="demo-card" id="card-events">
+    <div class="demo-card-header">
+      <span class="card-num">05</span>
+      <h2>Events</h2>
+      <span class="card-tag">open · opened · close · closed · change · ready</span>
+    </div>
+    <div class="demo-stage">
+      <div id="acc-events" class="manual">
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Expand me and watch the log</button>
+          <div data-accordion-panel><p>Events fire in pairs: <code>open.ts.accordion</code> starts the animation, <code>opened.ts.accordion</code> fires after it completes.</p></div>
+        </div>
+        <div data-accordion-item>
+          <button type="button" data-accordion-trigger>Close me to see close events</button>
+          <div data-accordion-panel><p><code>close.ts.accordion</code> starts the collapse, <code>closed.ts.accordion</code> fires once the panel is fully hidden.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-ghost-ts" onclick="clearLog('log-events')">Clear log</button>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#acc-events'</span>)
+  .on(<span class="hl-val">'open.ts.accordion'</span>,   (e, idx) =&gt; log(<span class="hl-val">'open'</span>,   idx))
+  .on(<span class="hl-val">'opened.ts.accordion'</span>, (e, idx) =&gt; log(<span class="hl-val">'opened'</span>, idx))
+  .on(<span class="hl-val">'close.ts.accordion'</span>,  (e, idx) =&gt; log(<span class="hl-val">'close'</span>,  idx))
+  .on(<span class="hl-val">'closed.ts.accordion'</span>, (e, idx) =&gt; log(<span class="hl-val">'closed'</span>, idx))
+  .on(<span class="hl-val">'change.ts.accordion'</span>, (e, idx, isOpen) =&gt; log(<span class="hl-val">'change'</span>, idx, isOpen));</pre>
+    <div class="demo-log" id="log-events"><span class="log-entry">// interact with the accordion above</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.accordion.js"></script>
+
+<script>
+$(function () {
+
+  /* Card 01 */
+  $('#acc-default').themestrapPluginAccordion({ exclusive: true, openIndex: 0 });
+  $('#acc-default').on('change.ts.accordion', function (e, idx, isOpen) {
+    log('log-default', '// change — item ' + idx + ' → ' + (isOpen ? 'open' : 'closed'));
+  });
+
+  /* Card 02 */
+  $('#acc-multi').themestrapPluginAccordion({ exclusive: false, openIndex: [0, 2] });
+  log('log-multi', '// items 0 and 2 open on init');
+
+  /* Card 03 */
+  $('#acc-flush').themestrapPluginAccordion({ flush: true, openIndex: 'none', duration: '250ms' });
+  log('log-flush', '// flush — openIndex:"none" → all collapsed');
+
+  /* Card 04 */
+  $('#acc-api').themestrapPluginAccordion({ exclusive: false, openIndex: 0 });
+
+  /* Card 05 */
+  $('#acc-events')
+    .on('open.ts.accordion',   function (e, idx) { appendLog('log-events', 'open.ts.accordion   idx=' + idx); })
+    .on('opened.ts.accordion', function (e, idx) { appendLog('log-events', 'opened.ts.accordion idx=' + idx); })
+    .on('close.ts.accordion',  function (e, idx) { appendLog('log-events', 'close.ts.accordion  idx=' + idx); })
+    .on('closed.ts.accordion', function (e, idx) { appendLog('log-events', 'closed.ts.accordion idx=' + idx); })
+    .on('change.ts.accordion', function (e, idx, isOpen) { appendLog('log-events', 'change.ts.accordion idx=' + idx + ' isOpen=' + isOpen); });
+  $('#acc-events').themestrapPluginAccordion({ exclusive: true, openIndex: 'none' });
+
+});
+
+function getApi() { return $('#acc-api').data('__accordion'); }
+
+var _disabled = false;
+
+function apiCmd(method, idx) {
+  const acc = getApi();
+  if (!acc) return log('log-api', '// no instance', 'warn');
+  let result;
+  if (idx !== undefined) {
+    result = acc[method](idx);
+  } else {
+    result = acc[method]();
+  }
+  if (method === 'openedIndexes') {
+    log('log-api', '// openedIndexes() → [' + result.join(', ') + ']');
+  } else {
+    log('log-api', '// ' + method + (idx !== undefined ? '(' + idx + ')' : '()') + ' called');
+  }
+}
+
+function apiToggleDisabled() {
+  const acc = getApi();
+  if (!acc) return;
+  _disabled = !_disabled;
+  acc.setDisabled(_disabled);
+  log('log-api', '// setDisabled(' + _disabled + ')');
+}
+
+function log(id, msg, type) {
+  const cls = type === 'warn' ? 'log-warn' : 'log-entry';
+  $('#' + id).html('<span class="' + cls + '">' + msg + '</span>');
+}
+
+function appendLog(id, msg) {
+  const ts = new Date().toTimeString().slice(0, 8);
+  $('#' + id).append('<div class="log-entry">[' + ts + '] ' + msg + '</div>');
+  const el = document.getElementById(id);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clearLog(id) {
+  $('#' + id).html('<span class="log-entry">// cleared</span>');
+}
+</script>
+
+</body>
+</html>

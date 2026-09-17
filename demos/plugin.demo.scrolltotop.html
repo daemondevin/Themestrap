@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ScrollToTop Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts    { background: var(--ts-teal);   color: #fff; } .btn-teal-ts:hover    { background: #22a0af; }
+    .btn-ghost-ts   { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Long-page spacer for scroll testing */
+    .scroll-spacer { padding: 3rem 0; }
+    .scroll-spacer p { color: #555; font-size: .88rem; line-height: 1.8; }
+
+    /* Inline scroll container for scoped demo */
+    .scroll-box {
+      height: 260px; overflow-y: auto; position: relative;
+      border: 1px solid #dde4ec; border-radius: 8px;
+      background: #fff;
+    }
+    .scroll-box-content { padding: 1rem 1.5rem; }
+    .scroll-box-content p { margin-bottom: 1rem; font-size: .88rem; color: #555; line-height: 1.7; }
+
+    /* Scroll indicator strip */
+    .scroll-indicator {
+      position: sticky; top: 0; z-index: 1;
+      background: rgba(255,255,255,.9); backdrop-filter: blur(4px);
+      border-bottom: 1px solid #e9ecef;
+      padding: .4rem .9rem;
+      font-family: var(--ts-font-mono); font-size: .72rem; color: #888;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>ScrollToTop <span class="badge-pill">plugin</span></h1>
+  <p>Fade-in scroll-to-top button — configurable threshold, label, easing, target element, and mobile visibility</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-page">Page scroll</a>
+  <a href="#card-element">Element scroll</a>
+  <a href="#card-label">Custom label</a>
+  <a href="#card-api">API</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Page-level scroll -->
+  <div class="demo-card" id="card-page">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Page scroll — button appears after scrolling past threshold</h2>
+      <span class="card-tag">scrollAfter: 300</span>
+    </div>
+    <div class="demo-stage">
+      <p style="font-size:.88rem;color:#555;margin:0">
+        The default scroll-to-top button is fixed at the <strong>bottom-right</strong> of the viewport.
+        It appears once the page is scrolled past <code>scrollAfter</code> pixels (300 px by default).<br><br>
+        <strong>Scroll the page down</strong> to see the button appear, then click it to return to the top.
+      </p>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"scroll-to-top"</span><span class="hl-tag">&gt;&lt;/div&gt;</span>
+
+$(<span class="hl-val">'#scroll-to-top'</span>).themestrapPluginScrollToTop({
+  scrollAfter:    300,       <span class="hl-cmt">// px from top before button fades in</span>
+  scrollDuration: 700,       <span class="hl-cmt">// ms for the scroll animation</span>
+  easing:         <span class="hl-val">'swing'</span>,  <span class="hl-cmt">// jQuery easing (easeOutBack if loaded)</span>
+  visibleMobile:  <span class="hl-kw">true</span>,     <span class="hl-cmt">// show on mobile viewports</span>
+});</pre>
+    <div class="demo-log" id="log-page"><span class="log-entry">// scroll down 300 px to reveal the button</span></div>
+  </div>
+
+
+  <!-- Card 02: Element-scoped scroll -->
+  <div class="demo-card" id="card-element">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Element scroll — scoped to an overflow container</h2>
+      <span class="card-tag">scrollTarget: '#scroll-box'</span>
+    </div>
+    <div class="demo-stage">
+      <p style="font-size:.88rem;color:#555;margin:0 0 1rem">The plugin can scope scrolling to any overflow container. A local scroll-to-top button will appear inside the container after scrolling past the threshold.</p>
+      <div class="scroll-box" id="scroll-box-02">
+        <div class="scroll-indicator" id="si-02">Scroll position: <span id="sp-02">0 px</span></div>
+        <div class="scroll-box-content">
+          <p>Scroll down inside this box to trigger the scroll-to-top button. The button will appear after the inner scroll position exceeds the configured threshold.</p>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin euismod sapien at nunc convallis, ac faucibus libero dignissim.</p>
+          <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+          <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+          <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+          <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam.</p>
+          <p>Donec ligula augue, pretium a, scelerisque in, sollicitudin id, massa. Fusce aliquet pede non pede.</p>
+        </div>
+      </div>
+      <div id="stt-02" style="display:inline-block;margin-top:.75rem"></div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#stt-holder'</span>).themestrapPluginScrollToTop({
+  scrollTarget:   <span class="hl-val">'#scroll-box'</span>,  <span class="hl-cmt">// scoped element instead of window</span>
+  scrollAfter:    80,
+  scrollDuration: 400,
+});</pre>
+    <div class="demo-log" id="log-element"><span class="log-entry">// scroll inside the box to trigger</span></div>
+  </div>
+
+
+  <!-- Card 03: Custom label -->
+  <div class="demo-card" id="card-label">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Custom label — text or HTML content inside the button</h2>
+      <span class="card-tag">label option</span>
+    </div>
+    <div class="demo-stage">
+      <p style="font-size:.88rem;color:#555;margin:0 0 1.25rem">The default label is an arrow icon. Any text or HTML can be substituted.</p>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+        <div id="stt-arrow" style="position:relative;display:inline-block">
+          <span style="font-family:var(--ts-font-mono);font-size:.72rem;color:#888;margin-right:.5rem">↑ arrow (default)</span>
+        </div>
+        <div id="stt-text" style="position:relative;display:inline-block">
+          <span style="font-family:var(--ts-font-mono);font-size:.72rem;color:#888;margin-right:.5rem">text label</span>
+        </div>
+        <div id="stt-emoji" style="position:relative;display:inline-block">
+          <span style="font-family:var(--ts-font-mono);font-size:.72rem;color:#888;margin-right:.5rem">emoji label</span>
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-ghost-ts" onclick="scrollDown()">Scroll page down to reveal</button>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Default arrow icon:</span>
+$(<span class="hl-val">'#stt'</span>).themestrapPluginScrollToTop();
+
+<span class="hl-cmt">// Text label:</span>
+$(<span class="hl-val">'#stt'</span>).themestrapPluginScrollToTop({ label: <span class="hl-val">'Back to top'</span> });
+
+<span class="hl-cmt">// Custom HTML:</span>
+$(<span class="hl-val">'#stt'</span>).themestrapPluginScrollToTop({ label: <span class="hl-val">'🚀'</span> });</pre>
+    <div class="demo-log" id="log-label"><span class="log-entry">// scroll down to see all three button variants</span></div>
+  </div>
+
+
+  <!-- Card 04: API -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>API — show · hide · scrollTo · destroy</h2>
+      <span class="card-tag">programmatic control</span>
+    </div>
+    <div class="demo-stage">
+      <p style="font-size:.88rem;color:#555;margin:0">Call methods directly on the stored instance without waiting for the scroll threshold to be crossed.</p>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-teal-ts"    onclick="apiCall('show')">show()</button>
+      <button class="btn-ts btn-primary-ts" onclick="apiCall('hide')">hide()</button>
+      <button class="btn-ts btn-primary-ts" onclick="apiCall('scrollTo')">scrollTo()</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="apiCall('destroy')">destroy()</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="reinit()">reinit</button>
+    </div>
+<pre class="snip"><span class="hl-kw">const</span> inst = $(<span class="hl-val">'#stt-wrapper'</span>).data(<span class="hl-val">'__scrollToTop'</span>);
+
+inst.show();      <span class="hl-cmt">// force-show the button</span>
+inst.hide();      <span class="hl-cmt">// force-hide the button</span>
+inst.scrollTo();  <span class="hl-cmt">// fire the scroll animation immediately</span>
+inst.destroy();   <span class="hl-cmt">// remove button and unbind events</span></pre>
+    <div class="demo-log" id="log-api"><span class="log-entry">// click a button above</span></div>
+  </div>
+
+</div>
+
+<!-- Spacer so the page is scrollable -->
+<div class="scroll-spacer" style="max-width:960px;margin:0 auto;padding-left:1rem;padding-right:1rem">
+  <h3 style="font-family:var(--ts-font-display);color:#fff;margin-bottom:1rem">Scroll content — keep scrolling to see the button</h3>
+  <p style="color:rgba(255,255,255,.5)">This section exists to give the page enough height for the scroll-to-top button to activate. Once you have scrolled past 300 px, the button will appear at the bottom-right of the viewport.</p>
+  <p style="color:rgba(255,255,255,.4)">Continue scrolling…</p>
+  <p style="color:rgba(255,255,255,.35)">Almost there…</p>
+  <p style="color:rgba(255,255,255,.3)">The button should be visible now — click it to jump back to the top.</p>
+  <p style="color:rgba(255,255,255,.25)">Repeat the journey as many times as you like. The easing can be changed via the <code>easing</code> option — <code>'swing'</code>, <code>'linear'</code>, or any jQuery easing plugin value.</p>
+  <p style="color:rgba(255,255,255,.2)">Each page should only have one scroll-to-top instance targeting <code>window</code>. Multiple targets are fine as long as only one uses <code>window</code> as its <code>scrollTarget</code>.</p>
+</div>
+
+<!-- Hidden wrappers for API card -->
+<div id="stt-api-wrapper" style="display:none"></div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/jquery.easing/jquery.easing.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.scrolltotop.js"></script>
+
+<script>
+$(function () {
+
+  /* Card 01: Page scroll */
+  var $stt = $('<div id="stt-page"></div>').appendTo('body');
+  $stt.themestrapPluginScrollToTop({
+    scrollAfter:    300,
+    scrollDuration: 700,
+    easing:         'easeOutBack',
+    visibleMobile:  true,
+  });
+  $(window).on('scroll.demo', function () {
+    var y = $(window).scrollTop();
+    if (y > 50) {
+      $('#log-page').html('<span class="log-entry">// scroll: ' + y + 'px' + (y > 300 ? ' — button visible' : ' — below threshold') + '</span>');
+    }
+  });
+
+  /* Card 02: Element scroll */
+  $('#stt-02').themestrapPluginScrollToTop({
+    scrollTarget:   '#scroll-box-02',
+    scrollAfter:    80,
+    scrollDuration: 400,
+    easing:         'swing',
+  });
+  $('#scroll-box-02').on('scroll', function () {
+    var y = $(this).scrollTop();
+    $('#sp-02').text(y + ' px');
+    $('#log-element').html('<span class="log-entry">// inner scroll: ' + y + 'px' + (y > 80 ? ' — button visible' : '') + '</span>');
+  });
+
+  /* Card 03: Label variants — shown as static inline examples */
+  $('#stt-arrow').append('<div id="stt-arrow-btn"></div>');
+  $('#stt-arrow-btn').themestrapPluginScrollToTop({ scrollAfter: 0 });
+
+  $('#stt-text').append('<div id="stt-text-btn"></div>');
+  $('#stt-text-btn').themestrapPluginScrollToTop({ scrollAfter: 0, label: 'Back to top' });
+
+  $('#stt-emoji').append('<div id="stt-emoji-btn"></div>');
+  $('#stt-emoji-btn').themestrapPluginScrollToTop({ scrollAfter: 0, label: '🚀' });
+
+  /* Force all three visible for inline preview */
+  setTimeout(function () {
+    $('#stt-arrow-btn').data('__scrollToTop') && $('#stt-arrow-btn').data('__scrollToTop').show();
+    $('#stt-text-btn').data('__scrollToTop')  && $('#stt-text-btn').data('__scrollToTop').show();
+    $('#stt-emoji-btn').data('__scrollToTop') && $('#stt-emoji-btn').data('__scrollToTop').show();
+  }, 200);
+
+  /* Card 04: API instance */
+  $('#stt-api-wrapper').themestrapPluginScrollToTop({ scrollAfter: 99999 });
+
+});
+
+function scrollDown() {
+  $('html, body').animate({ scrollTop: 500 }, 600, 'swing');
+}
+
+function apiCall(method) {
+  var inst = $('#stt-api-wrapper').data('__scrollToTop');
+  if (!inst && method !== 'destroy') { log('log-api', '// destroyed — click reinit', 'warn'); return; }
+  if (inst) inst[method]();
+  log('log-api', '// ' + method + '() called');
+}
+
+function reinit() {
+  if ($('#stt-api-wrapper').data('__scrollToTop')) { log('log-api', '// already initialized'); return; }
+  $('#stt-api-wrapper').themestrapPluginScrollToTop({ scrollAfter: 99999 });
+  log('log-api', '// reinitialized');
+}
+
+function log(id, msg) {
+  $('#' + id).html('<span class="log-entry">' + msg + '</span>');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DarkMode Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts { background: var(--ts-teal); color: #fff; } .btn-teal-ts:hover { background: #22a0af; }
+    .btn-ghost-ts { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Simulated page surface for the theme preview */
+    .theme-surface {
+      border-radius: 8px; padding: 1.5rem; border: 1px solid #dde4ec;
+      background: #fff; color: #1a2332;
+      transition: background .3s, color .3s, border-color .3s;
+    }
+    .theme-surface.is-dark { background: #1a2535; color: #c9d1d9; border-color: #2a3548; }
+    .theme-surface h3 { font-family: var(--ts-font-display); font-size: 1.1rem; margin: 0 0 .5rem; }
+    .theme-surface p  { font-size: .88rem; margin: 0; line-height: 1.6; opacity: .8; }
+
+    /* Custom toggle button */
+    .dm-btn {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .5rem 1.1rem; border-radius: 99px; border: 2px solid var(--ts-navy);
+      background: #fff; color: var(--ts-navy); cursor: pointer;
+      font-family: var(--ts-font-mono); font-size: .82rem; font-weight: 600;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .dm-btn:hover { background: var(--ts-navy); color: #fff; }
+    .dm-btn .dm-icon { font-size: 1rem; }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>DarkMode <span class="badge-pill">plugin</span></h1>
+  <p>System-preference-aware light/dark toggle with <code>localStorage</code> persistence, Bootstrap <code>data-bs-theme</code> sync, and a static API</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-button">Toggle button</a>
+  <a href="#card-custom">Custom trigger</a>
+  <a href="#card-api">Static API</a>
+  <a href="#card-events">Events</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Default toggle button -->
+  <div class="demo-card" id="card-button">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Default — icon toggle button injected into the wrapper</h2>
+      <span class="card-tag">auto-renders ☀/🌙 button</span>
+    </div>
+    <div class="demo-stage">
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+        <div id="dm-01"></div>
+        <div class="theme-surface" id="surface-01" style="flex:1;min-width:200px">
+          <h3>Live preview surface</h3>
+          <p>This surface transitions between light and dark when you click the toggle. The plugin sets <code>data-bs-theme</code> on <code>&lt;html&gt;</code> and adds <code>html.dark</code>.</p>
+        </div>
+      </div>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"dm-wrapper"</span><span class="hl-tag">&gt;&lt;/div&gt;</span>
+
+$(<span class="hl-val">'#dm-wrapper'</span>).themestrapPluginDarkMode({
+  storageKey: <span class="hl-val">'theme'</span>,
+  <span class="hl-cmt">// Reads localStorage on init; falls back to prefers-color-scheme.</span>
+  <span class="hl-cmt">// Sets data-bs-theme on &lt;html&gt; + adds html.dark on every change.</span>
+});</pre>
+    <div class="demo-log" id="log-01"><span class="log-entry">// click the sun/moon button above</span></div>
+  </div>
+
+
+  <!-- Card 02: Custom trigger -->
+  <div class="demo-card" id="card-custom">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Custom trigger — renderIcon: false, provide your own button</h2>
+      <span class="card-tag">renderIcon: false</span>
+    </div>
+    <div class="demo-stage">
+      <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap">
+        <button class="dm-btn" id="dm-custom-btn" onclick="customToggle()">
+          <span class="dm-icon">☀️</span>
+          <span id="dm-custom-label">Light mode</span>
+        </button>
+        <div class="theme-surface" id="surface-02" style="flex:1;min-width:200px">
+          <h3>Custom button preview</h3>
+          <p>Pass <code>renderIcon: false</code> and supply your own trigger. Call <code>themestrap.DarkMode.toggle()</code> from its click handler.</p>
+        </div>
+      </div>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;button</span> <span class="hl-attr">onclick</span>=<span class="hl-val">"themestrap.DarkMode.toggle()"</span><span class="hl-tag">&gt;</span>
+  Toggle theme
+<span class="hl-tag">&lt;/button&gt;</span>
+
+$(<span class="hl-val">'#dm-holder'</span>).themestrapPluginDarkMode({
+  renderIcon: <span class="hl-kw">false</span>,
+  onChange: (theme) =&gt; {
+    myBtn.textContent = theme === <span class="hl-val">'dark'</span> ? <span class="hl-val">'🌙 Dark'</span> : <span class="hl-val">'☀️ Light'</span>;
+  }
+});</pre>
+    <div class="demo-log" id="log-02"><span class="log-entry">// click the button to toggle and watch the custom label update</span></div>
+  </div>
+
+
+  <!-- Card 03: Static API -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Static API — themestrap.DarkMode.*</h2>
+      <span class="card-tag">getTheme · setTheme · toggle · reset</span>
+    </div>
+    <div class="demo-stage">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
+        <div>
+          <p style="font-size:.85rem;color:#555;margin:0 0 .75rem">Current theme: <strong id="api-theme-display" style="font-family:var(--ts-font-mono);color:var(--ts-orange)">—</strong></p>
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts"  onclick="apiSetTheme('light')">setTheme('light')</button>
+      <button class="btn-ts btn-primary-ts"  onclick="apiSetTheme('dark')">setTheme('dark')</button>
+      <button class="btn-ts btn-teal-ts"     onclick="apiToggle()">toggle()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="apiGetTheme()">getTheme()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="apiReset()">reset()</button>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Available as soon as the plugin is initialized once on the page.</span>
+themestrap.DarkMode.getTheme();            <span class="hl-cmt">// → 'light' | 'dark'</span>
+themestrap.DarkMode.setTheme(<span class="hl-val">'dark'</span>);     <span class="hl-cmt">// sets + persists</span>
+themestrap.DarkMode.toggle();              <span class="hl-cmt">// flips current theme</span>
+themestrap.DarkMode.reset();              <span class="hl-cmt">// clears localStorage, reverts to system pref</span></pre>
+    <div class="demo-log" id="log-api"><span class="log-entry">// click a button above</span></div>
+  </div>
+
+
+  <!-- Card 04: Events -->
+  <div class="demo-card" id="card-events">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Events — change.ts.darkmode on the wrapper</h2>
+    </div>
+    <div class="demo-stage">
+      <div id="dm-04" style="display:inline-block"></div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#dm-wrapper'</span>)
+  .on(<span class="hl-val">'change.ts.darkmode'</span>, (e, theme) =&gt; {
+    console.log(<span class="hl-val">'Theme changed to:'</span>, theme); <span class="hl-cmt">// 'light' | 'dark'</span>
+  });
+
+<span class="hl-cmt">// onChange callback (option alternative to the event):</span>
+$(<span class="hl-val">'#dm-wrapper'</span>).themestrapPluginDarkMode({
+  onChange: (theme) =&gt; console.log(theme),
+});</pre>
+    <div class="demo-log" id="log-04" style="max-height:130px;overflow-y:auto"><span class="log-entry">// click the sun/moon button above</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.darkmode.js"></script>
+
+<script>
+$(function () {
+
+  /* Card 01 */
+  $('#dm-01').themestrapPluginDarkMode({
+    storageKey: 'ts-demo-theme',
+    onChange: function (theme) {
+      var isDark = theme === 'dark';
+      $('#surface-01').toggleClass('is-dark', isDark);
+      $('#log-01').html('<span class="log-entry">// change → theme: "' + theme + '"</span>');
+    }
+  });
+
+  /* Card 02 */
+  $('#dm-custom-trigger-holder').themestrapPluginDarkMode({
+    renderIcon: false,
+    storageKey: 'ts-demo-theme',
+    onChange: function (theme) {
+      var isDark = theme === 'dark';
+      $('#surface-02').toggleClass('is-dark', isDark);
+      $('#dm-custom-btn .dm-icon').text(isDark ? '🌙' : '☀️');
+      $('#dm-custom-label').text(isDark ? 'Dark mode' : 'Light mode');
+      $('#log-02').html('<span class="log-entry">// onChange → "' + theme + '" — label updated</span>');
+    }
+  });
+  /* Sync the custom button label on init */
+  (function () {
+    var t = themestrap.DarkMode ? themestrap.DarkMode.getTheme() : 'light';
+    $('#dm-custom-btn .dm-icon').text(t === 'dark' ? '🌙' : '☀️');
+    $('#dm-custom-label').text(t === 'dark' ? 'Dark mode' : 'Light mode');
+    $('#surface-02').toggleClass('is-dark', t === 'dark');
+  }());
+
+  /* Card 03 */
+  updateApiDisplay();
+
+  /* Card 04 */
+  $('#dm-04')
+    .on('change.ts.darkmode', function (e, theme) {
+      appendLog('log-04', 'change.ts.darkmode  →  "' + theme + '"');
+    });
+  $('#dm-04').themestrapPluginDarkMode({ storageKey: 'ts-demo-theme' });
+
+});
+
+function customToggle() {
+  if (themestrap.DarkMode) themestrap.DarkMode.toggle();
+}
+
+function apiGetTheme() {
+  if (!themestrap.DarkMode) return;
+  var t = themestrap.DarkMode.getTheme();
+  updateApiDisplay();
+  log('log-api', '// getTheme() → "' + t + '"');
+}
+
+function apiSetTheme(t) {
+  if (!themestrap.DarkMode) return;
+  themestrap.DarkMode.setTheme(t);
+  updateApiDisplay();
+  log('log-api', '// setTheme("' + t + '") called');
+}
+
+function apiToggle() {
+  if (!themestrap.DarkMode) return;
+  themestrap.DarkMode.toggle();
+  updateApiDisplay();
+  log('log-api', '// toggle() → now "' + themestrap.DarkMode.getTheme() + '"');
+}
+
+function apiReset() {
+  if (!themestrap.DarkMode) return;
+  themestrap.DarkMode.reset();
+  updateApiDisplay();
+  log('log-api', '// reset() — localStorage cleared, reverting to system preference');
+}
+
+function updateApiDisplay() {
+  if (!themestrap.DarkMode) return;
+  $('#api-theme-display').text('"' + themestrap.DarkMode.getTheme() + '"');
+}
+
+function log(id, msg) {
+  $('#' + id).html('<span class="log-entry">' + msg + '</span>');
+}
+
+function appendLog(id, msg) {
+  var ts = new Date().toTimeString().slice(0, 8);
+  var $log = $('#' + id);
+  $log.append('<div class="log-entry">[' + ts + '] ' + msg + '</div>');
+  $log[0].scrollTop = $log[0].scrollHeight;
+}
+</script>
+
+</body>
+</html>

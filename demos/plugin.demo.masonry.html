@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Masonry Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts    { background: var(--ts-teal);   color: #fff; } .btn-teal-ts:hover    { background: #22a0af; }
+    .btn-ghost-ts   { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Masonry items */
+    .masonry-container { position: relative; }
+    .masonry-item {
+      width: calc(33.333% - 12px);
+      background: #fff; border-radius: 8px; border: 1px solid #e0e7ef;
+      padding: 1.25rem; margin-bottom: 16px; float: left;
+    }
+    .masonry-item .mi-label {
+      display: inline-block; font-family: var(--ts-font-mono); font-size: .68rem; color: var(--ts-orange);
+      border: 1px solid var(--ts-orange); border-radius: 3px; padding: .1em .45em; margin-bottom: .5rem;
+    }
+    .masonry-item p { font-size: .84rem; color: #555; line-height: 1.6; margin: 0; }
+    .masonry-item h4 { font-family: var(--ts-font-display); font-size: .95rem; margin: 0 0 .4rem; }
+
+    /* Responsive masonry sizes */
+    @media (max-width: 640px) {
+      .masonry-item { width: calc(50% - 8px); }
+    }
+    @media (max-width: 420px) {
+      .masonry-item { width: 100%; }
+    }
+
+    /* 2-column variant */
+    .masonry-2col .masonry-item { width: calc(50% - 10px); }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Masonry <span class="badge-pill">plugin</span></h1>
+  <p>Pure-JS masonry layout — no Isotope, no imagesLoaded, variable-height items packed into columns by shortest-column algorithm</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-3col">3-column</a>
+  <a href="#card-2col">2-column</a>
+  <a href="#card-append">Dynamic append</a>
+  <a href="#card-options">Options</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: 3-column -->
+  <div class="demo-card" id="card-3col">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>3-column masonry — mixed-height items</h2>
+      <span class="card-tag">columns: 3 · gutter: 16</span>
+    </div>
+    <div class="demo-stage">
+      <div id="msn-01" class="masonry-container" style="overflow:hidden">
+        <div class="masonry-item"><span class="mi-label">card A</span><h4>Typography</h4><p>Line length, leading, and scale form the three pillars of readable type. A comfortable measure runs between 45 and 75 characters per line.</p></div>
+        <div class="masonry-item"><span class="mi-label">card B</span><h4>Colour</h4><p>HSL is the more intuitive workspace for building palettes.</p></div>
+        <div class="masonry-item"><span class="mi-label">card C</span><h4>Grid systems</h4><p>A grid is a scaffold, not a cage. Establishing a spatial system early lets every element occupy its correct proportion of the surface, keeping the layout coherent as content grows.</p></div>
+        <div class="masonry-item"><span class="mi-label">card D</span><h4>Motion</h4><p>Animation should communicate, not decorate. Ease-in-out curves for elements moving across the viewport; ease-out for elements entering; ease-in for elements leaving.</p></div>
+        <div class="masonry-item"><span class="mi-label">card E</span><h4>Contrast</h4><p>WCAG AA requires 4.5:1 for normal text.</p></div>
+        <div class="masonry-item"><span class="mi-label">card F</span><h4>Spacing</h4><p>An 8-point spacing scale keeps alignment decisions consistent across breakpoints. Multiples of 8 — 8, 16, 24, 32, 48 — cover most layout needs without bespoke values.</p></div>
+        <div class="masonry-item"><span class="mi-label">card G</span><h4>Iconography</h4><p>Keep icon strokes consistent. Match the weight of the surrounding text.</p></div>
+        <div class="masonry-item"><span class="mi-label">card H</span><h4>Elevation</h4><p>Shadows communicate z-axis position. Prefer layered box-shadows with low opacity over heavy single-shadow values — they appear more natural and work better in dark mode.</p></div>
+        <div class="masonry-item"><span class="mi-label">card I</span><h4>Border radius</h4><p>Keep border-radius consistent across components. A token-based approach guarantees that cards, buttons, and inputs share the same visual language.</p></div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#my-grid'</span>).themestrapPluginMasonry({
+  columns:    3,       <span class="hl-cmt">// number of columns</span>
+  gutter:     16,      <span class="hl-cmt">// px gap between items</span>
+  itemsClass: <span class="hl-val">'.masonry-item'</span>,
+  animate:    <span class="hl-kw">true</span>,   <span class="hl-cmt">// fade-in on layout</span>
+});</pre>
+    <div class="demo-log" id="log-3col"><span class="log-entry">// masonry layout complete</span></div>
+  </div>
+
+
+  <!-- Card 02: 2-column -->
+  <div class="demo-card" id="card-2col">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>2-column — wider items, larger gutter</h2>
+      <span class="card-tag">columns: 2 · gutter: 24</span>
+    </div>
+    <div class="demo-stage">
+      <div id="msn-02" class="masonry-container masonry-2col" style="overflow:hidden">
+        <div class="masonry-item"><span class="mi-label">entry 1</span><h4>Performance budgets</h4><p>Set a budget before writing a line of code. Time-to-interactive under 3 s on a mid-range device over a simulated 4G connection is a reasonable starting point for most consumer-facing products.</p></div>
+        <div class="masonry-item"><span class="mi-label">entry 2</span><h4>Accessibility first</h4><p>Semantic HTML is the foundation. ARIA is a patch for when semantics fall short — prefer native elements wherever they exist.</p></div>
+        <div class="masonry-item"><span class="mi-label">entry 3</span><h4>Progressive enhancement</h4><p>Start with HTML that works without JavaScript, then layer interactivity. A broken JS bundle should never leave the user staring at a blank page.</p></div>
+        <div class="masonry-item"><span class="mi-label">entry 4</span><h4>Core Web Vitals</h4><p>LCP, INP, and CLS are the three metrics Google uses to measure page experience. Optimizing for them usually means optimizing for users.</p></div>
+        <div class="masonry-item"><span class="mi-label">entry 5</span><h4>Caching strategy</h4><p>Cache aggressively at the CDN level; invalidate with content hashes. Never serve stale HTML.</p></div>
+        <div class="masonry-item"><span class="mi-label">entry 6</span><h4>Error boundaries</h4><p>Every async operation that touches the network should have an explicit error state. Silence is a poor error message — show users something actionable when things go wrong, and log the error for diagnostics.</p></div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#msn-02'</span>).themestrapPluginMasonry({
+  columns:    2,
+  gutter:     24,
+  itemsClass: <span class="hl-val">'.masonry-item'</span>,
+});</pre>
+    <div class="demo-log" id="log-2col"><span class="log-entry">// 2-column layout ready</span></div>
+  </div>
+
+
+  <!-- Card 03: Dynamic append -->
+  <div class="demo-card" id="card-append">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Dynamic append — add items at runtime, then call layout()</h2>
+      <span class="card-tag">layout() · prepend · append</span>
+    </div>
+    <div class="demo-stage">
+      <div id="msn-03" class="masonry-container" style="overflow:hidden">
+        <div class="masonry-item"><span class="mi-label">initial</span><h4>Item One</h4><p>This item was present on page load. The grid starts with three items.</p></div>
+        <div class="masonry-item"><span class="mi-label">initial</span><h4>Item Two</h4><p>Second initial item — shorter content.</p></div>
+        <div class="masonry-item"><span class="mi-label">initial</span><h4>Item Three</h4><p>Third initial item. Add more items below using the buttons, then watch the layout repack around the new card heights.</p></div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts"  onclick="appendItem()">Append item</button>
+      <button class="btn-ts btn-teal-ts"     onclick="prependItem()">Prepend item</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="relayout()">layout()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="resetGrid()">Reset</button>
+    </div>
+<pre class="snip"><span class="hl-kw">const</span> msn = $(<span class="hl-val">'#msn-03'</span>).data(<span class="hl-val">'__masonry'</span>);
+
+<span class="hl-cmt">// append new element, then repack</span>
+$(<span class="hl-val">'#msn-03'</span>).append(newItem);
+msn.layout();
+
+<span class="hl-cmt">// prepend and repack</span>
+$(<span class="hl-val">'#msn-03'</span>).prepend(newItem);
+msn.layout();</pre>
+    <div class="demo-log" id="log-append"><span class="log-entry">// 3 items on load — click append / prepend</span></div>
+  </div>
+
+
+  <!-- Card 04: Options reference -->
+  <div class="demo-card" id="card-options">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Options reference</h2>
+      <span class="card-tag">all configurable values</span>
+    </div>
+    <div class="demo-stage">
+      <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+        <thead>
+          <tr style="border-bottom:2px solid #dde4ec">
+            <th style="padding:.5rem .75rem;text-align:left;font-family:var(--ts-font-mono);font-size:.78rem">Option</th>
+            <th style="padding:.5rem .75rem;text-align:left;font-family:var(--ts-font-mono);font-size:.78rem">Default</th>
+            <th style="padding:.5rem .75rem;text-align:left">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">columns</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">3</td><td style="padding:.45rem .75rem;color:#555">Number of equal-width columns</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">gutter</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">16</td><td style="padding:.45rem .75rem;color:#555">Gap between items in px</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">itemsClass</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'.masonry-item'</td><td style="padding:.45rem .75rem;color:#555">CSS selector for child items</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">animate</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">false</td><td style="padding:.45rem .75rem;color:#555">Fade items in after layout</td></tr>
+          <tr><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">animationDuration</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">400</td><td style="padding:.45rem .75rem;color:#555">Fade animation duration (ms)</td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Auto-init via data attribute:</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-masonry</span>
+     <span class="hl-attr">data-masonry-columns</span>=<span class="hl-val">"3"</span>
+     <span class="hl-attr">data-masonry-gutter</span>=<span class="hl-val">"16"</span><span class="hl-tag">&gt;</span>
+  …items…
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// API methods:</span>
+<span class="hl-kw">const</span> msn = $(<span class="hl-val">'#grid'</span>).data(<span class="hl-val">'__masonry'</span>);
+msn.layout();     <span class="hl-cmt">// repack all items</span>
+msn.destroy();    <span class="hl-cmt">// restore normal flow</span></pre>
+    <div class="demo-log" id="log-opts"><span class="log-entry">// all options available via JS or data attributes</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.masonry.js"></script>
+
+<script>
+var _appendCount = 0;
+var _prependCount = 0;
+
+$(function () {
+  $('#msn-01').themestrapPluginMasonry({ columns: 3, gutter: 16, itemsClass: '.masonry-item', animate: true });
+  log('log-3col', '// 9 items laid out in 3 columns');
+
+  $('#msn-02').themestrapPluginMasonry({ columns: 2, gutter: 24, itemsClass: '.masonry-item', animate: true });
+  log('log-2col', '// 6 items laid out in 2 columns');
+
+  $('#msn-03').themestrapPluginMasonry({ columns: 3, gutter: 16, itemsClass: '.masonry-item' });
+  log('log-append', '// 3 initial items — use buttons to add more');
+});
+
+var _loremPool = [
+  'Short card.',
+  'Medium-length card with a couple of sentences. The masonry algorithm picks the shortest column for each new item.',
+  'A longer card with several lines of content. Masonry shines when card heights vary substantially — the packing algorithm fills visual gaps that would otherwise appear in a regular grid.',
+  'Another short entry to contrast the tall ones.',
+];
+
+function appendItem() {
+  _appendCount++;
+  var h = Math.floor(Math.random() * 4);
+  var $item = $('<div class="masonry-item"><span class="mi-label">appended ' + _appendCount + '</span><h4>New Item ' + _appendCount + '</h4><p>' + _loremPool[h] + '</p></div>');
+  $item.css('opacity', 0);
+  $('#msn-03').append($item);
+  var msn = $('#msn-03').data('__masonry');
+  if (msn) msn.layout();
+  $item.animate({ opacity: 1 }, 250);
+  log('log-append', '// appended item ' + _appendCount + ' → layout() called');
+}
+
+function prependItem() {
+  _prependCount++;
+  var $item = $('<div class="masonry-item"><span class="mi-label">prepended ' + _prependCount + '</span><h4>Prepended ' + _prependCount + '</h4><p>This item was prepended and the grid was repacked.</p></div>');
+  $item.css('opacity', 0);
+  $('#msn-03').prepend($item);
+  var msn = $('#msn-03').data('__masonry');
+  if (msn) msn.layout();
+  $item.animate({ opacity: 1 }, 250);
+  log('log-append', '// prepended item ' + _prependCount + ' → layout() called');
+}
+
+function relayout() {
+  var msn = $('#msn-03').data('__masonry');
+  if (msn) { msn.layout(); log('log-append', '// layout() called manually'); }
+}
+
+function resetGrid() {
+  var msn = $('#msn-03').data('__masonry');
+  if (msn) msn.destroy();
+  $('#msn-03 .masonry-item:not(:nth-child(-n+3))').remove();
+  _appendCount = 0; _prependCount = 0;
+  $('#msn-03').themestrapPluginMasonry({ columns: 3, gutter: 16, itemsClass: '.masonry-item' });
+  log('log-append', '// reset to 3 initial items');
+}
+
+function log(id, msg) {
+  $('#' + id).html('<span class="log-entry">' + msg + '</span>');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Collapsible Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-serif:'Fraunces',Georgia,serif; --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts { background: var(--ts-teal); color: #fff; } .btn-teal-ts:hover { background: #22a0af; }
+    .btn-ghost-ts { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); } .demo-log .log-warn { color: var(--ts-orange); }
+
+    /* Collapsible trigger styling for demo */
+    .c-trigger {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: .85rem 1rem;
+      background: var(--ts-navy); color: #fff;
+      border: none; border-radius: 6px; cursor: pointer;
+      font-family: var(--ts-font-display); font-size: .95rem; font-weight: 600;
+      transition: background .15s;
+    }
+    .c-trigger:hover { background: #1a3555; }
+    .c-trigger .c-chev { display: inline-block; transition: transform 300ms ease; font-style: normal; font-size: .75rem; }
+    .ts-collapsible--open .c-trigger .c-chev { transform: rotate(180deg); }
+
+    .c-body { padding: 1rem; background: #f8fbff; border: 1px solid #dce8f5; border-top: none; border-radius: 0 0 6px 6px; color: #374151; font-size: .9rem; line-height: 1.7; }
+    .c-body p:last-child { margin: 0; }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Collapsible <span class="badge-pill">plugin</span></h1>
+  <p>Single-panel disclosure with animated height transition — the standalone counterpart to Accordion</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-default">Default closed</a>
+  <a href="#card-open">Start open</a>
+  <a href="#card-easing">Custom easing</a>
+  <a href="#card-api">API</a>
+  <a href="#card-events">Events</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Default (closed) -->
+  <div class="demo-card" id="card-default">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Default — closed on init</h2>
+      <span class="card-tag">defaultOpen: false</span>
+    </div>
+    <div class="demo-stage">
+      <div id="c-01">
+        <button type="button" class="c-trigger" data-collapsible-trigger>
+          Show advanced options
+          <span class="c-chev" data-collapsible-chevron>▼</span>
+        </button>
+        <div data-collapsible-content class="c-body">
+          <p>These are the advanced options that are hidden until the user needs them. The collapsible plugin measures the natural height of this element and animates the shell from 0 px to that value, then clears the inline style so the content can grow freely.</p>
+          <p>Using <code>data-collapsible-trigger</code> on the button and <code>data-collapsible-content</code> on the body is the standard markup convention.</p>
+        </div>
+      </div>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"my-panel"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-collapsible-trigger</span><span class="hl-tag">&gt;</span>Toggle<span class="hl-tag">&lt;/button&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-collapsible-content</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+$(<span class="hl-val">'#my-panel'</span>).themestrapPluginCollapsible();
+<span class="hl-cmt">// defaultOpen: false (default)</span></pre>
+    <div class="demo-log" id="log-01"><span class="log-entry">// click the button above</span></div>
+  </div>
+
+
+  <!-- Card 02: Start open -->
+  <div class="demo-card" id="card-open">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Start open — defaultOpen: true</h2>
+      <span class="card-tag">defaultOpen: true</span>
+    </div>
+    <div class="demo-stage">
+      <div id="c-02" class="manual">
+        <button type="button" class="c-trigger" data-collapsible-trigger>
+          Release notes v4.2
+          <span class="c-chev" data-collapsible-chevron>▼</span>
+        </button>
+        <div data-collapsible-content class="c-body">
+          <p><strong>New:</strong> HoverEffect plugin now supports combined magnetic + 3D mode via <code>effect: 'magnetic-3d'</code>.</p>
+          <p><strong>Fixed:</strong> Accordion height not recalculating after dynamic DOM mutation when <code>refresh()</code> is called.</p>
+          <p><strong>Improved:</strong> DarkMode now propagates changes between tabs via the <code>storage</code> event.</p>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#c-02'</span>).themestrapPluginCollapsible({
+  defaultOpen: <span class="hl-kw">true</span>,
+});</pre>
+    <div class="demo-log" id="log-02"><span class="log-entry">// starts expanded</span></div>
+  </div>
+
+
+  <!-- Card 03: Custom duration + easing -->
+  <div class="demo-card" id="card-easing">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Custom duration &amp; easing</h2>
+      <span class="card-tag">duration: 600ms · easing: spring</span>
+    </div>
+    <div class="demo-stage">
+      <div id="c-03" class="manual">
+        <button type="button" class="c-trigger" data-collapsible-trigger>
+          Ingredients list
+          <span class="c-chev" data-collapsible-chevron>▼</span>
+        </button>
+        <div data-collapsible-content class="c-body">
+          <ul style="margin:0;padding-left:1.2rem">
+            <li>250 g plain flour</li>
+            <li>125 g unsalted butter, cold and cubed</li>
+            <li>80 g icing sugar</li>
+            <li>1 egg yolk</li>
+            <li>2–3 tbsp ice-cold water</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#c-03'</span>).themestrapPluginCollapsible({
+  duration: <span class="hl-val">'600ms'</span>,
+  easing:   <span class="hl-val">'cubic-bezier(0.34, 1.56, 0.64, 1)'</span>, <span class="hl-cmt">// spring</span>
+});</pre>
+    <div class="demo-log" id="log-03"><span class="log-entry">// watch the spring overshoot on open</span></div>
+  </div>
+
+
+  <!-- Card 04: Programmatic API -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Programmatic API</h2>
+      <span class="card-tag">open · close · toggle · isOpen · setDisabled · destroy</span>
+    </div>
+    <div class="demo-stage">
+      <div id="c-04" class="manual">
+        <button type="button" class="c-trigger" data-collapsible-trigger>
+          Controlled panel
+          <span class="c-chev" data-collapsible-chevron>▼</span>
+        </button>
+        <div data-collapsible-content class="c-body">
+          <p>This panel is controlled entirely by the buttons below. Clicking the trigger above also works — the API and the trigger share the same internal state machine.</p>
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts"  onclick="apiCall('open')">open()</button>
+      <button class="btn-ts btn-teal-ts"     onclick="apiCall('close')">close()</button>
+      <button class="btn-ts btn-teal-ts"     onclick="apiCall('toggle')">toggle()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="apiCall('isOpen')">isOpen()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="toggleDisabled()">toggleDisabled()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="apiCall('destroy')">destroy()</button>
+      <button class="btn-ts btn-ghost-ts"    onclick="reinit()">reinit</button>
+    </div>
+<pre class="snip"><span class="hl-kw">const</span> inst = $(<span class="hl-val">'#c-04'</span>).data(<span class="hl-val">'__pluginCollapsible'</span>);
+
+inst.open();          <span class="hl-cmt">// expand with animation</span>
+inst.close();         <span class="hl-cmt">// collapse with animation</span>
+inst.toggle();        <span class="hl-cmt">// flip current state</span>
+inst.isOpen();        <span class="hl-cmt">// → true | false</span>
+inst.setDisabled(true); <span class="hl-cmt">// make trigger inert</span>
+inst.destroy();       <span class="hl-cmt">// unwrap shell, restore DOM</span></pre>
+    <div class="demo-log" id="log-04"><span class="log-entry">// click a button above</span></div>
+  </div>
+
+
+  <!-- Card 05: Events -->
+  <div class="demo-card" id="card-events">
+    <div class="demo-card-header">
+      <span class="card-num">05</span>
+      <h2>Events — open · opened · close · closed · change</h2>
+    </div>
+    <div class="demo-stage">
+      <div id="c-05" class="manual">
+        <button type="button" class="c-trigger" data-collapsible-trigger>
+          Toggle to see events fire
+          <span class="c-chev" data-collapsible-chevron>▼</span>
+        </button>
+        <div data-collapsible-content class="c-body">
+          <p>Four events — <code>open</code>, <code>opened</code>, <code>close</code>, <code>closed</code> — plus the <code>change</code> event that fires on every toggle with the new boolean state.</p>
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-ghost-ts" onclick="clearEvtLog()">Clear log</button>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#c-05'</span>)
+  .on(<span class="hl-val">'open.ts.collapsible'</span>,   () =&gt; log(<span class="hl-val">'open'</span>))
+  .on(<span class="hl-val">'opened.ts.collapsible'</span>, () =&gt; log(<span class="hl-val">'opened — animation done'</span>))
+  .on(<span class="hl-val">'close.ts.collapsible'</span>,  () =&gt; log(<span class="hl-val">'close'</span>))
+  .on(<span class="hl-val">'closed.ts.collapsible'</span>, () =&gt; log(<span class="hl-val">'closed — animation done'</span>))
+  .on(<span class="hl-val">'change.ts.collapsible'</span>, (e, isOpen) =&gt; log(<span class="hl-val">'change: isOpen='</span> + isOpen));</pre>
+    <div class="demo-log" id="log-events" style="max-height:160px;overflow-y:auto"><span class="log-entry">// toggle the panel above</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.collapsible.js"></script>
+
+<script>
+$(function () {
+
+  $('#c-01').themestrapPluginCollapsible();
+  $('#c-01').on('change.ts.collapsible', function (e, isOpen) {
+    log('log-01', '// change — isOpen: ' + isOpen);
+  });
+
+  $('#c-02').themestrapPluginCollapsible({ defaultOpen: true });
+  log('log-02', '// defaultOpen: true — starts expanded');
+
+  $('#c-03').themestrapPluginCollapsible({ duration: '600ms', easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' });
+  log('log-03', '// spring easing — notice the overshoot');
+
+  $('#c-04').themestrapPluginCollapsible();
+
+  /* Events demo */
+  $('#c-05')
+    .on('open.ts.collapsible',   function () { appendEvt('open.ts.collapsible'); })
+    .on('opened.ts.collapsible', function () { appendEvt('opened.ts.collapsible'); })
+    .on('close.ts.collapsible',  function () { appendEvt('close.ts.collapsible'); })
+    .on('closed.ts.collapsible', function () { appendEvt('closed.ts.collapsible'); })
+    .on('change.ts.collapsible', function (e, isOpen) { appendEvt('change.ts.collapsible  isOpen=' + isOpen); });
+  $('#c-05').themestrapPluginCollapsible();
+
+});
+
+var _disabled = false;
+
+function apiCall(method) {
+  var inst = $('#c-04').data('__pluginCollapsible');
+  if (!inst && method !== 'reinit') { log('log-04', '// destroyed — click reinit', 'warn'); return; }
+  var result = inst[method]();
+  var out = method === 'isOpen' ? '// isOpen() → ' + result : '// ' + method + '()';
+  log('log-04', out);
+}
+
+function toggleDisabled() {
+  var inst = $('#c-04').data('__pluginCollapsible');
+  if (!inst) return;
+  _disabled = !_disabled;
+  inst.setDisabled(_disabled);
+  log('log-04', '// setDisabled(' + _disabled + ')');
+}
+
+function reinit() {
+  if ($('#c-04').data('__pluginCollapsible')) { log('log-04', '// already initialized', 'warn'); return; }
+  $('#c-04').themestrapPluginCollapsible();
+  log('log-04', '// reinitialized');
+}
+
+function log(id, msg, type) {
+  var cls = type === 'warn' ? 'log-warn' : 'log-entry';
+  $('#' + id).html('<span class="' + cls + '">' + msg + '</span>');
+}
+
+function appendEvt(msg) {
+  var ts  = new Date().toTimeString().slice(0, 8);
+  var $log = $('#log-events');
+  $log.append('<div class="log-entry">[' + ts + '] ' + msg + '</div>');
+  $log[0].scrollTop = $log[0].scrollHeight;
+}
+
+function clearEvtLog() {
+  $('#log-events').html('<span class="log-entry">// cleared</span>');
+}
+</script>
+
+</body>
+</html>

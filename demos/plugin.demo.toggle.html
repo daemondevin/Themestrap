@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toggle Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Toggle component styles (from themestrap pattern) */
+    .toggle-wrapper { border: 1px solid #e0e6ed; border-radius: 8px; overflow: hidden; }
+    .toggle { border-top: 1px solid #e0e6ed; }
+    .toggle:first-child { border-top: none; }
+    .toggle > label,
+    .toggle > .toggle-title {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 1.1rem; cursor: pointer; font-weight: 600; font-size: .9rem;
+      background: #fff; color: #1a2332; transition: background .15s;
+      user-select: none;
+    }
+    .toggle > label:hover,
+    .toggle > .toggle-title:hover { background: #f5f8fc; }
+    .toggle.active > label,
+    .toggle.active > .toggle-title { color: var(--ts-orange); }
+    .toggle > label::after,
+    .toggle > .toggle-title::after {
+      content: '＋'; font-size: .9rem; transition: transform .3s ease; display: inline-block;
+    }
+    .toggle.active > label::after,
+    .toggle.active > .toggle-title::after { transform: rotate(45deg); }
+    .toggle > .toggle-content { padding: 0 1.1rem; display: none; }
+    .toggle.active > .toggle-content { display: block; }
+    .toggle > p { font-size: .88rem; color: #666; overflow: hidden; margin: 0; height: 0; }
+    .toggle > p.preview-active { padding-top: .5rem; }
+    .toggle-content p { font-size: .88rem; color: #555; line-height: 1.7; padding: .75rem 0; margin: 0; }
+    .toggle-content p:first-child { padding-top: .5rem; }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Toggle <span class="badge-pill">plugin</span></h1>
+  <p>jQuery slideDown/Up accordion using <code>.toggle</code> + <code>label</code> or <code>.toggle-title</code> markup</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-default">Default</a>
+  <a href="#card-accordion">Accordion mode</a>
+  <a href="#card-active">Start active</a>
+  <a href="#card-preview">Preview paragraph</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Default -->
+  <div class="demo-card" id="card-default">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Default — multiple panels open simultaneously</h2>
+      <span class="card-tag">isAccordion: false</span>
+    </div>
+    <div class="demo-stage">
+      <div id="tg-01" class="toggle-wrapper">
+        <div class="toggle">
+          <label>Getting started</label>
+          <div class="toggle-content">
+            <p>Include jQuery, Bootstrap 5, <code>themestrap.js</code>, and the plugin file. Add the <code>.toggle-wrapper</code> container and as many <code>.toggle</code> rows as you need. Each row has a <code>label</code> or <code>.toggle-title</code> and a <code>.toggle-content</code> sibling.</p>
+          </div>
+        </div>
+        <div class="toggle">
+          <label>Markup requirements</label>
+          <div class="toggle-content">
+            <p>The plugin scans <code>&gt; .toggle</code> children of the initialized wrapper. The trigger can be a <code>&lt;label&gt;</code> or any element with class <code>.toggle-title</code>. Content goes inside <code>.toggle-content</code>.</p>
+          </div>
+        </div>
+        <div class="toggle">
+          <label>Dependency</label>
+          <div class="toggle-content">
+            <p>The only dependency is core jQuery — no additional plugins needed. Animation uses jQuery's built-in <code>slideDown</code> / <code>slideUp</code>. Duration is configurable via the <code>duration</code> option.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">id</span>=<span class="hl-val">"my-toggle"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"toggle"</span><span class="hl-tag">&gt;</span>
+    <span class="hl-tag">&lt;label&gt;</span>Section title<span class="hl-tag">&lt;/label&gt;</span>
+    <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"toggle-content"</span><span class="hl-tag">&gt;&lt;p&gt;</span>Content.<span class="hl-tag">&lt;/p&gt;&lt;/div&gt;</span>
+  <span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+$(<span class="hl-val">'#my-toggle'</span>).themestrapPluginToggle();</pre>
+    <div class="demo-log" id="log-01"><span class="log-entry">// multiple panels can be open at once</span></div>
+  </div>
+
+
+  <!-- Card 02: isAccordion -->
+  <div class="demo-card" id="card-accordion">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Accordion mode — only one open at a time</h2>
+      <span class="card-tag">isAccordion: true</span>
+    </div>
+    <div class="demo-stage">
+      <div id="tg-02" class="toggle-wrapper">
+        <div class="toggle">
+          <div class="toggle-title">Plan — Starter</div>
+          <div class="toggle-content">
+            <p>Up to 3 projects, 5 GB storage, community support. Perfect for personal projects and experimentation.</p>
+          </div>
+        </div>
+        <div class="toggle">
+          <div class="toggle-title">Plan — Pro</div>
+          <div class="toggle-content">
+            <p>Unlimited projects, 50 GB storage, priority email support, and access to beta features.</p>
+          </div>
+        </div>
+        <div class="toggle">
+          <div class="toggle-title">Plan — Enterprise</div>
+          <div class="toggle-content">
+            <p>Dedicated infrastructure, SSO, SLA, audit logs, and a dedicated customer success manager.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'#tg-02'</span>).themestrapPluginToggle({
+  isAccordion: <span class="hl-kw">true</span>,  <span class="hl-cmt">// closing the open panel before opening another</span>
+  duration:    350,
+});</pre>
+    <div class="demo-log" id="log-02"><span class="log-entry">// opening one panel closes the others</span></div>
+  </div>
+
+
+  <!-- Card 03: Start active -->
+  <div class="demo-card" id="card-active">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Start active — add <code>.active</code> to a row</h2>
+      <span class="card-tag">class="toggle active"</span>
+    </div>
+    <div class="demo-stage">
+      <div id="tg-03" class="toggle-wrapper">
+        <div class="toggle">
+          <label>Closed on load</label>
+          <div class="toggle-content"><p>This panel is closed when the page loads.</p></div>
+        </div>
+        <div class="toggle active">
+          <label>Open on load</label>
+          <div class="toggle-content"><p>Adding the <code>.active</code> class to a <code>.toggle</code> row before initialization causes the plugin to slide that panel open immediately. Use this for panels that should be visible by default.</p></div>
+        </div>
+        <div class="toggle">
+          <label>Also closed on load</label>
+          <div class="toggle-content"><p>This panel is also closed when the page loads.</p></div>
+        </div>
+      </div>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"toggle active"</span><span class="hl-tag">&gt;</span>   <span class="hl-cmt">&lt;!-- starts open --&gt;</span>
+  <span class="hl-tag">&lt;label&gt;</span>Open on load<span class="hl-tag">&lt;/label&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"toggle-content"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+$(<span class="hl-val">'#tg-03'</span>).themestrapPluginToggle();</pre>
+    <div class="demo-log" id="log-03"><span class="log-entry">// second panel starts expanded via .active class</span></div>
+  </div>
+
+
+  <!-- Card 04: Preview paragraph -->
+  <div class="demo-card" id="card-preview">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Preview paragraph — teaser text under the label</h2>
+      <span class="card-tag">&lt;p&gt; after &lt;label&gt;</span>
+    </div>
+    <div class="demo-stage">
+      <div id="tg-04" class="toggle-wrapper">
+        <div class="toggle">
+          <label>Design principles</label>
+          <p>Clarity above cleverness.</p>
+          <div class="toggle-content">
+            <p>Good design is honest. It does not make a product appear more innovative, powerful or valuable than it really is. It does not attempt to manipulate the consumer with promises that cannot be kept. It is simple, purposeful, and long-lasting.</p>
+          </div>
+        </div>
+        <div class="toggle">
+          <label>Engineering principles</label>
+          <p>Simple things should be simple, complex things possible.</p>
+          <div class="toggle-content">
+            <p>A system that is easy to understand is easy to change. Before optimizing, measure. Prefer explicit over implicit. Write code that is boring to read — the best engineers are frequently bored by their own output.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"toggle"</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;label&gt;</span>Title<span class="hl-tag">&lt;/label&gt;</span>
+  <span class="hl-tag">&lt;p&gt;</span>Teaser line visible when collapsed.<span class="hl-tag">&lt;/p&gt;</span>
+  <span class="hl-tag">&lt;div</span> <span class="hl-attr">class</span>=<span class="hl-val">"toggle-content"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// The plugin animates the &lt;p&gt; height from 0 to auto
+// in sync with the content panel opening.</span></pre>
+    <div class="demo-log" id="log-04"><span class="log-entry">// teaser paragraph expands in sync with the content</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.toggle.js"></script>
+
+<script>
+$(function () {
+  $('#tg-01').themestrapPluginToggle({ duration: 350 });
+  $('#tg-02').themestrapPluginToggle({ isAccordion: true, duration: 350 });
+  $('#tg-03').themestrapPluginToggle({ duration: 350 });
+  $('#tg-04').themestrapPluginToggle({ duration: 400 });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Animate Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../vendor/animate.css/animate.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts    { background: var(--ts-teal);   color: #fff; } .btn-teal-ts:hover    { background: #22a0af; }
+    .btn-ghost-ts   { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Animation stage boxes */
+    .anim-grid { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .anim-box {
+      width: 130px; height: 90px; border-radius: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: .3rem;
+      background: var(--ts-navy); color: #fff; text-align: center;
+    }
+    .anim-box .ab-name { font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.55); }
+    .anim-box .ab-icon { font-size: 1.5rem; line-height: 1; }
+
+    /* Stagger demo boxes */
+    .stagger-box {
+      height: 56px; border-radius: 6px;
+      display: flex; align-items: center; padding: 0 1rem;
+      background: var(--ts-navy); color: #fff; margin-bottom: .5rem;
+      font-family: var(--ts-font-display); font-size: .9rem; font-weight: 600;
+    }
+    .stagger-box span { font-family: var(--ts-font-mono); font-size: .7rem; color: var(--ts-teal); margin-left: auto; }
+
+    /* Flag-class-only demo */
+    .fco-item {
+      padding: .85rem 1.1rem; border-radius: 6px; border: 1px solid #dde4ec;
+      background: #fff; margin-bottom: .5rem; font-size: .88rem; color: #374151;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .fco-item.appear-animation-visible {
+      transform: translateY(0);
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Animate <span class="badge-pill">plugin</span></h1>
+  <p>Scroll-triggered entrance animations via Animate.css — configurable delay, duration, stagger, and flag-class-only mode</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-gallery">Animation gallery</a>
+  <a href="#card-stagger">Staggered delay</a>
+  <a href="#card-flagclass">Flag-class-only</a>
+  <a href="#card-options">Options</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Gallery -->
+  <div class="demo-card" id="card-gallery">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Animation gallery — common Animate.css entrance names</h2>
+      <span class="card-tag">forceAnimation: true · data-appear-animation</span>
+    </div>
+    <div class="demo-stage">
+      <div class="anim-grid" id="anim-gallery">
+        <div class="anim-box manual" data-appear-animation="fadeIn">         <div class="ab-icon">👁️</div><div class="ab-name">fadeIn</div></div>
+        <div class="anim-box manual" data-appear-animation="fadeInUp">       <div class="ab-icon">⬆️</div><div class="ab-name">fadeInUp</div></div>
+        <div class="anim-box manual" data-appear-animation="fadeInDown">     <div class="ab-icon">⬇️</div><div class="ab-name">fadeInDown</div></div>
+        <div class="anim-box manual" data-appear-animation="fadeInLeft">     <div class="ab-icon">⬅️</div><div class="ab-name">fadeInLeft</div></div>
+        <div class="anim-box manual" data-appear-animation="fadeInRight">    <div class="ab-icon">➡️</div><div class="ab-name">fadeInRight</div></div>
+        <div class="anim-box manual" data-appear-animation="bounceIn">       <div class="ab-icon">🏀</div><div class="ab-name">bounceIn</div></div>
+        <div class="anim-box manual" data-appear-animation="bounceInUp">     <div class="ab-icon">🎈</div><div class="ab-name">bounceInUp</div></div>
+        <div class="anim-box manual" data-appear-animation="zoomIn">         <div class="ab-icon">🔍</div><div class="ab-name">zoomIn</div></div>
+        <div class="anim-box manual" data-appear-animation="zoomInDown">     <div class="ab-icon">🎯</div><div class="ab-name">zoomInDown</div></div>
+        <div class="anim-box manual" data-appear-animation="slideInUp">      <div class="ab-icon">📤</div><div class="ab-name">slideInUp</div></div>
+        <div class="anim-box manual" data-appear-animation="slideInLeft">    <div class="ab-icon">🎠</div><div class="ab-name">slideInLeft</div></div>
+        <div class="anim-box manual" data-appear-animation="flipInX">        <div class="ab-icon">↔️</div><div class="ab-name">flipInX</div></div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="replayGallery()">Replay all</button>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span>
+  <span class="hl-attr">data-appear-animation</span>=<span class="hl-val">"fadeInUp"</span>
+  <span class="hl-attr">data-appear-animation-duration</span>=<span class="hl-val">"800ms"</span><span class="hl-tag">&gt;</span>
+  …content…
+<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Manual init with forceAnimation to play regardless of scroll</span>
+$(<span class="hl-val">'[data-appear-animation]'</span>).themestrapPluginAnimate({
+  forceAnimation: <span class="hl-kw">true</span>,
+});</pre>
+    <div class="demo-log" id="log-gallery"><span class="log-entry">// animations fire on page load; click Replay to replay</span></div>
+  </div>
+
+
+  <!-- Card 02: Staggered delay -->
+  <div class="demo-card" id="card-stagger">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Staggered delay — each item offset by data-appear-animation-delay</h2>
+      <span class="card-tag">data-appear-animation-delay</span>
+    </div>
+    <div class="demo-stage">
+      <div id="stagger-container">
+        <div class="stagger-box manual" data-appear-animation="fadeInLeft" data-appear-animation-delay="0ms">   Item 1 — delay: 0 ms<span>0 ms</span></div>
+        <div class="stagger-box manual" data-appear-animation="fadeInLeft" data-appear-animation-delay="150ms"> Item 2 — delay: 150 ms<span>150 ms</span></div>
+        <div class="stagger-box manual" data-appear-animation="fadeInLeft" data-appear-animation-delay="300ms"> Item 3 — delay: 300 ms<span>300 ms</span></div>
+        <div class="stagger-box manual" data-appear-animation="fadeInLeft" data-appear-animation-delay="450ms"> Item 4 — delay: 450 ms<span>450 ms</span></div>
+        <div class="stagger-box manual" data-appear-animation="fadeInLeft" data-appear-animation-delay="600ms"> Item 5 — delay: 600 ms<span>600 ms</span></div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="replayStagger()">Replay</button>
+    </div>
+<pre class="snip"><span class="hl-tag">&lt;div</span> <span class="hl-attr">data-appear-animation</span>=<span class="hl-val">"fadeInLeft"</span> <span class="hl-attr">data-appear-animation-delay</span>=<span class="hl-val">"0ms"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-appear-animation</span>=<span class="hl-val">"fadeInLeft"</span> <span class="hl-attr">data-appear-animation-delay</span>=<span class="hl-val">"150ms"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/div&gt;</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-appear-animation</span>=<span class="hl-val">"fadeInLeft"</span> <span class="hl-attr">data-appear-animation-delay</span>=<span class="hl-val">"300ms"</span><span class="hl-tag">&gt;</span>…<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Each element gets its own plugin instance, initialized in a loop</span>
+$(<span class="hl-val">'#stagger-container [data-appear-animation]'</span>).each(<span class="hl-kw">function</span>() {
+  $(<span class="hl-kw">this</span>).themestrapPluginAnimate({ forceAnimation: <span class="hl-kw">true</span> });
+});</pre>
+    <div class="demo-log" id="log-stagger"><span class="log-entry">// staggered entrances cascade 150 ms apart</span></div>
+  </div>
+
+
+  <!-- Card 03: Flag-class-only mode -->
+  <div class="demo-card" id="card-flagclass">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Flag-class-only — let CSS handle the animation</h2>
+      <span class="card-tag">flagClassOnly: true</span>
+    </div>
+    <div class="demo-stage">
+      <div id="fco-container">
+        <div class="fco-item manual" data-appear-animation="fco" style="transform:translateY(20px);opacity:0;transition:transform .5s ease, opacity .5s ease">
+          Item A — slides in from below, driven by CSS transition on <code>.appear-animation-visible</code>
+        </div>
+        <div class="fco-item manual" data-appear-animation="fco" data-appear-animation-delay="200ms" style="transform:translateY(20px);opacity:0;transition:transform .5s ease .2s, opacity .5s ease .2s">
+          Item B — same transition, 200 ms delay on CSS transition-delay
+        </div>
+        <div class="fco-item manual" data-appear-animation="fco" data-appear-animation-delay="400ms" style="transform:translateY(20px);opacity:0;transition:transform .5s ease .4s, opacity .5s ease .4s">
+          Item C — 400 ms transition-delay
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="replayFCO()">Replay</button>
+    </div>
+<pre class="snip"><span class="hl-cmt">/* CSS owns the animation — plugin only adds the class */</span>
+.my-item {
+  transform: translateY(20px); opacity: 0;
+  transition: transform .5s ease, opacity .5s ease;
+}
+.my-item.appear-animation-visible {
+  transform: translateY(0);  opacity: 1;
+}
+
+$(<span class="hl-val">'.my-item'</span>).themestrapPluginAnimate({
+  flagClassOnly:  <span class="hl-kw">true</span>,  <span class="hl-cmt">// skip Animate.css class; just add .appear-animation-visible</span>
+  forceAnimation: <span class="hl-kw">true</span>,
+});</pre>
+    <div class="demo-log" id="log-fco"><span class="log-entry">// plugin adds .appear-animation-visible; CSS does the rest</span></div>
+  </div>
+
+
+  <!-- Card 04: Options reference -->
+  <div class="demo-card" id="card-options">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Options — full reference</h2>
+      <span class="card-tag">all configurable values</span>
+    </div>
+    <div class="demo-stage">
+      <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+        <thead>
+          <tr style="border-bottom:2px solid #dde4ec">
+            <th style="padding:.5rem .75rem;text-align:left;font-family:var(--ts-font-mono);font-size:.78rem">Option / Attribute</th>
+            <th style="padding:.5rem .75rem;text-align:left;font-family:var(--ts-font-mono);font-size:.78rem">Default</th>
+            <th style="padding:.5rem .75rem;text-align:left">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">animation / data-appear-animation</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">''</td><td style="padding:.45rem .75rem;color:#555">Animate.css class name (without <code>animate__</code>)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">duration / data-appear-animation-duration</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'1s'</td><td style="padding:.45rem .75rem;color:#555">CSS animation-duration value</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">delay / data-appear-animation-delay</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'0s'</td><td style="padding:.45rem .75rem;color:#555">CSS animation-delay value</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">forceAnimation</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">false</td><td style="padding:.45rem .75rem;color:#555">Animate even if element is above the fold</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">flagClassOnly</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">false</td><td style="padding:.45rem .75rem;color:#555">Only add <code>.appear-animation-visible</code>; skip Animate.css classes</td></tr>
+          <tr><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">minWindowWidth</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0</td><td style="padding:.45rem .75rem;color:#555">Disable animation on viewports narrower than this</td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Auto-init (via themestrap.init.js) triggers on scroll into view.
+// In demos, use forceAnimation: true for immediate playback.</span>
+
+<span class="hl-cmt">// Destroy:</span>
+$(<span class="hl-val">'.animated-el'</span>).data(<span class="hl-val">'__animate'</span>).destroy();</pre>
+    <div class="demo-log" id="log-opts"><span class="log-entry">// one plugin instance per element</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.animate.js"></script>
+
+<script>
+$(function () {
+
+  /* Card 01: Gallery — play immediately */
+  playGallery();
+
+  /* Card 02: Stagger */
+  playStagger();
+
+  /* Card 03: Flag-class-only */
+  playFCO();
+
+});
+
+/* Play helpers */
+function playGallery() {
+  $('#anim-gallery [data-appear-animation]').each(function () {
+    $(this).themestrapPluginAnimate({ forceAnimation: true });
+  });
+  $('#log-gallery').html('<span class="log-entry">// playing ' + $('#anim-gallery [data-appear-animation]').length + ' animations</span>');
+}
+
+function replayGallery() {
+  resetElements('#anim-gallery [data-appear-animation]');
+  setTimeout(playGallery, 50);
+}
+
+function playStagger() {
+  $('#stagger-container [data-appear-animation]').each(function () {
+    $(this).themestrapPluginAnimate({ forceAnimation: true });
+  });
+  log('log-stagger', '// staggered cascade playing');
+}
+
+function replayStagger() {
+  resetElements('#stagger-container [data-appear-animation]');
+  setTimeout(playStagger, 50);
+}
+
+function playFCO() {
+  $('#fco-container [data-appear-animation]').each(function () {
+    $(this).themestrapPluginAnimate({ flagClassOnly: true, forceAnimation: true });
+  });
+  $('#fco-container [data-appear-animation]').css({ opacity: 1, transform: 'translateY(0)' });
+  log('log-fco', '// .appear-animation-visible added; CSS transition handles the rest');
+}
+
+function replayFCO() {
+  var $items = $('#fco-container [data-appear-animation]');
+  $items.each(function () {
+    var inst = $(this).data('__animate');
+    if (inst) inst.destroy();
+    $(this).removeClass('appear-animation appear-animation-visible');
+  });
+  $items.css({ opacity: 0, transform: 'translateY(20px)' });
+  setTimeout(playFCO, 60);
+}
+
+function resetElements(sel) {
+  $(sel).each(function () {
+    var inst = $(this).data('__animate');
+    if (inst) inst.destroy();
+    $(this).removeClass('appear-animation appear-animation-visible animated');
+    /* Remove all animate__ classes */
+    var classes = $(this).attr('class') || '';
+    classes = classes.replace(/\banimate__\S+/g, '').trim();
+    $(this).attr('class', classes).css({ opacity: '', transform: '', 'animation-name': '' });
+  });
+}
+
+function log(id, msg) {
+  $('#' + id).html('<span class="log-entry">' + msg + '</span>');
+}
+</script>
+
+</body>
+</html>

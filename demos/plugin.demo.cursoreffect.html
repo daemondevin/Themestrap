@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CursorEffect Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2.5rem 2rem; background: var(--ts-navy); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .demo-stage--light { background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts    { background: var(--ts-teal);   color: #fff; } .btn-teal-ts:hover    { background: #22a0af; }
+    .btn-ghost-ts   { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Hover zones */
+    .hover-zone {
+      border: 1px dashed rgba(255,255,255,.2);
+      border-radius: 8px; padding: 1.25rem;
+      color: rgba(255,255,255,.7); font-size: .88rem;
+      transition: border-color .2s, background .2s;
+      margin-bottom: 1rem; cursor: default;
+    }
+    .hover-zone:last-child { margin-bottom: 0; }
+    .hover-zone strong { color: #fff; font-family: var(--ts-font-mono); font-size: .8rem; }
+
+    /* Color swatches */
+    .color-swatch-row { display: flex; gap: .75rem; flex-wrap: wrap; }
+    .c-swatch {
+      width: 80px; height: 80px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--ts-font-mono); font-size: .68rem; color: #fff; font-weight: 600;
+      cursor: pointer; transition: transform .15s; border: 2px solid transparent;
+    }
+    .c-swatch:hover { transform: scale(1.08); border-color: rgba(255,255,255,.4); }
+    .c-swatch.sel { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.3); }
+  </style>
+</head>
+<body data-plugin-cursor-effect>
+
+<div class="demo-header">
+  <h1>CursorEffect <span class="badge-pill">plugin</span></h1>
+  <p>Custom cursor overlay — ring + dot, hover morphs via data attributes, nine colour themes, three size variants</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-active">Active cursor</a>
+  <a href="#card-hover">Hover morphs</a>
+  <a href="#card-colors">Colours</a>
+  <a href="#card-api">API</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Active cursor -->
+  <div class="demo-card" id="card-active">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Active cursor — move your mouse anywhere on this page</h2>
+      <span class="card-tag">initialized on &lt;body&gt;</span>
+    </div>
+    <div class="demo-stage">
+      <p style="color:rgba(255,255,255,.6);font-size:.88rem;text-align:center;margin:0">
+        The ring + dot overlay is active across the whole page.<br>
+        Move your mouse around to see it track your cursor.
+      </p>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Initialize once on body — the overlay is global</span>
+$(<span class="hl-val">'body'</span>).themestrapPluginCursorEffect({
+  color:   <span class="hl-val">'default'</span>,  <span class="hl-cmt">// colour theme</span>
+  size:    <span class="hl-val">'default'</span>,  <span class="hl-cmt">// 'small' | 'default' | 'big'</span>
+  hideNative: <span class="hl-kw">true</span>,  <span class="hl-cmt">// hide the OS cursor</span>
+});
+
+<span class="hl-cmt">// The plugin appends .cursor-outer and .cursor-inner to body.</span>
+<span class="hl-cmt">// Styles are injected lazily from build().</span></pre>
+    <div class="demo-log" id="log-active"><span class="log-entry">// cursor overlay active on page load</span></div>
+  </div>
+
+
+  <!-- Card 02: Hover morphs -->
+  <div class="demo-card" id="card-hover">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Hover morphs — data attribute triggers shape changes</h2>
+      <span class="card-tag">data-cursor-effect-hover</span>
+    </div>
+    <div class="demo-stage">
+      <div class="hover-zone" data-cursor-effect-hover="fit">
+        <strong>data-cursor-effect-hover="fit"</strong><br>
+        Ring scales to enclose the element exactly — useful on buttons and links
+      </div>
+      <div class="hover-zone" data-cursor-effect-hover="plus">
+        <strong>data-cursor-effect-hover="plus"</strong><br>
+        Ring morphs into a plus / crosshair shape — useful on interactive content areas
+      </div>
+      <div class="hover-zone">
+        <strong>No data attribute</strong><br>
+        Default ring + dot — no morph applied
+      </div>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Add to any element — the cursor reacts on mouseenter/mouseleave</span>
+<span class="hl-tag">&lt;button</span> <span class="hl-attr">data-cursor-effect-hover</span>=<span class="hl-val">"fit"</span><span class="hl-tag">&gt;</span>Hover me<span class="hl-tag">&lt;/button&gt;</span>
+<span class="hl-tag">&lt;div</span>    <span class="hl-attr">data-cursor-effect-hover</span>=<span class="hl-val">"plus"</span><span class="hl-tag">&gt;</span>Hover me<span class="hl-tag">&lt;/div&gt;</span>
+
+<span class="hl-cmt">// Morphs are CSS-driven — no JS per element beyond the data attribute.</span></pre>
+    <div class="demo-log" id="log-hover"><span class="log-entry">// hover each zone above to see the morph</span></div>
+  </div>
+
+
+  <!-- Card 03: Colour themes -->
+  <div class="demo-card" id="card-colors">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Colour themes — nine built-in options</h2>
+      <span class="card-tag">color option</span>
+    </div>
+    <div class="demo-stage">
+      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin:0 0 1.25rem">Click a swatch to reinitialize the cursor with that colour theme</p>
+      <div class="color-swatch-row">
+        <div class="c-swatch sel" style="background:#2ab8c8" data-color="default"        onclick="changeColor('default',        this)">default</div>
+        <div class="c-swatch"    style="background:#e8672a" data-color="orange"         onclick="changeColor('orange',         this)">orange</div>
+        <div class="c-swatch"    style="background:#c41e3a" data-color="red"            onclick="changeColor('red',            this)">red</div>
+        <div class="c-swatch"    style="background:#2e7d32" data-color="green"          onclick="changeColor('green',          this)">green</div>
+        <div class="c-swatch"    style="background:#1565c0" data-color="blue"           onclick="changeColor('blue',           this)">blue</div>
+        <div class="c-swatch"    style="background:#f9a825" data-color="yellow"         onclick="changeColor('yellow',         this)">yellow</div>
+        <div class="c-swatch"    style="background:#6a1b9a" data-color="purple"         onclick="changeColor('purple',         this)">purple</div>
+        <div class="c-swatch"    style="background:#37474f" data-color="dark"           onclick="changeColor('dark',           this)">dark</div>
+        <div class="c-swatch"    style="background:#e0e0e0;color:#1a2332" data-color="white" onclick="changeColor('white',    this)">white</div>
+      </div>
+    </div>
+<pre class="snip" id="snip-color">$(<span class="hl-val">'body'</span>).themestrapPluginCursorEffect({
+  color: <span class="hl-val">'default'</span>,   <span class="hl-cmt">// teal</span>
+});</pre>
+    <div class="demo-log" id="log-colors"><span class="log-entry">// click a swatch to switch colour</span></div>
+  </div>
+
+
+  <!-- Card 04: API -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>API — size, show/hide, destroy</h2>
+      <span class="card-tag">setSize · show · hide · destroy · reinit</span>
+    </div>
+    <div class="demo-stage demo-stage--light">
+      <p style="margin:0;font-size:.88rem;color:#555">Use the buttons below to control the cursor overlay programmatically.</p>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-ghost-ts"   onclick="setSize('small')">size: small</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="setSize('default')">size: default</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="setSize('big')">size: big</button>
+      <button class="btn-ts btn-teal-ts"    onclick="apiCall('show')">show()</button>
+      <button class="btn-ts btn-primary-ts" onclick="apiCall('hide')">hide()</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="apiCall('destroy')">destroy()</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="reinit()">reinit</button>
+    </div>
+<pre class="snip"><span class="hl-kw">const</span> cursor = $(<span class="hl-val">'body'</span>).data(<span class="hl-val">'__cursorEffect'</span>);
+
+cursor.setSize(<span class="hl-val">'small'</span>);    <span class="hl-cmt">// 'small' | 'default' | 'big'</span>
+cursor.show();                <span class="hl-cmt">// make overlay visible</span>
+cursor.hide();                <span class="hl-cmt">// hide without destroying</span>
+cursor.destroy();             <span class="hl-cmt">// remove overlay + restore native cursor</span></pre>
+    <div class="demo-log" id="log-api"><span class="log-entry">// click a button above</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.cursoreffect.js"></script>
+
+<script>
+$(function () {
+  /* Init on page load */
+  if ($.isFunction($.fn['themestrapPluginCursorEffect']) && $('[data-plugin-cursor-effect]').length ) {
+	themestrap.fn.intObsInit( '[data-plugin-cursor-effect]:not(.manual)', 'themestrapPluginCursorEffect' );
+  }
+  log('log-active', '// cursor initialized — color:"default" size:"default"');
+
+  /* Hover morph log */
+  $('[data-cursor-effect-hover]').on('mouseenter', function () {
+    var morph = $(this).data('cursor-effect-hover');
+    log('log-hover', '// mouseenter — hover morph: "' + morph + '"');
+  }).on('mouseleave', function () {
+    log('log-hover', '// mouseleave — reverted to default ring');
+  });
+});
+
+function getCursor() {
+  return $('body').data('__cursorEffect');
+}
+
+function changeColor(color, el) {
+  var cursor = getCursor();
+  if (cursor) cursor.destroy();
+  $('body').themestrapPluginCursorEffect({ color: color, size: 'default', hideNative: true });
+  $('.c-swatch').removeClass('sel');
+  $(el).addClass('sel');
+  $('#snip-color').html(
+    '$(<span class="hl-val">\'body\'</span>).themestrapPluginCursorEffect({\n' +
+    '  color: <span class="hl-val">\'' + color + '\'</span>,\n' +
+    '});'
+  );
+  log('log-colors', '// reinitialized with color: "' + color + '"');
+}
+
+function setSize(size) {
+  var cursor = getCursor();
+  if (!cursor) { log('log-api', '// no instance — click reinit first', 'warn'); return; }
+  cursor.setSize(size);
+  log('log-api', '// setSize("' + size + '")');
+}
+
+function apiCall(method) {
+  var cursor = getCursor();
+  if (!cursor && method !== 'destroy') { log('log-api', '// destroyed — click reinit', 'warn'); return; }
+  if (cursor) cursor[method]();
+  log('log-api', '// ' + method + '() called');
+}
+
+function reinit() {
+  if (getCursor()) { log('log-api', '// already initialized', 'warn'); return; }
+  $('body').themestrapPluginCursorEffect({ color: 'default', size: 'default', hideNative: true });
+  log('log-api', '// reinitialized');
+}
+
+function log(id, msg) {
+  $('#' + id).html('<span class="log-entry">' + msg + '</span>');
+}
+</script>
+
+</body>
+</html>

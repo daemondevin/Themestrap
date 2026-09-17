@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toast Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2rem; background: var(--ts-cream); border-bottom: 1px solid #e8e0d4; }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts    { background: var(--ts-teal);   color: #fff; } .btn-teal-ts:hover    { background: #22a0af; }
+    .btn-navy-ts    { background: var(--ts-navy);   color: #fff; } .btn-navy-ts:hover    { background: #06101d; }
+    .btn-ghost-ts   { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Position selector */
+    .pos-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+      max-width: 240px;
+    }
+    .pos-btn {
+      font-family: var(--ts-font-mono); font-size: .68rem; padding: .3rem .4rem;
+      border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer;
+      text-align: center; transition: background .12s, border-color .12s;
+    }
+    .pos-btn:hover  { background: #f0f7ff; border-color: var(--ts-teal); }
+    .pos-btn.sel    { background: var(--ts-teal); color: #fff; border-color: var(--ts-teal); }
+    label.ctrl-lbl  { font-family: var(--ts-font-mono); font-size: .78rem; color: #555; margin-bottom: .3rem; display: block; }
+    .ctrl-input {
+      font-family: var(--ts-font-mono); font-size: .78rem; padding: .25rem .5rem;
+      border: 1px solid #ccc; border-radius: 4px; width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>Toast <span class="badge-pill">plugin</span></h1>
+  <p>Auto-dismissing notification toasts — static API, nine positions, progress bar, icon variants, persistent mode</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-types">Types</a>
+  <a href="#card-positions">Positions</a>
+  <a href="#card-builder">Builder</a>
+  <a href="#card-static">Static API</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Types -->
+  <div class="demo-card" id="card-types">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Types — success · danger · warning · info · default</h2>
+      <span class="card-tag">type option</span>
+    </div>
+    <div class="demo-stage" style="display:flex;gap:.75rem;flex-wrap:wrap">
+      <p style="margin:0;font-size:.88rem;color:#555;width:100%">Click each button to fire that toast type. Toasts stack in <code>top-right</code> by default.</p>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-teal-ts"    onclick="fire('success', 'Changes saved', 'Your profile has been updated successfully.')">success</button>
+      <button class="btn-ts btn-primary-ts" onclick="fire('danger',  'Upload failed', 'The file exceeded the 10 MB size limit.')">danger</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="fire('warning', 'Slow connection', 'Uploads may take longer than usual.')">warning</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="fire('info',    'New version available', 'Refresh the page to get v4.3.')">info</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="fire('default', 'Clipboard copied', 'The link is ready to paste.')">default</button>
+    </div>
+<pre class="snip">$(<span class="hl-val">'body'</span>).themestrapPluginToast({
+  type:    <span class="hl-val">'success'</span>,    <span class="hl-cmt">// success | danger | warning | info | default</span>
+  title:   <span class="hl-val">'Changes saved'</span>,
+  message: <span class="hl-val">'Your profile has been updated.'</span>,
+  delay:   4000,           <span class="hl-cmt">// ms before auto-dismiss</span>
+  progress: <span class="hl-kw">true</span>,        <span class="hl-cmt">// show countdown bar</span>
+});</pre>
+    <div class="demo-log" id="log-types"><span class="log-entry">// click a type button above</span></div>
+  </div>
+
+
+  <!-- Card 02: Positions -->
+  <div class="demo-card" id="card-positions">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Positions — nine placement options</h2>
+      <span class="card-tag">position option</span>
+    </div>
+    <div class="demo-stage">
+      <p style="margin:0 0 1rem;font-size:.88rem;color:#555">Select a corner/edge, then fire a toast there.</p>
+      <div class="pos-grid" id="pos-grid">
+        <button class="pos-btn" data-pos="top-left">↖ top-left</button>
+        <button class="pos-btn sel" data-pos="top-center">↑ top-center</button>
+        <button class="pos-btn" data-pos="top-right">↗ top-right</button>
+        <button class="pos-btn" data-pos="middle-left">← mid-left</button>
+        <button class="pos-btn" data-pos="middle-center">· center</button>
+        <button class="pos-btn" data-pos="middle-right">→ mid-right</button>
+        <button class="pos-btn" data-pos="bottom-left">↙ btm-left</button>
+        <button class="pos-btn" data-pos="bottom-center">↓ btm-center</button>
+        <button class="pos-btn" data-pos="bottom-right">↘ btm-right</button>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="firePos()">Fire toast at selected position</button>
+    </div>
+<pre class="snip">$(<span class="hl-val">'body'</span>).themestrapPluginToast({
+  position: <span class="hl-val">'bottom-right'</span>,
+  <span class="hl-cmt">// top-left | top-center | top-right</span>
+  <span class="hl-cmt">// middle-left | middle-center | middle-right</span>
+  <span class="hl-cmt">// bottom-left | bottom-center | bottom-right</span>
+});</pre>
+    <div class="demo-log" id="log-pos"><span class="log-entry">// select a position then fire</span></div>
+  </div>
+
+
+  <!-- Card 03: Builder -->
+  <div class="demo-card" id="card-builder">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Builder — assemble a custom toast</h2>
+      <span class="card-tag">all options in one go</span>
+    </div>
+    <div class="demo-stage">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:520px">
+        <div>
+          <label class="ctrl-lbl">type</label>
+          <select id="b-type" class="ctrl-input">
+            <option value="default">default</option>
+            <option value="success" selected>success</option>
+            <option value="danger">danger</option>
+            <option value="warning">warning</option>
+            <option value="info">info</option>
+          </select>
+        </div>
+        <div>
+          <label class="ctrl-lbl">delay (ms) — 0 = persistent</label>
+          <input id="b-delay" class="ctrl-input" type="number" value="5000" min="0" step="500">
+        </div>
+        <div>
+          <label class="ctrl-lbl">title</label>
+          <input id="b-title" class="ctrl-input" type="text" value="Build complete">
+        </div>
+        <div>
+          <label class="ctrl-lbl">message</label>
+          <input id="b-msg" class="ctrl-input" type="text" value="assets/main.js rebuilt in 42 ms">
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="checkbox" id="b-progress" checked>
+          <label class="ctrl-lbl" for="b-progress" style="margin:0">progress bar</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="checkbox" id="b-close" checked>
+          <label class="ctrl-lbl" for="b-close" style="margin:0">close button</label>
+        </div>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-primary-ts" onclick="fireBuilder()">Fire toast</button>
+    </div>
+<pre class="snip" id="builder-snip">$(<span class="hl-val">'body'</span>).themestrapPluginToast({
+  type:      <span class="hl-val">'success'</span>,
+  title:     <span class="hl-val">'Build complete'</span>,
+  message:   <span class="hl-val">'assets/main.js rebuilt in 42 ms'</span>,
+  delay:     5000,
+  progress:  <span class="hl-kw">true</span>,
+  closeBtn:  <span class="hl-kw">true</span>,
+  position:  <span class="hl-val">'top-right'</span>,
+});</pre>
+    <div class="demo-log" id="log-builder"><span class="log-entry">// configure above then fire</span></div>
+  </div>
+
+
+  <!-- Card 04: Static API -->
+  <div class="demo-card" id="card-static">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Static API — themestrap.PluginToast.show()</h2>
+      <span class="card-tag">no jQuery element needed</span>
+    </div>
+    <div class="demo-stage">
+      <p style="margin:0;font-size:.88rem;color:#555">The static helper fires a toast without needing a pre-existing DOM element — useful in fetch callbacks, event handlers, or anywhere without a natural jQuery context.</p>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-teal-ts"  onclick="staticSuccess()">Static success</button>
+      <button class="btn-ts btn-primary-ts" onclick="staticDanger()">Static danger</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="staticPersistent()">Persistent (delay: 0)</button>
+    </div>
+<pre class="snip"><span class="hl-cmt">// call from anywhere — no element needed</span>
+themestrap.PluginToast.show({
+  type:     <span class="hl-val">'success'</span>,
+  title:    <span class="hl-val">'Saved'</span>,
+  message:  <span class="hl-val">'Record committed to the database.'</span>,
+  delay:    4000,
+  progress: <span class="hl-kw">true</span>,
+  position: <span class="hl-val">'bottom-right'</span>,
+});
+
+<span class="hl-cmt">// delay: 0 → persistent, requires manual close</span>
+themestrap.PluginToast.show({ type: <span class="hl-val">'info'</span>, delay: 0, message: <span class="hl-val">'Action needed'</span> });</pre>
+    <div class="demo-log" id="log-static"><span class="log-entry">// click a button above</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.toast.js"></script>
+
+<script>
+var _pos = 'top-center';
+
+$(function () {
+  /* Position grid selection */
+  $('#pos-grid').on('click', '.pos-btn', function () {
+    $('#pos-grid .pos-btn').removeClass('sel');
+    $(this).addClass('sel');
+    _pos = $(this).data('pos');
+    $('#log-pos').html('<span class="log-entry">// position set to "' + _pos + '"</span>');
+  });
+});
+
+function fire(type, title, msg) {
+  $('body').themestrapPluginToast({
+    type:     type,
+    title:    title,
+    message:  msg,
+    delay:    4000,
+    progress: true,
+    position: 'top-right',
+  });
+  $('#log-types').html('<span class="log-entry">// fired type="' + type + '"</span>');
+}
+
+function firePos() {
+  $('body').themestrapPluginToast({
+    type:     'info',
+    title:    'Position: ' + _pos,
+    message:  'Toasts at this position stack vertically.',
+    delay:    3500,
+    progress: true,
+    position: _pos,
+  });
+  $('#log-pos').html('<span class="log-entry">// fired at position="' + _pos + '"</span>');
+}
+
+function fireBuilder() {
+  var type     = $('#b-type').val();
+  var title    = $('#b-title').val();
+  var msg      = $('#b-msg').val();
+  var delay    = parseInt($('#b-delay').val(), 10) || 0;
+  var progress = $('#b-progress').is(':checked');
+  var closeBtn = $('#b-close').is(':checked');
+
+  $('body').themestrapPluginToast({
+    type:     type,
+    title:    title,
+    message:  msg,
+    delay:    delay,
+    progress: progress,
+    closeBtn: closeBtn,
+    position: 'top-right',
+  });
+
+  $('#log-builder').html('<span class="log-entry">// fired — type="' + type + '" delay=' + delay + ' progress=' + progress + '</span>');
+}
+
+function staticSuccess() {
+  if (!themestrap.PluginToast) { alert('PluginToast.show not available'); return; }
+  themestrap.PluginToast.show({
+    type: 'success', title: 'Record saved', message: 'Changes committed to the database.', delay: 4000, progress: true, position: 'bottom-right',
+  });
+  $('#log-static').html('<span class="log-entry">// PluginToast.show() — success, bottom-right</span>');
+}
+
+function staticDanger() {
+  if (!themestrap.PluginToast) { return; }
+  themestrap.PluginToast.show({
+    type: 'danger', title: 'Request failed', message: '503 Service Unavailable — retry in a moment.', delay: 5000, progress: true, position: 'bottom-right',
+  });
+  $('#log-static').html('<span class="log-entry">// PluginToast.show() — danger, bottom-right</span>');
+}
+
+function staticPersistent() {
+  if (!themestrap.PluginToast) { return; }
+  themestrap.PluginToast.show({
+    type: 'warning', title: 'Action required', message: 'Your session expires in 2 minutes. Save your work.', delay: 0, closeBtn: true, position: 'top-center',
+  });
+  $('#log-static').html('<span class="log-entry">// delay: 0 → persistent until dismissed</span>');
+}
+</script>
+
+</body>
+</html>

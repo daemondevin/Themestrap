@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HoverEffect Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+    .demo-stage { padding: 2.5rem 2rem; background: var(--ts-navy); border-bottom: 1px solid rgba(255,255,255,.06); }
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+
+    /* Effect cards */
+    .effect-grid { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+    .ef-card {
+      width: 160px; height: 160px; border-radius: 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem;
+      background: linear-gradient(135deg, #1a3555 0%, #0d2340 100%);
+      color: #fff; border: 1px solid rgba(255,255,255,.1);
+      cursor: default; user-select: none; overflow: hidden;
+    }
+    .ef-card .ef-icon { font-size: 2.4rem; line-height: 1; }
+    .ef-card .ef-label { font-family: var(--ts-font-mono); font-size: .72rem; color: rgba(255,255,255,.6); text-align: center; }
+
+    /* Scale variant */
+    .ef-card-scale { transform-origin: center; }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>HoverEffect <span class="badge-pill">plugin</span></h1>
+  <p>Magnetic pull and 3D perspective tilt driven by mouse position — zero vendor dependencies</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-magnetic">Magnetic</a>
+  <a href="#card-3d">3D tilt</a>
+  <a href="#card-combined">Combined</a>
+  <a href="#card-options">Options</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Magnetic -->
+  <div class="demo-card" id="card-magnetic">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Magnetic — element follows the cursor</h2>
+      <span class="card-tag">effect: 'magnetic'</span>
+    </div>
+    <div class="demo-stage">
+      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin:0 0 1.5rem;text-align:center">Hover over a card — it will pull toward your cursor</p>
+      <div class="effect-grid">
+        <div class="ef-card manual" id="he-mag-1">
+          <div class="ef-icon">🧲</div>
+          <div class="ef-label">strength: 0.4<br>(default)</div>
+        </div>
+        <div class="ef-card manual" id="he-mag-2">
+          <div class="ef-icon">⚡</div>
+          <div class="ef-label">strength: 0.8<br>(stronger)</div>
+        </div>
+        <div class="ef-card manual" id="he-mag-3">
+          <div class="ef-icon">🪐</div>
+          <div class="ef-label">strength: 1.4<br>(maximum)</div>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
+  effect:   <span class="hl-val">'magnetic'</span>,
+  strength: <span class="hl-val">0.4</span>,  <span class="hl-cmt">// 0–2, default 0.4</span>
+});</pre>
+    <div class="demo-log" id="log-mag"><span class="log-entry">// hover a card to see the pull</span></div>
+  </div>
+
+
+  <!-- Card 02: 3D tilt -->
+  <div class="demo-card" id="card-3d">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>3D tilt — perspective rotation following the cursor</h2>
+      <span class="card-tag">effect: '3d'</span>
+    </div>
+    <div class="demo-stage">
+      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin:0 0 1.5rem;text-align:center">Move your cursor across each card to tilt it in 3D space</p>
+      <div class="effect-grid">
+        <div class="ef-card manual" id="he-3d-1">
+          <div class="ef-icon">🎲</div>
+          <div class="ef-label">tiltMax: 15°<br>(default)</div>
+        </div>
+        <div class="ef-card manual" id="he-3d-2" style="background:linear-gradient(135deg,#1d3a5f,#0b2040)">
+          <div class="ef-icon">🏔️</div>
+          <div class="ef-label">tiltMax: 30°<br>(dramatic)</div>
+        </div>
+        <div class="ef-card manual" id="he-3d-glare" style="background:linear-gradient(135deg,#1e2d50,#111e38)">
+          <div class="ef-icon">✨</div>
+          <div class="ef-label">glare: true<br>tiltMax: 20°</div>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
+  effect:  <span class="hl-val">'3d'</span>,
+  tiltMax: 15,    <span class="hl-cmt">// degrees, default 15</span>
+  glare:   <span class="hl-kw">false</span>, <span class="hl-cmt">// reflective highlight overlay</span>
+});
+
+<span class="hl-cmt">// with glare overlay:</span>
+$(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
+  effect: <span class="hl-val">'3d'</span>, tiltMax: 20, glare: <span class="hl-kw">true</span>, glareOpacity: 0.3,
+});</pre>
+    <div class="demo-log" id="log-3d"><span class="log-entry">// hover across a card to see the tilt</span></div>
+  </div>
+
+
+  <!-- Card 03: Combined magnetic-3d -->
+  <div class="demo-card" id="card-combined">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Combined — magnetic pull + 3D tilt simultaneously</h2>
+      <span class="card-tag">effect: 'magnetic-3d'</span>
+    </div>
+    <div class="demo-stage">
+      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin:0 0 1.5rem;text-align:center">Both effects active at once — the card pulls <em>and</em> tilts</p>
+      <div class="effect-grid">
+        <div class="ef-card manual" id="he-comb-1" style="width:200px;height:200px;background:linear-gradient(135deg,#2a1f55,#160f38)">
+          <div class="ef-icon" style="font-size:3rem">🪄</div>
+          <div class="ef-label">magnetic-3d<br>strength 0.5 · tilt 20°</div>
+        </div>
+        <div class="ef-card manual" id="he-comb-2" style="width:200px;height:200px;background:linear-gradient(135deg,#1a3a2a,#0c2018)">
+          <div class="ef-icon" style="font-size:3rem">🌿</div>
+          <div class="ef-label">magnetic-3d + scale<br>strength 0.6 · tilt 18°</div>
+        </div>
+      </div>
+    </div>
+<pre class="snip">$(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
+  effect:   <span class="hl-val">'magnetic-3d'</span>,
+  strength: 0.5,  <span class="hl-cmt">// magnetic pull strength</span>
+  tiltMax:  20,   <span class="hl-cmt">// 3D tilt degrees</span>
+  scale:    1.05, <span class="hl-cmt">// scale up on hover (1 = no scale)</span>
+  glare:    <span class="hl-kw">false</span>,
+});</pre>
+    <div class="demo-log" id="log-comb"><span class="log-entry">// the combined effect on hover</span></div>
+  </div>
+
+
+  <!-- Card 04: Options reference -->
+  <div class="demo-card" id="card-options">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Options — full reference</h2>
+      <span class="card-tag">all configurable values</span>
+    </div>
+    <div class="demo-stage" style="background:var(--ts-cream)">
+      <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+        <thead>
+          <tr style="border-bottom:2px solid #dde4ec">
+            <th style="padding:.5rem .75rem;text-align:left;font-family:var(--ts-font-mono);font-size:.78rem">Option</th>
+            <th style="padding:.5rem .75rem;text-align:left;font-family:var(--ts-font-mono);font-size:.78rem">Default</th>
+            <th style="padding:.5rem .75rem;text-align:left">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">effect</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'magnetic'</td><td style="padding:.45rem .75rem;color:#555">'magnetic' | '3d' | 'magnetic-3d'</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">strength</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.4</td><td style="padding:.45rem .75rem;color:#555">Magnetic pull intensity (0–2)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">tiltMax</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">15</td><td style="padding:.45rem .75rem;color:#555">Max rotation in degrees (3D mode)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">scale</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">1</td><td style="padding:.45rem .75rem;color:#555">Scale factor on hover (1 = off)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">glare</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">false</td><td style="padding:.45rem .75rem;color:#555">Reflective glare overlay (3D modes)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">glareOpacity</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.25</td><td style="padding:.45rem .75rem;color:#555">Glare highlight max opacity</td></tr>
+          <tr><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">transition</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'300ms ease'</td><td style="padding:.45rem .75rem;color:#555">CSS transition for the reset-on-leave snap</td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre class="snip">$(<span class="hl-val">'[data-plugin-hover-effect]'</span>).themestrapPluginHoverEffect();
+<span class="hl-cmt">// OR via data attributes on the element:</span>
+<span class="hl-cmt">// data-hover-effect="3d"</span>
+<span class="hl-cmt">// data-hover-effect-strength="0.6"</span>
+<span class="hl-cmt">// data-hover-effect-tilt-max="20"</span>
+<span class="hl-cmt">// data-hover-effect-glare="true"</span>
+<span class="hl-cmt">// data-hover-effect-scale="1.05"</span>
+
+<span class="hl-cmt">// Destroy:</span>
+$(<span class="hl-val">'.ef-card'</span>).data(<span class="hl-val">'__hoverEffect'</span>).destroy();</pre>
+    <div class="demo-log" id="log-opts"><span class="log-entry">// all options available via JS or data attributes</span></div>
+  </div>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.hovereffect.js"></script>
+
+<script>
+$(function () {
+
+  /* Card 01: Magnetic */
+  $('#he-mag-1').themestrapPluginHoverEffect({ effect: 'magnetic', strength: 0.4 });
+  $('#he-mag-2').themestrapPluginHoverEffect({ effect: 'magnetic', strength: 0.8 });
+  $('#he-mag-3').themestrapPluginHoverEffect({ effect: 'magnetic', strength: 1.4 });
+
+  $('#he-mag-1, #he-mag-2, #he-mag-3').on('mouseenter', function () {
+    var id = $(this).attr('id');
+    var str = { 'he-mag-1': '0.4', 'he-mag-2': '0.8', 'he-mag-3': '1.4' }[id];
+    $('#log-mag').html('<span class="log-entry">// mouseenter — strength: ' + str + '</span>');
+  });
+
+  /* Card 02: 3D tilt */
+  $('#he-3d-1').themestrapPluginHoverEffect({ effect: '3d', tiltMax: 15 });
+  $('#he-3d-2').themestrapPluginHoverEffect({ effect: '3d', tiltMax: 30 });
+  $('#he-3d-glare').themestrapPluginHoverEffect({ effect: '3d', tiltMax: 20, glare: true, glareOpacity: 0.3 });
+
+  $('#he-3d-1, #he-3d-2, #he-3d-glare').on('mouseenter', function () {
+    var id = $(this).attr('id');
+    var info = { 'he-3d-1': '15° no glare', 'he-3d-2': '30° no glare', 'he-3d-glare': '20° glare=true' }[id];
+    $('#log-3d').html('<span class="log-entry">// 3D active — ' + info + '</span>');
+  });
+
+  /* Card 03: Combined */
+  $('#he-comb-1').themestrapPluginHoverEffect({ effect: 'magnetic-3d', strength: 0.5, tiltMax: 20 });
+  $('#he-comb-2').themestrapPluginHoverEffect({ effect: 'magnetic-3d', strength: 0.6, tiltMax: 18, scale: 1.06 });
+
+  $('#he-comb-1, #he-comb-2').on('mouseenter', function () {
+    var id = $(this).attr('id');
+    var label = id === 'he-comb-1' ? 'magnetic-3d  str=0.5  tilt=20°' : 'magnetic-3d  str=0.6  tilt=18°  scale=1.06';
+    $('#log-comb').html('<span class="log-entry">// ' + label + '</span>');
+  });
+
+});
+</script>
+
+</body>
+</html>

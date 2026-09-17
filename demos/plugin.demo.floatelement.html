@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FloatElement Plugin — Demo | Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=Syne:wght@600;700&family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    :root {
+      --ts-navy:#0a1929; --ts-navy-2:#0e2238; --ts-orange:#e8672a; --ts-orange-2:#d2541b; --ts-teal:#2ab8c8; --ts-cream:#f5f0e8;
+      --ts-font-display:'Syne',sans-serif; --ts-font-body:'DM Sans',system-ui,sans-serif; --ts-font-mono:'JetBrains Mono',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--ts-font-body); background: var(--ts-navy-2); color: #1a2332; margin: 0; }
+
+    .demo-header { background: var(--ts-navy); color: #fff; padding: 2.5rem 2rem 2rem; border-bottom: 3px solid var(--ts-orange); }
+    .demo-header h1 { font-family: var(--ts-font-display); font-size: 2rem; font-weight: 700; margin: 0 0 .25rem; }
+    .demo-header p { margin: 0; opacity: .7; font-size: .95rem; }
+    .badge-pill { display: inline-block; background: var(--ts-orange); color: #fff; font-family: var(--ts-font-mono); font-size: .7rem; padding: .2em .6em; border-radius: 99px; margin-left: .5rem; vertical-align: middle; }
+
+    .demo-nav { background: var(--ts-navy-2); padding: .6rem 2rem; display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .demo-nav a { color: rgba(255,255,255,.6); text-decoration: none; font-size: .82rem; font-family: var(--ts-font-mono); transition: color .15s; }
+    .demo-nav a:hover { color: var(--ts-teal); }
+
+    .demo-body { max-width: 960px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+    .demo-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 2rem; overflow: hidden; }
+    .demo-card-header { background: var(--ts-navy); color: #fff; padding: .75rem 1.25rem; display: flex; align-items: center; gap: .75rem; }
+    .demo-card-header h2 { font-family: var(--ts-font-display); font-size: 1rem; font-weight: 600; margin: 0; }
+    .card-num { font-family: var(--ts-font-mono); font-size: .75rem; color: var(--ts-teal); border: 1px solid var(--ts-teal); border-radius: 4px; padding: .1em .45em; }
+    .card-tag { margin-left: auto; font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.45); }
+
+    .demo-stage { padding: 0; background: var(--ts-navy); border-bottom: 1px solid rgba(255,255,255,.06); overflow: hidden; position: relative; }
+    .demo-stage--light { background: var(--ts-cream) !important; border-bottom: 1px solid #e8e0d4 !important; overflow: visible !important; padding: 2rem !important; }
+
+    pre.snip { margin: 0; padding: 1.25rem 1.5rem; background: #0d1b2a; color: #c9d1d9; font-family: var(--ts-font-mono); font-size: .78rem; line-height: 1.6; overflow-x: auto; }
+    pre.snip .hl-attr { color: #79c0ff; } pre.snip .hl-val { color: #a5d6a7; } pre.snip .hl-tag { color: #ff7b72; } pre.snip .hl-cmt { color: #6a737d; } pre.snip .hl-kw { color: #c792ea; }
+
+    .demo-controls { padding: 1rem 1.5rem; background: #f8f9fa; border-top: 1px solid #e9ecef; display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .btn-ts { font-family: var(--ts-font-mono); font-size: .78rem; padding: .3rem .85rem; border-radius: 5px; border: none; cursor: pointer; transition: background .15s; }
+    .btn-primary-ts { background: var(--ts-orange); color: #fff; } .btn-primary-ts:hover { background: var(--ts-orange-2); }
+    .btn-teal-ts    { background: var(--ts-teal);   color: #fff; } .btn-teal-ts:hover    { background: #22a0af; }
+    .btn-ghost-ts   { background: transparent; color: var(--ts-navy); border: 1px solid #ccc; } .btn-ghost-ts:hover { background: #f0f2f5; }
+
+    .demo-log { font-family: var(--ts-font-mono); font-size: .78rem; padding: .75rem 1.5rem; background: #0d1b2a; color: #8b949e; border-top: 1px solid rgba(255,255,255,.05); min-height: 2.5rem; }
+    .demo-log .log-entry { color: var(--ts-teal); }
+    .demo-log .log-warn  { color: var(--ts-orange); }
+
+    /* Shared scene base */
+    .scene {
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .scene::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(42,184,200,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,184,200,.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* Floating element primitives */
+    .fe-orb {
+      width: 96px; height: 96px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.1rem; flex-shrink: 0; position: relative;
+      box-shadow: 0 8px 28px rgba(0,0,0,.45);
+    }
+    .fe-card {
+      width: 152px; padding: 1.1rem; border-radius: 10px;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.13);
+      color: #fff; flex-shrink: 0; backdrop-filter: blur(6px);
+    }
+    .fe-card h4 { font-family: var(--ts-font-display); font-size: .88rem; margin: 0 0 .35rem; }
+    .fe-card p  { font-size: .76rem; color: rgba(255,255,255,.5); margin: 0; line-height: 1.5; }
+    .fe-pill {
+      padding: .55rem 1.15rem; border-radius: 99px;
+      color: #fff; font-family: var(--ts-font-mono); font-size: .78rem;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .fe-label {
+      position: absolute; bottom: -1.5rem; left: 50%; transform: translateX(-50%);
+      white-space: nowrap; font-family: var(--ts-font-mono); font-size: .63rem;
+      color: rgba(255,255,255,.38);
+    }
+
+    .scroll-hint {
+      text-align: center; color: rgba(255,255,255,.3);
+      font-family: var(--ts-font-mono); font-size: .7rem;
+      padding: .6rem; letter-spacing: .05em;
+    }
+
+    /* Live readout table inside a stage */
+    .readout {
+      position: absolute; bottom: .75rem; right: .75rem;
+      background: rgba(10,25,41,.82); border: 1px solid rgba(42,184,200,.25);
+      border-radius: 6px; padding: .55rem .8rem;
+      font-family: var(--ts-font-mono); font-size: .68rem; color: rgba(255,255,255,.55);
+      backdrop-filter: blur(4px); min-width: 170px; line-height: 1.8;
+    }
+    .readout span { color: var(--ts-teal); font-weight: 600; }
+
+    /* Clamp / direction comparison layout */
+    .compare-row {
+      display: flex; align-items: stretch; gap: 0;
+    }
+    .compare-col {
+      flex: 1; padding: 1.5rem 1rem 1rem;
+      display: flex; flex-direction: column; align-items: center;
+      border-right: 1px solid rgba(255,255,255,.07); gap: .75rem;
+    }
+    .compare-col:last-child { border-right: none; }
+    .compare-col-label {
+      font-family: var(--ts-font-mono); font-size: .68rem;
+      color: rgba(255,255,255,.38); text-align: center; padding-bottom: .5rem;
+      border-bottom: 1px solid rgba(255,255,255,.07); width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-header">
+  <h1>FloatElement <span class="badge-pill">plugin</span></h1>
+  <p>Scroll-driven parallax — vertical &amp; horizontal, multi-transform (scale, rotate, opacity, skew), clamp, scroll direction gate, dependency-free IntersectionObserver visibility</p>
+</div>
+
+<nav class="demo-nav">
+  <a href="#card-vertical">Vertical</a>
+  <a href="#card-horizontal">Horizontal</a>
+  <a href="#card-multitransform">Multi-transform</a>
+  <a href="#card-clamp">Clamp &amp; direction</a>
+  <a href="#card-api">API &amp; onMove</a>
+</nav>
+
+<div class="demo-body">
+
+  <!-- Card 01: Vertical drift -->
+  <div class="demo-card" id="card-vertical">
+    <div class="demo-card-header">
+      <span class="card-num">01</span>
+      <h2>Vertical drift — three speeds</h2>
+      <span class="card-tag">speed: 3 / 5 / 8</span>
+    </div>
+    <div class="demo-stage">
+      <div class="scene" style="height:340px;gap:3rem;padding:2rem">
+        <div style="position:relative;padding-bottom:1.75rem">
+          <div class="fe-orb manual" id="fe-v1" style="background:radial-gradient(circle at 35% 35%,#3dd6e8,#1a8fa0)">🌊</div>
+          <span class="fe-label">speed: 3 (default)</span>
+        </div>
+        <div style="position:relative;padding-bottom:1.75rem">
+          <div class="fe-card manual" id="fe-v2">
+            <h4>Medium</h4>
+            <p>speed: 5<br>Subtler drift than the orb</p>
+          </div>
+          <span class="fe-label" style="bottom:-1.75rem">speed: 5</span>
+        </div>
+        <div style="position:relative;padding-bottom:1.75rem">
+          <div class="fe-orb manual" id="fe-v3" style="background:radial-gradient(circle at 35% 35%,#f0a065,#b84e15)">🔥</div>
+          <span class="fe-label">speed: 8 (subtle)</span>
+        </div>
+      </div>
+      <div class="scroll-hint">↕ Scroll the page — each element drifts at a different rate</div>
+    </div>
+<pre class="snip"><span class="hl-cmt">// speed is a divisor — larger value → subtler movement
+// scrollPercent / speed gives the translate% value</span>
+$(<span class="hl-val">'#fast'</span>).themestrapPluginFloatElement({ speed: 3 });
+$(<span class="hl-val">'#mid'</span>).themestrapPluginFloatElement({ speed: 5 });
+$(<span class="hl-val">'#slow'</span>).themestrapPluginFloatElement({ speed: 8 });
+
+<span class="hl-cmt">// Auto-init via data attribute:</span>
+<span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-float-element</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"speed": 5}'</span><span class="hl-tag">&gt;&lt;/div&gt;</span></pre>
+    <div class="demo-log" id="log-v"><span class="log-entry">// scroll the page to see the parallax drift</span></div>
+  </div>
+
+
+  <!-- Card 02: Horizontal + invertDirection -->
+  <div class="demo-card" id="card-horizontal">
+    <div class="demo-card-header">
+      <span class="card-num">02</span>
+      <h2>Horizontal drift — axis and direction</h2>
+      <span class="card-tag">horizontal: true · invertDirection</span>
+    </div>
+    <div class="demo-stage">
+      <div class="scene" style="height:260px;flex-direction:column;gap:1.1rem;padding:1.5rem">
+        <div class="fe-pill manual" id="fe-h1" style="background:rgba(42,184,200,.18);border:1px solid rgba(42,184,200,.4)">
+          horizontal: true — speed 4
+        </div>
+        <div class="fe-pill manual" id="fe-h2" style="background:rgba(232,103,42,.18);border:1px solid rgba(232,103,42,.4)">
+          invertDirection: true — speed 4
+        </div>
+        <div class="fe-pill manual" id="fe-h3" style="background:rgba(150,110,220,.18);border:1px solid rgba(150,110,220,.4)">
+          invertDirection: true — speed 7
+        </div>
+      </div>
+      <div class="scroll-hint">↕ The pills slide in opposite horizontal directions as you scroll</div>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Normal horizontal</span>
+$(<span class="hl-val">'#h1'</span>).themestrapPluginFloatElement({
+  horizontal: <span class="hl-kw">true</span>,
+  speed:      4,
+});
+
+<span class="hl-cmt">// invertDirection flips the sign — replaces the old minus: '-' pattern</span>
+$(<span class="hl-val">'#h2'</span>).themestrapPluginFloatElement({
+  horizontal:      <span class="hl-kw">true</span>,
+  speed:           4,
+  invertDirection: <span class="hl-kw">true</span>,
+});</pre>
+    <div class="demo-log" id="log-h"><span class="log-entry">// top pill and bottom pill slide in opposite directions</span></div>
+  </div>
+
+
+  <!-- Card 03: Multi-transform -->
+  <div class="demo-card" id="card-multitransform">
+    <div class="demo-card-header">
+      <span class="card-num">03</span>
+      <h2>Multi-transform — scale, rotate, opacity in one instance</h2>
+      <span class="card-tag">scale · rotate · opacity · transition</span>
+    </div>
+    <div class="demo-stage">
+      <div class="scene" style="height:360px;gap:3.5rem;padding:2rem">
+        <!-- scale + rotate + opacity -->
+        <div class="fe-card manual" id="fe-mt1" style="width:172px">
+          <h4>Scale + Rotate</h4>
+          <p>Grows from 1× to 1.07×<br>Rotates −4° → +4°</p>
+        </div>
+        <!-- opacity + scale -->
+        <div style="position:relative">
+          <div class="fe-orb manual" id="fe-mt2" style="background:radial-gradient(circle at 35% 35%,#c792ea,#7b2fa8)">✦</div>
+        </div>
+        <!-- skew -->
+        <div class="fe-card manual" id="fe-mt3" style="width:152px">
+          <h4>Skew</h4>
+          <p>skewX 0° → 6°<br>opacity 1 → 0.4</p>
+        </div>
+        <!-- live readout -->
+        <div class="readout" id="mt-readout">
+          <div>scrollPct <span id="mt-pct">—</span></div>
+          <div>translateY <span id="mt-ty">—</span></div>
+          <div>scale <span id="mt-scale">—</span></div>
+          <div>rotate <span id="mt-rotate">—</span></div>
+          <div>opacity <span id="mt-opacity">—</span></div>
+        </div>
+      </div>
+      <div class="scroll-hint">↕ Scroll — live values update in the readout panel</div>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Each transform takes a [from, to] tuple, interpolated 0–1
+// across the normalised scroll position of the element.</span>
+$(<span class="hl-val">'#hero-card'</span>).themestrapPluginFloatElement({
+  speed:              4,
+  scale:              [1, 1.07],    <span class="hl-cmt">// grows as element scrolls up</span>
+  rotate:             [-4, 4],      <span class="hl-cmt">// degrees</span>
+  transition:         <span class="hl-kw">true</span>,
+  transitionDuration: 200,          <span class="hl-cmt">// ms — absorbs micro-jitter</span>
+});
+
+$(<span class="hl-val">'#orb'</span>).themestrapPluginFloatElement({
+  speed:   3,
+  opacity: [0.4, 1],  <span class="hl-cmt">// fades in as it scrolls into view</span>
+  scale:   [0.9, 1.1],
+});
+
+$(<span class="hl-val">'#panel'</span>).themestrapPluginFloatElement({
+  speed:   5,
+  skew:    [0, 6],    <span class="hl-cmt">// skewX in degrees</span>
+  opacity: [1, 0.4],
+});</pre>
+    <div class="demo-log" id="log-mt"><span class="log-entry">// scroll to see scale, rotate, skew, and opacity animate simultaneously</span></div>
+  </div>
+
+
+  <!-- Card 04: Clamp + scrollDirection -->
+  <div class="demo-card" id="card-clamp">
+    <div class="demo-card-header">
+      <span class="card-num">04</span>
+      <h2>Clamp &amp; scroll direction — contain drift, gate on direction</h2>
+      <span class="card-tag">clamp · scrollDirection</span>
+    </div>
+    <div class="demo-stage">
+      <div class="compare-row" style="min-height:260px">
+        <div class="compare-col">
+          <div class="compare-col-label">clamp: false<br>(uncapped)</div>
+          <div class="fe-orb manual" id="fe-unc" style="background:radial-gradient(circle at 35% 35%,#e8672a,#8a3410)">∞</div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-col-label">clamp: 4<br>(max ±4%)</div>
+          <div class="fe-orb manual" id="fe-clamp" style="background:radial-gradient(circle at 35% 35%,#2ab8c8,#136d78)">■</div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-col-label">scrollDirection: 'down'<br>(freezes on up-scroll)</div>
+          <div class="fe-orb manual" id="fe-sd-down" style="background:radial-gradient(circle at 35% 35%,#a0d4a0,#2d7a2d)">↓</div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-col-label">scrollDirection: 'up'<br>(freezes on down-scroll)</div>
+          <div class="fe-orb manual" id="fe-sd-up" style="background:radial-gradient(circle at 35% 35%,#c792ea,#6a2a8a)">↑</div>
+        </div>
+      </div>
+      <div class="scroll-hint">↕ Scroll down then back up — watch the directional orbs freeze</div>
+    </div>
+<pre class="snip"><span class="hl-cmt">// clamp: N caps the translate at ±N% regardless of scroll distance</span>
+$(<span class="hl-val">'#constrained'</span>).themestrapPluginFloatElement({
+  speed: 2,
+  clamp: 4,
+});
+
+<span class="hl-cmt">// scrollDirection: 'down' — transform only updates while scrolling down
+// scrollDirection: 'up'   — transform only updates while scrolling up
+// scrollDirection: 'both' — always updates (default)</span>
+$(<span class="hl-val">'#down-only'</span>).themestrapPluginFloatElement({
+  speed:           3,
+  scrollDirection: <span class="hl-val">'down'</span>,
+});</pre>
+    <div class="demo-log" id="log-clamp"><span class="log-entry">// scroll down then back up — watch the right two orbs freeze mid-drift</span></div>
+  </div>
+
+
+  <!-- Card 05: Programmatic API + onMove callback -->
+  <div class="demo-card" id="card-api">
+    <div class="demo-card-header">
+      <span class="card-num">05</span>
+      <h2>Programmatic API &amp; onMove callback</h2>
+      <span class="card-tag">pause · resume · recalculate · destroy · string commands</span>
+    </div>
+    <div class="demo-stage">
+      <div class="scene" style="height:300px;gap:3rem;padding:2rem">
+        <div class="fe-orb manual" id="fe-api" style="background:radial-gradient(circle at 35% 35%,#ffcc66,#cc7700)">★</div>
+        <div>
+          <div class="readout" style="position:static;min-width:210px">
+            <div>scrollPct <span id="api-pct">—</span></div>
+            <div>translateY <span id="api-ty">—</span></div>
+            <div>scale <span id="api-scale">—</span></div>
+            <div>opacity <span id="api-opacity">—</span></div>
+            <div style="margin-top:.4rem;color:rgba(255,255,255,.3)">state: <span id="api-state" style="color:var(--ts-teal)">active</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="scroll-hint">↕ Scroll or use the buttons below to control the instance</div>
+    </div>
+    <div class="demo-controls">
+      <button class="btn-ts btn-teal-ts"    onclick="apiCmd('pause')">pause()</button>
+      <button class="btn-ts btn-teal-ts"    onclick="apiCmd('resume')">resume()</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="apiCmd('recalculate')">recalculate()</button>
+      <button class="btn-ts btn-primary-ts" onclick="apiCmd('destroy')">destroy()</button>
+      <button class="btn-ts btn-ghost-ts"   onclick="reinit()">reinit</button>
+    </div>
+<pre class="snip"><span class="hl-cmt">// Instance retrieval (never chain off the init call)</span>
+<span class="hl-kw">const</span> inst = $(<span class="hl-val">'#fe'</span>).data(<span class="hl-val">'__floatElement'</span>);
+
+inst.pause();        <span class="hl-cmt">// suspend rAF updates</span>
+inst.resume();       <span class="hl-cmt">// resume + immediately recalculates</span>
+inst.recalculate();  <span class="hl-cmt">// force one tick without scrolling</span>
+inst.destroy();      <span class="hl-cmt">// unbinds scroll, clears transform, disconnects IO</span>
+
+<span class="hl-cmt">// String command shorthand via the jQuery bridge:</span>
+$(<span class="hl-val">'#fe'</span>).themestrapPluginFloatElement(<span class="hl-val">'pause'</span>);
+
+<span class="hl-cmt">// onMove fires on every computed rAF tick</span>
+$(<span class="hl-val">'#fe'</span>).themestrapPluginFloatElement({
+  speed:   3,
+  scale:   [1, 1.1],
+  opacity: [0.6, 1],
+  onMove: (pct, transforms) =&gt; {
+    console.log(pct, transforms.translateY, transforms.scale);
+  },
+});</pre>
+    <div class="demo-log" id="log-api"><span class="log-entry">// scroll or click a button above</span></div>
+  </div>
+
+</div>
+
+<!-- Scroll runway -->
+<div style="max-width:960px;margin:0 auto;padding:0 1rem 8rem;text-align:center">
+  <p style="color:rgba(255,255,255,.2);font-family:var(--ts-font-mono);font-size:.72rem">— end of runway —</p>
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.floatelement.js"></script>
+
+<script>
+$(function () {
+
+  /* Card 01: Vertical */
+  $('#fe-v1').themestrapPluginFloatElement({ speed: 3, minWindowWidth: 0 });
+  $('#fe-v2').themestrapPluginFloatElement({ speed: 5, minWindowWidth: 0 });
+  $('#fe-v3').themestrapPluginFloatElement({ speed: 8, minWindowWidth: 0 });
+
+  /* Card 02: Horizontal */
+  $('#fe-h1').themestrapPluginFloatElement({ horizontal: true, speed: 4, minWindowWidth: 0 });
+  $('#fe-h2').themestrapPluginFloatElement({ horizontal: true, speed: 4, invertDirection: true, minWindowWidth: 0 });
+  $('#fe-h3').themestrapPluginFloatElement({ horizontal: true, speed: 7, invertDirection: true, minWindowWidth: 0 });
+
+  /* Card 03: Multi-transform */
+  $('#fe-mt1').themestrapPluginFloatElement({
+    speed: 4, scale: [1, 1.07], rotate: [-4, 4],
+    transition: true, transitionDuration: 200, minWindowWidth: 0,
+    onMove: function (pct, t) {
+      $('#mt-pct').text(pct.toFixed(1));
+      if (t.translateY  !== undefined) $('#mt-ty').text(t.translateY.toFixed(2)  + '%');
+      if (t.scale       !== undefined) $('#mt-scale').text(t.scale.toFixed(3));
+      if (t.rotate      !== undefined) $('#mt-rotate').text(t.rotate.toFixed(2)  + '°');
+    },
+  });
+  $('#fe-mt2').themestrapPluginFloatElement({
+    speed: 3, opacity: [0.4, 1], scale: [0.9, 1.1], minWindowWidth: 0,
+    onMove: function (pct, t) {
+      if (t.opacity !== undefined) $('#mt-opacity').text(t.opacity.toFixed(3));
+    },
+  });
+  $('#fe-mt3').themestrapPluginFloatElement({ speed: 5, skew: [0, 6], opacity: [1, 0.4], minWindowWidth: 0 });
+
+  /* Card 04: Clamp + scrollDirection */
+  $('#fe-unc').themestrapPluginFloatElement({ speed: 2, minWindowWidth: 0 });
+  $('#fe-clamp').themestrapPluginFloatElement({ speed: 2, clamp: 4, minWindowWidth: 0 });
+  $('#fe-sd-down').themestrapPluginFloatElement({ speed: 3, scrollDirection: 'down', minWindowWidth: 0 });
+  $('#fe-sd-up').themestrapPluginFloatElement({ speed: 3, scrollDirection: 'up', minWindowWidth: 0 });
+
+  /* Card 05: API + onMove */
+  $('#fe-api').themestrapPluginFloatElement({
+    speed: 3, scale: [1, 1.1], opacity: [0.6, 1], minWindowWidth: 0,
+    onMove: function (pct, t) {
+      $('#api-pct').text(pct.toFixed(1));
+      if (t.translateY !== undefined) $('#api-ty').text(t.translateY.toFixed(2) + '%');
+      if (t.scale      !== undefined) $('#api-scale').text(t.scale.toFixed(3));
+      if (t.opacity    !== undefined) $('#api-opacity').text(t.opacity.toFixed(3));
+    },
+  });
+
+  /* Global scroll log for cards 01 and 02 */
+  var _logTick = false;
+  $(window).on('scroll.fe-demo', function () {
+    if (_logTick) return;
+    _logTick = true;
+    requestAnimationFrame(function () {
+      var y = $(window).scrollTop();
+      var msg = '<span class="log-entry">// scrollTop: ' + y + 'px</span>';
+      $('#log-v, #log-h, #log-clamp').html(msg);
+      _logTick = false;
+    });
+  });
+
+});
+
+function getApi() {
+  return $('#fe-api').data('__floatElement');
+}
+
+function apiCmd(method) {
+  var inst = getApi();
+  if (!inst) { log('log-api', '// destroyed — click reinit', 'warn'); return; }
+  inst[method]();
+  var state = method === 'pause'   ? 'paused'
+            : method === 'resume'  ? 'active'
+            : method === 'destroy' ? 'destroyed'
+            : null;
+  if (state) $('#api-state').text(state);
+  log('log-api', '// ' + method + '() called');
+}
+
+function reinit() {
+  if (getApi()) { log('log-api', '// already initialized', 'warn'); return; }
+  $('#fe-api').themestrapPluginFloatElement({
+    speed: 3, scale: [1, 1.1], opacity: [0.6, 1], minWindowWidth: 0,
+    onMove: function (pct, t) {
+      $('#api-pct').text(pct.toFixed(1));
+      if (t.translateY !== undefined) $('#api-ty').text(t.translateY.toFixed(2) + '%');
+      if (t.scale      !== undefined) $('#api-scale').text(t.scale.toFixed(3));
+      if (t.opacity    !== undefined) $('#api-opacity').text(t.opacity.toFixed(3));
+    },
+  });
+  $('#api-state').text('active');
+  log('log-api', '// reinitialized');
+}
+
+function log(id, msg, type) {
+  var cls = type === 'warn' ? 'log-warn' : 'log-entry';
+  $('#' + id).html('<span class="' + cls + '">' + msg + '</span>');
+}
+</script>
+
+</body>
+</html>
