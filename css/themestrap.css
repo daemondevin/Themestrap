@@ -5961,7 +5961,7 @@ section.page-header.custom-product {
 
 .section-angled-layer-top.section-angled-layer-increase-angle,
 .section-angled-layer-bottom.section-angled-layer-increase-angle {
-    background-color: var(bg-light-100);
+    background-color: var(--light-100);
 }
 
 /* Container */
