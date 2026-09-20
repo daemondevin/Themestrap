@@ -112,7 +112,7 @@
 /* Themestrap — PluginNavigation */
 
 /* Token layer */
-.ts-nav {
+:root {
     /* Geometry */
     --ts-nav-width:              260px;
     --ts-nav-width-collapsed:     64px;
@@ -156,8 +156,7 @@
 }
 
 /* Dark variant — via option class or html.dark */
-.ts-nav--dark,
-html.dark .ts-nav {
+:root.dark {
     --ts-nav-bg:                 var(--dark, #212529);
     --ts-nav-border-color:       var(--dark--200, #101214);
     --ts-nav-header-bg:          var(--dark--100, #2c3237);
