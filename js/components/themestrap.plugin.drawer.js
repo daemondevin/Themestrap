@@ -1,67 +1,403 @@
-/** 
- * Themestrap PluginDrawer
- * A drawer/off-canvas component.
+/**
+ * Themestrap Drawer Plugin
+ * Accessible panel that slides in from any edge — bottom (default), top, left, or right.
+ * Supports backdrop, drag-to-dismiss via a grab handle, scroll-lock, and focus trapping.
+ * Part of the Themestrap component library for MODX 3.
  *
- * Usage:
- *   $('[data-plugin-drawer]').themestrapPluginDrawer();
+ * Markup anatomy:
  *
- * Programmatic:
- *   $('#my-drawer').themestrapPluginDrawer('open');
- *   $('#my-drawer').themestrapPluginDrawer('close');
- *   $('#my-drawer').themestrapPluginDrawer('toggle');
+ *   <!-- Trigger (anywhere in the DOM) -->
+ *   <button data-drawer-open="my-drawer">Open</button>
  *
- * Markup:
+ *   <!-- Drawer root -->
+ *   <div data-plugin-drawer id="my-drawer"
+ *        data-plugin-options='{"direction": "bottom"}'>
  *
- * <div
- *     id="my-drawer"
- *     data-plugin-drawer
- *     data-plugin-options='{"direction":"bottom"}'
- * >
- *     <div data-drawer-overlay></div>
+ *     <!-- Backdrop (auto-injected if omitted) -->
+ *     <div data-drawer-backdrop></div>
  *
- *     <div data-drawer-content>
- *         <div data-drawer-handle></div>
+ *     <!-- Panel -->
+ *     <div data-drawer-panel>
  *
- *         <div data-drawer-header>
- *             <h2 data-drawer-title>Drawer Title</h2>
- *             <p data-drawer-description>Description</p>
- *         </div>
+ *       <!-- [data-drawer-handle] is auto-injected for bottom/top drawers.
+ *            Add it manually inside [data-drawer-panel] to control its position. -->
  *
- *         <div data-drawer-body>
- *             Drawer content.
- *         </div>
+ *       <h2 data-drawer-title>Drawer Title</h2>
+ *       <p  data-drawer-description>Optional description.</p>
  *
- *         <div data-drawer-footer>
- *             <button data-drawer-close>Close</button>
- *         </div>
+ *       <!-- Content -->
+ *
+ *       <button data-drawer-close>Close</button>
  *     </div>
- * </div>
+ *   </div>
  *
- * Trigger:
- *   <button data-drawer-trigger="#my-drawer">Open Drawer</button>
+ * Public API (via stored instance):
+ *   const drw = $('#my-drawer').data('__pluginDrawer');
+ *   drw.open();
+ *   drw.close();
+ *   drw.toggle();
+ *
+ * Events fired on the drawer root element:
+ *   drawer:open  — after the open transition starts  (receives instance as arg)
+ *   drawer:close — after the close transition ends   (receives instance as arg)
+ *
+ * Init.js wiring (DOMReady-immediate — drawers must be ready before any trigger fires):
+ *   if ($.isFunction($.fn['themestrapPluginDrawer']) && $('[data-plugin-drawer]').length) {
+ *       $(() => {
+ *           $('[data-plugin-drawer]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginDrawer(opts);
+ *           });
+ *       });
+ *   }
  */
-// Drawer
 (((themestrap = {}, $) => {
+    const instanceName = '__pluginDrawer';
 
-    const instanceName = '__drawer';
+    const FOCUSABLE = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])',
+        '[contenteditable="true"]',
+    ].join(', ');
+
+    let _seq = 0;
+    const uid = (prefix) => `${prefix}-${++_seq}-${Math.random().toString(36).slice(2, 7)}`;
+
     const STYLE_ID = 'ts-drawer-styles';
+    const CSS_TEXT = `/* PluginDrawer — Themestrap Drawer Styles
+ *
+ * Structure:
+ *   .drawer-root                  [data-plugin-drawer] fixed full-screen container
+ *   ├── [data-drawer-backdrop]    translucent overlay
+ *   └── [data-drawer-panel]       the visible panel; slides in from an edge
+ *       ├── [data-drawer-handle]  drag indicator (auto-injected for bottom/top)
+ *       ├── [data-drawer-title]
+ *       ├── [data-drawer-description]
+ *       └── ...content...
+ *
+ * State classes (toggled by the plugin):
+ *   .drawer-root.drawer-hidden    closed (display:none)
+ *   .drawer-root.drawer-is-open   panel is in the DOM, pre-transition
+ *   .drawer-root.drawer-open      panel is visible (transition target)
+ *   .drawer-{bottom|top|left|right}  direction variant
+ *
+ * CSS custom properties (override at any scope level):
+ *   --ts-drw-bg           Panel background
+ *   --ts-drw-overlay      Backdrop colour
+ *   --ts-drw-shadow-b/t/l/r  Direction-specific panel shadow
+ *   --ts-drw-radius       Corner radius
+ *   --ts-drw-handle       Handle pill colour
+ *   --ts-drw-handle-hover Handle pill hover colour
+ *   --ts-drw-text-muted   [data-drawer-description] colour
+ *   --ts-drw-max-h        Max height for bottom/top drawers
+ *   --ts-drw-side-w       Width for left/right drawers
+ *   --ts-drw-pad          Panel padding
+ *   --ts-drw-dur          Transition duration (keep in sync with transitionDuration option)
+ *   --ts-drw-ease         Transition easing
+ */
+
+:root {
+    --ts-drw-bg          : #ffffff;
+    --ts-drw-overlay     : rgba(0, 0, 0, 0.5);
+    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
+    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-radius      : 1rem;
+    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
+    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
+    --ts-drw-text-muted  : #6b7280;
+    --ts-drw-max-h       : 85svh;
+    --ts-drw-side-w      : min(380px, 85vw);
+    --ts-drw-pad         : 1.5rem;
+    --ts-drw-dur         : 320ms;
+    --ts-drw-ease        : cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+
+/* Root container */
+.drawer-root {
+    position  : fixed;
+    inset     : 0;
+    z-index   : 1060;
+    isolation : isolate;
+
+    &.drawer-hidden {
+        display        : none;
+        pointer-events : none;
+        visibility     : hidden;
+    }
+}
+
+
+/* Backdrop */
+[data-drawer-backdrop] {
+    position                : absolute;
+    inset                   : 0;
+    z-index                 : 0;
+    background              : var(--ts-drw-overlay);
+    backdrop-filter         : blur(2px);
+    -webkit-backdrop-filter : blur(2px);
+    opacity                 : 0;
+    transition              : opacity var(--ts-drw-dur) ease;
+
+    .drawer-open & {
+        opacity : 1;
+    }
+}
+
+
+/* Panel — shared base */
+[data-drawer-panel] {
+    position            : absolute;
+    z-index             : 1;
+    background          : var(--ts-drw-bg);
+    overflow-y          : auto;
+    overscroll-behavior : contain;
+    transition          : transform var(--ts-drw-dur) var(--ts-drw-ease);
+    will-change         : transform;
+    scrollbar-width     : thin;
+
+    &::-webkit-scrollbar       { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.18); border-radius: 2px; }
+}
+
+
+/* Bottom drawer */
+.drawer-bottom [data-drawer-panel] {
+    bottom        : 0;
+    left          : 0;
+    right         : 0;
+    max-height    : var(--ts-drw-max-h);
+    border-radius : var(--ts-drw-radius) var(--ts-drw-radius) 0 0;
+    box-shadow    : var(--ts-drw-shadow-b);
+    padding       : 0 var(--ts-drw-pad) calc(var(--ts-drw-pad) + env(safe-area-inset-bottom, 0px));
+    transform     : translateY(100%);
+}
+.drawer-bottom.drawer-open [data-drawer-panel] { transform: translateY(0); }
+
+
+/* Top drawer */
+.drawer-top [data-drawer-panel] {
+    top           : 0;
+    left          : 0;
+    right         : 0;
+    max-height    : var(--ts-drw-max-h);
+    border-radius : 0 0 var(--ts-drw-radius) var(--ts-drw-radius);
+    box-shadow    : var(--ts-drw-shadow-t);
+    padding       : calc(var(--ts-drw-pad) + env(safe-area-inset-top, 0px)) var(--ts-drw-pad) 0;
+    transform     : translateY(-100%);
+}
+.drawer-top.drawer-open [data-drawer-panel] { transform: translateY(0); }
+
+
+/* Left drawer */
+.drawer-left [data-drawer-panel] {
+    top           : 0;
+    left          : 0;
+    bottom        : 0;
+    height        : 100%;
+    width         : var(--ts-drw-side-w);
+    border-radius : 0 var(--ts-drw-radius) var(--ts-drw-radius) 0;
+    box-shadow    : var(--ts-drw-shadow-l);
+    padding       : calc(var(--ts-drw-pad) + env(safe-area-inset-top, 0px))
+                    var(--ts-drw-pad)
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-bottom, 0px))
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-left, 0px));
+    transform     : translateX(-100%);
+}
+.drawer-left.drawer-open [data-drawer-panel] { transform: translateX(0); }
+
+
+/* Right drawer */
+.drawer-right [data-drawer-panel] {
+    top           : 0;
+    right         : 0;
+    bottom        : 0;
+    height        : 100%;
+    width         : var(--ts-drw-side-w);
+    border-radius : var(--ts-drw-radius) 0 0 var(--ts-drw-radius);
+    box-shadow    : var(--ts-drw-shadow-r);
+    padding       : calc(var(--ts-drw-pad) + env(safe-area-inset-top, 0px))
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-right, 0px))
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-bottom, 0px))
+                    var(--ts-drw-pad);
+    transform     : translateX(100%);
+}
+.drawer-right.drawer-open [data-drawer-panel] { transform: translateX(0); }
+
+
+/* Drag handle — renders as a sticky full-width bar with a centred pill */
+[data-drawer-handle] {
+    display             : flex;
+    align-items         : center;
+    justify-content     : center;
+    width               : auto;
+    background          : var(--ts-drw-bg);
+    cursor              : grab;
+    touch-action        : none;
+    user-select         : none;
+    -webkit-user-select : none;
+    flex-shrink         : 0;
+
+    &::before {
+        content       : '';
+        display       : block;
+        width         : 48px;
+        height        : 4px;
+        background    : var(--ts-drw-handle);
+        border-radius : 2px;
+        transition    : background 0.15s ease;
+    }
+
+    &:hover::before { background: var(--ts-drw-handle-hover); }
+    &:active        { cursor: grabbing; }
+    &:active::before{ background: var(--ts-drw-handle-hover); }
+}
+
+/* Bottom drawer handle — sticky top strip */
+.drawer-bottom [data-drawer-handle] {
+    position  : sticky;
+    top       : 0;
+    z-index   : 2;
+    padding   : 0.875rem 0;
+    /* bleed to panel edges so the bg fills edge-to-edge */
+    margin    : 0 calc(var(--ts-drw-pad) * -1);
+}
+
+/* Top drawer handle — sticky bottom strip */
+.drawer-top [data-drawer-handle] {
+    position  : sticky;
+    bottom    : 0;
+    z-index   : 2;
+    padding   : 0.875rem 0;
+    margin    : 0 calc(var(--ts-drw-pad) * -1);
+}
+
+/* Side drawers — no visual handle (backdrop / close button preferred) */
+.drawer-left  [data-drawer-handle],
+.drawer-right [data-drawer-handle] {
+    display : none;
+}
+
+
+/* Typography helpers */
+[data-drawer-title] {
+    font-size    : 1.25rem;
+    font-weight  : 600;
+    line-height  : 1.3;
+    margin-top   : 0;
+    margin-bottom: 0.5rem;
+    color        : inherit;
+}
+
+[data-drawer-description] {
+    font-size    : 0.9375rem;
+    color        : var(--ts-drw-text-muted);
+    margin-bottom: 1.5rem;
+    line-height  : 1.5;
+}
+
+
+/* Scroll-lock utility — shared with PluginDialog; redundant definition is harmless */
+body.ts-scroll-lock {
+    overflow      : hidden;
+    padding-right : var(--ts-scrollbar-width, 0px);
+}
+
+
+/* Dark mode — tier 1: system preference */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ts-drw-bg          : #1e2939;
+        --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
+        --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
+        --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
+        --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
+        --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
+        --ts-drw-handle      : rgba(255, 255, 255, 0.22);
+        --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
+        --ts-drw-text-muted  : #9ca3af;
+    }
+
+    [data-drawer-panel]::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Dark mode — tier 2: explicit class/attribute */
+html.dark,
+[data-bs-theme="dark"] {
+    --ts-drw-bg          : #1e2939;
+    --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
+    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
+    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
+    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
+    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
+    --ts-drw-handle      : rgba(255, 255, 255, 0.22);
+    --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
+    --ts-drw-text-muted  : #9ca3af;
+}
+
+html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
+[data-bs-theme="dark"] [data-drawer-panel]::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Dark mode — tier 3: explicit light override */
+[data-bs-theme="light"] {
+    --ts-drw-bg          : #ffffff;
+    --ts-drw-overlay     : rgba(0, 0, 0, 0.50);
+    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
+    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
+    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
+    --ts-drw-text-muted  : #6b7280;
+}
+
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    [data-drawer-backdrop],
+    [data-drawer-panel] {
+        transition-duration : 0.01ms !important;
+    }
+}`;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = CSS_TEXT;
+        (document.head || document.documentElement).appendChild(style);
+    }
 
     class PluginDrawer {
-
         constructor($el, opts) {
             return this.initialize($el, opts);
         }
 
         initialize($el, opts) {
-            if (!$el || !$el.length) {
+            if ($el.data(instanceName)) {
                 return this;
             }
 
-            if ($el.data(instanceName)) {
-                return $el.data(instanceName);
-            }
-
-            this.$el = $el;
+            this.$el            = $el;
+            this.$panel         = null;
+            this.$backdrop      = null;
+            this.$handle        = null;
+            this.$previousFocus = null;
+            this.isOpen         = false;
+            this._uid           = uid('drawer');
+            this._drag          = null;
+            this._closeTimer    = null;
 
             this
                 .setData()
@@ -69,1186 +405,438 @@
                 .build()
                 .events();
 
-            $el.data(instanceName, this);
-
             return this;
         }
 
         setData() {
-            this.data = {
-                isOpen: false,
-                isDragging: false,
-                startY: 0,
-                currentY: 0,
-                lastY: 0,
-                velocityY: 0,
-                startTime: 0,
-                pointerId: null,
-                startTranslate: 0,
-                currentTranslate: 0,
-                contentHeight: 0,
-                raf: null,
-                previousFocus: null,
-                bodyOverflow: null
-            };
-
+            this.$el.data(instanceName, this);
             return this;
         }
 
         setOptions(opts) {
-            opts = opts || {};
-
             this.options = $.extend(true, {}, PluginDrawer.defaults, opts, {
-                wrapper: this.$el
+                wrapper: this.$el,
             });
-
             return this;
         }
 
         build() {
-            this._ensureStructure();
-            this._injectStyles();
-            this._cacheElements();
-            this._setupARIA();
-            this._setupDirection();
-            this._setupInitialState();
+            injectStyles();
 
-            return this;
-        }
+            const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
+            const dir  = opts.direction;
 
-        _ensureStructure() {
-            let $content = this.$el.find('[data-drawer-content]').first();
+            // ARIA role and modal flag
+            if (!$el.attr('role')) $el.attr('role', 'dialog');
+            $el.attr('aria-modal', 'true');
 
-            if (!$content.length) {
-                $content = $('<div data-drawer-content></div>');
-
-                const $children = this.$el.children().detach();
-
-                $content.append($children);
-                this.$el.append($content);
+            // Auto-wire title → aria-labelledby
+            const $title = $el.find('[data-drawer-title]').first();
+            if ($title.length && !$el.attr('aria-labelledby')) {
+                const id = $title.attr('id') || uid('drawer-title');
+                $title.attr('id', id);
+                $el.attr('aria-labelledby', id);
             }
 
-            if (!this.$el.find('[data-drawer-overlay]').length) {
-                this.$el.prepend(
-                    '<div data-drawer-overlay data-drawer-part="overlay"></div>'
-                );
+            // Auto-wire description → aria-describedby
+            const $desc = $el.find('[data-drawer-description]').first();
+            if ($desc.length && !$el.attr('aria-describedby')) {
+                const id = $desc.attr('id') || uid('drawer-desc');
+                $desc.attr('id', id);
+                $el.attr('aria-describedby', id);
             }
 
-            if (
-                this.options.showHandle &&
-                !this.$el.find('[data-drawer-handle]').length
-            ) {
-                $content.prepend(
-                    '<div data-drawer-handle data-drawer-part="handle">' +
-                    '<span></span>' +
-                    '</div>'
-                );
+            // Backdrop — auto-inject when missing
+            if (opts.backdrop) {
+                self.$backdrop = $el.find('[data-drawer-backdrop]');
+                if (!self.$backdrop.length) {
+                    self.$backdrop = $('<div data-drawer-backdrop></div>');
+                    $el.prepend(self.$backdrop);
+                }
             }
 
-            return this;
-        }
+            // Panel
+            self.$panel = $el.find('[data-drawer-panel]');
 
-        _cacheElements() {
-            this.$overlay = this.$el.find('[data-drawer-overlay]').first();
-            this.$content = this.$el.find('[data-drawer-content]').first();
-            this.$handle = this.$el.find('[data-drawer-handle]').first();
-
-            this.$trigger = $(
-                `[data-drawer-trigger="#${this.$el.attr('id')}"]`
-            );
-
-            this.$close = this.$el.find(
-                '[data-drawer-close], [data-drawer-dismiss]'
-            );
-
-            return this;
-        }
-
-        _setupARIA() {
-            const id = this.$el.attr('id');
-
-            this.$el.attr({
-                role: 'dialog',
-                'aria-modal': 'true',
-                'aria-hidden': 'true'
-            });
-
-            if (id) {
-                this.$trigger.attr('aria-controls', id);
-            }
-
-            if (!this.$el.find('[data-drawer-title]').length) {
-                this.$el.attr('aria-label', this.options.ariaLabel);
-            } else {
-                const titleId = this._getOrCreateId(
-                    this.$el.find('[data-drawer-title]').first(),
-                    'ts-drawer-title'
-                );
-
-                this.$el.attr('aria-labelledby', titleId);
-            }
-
-            const $description = this.$el
-                .find('[data-drawer-description]')
-                .first();
-
-            if ($description.length) {
-                const descriptionId = this._getOrCreateId(
-                    $description,
-                    'ts-drawer-description'
-                );
-
-                this.$el.attr('aria-describedby', descriptionId);
-            }
-
-            return this;
-        }
-
-        _getOrCreateId($element, prefix) {
-            let id = $element.attr('id');
-
-            if (!id) {
-                id =
-                    prefix +
-                    '-' +
-                    Math.random().toString(36).slice(2, 9);
-
-                $element.attr('id', id);
-            }
-
-            return id;
-        }
-
-        _setupDirection() {
-            this.$el.attr(
-                'data-drawer-direction',
-                this.options.direction
-            );
-
-            return this;
-        }
-
-        _setupInitialState() {
-            this.$el.addClass('ts-drawer');
-            this.$el.addClass('ts-drawer--closed');
-
-            if (this.options.modal) {
-                this.$el.addClass('ts-drawer--modal');
-            }
-
-            if (this.options.overlay) {
-                this.$el.addClass('ts-drawer--overlay');
-            }
-
-            if (this.options.showHandle) {
-                this.$el.addClass('ts-drawer--handle');
-            }
-
-            if (this.options.closeOnOutsideClick === false) {
-                this.$el.addClass('ts-drawer--no-outside-close');
-            }
-
-            this._setTranslate(this._closedTranslate(), false);
-
-            return this;
-        }
-
-        _injectStyles() {
-            if (document.getElementById(STYLE_ID)) {
-                return this;
-            }
-
-            const css = `
-                .ts-drawer {
-                    position: fixed;
-                    inset: 0;
-                    z-index: var(--ts-drawer-z-index, 1050);
-                    pointer-events: none;
-                    visibility: hidden;
-                }
-
-                .ts-drawer *,
-                .ts-drawer *::before,
-                .ts-drawer *::after {
-                    box-sizing: border-box;
-                }
-
-                .ts-drawer[data-drawer-direction="bottom"] {
-                    --ts-drawer-size: ${this.options.size};
-                }
-
-                .ts-drawer[data-drawer-direction="top"] {
-                    --ts-drawer-size: ${this.options.size};
-                }
-
-                .ts-drawer[data-drawer-direction="left"],
-                .ts-drawer[data-drawer-direction="right"] {
-                    --ts-drawer-size: ${this.options.sideSize};
-                }
-
-                .ts-drawer--open {
-                    pointer-events: auto;
-                    visibility: visible;
-                }
-
-                [data-drawer-overlay] {
-                    position: absolute;
-                    inset: 0;
-                    background: rgba(0, 0, 0, ${this.options.overlayOpacity});
-                    opacity: 0;
-                    transition: opacity ${this.options.animationDuration}ms
-                        ${this.options.easing};
-                }
-
-                .ts-drawer--open [data-drawer-overlay] {
-                    opacity: 1;
-                }
-
-                .ts-drawer--closed [data-drawer-overlay] {
-                    opacity: 0;
-                }
-
-                [data-drawer-content] {
-                    position: absolute;
-                    display: flex;
-                    flex-direction: column;
-                    background: ${this.options.background};
-                    color: ${this.options.color};
-                    box-shadow: ${this.options.shadow};
-                    will-change: transform;
-                    touch-action: none;
-                    transition:
-                        transform ${this.options.animationDuration}ms
-                        ${this.options.easing};
-                    overflow: hidden;
-                }
-
-                [data-drawer-direction="bottom"] [data-drawer-content] {
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    max-height: ${this.options.maxHeight};
-                    height: var(--ts-drawer-size);
-                    border-radius:
-                        ${this.options.radius}
-                        ${this.options.radius}
-                        0 0;
-                }
-
-                [data-drawer-direction="top"] [data-drawer-content] {
-                    left: 0;
-                    right: 0;
-                    top: 0;
-                    max-height: ${this.options.maxHeight};
-                    height: var(--ts-drawer-size);
-                    border-radius:
-                        0 0
-                        ${this.options.radius}
-                        ${this.options.radius};
-                }
-
-                [data-drawer-direction="left"] [data-drawer-content] {
-                    top: 0;
-                    bottom: 0;
-                    left: 0;
-                    width: var(--ts-drawer-size);
-                    max-width: ${this.options.maxWidth};
-                    border-radius:
-                        0
-                        ${this.options.radius}
-                        ${this.options.radius}
-                        0;
-                }
-
-                [data-drawer-direction="right"] [data-drawer-content] {
-                    top: 0;
-                    bottom: 0;
-                    right: 0;
-                    width: var(--ts-drawer-size);
-                    max-width: ${this.options.maxWidth};
-                    border-radius:
-                        ${this.options.radius}
-                        0 0
-                        ${this.options.radius};
-                }
-
-                [data-drawer-handle] {
-                    flex: 0 0 auto;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 24px;
-                    cursor: grab;
-                    touch-action: none;
-                    user-select: none;
-                }
-
-                [data-drawer-handle]:active {
-                    cursor: grabbing;
-                }
-
-                [data-drawer-handle] span {
-                    display: block;
-                    width: 100px;
-                    height: 4px;
-                    border-radius: 999px;
-                    background: ${this.options.handleColor};
-                }
-
-                [data-drawer-header] {
-                    flex: 0 0 auto;
-                    padding: ${this.options.headerPadding};
-                }
-
-                [data-drawer-body] {
-                    flex: 1 1 auto;
-                    min-height: 0;
-                    overflow-y: auto;
-                    overscroll-behavior: contain;
-                    padding: ${this.options.bodyPadding};
-                    touch-action: pan-y;
-                }
-
-                [data-drawer-footer] {
-                    flex: 0 0 auto;
-                    padding: ${this.options.footerPadding};
-                }
-
-                [data-drawer-title] {
-                    margin: 0;
-                }
-
-                [data-drawer-description] {
-                    margin: ${this.options.descriptionMargin};
-                    color: ${this.options.mutedColor};
-                }
-
-                .ts-drawer--dragging [data-drawer-content] {
-                    transition: none !important;
-                }
-
-                .ts-drawer--dragging [data-drawer-overlay] {
-                    transition: none !important;
-                }
-
-                .ts-drawer--dragging [data-drawer-content] {
-                    user-select: none;
-                }
-
-                .ts-drawer--no-outside-close
-                    [data-drawer-overlay] {
-                    cursor: default;
-                }
-
-                @media (prefers-reduced-motion: reduce) {
-                    [data-drawer-content],
-                    [data-drawer-overlay] {
-                        transition-duration: 1ms !important;
+            // Handle — auto-inject for bottom/top; left/right have no grab handle by default
+            if (opts.showHandle && (dir === 'bottom' || dir === 'top')) {
+                self.$handle = $el.find('[data-drawer-handle]');
+                if (!self.$handle.length) {
+                    self.$handle = $('<div data-drawer-handle role="presentation"></div>');
+                    if (dir === 'bottom') {
+                        self.$panel.prepend(self.$handle);
+                    } else {
+                        // Top drawer: handle belongs at the bottom of the panel
+                        self.$panel.append(self.$handle);
                     }
                 }
-            `;
+            }
 
-            $('<style>', {
-                id: STYLE_ID,
-                type: 'text/css',
-                text: css
-            }).appendTo(document.head);
+            // Direction and root classes
+            $el
+                .addClass(`drawer-root drawer-${dir}`)
+                .attr('aria-hidden', 'true')
+                .attr('tabindex', '-1');
+
+            if (!$el.hasClass('drawer-is-open')) {
+                $el.addClass('drawer-hidden');
+            }
 
             return this;
         }
 
         events() {
-            this._bindTriggers();
-            this._bindOverlay();
-            this._bindClose();
-            this._bindKeyboard();
-            this._bindDrag();
+            const self     = this;
+            const $el      = self.$el;
+            const opts     = self.options;
+            const drawerId = $el.attr('id');
 
-            return this;
-        }
-
-        _bindTriggers() {
-            const self = this;
-
-            $(document).on(
-                'click.ts.drawer',
-                '[data-drawer-trigger]',
-                function (e) {
-                    const selector = $(this).attr('data-drawer-trigger');
-
-                    if (
-                        selector === '#' + self.$el.attr('id') ||
-                        selector === self.$el.attr('id')
-                    ) {
+            // External open triggers
+            if (drawerId) {
+                $(document).on(
+                    `click.drawer.${self._uid}`,
+                    `[data-drawer-open="${drawerId}"]`,
+                    function (e) {
                         e.preventDefault();
-
-                        self.data.previousFocus = this;
                         self.open();
                     }
-                }
-            );
+                );
+            }
 
-            return this;
-        }
-
-        _bindOverlay() {
-            const self = this;
-
-            this.$overlay.on('click.ts.drawer', function (e) {
-                if (
-                    self.options.closeOnOutsideClick &&
-                    e.target === this
-                ) {
-                    self.close('overlay');
-                }
-            });
-
-            return this;
-        }
-
-        _bindClose() {
-            const self = this;
-
-            this.$close.on('click.ts.drawer', function (e) {
+            // Internal close triggers
+            $el.on('click.drawer', '[data-drawer-close]', function (e) {
                 e.preventDefault();
-                self.close('button');
+                self.close();
             });
 
-            return this;
-        }
+            // Backdrop click
+            if (opts.closeOnBackdrop && self.$backdrop && self.$backdrop.length) {
+                $el.on('click.drawer.backdrop', function (e) {
+                    if ($(e.target).is('[data-drawer-backdrop]')) {
+                        self.close();
+                    }
+                });
+            }
 
-        _bindKeyboard() {
-            const self = this;
+            // Escape key
+            if (opts.closeOnEscape) {
+                $(document).on(`keydown.drawer.${self._uid}`, function (e) {
+                    if (self.isOpen && (e.key === 'Escape' || e.keyCode === 27)) {
+                        e.preventDefault();
+                        self.close();
+                    }
+                });
+            }
 
-            $(document).on('keydown.ts.drawer', function (e) {
-                if (!self.data.isOpen) {
-                    return;
-                }
-
-                if (
-                    e.key === 'Escape' &&
-                    self.options.closeOnEscape
-                ) {
-                    e.preventDefault();
-                    self.close('escape');
-                }
-            });
+            // Drag to dismiss (handle only; avoids interfering with panel scroll)
+            if (opts.draggable && self.$handle && self.$handle.length) {
+                self._bindDrag();
+            }
 
             return this;
         }
 
         _bindDrag() {
-            const self = this;
+            const self     = this;
+            const $el      = self.$el;
+            const $panel   = self.$panel;
+            const opts     = self.options;
+            const dir      = opts.direction;
+            const handleEl = self.$handle[0];
+            const isVert   = dir === 'bottom' || dir === 'top';
 
-            if (!this.options.draggable) {
-                return this;
-            }
+            handleEl.addEventListener('pointerdown', function (e) {
+                if (!self.isOpen) return;
 
-            this.$content.on(
-                'pointerdown.ts.drawer',
-                function (e) {
-                    self._pointerDown(e);
-                }
-            );
+                // Capture so pointermove/up keep firing even outside the handle
+                handleEl.setPointerCapture(e.pointerId);
 
-            this.$content.on(
-                'pointermove.ts.drawer',
-                function (e) {
-                    self._pointerMove(e);
-                }
-            );
+                self._drag = {
+                    startX  : e.clientX,
+                    startY  : e.clientY,
+                    lastX   : e.clientX,
+                    lastY   : e.clientY,
+                    lastTime: Date.now(),
+                    velocity: 0,
+                    delta   : 0,
+                };
 
-            this.$content.on(
-                'pointerup.ts.drawer pointercancel.ts.drawer',
-                function (e) {
-                    self._pointerUp(e);
-                }
-            );
+                // Disable CSS transition while dragging for a 1:1 feel
+                $panel.css('transition', 'none');
+            });
 
-            return this;
-        }
+            handleEl.addEventListener('pointermove', function (e) {
+                if (!self._drag) return;
 
-        _pointerDown(e) {
-            if (!this.data.isOpen) {
-                return;
-            }
+                const d   = self._drag;
+                const now = Date.now();
+                const dt  = now - d.lastTime;
 
-            const direction = this.options.direction;
+                // Raw displacement from the drag origin
+                let raw = isVert ? (e.clientY - d.startY) : (e.clientX - d.startX);
 
-            // For horizontal drawers, use the X axis.
-            const axis =
-                direction === 'left' ||
-                    direction === 'right'
-                    ? 'x'
-                    : 'y';
+                // Clamp: only allow movement toward the dismiss edge
+                if (dir === 'bottom' && raw < 0) raw = 0;
+                if (dir === 'top'    && raw > 0) raw = 0;
 
-            // Don't hijack normal interaction with buttons,
-            // links, inputs, selects, textareas, etc.
-            if (
-                this.options.dragAnywhere === false &&
-                !$(e.target).closest('[data-drawer-handle]').length
-            ) {
-                return;
-            }
+                d.delta = raw;
 
-            if (
-                this.options.dragAnywhere &&
-                $(e.target).closest(
-                    'button, a, input, textarea, select, option'
-                ).length
-            ) {
-                return;
-            }
-
-            this.data.pointerId = e.pointerId;
-            this.data.startTime = performance.now();
-            this.data.startX = e.clientX;
-            this.data.startY = e.clientY;
-            this.data.lastX = e.clientX;
-            this.data.lastY = e.clientY;
-            this.data.velocity = 0;
-
-            this.data.axis = axis;
-            this.data.startTranslate = this.data.currentTranslate;
-
-            this.data.isDragging = false;
-
-            try {
-                this.$content[0].setPointerCapture(e.pointerId);
-            } catch (_) { }
-
-            return this;
-        }
-
-        _pointerMove(e) {
-            if (
-                this.data.pointerId !== e.pointerId
-            ) {
-                return;
-            }
-
-            const dx = e.clientX - this.data.startX;
-            const dy = e.clientY - this.data.startY;
-
-            const delta =
-                this.data.axis === 'x'
-                    ? dx
-                    : dy;
-
-            if (!this.data.isDragging) {
-                if (Math.abs(delta) < this.options.dragStartThreshold) {
-                    return;
+                // Instantaneous velocity in px/ms
+                if (dt > 0) {
+                    d.velocity = isVert
+                        ? (e.clientY - d.lastY) / dt
+                        : (e.clientX - d.lastX) / dt;
                 }
 
-                if (!this._isCorrectDragDirection(delta)) {
-                    this._resetPointer();
-                    return;
-                }
-
-                this.data.isDragging = true;
-
-                this.$el.addClass('ts-drawer--dragging');
-            }
-
-            const now = performance.now();
-            const elapsed = Math.max(
-                now - this.data.startTime,
-                1
-            );
-
-            this.data.velocity = delta / elapsed;
-
-            let translate =
-                this.data.startTranslate + delta;
-
-            translate = this._clampTranslate(translate);
-
-            this.data.currentTranslate = translate;
-
-            this._setTranslate(translate, false);
-
-            this.data.lastX = e.clientX;
-            this.data.lastY = e.clientY;
-
-            return this;
-        }
-
-        _pointerUp(e) {
-            if (
-                this.data.pointerId !== e.pointerId
-            ) {
-                return;
-            }
-
-            if (!this.data.isDragging) {
-                this._resetPointer();
-                return;
-            }
-
-            const translate = this.data.currentTranslate;
-            const velocity = this.data.velocity;
-
-            const shouldClose =
-                Math.abs(translate) >=
-                this._dismissThreshold() ||
-                this._isDismissVelocity(velocity);
-
-            this.$el.removeClass('ts-drawer--dragging');
-
-            this._resetPointer();
-
-            if (shouldClose) {
-                this.close('drag');
-            } else {
-                this._animateToOpen();
-            }
-
-            return this;
-        }
-
-        _resetPointer() {
-            this.data.pointerId = null;
-            this.data.isDragging = false;
-            this.data.startTranslate = 0;
-            this.data.velocity = 0;
-
-            return this;
-        }
-
-        _isCorrectDragDirection(delta) {
-            const direction = this.options.direction;
-
-            if (direction === 'bottom') {
-                return delta > 0;
-            }
-
-            if (direction === 'top') {
-                return delta < 0;
-            }
-
-            if (direction === 'left') {
-                return delta < 0;
-            }
-
-            if (direction === 'right') {
-                return delta > 0;
-            }
-
-            return false;
-        }
-
-        _isDismissVelocity(velocity) {
-            const direction = this.options.direction;
-
-            if (direction === 'bottom') {
-                return velocity > this.options.velocityThreshold;
-            }
-
-            if (direction === 'top') {
-                return velocity < -this.options.velocityThreshold;
-            }
-
-            if (direction === 'left') {
-                return velocity < -this.options.velocityThreshold;
-            }
-
-            if (direction === 'right') {
-                return velocity > this.options.velocityThreshold;
-            }
-
-            return false;
-        }
-
-        _dismissThreshold() {
-            const size = this._drawerSize();
-
-            return size * this.options.dismissThreshold;
-        }
-
-        _drawerSize() {
-            const rect = this.$content[0].getBoundingClientRect();
-
-            if (
-                this.options.direction === 'left' ||
-                this.options.direction === 'right'
-            ) {
-                return rect.width;
-            }
-
-            return rect.height;
-        }
-
-        _closedTranslate() {
-            return this._drawerSize();
-        }
-
-        _clampTranslate(value) {
-            // The drawer is open at zero.
-            // Positive/negative movement depends on direction.
-
-            const direction = this.options.direction;
-
-            if (
-                direction === 'bottom' ||
-                direction === 'right'
-            ) {
-                return Math.max(0, value);
-            }
-
-            return Math.min(0, value);
-        }
-
-        _setTranslate(value, animate) {
-            const direction = this.options.direction;
-
-            let transform;
-
-            if (direction === 'bottom') {
-                transform = `translate3d(0, ${Math.max(0, value)}px, 0)`;
-            } else if (direction === 'top') {
-                transform = `translate3d(0, ${Math.min(0, value)}px, 0)`;
-            } else if (direction === 'left') {
-                transform = `translate3d(${Math.min(0, value)}px, 0, 0)`;
-            } else {
-                transform = `translate3d(${Math.max(0, value)}px, 0, 0)`;
-            }
-
-            if (!animate) {
-                this.$content.css(
-                    'transition',
-                    'none'
-                );
-            } else {
-                this.$content.css(
-                    'transition',
-                    ''
-                );
-            }
-
-            this.$content.css(
-                'transform',
-                transform
-            );
-
-            this._updateOverlayOpacity(value);
-
-            if (!animate) {
-                requestAnimationFrame(() => {
-                    if (
-                        !this.data.isDragging
-                    ) {
-                        this.$content.css(
-                            'transition',
-                            ''
-                        );
-                    }
-                });
-            }
-
-            return this;
-        }
-
-        _updateOverlayOpacity(value) {
-            if (!this.options.overlay) {
-                return;
-            }
-
-            const size = Math.max(
-                this._drawerSize(),
-                1
-            );
-
-            const progress = Math.max(
-                0,
-                Math.min(
-                    1,
-                    1 - Math.abs(value) / size
-                )
-            );
-
-            this.$overlay.css(
-                'opacity',
-                progress
-            );
-
-            return this;
-        }
-
-        _animateToOpen() {
-            this.data.currentTranslate = 0;
-
-            this.$content.css(
-                'transition',
-                ''
-            );
-
-            this.$content.css(
-                'transform',
-                'translate3d(0, 0, 0)'
-            );
-
-            this.$overlay.css(
-                'opacity',
-                1
-            );
-
-            return this;
-        }
-
-        open() {
-            if (this.data.isOpen) {
-                return this;
-            }
-
-            this.data.previousFocus =
-                document.activeElement;
-
-            this.data.isOpen = true;
-            this.data.currentTranslate = 0;
-
-            this.$el
-                .removeClass('ts-drawer--closed')
-                .addClass('ts-drawer--open');
-
-            this.$el.attr(
-                'aria-hidden',
-                'false'
-            );
-
-            this._lockBody();
-
-            requestAnimationFrame(() => {
-                this.$content.css(
-                    'transform',
-                    'translate3d(0, 0, 0)'
-                );
-
-                this.$overlay.css(
-                    'opacity',
-                    this.options.overlay ? 1 : 0
+                d.lastX    = e.clientX;
+                d.lastY    = e.clientY;
+                d.lastTime = now;
+
+                $panel.css('transform', isVert
+                    ? `translateY(${raw}px)`
+                    : `translateX(${raw}px)`
                 );
             });
 
-            this._focusDrawer();
+            handleEl.addEventListener('pointerup', function () {
+                if (!self._drag) return;
 
-            this._dispatch(
-                'open',
-                {
-                    reason: 'programmatic'
+                const d        = self._drag;
+                const absDelta = Math.abs(d.delta);
+                const absVel   = Math.abs(d.velocity);
+                const size     = isVert ? $panel.outerHeight() : $panel.outerWidth();
+
+                self._drag = null;
+
+                // Re-enable CSS transition
+                $panel.css('transition', '');
+
+                const shouldClose = absDelta > size * opts.dragThreshold
+                                 || absVel   > opts.velocityThreshold;
+
+                if (shouldClose) {
+                    // Continue animating from the current drag position to fully off-screen.
+                    // The panel already has an inline transform from the drag — the transition
+                    // will now run from there to the destination.
+                    const sign = (dir === 'bottom') ? 1 : -1;
+                    const dest = isVert
+                        ? `translateY(${sign * size}px)`
+                        : `translateX(${sign * size}px)`;
+
+                    $panel.css('transform', dest);
+
+                    // Fade the backdrop out in sync by removing drawer-open
+                    $el.removeClass('drawer-open');
+
+                    // Schedule DOM cleanup after the transition finishes
+                    clearTimeout(self._closeTimer);
+                    self._closeTimer = setTimeout(() => {
+                        self._finishClose();
+                    }, opts.transitionDuration + 50);
+
+                } else {
+                    // Snap the panel back to the fully-open position
+                    $panel.css('transform', '');
                 }
-            );
+            });
+
+            handleEl.addEventListener('pointercancel', function () {
+                if (!self._drag) return;
+                self._drag = null;
+                $panel.css({ transition: '', transform: '' });
+            });
+        }
+
+        open() {
+            const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
+
+            if (self.isOpen) return this;
+            self.isOpen = true;
+
+            // Cancel any pending close-cleanup from a prior close() call
+            clearTimeout(self._closeTimer);
+
+            // Clear any leftover inline transform from a drag-dismiss
+            self.$panel.css('transform', '');
+
+            self.$previousFocus = $(document.activeElement);
+
+            if (opts.scrollLock) {
+                $('body').addClass('ts-scroll-lock');
+            }
+
+            // Step 1 — reveal the root (removes display:none)
+            $el
+                .removeClass('drawer-hidden')
+                .addClass('drawer-is-open')
+                .attr('aria-hidden', 'false');
+
+            // Step 2 — force a reflow so the browser registers the display change
+            //          before the transition-triggering class is added
+            void $el[0].offsetHeight;
+
+            // Step 3 — add drawer-open; the CSS transition fires
+            $el.addClass('drawer-open');
+
+            // Move focus into the drawer after the transition has started
+            setTimeout(() => self._focusFirst(), 50);
+
+            // Focus trap
+            $el.on('keydown.drawer.trap', (e) => {
+                if (e.key === 'Tab' || e.keyCode === 9) {
+                    self._trapFocus(e);
+                }
+            });
+
+            if (typeof opts.onOpen === 'function') opts.onOpen.call(self, $el);
+            $el.trigger('drawer:open', [self]);
 
             return this;
         }
 
-        close(reason = 'programmatic') {
-            if (!this.data.isOpen) {
-                return this;
-            }
-
-            this.data.isOpen = false;
-
-            const translate =
-                this._closedTranslate();
-
-            const direction =
-                this.options.direction;
-
-            let transform;
-
-            if (direction === 'bottom') {
-                transform =
-                    `translate3d(0, ${translate}px, 0)`;
-            } else if (direction === 'top') {
-                transform =
-                    `translate3d(0, -${translate}px, 0)`;
-            } else if (direction === 'left') {
-                transform =
-                    `translate3d(-${translate}px, 0, 0)`;
-            } else {
-                transform =
-                    `translate3d(${translate}px, 0, 0)`;
-            }
-
-            this.$content.css(
-                'transform',
-                transform
-            );
-
-            this.$overlay.css(
-                'opacity',
-                0
-            );
-
-            this.$el.attr(
-                'aria-hidden',
-                'true'
-            );
-
+        close() {
             const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
 
-            setTimeout(() => {
-                if (!self.data.isOpen) {
-                    self.$el
-                        .removeClass('ts-drawer--open')
-                        .addClass('ts-drawer--closed');
+            if (!self.isOpen) return this;
 
-                    self._unlockBody();
-                    self._restoreFocus();
-                }
-            }, this.options.animationDuration);
+            $el.off('keydown.drawer.trap');
 
-            this._dispatch(
-                'close',
-                {
-                    reason
-                }
-            );
+            // Remove drawer-open — CSS transition slides the panel back off-screen
+            // and fades the backdrop out simultaneously
+            $el.removeClass('drawer-open');
+
+            // Schedule DOM cleanup after the transition completes
+            clearTimeout(self._closeTimer);
+            self._closeTimer = setTimeout(() => {
+                self._finishClose();
+            }, opts.transitionDuration + 50);
 
             return this;
         }
 
         toggle() {
-            return this.data.isOpen
-                ? this.close('toggle')
-                : this.open();
+            return this.isOpen ? this.close() : this.open();
         }
 
-        isOpen() {
-            return this.data.isOpen;
-        }
+        _finishClose() {
+            const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
 
-        _focusDrawer() {
-            if (!this.options.trapFocus) {
-                return;
+            // Guard: open() may have been called during the close transition
+            if (!self.isOpen) return;
+            self.isOpen = false;
+
+            // Clear any inline transform set by a drag-dismiss
+            self.$panel.css('transform', '');
+
+            $el
+                .addClass('drawer-hidden')
+                .removeClass('drawer-is-open')
+                .attr('aria-hidden', 'true');
+
+            if (opts.scrollLock) {
+                $('body').removeClass('ts-scroll-lock');
             }
 
-            const $focusable = this.$content.find(
-                'button:not([disabled]),' +
-                'a[href],' +
-                'input:not([disabled]),' +
-                'select:not([disabled]),' +
-                'textarea:not([disabled]),' +
-                '[tabindex]:not([tabindex="-1"])'
-            ).first();
+            // Restore focus to the element that triggered the open
+            if (self.$previousFocus && self.$previousFocus.length) {
+                self.$previousFocus.trigger('focus');
+                self.$previousFocus = null;
+            }
 
-            if ($focusable.length) {
-                requestAnimationFrame(() => {
-                    $focusable.trigger('focus');
-                });
+            if (typeof opts.onClose === 'function') opts.onClose.call(self, $el);
+            $el.trigger('drawer:close', [self]);
+        }
+
+        _focusFirst() {
+            const focusable = this._focusable();
+            if (focusable.length) {
+                focusable.first().trigger('focus');
             } else {
                 this.$el.trigger('focus');
             }
         }
 
-        _restoreFocus() {
-            if (
-                this.data.previousFocus &&
-                document.contains(
-                    this.data.previousFocus
-                )
-            ) {
-                try {
-                    this.data.previousFocus.focus();
-                } catch (_) { }
-            }
+        _trapFocus(e) {
+            const focusable = this._focusable();
+            if (!focusable.length) return;
 
-            this.data.previousFocus = null;
+            const $first   = focusable.first();
+            const $last    = focusable.last();
+            const $current = $(document.activeElement);
 
-            return this;
-        }
-
-        _lockBody() {
-            if (!this.options.modal) {
-                return;
-            }
-
-            if (
-                document.body.classList.contains(
-                    'ts-drawer-body-locked'
-                )
-            ) {
-                return;
-            }
-
-            this.data.bodyOverflow =
-                document.body.style.overflow;
-
-            document.body.classList.add(
-                'ts-drawer-body-locked'
-            );
-
-            document.body.style.overflow =
-                'hidden';
-
-            return this;
-        }
-
-        _unlockBody() {
-            if (!this.options.modal) {
-                return;
-            }
-
-            document.body.classList.remove(
-                'ts-drawer-body-locked'
-            );
-
-            document.body.style.overflow =
-                this.data.bodyOverflow || '';
-
-            this.data.bodyOverflow = null;
-
-            return this;
-        }
-
-        _dispatch(name, detail) {
-            const event = new CustomEvent(
-                `drawer:${name}`,
-                {
-                    bubbles: true,
-                    detail: $.extend(
-                        true,
-                        {
-                            instance: this,
-                            element: this.$el[0]
-                        },
-                        detail || {}
-                    )
+            if (e.shiftKey) {
+                if ($current.is($first)) {
+                    e.preventDefault();
+                    $last.trigger('focus');
                 }
-            );
-
-            this.$el[0].dispatchEvent(event);
-
-            return this;
+            } else {
+                if ($current.is($last)) {
+                    e.preventDefault();
+                    $first.trigger('focus');
+                }
+            }
         }
 
-        refresh() {
-            this._cacheElements();
-            this._setupARIA();
-
-            if (!this.data.isOpen) {
-                this._setTranslate(
-                    this._closedTranslate(),
-                    false
-                );
-            }
-
-            return this;
+        _focusable() {
+            return this.$el.find(FOCUSABLE).filter(':visible').not('[data-drawer-backdrop]');
         }
 
         destroy() {
-            this.$el
-                .removeClass(
-                    'ts-drawer ts-drawer--open ts-drawer--closed'
-                )
-                .removeAttr(
-                    'aria-hidden aria-modal aria-labelledby aria-describedby'
-                );
+            const self = this;
+            const $el  = self.$el;
 
-            this.$content.css({
-                transform: '',
-                transition: ''
-            });
+            clearTimeout(self._closeTimer);
 
-            this.$overlay.css({
-                opacity: ''
-            });
+            if (self.isOpen) {
+                self.isOpen = false;
+                $('body').removeClass('ts-scroll-lock');
+            }
 
-            this.$el.off('.ts.drawer');
-            this.$content.off('.ts.drawer');
-            this.$overlay.off('.ts.drawer');
-            this.$close.off('.ts.drawer');
+            $(document).off(`click.drawer.${self._uid}`);
+            $(document).off(`keydown.drawer.${self._uid}`);
+            $el.off('.drawer');
 
-            $(document).off(
-                '.ts.drawer'
-            );
-
-            this._unlockBody();
-
-            this.$el.removeData(
-                instanceName
-            );
-
-            this._dispatch(
-                'destroy'
-            );
+            $el
+                .removeData(instanceName)
+                .removeAttr('role aria-modal aria-hidden aria-labelledby aria-describedby tabindex')
+                .removeClass('drawer-root drawer-hidden drawer-is-open drawer-open drawer-bottom drawer-top drawer-left drawer-right');
 
             return this;
         }
     }
 
     PluginDrawer.defaults = {
-        direction: 'bottom',
-
-        // Drawer dimensions.
-        size: 'auto',
-        sideSize: '400px',
-        maxHeight: '96vh',
-        maxWidth: '90vw',
-
-        // Appearance.
-        background: '#ffffff',
-        color: '#212529',
-        mutedColor: '#6c757d',
-        overlayOpacity: 0.5,
-        shadow: '0 -8px 30px rgba(0, 0, 0, 0.12)',
-        radius: '12px',
-        handleColor: '#adb5bd',
-
-        // Spacing.
-        headerPadding: '16px 24px 8px',
-        bodyPadding: '8px 24px 24px',
-        footerPadding: '16px 24px 24px',
-        descriptionMargin: '4px 0 0',
-
-        // Animation.
-        animationDuration: 300,
-        easing: 'cubic-bezier(0.32, 0.72, 0, 1)',
-
-        // Interaction.
-        draggable: true,
-        dragAnywhere: false,
-        dragStartThreshold: 5,
-        dismissThreshold: 0.5,
-        velocityThreshold: 0.5,
-
-        closeOnEscape: true,
-        closeOnOutsideClick: true,
-
-        // Modal behavior.
-        modal: true,
-        overlay: true,
-        trapFocus: true,
-
-        showHandle: true,
-
-        ariaLabel: 'Drawer'
+        direction         : 'bottom',  // 'bottom' | 'top' | 'left' | 'right'
+        closeOnBackdrop   : true,      // close when [data-drawer-backdrop] is clicked
+        closeOnEscape     : true,      // close on Escape key
+        backdrop          : true,      // ensure a [data-drawer-backdrop] element exists
+        scrollLock        : true,      // add .ts-scroll-lock to <body> while open
+        showHandle        : true,      // auto-inject drag handle for bottom/top drawers
+        draggable         : true,      // enable drag-to-dismiss via the handle
+        dragThreshold     : 0.4,       // dismiss if drag displacement > 40% of panel size
+        velocityThreshold : 0.5,       // dismiss if swipe velocity exceeds 0.5 px/ms
+        transitionDuration: 320,       // ms — must match --ts-drw-dur
+        onOpen            : null,      // callback($el) — fires after open transition starts
+        onClose           : null,      // callback($el) — fires after close transition ends
     };
-
-    /**
-     * Global stylesheet for body locking.
-     */
-    if (!document.getElementById('ts-drawer-body-styles')) {
-        $('<style>', {
-            id: 'ts-drawer-body-styles',
-            text: `
-                body.ts-drawer-body-locked {
-                    overflow: hidden !important;
-                }
-            `
-        }).appendTo(document.head);
-    }
 
     $.extend(themestrap, { PluginDrawer });
 
-    $.fn.themestrapPluginDrawer = function(opts) {
-        return this.map(function() {
+    $.fn.themestrapPluginDrawer = function (opts) {
+        return this.map(function () {
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
-            } else {
-                return new PluginDrawer($this, opts);
             }
+            return new PluginDrawer($this, opts);
         });
     };
 
