@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginRichEditor — Live Demo | Themestrap</title>
+<meta name="description" content="Live demo of the Themestrap RichEditor plugin — a lightweight contenteditable editor built on PluginToolbar and PluginDialog.">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system: demo page chrome */
+:root {
+    --ts-navy:         #0a1929;
+    --ts-navy-2:       #0e2238;
+    --ts-orange:       #e8672a;
+    --ts-teal:         #2ab8c8;
+    --ts-cream:        #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', system-ui, sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: var(--ts-font-body);
+    background: var(--ts-navy-2);
+    color: #1a2332;
+    margin: 0;
+}
+
+/* Page header */
+.demo-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+}
+.demo-header h1 {
+    font-family: var(--ts-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+}
+.demo-header p { margin: 0; opacity: .7; font-size: .95rem; max-width: 46rem; }
+.demo-header .badge-pill,
+.demo-header .badge-dep {
+    display: inline-block;
+    font-family: var(--ts-font-mono);
+    font-size: .7rem;
+    padding: .2em .6em;
+    border-radius: 99px;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+.demo-header .badge-pill { background: var(--ts-orange); color: #fff; }
+.demo-header .badge-dep  { color: var(--ts-teal); border: 1px solid var(--ts-teal); }
+
+/* Nav strip */
+.demo-nav {
+    background: var(--ts-navy-2);
+    padding: .6rem 2rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.demo-nav a {
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size: .8rem;
+    font-family: var(--ts-font-mono);
+    transition: color .15s;
+    white-space: nowrap;
+}
+.demo-nav a:hover { color: var(--ts-teal); }
+
+/* Layout */
+.demo-body {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    scroll-margin-top: 1rem;
+}
+.demo-card-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.demo-card-header h2 {
+    font-family: var(--ts-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: .02em;
+}
+.demo-card-header .card-num {
+    font-family: var(--ts-font-mono);
+    font-size: .75rem;
+    color: var(--ts-teal);
+    border: 1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding: .1em .45em;
+    flex-shrink: 0;
+}
+.demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    margin-left: auto;
+    text-align: right;
+}
+
+.demo-blurb {
+    margin: 0;
+    padding: 1rem 1.5rem 0;
+    font-size: .9rem;
+    color: #46566a;
+}
+.demo-blurb code { font-family: var(--ts-font-mono); font-size: .8rem; color: #b8481a; }
+.demo-blurb kbd {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+    background: #eef1f5;
+    border: 1px solid #d3dae3;
+    border-radius: 4px;
+    padding: .05em .4em;
+    color: #1a2332;
+}
+
+/* Demo stage */
+.demo-stage {
+    padding: 2rem 1.75rem;
+    background: var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+}
+.demo-stage.dark-stage { background: var(--ts-navy); border-bottom-color: rgba(255,255,255,.05); }
+
+/* Snippet block: PluginHighlight renders inside this wrapper */
+.demo-snip { background: #181818; border-top: 1px solid rgba(255,255,255,.05); }
+.demo-snip pre[data-plugin-highlight] {
+    margin: 0;
+    border-radius: 0;
+    font-family: var(--ts-font-mono);
+    font-size: .77rem;
+}
+
+/* Controls */
+.demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: #f4f1ea;
+    border-top: 1px solid #e8e0d4;
+}
+.demo-controls .btn {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+}
+
+/* Live output readout */
+.demo-output {
+    margin: 1rem 0 0;
+    padding: .75rem 1rem;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    color: #9fb3c8;
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3.2rem;
+}
+.demo-output .meta { color: var(--ts-teal); display: block; margin-bottom: .35rem; }
+
+/* Event log */
+.demo-log {
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    padding: .65rem 1.5rem;
+    background: #0d1b2a;
+    color: #8b949e;
+    border-top: 1px solid rgba(255,255,255,.05);
+    min-height: 2.6rem;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.demo-log .log-line  { display: block; }
+.demo-log .log-time  { color: #5a7898; margin-right: .6rem; }
+.demo-log .log-event { color: var(--ts-teal); }
+.demo-log .log-warn  { color: var(--ts-orange); }
+.demo-log .log-hint  { color: #8b949e; }
+
+/* Editor width inside stages */
+.demo-stage .editor-cap { max-width: 720px; }
+
+/* Custom-themed editor for card 07 (tokens set on the wrapper) */
+.re-brand {
+    --ts-re-bg:           #fff7f0;
+    --ts-re-border:       rgba(232,103,42,.35);
+    --ts-re-border-focus: #e8672a;
+    --ts-re-toolbar-bg:   rgba(232,103,42,.08);
+    --ts-re-link:         #b8481a;
+    --ts-re-radius:       14px;
+    --ts-re-padding:      18px 20px;
+}
+
+.demo-footer {
+    text-align: center;
+    padding: 1.5rem 1rem 3rem;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+}
+.demo-footer code { color: var(--ts-teal); font-family: var(--ts-font-mono); }
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+    <div class="container">
+        <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+        <h1>RichEditor <span class="badge-pill">data-plugin-richeditor</span><span class="badge-dep">needs Toolbar + Dialog</span></h1>
+        <p>A lightweight contenteditable editor. PluginToolbar renders the formatting controls, PluginDialog owns the link dialog, and the editor itself adds selection handling, safe URL normalization, plain-text paste, and light/dark theming.</p>
+    </div>
+</header>
+
+<nav class="demo-nav" aria-label="Demo sections">
+    <a href="#demo-default">01 default</a>
+    <a href="#demo-custom">02 custom toolbar</a>
+    <a href="#demo-bare">03 no toolbar</a>
+    <a href="#demo-links">04 links</a>
+    <a href="#demo-api">05 api</a>
+    <a href="#demo-form">06 form</a>
+    <a href="#demo-theme">07 theming</a>
+</nav>
+
+<main class="demo-body">
+
+    <!-- 01 Default -->
+    <section class="demo-card" id="demo-default">
+        <div class="demo-card-header">
+            <span class="card-num">01</span>
+            <h2>Default Toolbar</h2>
+            <span class="card-tag">data-plugin-richeditor</span>
+        </div>
+        <p class="demo-blurb">Zero options. Type, select text, and use the toolbar or <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> <kbd>I</kbd> <kbd>U</kbd>. Pasted content is reduced to plain text by default.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <div id="re-default" data-plugin-richeditor></div>
+                <div class="demo-output" id="out-default"><span class="meta">0 words · 0 characters</span>(empty)</div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;div id="re-default" data-plugin-richeditor&gt;&lt;/div&gt;
+</code></pre>
+        </div>
+
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-default-sample">Insert sample</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-default-clear">Clear</button>
+        </div>
+        <div class="demo-log" id="log-default"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <!-- 02 Custom toolbar -->
+    <section class="demo-card" id="demo-custom">
+        <div class="demo-card-header">
+            <span class="card-num">02</span>
+            <h2>Custom Toolbar &amp; Sizing</h2>
+            <span class="card-tag">toolbar · placeholder · minHeight</span>
+        </div>
+        <p class="demo-blurb">Pick the commands with the <code>toolbar</code> array. Separators (<code>"|"</code>) are optional, groups are derived automatically. Numbers for <code>minHeight</code> are treated as pixels.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <div id="re-custom" data-plugin-richeditor
+                     data-plugin-options='{"toolbar":["bold","italic","|","link"],"placeholder":"Short reply…","minHeight":120}'></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;div data-plugin-richeditor
+     data-plugin-options='{"toolbar":["bold","italic","|","link"],
+                           "placeholder":"Short reply…",
+                           "minHeight":120}'&gt;&lt;/div&gt;
+</code></pre>
+        </div>
+
+        <div class="demo-log" id="log-custom"><span class="log-hint">Only bold, italic, and link are enabled. Ctrl/⌘+K still opens the link dialog.</span></div>
+    </section>
+
+    <!-- 03 No toolbar -->
+    <section class="demo-card" id="demo-bare">
+        <div class="demo-card-header">
+            <span class="card-num">03</span>
+            <h2>No Toolbar, Capped Height</h2>
+            <span class="card-tag">toolbar: false · maxHeight</span>
+        </div>
+        <p class="demo-blurb">With <code>toolbar: false</code> neither PluginToolbar nor PluginDialog is required or built. The browser's native <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> <kbd>I</kbd> <kbd>U</kbd> shortcuts still work. The area scrolls after <code>maxHeight</code>.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <div id="re-bare" data-plugin-richeditor
+                     data-plugin-options='{"toolbar":false,"placeholder":"Add a comment…","minHeight":72,"maxHeight":150}'></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;div data-plugin-richeditor
+     data-plugin-options='{"toolbar":false,"placeholder":"Add a comment…",
+                           "minHeight":72,"maxHeight":150}'&gt;&lt;/div&gt;
+</code></pre>
+        </div>
+
+        <div class="demo-log" id="log-bare"><span class="log-hint">Type a few lines to watch the scroll cap kick in.</span></div>
+    </section>
+
+    <!-- 04 Links -->
+    <section class="demo-card" id="demo-links">
+        <div class="demo-card-header">
+            <span class="card-num">04</span>
+            <h2>Links, Editing &amp; URL Safety</h2>
+            <span class="card-tag">linkTarget · allowedProtocols</span>
+        </div>
+        <p class="demo-blurb">Markup inside the host becomes the initial content. Put the caret inside the link and press <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd> to edit or remove it. Try <code>example.com</code> (gets <code>https://</code>), <code>me@example.com</code> (gets <code>mailto:</code>) and <code>javascript:alert(1)</code> (refused).</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <div id="re-links" data-plugin-richeditor>
+                    <p>Read the <a href="https://themestrap.dev/docs">Themestrap docs</a>, then select any text and add your own link.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;div data-plugin-richeditor
+     data-plugin-options='{"linkTarget":"_blank",
+                           "allowedProtocols":["http","https","mailto","tel"]}'&gt;
+    &lt;p&gt;Read the &lt;a href="https://themestrap.dev/docs"&gt;Themestrap docs&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+</code></pre>
+        </div>
+
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-links-target">Toggle target="_blank"</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-links-inspect">Inspect anchors</button>
+        </div>
+        <div class="demo-log" id="log-links"><span class="log-hint">linkTarget is currently "_blank".</span></div>
+    </section>
+
+    <!-- 05 API -->
+    <section class="demo-card" id="demo-api">
+        <div class="demo-card-header">
+            <span class="card-num">05</span>
+            <h2>Programmatic API</h2>
+            <span class="card-tag">.manual · instance methods</span>
+        </div>
+        <p class="demo-blurb">The host carries <code>.manual</code>, so auto-init skips it and the page initializes it with callbacks. <code>destroy()</code> writes the current content back into the host, so re-initializing keeps your work.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <div id="re-api" class="manual" data-plugin-richeditor></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#re-api').themestrapPluginRichEditor({
+    placeholder: 'Try the buttons below…',
+    onChange: function (html) { console.log('change', html); }
+});
+
+// Retrieve the instance from a fresh selection, never off the init call
+const editor = $('#re-api').data('__pluginRichEditor');
+
+editor.setContent('&lt;p&gt;Hello &lt;strong&gt;world&lt;/strong&gt;&lt;/p&gt;');
+editor.getContent();   // '&lt;p&gt;Hello &lt;strong&gt;world&lt;/strong&gt;&lt;/p&gt;'
+editor.getText();      // 'Hello world'
+editor.isEmpty();      // false
+editor.disable();
+editor.enable();
+editor.clear();
+editor.destroy();
+</code></pre>
+        </div>
+
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="set">setContent</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="get">getContent</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="text">getText</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="empty">isEmpty</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="clear">clear</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="focus">focus</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="disable">disable</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" data-api="enable">enable</button>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-api="destroy">destroy</button>
+            <button type="button" class="btn btn-sm btn-outline-success" data-api="init">re-init</button>
+        </div>
+        <div class="demo-log" id="log-api"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <!-- 06 Form -->
+    <section class="demo-card" id="demo-form">
+        <div class="demo-card-header">
+            <span class="card-num">06</span>
+            <h2>Form Integration</h2>
+            <span class="card-tag">onChange → hidden field</span>
+        </div>
+        <p class="demo-blurb">The editor is not a native form control, so a hidden field mirrors its HTML through <code>onChange</code>. This is the pattern the mailbox compose page uses.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <form id="compose-form" class="editor-cap" novalidate>
+                <input type="text" id="compose-subject" class="form-control mb-3" placeholder="Subject" autocomplete="off">
+                <div id="re-form" class="manual" data-plugin-richeditor></div>
+                <input type="hidden" name="body" id="compose-body">
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-sm btn-primary">Send</button>
+                    <button type="reset" class="btn btn-sm btn-outline-light">Reset</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#re-form').themestrapPluginRichEditor({
+    placeholder: 'Write your message…',
+    onChange: function (html) { $('#compose-body').val(html); }
+});
+
+$('#compose-form').on('submit', function (e) {
+    e.preventDefault();
+    const editor = $('#re-form').data('__pluginRichEditor');
+    if (editor.isEmpty()) { return; }        // getContent() is '' when empty
+    send({ subject: $('#compose-subject').val(), body: editor.getContent() });
+});
+</code></pre>
+        </div>
+
+        <div class="demo-log" id="log-form"><span class="log-hint">Submit the form to see the payload.</span></div>
+    </section>
+
+    <!-- 07 Theming -->
+    <section class="demo-card" id="demo-theme">
+        <div class="demo-card-header">
+            <span class="card-num">07</span>
+            <h2>Theming</h2>
+            <span class="card-tag">data-bs-theme · --ts-re-* tokens</span>
+        </div>
+        <p class="demo-blurb">The editor follows <code>prefers-color-scheme</code>, <code>html.dark</code> / <code>[data-bs-theme="dark"]</code>, and an explicit <code>[data-bs-theme="light"]</code> override. This stage is forced light. The second editor overrides tokens on its own wrapper.</p>
+
+        <div class="demo-stage" data-bs-theme="light">
+            <div class="editor-cap">
+                <div class="mb-3" id="re-light" data-plugin-richeditor
+                     data-plugin-options='{"placeholder":"Light theme (defaults)","minHeight":110}'></div>
+                <div id="re-brand" class="re-brand" data-plugin-richeditor
+                     data-plugin-options='{"placeholder":"Brand tokens on the wrapper","minHeight":110}'></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="css" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+.re-brand {
+    --ts-re-bg:           #fff7f0;
+    --ts-re-border:       rgba(232,103,42,.35);
+    --ts-re-border-focus: #e8672a;
+    --ts-re-toolbar-bg:   rgba(232,103,42,.08);
+    --ts-re-link:         #b8481a;
+    --ts-re-radius:       14px;
+    --ts-re-padding:      18px 20px;
+}
+</code></pre>
+        </div>
+
+        <div class="demo-log" id="log-theme"><span class="log-hint">The link dialog lives on &lt;body&gt;, so wrapper-level tokens do not reach it. Set the tokens on :root to restyle the dialog too.</span></div>
+    </section>
+
+</main>
+
+<footer class="demo-footer">
+    <p>Themestrap · <code>PluginRichEditor</code> · part of the Themestrap component library</p>
+</footer>
+
+<!-- jQuery + Bootstrap 5 JS -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Themestrap core (must come first; path relative to your install) -->
+<script src="../js/themestrap.js"></script>
+
+<!-- Plugins: RichEditor needs Toolbar and Dialog loaded before it -->
+<script src="../js/components/themestrap.plugin.toolbar.js"></script>
+<script src="../js/components/themestrap.plugin.dialog.js"></script>
+<script src="../js/components/themestrap.plugin.richeditor.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+
+<script>
+// Standalone fallback so the page still runs if the core file lacks the helper
+window.themestrap = window.themestrap || {};
+themestrap.fn = themestrap.fn || {};
+if (typeof themestrap.fn.getOptions !== 'function') {
+    themestrap.fn.getOptions = function (raw) {
+        if (raw && typeof raw === 'object') { return raw; }
+        try { return raw ? JSON.parse(raw) : {}; } catch (err) { return {}; }
+    };
+}
+</script>
+
+<script>
+$(function () {
+
+    // Auto-init: editors that carry their options in data-plugin-options
+    if (typeof $.fn.themestrapPluginRichEditor === 'function') {
+        $('[data-plugin-richeditor]:not(.manual)').each(function () {
+            const $this = $(this);
+            const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+            $this.themestrapPluginRichEditor(opts);
+        });
+    }
+
+    // Syntax highlighting: the snippets use PluginHighlight itself
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('pre[data-plugin-highlight]').each(function () {
+            const $pre = $(this);
+            const opts = themestrap.fn.getOptions($pre.data('plugin-options')) || undefined;
+            $pre.themestrapPluginHighlight(opts);
+        });
+    }
+
+    // Logging helper: timestamped lines, newest first, change events collapse into a counter
+    function makeLog(sel) {
+        const $log = $(sel);
+        let started = false;
+        let changeCount = 0;
+        let $changeLine = null;
+
+        const stamp = () => new Date().toTimeString().slice(0, 8);
+
+        const line = (label, detail, cls) => {
+            if (!started) { $log.empty(); started = true; }
+            const $line = $('<span class="log-line">');
+            $line.append($('<span class="log-time">').text(stamp()));
+            $line.append($('<strong>').addClass(cls || 'log-event').text(label));
+            if (detail) { $line.append(' ').append($('<span>').text(detail)); }
+            $log.prepend($line);
+            $log.children().slice(40).remove();
+            return $line;
+        };
+
+        return {
+            event(name, detail) {
+                if (name === 'change') {
+                    changeCount++;
+                    if ($changeLine && $changeLine.is($log.children().first())) {
+                        $changeLine.find('.log-time').text(stamp());
+                        $changeLine.find('strong').text('ts.richeditor.change ×' + changeCount);
+                        return;
+                    }
+                    changeCount = 1;
+                    $changeLine = line('ts.richeditor.change ×1', detail);
+                    return;
+                }
+                line('ts.richeditor.' + name, detail);
+            },
+            call(text, detail) { line(text, detail, 'log-event'); },
+            warn(text)         { line(text, '', 'log-warn'); }
+        };
+    }
+
+    // Native CustomEvents: jQuery .on('ts.richeditor.change') would parse the dots as
+    // namespaces, so the events are subscribed to with addEventListener instead.
+    function watch(id, log) {
+        const el = document.getElementById(id);
+        ['focus', 'blur', 'change'].forEach(function (name) {
+            el.addEventListener('ts.richeditor.' + name, function () {
+                log.event(name);
+            });
+        });
+    }
+
+    const countText = (text) => {
+        const t = text.trim();
+        return (t ? t.split(/\s+/).length : 0) + ' words · ' + t.length + ' characters';
+    };
+
+    // 01 Default
+    (function () {
+        const log = makeLog('#log-default');
+        const $out = $('#out-default');
+        watch('re-default', log);
+
+        const refresh = () => {
+            const ed = $('#re-default').data('__pluginRichEditor');
+            if (!ed) { return; }
+            $out.empty()
+                .append($('<span class="meta">').text(countText(ed.getText())))
+                .append(document.createTextNode(ed.getContent() || '(empty)'));
+        };
+        document.getElementById('re-default').addEventListener('ts.richeditor.change', refresh);
+
+        $('#btn-default-sample').on('click', function () {
+            const ed = $('#re-default').data('__pluginRichEditor');
+            ed.setContent('<p><strong>Themestrap</strong> ships <em>zero-build</em> components.</p><ul><li>jQuery plugins</li><li>Bootstrap 5 tokens</li></ul>');
+            refresh();
+            log.call('setContent()', 'sample loaded');
+        });
+        $('#btn-default-clear').on('click', function () {
+            $('#re-default').data('__pluginRichEditor').clear();
+            refresh();
+            log.call('clear()');
+        });
+    }());
+
+    // 02 Custom toolbar
+    (function () {
+        const log = makeLog('#log-custom');
+        watch('re-custom', log);
+    }());
+
+    // 03 Bare
+    (function () {
+        const log = makeLog('#log-bare');
+        watch('re-bare', log);
+    }());
+
+    // 04 Links
+    (function () {
+        const log = makeLog('#log-links');
+        watch('re-links', log);
+
+        $('#btn-links-target').on('click', function () {
+            const ed = $('#re-links').data('__pluginRichEditor');
+            ed.options.linkTarget = ed.options.linkTarget ? '' : '_blank';
+            log.call('linkTarget', ed.options.linkTarget ? '"_blank" (new links open in a new tab)' : '"" (no target attribute is written)');
+        });
+
+        $('#btn-links-inspect').on('click', function () {
+            const html = $('#re-links').data('__pluginRichEditor').getContent();
+            const $anchors = $('<div>').html(html).find('a');
+            if (!$anchors.length) { log.warn('no anchors in the content'); return; }
+            $anchors.each(function () {
+                log.call('<a>', this.getAttribute('href') + '  target=' + (this.getAttribute('target') || '—') + '  rel=' + (this.getAttribute('rel') || '—'));
+            });
+        });
+    }());
+
+    // 05 API
+    (function () {
+        const log = makeLog('#log-api');
+        const opts = {
+            placeholder: 'Try the buttons below…',
+            minHeight: 140,
+            onChange: function () { /* counted by the event watcher */ }
+        };
+        const getEd = () => $('#re-api').data('__pluginRichEditor');
+        const short = (s) => (s.length > 90 ? s.slice(0, 90) + '…' : s);
+
+        $('#re-api').themestrapPluginRichEditor(opts);
+        watch('re-api', log);
+
+        $('#demo-api').on('click', '[data-api]', function () {
+            const action = this.getAttribute('data-api');
+            const ed = getEd();
+
+            if (action === 'init') {
+                if (ed) { log.warn('already initialized'); return; }
+                $('#re-api').themestrapPluginRichEditor(opts);
+                log.call('themestrapPluginRichEditor()', 're-initialized, content restored from the host');
+                return;
+            }
+            if (!ed) { log.warn('no instance, click re-init first'); return; }
+
+            switch (action) {
+                case 'set':
+                    ed.setContent('<p>Hello <strong>world</strong>, this is <u>setContent()</u>.</p>');
+                    log.call('setContent()');
+                    break;
+                case 'get':
+                    log.call('getContent()', short(ed.getContent() || "'' (empty)"));
+                    break;
+                case 'text':
+                    log.call('getText()', short(ed.getText() || "'' (empty)"));
+                    break;
+                case 'empty':
+                    log.call('isEmpty()', String(ed.isEmpty()));
+                    break;
+                case 'clear':
+                    ed.clear();
+                    log.call('clear()');
+                    break;
+                case 'focus':
+                    ed.focus();
+                    log.call('focus()');
+                    break;
+                case 'disable':
+                    ed.disable();
+                    log.call('disable()', 'contenteditable="false", aria-disabled="true"');
+                    break;
+                case 'enable':
+                    ed.enable();
+                    log.call('enable()');
+                    break;
+                case 'destroy':
+                    ed.destroy();
+                    log.call('destroy()', 'DOM restored, current content written back to the host');
+                    break;
+            }
+        });
+    }());
+
+    // 06 Form
+    (function () {
+        const log = makeLog('#log-form');
+        $('#re-form').themestrapPluginRichEditor({
+            placeholder: 'Write your message…',
+            minHeight: 160,
+            onChange: function (html) { $('#compose-body').val(html); }
+        });
+        const getEd = () => $('#re-form').data('__pluginRichEditor');
+
+        $('#compose-form').on('submit', function (e) {
+            e.preventDefault();
+            const subject = $('#compose-subject').val().trim();
+            if (!subject) { log.warn('subject is required'); return; }
+            if (getEd().isEmpty()) { log.warn('the message body is empty'); return; }
+            log.call('submit', JSON.stringify({ subject: subject, body: $('#compose-body').val() }));
+        });
+
+        $('#compose-form').on('reset', function () {
+            getEd().clear();
+            $('#compose-body').val('');
+            log.call('reset', 'editor cleared');
+        });
+    }());
+
+    // 07 Theming
+    (function () {
+        const log = makeLog('#log-theme');
+        watch('re-brand', log);
+    }());
+
+});
+</script>
+
+</body>
+</html>
