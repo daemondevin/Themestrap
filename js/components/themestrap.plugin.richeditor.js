@@ -5,7 +5,7 @@
  *
  * Markup:
  *
- *   <div data-plugin-rich-editor
+ *   <div data-plugin-richeditor
  *        data-plugin-options='{"placeholder": "Write your message...", "minHeight": 220}'>
  *       <p>Optional seed content.</p>
  *   </div>
@@ -32,11 +32,10 @@
  *   --ts-re-accent-contrast
  *
  * Init.js wiring (or a definePlugin entry in themestrap.modules.js):
- *   if ($.isFunction($.fn['themestrapPluginRichEditor']) && $('[data-plugin-rich-editor]').length) {
- *       themestrap.fn.intObsInit('[data-plugin-rich-editor]:not(.manual)', 'themestrapPluginRichEditor');
+ *   if ($.isFunction($.fn['themestrapPluginRichEditor']) && $('[data-plugin-richeditor]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-richeditor]:not(.manual)', 'themestrapPluginRichEditor');
  *   }
  */
-// RichEditor
 (((themestrap = {}, $) => {
     const instanceName = '__pluginRichEditor';
     const STYLE_ID     = 'ts-richeditor-styles';
@@ -292,8 +291,11 @@
             const opts = self.options;
             const $el  = opts.wrapper;
 
-            if (!self._requires('themestrapPluginDialog', 'PluginDialog')
-                || (opts.toolbar !== false && !self._requires('themestrapPluginToolbar', 'PluginToolbar'))) {
+            self._enabled = self._enabledKeys();
+
+            // Dependencies are only required for the features that are switched on
+            if ((self._enabled.size && !self._requires('themestrapPluginToolbar', 'PluginToolbar'))
+                || (self._enabled.has('link') && !self._requires('themestrapPluginDialog', 'PluginDialog'))) {
                 self._failed = true;
                 $el.removeData(instanceName);
                 return this;
@@ -307,13 +309,11 @@
                 document.head.appendChild(style);
             }
 
-            self._enabled = self._enabledKeys();
-
             // Any markup already inside the host becomes the initial content
             const seed = $el.html().trim();
             $el.empty().addClass('ts-richeditor');
 
-            if (opts.toolbar !== false && self._enabled.size) {
+            if (self._enabled.size) {
                 self.$toolbarEl = self._buildToolbarEl();
                 $el.append(self.$toolbarEl);
                 self.$toolbarEl.themestrapPluginToolbar($.extend({}, opts.toolbarOptions));
@@ -360,6 +360,7 @@
         // Set of enabled command keys derived from options.toolbar
         _enabledKeys() {
             const t = this.options.toolbar;
+            if (t === false) return new Set();
             if (t === true || !Array.isArray(t)) return new Set(Object.keys(CMDS));
 
             const keys = new Set();
