@@ -660,9 +660,6 @@ window.themestrap.fn = {
 				child: null
 			};
 
-			// [#2] $.extend no longer mutates defaults — target is now a fresh {}
-			// [#7] var options shadowing parameter replaced with const opts;
-			//      var next double-declaration replaced with single let next
 			const opts = $.extend({}, defaults, options);
 
 			return this.each(function() {
@@ -780,7 +777,6 @@ window.themestrap.fn = {
 
 			return this;
 		},
-		// [#11] unreachable `return this` removed; simplified to single expression
 		checkCookie() {
 			return !!$.cookie('themestrapNoticeTopBarClose');
 		},
@@ -808,16 +804,36 @@ window.themestrap.fn = {
 
 	/**
 	 * Reading Progress
+	 *
+	 * Markup:  <div class="progress-reading" data-reading-target=".post-body"><div class="progress-bar"></div></div>
+	 *
+	 * With data-reading-target the bar tracks that element: 0% when its top reaches the top of the screen,
+	 * 100% when its end reaches the bottom. Without it the bar tracks the whole page.
 	 */
-	if( $('.progress-reading').length ) {
+	if($('.progress-reading').length) {
 
-		// [#3] pageHeight and progress were implicit globals — now correctly declared
 		function updateScrollProgress() {
-			const pixels     = $(document).scrollTop();
-			const pageHeight = $(document).height() - $(window).height();
-			const progress   = 100 * pixels / pageHeight;
+			$('.progress-reading').each(function() {
+				const $bar    = $(this);
+				const target  = $bar.attr('data-reading-target');
+				const $target = target ? $(target).first() : $();
+				let progress;
 
-			$('.progress-reading .progress-bar').width(parseInt(progress) + "%");
+				if($target.length) {
+					const rect = $target[0].getBoundingClientRect();
+					const span = rect.height - $(window).height();
+					$bar.toggleClass('is-idle', span <= 0);
+					progress = span > 0 ? 100 * -rect.top / span : 100;
+				} else {
+					const pixels     = $(document).scrollTop();
+					const pageHeight = $(document).height() - $(window).height();
+					progress = pageHeight > 0 ? 100 * pixels / pageHeight : 0;
+				}
+
+				progress = Math.min(100, Math.max(0, progress));
+				$bar.find('.progress-bar').width(parseInt(progress) + "%");
+				$bar.attr('aria-valuenow', parseInt(progress));
+			});
 		}
 
 		$(document).on('scroll ready', () => {
@@ -843,7 +859,6 @@ window.themestrap.fn = {
 			link_click = $(this);
 		});
 
-		// [#4] href guarded against undefined before calling .indexOf()
 		$(window).on("beforeunload", e => {
 			if( typeof link_click === 'object' ) {
 				const href = link_click.attr('href');
@@ -868,30 +883,23 @@ window.themestrap.fn = {
 	/**
 	 * Clone Element
 	 */
-	if( $('[data-clone-element]').length ) {
-
+	if ($('[data-clone-element]').length) {
 		$('[data-clone-element]').each(function() {
-
-			const $el = $(this), content = $el.html(), qty = $el.attr('data-clone-element');
-
+			const $el = $(this), 
+				  content = $el.html(), 
+				  qty = $el.attr('data-clone-element');
 			for (let i = 0; i < qty; i++) {
 				$el.html($el.html() + content);
 			}
-
 		});
-
 	}
 
-	if( $('[data-clone-element-to]').length ) {
-
+	if ($('[data-clone-element-to]').length) {
 		$('[data-clone-element-to]').each(function() {
-
 			const $el = $(this);
 			const content = $el.html();
 			const $to = $($el.attr('data-clone-element-to'));
-
 			$to.html($to.html() + content);
-
 		});
 
 	}
@@ -900,43 +908,40 @@ window.themestrap.fn = {
 	 * Thumb Info Floating Caption
 	 */
 	$('.thumb-info-floating-caption').each(function() {
-
 		$(this)
 			.addClass('thumb-info-floating-element-wrapper')
-			.append( '<span class="thumb-info-floating-element thumb-info-floating-caption-title d-none">'+ $(this).data('title') +'</span>' );
+			.append('<span class="thumb-info-floating-element thumb-info-floating-caption-title d-none">'+ $(this).data('title') +'</span>');
 
-		if( $(this).data('type') ) {
+		if ($(this).data('type')) {
 			$('.thumb-info-floating-caption-title', $(this))
 				.append( '<div class="thumb-info-floating-caption-type">'+ $(this).data('type') +'</div>' )
 				.css({
 					'padding-bottom' : 22
 				});
 		}
-
-		if( $(this).hasClass('thumb-info-floating-caption-clean') ) {
+		if ($(this).hasClass('thumb-info-floating-caption-clean')) {
 			$('.thumb-info-floating-element', $(this)).addClass('bg-transparent');
 		}
-
 	});
 
 	/**
 	 * Thumb Info Floating Element
 	 */
-	if( $('.thumb-info-floating-element-wrapper').length ) {
-
+	if ($('.thumb-info-floating-element-wrapper').length) {
 		if (typeof gsap !== 'undefined') {
-
 			$('.thumb-info-floating-element-wrapper').on('mouseenter', function({clientX, clientY}) {
-				
 				if(!$(this).data('offset')) {
 					$(this).data('offset', 0);
 				}
-
 				const offset = parseInt($(this).data('offset'));
-
 				$('.thumb-info-floating-element-clone').remove();
-
-				$('.thumb-info-floating-element', $(this)).clone().addClass('thumb-info-floating-element-clone p-fixed p-events-none').attr('style', 'transform: scale(0.1);').removeClass('d-none').appendTo('body');
+				$('.thumb-info-floating-element', 
+					$(this))
+						.clone()
+						.addClass('thumb-info-floating-element-clone p-fixed p-events-none')
+						.attr('style', 'transform: scale(0.1);')
+						.removeClass('d-none')
+						.appendTo('body');
 
 				$('.thumb-info-floating-element-clone').css({
 					left: clientX + (offset),
@@ -951,18 +956,14 @@ window.themestrap.fn = {
 				});
 
 				$(document).off('mousemove').on('mousemove', ({clientX, clientY}) => {
-
 					gsap.to('.thumb-info-floating-element-clone', 0.5, {
 						css: {
 							left: clientX + (offset),
 							top: clientY + (offset)
 						}
 					});
-
 				});
-
 			}).on('mouseout', () => {
-
 				gsap.to('.thumb-info-floating-element-clone', 0.5, {
 					css: {
 						scaleX: 0.5,
@@ -970,13 +971,10 @@ window.themestrap.fn = {
 						opacity: 0
 					}
 				});
-
 			});
-
 		} else {
 			themestrap.fn.showErrorMessage('Failed to Load File', 'Failed to load: GSAP - Include the following file(s): (vendor/gsap/gsap.min.js)');
 		}
-
 	}
 
 	/**
@@ -1029,8 +1027,7 @@ window.themestrap.fn = {
 	 */
 	$('[data-toggle-class]').on('click', function (e) {
 		e.preventDefault();
-
-		$(this).toggleClass( $(this).data('toggle-class') );
+		$(this).toggleClass($(this).data('toggle-class'));
 	});
 
 	/**
@@ -1053,7 +1050,6 @@ window.themestrap.fn = {
 
 				$(this).append( svgClone );
 			}
-
 			$(this).addClass('start');
 		}, {});
 	}
@@ -1062,7 +1058,7 @@ window.themestrap.fn = {
 	 * Shape Divider - SVG Aspect Ratio
 	 */
 	function aspectRatioSVG() {
-		if( $(window).width() < 1950 ) {
+		if ($(window).width() < 1950) {
 			$('.shape-divider svg[preserveAspectRatio]').each(function(){
 				if( !$(this).parent().hasClass('shape-divider-horizontal-animation') ) {
 					$(this).attr('preserveAspectRatio', 'xMinYMin');
@@ -1082,13 +1078,9 @@ window.themestrap.fn = {
 	 */
 	$('[data-content-switcher]').on('change', function(e, v) {
 		const switcherRel = ($(this).is(':checked') ? '1' : '2' ), switcherId = $(this).attr('data-content-switcher-content-id');
-
 		$('[data-content-switcher-id=' + switcherId + ']').addClass('initialized').removeClass('active');
-
 		const $activeEl = $('[data-content-switcher-id=' + switcherId + '][data-content-switcher-rel=' + switcherRel + ']');
-
 		$activeEl.addClass('active');
-
 		$activeEl.parent().css('height', $activeEl.height());
 	});
 
@@ -1130,14 +1122,14 @@ window.themestrap.fn = {
 	});
 
 	// Mobile First Load
-	if( $window.width() < 992 ) {
+	if($window.width() < 992) {
 		$window.trigger('dynamic.height.resize');
 	}
 
 	/**
 	 * Video - Trigger Play
 	 */
-	if( $('[data-trigger-play-video]').length ) {
+	if ($('[data-trigger-play-video]').length) {
 		themestrap.fn.execOnceThroughEvent( '[data-trigger-play-video]', 'mouseover.trigger.play.video', function(){
 			const $video = $( $(this).data('trigger-play-video') );
 
@@ -1164,14 +1156,14 @@ window.themestrap.fn = {
 	/**
 	 * Video - Auto Play
 	 */
-	if( $('video[data-auto-play]').length ) {
+	if ($('video[data-auto-play]').length) {
 		$(window).on('load', () => {
 			$('video[data-auto-play]').each(function(){
 				const $video = $(this);
 
 				setTimeout(() => {
-					if( $( '#' + $video.attr('id') ).length ) {
-						if( $( '[data-trigger-play-video="#' + $video.attr('id') + '"]' ).data('trigger-play-video-remove') == 'yes' ) {
+					if($('#' + $video.attr('id')).length) {
+						if ( $( '[data-trigger-play-video="#' + $video.attr('id') + '"]' ).data('trigger-play-video-remove') == 'yes' ) {
 							$( '[data-trigger-play-video="#' + $video.attr('id') + '"]' ).animate({
 								opacity: 0
 							}, 300, () => {
@@ -1194,7 +1186,7 @@ window.themestrap.fn = {
 	/**
 	 * Remove min height after the load of page
 	 */
-	if( $('[data-remove-min-height]').length ) {
+	if ( $('[data-remove-min-height]').length ) {
 		$(window).on('load', () => {
 			$('[data-remove-min-height]').each(function(){
 				$(this).css({
@@ -1207,22 +1199,18 @@ window.themestrap.fn = {
 	/**
 	 * Title Border
 	 */
-	if($('[data-title-border]').length) {
-
-		const $pageHeaderTitleBorder = $('<span class="page-header-title-border"></span>'), $pageHeaderTitle = $('[data-title-border]'), $window = $(window);
-
+	if ($('[data-title-border]').length) {
+		const $pageHeaderTitleBorder = $('<span class="page-header-title-border"></span>'), 
+		 	  $pageHeaderTitle = $('[data-title-border]'), 
+			  $window = $(window);
 		$pageHeaderTitle.before($pageHeaderTitleBorder);
-
 		const setPageHeaderTitleBorderWidth = () => {
 			$pageHeaderTitleBorder.width($pageHeaderTitle.width());
 		};
-
 		$window.afterResize(() => {
 			setPageHeaderTitleBorderWidth();
 		});
-
 		setPageHeaderTitleBorderWidth();
-
 		$pageHeaderTitleBorder.addClass('visible');
 	}
 
@@ -1239,7 +1227,9 @@ window.themestrap.fn = {
 				self.events();
 			},
 			build() {
-				const self = this, footer_height = self.$wrapper.outerHeight(true), window_height = ( $(window).height() - $('.header-body').height() );
+				const self = this, 
+					  footer_height = self.$wrapper.outerHeight(true), 
+					  window_height = ($(window).height() - $('.header-body').height());
 
 				if( footer_height > window_height ) {
 					$('#footer').removeClass('footer-reveal');
@@ -1248,11 +1238,9 @@ window.themestrap.fn = {
 					$('#footer').addClass('footer-reveal');
 					$('body').css('margin-bottom', footer_height);
 				}
-
 			},
 			events() {
 				const self = this, $window = $(window);
-
 				$window.on('load', () => {
 					$window.afterResize(() => {
 						self.build();
@@ -1260,8 +1248,7 @@ window.themestrap.fn = {
 				});
 			}
 		};
-
-		if( $('.footer-reveal').length ) {
+		if ($('.footer-reveal').length) {
 			$footerReveal.init();
 		}
 	})(jQuery);
@@ -1269,67 +1256,28 @@ window.themestrap.fn = {
 	/**
 	 * Re-Init Plugin
 	 */
-	if( $('[data-reinit-plugin]').length ) {
+	if ($('[data-reinit-plugin]').length) {
 		$('[data-reinit-plugin]').on('click', function(e) {
 			e.preventDefault();
 
-			const pluginInstance = $(this).data('reinit-plugin'), pluginFunction = $(this).data('reinit-plugin-function'), pluginElement  = $(this).data('reinit-plugin-element'), pluginOptions  = themestrap.fn.getOptions($(this).data('reinit-plugin-options'));
+			const pluginInstance = $(this).data('reinit-plugin'), 
+				  pluginFunction = $(this).data('reinit-plugin-function'), 
+				  pluginElement  = $(this).data('reinit-plugin-element'), 
+				  pluginOptions  = themestrap.fn.getOptions($(this).data('reinit-plugin-options'));
 
-			$( pluginElement ).data( pluginInstance ).destroy();
+			$(pluginElement).data(pluginInstance).destroy();
 
 			setTimeout(() => {
-				themestrap.fn.execPluginFunction(pluginFunction, $( pluginElement ), pluginOptions);
+				themestrap.fn.execPluginFunction(pluginFunction, $(pluginElement), pluginOptions);
 			}, 1000);
 
 		});
 	}
 
 	/**
-	 * Simple Copy To Clipboard
-	 */
-	if( $('[data-copy-to-clipboard]').length ) {
-		themestrap.fn.intObs( '[data-copy-to-clipboard]', function(){
-			const $this = $(this);
-
-			$this.wrap( '<div class="copy-to-clipboard-wrapper position-relative"></div>' );
-
-			const $copyButton = $('<a href="#" class="btn btn-primary btn-px-2 py-1 text-0 position-absolute top-8 right-8">COPY</a>');
-			$this.parent().prepend( $copyButton );
-
-			// [#20] navigator.clipboard.writeText() replaces deprecated document.execCommand('copy')
-			//       with execCommand retained as fallback for non-secure contexts
-			$copyButton.on('click', function(e){
-				e.preventDefault();
-
-				const $btn = $(this);
-				const text = $this.text();
-
-				if (navigator.clipboard && window.isSecureContext) {
-					navigator.clipboard.writeText(text).then(() => {
-						$btn.addClass('copied');
-						setTimeout(() => $btn.removeClass('copied'), 1000);
-					});
-				} else {
-					const $temp = $('<textarea class="d-block opacity-0" style="height: 0;">');
-					$btn.parent().append($temp);
-					$temp.val(text)[0].select();
-					$temp[0].setSelectionRange(0, 99999);
-					document.execCommand('copy');
-					$temp.remove();
-					$btn.addClass('copied');
-					setTimeout(() => $btn.removeClass('copied'), 1000);
-				}
-			});
-		}, {
-			rootMargin: '0px 0px 0px 0px'
-		} );
-	}
-
-	/**
 	 * Marquee
 	 */
-	// [#19] $.isFunction removed in jQuery 4 — replaced with typeof check
-	if( $('.marquee').length && typeof $.fn.marquee === 'function' ) {
+	if ($('.marquee').length && typeof $.fn.marquee === 'function') {
 		$('.marquee').marquee({
 			duration: 5000,
 			gap: 0,

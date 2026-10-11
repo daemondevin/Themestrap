@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginMarkdownEditor — Live Demo | Themestrap</title>
+<meta name="description" content="Live demo of the Themestrap MarkdownEditor plugin: a distraction-free Markdown writing surface with toolbar, live preview, and image upload hooks.">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system: demo page chrome */
+:root {
+    --ts-navy:         #0a1929;
+    --ts-navy-2:       #0e2238;
+    --ts-orange:       #e8672a;
+    --ts-teal:         #2ab8c8;
+    --ts-cream:        #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', system-ui, sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: var(--ts-font-body);
+    background: var(--ts-navy-2);
+    color: #1a2332;
+    margin: 0;
+}
+
+/* Page header */
+.demo-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+}
+.demo-header h1 {
+    font-family: var(--ts-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+}
+.demo-header p { margin: 0; opacity: .7; font-size: .95rem; max-width: 46rem; }
+.demo-header .badge-pill,
+.demo-header .badge-dep {
+    display: inline-block;
+    font-family: var(--ts-font-mono);
+    font-size: .7rem;
+    padding: .2em .6em;
+    border-radius: 99px;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+.demo-header .badge-pill { background: var(--ts-orange); color: #fff; }
+.demo-header .badge-dep  { color: var(--ts-teal); border: 1px solid var(--ts-teal); }
+
+/* Nav strip */
+.demo-nav {
+    background: var(--ts-navy-2);
+    padding: .6rem 2rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.demo-nav a {
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size: .8rem;
+    font-family: var(--ts-font-mono);
+    transition: color .15s;
+    white-space: nowrap;
+}
+.demo-nav a:hover { color: var(--ts-teal); }
+
+/* Layout */
+.demo-body {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    scroll-margin-top: 1rem;
+}
+.demo-card-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.demo-card-header h2 {
+    font-family: var(--ts-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: .02em;
+}
+.demo-card-header .card-num {
+    font-family: var(--ts-font-mono);
+    font-size: .75rem;
+    color: var(--ts-teal);
+    border: 1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding: .1em .45em;
+    flex-shrink: 0;
+}
+.demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    margin-left: auto;
+    text-align: right;
+}
+
+.demo-blurb {
+    margin: 0;
+    background-color: #142231;
+    padding: 1rem 1.5rem 1rem;
+    font-size: .9rem;
+    color: #b2b7bc;
+}
+.demo-blurb code { font-family: var(--ts-font-mono); font-size: .8rem; color: #b8481a; }
+.demo-blurb kbd {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+    background: #eef1f5;
+    border: 1px solid #d3dae3;
+    border-radius: 4px;
+    padding: .05em .4em;
+    color: #1a2332;
+}
+
+/* Demo stage */
+.demo-stage {
+    padding: 2rem 1.75rem;
+    background: var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+}
+.demo-stage.dark-stage { background: var(--ts-navy); border-bottom-color: rgba(255,255,255,.05); }
+
+/* Snippet block: PluginHighlight renders inside this wrapper */
+.demo-snip { background: #181818; border-top: 1px solid rgba(255,255,255,.05); }
+.demo-snip pre[data-plugin-highlight] {
+    margin: 0;
+    border-radius: 0;
+    font-family: var(--ts-font-mono);
+    font-size: .77rem;
+}
+
+/* Controls */
+.demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: #f4f1ea;
+    border-top: 1px solid #e8e0d4;
+}
+.demo-controls .btn {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+}
+
+/* Live output readout */
+.demo-output {
+    margin: 1rem 0 0;
+    padding: .75rem 1rem;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    color: #9fb3c8;
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3.2rem;
+}
+.demo-output .meta { color: var(--ts-teal); display: block; margin-bottom: .35rem; }
+
+/* Event log */
+.demo-log {
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    padding: .65rem 1.5rem;
+    background: #0d1b2a;
+    color: #8b949e;
+    border-top: 1px solid rgba(255,255,255,.05);
+    min-height: 2.6rem;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.demo-log .log-line  { display: block; }
+.demo-log .log-time  { color: #5a7898; margin-right: .6rem; }
+.demo-log .log-event { color: var(--ts-teal); }
+.demo-log .log-warn  { color: var(--ts-orange); }
+.demo-log .log-hint  { color: #8b949e; }
+
+/* Editor width inside stages */
+.demo-stage .editor-cap { max-width: 720px; }
+
+/* Custom-themed editor for card 07 (tokens set on the wrapper) */
+.re-brand {
+    --ts-re-bg:           #fff7f0;
+    --ts-re-border:       rgba(232,103,42,.35);
+    --ts-re-border-focus: #e8672a;
+    --ts-re-toolbar-bg:   rgba(232,103,42,.08);
+    --ts-re-link:         #b8481a;
+    --ts-re-radius:       14px;
+    --ts-re-padding:      18px 20px;
+}
+
+.demo-footer {
+    text-align: center;
+    padding: 1.5rem 1rem 3rem;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+}
+.demo-footer code { color: var(--ts-teal); font-family: var(--ts-font-mono); }
+</style>
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+    <div class="container">
+        <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+        <h1>MarkdownEditor <span class="badge-pill">data-plugin-markdowneditor</span><span class="badge-dep">needs Toolbar · optional Markdown</span></h1>
+        <p>A distraction-free Markdown writing surface that enhances a plain textarea: toolbar, smart list continuation, image paste and drop, live preview, word count, and fullscreen focus mode. The Markdown stays in the textarea, so there is nothing to convert on save.</p>
+    </div>
+</header>
+
+<nav class="demo-nav" aria-label="Demo sections">
+    <a href="#demo-default">01 default</a>
+    <a href="#demo-split">02 split + upload</a>
+    <a href="#demo-custom">03 custom toolbar</a>
+    <a href="#demo-renderer">04 renderer</a>
+    <a href="#demo-api">05 api</a>
+    <a href="#demo-theme">06 theming</a>
+</nav>
+
+<main class="demo-body">
+
+    <section class="demo-card" id="demo-default">
+        <div class="demo-card-header">
+            <span class="card-num">01</span>
+            <h2>Default Writing Surface</h2>
+            <span class="card-tag">data-plugin-markdowneditor</span>
+        </div>
+        <p class="demo-blurb">Zero options. A plain textarea gains a toolbar, a live word count, and smart typing: <kbd>Enter</kbd> continues lists and quotes, <kbd>Tab</kbd> indents list items, <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> <kbd>I</kbd> <kbd>K</kbd> format. The textarea stays the source of truth, so a normal form post keeps working.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <textarea id="me-default" data-plugin-markdowneditor
+                          data-plugin-options='{"minHeight": 260}'></textarea>
+                <div class="demo-output" id="out-default"><span class="meta">0 words</span>(empty)</div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>&lt;!-- The simplest way to get a MarkdownEditor: just add the attribute --&gt;
+&lt;textarea id="me-default" data-plugin-markdowneditor&gt;&lt;/textarea&gt;
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-default-sample">Insert sample</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-default-clear">Clear</button>
+        </div>
+        <div class="demo-log" id="log-default"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+    <section class="demo-card" id="demo-split">
+        <div class="demo-card-header">
+            <span class="card-num">02</span>
+            <h2>Split View &amp; Image Upload</h2>
+            <span class="card-tag">view · imageUpload</span>
+        </div>
+        <p class="demo-blurb">Write on the left and see the rendered result on the right. Paste or drop an image onto the editor, or use the image button: <code>imageUpload</code> receives the file and returns a URL (or a Promise of one). This demo turns the file into a data URL; a real site would post it to the server.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <textarea id="me-split" class="manual"># Split view
+
+Type here, **the preview follows**.
+
+- [x] Task lists render
+- [ ] Drop an image to try the upload hook
+
+> Quotes and `inline code` work too.
+</textarea>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>$('#me-split').themestrapPluginMarkdownEditor({
+    view: 'split',
+    minHeight: 320,
+    imageUpload: function (file) {
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload  = function () { resolve(reader.result); };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+});
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-split-view">Cycle view (write / split / preview)</button>
+        </div>
+        <div class="demo-log" id="log-split"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+    <section class="demo-card" id="demo-custom">
+        <div class="demo-card-header">
+            <span class="card-num">03</span>
+            <h2>Custom Toolbar, No Preview</h2>
+            <span class="card-tag">toolbar · preview · statusBar</span>
+        </div>
+        <p class="demo-blurb">Choose commands with the <code>toolbar</code> array, and drop the preview pane entirely with <code>preview: false</code>. <code>"|"</code> separates groups, <code>"spacer"</code> pushes the rest to the right.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <textarea id="me-custom" data-plugin-markdowneditor class="manual"></textarea>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>$('#me-custom').themestrapPluginMarkdownEditor({
+    preview: false,
+    statusBar: false,
+    minHeight: 120,
+    placeholder: 'A short reply…',
+    toolbar: ['bold', 'italic', 'code', '|', 'link', 'spacer', 'fullscreen']
+});
+</code></pre>
+        </div>
+    </section>
+    <section class="demo-card" id="demo-renderer">
+        <div class="demo-card-header">
+            <span class="card-num">04</span>
+            <h2>Custom or Server-Side Renderer</h2>
+            <span class="card-tag">renderer</span>
+        </div>
+        <p class="demo-blurb">By default the preview uses <code>PluginMarkdown</code>. Pass <code>renderer</code> to use anything else: a different parser, or a server round trip so the preview matches the published page exactly. The function may return HTML or a Promise of HTML, and only the latest result is applied. This demo fakes a slow server.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <textarea id="me-renderer" class="manual">Edit me. The preview is **rendered by a function** you supply.</textarea>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>$('#me-renderer').themestrapPluginMarkdownEditor({
+    view: 'split',
+    minHeight: 180,
+    renderer: function (md) {
+        return fetch('/admin/render', { method: 'POST', body: new URLSearchParams({ body: md }) })
+            .then(function (r) { return r.json(); })
+            .then(function (j) { return j.html; });
+    }
+});
+</code></pre>
+        </div>
+    </section>
+    <section class="demo-card" id="demo-api">
+        <div class="demo-card-header">
+            <span class="card-num">05</span>
+            <h2>API &amp; Events</h2>
+            <span class="card-tag">getValue · insert · command</span>
+        </div>
+        <p class="demo-blurb">Drive the editor from your own UI. Every call below goes through the public API, and the log shows the native <code>CustomEvent</code>s the editor dispatches. <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>S</kbd> raises <code>ts.markdowneditor.save</code> without touching the browser's save dialog.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <textarea id="me-api" class="manual">Select some words, then press a button.</textarea>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>const ed = $('#me-api').data('__pluginMarkdownEditor');
+
+ed.command('bold');            // toggle **bold** around the selection
+ed.insert('\n---\n');          // insert at the caret
+ed.setView('split');
+ed.fullscreen(true);
+ed.getValue();                 // Markdown string
+ed.getHtml();                  // rendered HTML
+
+document.getElementById('me-api')
+    .addEventListener('ts.markdowneditor.save', function (e) { /* post the form */ });
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-api-bold">command('bold')</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-api-h2">command('h2')</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-api-table">command('table')</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-api-insert">insert('---')</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-api-full">fullscreen()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-api-html">getHtml()</button>
+        </div>
+        <div class="demo-log" id="log-api"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+    <section class="demo-card" id="demo-theme">
+        <div class="demo-card-header">
+            <span class="card-num">06</span>
+            <h2>Theming</h2>
+            <span class="card-tag">--ts-me-*</span>
+        </div>
+        <p class="demo-blurb">Every color is a custom property with a light and a dark default, resolved through the standard three-tier pattern. Set tokens on the editor, or on <code>:root</code> to restyle them all. The typing font is a token too.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap">
+                <textarea id="me-theme" class="manual">A warmer editor, set entirely with CSS custom properties.</textarea>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="css" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>.writer {
+    --ts-me-border-focus: #e8672a;
+    --ts-me-radius:       14px;
+    --ts-me-font:         Georgia, serif;
+    --ts-me-font-size:    17px;
+    --ts-me-padding:      22px 26px;
+}
+</code></pre>
+        </div>
+    </section>
+
+</main>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script src="../js/themestrap.js"></script>
+
+<script src="../js/components/themestrap.plugin.toolbar.js"></script>
+<script src="../js/components/themestrap.plugin.markdown.js"></script>
+<script src="../js/components/themestrap.plugin.markdowneditor.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+
+<script>
+$(function () {
+
+    // Auto-init: editors that carry their options in data-plugin-options
+    if (typeof $.fn.themestrapPluginMarkdownEditor === 'function') {
+        $('[data-plugin-markdowneditor]:not(.manual)').each(function () {
+            const $this = $(this);
+            const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+            $this.themestrapPluginMarkdownEditor(opts);
+        });
+    }
+
+    // Syntax highlighting: the snippets use PluginHighlight itself
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('pre[data-plugin-highlight]').each(function () {
+            const $pre = $(this);
+            const opts = themestrap.fn.getOptions($pre.data('plugin-options')) || undefined;
+            $pre.themestrapPluginHighlight(opts);
+        });
+    }
+
+    // Timestamped log, newest first. Change events collapse into a counter.
+    function makeLog(sel) {
+        const $log = $(sel);
+        let started = false, count = 0, $changeLine = null;
+        const stamp = () => new Date().toTimeString().slice(0, 8);
+        const line = (label, detail, cls) => {
+            if (!started) { $log.empty(); started = true; }
+            const $l = $('<span class="log-line">');
+            $l.append($('<span class="log-time">').text(stamp()));
+            $l.append($('<strong>').addClass(cls || 'log-event').text(label));
+            if (detail) { $l.append(' ').append($('<span>').text(detail)); }
+            $log.prepend($l);
+            $log.children().slice(40).remove();
+            return $l;
+        };
+        return {
+            event(name, detail) {
+                if (name === 'change') {
+                    count++;
+                    if ($changeLine && $changeLine.is($log.children().first())) {
+                        $changeLine.find('.log-time').text(stamp());
+                        $changeLine.find('strong').text('ts.markdowneditor.change ×' + count);
+                        return;
+                    }
+                    count = 1;
+                    $changeLine = line('ts.markdowneditor.change ×1', detail);
+                    return;
+                }
+                line('ts.markdowneditor.' + name, detail);
+            },
+            call(text, detail) { line(text, detail, 'log-event'); }
+        };
+    }
+
+    const inst = (sel) => $(sel).data('__pluginMarkdownEditor');
+    const words = (s) => (s.match(/[\p{L}\p{N}']+/gu) || []).length;
+
+    // 01 default
+    const logDefault = makeLog('#log-default');
+    const $outDefault = $('#out-default');
+    const showDefault = () => {
+        const v = inst('#me-default').getValue();
+        $outDefault.empty().append($('<span class="meta">').text(words(v) + ' words · ' + v.length + ' characters')).append(document.createTextNode(v || '(empty)'));
+    };
+    $('#me-default')[0].addEventListener('ts.markdowneditor.change', () => { showDefault(); logDefault.event('change'); });
+    $('#btn-default-sample').on('click', () => {
+        inst('#me-default').setValue('# Hello\n\nSome **bold** words and a list:\n\n- one\n- two\n');
+        showDefault(); logDefault.call('setValue()');
+    });
+    $('#btn-default-clear').on('click', () => { inst('#me-default').setValue(''); showDefault(); logDefault.call('setValue(\'\')'); });
+
+    // 02 split + upload
+    $('#me-split').themestrapPluginMarkdownEditor({
+        view: 'split',
+        minHeight: 320,
+        imageUpload: (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload  = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        })
+    });
+    const logSplit = makeLog('#log-split');
+    ['upload', 'view', 'error'].forEach((n) => $('#me-split')[0].addEventListener('ts.markdowneditor.' + n, (e) =>
+        logSplit.event(n, n === 'view' ? e.detail.view : (e.detail.file ? e.detail.file.name : ''))));
+    $('#btn-split-view').on('click', () => {
+        const order = ['write', 'split', 'preview'];
+        const e = inst('#me-split');
+        e.setView(order[(order.indexOf(e.getView()) + 1) % 3]);
+    });
+
+    // 03 custom
+    $('#me-custom').themestrapPluginMarkdownEditor({
+        preview: false, statusBar: false, minHeight: 120,
+        placeholder: 'A short reply…',
+        toolbar: ['bold', 'italic', 'code', '|', 'link', 'spacer', 'fullscreen']
+    });
+
+    // 04 renderer: a pretend server with latency
+    $('#me-renderer').themestrapPluginMarkdownEditor({
+        view: 'split', minHeight: 180, previewDelay: 200,
+        renderer: (md) => new Promise((resolve) => {
+            setTimeout(() => resolve('<p><em>rendered by the “server”:</em></p>' + $('<div>').text(md).html().replace(/\n/g, '<br>')), 350);
+        })
+    });
+
+    // 05 api
+    $('#me-api').themestrapPluginMarkdownEditor({ view: 'split', minHeight: 180 });
+    const logApi = makeLog('#log-api');
+    ['change', 'save', 'view', 'focus', 'blur'].forEach((n) => $('#me-api')[0].addEventListener('ts.markdowneditor.' + n, () => logApi.event(n)));
+    $('#btn-api-bold').on('click', () => { inst('#me-api').command('bold'); logApi.call('command(\'bold\')'); });
+    $('#btn-api-h2').on('click', () => { inst('#me-api').command('h2'); logApi.call('command(\'h2\')'); });
+    $('#btn-api-table').on('click', () => { inst('#me-api').command('table'); logApi.call('command(\'table\')'); });
+    $('#btn-api-insert').on('click', () => { inst('#me-api').insert('\n---\n'); logApi.call('insert()'); });
+    $('#btn-api-full').on('click', () => { inst('#me-api').fullscreen(true); logApi.call('fullscreen(true)', 'press Esc to leave'); });
+    $('#btn-api-html').on('click', () => logApi.call('getHtml()', inst('#me-api').getHtml().replace(/\s+/g, ' ').slice(0, 90)));
+
+    // 06 theming
+    $('#me-theme').closest('.demo-stage').find('.editor-cap').addClass('writer');
+    $('#me-theme').themestrapPluginMarkdownEditor({ minHeight: 160 });
+});
+</script>
+
+<style>
+.writer {
+    --ts-me-border-focus: #e8672a;
+    --ts-me-radius:       14px;
+    --ts-me-font:         Georgia, serif;
+    --ts-me-font-size:    17px;
+    --ts-me-padding:      22px 26px;
+}
+</style>
+</body>
+</html>

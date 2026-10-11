@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginTagsInput Demo | Themestrap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #0a1929;
+        --card: #0e2238;
+        --card-2: #0b1c30;
+        --line: rgba(255,255,255,0.08);
+        --text: #cdd8e6;
+        --muted: rgba(205,216,230,0.55);
+        --teal: #00c7be;
+        --orange: #ff9f43;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+        background: radial-gradient(1200px 600px at 80% -10%, rgba(0,199,190,0.08), transparent 60%), var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 56px 20px 96px;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .hero h1 {
+        font-family: 'Fraunces', serif;
+        font-size: 42px;
+        line-height: 1.1;
+        margin: 0 0 10px;
+        color: #fff;
+    }
+    .hero h1 em { color: var(--teal); font-style: italic; }
+    .hero p { color: var(--muted); max-width: 640px; margin: 0 0 40px; }
+    .hero code, .note code, .demo-card-body p code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        background: rgba(255,255,255,0.06);
+        padding: 1px 6px;
+        border-radius: 4px;
+        color: var(--orange);
+    }
+
+    .demo-card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+    .demo-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+    }
+    .badge-n {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: rgba(0,199,190,0.15);
+        color: var(--teal);
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+    }
+    .demo-card-header h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        margin: 0;
+        color: #fff;
+        flex: 1;
+    }
+    .tag-r {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--orange);
+        border: 1px solid rgba(255,159,67,0.35);
+        border-radius: 20px;
+        padding: 1px 10px;
+    }
+    .demo-card-body { padding: 18px; }
+    .demo-card-body > p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+    .demo-stage {
+        background: var(--card-2);
+        border: 1px dashed rgba(255,255,255,0.10);
+        border-radius: 8px;
+        padding: 22px 18px;
+    }
+    .demo-stage label {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin-bottom: 6px;
+    }
+    .demo-stage .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .demo-stage .row-2 { grid-template-columns: 1fr; } }
+
+    pre.snip {
+        margin: 14px 0 0;
+        padding: 14px 16px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #b9c7d8;
+    }
+    pre.snip code { font-family: inherit; }
+
+    .demo-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+    .btn-d {
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        padding: 6px 14px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-d:hover { background: rgba(0,199,190,0.12); border-color: rgba(0,199,190,0.5); }
+    .btn-d.primary { background: var(--teal); color: #04201f; border-color: var(--teal); font-weight: 600; }
+    .btn-d.primary:hover { background: #12d9d0; }
+    .inp-d {
+        font-family: inherit;
+        font-size: 13px;
+        color: var(--text);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        padding: 6px 10px;
+        min-width: 180px;
+    }
+    .inp-d:focus { outline: none; border-color: var(--teal); }
+
+    .demo-log {
+        margin-top: 14px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        height: 104px;
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #8fa3ba;
+    }
+    .demo-log:empty::before { content: 'event log'; opacity: 0.4; }
+    .demo-log .t { color: var(--teal); margin-right: 8px; }
+    .demo-log .ev { color: var(--orange); }
+
+    .out {
+        margin-top: 14px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #8fa3ba;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        word-break: break-all;
+        min-height: 40px;
+    }
+    .out b { color: var(--teal); font-weight: 500; }
+
+    /* Footer */
+    .demo-footer {
+        padding: 20px 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .demo-footer a { color: var(--orange); text-decoration: none; }
+    .demo-footer a:hover { text-decoration: underline; }
+    .demo-footer code { font-family: var(--mono); font-size: 12px; }
+
+    /* Themed variant, only tokens are overridden */
+    .theme-amber {
+        --ts-ti-bg: rgba(255,159,67,0.05);
+        --ts-ti-border: rgba(255,159,67,0.30);
+        --ts-ti-border-hover: rgba(255,159,67,0.55);
+        --ts-ti-border-focus: #ff9f43;
+        --ts-ti-radius: 10px;
+        --ts-ti-tag-bg: rgba(255,159,67,0.16);
+        --ts-ti-tag-text: #ffb870;
+        --ts-ti-tag-border: rgba(255,159,67,0.35);
+        --ts-ti-tag-radius: 6px;
+    }
+    /* Light surface variant for pages that are not dark */
+    .theme-light {
+        background: #f4f7fb;
+        border-radius: 8px;
+        padding: 18px;
+        --ts-ti-bg: #ffffff;
+        --ts-ti-border: #cfd8e3;
+        --ts-ti-border-hover: #9fb1c5;
+        --ts-ti-border-focus: #0a8f89;
+        --ts-ti-text: #1c2b3a;
+        --ts-ti-placeholder: #8a9bb0;
+        --ts-ti-tag-bg: #e3f6f5;
+        --ts-ti-tag-text: #0a6f6a;
+        --ts-ti-tag-border: #a6e0dd;
+    }
+    .theme-light label { color: #5b6e83; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <header class="hero">
+        <h1>Plugin<em>TagsInput</em></h1>
+        <p>A zero dependency tag and recipient field that wraps a plain text input. Tags are committed with Enter, comma, semicolon or Tab, validated as email addresses by default, and kept in sync with the source input as a comma separated string. Initialize with <code>data-plugin-tagsinput</code> or <code>$.fn.themestrapPluginTagsInput()</code>.</p>
+    </header>
+
+    <!-- 1 Basic -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">1</span>
+            <h2>Basic email recipients</h2>
+            <span class="tag-r">data attribute</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Pre-filled from the input <code>value</code>. Type an address and press Enter, comma, semicolon or Tab. Try <code>not-an-email</code> to see the invalid shake. Backspace on an empty field removes the last tag.</p>
+            <div class="demo-stage">
+                <label for="d1">To</label>
+                <input type="text" id="d1" data-plugin-tagsinput data-log="log1" value="ada@example.com, grace@example.com">
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;input type="text" id="to"
+       data-plugin-tagsinput
+       value="ada@example.com, grace@example.com"&gt;</code></pre>
+            <div class="demo-log" id="log1"></div>
+        </div>
+    </section>
+
+    <!-- 2 Options -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">2</span>
+            <h2>Per element options</h2>
+            <span class="tag-r">data-plugin-options</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Options go in <code>data-plugin-options</code> as single quoted JSON. This field accepts free form keywords by turning email validation off.</p>
+            <div class="demo-stage">
+                <label for="d2">Keywords</label>
+                <input type="text" id="d2" data-plugin-tagsinput
+                       data-plugin-options='{"validateEmail": false, "placeholder": "Add a keyword..."}'
+                       data-log="log2" value="jquery, bootstrap, zero-build">
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;input type="text"
+       data-plugin-tagsinput
+       data-plugin-options='{"validateEmail": false, "placeholder": "Add a keyword..."}'
+       value="jquery, bootstrap, zero-build"&gt;</code></pre>
+            <div class="demo-log" id="log2"></div>
+        </div>
+    </section>
+
+    <!-- 3 Programmatic API -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">3</span>
+            <h2>Public API</h2>
+            <span class="tag-r">addTag / removeTag / getTags / clearTags</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Initialized manually with the <code>.manual</code> class. The instance is stored under <code>__tagsinput</code>. Tags added through the API fire events unless the second argument is <code>true</code> (silent).</p>
+            <div class="demo-stage">
+                <label for="d3">Recipients</label>
+                <input type="text" id="d3" class="manual" data-log="log3" value="ada@example.com">
+            </div>
+            <div class="demo-controls">
+                <input type="text" class="inp-d" id="apiTag" placeholder="grace@example.com">
+                <button class="btn-d primary" id="apiAdd">addTag</button>
+                <button class="btn-d" id="apiAddSilent">addTag (silent)</button>
+                <button class="btn-d" id="apiRemove">removeTag (last)</button>
+                <button class="btn-d" id="apiGet">getTags</button>
+                <button class="btn-d" id="apiClear">clearTags</button>
+            </div>
+            <div class="out" id="apiOut">Source value: <b></b></div>
+<pre class="snip" data-plugin-highlight="javascript"><code>const $el = $('#to').themestrapPluginTagsInput({ validateEmail: true });
+const ti  = $('#to').data('__tagsinput');
+
+ti.addTag('grace@example.com');          // fires ts.tagsinput.add
+ti.addTag('hopper@example.com', true);   // silent, no event
+ti.removeTag('grace@example.com');       // fires ts.tagsinput.remove
+ti.getTags();                            // ['ada@example.com', 'hopper@example.com']
+ti.clearTags();                          // empties the field, fires no event</code></pre>
+            <div class="demo-log" id="log3"></div>
+        </div>
+    </section>
+
+    <!-- 4 Form -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">4</span>
+            <h2>Form submission</h2>
+            <span class="tag-r">source input sync</span>
+        </div>
+        <div class="demo-card-body">
+            <p>The hidden source input keeps the value as <code>a, b, c</code>, so a normal form post just works. Split on the server with <code>explode(',', ...)</code> and trim each entry.</p>
+            <form id="demoForm" novalidate>
+                <div class="demo-stage">
+                    <div class="row-2">
+                        <div>
+                            <label for="d4to">To</label>
+                            <input type="text" id="d4to" name="to" data-plugin-tagsinput value="ada@example.com">
+                        </div>
+                        <div>
+                            <label for="d4cc">Cc</label>
+                            <input type="text" id="d4cc" name="cc" data-plugin-tagsinput data-plugin-options='{"placeholder": "Add Cc..."}'>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-controls">
+                    <button type="submit" class="btn-d primary">Serialize form</button>
+                </div>
+            </form>
+            <div class="out" id="formOut">Submit the form to see the serialized values.</div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;form method="post"&gt;
+    &lt;input type="text" name="to" data-plugin-tagsinput&gt;
+    &lt;input type="text" name="cc" data-plugin-tagsinput
+           data-plugin-options='{"placeholder": "Add Cc..."}'&gt;
+    &lt;button type="submit"&gt;Send&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+        </div>
+    </section>
+
+    <!-- 5 Paste -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">5</span>
+            <h2>Recipe: split on paste</h2>
+            <span class="tag-r">recipe</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Pasting a list into the field is not split by the plugin itself. This delegated handler splits on commas, semicolons and whitespace and feeds each piece to <code>addTag()</code>. Try pasting <code>a@x.com; b@x.com c@x.com, d@x.com</code>.</p>
+            <div class="demo-stage">
+                <label for="d5">Paste a list</label>
+                <input type="text" id="d5" data-plugin-tagsinput data-log="log5">
+            </div>
+<pre class="snip" data-plugin-highlight="javascript"><code>$(document).on('paste', '.ts-tagsinput-field', function (e) {
+    const text = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
+    if (!/[,;\s]/.test(text.trim())) return;   // single value, let the browser handle it
+
+    e.preventDefault();
+    const ti = $(this).closest('.ts-tagsinput').prev().data('__tagsinput');
+    text.split(/[,;\s]+/).forEach(v =&gt; ti.addTag(v));
+});</code></pre>
+            <div class="demo-log" id="log5"></div>
+        </div>
+    </section>
+
+    <!-- 6 Theming -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">6</span>
+            <h2>CSS custom properties</h2>
+            <span class="tag-r">--ts-ti-*</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Every colour and radius is a token. Set them on the field or on any ancestor. The defaults are tuned for dark surfaces, so light pages should override the background, border and text tokens as shown on the right.</p>
+            <div class="demo-stage">
+                <div class="row-2">
+                    <div class="theme-amber">
+                        <label for="d6a">Amber on dark</label>
+                        <input type="text" id="d6a" data-plugin-tagsinput data-plugin-options='{"validateEmail": false}' value="design, frontend, tokens">
+                    </div>
+                    <div class="theme-light">
+                        <label for="d6b">Light surface</label>
+                        <input type="text" id="d6b" data-plugin-tagsinput value="grace@example.com">
+                    </div>
+                </div>
+            </div>
+<pre class="snip" data-plugin-highlight="css"><code>.theme-amber {
+    --ts-ti-bg: rgba(255,159,67,0.05);
+    --ts-ti-border: rgba(255,159,67,0.30);
+    --ts-ti-border-focus: #ff9f43;
+    --ts-ti-radius: 10px;
+    --ts-ti-tag-bg: rgba(255,159,67,0.16);
+    --ts-ti-tag-text: #ffb870;
+    --ts-ti-tag-radius: 6px;
+}</code></pre>
+        </div>
+    </section>
+
+    <!-- 7 Lifecycle -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">7</span>
+            <h2>Destroy and re-initialize</h2>
+            <span class="tag-r">destroy()</span>
+        </div>
+        <div class="demo-card-body">
+            <p><code>destroy()</code> removes the widget, unhides the source input and clears the instance. The source keeps its last value, and the injected stylesheet is removed once the last instance is gone.</p>
+            <div class="demo-stage">
+                <label for="d7">Lifecycle</label>
+                <input type="text" id="d7" class="manual" data-log="log7" value="ada@example.com, grace@example.com">
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" id="lcDestroy">destroy</button>
+                <button class="btn-d" id="lcInit">initialize</button>
+            </div>
+            <div class="out" id="lcOut">State: <b>active</b></div>
+<pre class="snip" data-plugin-highlight="javascript"><code>$('#field').data('__tagsinput').destroy();       // tear down
+$('#field').themestrapPluginTagsInput({});         // initialize again, reads the value</code></pre>
+            <div class="demo-log" id="log7"></div>
+        </div>
+    </section>
+
+</div>
+
+
+<footer class="demo-footer">
+    <p>Themestrap &middot; <code>PluginTagsInput</code> &middot; part of the Themestrap component library</p>
+</footer>
+
+
+<script>
+// Themestrap namespace stub for standalone demo pages
+window.themestrap = window.themestrap || {};
+themestrap.fn = themestrap.fn || {
+    getOptions: function (raw) {
+        if (!raw) return {};
+        if (typeof raw === 'object') return raw;
+        try { return JSON.parse(String(raw).replace(/'/g, '"')); } catch (e) { return {}; }
+    }
+};
+</script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="../js/components/themestrap.plugin.tagsinput.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script>
+(function ($) {
+    'use strict';
+
+    // helpers
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function log(id, evName, msg) {
+        const t = new Date().toTimeString().slice(0, 8);
+        $('#' + id).prepend('<div><span class="t">' + t + '</span><span class="ev">' + evName + '</span> ' + esc(msg) + '</div>');
+    }
+    function opts($el) {
+        return themestrap.fn.getOptions($el.data('plugin-options')) || undefined;
+    }
+
+    // syntax highlighting with PluginHighlight itself
+    if ($.fn.themestrapPluginHighlight) {
+        $('pre[data-plugin-highlight]').each(function () {
+            const $pre = $(this);
+            $pre.themestrapPluginHighlight();
+        });
+    }
+
+    // auto init, uses the framework wiring when present, otherwise falls back to a plain loop
+    if (typeof themestrap.fn.intObsInit === 'function') {
+        themestrap.fn.intObsInit('[data-plugin-tagsinput]:not(.manual)', 'themestrapPluginTagsInput');
+    } else {
+        $('[data-plugin-tagsinput]:not(.manual)').each(function () {
+            $(this).themestrapPluginTagsInput(opts($(this)));
+        });
+    }
+
+    // events are native CustomEvents dispatched on the source input, so use addEventListener
+    ['add', 'remove'].forEach(function (name) {
+        document.addEventListener('ts.tagsinput.' + name, function (e) {
+            const id = e.target.getAttribute('data-log');
+            if (!id) return;
+            log(id, 'ts.tagsinput.' + name, e.detail.tag + '  ->  [' + e.detail.tags.join(', ') + ']');
+        });
+    });
+
+    // 3 API
+    $('#d3').themestrapPluginTagsInput({});
+    function ti3() { return $('#d3').data('__tagsinput'); }
+    function showSource() { $('#apiOut b').text($('#d3').val() || '(empty)'); }
+    showSource();
+
+    $('#apiAdd').on('click', function () {
+        const $i = $('#apiTag');
+        ti3().addTag($i.val());
+        $i.val('').trigger('focus');
+        showSource();
+    });
+    $('#apiAddSilent').on('click', function () {
+        const $i = $('#apiTag');
+        ti3().addTag($i.val(), true);
+        log('log3', 'silent', 'addTag("' + $i.val() + '") fired no event');
+        $i.val('');
+        showSource();
+    });
+    $('#apiRemove').on('click', function () {
+        const tags = ti3().getTags();
+        if (tags.length) ti3().removeTag(tags[tags.length - 1]);
+        showSource();
+    });
+    $('#apiGet').on('click', function () {
+        log('log3', 'getTags', JSON.stringify(ti3().getTags()));
+    });
+    $('#apiClear').on('click', function () {
+        ti3().clearTags();
+        log('log3', 'clearTags', 'cleared, no event fired');
+        showSource();
+    });
+    $('#apiTag').on('keydown', function (e) { if (e.key === 'Enter') $('#apiAdd').trigger('click'); });
+    // keep the readout in sync when tags change inside the widget
+    document.addEventListener('ts.tagsinput.add', showSource);
+    document.addEventListener('ts.tagsinput.remove', showSource);
+
+    // 4 Form
+    $('#demoForm').on('submit', function (e) {
+        e.preventDefault();
+        const rows = $(this).serializeArray().map(function (f) {
+            return '<b>' + esc(f.name) + '</b> = "' + esc(f.value) + '"';
+        });
+        $('#formOut').html(rows.join('<br>'));
+    });
+
+    // 5 Paste recipe
+    $(document).on('paste', '.ts-tagsinput-field', function (e) {
+        const text = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
+        if (!/[,;\s]/.test(text.trim())) return;
+
+        e.preventDefault();
+        const ti = $(this).closest('.ts-tagsinput').prev().data('__tagsinput');
+        text.split(/[,;\s]+/).forEach(function (v) { ti.addTag(v); });
+    });
+
+    // 7 Lifecycle
+    function initLc() {
+        $('#d7').themestrapPluginTagsInput({});
+        $('#lcOut b').text('active');
+        log('log7', 'initialize', 'widget built from "' + $('#d7').val() + '"');
+    }
+    $('#d7').themestrapPluginTagsInput({});
+    $('#lcDestroy').on('click', function () {
+        const inst = $('#d7').data('__tagsinput');
+        if (!inst) return;
+        inst.destroy();
+        $('#lcOut b').text('destroyed, source value is still "' + $('#d7').val() + '"');
+        log('log7', 'destroy', 'widget removed');
+    });
+    $('#lcInit').on('click', function () {
+        if ($('#d7').data('__tagsinput')) return;
+        initLc();
+    });
+})(jQuery);
+</script>
+</body>
+</html>

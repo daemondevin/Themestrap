@@ -30,6 +30,15 @@ When the container scrolls, the plugin reads `scrollTop`, `scrollHeight`, `clien
 - **both** — shadows on all four edges. Used when content scrolls in two dimensions. Uses two layered `mask-image` gradients with `mask-composite: intersect`.
 
 
+### Two scopes
+
+| Scope | For | How it draws |
+| - | - | - |
+| `'element'` (default) | A container that scrolls inside itself: tables, chat threads, carousels | A CSS mask on the container (layers 1 and 2 above) |
+| `'page'` | Content that scrolls with the page, such as a blog post or article | Fixed fades at the viewport edge, drawn while the element extends past it |
+
+The mask cannot say "more to read" for an article, because the page scrolls, not the article. Page scope tracks the element's position against the viewport instead: the bottom fade shows once the element has started to enter the screen and its end is still below it, and goes away when the end scrolls into view. Before the element reaches the screen, and after it has passed, there is no fade. An optional pill ("Keep reading") scrolls down by 80% of the screen when clicked. The element is not given `overflow` or a mask, so its layout is untouched.
+
 ## [Quick **Start**](#quick-start)
 
 ### Markup contract
@@ -72,6 +81,33 @@ themestrap.fn.intObsInit(
 | `color` | string | `'black'` | Any CSS color. The mask gradient fades from transparent to this color in the centre. |
 | `offset` | number | `2` | Pixels of scroll tolerance before showing/hiding edge shadows. Higher values feel more "snappy". |
 | `isEnabled` | bool | `true` | Toggle shadows at runtime via `setEnabled(false)`. When false, all four state classes are removed. |
+| `scope` | string | `'element'` | `'element'` masks a scrollable container. `'page'` draws fixed fades for content that scrolls with the page. |
+| `edges` | array | `['top', 'bottom']` | Page scope only: which viewport edges get a fade. Replaces, not merges with, the default. |
+| `fade` | string | `null` | Page scope only: the page background colour the fade dissolves into. Prefer setting `--ts-ss-fade` on `:root`, so light and dark themes both work. |
+| `hint` | string | `''` | Page scope only: text for a pill on the bottom fade. Empty for none. |
+
+### Page scope
+
+```html
+<article data-plugin-scroll-shadow
+         data-plugin-options='{"scope": "page", "edges": ["bottom"], "size": "110px", "hint": "Keep reading"}'>
+    …a long post…
+</article>
+```
+
+`init.js` already wires `[data-plugin-scroll-shadow]`, so no script is needed. Set the fade colour once, to match the page:
+
+```css
+:root {
+    --ts-ss-fade:      var(--page-bg);
+    --ts-ss-hint-bg:   #1d2b3a;
+    --ts-ss-hint-fg:   #fff;
+}
+```
+
+The element receives `ts-ss--top` and `ts-ss--bottom` while content lies beyond that edge, which CSS can use. The fades are `aria-hidden` and `pointer-events: none` (only the pill is clickable), and they are hidden when printing if you add `@media print { .ts-ss-page { display: none } }`.
+
+Pair it with a reading progress bar for a complete "how much is left" cue.
 
 ### CSS custom property overrides
 
@@ -190,6 +226,12 @@ The plugin sets up a `ResizeObserver` on the container _and_ a `MutationObserver
 **Background image vs background color.** Because the plugin masks the container itself, any `background-image` or `background-color` on the container is also clipped at the edges. If you need a solid background that doesn't fade, wrap the scrollable element in an outer div: `<div class="bg"><div class="js-scroll-shadow">...</div></div>`.
 
 **Z-index inside scrollable.** `mask-image` creates a stacking context. Any element with a higher `z-index` inside the scrollable will be masked too. Move absolute-positioned overlays (e.g. a sticky header inside the scroller) outside the scrollable container.
+
+### Page scope shows nothing
+
+- The element must be taller than the screen, and its end must be below the bottom edge. A short element has nothing to indicate.
+- The fade is a gradient *to a colour*, not a mask. If `--ts-ss-fade` does not match the page background, it shows as a coloured band. Set it on `:root` using the page's own background variable.
+- A strict Content Security Policy that blocks inline styles stops the stylesheet from loading (it is injected through a `<style>` element). Allow inline styles, or copy the `.ts-ss-page` rules into your own CSS.
 
 ### When shadows do not appear
 

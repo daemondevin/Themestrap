@@ -33,7 +33,7 @@ The renderer walks the token array and emits HTML. Block tokens call `renderInli
 
 **Lazy CSS injection:** On first instantiation, `build()` calls `injectStyles()`, which creates a `<style id="ts-markdown-styles">` tag and appends it to `<head>`. Subsequent instances find the tag by ID and skip the injection — no per-instance style duplication.
 
-> [!NOTE]
+> [!NOTE]  
 > The bundled GFM parser is intentionally minimal — it covers the GFM spec features actually used in documentation and README files. It does not support definition lists, footnotes, custom containers, or LaTeX math blocks. For those, swap `GFM.parse()` for `marked.parse()` and keep the plugin wrapper unchanged.
 
 
@@ -80,6 +80,7 @@ Some **bold** text, *italic*, and a [link](https://example.com).
 ### Auto-init wiring (`themestrap.init.js`)
 
 ```js
+// Markdown
 if ($.isFunction($.fn['themestrapPluginMarkdown']) && $('[data-plugin-markdown]').length) {
     themestrap.fn.intObsInit('[data-plugin-markdown]:not(.manual)', 'themestrapPluginMarkdown');
 }

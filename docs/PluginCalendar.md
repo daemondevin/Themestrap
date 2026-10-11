@@ -51,12 +51,8 @@ $('#my-calendar').themestrapPluginCalendar({
 
 ```js
 // Calendar
-if (typeof $.fn['themestrapPluginCalendar'] === 'function'
-    && $('[data-plugin-calendar]').length) {
-    themestrap.fn.intObsInit(
-        '[data-plugin-calendar]:not(.manual)',
-        'themestrapPluginCalendar'
-    );
+if (typeof $.fn['themestrapPluginCalendar'] === 'function' && $('[data-plugin-calendar]').length) {
+    themestrap.fn.intObsInit('[data-plugin-calendar]:not(.manual)', 'themestrapPluginCalendar');
 }
 ```
 

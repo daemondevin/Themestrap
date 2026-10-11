@@ -12155,6 +12155,797 @@ body.ts-scroll-lock {
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Drawer
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginDrawer';
+
+    const FOCUSABLE = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])',
+        '[contenteditable="true"]',
+    ].join(', ');
+
+    let _seq = 0;
+    const uid = (prefix) => `${prefix}-${++_seq}-${Math.random().toString(36).slice(2, 7)}`;
+
+    const STYLE_ID = 'ts-drawer-styles';
+    const CSS_TEXT = `/* PluginDrawer — Themestrap Drawer Styles
+ *
+ * Structure:
+ *   .drawer-root                  [data-plugin-drawer] fixed full-screen container
+ *   ├── [data-drawer-backdrop]    translucent overlay
+ *   └── [data-drawer-panel]       the visible panel; slides in from an edge
+ *       ├── [data-drawer-handle]  drag indicator (auto-injected for bottom/top)
+ *       ├── [data-drawer-title]
+ *       ├── [data-drawer-description]
+ *       └── ...content...
+ *
+ * State classes (toggled by the plugin):
+ *   .drawer-root.drawer-hidden    closed (display:none)
+ *   .drawer-root.drawer-is-open   panel is in the DOM, pre-transition
+ *   .drawer-root.drawer-open      panel is visible (transition target)
+ *   .drawer-{bottom|top|left|right}  direction variant
+ *
+ * CSS custom properties (override at any scope level):
+ *   --ts-drw-bg           Panel background
+ *   --ts-drw-overlay      Backdrop colour
+ *   --ts-drw-shadow-b/t/l/r  Direction-specific panel shadow
+ *   --ts-drw-radius       Corner radius
+ *   --ts-drw-handle       Handle pill colour
+ *   --ts-drw-handle-hover Handle pill hover colour
+ *   --ts-drw-text-muted   [data-drawer-description] colour
+ *   --ts-drw-max-h        Max height for bottom/top drawers
+ *   --ts-drw-side-w       Width for left/right drawers
+ *   --ts-drw-pad          Panel padding
+ *   --ts-drw-dur          Transition duration (keep in sync with transitionDuration option)
+ *   --ts-drw-ease         Transition easing
+ */
+
+:root {
+    --ts-drw-bg          : #ffffff;
+    --ts-drw-overlay     : rgba(0, 0, 0, 0.5);
+    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
+    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-radius      : 1rem;
+    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
+    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
+    --ts-drw-text-muted  : #6b7280;
+    --ts-drw-max-h       : 85svh;
+    --ts-drw-side-w      : min(380px, 85vw);
+    --ts-drw-pad         : 1.5rem;
+    --ts-drw-dur         : 320ms;
+    --ts-drw-ease        : cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+
+/* Root container */
+.drawer-root {
+    position  : fixed;
+    inset     : 0;
+    z-index   : 1060;
+    isolation : isolate;
+
+    &.drawer-hidden {
+        display        : none;
+        pointer-events : none;
+        visibility     : hidden;
+    }
+}
+
+
+/* Backdrop */
+[data-drawer-backdrop] {
+    position                : absolute;
+    inset                   : 0;
+    z-index                 : 0;
+    background              : var(--ts-drw-overlay);
+    backdrop-filter         : blur(2px);
+    -webkit-backdrop-filter : blur(2px);
+    opacity                 : 0;
+    transition              : opacity var(--ts-drw-dur) ease;
+
+    .drawer-open & {
+        opacity : 1;
+    }
+}
+
+
+/* Panel — shared base */
+[data-drawer-panel] {
+    position            : absolute;
+    z-index             : 1;
+    background          : var(--ts-drw-bg);
+    overflow-y          : auto;
+    overscroll-behavior : contain;
+    transition          : transform var(--ts-drw-dur) var(--ts-drw-ease);
+    will-change         : transform;
+    scrollbar-width     : thin;
+
+    &::-webkit-scrollbar       { width: 4px; }
+    &::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.18); border-radius: 2px; }
+}
+
+
+/* Bottom drawer */
+.drawer-bottom [data-drawer-panel] {
+    bottom        : 0;
+    left          : 0;
+    right         : 0;
+    max-height    : var(--ts-drw-max-h);
+    border-radius : var(--ts-drw-radius) var(--ts-drw-radius) 0 0;
+    box-shadow    : var(--ts-drw-shadow-b);
+    padding       : 0 var(--ts-drw-pad) calc(var(--ts-drw-pad) + env(safe-area-inset-bottom, 0px));
+    transform     : translateY(100%);
+}
+.drawer-bottom.drawer-open [data-drawer-panel] { transform: translateY(0); }
+
+
+/* Top drawer */
+.drawer-top [data-drawer-panel] {
+    top           : 0;
+    left          : 0;
+    right         : 0;
+    max-height    : var(--ts-drw-max-h);
+    border-radius : 0 0 var(--ts-drw-radius) var(--ts-drw-radius);
+    box-shadow    : var(--ts-drw-shadow-t);
+    padding       : calc(var(--ts-drw-pad) + env(safe-area-inset-top, 0px)) var(--ts-drw-pad) 0;
+    transform     : translateY(-100%);
+}
+.drawer-top.drawer-open [data-drawer-panel] { transform: translateY(0); }
+
+
+/* Left drawer */
+.drawer-left [data-drawer-panel] {
+    top           : 0;
+    left          : 0;
+    bottom        : 0;
+    height        : 100%;
+    width         : var(--ts-drw-side-w);
+    border-radius : 0 var(--ts-drw-radius) var(--ts-drw-radius) 0;
+    box-shadow    : var(--ts-drw-shadow-l);
+    padding       : calc(var(--ts-drw-pad) + env(safe-area-inset-top, 0px))
+                    var(--ts-drw-pad)
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-bottom, 0px))
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-left, 0px));
+    transform     : translateX(-100%);
+}
+.drawer-left.drawer-open [data-drawer-panel] { transform: translateX(0); }
+
+
+/* Right drawer */
+.drawer-right [data-drawer-panel] {
+    top           : 0;
+    right         : 0;
+    bottom        : 0;
+    height        : 100%;
+    width         : var(--ts-drw-side-w);
+    border-radius : var(--ts-drw-radius) 0 0 var(--ts-drw-radius);
+    box-shadow    : var(--ts-drw-shadow-r);
+    padding       : calc(var(--ts-drw-pad) + env(safe-area-inset-top, 0px))
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-right, 0px))
+                    calc(var(--ts-drw-pad) + env(safe-area-inset-bottom, 0px))
+                    var(--ts-drw-pad);
+    transform     : translateX(100%);
+}
+.drawer-right.drawer-open [data-drawer-panel] { transform: translateX(0); }
+
+
+/* Drag handle — renders as a sticky full-width bar with a centred pill */
+[data-drawer-handle] {
+    display             : flex;
+    align-items         : center;
+    justify-content     : center;
+    width               : auto;
+    background          : var(--ts-drw-bg);
+    cursor              : grab;
+    touch-action        : none;
+    user-select         : none;
+    -webkit-user-select : none;
+    flex-shrink         : 0;
+
+    &::before {
+        content       : '';
+        display       : block;
+        width         : 48px;
+        height        : 4px;
+        background    : var(--ts-drw-handle);
+        border-radius : 2px;
+        transition    : background 0.15s ease;
+    }
+
+    &:hover::before { background: var(--ts-drw-handle-hover); }
+    &:active        { cursor: grabbing; }
+    &:active::before{ background: var(--ts-drw-handle-hover); }
+}
+
+/* Bottom drawer handle — sticky top strip */
+.drawer-bottom [data-drawer-handle] {
+    position  : sticky;
+    top       : 0;
+    z-index   : 2;
+    padding   : 0.875rem 0;
+    /* bleed to panel edges so the bg fills edge-to-edge */
+    margin    : 0 calc(var(--ts-drw-pad) * -1);
+}
+
+/* Top drawer handle — sticky bottom strip */
+.drawer-top [data-drawer-handle] {
+    position  : sticky;
+    bottom    : 0;
+    z-index   : 2;
+    padding   : 0.875rem 0;
+    margin    : 0 calc(var(--ts-drw-pad) * -1);
+}
+
+/* Side drawers — no visual handle (backdrop / close button preferred) */
+.drawer-left  [data-drawer-handle],
+.drawer-right [data-drawer-handle] {
+    display : none;
+}
+
+
+/* Typography helpers */
+[data-drawer-title] {
+    font-size    : 1.25rem;
+    font-weight  : 600;
+    line-height  : 1.3;
+    margin-top   : 0;
+    margin-bottom: 0.5rem;
+    color        : inherit;
+}
+
+[data-drawer-description] {
+    font-size    : 0.9375rem;
+    color        : var(--ts-drw-text-muted);
+    margin-bottom: 1.5rem;
+    line-height  : 1.5;
+}
+
+
+/* Scroll-lock utility — shared with PluginDialog; redundant definition is harmless */
+body.ts-scroll-lock {
+    overflow      : hidden;
+    padding-right : var(--ts-scrollbar-width, 0px);
+}
+
+
+/* Dark mode — tier 1: system preference */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ts-drw-bg          : #1e2939;
+        --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
+        --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
+        --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
+        --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
+        --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
+        --ts-drw-handle      : rgba(255, 255, 255, 0.22);
+        --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
+        --ts-drw-text-muted  : #9ca3af;
+    }
+
+    [data-drawer-panel]::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Dark mode — tier 2: explicit class/attribute */
+html.dark,
+[data-bs-theme="dark"] {
+    --ts-drw-bg          : #1e2939;
+    --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
+    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
+    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
+    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
+    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
+    --ts-drw-handle      : rgba(255, 255, 255, 0.22);
+    --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
+    --ts-drw-text-muted  : #9ca3af;
+}
+
+html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
+[data-bs-theme="dark"] [data-drawer-panel]::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Dark mode — tier 3: explicit light override */
+[data-bs-theme="light"] {
+    --ts-drw-bg          : #ffffff;
+    --ts-drw-overlay     : rgba(0, 0, 0, 0.50);
+    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
+    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
+    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
+    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
+    --ts-drw-text-muted  : #6b7280;
+}
+
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    [data-drawer-backdrop],
+    [data-drawer-panel] {
+        transition-duration : 0.01ms !important;
+    }
+}`;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = CSS_TEXT;
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    class PluginDrawer {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el            = $el;
+            this.$panel         = null;
+            this.$backdrop      = null;
+            this.$handle        = null;
+            this.$previousFocus = null;
+            this.isOpen         = false;
+            this._uid           = uid('drawer');
+            this._drag          = null;
+            this._closeTimer    = null;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginDrawer.defaults, opts, {
+                wrapper: this.$el,
+            });
+            return this;
+        }
+
+        build() {
+            injectStyles();
+
+            const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
+            const dir  = opts.direction;
+
+            // ARIA role and modal flag
+            if (!$el.attr('role')) $el.attr('role', 'dialog');
+            $el.attr('aria-modal', 'true');
+
+            // Auto-wire title → aria-labelledby
+            const $title = $el.find('[data-drawer-title]').first();
+            if ($title.length && !$el.attr('aria-labelledby')) {
+                const id = $title.attr('id') || uid('drawer-title');
+                $title.attr('id', id);
+                $el.attr('aria-labelledby', id);
+            }
+
+            // Auto-wire description → aria-describedby
+            const $desc = $el.find('[data-drawer-description]').first();
+            if ($desc.length && !$el.attr('aria-describedby')) {
+                const id = $desc.attr('id') || uid('drawer-desc');
+                $desc.attr('id', id);
+                $el.attr('aria-describedby', id);
+            }
+
+            // Backdrop — auto-inject when missing
+            if (opts.backdrop) {
+                self.$backdrop = $el.find('[data-drawer-backdrop]');
+                if (!self.$backdrop.length) {
+                    self.$backdrop = $('<div data-drawer-backdrop></div>');
+                    $el.prepend(self.$backdrop);
+                }
+            }
+
+            // Panel
+            self.$panel = $el.find('[data-drawer-panel]');
+
+            // Handle — auto-inject for bottom/top; left/right have no grab handle by default
+            if (opts.showHandle && (dir === 'bottom' || dir === 'top')) {
+                self.$handle = $el.find('[data-drawer-handle]');
+                if (!self.$handle.length) {
+                    self.$handle = $('<div data-drawer-handle role="presentation"></div>');
+                    if (dir === 'bottom') {
+                        self.$panel.prepend(self.$handle);
+                    } else {
+                        // Top drawer: handle belongs at the bottom of the panel
+                        self.$panel.append(self.$handle);
+                    }
+                }
+            }
+
+            // Direction and root classes
+            $el
+                .addClass(`drawer-root drawer-${dir}`)
+                .attr('aria-hidden', 'true')
+                .attr('tabindex', '-1');
+
+            if (!$el.hasClass('drawer-is-open')) {
+                $el.addClass('drawer-hidden');
+            }
+
+            return this;
+        }
+
+        events() {
+            const self     = this;
+            const $el      = self.$el;
+            const opts     = self.options;
+            const drawerId = $el.attr('id');
+
+            // External open triggers
+            if (drawerId) {
+                $(document).on(
+                    `click.drawer.${self._uid}`,
+                    `[data-drawer-open="${drawerId}"]`,
+                    function (e) {
+                        e.preventDefault();
+                        self.open();
+                    }
+                );
+            }
+
+            // Internal close triggers
+            $el.on('click.drawer', '[data-drawer-close]', function (e) {
+                e.preventDefault();
+                self.close();
+            });
+
+            // Backdrop click
+            if (opts.closeOnBackdrop && self.$backdrop && self.$backdrop.length) {
+                $el.on('click.drawer.backdrop', function (e) {
+                    if ($(e.target).is('[data-drawer-backdrop]')) {
+                        self.close();
+                    }
+                });
+            }
+
+            // Escape key
+            if (opts.closeOnEscape) {
+                $(document).on(`keydown.drawer.${self._uid}`, function (e) {
+                    if (self.isOpen && (e.key === 'Escape' || e.keyCode === 27)) {
+                        e.preventDefault();
+                        self.close();
+                    }
+                });
+            }
+
+            // Drag to dismiss (handle only; avoids interfering with panel scroll)
+            if (opts.draggable && self.$handle && self.$handle.length) {
+                self._bindDrag();
+            }
+
+            return this;
+        }
+
+        _bindDrag() {
+            const self     = this;
+            const $el      = self.$el;
+            const $panel   = self.$panel;
+            const opts     = self.options;
+            const dir      = opts.direction;
+            const handleEl = self.$handle[0];
+            const isVert   = dir === 'bottom' || dir === 'top';
+
+            handleEl.addEventListener('pointerdown', function (e) {
+                if (!self.isOpen) return;
+
+                // Capture so pointermove/up keep firing even outside the handle
+                handleEl.setPointerCapture(e.pointerId);
+
+                self._drag = {
+                    startX  : e.clientX,
+                    startY  : e.clientY,
+                    lastX   : e.clientX,
+                    lastY   : e.clientY,
+                    lastTime: Date.now(),
+                    velocity: 0,
+                    delta   : 0,
+                };
+
+                // Disable CSS transition while dragging for a 1:1 feel
+                $panel.css('transition', 'none');
+            });
+
+            handleEl.addEventListener('pointermove', function (e) {
+                if (!self._drag) return;
+
+                const d   = self._drag;
+                const now = Date.now();
+                const dt  = now - d.lastTime;
+
+                // Raw displacement from the drag origin
+                let raw = isVert ? (e.clientY - d.startY) : (e.clientX - d.startX);
+
+                // Clamp: only allow movement toward the dismiss edge
+                if (dir === 'bottom' && raw < 0) raw = 0;
+                if (dir === 'top'    && raw > 0) raw = 0;
+
+                d.delta = raw;
+
+                // Instantaneous velocity in px/ms
+                if (dt > 0) {
+                    d.velocity = isVert
+                        ? (e.clientY - d.lastY) / dt
+                        : (e.clientX - d.lastX) / dt;
+                }
+
+                d.lastX    = e.clientX;
+                d.lastY    = e.clientY;
+                d.lastTime = now;
+
+                $panel.css('transform', isVert
+                    ? `translateY(${raw}px)`
+                    : `translateX(${raw}px)`
+                );
+            });
+
+            handleEl.addEventListener('pointerup', function () {
+                if (!self._drag) return;
+
+                const d        = self._drag;
+                const absDelta = Math.abs(d.delta);
+                const absVel   = Math.abs(d.velocity);
+                const size     = isVert ? $panel.outerHeight() : $panel.outerWidth();
+
+                self._drag = null;
+
+                // Re-enable CSS transition
+                $panel.css('transition', '');
+
+                const shouldClose = absDelta > size * opts.dragThreshold
+                                 || absVel   > opts.velocityThreshold;
+
+                if (shouldClose) {
+                    // Continue animating from the current drag position to fully off-screen.
+                    // The panel already has an inline transform from the drag — the transition
+                    // will now run from there to the destination.
+                    const sign = (dir === 'bottom') ? 1 : -1;
+                    const dest = isVert
+                        ? `translateY(${sign * size}px)`
+                        : `translateX(${sign * size}px)`;
+
+                    $panel.css('transform', dest);
+
+                    // Fade the backdrop out in sync by removing drawer-open
+                    $el.removeClass('drawer-open');
+
+                    // Schedule DOM cleanup after the transition finishes
+                    clearTimeout(self._closeTimer);
+                    self._closeTimer = setTimeout(() => {
+                        self._finishClose();
+                    }, opts.transitionDuration + 50);
+
+                } else {
+                    // Snap the panel back to the fully-open position
+                    $panel.css('transform', '');
+                }
+            });
+
+            handleEl.addEventListener('pointercancel', function () {
+                if (!self._drag) return;
+                self._drag = null;
+                $panel.css({ transition: '', transform: '' });
+            });
+        }
+
+        open() {
+            const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
+
+            if (self.isOpen) return this;
+            self.isOpen = true;
+
+            // Cancel any pending close-cleanup from a prior close() call
+            clearTimeout(self._closeTimer);
+
+            // Clear any leftover inline transform from a drag-dismiss
+            self.$panel.css('transform', '');
+
+            self.$previousFocus = $(document.activeElement);
+
+            if (opts.scrollLock) {
+                $('body').addClass('ts-scroll-lock');
+            }
+
+            // Step 1 — reveal the root (removes display:none)
+            $el
+                .removeClass('drawer-hidden')
+                .addClass('drawer-is-open')
+                .attr('aria-hidden', 'false');
+
+            // Step 2 — force a reflow so the browser registers the display change
+            //          before the transition-triggering class is added
+            void $el[0].offsetHeight;
+
+            // Step 3 — add drawer-open; the CSS transition fires
+            $el.addClass('drawer-open');
+
+            // Move focus into the drawer after the transition has started
+            setTimeout(() => self._focusFirst(), 50);
+
+            // Focus trap
+            $el.on('keydown.drawer.trap', (e) => {
+                if (e.key === 'Tab' || e.keyCode === 9) {
+                    self._trapFocus(e);
+                }
+            });
+
+            if (typeof opts.onOpen === 'function') opts.onOpen.call(self, $el);
+            $el.trigger('drawer:open', [self]);
+
+            return this;
+        }
+
+        close() {
+            const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
+
+            if (!self.isOpen) return this;
+
+            $el.off('keydown.drawer.trap');
+
+            // Remove drawer-open — CSS transition slides the panel back off-screen
+            // and fades the backdrop out simultaneously
+            $el.removeClass('drawer-open');
+
+            // Schedule DOM cleanup after the transition completes
+            clearTimeout(self._closeTimer);
+            self._closeTimer = setTimeout(() => {
+                self._finishClose();
+            }, opts.transitionDuration + 50);
+
+            return this;
+        }
+
+        toggle() {
+            return this.isOpen ? this.close() : this.open();
+        }
+
+        _finishClose() {
+            const self = this;
+            const $el  = self.$el;
+            const opts = self.options;
+
+            // Guard: open() may have been called during the close transition
+            if (!self.isOpen) return;
+            self.isOpen = false;
+
+            // Clear any inline transform set by a drag-dismiss
+            self.$panel.css('transform', '');
+
+            $el
+                .addClass('drawer-hidden')
+                .removeClass('drawer-is-open')
+                .attr('aria-hidden', 'true');
+
+            if (opts.scrollLock) {
+                $('body').removeClass('ts-scroll-lock');
+            }
+
+            // Restore focus to the element that triggered the open
+            if (self.$previousFocus && self.$previousFocus.length) {
+                self.$previousFocus.trigger('focus');
+                self.$previousFocus = null;
+            }
+
+            if (typeof opts.onClose === 'function') opts.onClose.call(self, $el);
+            $el.trigger('drawer:close', [self]);
+        }
+
+        _focusFirst() {
+            const focusable = this._focusable();
+            if (focusable.length) {
+                focusable.first().trigger('focus');
+            } else {
+                this.$el.trigger('focus');
+            }
+        }
+
+        _trapFocus(e) {
+            const focusable = this._focusable();
+            if (!focusable.length) return;
+
+            const $first   = focusable.first();
+            const $last    = focusable.last();
+            const $current = $(document.activeElement);
+
+            if (e.shiftKey) {
+                if ($current.is($first)) {
+                    e.preventDefault();
+                    $last.trigger('focus');
+                }
+            } else {
+                if ($current.is($last)) {
+                    e.preventDefault();
+                    $first.trigger('focus');
+                }
+            }
+        }
+
+        _focusable() {
+            return this.$el.find(FOCUSABLE).filter(':visible').not('[data-drawer-backdrop]');
+        }
+
+        destroy() {
+            const self = this;
+            const $el  = self.$el;
+
+            clearTimeout(self._closeTimer);
+
+            if (self.isOpen) {
+                self.isOpen = false;
+                $('body').removeClass('ts-scroll-lock');
+            }
+
+            $(document).off(`click.drawer.${self._uid}`);
+            $(document).off(`keydown.drawer.${self._uid}`);
+            $el.off('.drawer');
+
+            $el
+                .removeData(instanceName)
+                .removeAttr('role aria-modal aria-hidden aria-labelledby aria-describedby tabindex')
+                .removeClass('drawer-root drawer-hidden drawer-is-open drawer-open drawer-bottom drawer-top drawer-left drawer-right');
+
+            return this;
+        }
+    }
+
+    PluginDrawer.defaults = {
+        direction         : 'bottom',  // 'bottom' | 'top' | 'left' | 'right'
+        closeOnBackdrop   : true,      // close when [data-drawer-backdrop] is clicked
+        closeOnEscape     : true,      // close on Escape key
+        backdrop          : true,      // ensure a [data-drawer-backdrop] element exists
+        scrollLock        : true,      // add .ts-scroll-lock to <body> while open
+        showHandle        : true,      // auto-inject drag handle for bottom/top drawers
+        draggable         : true,      // enable drag-to-dismiss via the handle
+        dragThreshold     : 0.4,       // dismiss if drag displacement > 40% of panel size
+        velocityThreshold : 0.5,       // dismiss if swipe velocity exceeds 0.5 px/ms
+        transitionDuration: 320,       // ms — must match --ts-drw-dur
+        onOpen            : null,      // callback($el) — fires after open transition starts
+        onClose           : null,      // callback($el) — fires after close transition ends
+    };
+
+    $.extend(themestrap, { PluginDrawer });
+
+    $.fn.themestrapPluginDrawer = function (opts) {
+        return this.map(function () {
+            const $this = $(this);
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            }
+            return new PluginDrawer($this, opts);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
 // Float Element
 (((themestrap = {}, $) => {
     const instanceName = '__floatElement';
@@ -21227,7 +22018,7 @@ html.dark .ts-navbar,
 /* Themestrap — PluginNavigation */
 
 /* Token layer */
-.ts-nav {
+:root {
     /* Geometry */
     --ts-nav-width:              260px;
     --ts-nav-width-collapsed:     64px;
@@ -21271,8 +22062,7 @@ html.dark .ts-navbar,
 }
 
 /* Dark variant — via option class or html.dark */
-.ts-nav--dark,
-html.dark .ts-nav {
+:root.dark {
     --ts-nav-bg:                 var(--dark, #212529);
     --ts-nav-border-color:       var(--dark--200, #101214);
     --ts-nav-header-bg:          var(--dark--100, #2c3237);
@@ -33676,6 +34466,683 @@ html.dark .ts-readmore-overlay {
 	};
 })).apply(this, [window.themestrap, jQuery]);
 
+// Select
+(((themestrap = {}, $) => {
+
+    const STYLE_ID   = 'ts-select-styles';
+    const instanceName = '__pluginSelect';
+    let _instanceCount = 0;
+    let _uid = 0;
+
+    const SVG_CHEVRON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    const SVG_CHECK   = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+    const CSS = `
+        .ts-select {
+            --ts-select-h:                2.25rem;
+            --ts-select-trigger-bg:       var(--bs-body-bg, #fff);
+            --ts-select-trigger-border:   var(--bs-border-color, #dee2e6);
+            --ts-select-trigger-radius:   0.375rem;
+            --ts-select-trigger-color:    var(--bs-body-color, #212529);
+            --ts-select-trigger-muted:    var(--bs-secondary-color, #6c757d);
+            --ts-select-trigger-dim-bg:   var(--bs-secondary-bg, #e9ecef);
+            --ts-select-focus-ring:       0 0 0 0.25rem rgba(13,110,253,.25);
+            --ts-select-focus-border:     #86b7fe;
+            --ts-select-content-bg:       var(--bs-body-bg, #fff);
+            --ts-select-content-border:   var(--bs-border-color, #dee2e6);
+            --ts-select-content-radius:   0.5rem;
+            --ts-select-content-shadow:   0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
+            --ts-select-content-z:        1050;
+            --ts-select-item-h:           2rem;
+            --ts-select-item-radius:      0.25rem;
+            --ts-select-item-color:       var(--bs-body-color, #212529);
+            --ts-select-item-hover-bg:    var(--bs-tertiary-bg, #f8f9fa);
+            --ts-select-separator-bg:     var(--bs-border-color, #dee2e6);
+            position: relative;
+            display: block;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .ts-select {
+                --ts-select-trigger-bg:      var(--bs-body-bg, #212529);
+                --ts-select-trigger-border:  var(--bs-border-color, #495057);
+                --ts-select-trigger-color:   var(--bs-body-color, #dee2e6);
+                --ts-select-trigger-muted:   var(--bs-secondary-color, #adb5bd);
+                --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #343a40);
+                --ts-select-content-bg:      var(--bs-body-bg, #1a1d20);
+                --ts-select-content-border:  var(--bs-border-color, #495057);
+                --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3);
+                --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #2b2f33);
+            }
+        }
+
+        html.dark .ts-select,
+        [data-bs-theme="dark"] .ts-select {
+            --ts-select-trigger-bg:      var(--bs-body-bg, #212529);
+            --ts-select-trigger-border:  var(--bs-border-color, #495057);
+            --ts-select-trigger-color:   var(--bs-body-color, #dee2e6);
+            --ts-select-trigger-muted:   var(--bs-secondary-color, #adb5bd);
+            --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #343a40);
+            --ts-select-content-bg:      var(--bs-body-bg, #1a1d20);
+            --ts-select-content-border:  var(--bs-border-color, #495057);
+            --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3);
+            --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #2b2f33);
+        }
+
+        [data-bs-theme="light"] .ts-select {
+            --ts-select-trigger-bg:      var(--bs-body-bg, #fff);
+            --ts-select-trigger-border:  var(--bs-border-color, #dee2e6);
+            --ts-select-trigger-color:   var(--bs-body-color, #212529);
+            --ts-select-trigger-muted:   var(--bs-secondary-color, #6c757d);
+            --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #e9ecef);
+            --ts-select-content-bg:      var(--bs-body-bg, #fff);
+            --ts-select-content-border:  var(--bs-border-color, #dee2e6);
+            --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
+            --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #f8f9fa);
+        }
+
+        /* hide the native select — stays in DOM for form submission */
+        .ts-select select { display: none !important; }
+
+        /* trigger */
+        .ts-select-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            width: 100%;
+            height: var(--ts-select-h);
+            padding: 0 0.75rem;
+            background: var(--ts-select-trigger-bg);
+            border: 1px solid var(--ts-select-trigger-border);
+            border-radius: var(--ts-select-trigger-radius);
+            color: var(--ts-select-trigger-color);
+            font-family: inherit;
+            font-size: 0.875rem;
+            line-height: 1;
+            cursor: default;
+            text-align: left;
+            white-space: nowrap;
+            user-select: none;
+            transition: border-color .15s ease, box-shadow .15s ease;
+            outline: none;
+        }
+        .ts-select-trigger:focus-visible {
+            border-color: var(--ts-select-focus-border);
+            box-shadow: var(--ts-select-focus-ring);
+        }
+        .ts-select-trigger:disabled,
+        .ts-select--disabled .ts-select-trigger {
+            background: var(--ts-select-trigger-dim-bg);
+            color: var(--ts-select-trigger-muted);
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        .ts-select-value {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ts-select-value.ts-select-placeholder {
+            color: var(--ts-select-trigger-muted);
+        }
+
+        .ts-select-icon {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            color: var(--ts-select-trigger-muted);
+            transition: transform .2s ease;
+        }
+        .ts-select--open .ts-select-icon {
+            transform: rotate(180deg);
+        }
+
+        /* dropdown */
+        .ts-select-content {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: var(--ts-select-content-z);
+            background: var(--ts-select-content-bg);
+            border: 1px solid var(--ts-select-content-border);
+            border-radius: var(--ts-select-content-radius);
+            box-shadow: var(--ts-select-content-shadow);
+            padding: 0.25rem;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(-4px) scale(.98);
+            transform-origin: top center;
+            transition: opacity .15s ease, transform .15s ease, visibility 0ms .15s;
+            outline: none;
+        }
+        .ts-select-content--open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: none;
+            transition-delay: 0ms;
+        }
+
+        /* flip upward when there is more space above */
+        .ts-select--up .ts-select-content {
+            top: auto;
+            bottom: calc(100% + 4px);
+            transform-origin: bottom center;
+        }
+        .ts-select--up .ts-select-content:not(.ts-select-content--open) {
+            transform: translateY(4px) scale(.98);
+        }
+
+        /* scrollable option list */
+        .ts-select-viewport {
+            max-height: 280px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--ts-select-separator-bg) transparent;
+        }
+        .ts-select-viewport::-webkit-scrollbar        { width: 4px; }
+        .ts-select-viewport::-webkit-scrollbar-track  { background: transparent; }
+        .ts-select-viewport::-webkit-scrollbar-thumb  {
+            background: var(--ts-select-separator-bg);
+            border-radius: 2px;
+        }
+
+        /* option items */
+        .ts-select-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem 0 2rem;
+            min-height: var(--ts-select-item-h);
+            border-radius: var(--ts-select-item-radius);
+            color: var(--ts-select-item-color);
+            font-size: 0.875rem;
+            cursor: default;
+            user-select: none;
+        }
+        .ts-select-item:not(.ts-select-item--disabled):hover,
+        .ts-select-item:not(.ts-select-item--disabled).ts-select-item--focus {
+            background: var(--ts-select-item-hover-bg);
+        }
+        .ts-select-item--disabled {
+            color: var(--ts-select-trigger-muted);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* checkmark indicator */
+        .ts-select-item-indicator {
+            position: absolute;
+            left: 0.5rem;
+            display: flex;
+            align-items: center;
+            width: 1rem;
+            height: 1rem;
+            opacity: 0;
+        }
+        .ts-select-item--selected .ts-select-item-indicator {
+            opacity: 1;
+        }
+
+        .ts-select-item-text {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* option groups */
+        .ts-select-group:not(:first-child) {
+            border-top: 1px solid var(--ts-select-separator-bg);
+            margin-top: 0.25rem;
+            padding-top: 0.25rem;
+        }
+        .ts-select-group-label {
+            padding: 0.375rem 0.5rem 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--ts-select-trigger-muted);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        /* explicit separator element */
+        .ts-select-separator {
+            height: 1px;
+            background: var(--ts-select-separator-bg);
+            margin: 0.25rem 0;
+        }
+    `;
+
+    class PluginSelect {
+
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) { return this; }
+            this.$el             = $el;
+            this.initialHTML     = $el.html();
+            this.isOpen          = false;
+            this._uid            = ++_uid;
+            this._typeaheadTimer  = null;
+            this._typeaheadBuffer = '';
+            this.setData().setOptions(opts).build().events();
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginSelect.defaults, opts, { wrapper: this.$el });
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const opts = self.options;
+
+            if (!document.getElementById(STYLE_ID)) {
+                $('<style>').attr('id', STYLE_ID).text(CSS).appendTo('head');
+            }
+            _instanceCount++;
+
+            self.$native = self.$el.find('select');
+            if (!self.$native.length) { return this; }
+
+            if (self.$native.is(':disabled')) { opts.disabled = true; }
+
+            self._items = self._parseSelect();
+
+            /* read placeholder text from the first blank <option> */
+            const $blank = self.$native.find('option').filter(function() {
+                return $(this).val() === '';
+            }).first();
+            if ($blank.length) {
+                opts.placeholder = $blank.text().trim() || opts.placeholder;
+            }
+
+            const id        = `ts-select-${self._uid}`;
+            const listboxId = `${id}-listbox`;
+            const rawVal    = self.$native.val() || '';
+            const current   = self._findItem(rawVal);
+            self.currentValue = current ? rawVal : '';
+            self.currentText  = current ? current.text : opts.placeholder;
+
+            self.$el.addClass('ts-select');
+            if (opts.disabled) { self.$el.addClass('ts-select--disabled'); }
+
+            /* trigger button */
+            const $trigger = $('<button>', {
+                type:            'button',
+                class:           'ts-select-trigger',
+                role:            'combobox',
+                'aria-expanded': 'false',
+                'aria-haspopup': 'listbox',
+                'aria-controls': listboxId,
+                id:              `${id}-trigger`
+            });
+            if (opts.disabled) {
+                $trigger.prop('disabled', true).attr('aria-disabled', 'true');
+            }
+
+            self.$value = $('<span>', {
+                class: 'ts-select-value' + (current ? '' : ' ts-select-placeholder')
+            }).text(self.currentText);
+
+            const $icon = $('<span class="ts-select-icon">').html(SVG_CHEVRON);
+            $trigger.append(self.$value, $icon);
+
+            /* dropdown */
+            self.$viewport = $('<div class="ts-select-viewport">').html(self._buildItems());
+            self.$content  = $('<div>', {
+                class:             'ts-select-content',
+                role:              'listbox',
+                id:                listboxId,
+                'aria-labelledby': `${id}-trigger`,
+                tabindex:          '-1'
+            }).append(self.$viewport);
+
+            self.$trigger = $trigger;
+            self.$el.append(self.$trigger, self.$content);
+            return this;
+        }
+
+        /* parse native <select> into a plain items array */
+        _parseSelect() {
+            const items = [];
+            this.$native.children().each(function() {
+                const $c = $(this);
+                if ($c.is('optgroup')) {
+                    const group = { type: 'group', label: $c.attr('label') || '', children: [] };
+                    $c.find('option').each(function() {
+                        const $o = $(this);
+                        group.children.push({ type: 'option', value: $o.val(), text: $o.text().trim(), disabled: $o.is(':disabled') });
+                    });
+                    if (group.children.length) { items.push(group); }
+                } else if ($c.is('option') && $c.val() !== '') {
+                    items.push({ type: 'option', value: $c.val(), text: $c.text().trim(), disabled: $c.is(':disabled') });
+                }
+            });
+            return items;
+        }
+
+        /* find a non-disabled item by value */
+        _findItem(value) {
+            if (!value) { return null; }
+            for (const item of this._items) {
+                if (item.type === 'option' && item.value === value && !item.disabled) { return item; }
+                if (item.type === 'group') {
+                    for (const c of item.children) {
+                        if (c.value === value && !c.disabled) { return c; }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /* build inner HTML for the dropdown viewport */
+        _buildItems() {
+            const self = this;
+            let html = '';
+            let gi   = 0;
+            self._items.forEach(item => {
+                if (item.type === 'option') {
+                    html += self._buildOption(item);
+                } else if (item.type === 'group') {
+                    const lid = `ts-select-${self._uid}-gl-${++gi}`;
+                    html += `<div class="ts-select-group" role="group" aria-labelledby="${lid}">`;
+                    html += `<div class="ts-select-group-label" id="${lid}">${self._esc(item.label)}</div>`;
+                    item.children.forEach(c => { html += self._buildOption(c); });
+                    html += '</div>';
+                }
+            });
+            return html;
+        }
+
+        _buildOption(item) {
+            const sel = item.value === this.currentValue;
+            const cls = ['ts-select-item', sel ? 'ts-select-item--selected' : '', item.disabled ? 'ts-select-item--disabled' : ''].filter(Boolean).join(' ');
+            return `<div class="${cls}" role="option" data-value="${this._esc(item.value)}" aria-selected="${sel}"${item.disabled ? ' aria-disabled="true"' : ''}>`
+                + `<span class="ts-select-item-indicator">${SVG_CHECK}</span>`
+                + `<span class="ts-select-item-text">${this._esc(item.text)}</span>`
+                + '</div>';
+        }
+
+        _esc(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        events() {
+            const self = this;
+
+            /* open / close on trigger click */
+            self.$trigger.on('click.select', function(e) {
+                e.stopPropagation();
+                if (self.$trigger.prop('disabled')) { return; }
+                self.isOpen ? self.close() : self.open();
+            });
+
+            /* select on item click */
+            self.$content.on('click.select', '.ts-select-item:not(.ts-select-item--disabled)', function(e) {
+                e.stopPropagation();
+                self.select($(this).data('value'));
+                self.close();
+            });
+
+            /* keyboard on the trigger */
+            self.$trigger.on('keydown.select', function(e) { self._onTriggerKey(e); });
+
+            /* keyboard on the open dropdown */
+            self.$content.on('keydown.select', function(e) { self._onContentKey(e); });
+
+            /* close on outside click */
+            $(document).on(`click.select.${self._uid}`, function(e) {
+                if (self.isOpen && !self.$el.is(e.target) && !$.contains(self.$el[0], e.target)) {
+                    self.close();
+                }
+            });
+
+            return this;
+        }
+
+        _onTriggerKey(e) {
+            const self = this;
+            if (['ArrowDown', 'ArrowUp', 'Enter', ' '].indexOf(e.key) !== -1) {
+                e.preventDefault();
+                if (!self.isOpen) {
+                    self.open();
+                    const $sel = self.$content.find('[aria-selected="true"]');
+                    if ($sel.length) { self._focusItem($sel); } else { self._moveFocus(0); }
+                }
+            } else if (e.key === 'Escape') {
+                self.close();
+            }
+        }
+
+        _onContentKey(e) {
+            const self   = this;
+            const $items = self.$content.find('.ts-select-item:not(.ts-select-item--disabled)');
+            const idx    = $items.index(self.$content.find('.ts-select-item--focus'));
+
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    self._moveFocus(Math.min(idx + 1, $items.length - 1), $items);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    self._moveFocus(idx <= 0 ? 0 : idx - 1, $items);
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    self._moveFocus(0, $items);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    self._moveFocus($items.length - 1, $items);
+                    break;
+                case 'Enter':
+                case ' ': {
+                    e.preventDefault();
+                    const $f = self.$content.find('.ts-select-item--focus');
+                    if ($f.length) { self.select($f.data('value')); self.close(); }
+                    break;
+                }
+                case 'Escape':
+                case 'Tab':
+                    e.preventDefault();
+                    self.close();
+                    self.$trigger[0].focus();
+                    break;
+                default:
+                    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+                        self._typeahead(e.key, $items);
+                    }
+            }
+        }
+
+        _focusItem($item) {
+            const self = this;
+            self.$content.find('.ts-select-item--focus').removeClass('ts-select-item--focus');
+            $item.addClass('ts-select-item--focus');
+            /* scroll into view within the viewport */
+            const el = $item[0];
+            const vp = self.$viewport[0];
+            if (el && vp) {
+                const t = el.offsetTop;
+                const b = t + el.offsetHeight;
+                if (t < vp.scrollTop)                        { vp.scrollTop = t; }
+                else if (b > vp.scrollTop + vp.clientHeight) { vp.scrollTop = b - vp.clientHeight; }
+            }
+        }
+
+        _moveFocus(idx, $items) {
+            const $all = $items || this.$content.find('.ts-select-item:not(.ts-select-item--disabled)');
+            if ($all.length && idx >= 0) { this._focusItem($all.eq(idx)); }
+        }
+
+        /* type-ahead character search */
+        _typeahead(char, $items) {
+            const self = this;
+            clearTimeout(self._typeaheadTimer);
+            self._typeaheadBuffer += char.toLowerCase();
+            const buf = self._typeaheadBuffer;
+            const $m  = $items.filter(function() {
+                return $(this).find('.ts-select-item-text').text().trim().toLowerCase().startsWith(buf);
+            }).first();
+            if ($m.length) { self._focusItem($m); }
+            self._typeaheadTimer = setTimeout(() => { self._typeaheadBuffer = ''; }, 500);
+        }
+
+        /* detect whether the dropdown should open above or below */
+        _position() {
+            const r     = this.$trigger[0].getBoundingClientRect();
+            const below = window.innerHeight - r.bottom;
+            const above = r.top;
+            if (below < 300 && above > below) {
+                this.$el.addClass('ts-select--up');
+            } else {
+                this.$el.removeClass('ts-select--up');
+            }
+        }
+
+        open() {
+            const self = this;
+            if (self.isOpen || self.$trigger.prop('disabled')) { return this; }
+            self._position();
+            self.isOpen = true;
+            self.$el.addClass('ts-select--open');
+            self.$content.addClass('ts-select-content--open');
+            self.$trigger.attr('aria-expanded', 'true');
+            self.$content[0].focus();
+            self.$el[0].dispatchEvent(new CustomEvent('ts.select.open', {
+                bubbles: true,
+                detail:  { value: self.currentValue }
+            }));
+            return this;
+        }
+
+        close() {
+            const self = this;
+            if (!self.isOpen) { return this; }
+            self.isOpen = false;
+            self.$el.removeClass('ts-select--open');
+            self.$content.removeClass('ts-select-content--open');
+            self.$trigger.attr('aria-expanded', 'false');
+            self.$content.find('.ts-select-item--focus').removeClass('ts-select-item--focus');
+            self.$el[0].dispatchEvent(new CustomEvent('ts.select.close', {
+                bubbles: true,
+                detail:  { value: self.currentValue }
+            }));
+            return this;
+        }
+
+        select(value) {
+            const self = this;
+            const prev = self.currentValue;
+            const item = self._findItem(value);
+            if (!item) { return this; }
+            self.currentValue = value;
+            self.currentText  = item.text;
+            self.$native.val(value);
+            self.$value.text(item.text).removeClass('ts-select-placeholder');
+            self.$content.find('[role="option"]').each(function() {
+                const $o = $(this);
+                const s  = $o.data('value') === value;
+                $o.attr('aria-selected', s ? 'true' : 'false').toggleClass('ts-select-item--selected', s);
+            });
+            self.$el[0].dispatchEvent(new CustomEvent('ts.select.change', {
+                bubbles: true,
+                detail:  { value, text: item.text, previousValue: prev }
+            }));
+            return this;
+        }
+
+        getValue() { return this.currentValue; }
+
+        setValue(value) { return this.select(value); }
+
+        reset() {
+            const self = this;
+            self.currentValue = '';
+            self.currentText  = self.options.placeholder;
+            self.$native.val('');
+            self.$value.text(self.options.placeholder).addClass('ts-select-placeholder');
+            self.$content.find('[role="option"]').attr('aria-selected', 'false').removeClass('ts-select-item--selected');
+            return this;
+        }
+
+        enable() {
+            this.options.disabled = false;
+            this.$trigger.prop('disabled', false).removeAttr('aria-disabled');
+            this.$el.removeClass('ts-select--disabled');
+            return this;
+        }
+
+        disable() {
+            this.options.disabled = true;
+            this.$trigger.prop('disabled', true).attr('aria-disabled', 'true');
+            this.$el.addClass('ts-select--disabled');
+            return this;
+        }
+
+        destroy() {
+            const self = this;
+            clearTimeout(self._typeaheadTimer);
+            $(document).off(`.select.${self._uid}`);
+            self.$el.html(self.initialHTML);
+            self.$el.removeClass('ts-select ts-select--open ts-select--disabled ts-select--up');
+            self.$el.removeData(instanceName);
+            _instanceCount--;
+            if (_instanceCount <= 0) {
+                const s = document.getElementById(STYLE_ID);
+                if (s) { s.remove(); }
+                _instanceCount = 0;
+            }
+            return this;
+        }
+    }
+
+    PluginSelect.defaults = {
+        placeholder: 'Select an option…',
+        disabled:    false
+    };
+
+    $.extend(themestrap, { PluginSelect });
+
+    $.fn.themestrapPluginSelect = function(opts) {
+        const args = Array.prototype.slice.call(arguments, 1);
+        return this.map(function() {
+            const $this = $(this);
+            const inst  = $this.data(instanceName);
+            if (inst) {
+                if (typeof opts === 'string' && typeof inst[opts] === 'function') {
+                    return inst[opts].apply(inst, args);
+                }
+                return inst;
+            }
+            return new PluginSelect($this, typeof opts !== 'string' ? opts : undefined);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
 // SideNav
 (((themestrap = {}, $) => {
 
@@ -36771,6 +38238,306 @@ html.dark .ts-sidenav {
 		}
 
 	});
+})).apply(this, [window.themestrap, jQuery]);
+
+// TagsInput
+(((themestrap = {}, $) => {
+    const instanceName = '__tagsinput';
+    const STYLE_ID     = 'ts-tagsinput-styles';
+    let   instanceCount = 0;
+
+    const INJECTED_CSS = `
+        .ts-tagsinput {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 8px;
+            background: var(--ts-ti-bg, rgba(255,255,255,0.03));
+            border: 1px solid var(--ts-ti-border, rgba(255,255,255,0.10));
+            border-radius: var(--ts-ti-radius, 5px);
+            cursor: text;
+            min-height: 40px;
+            transition: border-color 0.15s;
+        }
+        .ts-tagsinput:hover {
+            border-color: var(--ts-ti-border-hover, rgba(255,255,255,0.20));
+        }
+        .ts-tagsinput.ts-ti-focused {
+            border-color: var(--ts-ti-border-focus, #00c7be);
+            outline: none;
+        }
+        .ts-tagsinput.ts-ti-invalid {
+            border-color: var(--ts-ti-border-invalid, #e74c3c);
+            animation: ts-ti-shake 0.35s ease;
+        }
+        @keyframes ts-ti-shake {
+            0%,100% { transform: translateX(0); }
+            25%      { transform: translateX(-4px); }
+            75%      { transform: translateX(4px); }
+        }
+        .ts-tagsinput-source {
+            display: none !important;
+        }
+        .ts-tagsinput-tags {
+            display: contents;
+        }
+        .ts-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 8px 2px 10px;
+            background: var(--ts-ti-tag-bg, rgba(0,199,190,0.15));
+            color: var(--ts-ti-tag-text, #00c7be);
+            border: 1px solid var(--ts-ti-tag-border, rgba(0,199,190,0.30));
+            border-radius: var(--ts-ti-tag-radius, 20px);
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.4;
+            white-space: nowrap;
+            max-width: 240px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ts-tag-remove {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            background: none;
+            border: none;
+            border-radius: 50%;
+            color: inherit;
+            opacity: 0.6;
+            padding: 0;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: opacity 0.12s, background 0.12s;
+        }
+        .ts-tag-remove:hover {
+            opacity: 1;
+            background: rgba(0,199,190,0.20);
+        }
+        .ts-tagsinput-field {
+            flex: 1;
+            min-width: 120px;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--ts-ti-text, inherit);
+            font-size: 13.5px;
+            padding: 2px 4px;
+            font-family: inherit;
+        }
+        .ts-tagsinput-field::placeholder {
+            color: var(--ts-ti-placeholder, rgba(205,216,230,0.40));
+        }
+    `;
+
+    class PluginTagsInput {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) { return this; }
+
+            this.$el = $el;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginTagsInput.defaults, opts, {
+                wrapper: this.$el
+            });
+            return this;
+        }
+
+        build() {
+            const self = this;
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style = document.createElement('style');
+                style.id = STYLE_ID;
+                style.textContent = INJECTED_CSS;
+                document.head.appendChild(style);
+            }
+
+            self.tags         = [];
+            self.initialValue = self.options.wrapper.val();
+
+            self.$container = $('<div class="ts-tagsinput" role="group" aria-label="Email addresses"></div>');
+            self.$tagArea   = $('<span class="ts-tagsinput-tags"></span>');
+            self.$field     = $('<input type="text" class="ts-tagsinput-field" autocomplete="off" aria-label="Add address" />');
+
+            if (self.options.placeholder) {
+                self.$field.attr('placeholder', self.options.placeholder);
+            }
+
+            self.$container.append(self.$tagArea).append(self.$field);
+            self.options.wrapper.addClass('ts-tagsinput-source').after(self.$container);
+
+            if (self.initialValue) {
+                self.initialValue.split(',').forEach(v => {
+                    const tag = v.trim();
+                    if (tag) self.addTag(tag, true);
+                });
+            }
+
+            return this;
+        }
+
+        events() {
+            const self = this;
+
+            self.$field
+                .on('focus.tagsinput', () => self.$container.addClass('ts-ti-focused'))
+                .on('blur.tagsinput', function() {
+                    self.$container.removeClass('ts-ti-focused');
+                    const val = $(this).val().trim();
+                    if (val) { self.addTag(val); $(this).val(''); }
+                })
+                .on('keydown.tagsinput', function(e) {
+                    const val = $(this).val().trim();
+
+                    if ((e.key === 'Enter' || e.key === ',' || e.key === ';' || e.key === 'Tab') && val) {
+                        e.preventDefault();
+                        self.addTag(val);
+                        $(this).val('');
+                        return;
+                    }
+
+                    if (e.key === 'Backspace' && !$(this).val() && self.tags.length) {
+                        self.removeTag(self.tags[self.tags.length - 1]);
+                    }
+                });
+
+            self.$container
+                .on('click.tagsinput', function(e) {
+                    if (!$(e.target).is('.ts-tag-remove')) {
+                        self.$field.trigger('focus');
+                    }
+                })
+                .on('click.tagsinput', '.ts-tag-remove', function(e) {
+                    e.stopPropagation();
+                    const tag = $(this).closest('.ts-tag').data('ts-tag');
+                    self.removeTag(tag);
+                });
+
+            return this;
+        }
+
+        addTag(text, silent) {
+            const self = this;
+            if (!text || typeof text !== 'string') return this;
+
+            const trimmed = text.trim();
+            if (!trimmed) return this;
+
+            if (self.options.validateEmail) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!re.test(trimmed)) {
+                    self.$container.addClass('ts-ti-invalid');
+                    setTimeout(() => self.$container.removeClass('ts-ti-invalid'), 700);
+                    return this;
+                }
+            }
+
+            if (self.tags.indexOf(trimmed) !== -1) return this;
+
+            self.tags.push(trimmed);
+            self._syncInput();
+
+            const $tag = $(`<span class="ts-tag"></span>`)
+                .text(trimmed)
+                .append(' <button type="button" class="ts-tag-remove" aria-label="Remove">&times;</button>')
+                .data('ts-tag', trimmed);
+
+            self.$tagArea.append($tag);
+
+            if (!silent) {
+                self.$el[0].dispatchEvent(new CustomEvent('ts.tagsinput.add', {
+                    detail: { tag: trimmed, tags: self.getTags() },
+                    bubbles: true
+                }));
+            }
+
+            return this;
+        }
+
+        removeTag(text) {
+            const self = this;
+            const idx = self.tags.indexOf(text);
+            if (idx === -1) return this;
+
+            self.tags.splice(idx, 1);
+            self._syncInput();
+
+            self.$tagArea.find('.ts-tag').filter(function() {
+                return $(this).data('ts-tag') === text;
+            }).first().remove();
+
+            self.$el[0].dispatchEvent(new CustomEvent('ts.tagsinput.remove', {
+                detail: { tag: text, tags: self.getTags() },
+                bubbles: true
+            }));
+
+            return this;
+        }
+
+        getTags()        { return this.tags.slice(); }
+        clearTags()      { this.tags = []; this.$tagArea.empty(); this._syncInput(); return this; }
+        _syncInput()     { this.options.wrapper.val(this.tags.join(', ')); }
+
+        destroy() {
+            const self = this;
+            self.$field.off('.tagsinput');
+            self.$container.off('.tagsinput').remove();
+            self.options.wrapper.removeClass('ts-tagsinput-source').removeData(instanceName);
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+
+            return this;
+        }
+    }
+
+    PluginTagsInput.defaults = {
+        placeholder:   'Add address...',
+        validateEmail: true
+    };
+
+    $.extend(themestrap, { PluginTagsInput });
+
+    $.fn.themestrapPluginTagsInput = function(opts) {
+        return this.map(function() {
+            const $this = $(this);
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            } else {
+                return new PluginTagsInput($this, opts);
+            }
+        });
+    };
 })).apply(this, [window.themestrap, jQuery]);
 
 // Toast
@@ -41165,6 +42932,820 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 return $this.data(instanceName);
             }
             return new PluginWizard($this, opts);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Rich Editor
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginRichEditor';
+    const STYLE_ID     = 'ts-richeditor-styles';
+    const EVENT_NS     = 'richeditor';
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+    const MOD    = IS_MAC ? '\u2318' : 'Ctrl+';
+
+    // Theme tokens. Private --re-* properties resolve the public --ts-re-* overrides
+    // against a per-theme fallback, so consumers can override on any ancestor.
+    const LIGHT_TOKENS = `
+        --re-bg:              var(--ts-re-bg, #ffffff);
+        --re-border:          var(--ts-re-border, rgba(0,0,0,.14));
+        --re-toolbar-bg:      var(--ts-re-toolbar-bg, rgba(0,0,0,.035));
+        --re-text:            var(--ts-re-text, #1f2937);
+        --re-placeholder:     var(--ts-re-placeholder, rgba(31,41,55,.42));
+        --re-link:            var(--ts-re-link, #0b8a83);
+        --re-accent:          var(--ts-re-border-focus, #00a89f);
+    `;
+
+    const DARK_TOKENS = `
+        --re-bg:              var(--ts-re-bg, rgba(255,255,255,.02));
+        --re-border:          var(--ts-re-border, rgba(255,255,255,.10));
+        --re-toolbar-bg:      var(--ts-re-toolbar-bg, rgba(0,0,0,.20));
+        --re-text:            var(--ts-re-text, #cdd8e6);
+        --re-placeholder:     var(--ts-re-placeholder, rgba(205,216,230,.35));
+        --re-link:            var(--ts-re-link, #00c7be);
+        --re-accent:          var(--ts-re-border-focus, #00c7be);
+    `;
+
+    const INJECTED_CSS = `
+        .ts-richeditor { ${LIGHT_TOKENS} }
+        @media (prefers-color-scheme: dark) {
+            .ts-richeditor { ${DARK_TOKENS} }
+        }
+        html.dark .ts-richeditor,
+        [data-bs-theme="dark"] .ts-richeditor { ${DARK_TOKENS} }
+        [data-bs-theme="light"] .ts-richeditor,
+        html [data-bs-theme="light"] .ts-richeditor { ${LIGHT_TOKENS} }
+
+        .ts-richeditor {
+            display: flex;
+            flex-direction: column;
+            background: var(--re-bg);
+            border: 1px solid var(--re-border);
+            border-radius: var(--ts-re-radius, 6px);
+            overflow: hidden;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .ts-richeditor.ts-re-focused {
+            border-color: var(--re-accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--re-accent) 18%, transparent);
+        }
+        .ts-richeditor.ts-re-disabled { opacity: .6; }
+        .ts-richeditor.ts-re-disabled .ts-toolbar { pointer-events: none; }
+
+        /* PluginToolbar shell variables are overridden so the toolbar merges
+           flush into the top edge of the editor container. */
+        .ts-richeditor .ts-toolbar {
+            --ts-tb-bg:     var(--re-toolbar-bg);
+            --ts-tb-border: transparent;
+            --ts-tb-shadow: none;
+            --ts-tb-radius: 0;
+            width: 100%;
+            max-width: 100%;
+            flex-wrap: wrap;
+            border-radius: 0;
+            border-bottom: 1px solid var(--re-border);
+        }
+
+        .ts-re-content {
+            flex: 1;
+            padding: var(--ts-re-padding, 14px 16px);
+            outline: none;
+            color: var(--re-text);
+            font-size: 14px;
+            line-height: 1.7;
+            font-family: inherit;
+            overflow-y: auto;
+            word-break: break-word;
+        }
+        /* Placeholder is floated with zero height so it never affects the caret line */
+        .ts-re-content.ts-re-empty::before {
+            content: attr(data-placeholder);
+            color: var(--re-placeholder);
+            pointer-events: none;
+            float: left;
+            height: 0;
+        }
+        .ts-re-content a            { color: var(--re-link); }
+        .ts-re-content ul,
+        .ts-re-content ol           { padding-left: 1.4em; margin: .4em 0; }
+        .ts-re-content p            { margin: 0 0 .6em; }
+        .ts-re-content p:last-child { margin-bottom: 0; }
+
+        /* Link dialog. The dialog lives on <body>, so it is themed with currentColor
+           and inherits its colors from PluginDialog's panel. */
+        .ts-re-link-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .10em;
+            text-transform: uppercase;
+            opacity: .65;
+            margin-bottom: 8px;
+        }
+        .ts-re-link-input {
+            display: block;
+            width: 100%;
+            background: transparent;
+            border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+            border-radius: 5px;
+            color: inherit;
+            font-size: 14px;
+            padding: 9px 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .15s;
+        }
+        .ts-re-link-input:focus            { border-color: var(--ts-re-border-focus, #00a89f); }
+        .ts-re-link-input[aria-invalid="true"] { border-color: #dc2626; }
+        .ts-re-link-error {
+            color: #dc2626;
+            font-size: 12px;
+            margin: 6px 0 0;
+        }
+        .ts-re-link-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        .ts-re-dlg-remove { margin-right: auto; }
+        .ts-re-dlg-cancel,
+        .ts-re-dlg-remove,
+        .ts-re-dlg-confirm {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity .14s;
+        }
+        .ts-re-dlg-cancel,
+        .ts-re-dlg-remove  { background: color-mix(in srgb, currentColor 10%, transparent); color: inherit; }
+        .ts-re-dlg-confirm {
+            background: var(--ts-re-border-focus, #00a89f);
+            color: var(--ts-re-accent-contrast, #04211f);
+            font-weight: 600;
+        }
+        .ts-re-dlg-cancel:hover,
+        .ts-re-dlg-remove:hover  { opacity: .8; }
+        .ts-re-dlg-confirm:hover { opacity: .87; }
+        .ts-re-dlg-remove[hidden] { display: none; }
+    `;
+
+    // Command definitions: key -> execCommand name, icon, label, and optional shortcut letter
+    const CMDS = {
+        bold:        { cmd: 'bold',                icon: 'fas fa-bold',          label: 'Bold',             key: 'B' },
+        italic:      { cmd: 'italic',              icon: 'fas fa-italic',        label: 'Italic',           key: 'I' },
+        underline:   { cmd: 'underline',           icon: 'fas fa-underline',     label: 'Underline',        key: 'U' },
+        strike:      { cmd: 'strikeThrough',       icon: 'fas fa-strikethrough', label: 'Strikethrough' },
+        ul:          { cmd: 'insertUnorderedList', icon: 'fas fa-list-ul',       label: 'Bullet List' },
+        ol:          { cmd: 'insertOrderedList',   icon: 'fas fa-list-ol',       label: 'Numbered List' },
+        link:        { cmd: 'link',                icon: 'fas fa-link',          label: 'Insert Link',      key: 'K' },
+        clearFormat: { cmd: 'removeFormat',        icon: 'fas fa-eraser',        label: 'Clear Formatting' },
+    };
+
+    const INLINE_KEYS = ['bold', 'italic', 'underline', 'strike'];
+    const LIST_KEYS   = ['ul', 'ol'];
+    const ACTION_KEYS = ['link', 'clearFormat'];
+
+    const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+
+    const toPx = (v) => (typeof v === 'number' ? `${v}px` : v);
+
+    const titleFor = (def) => (def.key ? `${def.label} (${MOD}${def.key})` : def.label);
+
+    // Returns a safe URL string, or '' when the input is rejected.
+    // Bare addresses get https:// and bare emails get mailto:, anything with a
+    // scheme outside the allowed list (javascript:, data:, ...) is refused.
+    const normalizeUrl = (raw, protocols) => {
+        let url = String(raw || '').replace(/[\u0000-\u001f\u007f\s]+/g, '');
+        if (!url) return '';
+        if (/^[\/#?]/.test(url)) return url;
+        if (/^[^@:\/]+@[^@:\/]+\.[^@:\/]+$/.test(url)) return `mailto:${url}`;
+        if (!/^[a-z][a-z0-9+.\-]*:/i.test(url)) url = `https://${url}`;
+        const scheme = url.match(/^([a-z][a-z0-9+.\-]*):/i)[1].toLowerCase();
+        return protocols.indexOf(scheme) !== -1 ? url : '';
+    };
+
+    class PluginRichEditor {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el           = $el;
+            this._uid          = ++seq;
+            this._ns           = `${EVENT_NS}${this._uid}`;
+            this._savedRange   = null;
+            this._linkEl       = null;
+            this._selectedText = '';
+            this._failed       = false;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginRichEditor.defaults, opts, {
+                wrapper: this.$el
+            });
+
+            // $.extend(true) merges arrays index by index, so a short user array would be
+            // padded with default entries. Arrays are replaced wholesale instead.
+            if (opts && Object.prototype.hasOwnProperty.call(opts, 'toolbar')) {
+                this.options.toolbar = opts.toolbar;
+            }
+            if (opts && Array.isArray(opts.allowedProtocols)) {
+                this.options.allowedProtocols = opts.allowedProtocols.slice();
+            }
+
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const opts = self.options;
+            const $el  = opts.wrapper;
+
+            self._enabled = self._enabledKeys();
+
+            // Dependencies are only required for the features that are switched on
+            if ((self._enabled.size && !self._requires('themestrapPluginToolbar', 'PluginToolbar'))
+                || (self._enabled.has('link') && !self._requires('themestrapPluginDialog', 'PluginDialog'))) {
+                self._failed = true;
+                $el.removeData(instanceName);
+                return this;
+            }
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style       = document.createElement('style');
+                style.id          = STYLE_ID;
+                style.textContent = INJECTED_CSS;
+                document.head.appendChild(style);
+            }
+
+            // Any markup already inside the host becomes the initial content
+            const seed = $el.html().trim();
+            $el.empty().addClass('ts-richeditor');
+
+            if (self._enabled.size) {
+                self.$toolbarEl = self._buildToolbarEl();
+                $el.append(self.$toolbarEl);
+                self.$toolbarEl.themestrapPluginToolbar($.extend({}, opts.toolbarOptions));
+                self._toolbar = self.$toolbarEl.data('__pluginToolbar');
+            }
+
+            self.$editable = $('<div class="ts-re-content ts-re-empty" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true"></div>')
+                .attr('aria-label', opts.ariaLabel);
+
+            if (opts.minHeight)    self.$editable.css('min-height', toPx(opts.minHeight));
+            if (opts.maxHeight)    self.$editable.css('max-height', toPx(opts.maxHeight));
+            if (opts.placeholder) {
+                self.$editable.attr({ 'data-placeholder': opts.placeholder, 'aria-placeholder': opts.placeholder });
+            }
+            if (seed) self.$editable.html(seed);
+            $el.append(self.$editable);
+            self._toggleEmpty();
+
+            if (self._enabled.has('link')) {
+                self._buildDialog();
+            }
+
+            if (opts.disabled) self.disable();
+
+            return this;
+        }
+
+        // Verifies a dependency plugin is loaded, reporting through the framework when it is not
+        _requires(method, label) {
+            if (typeof $.fn[method] === 'function') return true;
+
+            const file = `components/themestrap.plugin.${label.replace('Plugin', '').toLowerCase()}.js`;
+            if (themestrap.fn && typeof themestrap.fn.showErrorMessage === 'function') {
+                themestrap.fn.showErrorMessage(
+                    'Failed to Load File',
+                    `Failed to load: ${label} - Include the following file(s): (${file})`
+                );
+            } else {
+                console.error(`PluginRichEditor: ${label} must be loaded first (${file}).`);
+            }
+            return false;
+        }
+
+        // Set of enabled command keys derived from options.toolbar
+        _enabledKeys() {
+            const t = this.options.toolbar;
+            if (t === false) return new Set();
+            if (t === true || !Array.isArray(t)) return new Set(Object.keys(CMDS));
+
+            const keys = new Set();
+            t.forEach((item) => {
+                if (!item || item === '|') return;
+                if (CMDS[item]) { keys.add(item); return; }
+                // Accept raw execCommand names for backwards compatibility
+                const byCmd = Object.keys(CMDS).find((k) => CMDS[k].cmd === item);
+                if (byCmd) keys.add(byCmd);
+            });
+            return keys;
+        }
+
+        // PluginToolbar host element and its inner markup
+        _buildToolbarEl() {
+            const self    = this;
+            const enabled = self._enabled;
+
+            const inline  = INLINE_KEYS.filter((k) => enabled.has(k));
+            const lists   = LIST_KEYS.filter((k) => enabled.has(k));
+            const actions = ACTION_KEYS.filter((k) => enabled.has(k));
+
+            const groups = [];
+            if (inline.length) groups.push(self._toggleGroupHtml(inline, 'Inline formatting'));
+            if (lists.length)  groups.push(self._toggleGroupHtml(lists, 'List formatting'));
+            if (actions.length) {
+                groups.push(actions.map((k) => {
+                    const d = CMDS[k];
+                    return `
+                        <button type="button" class="ts-tb-icon"
+                                data-toolbar-button data-toolbar-value="${k}"
+                                title="${titleFor(d)}" aria-label="${d.label}">
+                            <i class="${d.icon}" aria-hidden="true"></i>
+                        </button>`;
+                }).join(''));
+            }
+
+            return $(`<div>${groups.join('<hr data-toolbar-separator>')}</div>`);
+        }
+
+        _toggleGroupHtml(keys, label) {
+            const items = keys.map((k) => {
+                const d = CMDS[k];
+                return `
+                    <button type="button" class="ts-tb-icon"
+                            data-toolbar-toggle-item data-toolbar-value="${k}"
+                            title="${titleFor(d)}" aria-label="${d.label}">
+                        <i class="${d.icon}" aria-hidden="true"></i>
+                    </button>`;
+            }).join('');
+
+            return `
+                <div data-toolbar-toggle-group data-toolbar-type="multiple"
+                     data-toolbar-group-label="${label}">${items}</div>`;
+        }
+
+        // Link dialog. PluginDialog owns the modal UX, focus trap, ARIA, and base CSS.
+        _buildDialog() {
+            const self = this;
+            const id   = `ts-re-dlg-${self._uid}`;
+
+            self.$dialog = $(`
+                <div data-plugin-dialog id="${id}">
+                    <div data-dialog-backdrop></div>
+                    <div data-dialog-panel class="dialog-sm">
+                        <h2 data-dialog-title>Insert Link</h2>
+                        <p data-dialog-description>Paste or type a URL. Select text first to wrap it in the link.</p>
+                        <label class="ts-re-link-label" for="${id}-url">URL</label>
+                        <input type="text" id="${id}-url" class="ts-re-link-input" inputmode="url"
+                               placeholder="https://" autocomplete="off" spellcheck="false">
+                        <p class="ts-re-link-error" role="alert" hidden></p>
+                        <div class="ts-re-link-btns">
+                            <button type="button" class="ts-re-dlg-remove" hidden>Remove link</button>
+                            <button type="button" class="ts-re-dlg-cancel" data-dialog-close>Cancel</button>
+                            <button type="button" class="ts-re-dlg-confirm">
+                                <i class="fas fa-link" aria-hidden="true"></i> <span>Insert</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            $('body').append(self.$dialog);
+            self.$dialog.themestrapPluginDialog($.extend({}, self.options.dialogOptions));
+            self._dialog = self.$dialog.data('__pluginDialog');
+
+            self.$linkInput  = self.$dialog.find('.ts-re-link-input');
+            self.$linkError  = self.$dialog.find('.ts-re-link-error');
+            self.$linkRemove = self.$dialog.find('.ts-re-dlg-remove');
+            self.$linkTitle  = self.$dialog.find('[data-dialog-title]');
+            self.$linkOk     = self.$dialog.find('.ts-re-dlg-confirm span');
+
+            return this;
+        }
+
+        events() {
+            const self = this;
+            if (self._failed) return this;
+
+            if (self.$toolbarEl) {
+                // Save the selection and keep focus in the editable while the toolbar is
+                // pressed. The click (and its toolbar:* event) still fires normally.
+                self.$toolbarEl.on(`mousedown.${EVENT_NS}`, (e) => {
+                    self._saveSelection();
+                    e.preventDefault();
+                });
+
+                // PluginToolbar dispatches native CustomEvents, so plain listeners are used
+                self.$toolbarEl[0].addEventListener('toolbar:toggle', (e) => {
+                    self._execCmd(e.detail.value);
+                });
+                self.$toolbarEl[0].addEventListener('toolbar:button', (e) => {
+                    if (e.detail.value === 'link') {
+                        self._openLinkDialog();
+                    } else {
+                        self._execCmd(e.detail.value);
+                    }
+                });
+            }
+
+            self.$editable
+                .on(`focus.${EVENT_NS}`, () => {
+                    self.options.wrapper.addClass('ts-re-focused');
+                    // Paragraphs instead of bare <div>s so the p rules in the injected CSS apply
+                    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (err) { /* unsupported */ }
+                    self._dispatch('ts.richeditor.focus');
+                    if (typeof self.options.onFocus === 'function') self.options.onFocus.call(self);
+                })
+                .on(`blur.${EVENT_NS}`, () => {
+                    self._saveSelection();
+                    self.options.wrapper.removeClass('ts-re-focused');
+                    self._dispatch('ts.richeditor.blur');
+                    if (typeof self.options.onBlur === 'function') self.options.onBlur.call(self);
+                })
+                .on(`keyup.${EVENT_NS} mouseup.${EVENT_NS}`, () => {
+                    self._syncState();
+                })
+                .on(`input.${EVENT_NS}`, () => {
+                    self._toggleEmpty();
+                    self._syncState();
+                    self._dispatch('ts.richeditor.change');
+                    if (typeof self.options.onChange === 'function') {
+                        self.options.onChange.call(self, self.getContent());
+                    }
+                })
+                .on(`keydown.${EVENT_NS}`, (e) => {
+                    const mod = e.ctrlKey || e.metaKey;
+                    if (mod && !e.altKey && !e.shiftKey && String(e.key).toLowerCase() === 'k'
+                        && self._enabled.has('link')) {
+                        e.preventDefault();
+                        self._openLinkDialog();
+                    }
+                })
+                .on(`paste.${EVENT_NS}`, (e) => {
+                    if (!self.options.pastePlainText) return;
+                    const data = (e.originalEvent || e).clipboardData;
+                    if (!data) return;
+                    e.preventDefault();
+                    document.execCommand('insertText', false, data.getData('text/plain'));
+                });
+
+            // selectionchange only fires on the document, never on an element
+            $(document).on(`selectionchange.${self._ns}`, () => {
+                if (document.activeElement === self.$editable[0]) self._syncState();
+            });
+
+            if (self.$dialog) self._dialogEvents();
+
+            return this;
+        }
+
+        _dialogEvents() {
+            const self = this;
+            const $dlg = self.$dialog;
+
+            $dlg.on(`dialog:open.${EVENT_NS}`, () => {
+                const editing = !!self._linkEl;
+                self._setLinkError('');
+                self.$linkInput.val(editing ? (self._linkEl.getAttribute('href') || '') : '');
+                self.$linkRemove.prop('hidden', !editing);
+                self.$linkTitle.text(editing ? 'Edit Link' : 'Insert Link');
+                self.$linkOk.text(editing ? 'Update' : 'Insert');
+                setTimeout(() => self.$linkInput.trigger('focus').trigger('select'), 60);
+            });
+
+            $dlg.on(`keydown.${EVENT_NS}`, '.ts-re-link-input', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    self._applyLink();
+                }
+            });
+
+            $dlg.on(`input.${EVENT_NS}`, '.ts-re-link-input', () => self._setLinkError(''));
+            $dlg.on(`click.${EVENT_NS}`, '.ts-re-dlg-confirm', () => self._applyLink());
+            $dlg.on(`click.${EVENT_NS}`, '.ts-re-dlg-remove', () => self._removeLink());
+
+            return this;
+        }
+
+        // Selection helpers
+
+        _inEditable(range) {
+            return !!range && this.$editable[0].contains(range.commonAncestorContainer);
+        }
+
+        // The live selection range when it sits inside the editable, otherwise the saved one
+        _activeRange() {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount) {
+                const range = sel.getRangeAt(0);
+                if (this._inEditable(range)) return range.cloneRange();
+            }
+            return this._savedRange ? this._savedRange.cloneRange() : null;
+        }
+
+        _saveSelection() {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount) {
+                const range = sel.getRangeAt(0);
+                if (this._inEditable(range)) this._savedRange = range.cloneRange();
+            }
+            return this;
+        }
+
+        _restoreSelection() {
+            if (!this._savedRange) return this;
+            const sel = window.getSelection();
+            if (sel) {
+                sel.removeAllRanges();
+                sel.addRange(this._savedRange);
+            }
+            return this;
+        }
+
+        _selectNode(node) {
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            this._savedRange = range;
+            return this._restoreSelection();
+        }
+
+        // Format commands
+
+        _execCmd(key) {
+            const def = CMDS[key];
+            if (!def) return this;
+
+            this._restoreSelection();
+            this.$editable.trigger('focus');
+            document.execCommand(def.cmd, false, null);
+            this._syncState();
+            return this;
+        }
+
+        // Link dialog flow
+
+        _openLinkDialog() {
+            const range = this._activeRange();
+            if (!range || !this._dialog) return this;
+
+            this._savedRange   = range;
+            this._selectedText = range.toString().trim();
+
+            const node = range.commonAncestorContainer;
+            const el   = node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+            const a    = el && typeof el.closest === 'function' ? el.closest('a') : null;
+            this._linkEl = a && this.$editable[0].contains(a) ? a : null;
+
+            this._dialog.open();
+            return this;
+        }
+
+        _setLinkError(message) {
+            this.$linkError.text(message).prop('hidden', !message);
+            this.$linkInput.attr('aria-invalid', message ? 'true' : 'false');
+            return this;
+        }
+
+        _applyLink() {
+            const self = this;
+            const raw  = self.$linkInput.val().trim();
+
+            if (!raw) {
+                if (self._linkEl) return self._removeLink();
+                self._dialog.close();
+                return this;
+            }
+
+            const url = normalizeUrl(raw, self.options.allowedProtocols);
+            if (!url) {
+                self._setLinkError('Enter a valid URL (' + self.options.allowedProtocols.join(', ') + ').');
+                self.$linkInput.trigger('focus');
+                return this;
+            }
+
+            self._restoreSelection();
+            self.$editable.trigger('focus');
+
+            if (self._linkEl) {
+                // Editing: retarget the whole existing link
+                self._selectNode(self._linkEl);
+                document.execCommand('createLink', false, url);
+            } else if (self._selectedText) {
+                document.execCommand('createLink', false, url);
+            } else {
+                document.execCommand('insertHTML', false,
+                    `<a href="${escapeHtml(url)}">${escapeHtml(raw)}</a>`
+                );
+            }
+
+            self._decorateLinks();
+            self._dialog.close();
+            return this;
+        }
+
+        _removeLink() {
+            if (this._linkEl) {
+                this._restoreSelection();
+                this.$editable.trigger('focus');
+                this._selectNode(this._linkEl);
+                document.execCommand('unlink', false, null);
+            }
+            this._dialog.close();
+            return this;
+        }
+
+        // Applies linkTarget and a safe rel to the anchors touched by the current selection
+        _decorateLinks() {
+            const target = this.options.linkTarget;
+            const sel    = window.getSelection();
+            if (!target || !sel || !sel.rangeCount) return this;
+
+            this.$editable.find('a[href]').each(function() {
+                if (!sel.containsNode(this, true)) return;
+                this.setAttribute('target', target);
+                this.setAttribute('rel', 'noopener noreferrer');
+            });
+            return this;
+        }
+
+        // State
+
+        // Syncs PluginToolbar toggle items with the real formatting state. Only aria-pressed
+        // and the toolbar class are written, so no commands are re-fired.
+        _syncState() {
+            if (!this.$toolbarEl) return this;
+
+            this.$toolbarEl.find('[data-toolbar-toggle-item]').each(function() {
+                const def = CMDS[this.getAttribute('data-toolbar-value')];
+                if (!def) return;
+
+                let active = false;
+                try { active = !!document.queryCommandState(def.cmd); } catch (err) { /* unsupported */ }
+                this.setAttribute('aria-pressed', active ? 'true' : 'false');
+                this.classList.toggle('ts-toolbar__toggle-item--on', active);
+            });
+            return this;
+        }
+
+        _toggleEmpty() {
+            this.$editable.toggleClass('ts-re-empty', this.isEmpty());
+            return this;
+        }
+
+        _dispatch(name) {
+            this.$el[0].dispatchEvent(new CustomEvent(name, {
+                detail: { instance: this },
+                bubbles: true
+            }));
+            return this;
+        }
+
+        // Public API
+
+        isEmpty() {
+            return this.$editable.text().trim() === ''
+                && !this.$editable.find('img, hr, li').length;
+        }
+
+        getContent() {
+            return this.isEmpty() ? '' : this.$editable.html();
+        }
+
+        getText() {
+            return this.$editable.text();
+        }
+
+        setContent(html) {
+            this.$editable.html(html || '');
+            this._toggleEmpty();
+            return this;
+        }
+
+        clear() {
+            return this.setContent('');
+        }
+
+        focus() {
+            this.$editable.trigger('focus');
+            return this;
+        }
+
+        enable() {
+            this.$editable.attr('contenteditable', 'true').removeAttr('aria-disabled');
+            this.options.wrapper.removeClass('ts-re-disabled');
+            return this;
+        }
+
+        disable() {
+            this.$editable.attr({ contenteditable: 'false', 'aria-disabled': 'true' });
+            this.options.wrapper.removeClass('ts-re-focused').addClass('ts-re-disabled');
+            return this;
+        }
+
+        destroy() {
+            const self = this;
+            if (self._failed) return this;
+
+            $(document).off(`selectionchange.${self._ns}`);
+
+            if (self._toolbar && typeof self._toolbar.destroy === 'function') {
+                self._toolbar.destroy();
+            }
+            if (self.$toolbarEl) {
+                self.$toolbarEl.off(`.${EVENT_NS}`).remove();
+            }
+
+            if (self._dialog && typeof self._dialog.destroy === 'function') {
+                self._dialog.destroy();
+            }
+            if (self.$dialog) {
+                self.$dialog.off(`.${EVENT_NS}`).remove();
+            }
+
+            // The current content is handed back to the host so a re-init keeps the user's work
+            const html = self.getContent();
+            self.$editable.off(`.${EVENT_NS}`).remove();
+            self.options.wrapper
+                .removeClass('ts-richeditor ts-re-focused ts-re-disabled')
+                .html(html)
+                .removeData(instanceName);
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+
+            return this;
+        }
+    }
+
+    PluginRichEditor.defaults = {
+        placeholder:      'Write your message\u2026',
+        ariaLabel:        'Rich text editor',
+        minHeight:        '220px',
+        maxHeight:        null,
+        // Command keys. Legacy '|' separators are accepted but ignored, since grouping is automatic.
+        // Set to false to render without a toolbar.
+        toolbar:          ['bold', 'italic', 'underline', 'strike', '|', 'ul', 'ol', '|', 'link', 'clearFormat'],
+        toolbarOptions:   { ariaLabel: 'Text formatting', size: 'sm', full: true },
+        dialogOptions:    { animationIn: 'zoomIn', animationOut: 'zoomOut', closeOnBackdrop: true, scrollLock: false },
+        linkTarget:       '_blank',    // '' leaves links without a target attribute
+        allowedProtocols: ['http', 'https', 'mailto', 'tel'],
+        pastePlainText:   true,        // strips formatting from pasted content
+        disabled:         false,
+        onChange:         null,        // function(html) {}
+        onFocus:          null,        // function() {}
+        onBlur:           null         // function() {}
+    };
+
+    $.extend(themestrap, { PluginRichEditor });
+
+    $.fn.themestrapPluginRichEditor = function(opts) {
+        return this.map(function() {
+            const $this = $(this);
+
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            } else {
+                return new PluginRichEditor($this, opts);
+            }
         });
     };
 

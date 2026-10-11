@@ -123,6 +123,17 @@ code {
     margin: 0 0 14px;
 }
 
+    /* Footer */
+    .demo-footer {
+        padding: 20px 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .demo-footer a { color: var(--orange); text-decoration: none; }
+    .demo-footer a:hover { text-decoration: underline; }
+    .demo-footer code { font-family: var(--mono); font-size: 12px; }
+
 .tip {
     background: #e8f7f9;
     border-left: 4px solid var(--ts-teal);
@@ -287,7 +298,7 @@ pre.snip .str { color: #d6f8a3; }
 
 <div class="demo-hero">
   <div class="container">
-    <span class="badge-orange mb-3 d-inline-block">Themestrap · MODX 3</span>
+    <span class="badge-orange mb-3 d-inline-block">Themestrap · Component</span>
     <h1 class="mt-3">PluginScrollShadow Live Demo</h1>
     <p class="lead">A subtle UX cue for scrollable containers — gradient masks on the edges that only appear when there's content beyond the current scroll position. Built on CSS <code>mask-image</code>, so it works cleanly on any background.</p>
   </div>
@@ -381,11 +392,66 @@ pre.snip .str { color: #d6f8a3; }
           <h3>Dark panel, dark mask</h3>
           <p class="lead-sm">The mask color must match the container's background — pass it through <code>color</code> or set <code>--ts-ss-color</code> in CSS.</p>
           <div class="dark-panel" data-plugin-scroll-shadow data-plugin-options='{"orientation":"vertical","size":"50px","color":"#0a1929"}'>
-            <p>Themestrap was started as a way to stop rewriting the same handful of MODX snippets for every Bootstrap-based site I built. It started small — a tsCard, a tsAccordion — and grew into a full library of porting between Porto's HTML and MODX-native chunks.</p>
-            <p>The trick was getting the property metadata, chunk templates, and JavaScript plugin auto-init pipeline to all play nicely together. Once that landed, building new components became almost mechanical.</p>
-            <p>The hardest pieces were the bits where MODX's templating overlaps with Bootstrap's data-attribute conventions, like nav. pdoMenu turned out to be the right primitive once we threaded through unique instance IDs.</p>
-            <p>If you're considering using Themestrap on your own project, start with the snippets you'd rewrite anyway: alerts, cards, modals. Add plugins as you need them.</p>
-            <p>The next major release will add a server-side rendering pipeline for the JS plugins, so the initial HTML matches the post-init DOM. That should solve the FOUC issues some users have reported.</p>
+                    <p>
+                        Themestrap began with a simple premise: common interface behavior 
+                        should be reusable without forcing a project into a build system, 
+                        application framework, or large runtime. A website should be able 
+                        to adopt the pieces of interaction it actually needs without 
+                        having to restructure the entire project around them.
+                    </p>
+                    <p>
+                        That makes small components surprisingly important. A tooltip can 
+                        explain an unfamiliar control. A scroll affordance can make a long 
+                        page easier to navigate. A loading overlay can provide feedback 
+                        while an operation is taking place. A notification can confirm that 
+                        an action succeeded. None of these features is particularly large 
+                        on its own, but together they can transform an interface from 
+                        something that merely functions into something that feels 
+                        polished and intentional by design.
+                    </p>
+                    <p>
+                        The less obvious benefit is composability. Themestrap components 
+                        are designed to exist independently while still working naturally 
+                        alongside one another. A component can be initialized from markup, 
+                        configured through data attributes, and exposed through JavaScript 
+                        when an application needs direct control. The same component can 
+                        therefore live comfortably in a static HTML page, a CMS template, 
+                        a server-rendered application, or a dynamically inserted fragment.
+                    </p>
+                    <p>
+                        This approach also keeps responsibility where it belongs. A 
+                        tooltip does not need to understand the application that contains 
+                        it. A carousel does not need to manage the page around it. A 
+                        loading indicator does not need to know how an API request is 
+                        implemented. Each component provides a focused piece of behavior 
+                        while leaving the surrounding application in control.
+                    </p>
+                    <p>
+                        This demo deliberately combines the quieter components rather 
+                        than presenting a gallery of conventional accordions, tabs, and 
+                        modals. The intention is to demonstrate something closer to how 
+                        these components are actually useful in a project: not as 
+                        isolated attractions, but as small pieces that work together.
+                    </p>
+                    <p>
+                        The result is an ordinary interface enhanced by a collection of 
+                        purposeful details. Tooltips provide context, loading states 
+                        communicate progress, scroll controls improve navigation, and 
+                        other supporting components respond to the user's actions without 
+                        demanding attention for themselves.
+                    </p>
+                    <p>
+                        That is the role Themestrap is intended to fill. It is not 
+                        necessary to turn every website into a full application simply 
+                        because it needs a little interaction. Sometimes all a project 
+                        needs are a handful of well-contained components that can be 
+                        dropped into existing markup, configured when necessary, and 
+                        controlled directly when the application calls for it.
+                    </p>
+                    <p>
+                        The individual components may be small. Their ability to work 
+                        together is what makes them useful.
+                    </p>
           </div>
         </div>
       </div>
@@ -427,10 +493,34 @@ pre.snip .str { color: #d6f8a3; }
         </div>
       </div>
 
+      <!-- 6. Page scope -->
+      <div class="demo-card">
+        <div class="card-body">
+          <p class="demo-section-label">scope: 'page' · content that scrolls with the page</p>
+          <h3>Page scope: more to read</h3>
+          <p class="lead-sm">For an article that scrolls with the page, a mask cannot work. <code>scope: 'page'</code> draws a fixed fade at the viewport edge while the article is on screen and extends past it. Scroll through the text below.</p>
+          <article id="ss-page" class="chat" style="max-height:none;overflow:visible;" data-plugin-scroll-shadow
+                   data-plugin-options='{"scope": "page", "edges": ["bottom"], "size": "110px", "hint": "Keep reading"}'>
+          <p>Long articles scroll with the page, not inside a box, so a mask on the article cannot hint at what is below. Page scope solves this by watching where the article sits against the screen.</p>
+          <p>As you scroll through this card you will see a soft fade rise from the bottom edge of the screen, with a small pill inviting you to keep reading. It belongs to the article, so it only appears while this text is on screen.</p>
+          <p>Nothing is drawn before the article reaches the screen, and nothing after you have scrolled past it. The fade also leaves on its own once the end of the article comes into view, which is the signal that there is nothing left to read.</p>
+          <p>The fade is a gradient into a colour rather than a mask, so it needs to match the page background. Set it once with a custom property on the root element and light and dark themes both stay correct.</p>
+          <p>Click the pill and the page scrolls down by about eighty percent of the screen, or jumps instantly if the visitor prefers reduced motion. Keyboard and screen reader users are not affected, because the fades are decorative and the article is ordinary content.</p>
+          <p>The same markup works anywhere the framework's init file runs, because the plugin is already wired to the scroll shadow data attribute. Add the options as JSON and the article gets its fade with no script of your own.</p>
+          <p>Pair it with a reading progress bar and the reader always knows both that there is more, and how much more. The blog theme in this project does exactly that on every post.</p>
+          <p>A few more paragraphs keep this article taller than most screens so the effect has room to show. Scroll slowly and watch the fade and the pill.</p>
+          <p>Reading time for a piece like this is short, but the principle scales: a ten thousand word essay gets the same single line of markup.</p>
+          <p>When the end of this article scrolls into view, the fade and the pill disappear.</p>
+          </article>
+          <pre class="mt-3"><code>&lt;article data-plugin-scroll-shadow
+         data-plugin-options='{"scope": "page", "edges": ["bottom"], "size": "110px", "hint": "Keep reading"}'&gt;</code></pre>
+        </div>
+      </div>
 
-      <p class="text-center note mt-5 pt-3">
-        Themestrap MODX 3 — PluginScrollShadow demo · plugin runs live in your browser.
-      </p>
+
+    <footer class="demo-footer">
+        <p>Themestrap &middot; <code>PluginScrollShadow</code> &middot; part of the Themestrap component library</p>
+    </footer>
     </div>
   </div>
 </div>
@@ -449,6 +539,9 @@ pre.snip .str { color: #d6f8a3; }
 <script>
 
 $(function () {
+    // Page scope fades dissolve into the page background
+    document.documentElement.style.setProperty('--ts-ss-fade', getComputedStyle(document.body).backgroundColor);
+
     // Auto-init every container with data-plugin-scroll-shadow.
     $('[data-plugin-scroll-shadow]').each(function () {
         const $this = $(this);

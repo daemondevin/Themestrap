@@ -29,7 +29,7 @@ A right-click context menu with nested sub-menus, separators, group labels, keyb
 <!-- 2. Mark your trigger element -->
 <div id="my-area">Right-click me</div>
 
-<!-- 3. Initialise -->
+<!-- 3. Initialize -->
 <script>
 $('#my-area').themestrapPluginContextMenu({
   items: [
@@ -46,7 +46,7 @@ $('#my-area').themestrapPluginContextMenu({
 
 ## HTML / Data-attribute Usage
 
-When `themestrap.init.js` is loaded, elements with `data-plugin-context-menu` are auto-initialised as they enter the viewport. Pass options as JSON in `data-plugin-options`:
+When `themestrap.init.js` is loaded, elements with `data-plugin-context-menu` are auto-initialized as they enter the viewport. Pass options as JSON in `data-plugin-options`:
 
 ```html
 <div
@@ -251,12 +251,8 @@ Add the following block to `themestrap.init.js`:
 
 ```js
 // Context Menu
-if ($.isFunction($.fn['themestrapPluginContextMenu'])
-    && $('[data-plugin-context-menu]').length) {
-  themestrap.fn.intObsInit(
-    '[data-plugin-context-menu]:not(.manual)',
-    'themestrapPluginContextMenu'
-  );
+if ($.isFunction($.fn['themestrapPluginContextMenu']) && $('[data-plugin-context-menu]').length) {
+    themestrap.fn.intObsInit('[data-plugin-context-menu]:not(.manual)', 'themestrapPluginContextMenu');
 }
 ```
 

@@ -1,3 +1,22 @@
+/**
+ * Themestrap ScrollShadow
+ *
+ * Edge shadows that show there is more to see. Two scopes:
+ *
+ *   scope: 'element' (default)  masks the edges of a scrollable container, as before.
+ *   scope: 'page'               for content that scrolls with the page, such as a blog post.
+ *                               Draws a fixed fade at the viewport edge (and an optional hint pill)
+ *                               while the element is on screen and more of it lies beyond that edge,
+ *                               and removes it once the element's end is in view.
+ *
+ *   $('.post-body').themestrapPluginScrollShadow({
+ *       scope: 'page', edges: ['bottom'], size: '96px', hint: 'Keep reading'
+ *   });
+ *
+ * Page scope options: edges (['top', 'bottom']), fade (CSS colour of the page background, or set
+ * --ts-ss-fade on :root), hint (text for a pill that scrolls down when clicked).
+ * The element also receives .ts-ss--top / .ts-ss--bottom so CSS can react.
+ */
 // Scroll Shadow
 (((themestrap = {}, $) => {
 
@@ -5,6 +24,8 @@
 
     // Injected stylesheet — runs once per page, keyed to the plugin stylesheet ID
     const STYLE_ID = 'ts-scroll-shadow-styles';
+    let instanceCount = 0;
+    let seq = 0;
     // CSS_TEXT is injected lazily by injectStyles() on first build (see below),
     // so loading this script never adds CSS to pages that don't use the plugin.
     const CSS_TEXT = `
@@ -208,6 +229,39 @@
     -webkit-mask-size: 100% 100%, 100% 100%;
     mask-size: 100% 100%, 100% 100%;
 }
+
+/* Page scope: fixed fades at the viewport edge */
+.ts-ss-page {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: var(--ts-ss-size, 40px);
+    pointer-events: none;
+    z-index: 40;
+    opacity: 0;
+    transition: opacity .25s ease;
+}
+.ts-ss-page.is-on { opacity: 1; }
+.ts-ss-page--bottom { bottom: 0; background: linear-gradient(to top,    var(--ts-ss-fade, Canvas) 15%, transparent); }
+.ts-ss-page--top    { top: 0;    background: linear-gradient(to bottom, var(--ts-ss-fade, Canvas) 15%, transparent); }
+.ts-ss-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    padding: 5px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ts-ss-hint-bg, rgba(20, 20, 20, .78));
+    color: var(--ts-ss-hint-fg, #fff);
+    font: 600 12px/1.4 system-ui, sans-serif;
+    letter-spacing: .02em;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+}
+.ts-ss-page:not(.is-on) .ts-ss-hint { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .ts-ss-page { transition: none; } }
 `;
 
     // Inject the stylesheet only when the plugin is actually used (called
@@ -251,6 +305,8 @@
             this.options = $.extend(true, {}, PluginScrollShadow.defaults, opts, {
                 wrapper: this.$el
             });
+            // Arrays are replaced, never merged index by index
+            if (opts && Array.isArray(opts.edges)) this.options.edges = opts.edges.slice();
             return this;
         }
 
@@ -260,6 +316,13 @@
             const self    = this;
             const $el     = self.$el;
             const options = self.options;
+
+            instanceCount++;
+            self._uid = ++seq;
+
+            if (options.scope === 'page') {
+                return self._buildPage();
+            }
 
             // Apply base class + orientation attribute
             $el.addClass('ts-scroll-shadow');
@@ -294,8 +357,55 @@
             return this;
         }
 
+        // Page scope: overlays on <body>, driven by window scroll and resize
+        _buildPage() {
+            const self = this;
+            const o    = self.options;
+            const edges = Array.isArray(o.edges) && o.edges.length ? o.edges : ['top', 'bottom'];
+
+            self._overlays = {};
+            edges.forEach((edge) => {
+                if (edge !== 'top' && edge !== 'bottom') return;
+                const el = document.createElement('div');
+                el.className = 'ts-ss-page ts-ss-page--' + edge;
+                el.setAttribute('aria-hidden', 'true');
+                el.style.setProperty('--ts-ss-size', o.size);
+                if (o.fade) el.style.setProperty('--ts-ss-fade', o.fade);
+                if (edge === 'bottom' && o.hint) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'ts-ss-hint';
+                    b.tabIndex = -1;
+                    b.textContent = o.hint;
+                    b.addEventListener('click', () => {
+                        const calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        window.scrollBy({ top: Math.round(window.innerHeight * 0.8), behavior: calm ? 'auto' : 'smooth' });
+                    });
+                    el.appendChild(b);
+                }
+                document.body.appendChild(el);
+                self._overlays[edge] = el;
+            });
+
+            self._raf = 0;
+            self._onPageScroll = () => {
+                if (self._raf) return;
+                self._raf = requestAnimationFrame(() => { self._raf = 0; self._updateShadows(); });
+            };
+            window.addEventListener('scroll', self._onPageScroll, { passive: true });
+            window.addEventListener('resize', self._onPageScroll, { passive: true });
+            if (typeof ResizeObserver !== 'undefined') {
+                self._resizeObserver = new ResizeObserver(self._onPageScroll);
+                self._resizeObserver.observe(self.$el[0]);
+            }
+            self._updateShadows();
+            return self;
+        }
+
         events() {
             const self = this;
+
+            if (self.options.scope === 'page') return this;
 
             self.$el.on('scroll.scrollshadow', () => {
                 self._updateShadows();
@@ -319,6 +429,19 @@
             const el      = self.$el[0];
             const options = self.options;
             const offset  = options.offset;
+
+            if (options.scope === 'page') {
+                const r  = el.getBoundingClientRect();
+                const vh = window.innerHeight || document.documentElement.clientHeight;
+                const on = options.isEnabled;
+                // Only while the element is actually on screen: it has more above, or more below
+                const top    = on && r.top < -offset && r.bottom > 0;
+                const bottom = on && r.bottom > vh + offset && r.top < vh;
+                self.$el.toggleClass('ts-ss--top', top).toggleClass('ts-ss--bottom', bottom);
+                if (self._overlays.top)    self._overlays.top.classList.toggle('is-on', top);
+                if (self._overlays.bottom) self._overlays.bottom.classList.toggle('is-on', bottom);
+                return;
+            }
 
             if (!options.isEnabled) {
                 self.$el.removeClass('ts-ss--top ts-ss--bottom ts-ss--left ts-ss--right');
@@ -363,6 +486,15 @@
         destroy() {
             const self = this;
 
+            if (self.options.scope === 'page') {
+                window.removeEventListener('scroll', self._onPageScroll);
+                window.removeEventListener('resize', self._onPageScroll);
+                if (self._raf) cancelAnimationFrame(self._raf);
+                Object.keys(self._overlays || {}).forEach((k) => self._overlays[k].remove());
+                self._overlays = {};
+                self.$el.removeClass('ts-ss--top ts-ss--bottom');
+            }
+
             self.$el.off('.scrollshadow');
 
             if (self._resizeObserver) {
@@ -378,6 +510,13 @@
                     '--ts-ss-color': ''
                 })
                 .removeData(instanceName);
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
 
             return this;
         }
@@ -418,7 +557,22 @@
          * Set to false to disable all shadow rendering while keeping the
          * plugin instance alive. Useful for toggling based on viewport size.
          */
-        isEnabled: true
+        isEnabled: true,
+
+        /**
+         * 'element' masks a scrollable container (default).
+         * 'page' draws fixed fades at the viewport edge for content that scrolls with the page.
+         */
+        scope: 'element',
+
+        /** Page scope: which viewport edges get a fade. */
+        edges: ['top', 'bottom'],
+
+        /** Page scope: colour of the page background the fade dissolves into. Defaults to --ts-ss-fade. */
+        fade: null,
+
+        /** Page scope: text of a "keep reading" pill on the bottom fade. Empty for none. */
+        hint: ''
     };
 
     $.extend(themestrap, { PluginScrollShadow });

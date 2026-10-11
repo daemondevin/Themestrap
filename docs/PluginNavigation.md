@@ -146,7 +146,7 @@ if ($.isFunction($.fn['themestrapPluginNavigation']) &&
 }
 ```
 
-> `forceInit: true` is set in defaults, so `dynIntObsInit` initialises immediately without waiting for the element to enter the viewport — correct for layout-critical navigation.
+> `forceInit: true` is set in defaults, so `dynIntObsInit` initializes immediately without waiting for the element to enter the viewport — correct for layout-critical navigation.
 
 
 ## Data Attributes
@@ -587,7 +587,7 @@ The CSS rule `.ts-nav--sidebar.ts-nav--collapsed .ts-nav__drawer { height: 0 !im
 **`accordion: true` not closing siblings**
 Accordion closes siblings via `$item.siblings('.ts-nav__item--has-children.ts-nav__item--open')`. This only works if all drawer-parent items are at the same nesting level inside the same list. Accordion has no effect across sections or across depth levels.
 
-**Plugin initialised before nav HTML is in the DOM**
+**Plugin initialized before nav HTML is in the DOM**
 The default wiring uses `dynIntObsInit` which respects `forceInit: true` and runs at DOMReady. If nav items are injected by AJAX after DOMReady, call the jQuery bridge manually after injection. Re-calling on an already-inited element is safe (guarded by `$el.data(instanceName)` check).
 
 **Diagnostic checklist**

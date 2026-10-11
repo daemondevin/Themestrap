@@ -234,12 +234,21 @@
                 .replace(/'/g, '&#39;');
         }
 
+        // Refuses javascript:, vbscript: and non-image data: URLs. Control characters and spaces are
+        // removed first because browsers ignore them inside a scheme ("java\tscript:").
+        function safeUrl(url) {
+            const probe = String(url).replace(/[\u0000-\u0020\u007f-\u009f]+/g, '').toLowerCase();
+            if (/^(javascript|vbscript|livescript):/.test(probe)) return '#';
+            if (/^data:/.test(probe) && !/^data:image\/(png|jpe?g|gif|webp);/.test(probe)) return '#';
+            return url;
+        }
+
         function renderInline(text, opts, refs) {
             let out = text;
 
             // Auto-links  <url>
             out = out.replace(/<(https?:\/\/[^\s>]+)>/g, (_, url) =>
-                `<a href="${escHtml(url)}">${escHtml(url)}</a>`
+                `<a href="${escHtml(safeUrl(url))}">${escHtml(url)}</a>`
             );
 
             // Inline code  `code`  (protect from further inline processing)
@@ -254,14 +263,14 @@
             out = out.replace(/!\[([^\]]*)\]\(([^)]*)\)/g, (_, alt, rest) => {
                 const [url, ...titleParts] = rest.trim().split(/\s+/);
                 const title = titleParts.join(' ').replace(/^["']|["']$/g, '');
-                return `<img src="${escHtml(url)}" alt="${escHtml(alt)}"${title ? ` title="${escHtml(title)}"` : ''}>`;
+                return `<img src="${escHtml(safeUrl(url))}" alt="${escHtml(alt)}"${title ? ` title="${escHtml(title)}"` : ''}>`;
             });
 
             // Links  [text](url "title")
             out = out.replace(/\[([^\]]+)\]\(([^)]*)\)/g, (_, label, rest) => {
                 const [url, ...titleParts] = rest.trim().split(/\s+/);
                 const title = titleParts.join(' ').replace(/^["']|["']$/g, '');
-                return `<a href="${escHtml(url)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
+                return `<a href="${escHtml(safeUrl(url))}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
             });
 
             // Reference links  [text][ref]  or  [text][]
@@ -269,7 +278,7 @@
                 const key = (ref || label).toLowerCase();
                 if (refs[key]) {
                     const { href, title } = refs[key];
-                    return `<a href="${escHtml(href)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
+                    return `<a href="${escHtml(safeUrl(href))}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
                 }
                 return escHtml(`[${label}][${ref}]`);
             });
@@ -279,7 +288,7 @@
                 const key = ref.toLowerCase();
                 if (refs[key]) {
                     const { href, title } = refs[key];
-                    return `<a href="${escHtml(href)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(ref, opts, refs)}</a>`;
+                    return `<a href="${escHtml(safeUrl(href))}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(ref, opts, refs)}</a>`;
                 }
                 return match; // leave unchanged — might be task-list bracket
             });
@@ -605,11 +614,19 @@
         }
 
         // Minimal strip: removes <script> and on* attributes.
+        // Defence in depth for raw HTML pass-through: drops active elements and event handlers,
+        // and neutralizes script-bearing URL attributes.
         function sanitize(html) {
             return html
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                .replace(/\s+on\w+="[^"]*"/gi, '')
-                .replace(/\s+on\w+='[^']*'/gi, '');
+                .replace(/<(script|iframe|object|embed|style|link|meta|base|frame|frameset|applet)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '')
+                .replace(/<\/?(script|iframe|object|embed|style|link|meta|base|frame|frameset|applet)\b[^>]*>/gi, '')
+                .replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '')
+                .replace(/\s+on\w+\s*=\s*'[^']*'/gi, '')
+                .replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
+                .replace(/\s(href|src|action|formaction|xlink:href)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/gi, (m, attr, whole, a, b, c) => {
+                    const v = a !== undefined ? a : (b !== undefined ? b : c);
+                    return safeUrl(v.replace(/&#(x?[0-9a-f]+);?/gi, (x, n) => String.fromCharCode(n[0].toLowerCase() === 'x' ? parseInt(n.slice(1), 16) : parseInt(n, 10)))) === '#' ? ` ${attr}="#"` : m;
+                });
         }
 
         function parse(src, opts) {

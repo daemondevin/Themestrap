@@ -220,8 +220,7 @@ table.api-table tr:last-child td { border-bottom: none; }
     <p class="demo-label">Themestrap Plugin</p>
     <h1 class="demo-title">PluginVerticalNav</h1>
     <p class="demo-subtitle">
-        Clarity Design System's Vertical Navigation — adapted to Themestrap's plugin architecture
-        with Bootstrap 5 tokens, full ARIA support, and a clean public API.
+        A class-driven mini-sidebar: hand-authored ts-vn-* markup, hamburger toggle, one level of groups, Bootstrap tooltips in mini mode, optional content push.
     </p>
 
     <div class="demo-card">
@@ -336,11 +335,11 @@ table.api-table tr:last-child td { border-bottom: none; }
                 Collapse
             </button>
             <button class="ctrl-btn" onclick="
-                const g = $('#nav1 .ts-vn-group').eq(0);
+                var g = $('#nav1 .ts-vn-group').eq(0);
                 $('#nav1').data('__verticalNav').openGroup(g);
             ">Open Group 1</button>
             <button class="ctrl-btn" onclick="
-                const g = $('#nav1 .ts-vn-group').eq(0);
+                var g = $('#nav1 .ts-vn-group').eq(0);
                 $('#nav1').data('__verticalNav').closeGroup(g);
             ">Close Group 1</button>
             <span class="ctrl-label">Public API demo</span>
@@ -623,6 +622,11 @@ table.api-table tr:last-child td { border-bottom: none; }
     </div>
 
 </div>
+ 
+<!-- Footer -->
+<footer style="padding:32px 28px;text-align:center;border-top:1px solid rgba(255,255,255,.08);">
+  <p style="color:var(--faint);font-size:12px;margin:0;">Themestrap &middot; <code>PluginVerticalNav</code> &middot; part of the Themestrap component library</p>
+</footer>
 
 <!-- jQuery + Bootstrap 5 JS -->
 <script src="../vendor/jquery/jquery.min.js"></script>
