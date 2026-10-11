@@ -4,6 +4,22 @@ All notable changes to Themestrap are documented here.
 
 This repository does not currently include semantic version tags or package metadata, so the version sequence below is inferred from the project’s actual Git commit history beginning with the initial repository import and continuing through the current main branch state.
 
+## [1.0.2] - 2026-10-11
+
+### Added
+- Additional demo and showcase refinements for project examples
+- Improved accessibility and documentation polish across interactive patterns
+
+### Changed
+- Refined initialization guidance and usage examples for newer plugin patterns
+- Continued cleanup of theme consistency, CSS variable organization, and demo presentation
+- Updated project references and narrative wording to better reflect the current component set
+
+### Fixed
+- Resolved edge-case initialization and re-initialization issues affecting plugin setup reliability
+- Corrected minor documentation inaccuracies, typos, and outdated examples across the guide set
+
+
 ## [1.0.1] - 2026-09-15
 
 ### Added
