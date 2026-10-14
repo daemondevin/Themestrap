@@ -117,6 +117,7 @@ A stack of open dialogs is maintained. Opening a second dialog while one is open
 | `data-dialog-description` | Auto-wired to `aria-describedby` on the root. |
 | `data-dialog-open="<id>"` | Trigger button. Calls `open()` on the dialog with the matching `id`. |
 | `data-dialog-close` | Any close trigger inside the panel. |
+| `data-dialog-autofocus` | The element that receives focus when the dialog opens, instead of the first focusable one. Use it to make the safe choice the default in a destructive dialog. |
 
 
 ## Size **Modifiers**
@@ -223,7 +224,47 @@ if ($.isFunction($.fn['themestrapPluginDialog']) && $('[data-plugin-dialog]').le
 }
 ```
 
+## Prompts: `confirm()` and `alert()`
+
+For a question or a notice you do not want to write markup for, use the built-in prompts. They replace `window.confirm()` and `window.alert()` with real, accessible, themed dialogs, and they return a Promise.
+
+```js
+themestrap.PluginDialog.confirm({
+    title:        'Delete this post?',
+    message:      'This removes it from your site for good. It cannot be undone.',
+    confirmLabel: 'Delete',
+    cancelLabel:  'Keep it',
+    danger:       true
+}).then(function (yes) {
+    if (yes) { deletePost(); }
+});
+
+themestrap.PluginDialog.alert({ title: 'Saved', message: 'Your changes are live.' })
+    .then(function () { /* after it is dismissed */ });
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `title` | `'Are you sure?'` (`'Notice'` for `alert`) | The heading. Inserted as text. |
+| `message` | `''` | The body. Inserted as text, never as HTML. Line breaks (`\n`) are kept. |
+| `confirmLabel` | `'OK'` | Text of the confirm button. |
+| `cancelLabel` | `'Cancel'` | Text of the cancel button (`confirm` only). |
+| `danger` | `false` | Destructive action: the confirm button gets the danger class and **Cancel is focused first**, so an accidental Enter does not delete anything. |
+| `closeOnBackdrop` | `true` | Clicking the backdrop counts as cancel. |
+| `closeOnEscape` | `true` | Escape counts as cancel. |
+| `classes` | `{ confirm: 'btn btn-primary', danger: 'btn btn-danger', cancel: 'btn btn-light', actions: '' }` | Button classes, for frameworks other than Bootstrap. |
+
+A plain string is shorthand for `{ message: '…' }`.
+
+`confirm` resolves `true` only when the confirm button is pressed. Escape, the backdrop and Cancel all resolve `false`. `alert` always resolves `true`. After it closes, the prompt removes its own markup, restores focus to where it was, and releases the scroll lock, so prompts can be used repeatedly without leaving anything behind.
+
+> The browser's own tab-close warning (`beforeunload`) cannot be replaced by any script. Use a prompt for in-page actions such as links, and keep `beforeunload` as a backstop.
+
 ## Recipe **Cookbook**
+
+#### Confirmation without markup
+
+Prefer `PluginDialog.confirm()` (above). The markup version below is for dialogs that need custom content.
 
 #### Confirmation dialog with result
 

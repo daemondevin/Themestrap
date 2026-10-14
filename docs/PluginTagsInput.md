@@ -90,6 +90,12 @@ The plugin must be applied to an `<input>`. It reads and writes its `.val()`.
 |---|---|---|---|
 | `placeholder` | string | `'Add address...'` | Placeholder on the inner text field. Falsy values remove it. |
 | `validateEmail` | boolean | `true` | Rejects any entry that does not match `^[^\s@]+@[^\s@]+\.[^\s@]+$`. Set `false` for free form tags. |
+| `separators` | string | `',;\n\t'` | The characters that end a tag when text is pasted, dropped or otherwise inserted: here a comma, semicolon, newline and tab. A comma always counts, because the source input stores the tags comma separated. `''` leaves only the comma. |
+| `splitOnSpace` | `boolean \| 'auto'` | `'auto'` | Also split on whitespace. `'auto'` follows `validateEmail`: addresses never contain spaces so they split on them, keywords often do so they do not. |
+| `maxTags` | number | `0` | The most tags allowed. `0` is no limit. Extra entries are skipped with the reason `'max'`, and the field shakes. |
+| `ignoreCase` | boolean | `false` | Treat `Web` and `web` as the same tag. The first spelling wins. |
+| `normalize` | function | `null` | `function (text) { return text; }`, runs on every entry before it is checked. Use it to strip characters or collapse spaces so the chips show what your server will keep. |
+| `messages` | object | `{ added: '%n added', skipped: '%n skipped' }` | What a screen reader hears after a paste. `%n` is the count. |
 
 Merge order: `defaults → opts → { wrapper }`.
 
@@ -104,13 +110,14 @@ const ti = $('#to').data('__tagsinput');
 
 | Method | Returns | Description |
 |---|---|---|
-| `addTag(text, silent?)` | `this` | Trims and validates, ignores blanks and duplicates, appends a chip and syncs the source. Pass `true` as the second argument to skip the `add` event. |
+| `addTag(text, silent?)` | `this` | Cleans (trim, then `normalize`) and validates, ignores blanks and duplicates, appends a chip and syncs the source. Pass `true` as the second argument to skip the `add` event. Text that contains a separator, such as `'a, b'`, is split and added as separate tags. |
+| `addTags(text, silent?)` | `{ added, skipped }` | Splits the text on the separators and adds each item. `added` is the list of new tags. `skipped` is a list of `{ tag, reason }` where `reason` is `'duplicate'`, `'invalid'` (failed email validation) or `'max'`. Fires an `add` event for each new tag unless `silent`. |
 | `removeTag(text)` | `this` | Removes the exact matching tag, syncs the source, fires `remove`. Does nothing when the tag is not present. |
 | `getTags()` | `string[]` | A copy of the current tags. |
 | `clearTags()` | `this` | Empties the field and syncs the source. Fires no events. |
 | `destroy()` | `this` | Unbinds handlers, removes the widget, unhides the source and clears the instance. The source keeps its last value. The injected stylesheet is removed once the last instance is destroyed. |
 
-Rejected input (failed validation) adds the `.ts-ti-invalid` class for 700 ms to run the shake animation. Duplicates are ignored silently.
+Rejected input (failed validation, or over `maxTags`) adds the `.ts-ti-invalid` class for 700 ms to run the shake animation. Duplicates are ignored silently, but `addTags()` and a paste report them in `skipped`.
 
 The jQuery bridge returns a jQuery collection of instances (it uses `.map()`), and it accepts an options object only. It does not support string commands.
 
@@ -127,6 +134,7 @@ All events are dispatched on the source input with `bubbles: true`. They are nat
 |---|---|---|
 | `ts.tagsinput.add` | `{ tag, tags }` | A tag is added through the UI or `addTag()` without `silent`. Not fired for the initial value. |
 | `ts.tagsinput.remove` | `{ tag, tags }` | A tag is removed through the chip button, Backspace, or `removeTag()`. |
+| `ts.tagsinput.paste` | `{ added, skipped, tags }` | After a pasted list has been split. Fires once, after the `add` event of each new tag. `added` is the new tags, `skipped` is `[{ tag, reason }]`, `tags` is the full set. Not fired for a single pasted word, which is inserted as text. |
 
 ```js
 document.addEventListener('ts.tagsinput.add', e => {
@@ -139,6 +147,8 @@ document.querySelector('#to').addEventListener('ts.tagsinput.remove', e => {
 ```
 
 `tags` is a copy, so it is safe to keep.
+
+A paste of a ten item list fires ten `add` events and then one `paste` event. Listen to `paste` when you want to react once (to show a message, say) and to `add` when you want to react to every tag.
 
 
 ## CSS Custom Properties
@@ -187,6 +197,9 @@ The chip remove button hover tint (`rgba(0,199,190,0.20)`) is not tokenized.
 | `Tab` | Field is empty | Normal focus movement |
 | `Backspace` | Field is empty | Remove the last tag |
 | Blur | Field has text | Commit the tag |
+| Paste | Text contains a separator | Every item becomes its own tag. The field is left empty |
+| Paste | A single word | Inserted into the field as text, so it can be edited before Enter |
+| Drop, phone keyboards, dictation | Text contains a separator | Complete items become tags. The last, unfinished item stays in the field |
 | Click on the container | Anywhere except a remove button | Focus the field |
 
 Remove buttons are real `<button>` elements, so they can be reached with Shift+Tab from the field and activated with Enter or Space.
@@ -201,6 +214,7 @@ Remove buttons are real `<button>` elements, so they can be reached with Shift+T
 | `.ts-tagsinput` | `aria-label` | `Email addresses` |
 | `.ts-tagsinput-field` | `aria-label` | `Add address` |
 | `.ts-tag-remove` | `aria-label` | `Remove` |
+| `.ts-ti-live` | `role`, `aria-live` | `status`, `polite`. A visually hidden note such as "3 added, 1 skipped" after a paste |
 
 The labels are hard coded and do not follow the `placeholder` option. For anything other than email, override them after init:
 
@@ -224,22 +238,47 @@ The source input is hidden with `display: none`, so any `<label for="...">` poin
        value="jquery, bootstrap">
 ```
 
-### Split a pasted list
+### Pasting lists
 
-The plugin does not split pasted text, so a pasted list is treated as one entry. This delegated handler fixes that for every instance on the page.
+Nothing to set up: pasting splits on commas, semicolons, new lines and tabs, and each item becomes its own tag. A column copied from a spreadsheet or a list copied from another tool works the same way.
+
+```html
+<input type="text" data-plugin-tagsinput
+       data-plugin-options='{"validateEmail": false, "maxTags": 20, "ignoreCase": true}'>
+```
+
+Tell people what was left out:
 
 ```js
-$(document).on('paste', '.ts-tagsinput-field', function (e) {
-    const text = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
-    if (!/[,;\s]/.test(text.trim())) return;
-
-    e.preventDefault();
-    const ti = $(this).closest('.ts-tagsinput').prev().data('__tagsinput');
-    text.split(/[,;\s]+/).forEach(v => ti.addTag(v));
+document.getElementById('keywords').addEventListener('ts.tagsinput.paste', function (e) {
+    const dup  = e.detail.skipped.filter(k => k.reason === 'duplicate').length;
+    const over = e.detail.skipped.filter(k => k.reason === 'max').length;
+    if (dup || over) {
+        alert('Added ' + e.detail.added.length + '. ' + dup + ' already there, ' + over + ' over the limit.');
+    }
 });
 ```
 
-The widget is always inserted directly after the source input, which is why `.prev()` finds it.
+### Make the chips match your server
+
+If the server cleans tags, give the plugin the same rules so what people see is what is saved. This is what the Themestrap blog does:
+
+```js
+$('#tags').themestrapPluginTagsInput({
+    validateEmail: false,
+    maxTags:       20,
+    ignoreCase:    true,
+    normalize:     function (t) { return t.replace(/["'<>,\/\\?#%]/g, '').replace(/\s+/g, ' ').trim(); }
+});
+```
+
+### Space separated lists
+
+Keywords may contain spaces, so a space does not split by default. For a field where it should (hashtags, say):
+
+```js
+$('#tags').themestrapPluginTagsInput({ validateEmail: false, splitOnSpace: true });
+```
 
 ### React to changes in the source input
 
@@ -296,14 +335,20 @@ jQuery treats the dots as event namespaces, so `ts.tagsinput.add` becomes the ev
 **`.data('__tagsinput')` returns undefined**
 Do not chain it off the init call. The bridge returns a jQuery collection of instances, not the source element. Retrieve the instance from a fresh `$(selector)`, or call `.get(0)` on the init result.
 
-**Pasted lists become one invalid entry**
-Pasting is not split. Use the paste recipe above.
+**Pasting `web design` gives one tag**
+A space does not separate keywords by default (many tags contain spaces). Separate with commas or new lines, or set `splitOnSpace: true`.
+
+**A pasted list lost some items**
+Duplicates, entries that failed email validation, and anything over `maxTags` are skipped. They are listed in `e.detail.skipped` of the `ts.tagsinput.paste` event, with a reason for each.
+
+**Pasting inserted text instead of making tags**
+A single word with no separator is deliberately left for the browser to paste as text, so you can edit it before pressing Enter. A separator (even a trailing comma) makes it a tag.
 
 **Source `change` handlers never run**
 `_syncInput()` uses `.val()`, which fires no DOM events. Listen to the plugin events instead.
 
 **Prefilled values are missing**
-Initial values are split on commas only, trimmed, and validated. Semicolon separated values, or invalid addresses when `validateEmail` is on, are silently dropped.
+Initial values are split on commas, trimmed, and validated, and an entry that contains another separator (such as `a; b`) is split further. Invalid addresses when `validateEmail` is on are silently dropped.
 
 **Screen reader label says "Email addresses" on a keyword field**
 The ARIA labels are fixed strings. Override them after init as shown in the ARIA section.

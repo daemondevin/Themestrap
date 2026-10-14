@@ -38248,6 +38248,7 @@ html.dark .ts-sidenav {
 
     const INJECTED_CSS = `
         .ts-tagsinput {
+            position: relative;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -38278,6 +38279,14 @@ html.dark .ts-sidenav {
         }
         .ts-tagsinput-source {
             display: none !important;
+        }
+        .ts-ti-live {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
         }
         .ts-tagsinput-tags {
             display: contents;
@@ -38365,6 +38374,15 @@ html.dark .ts-sidenav {
             this.options = $.extend(true, {}, PluginTagsInput.defaults, opts, {
                 wrapper: this.$el
             });
+
+            // What ends a tag when text is pasted, dropped or inserted. A comma always does, because the source
+            // input stores the tags comma separated.
+            const o     = this.options;
+            const chars = (',' + String(o.separators || '') + '\r').split('').filter((c, i, a) => a.indexOf(c) === i);
+            const esc   = chars.map(c => c === '\n' ? '\\n' : c === '\r' ? '\\r' : c === '\t' ? '\\t' : c.replace(/[\\\]\^-]/g, '\\$&')).join('');
+            const space = o.splitOnSpace === 'auto' ? !!o.validateEmail : !!o.splitOnSpace;
+            this._sepRe = new RegExp('[' + esc + (space ? '\\s' : '') + ']+');
+            this._hasSep = new RegExp('[' + esc + (space ? '\\s' : '') + ']');
             return this;
         }
 
@@ -38390,7 +38408,8 @@ html.dark .ts-sidenav {
                 self.$field.attr('placeholder', self.options.placeholder);
             }
 
-            self.$container.append(self.$tagArea).append(self.$field);
+            self.$live = $('<span class="ts-ti-live" role="status" aria-live="polite"></span>');
+            self.$container.append(self.$tagArea).append(self.$field).append(self.$live);
             self.options.wrapper.addClass('ts-tagsinput-source').after(self.$container);
 
             if (self.initialValue) {
@@ -38412,6 +38431,32 @@ html.dark .ts-sidenav {
                     self.$container.removeClass('ts-ti-focused');
                     const val = $(this).val().trim();
                     if (val) { self.addTag(val); $(this).val(''); }
+                })
+                .on('paste.tagsinput', function(e) {
+                    const cd     = (e.originalEvent || e).clipboardData || window.clipboardData;
+                    const pasted = cd ? cd.getData('text') : '';
+                    // One entry: let the browser paste it as text so it can still be edited
+                    if (!pasted || !self._hasSep.test(pasted.trim())) return;
+
+                    e.preventDefault();
+                    const el  = this;
+                    const val = el.value;
+                    const a   = typeof el.selectionStart === 'number' ? el.selectionStart : val.length;
+                    const b   = typeof el.selectionEnd   === 'number' ? el.selectionEnd   : a;
+                    el.value  = '';
+                    const result = self.addTags(val.slice(0, a) + pasted + val.slice(b));
+                    self._announce(result);
+                    self.$el[0].dispatchEvent(new CustomEvent('ts.tagsinput.paste', {
+                        detail: { added: result.added, skipped: result.skipped, tags: self.getTags() },
+                        bubbles: true
+                    }));
+                })
+                .on('input.tagsinput', function(e) {
+                    // Text that did not come from the keyboard shortcuts or a paste (drop, phone keyboards, dictation)
+                    if ((e.originalEvent || e).isComposing || !self._hasSep.test(this.value)) return;
+                    const parts = this.value.split(self._sepRe);
+                    this.value  = parts.pop();                  // what is still being typed stays in the field
+                    if (parts.length) self.addTags(parts.join(','));
                 })
                 .on('keydown.tagsinput', function(e) {
                     const val = $(this).val().trim();
@@ -38443,42 +38488,99 @@ html.dark .ts-sidenav {
             return this;
         }
 
+        // Cleans one entry: trimmed, then through the normalize option
+        _clean(text) {
+            let t = String(text == null ? '' : text).trim();
+            if (typeof this.options.normalize === 'function') t = String(this.options.normalize(t) == null ? '' : this.options.normalize(t)).trim();
+            return t;
+        }
+
+        _has(tag) {
+            if (!this.options.ignoreCase) return this.tags.indexOf(tag) !== -1;
+            const low = tag.toLowerCase();
+            return this.tags.some(t => t.toLowerCase() === low);
+        }
+
+        _shake() {
+            const self = this;
+            self.$container.addClass('ts-ti-invalid');
+            setTimeout(() => self.$container.removeClass('ts-ti-invalid'), 700);
+        }
+
+        // Adds one entry and says what happened: 'added', 'invalid', 'duplicate', 'max' or 'empty'
+        _addOne(text) {
+            const self = this;
+            const tag  = self._clean(text);
+            if (!tag) return { status: 'empty', tag };
+
+            if (self.options.validateEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tag)) return { status: 'invalid', tag };
+            if (self._has(tag)) return { status: 'duplicate', tag };
+            if (self.options.maxTags > 0 && self.tags.length >= self.options.maxTags) return { status: 'max', tag };
+
+            self.tags.push(tag);
+            self._syncInput();
+
+            const $tag = $(`<span class="ts-tag"></span>`)
+                .text(tag)
+                .append(' <button type="button" class="ts-tag-remove" aria-label="Remove">&times;</button>')
+                .data('ts-tag', tag);
+            self.$tagArea.append($tag);
+            return { status: 'added', tag };
+        }
+
         addTag(text, silent) {
             const self = this;
             if (!text || typeof text !== 'string') return this;
 
-            const trimmed = text.trim();
-            if (!trimmed) return this;
-
-            if (self.options.validateEmail) {
-                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!re.test(trimmed)) {
-                    self.$container.addClass('ts-ti-invalid');
-                    setTimeout(() => self.$container.removeClass('ts-ti-invalid'), 700);
-                    return this;
-                }
+            // "a, b" is two tags, not one tag with a comma in it
+            if (self._hasSep.test(text.trim())) {
+                self.addTags(text, silent);
+                return this;
             }
 
-            if (self.tags.indexOf(trimmed) !== -1) return this;
-
-            self.tags.push(trimmed);
-            self._syncInput();
-
-            const $tag = $(`<span class="ts-tag"></span>`)
-                .text(trimmed)
-                .append(' <button type="button" class="ts-tag-remove" aria-label="Remove">&times;</button>')
-                .data('ts-tag', trimmed);
-
-            self.$tagArea.append($tag);
-
-            if (!silent) {
+            const r = self._addOne(text);
+            if (r.status === 'invalid' || r.status === 'max') self._shake();
+            if (r.status === 'added' && !silent) {
                 self.$el[0].dispatchEvent(new CustomEvent('ts.tagsinput.add', {
-                    detail: { tag: trimmed, tags: self.getTags() },
+                    detail: { tag: r.tag, tags: self.getTags() },
                     bubbles: true
                 }));
             }
-
             return this;
+        }
+
+        // Splits text into entries and adds each one. Returns { added: [tags], skipped: [{ tag, reason }] }.
+        addTags(text, silent) {
+            const self    = this;
+            const added   = [];
+            const skipped = [];
+            if (typeof text !== 'string') return { added, skipped };
+
+            text.split(self._sepRe).forEach(part => {
+                const r = self._addOne(part);
+                if (r.status === 'added') {
+                    added.push(r.tag);
+                    if (!silent) {
+                        self.$el[0].dispatchEvent(new CustomEvent('ts.tagsinput.add', {
+                            detail: { tag: r.tag, tags: self.getTags() },
+                            bubbles: true
+                        }));
+                    }
+                } else if (r.status !== 'empty') {
+                    skipped.push({ tag: r.tag, reason: r.status });
+                }
+            });
+
+            if (skipped.some(k => k.reason === 'invalid' || k.reason === 'max')) self._shake();
+            return { added, skipped };
+        }
+
+        // A short note for screen readers after a batch
+        _announce(result) {
+            const m = this.options.messages;
+            let text = result.added.length ? m.added.replace('%n', result.added.length) : '';
+            if (result.skipped.length) text += (text ? ', ' : '') + m.skipped.replace('%n', result.skipped.length);
+            this.$live.text(text);
         }
 
         removeTag(text) {
@@ -38523,7 +38625,13 @@ html.dark .ts-sidenav {
 
     PluginTagsInput.defaults = {
         placeholder:   'Add address...',
-        validateEmail: true
+        validateEmail: true,
+        separators:    ',;\n\t',    // what ends a tag when text is pasted or dropped. A comma always does. '' for commas only
+        splitOnSpace:  'auto',        // also split on whitespace. 'auto' follows validateEmail: addresses never contain spaces, keywords often do
+        maxTags:       0,             // 0 for no limit. Extra tags are skipped (reason 'max') and the field shakes
+        ignoreCase:    false,         // treat "Web" and "web" as the same tag
+        normalize:     null,          // function (text) { return text; } runs on every entry before it is checked
+        messages:      { added: '%n added', skipped: '%n skipped' }   // spoken to screen readers after a paste
     };
 
     $.extend(themestrap, { PluginTagsInput });
@@ -43746,6 +43854,1077 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             } else {
                 return new PluginRichEditor($this, opts);
             }
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Number Input
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginNumberInput';
+    const STYLE_ID     = 'ts-numberinput-styles';
+    const EVENT        = 'ts.numberinput.change';
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    const ICON = {
+        minus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>',
+        plus:  '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+        up:    '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>',
+        down:  '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'
+    };
+
+    const LIGHT = `
+        --ni-h:            var(--ts-ni-h, 2.45rem);
+        --ni-bg:           var(--ts-ni-bg, #ffffff);
+        --ni-border:       var(--ts-ni-border, rgba(0,0,0,.18));
+        --ni-border-focus: var(--ts-ni-border-focus, #00a89f);
+        --ni-radius:       var(--ts-ni-radius, 7px);
+        --ni-text:         var(--ts-ni-text, #1f2937);
+        --ni-muted:        var(--ts-ni-muted, rgba(31,41,55,.55));
+        --ni-btn-bg:       var(--ts-ni-btn-bg, rgba(0,0,0,.035));
+        --ni-btn-hover:    var(--ts-ni-btn-hover, rgba(0,0,0,.09));
+        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px rgba(0,168,159,.20));
+    `;
+    const DARK = `
+        --ni-bg:           var(--ts-ni-bg, rgba(255,255,255,.03));
+        --ni-border:       var(--ts-ni-border, rgba(255,255,255,.14));
+        --ni-border-focus: var(--ts-ni-border-focus, #00c7be);
+        --ni-text:         var(--ts-ni-text, #d5dfeb);
+        --ni-muted:        var(--ts-ni-muted, rgba(213,223,235,.55));
+        --ni-btn-bg:       var(--ts-ni-btn-bg, rgba(255,255,255,.05));
+        --ni-btn-hover:    var(--ts-ni-btn-hover, rgba(255,255,255,.12));
+        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px rgba(0,199,190,.22));
+    `;
+
+    const CSS_TEXT = `
+        .ts-ni { ${LIGHT} }
+        @media (prefers-color-scheme: dark) { .ts-ni { ${DARK} } }
+        html.dark .ts-ni,
+        [data-bs-theme="dark"] .ts-ni { ${DARK} }
+        [data-bs-theme="light"] .ts-ni { ${LIGHT} }
+
+        .ts-ni {
+            display: inline-flex;
+            align-items: stretch;
+            width: var(--ts-ni-width, auto);
+            height: var(--ni-h);
+            background: var(--ni-bg);
+            border: 1px solid var(--ni-border);
+            border-radius: var(--ni-radius);
+            color: var(--ni-text);
+            overflow: hidden;
+            transition: border-color .15s, box-shadow .15s;
+            box-sizing: border-box;
+        }
+        .ts-ni:focus-within { border-color: var(--ni-border-focus); box-shadow: var(--ni-ring); }
+        .ts-ni--block { display: flex; width: 100%; }
+        .ts-ni--sm { --ni-h: 2rem; font-size: .85rem; }
+        .ts-ni--lg { --ni-h: 2.9rem; font-size: 1.05rem; }
+        .ts-ni--disabled { opacity: .55; }
+
+        .ts-ni-field { display: flex; align-items: center; flex: 1 1 auto; min-width: 0; }
+        .ts-ni input.ts-ni-input {
+            flex: 1 1 auto;
+            min-width: 2.6rem;
+            width: var(--ts-ni-input-width, 4.5rem);
+            height: 100%;
+            margin: 0;
+            padding: 0 .4rem;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            text-align: center;
+            box-shadow: none;
+            border-radius: 0;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        .ts-ni input.ts-ni-input::-webkit-outer-spin-button,
+        .ts-ni input.ts-ni-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .ts-ni--block input.ts-ni-input { width: auto; }
+        .ts-ni-unit { padding-right: .6rem; color: var(--ni-muted); font-size: .85em; pointer-events: none; white-space: nowrap; }
+
+        .ts-ni-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 var(--ni-h);
+            width: var(--ni-h);
+            padding: 0;
+            border: 0;
+            background: var(--ni-btn-bg);
+            color: var(--ni-text);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            transition: background-color .12s;
+        }
+        .ts-ni-btn:hover { background: var(--ni-btn-hover); }
+        .ts-ni-btn:active { background: var(--ni-btn-hover); }
+        .ts-ni-btn.is-disabled { opacity: .35; cursor: default; background: var(--ni-btn-bg); }
+        .ts-ni--split .ts-ni-dec { border-right: 1px solid var(--ni-border); }
+        .ts-ni--split .ts-ni-inc { border-left: 1px solid var(--ni-border); }
+
+        .ts-ni-stack { display: flex; flex-direction: column; flex: 0 0 1.9rem; border-left: 1px solid var(--ni-border); }
+        .ts-ni--stacked .ts-ni-btn { flex: 1 1 50%; width: 100%; height: 50%; }
+        .ts-ni--stacked .ts-ni-inc { border-bottom: 1px solid var(--ni-border); }
+
+        @media (prefers-reduced-motion: reduce) { .ts-ni, .ts-ni-btn { transition: none; } }
+    `;
+
+    function decimals(n) {
+        const s = String(n);
+        if (/e-/.test(s)) return parseInt(s.split('e-')[1], 10);
+        const i = s.indexOf('.');
+        return i === -1 ? 0 : s.length - i - 1;
+    }
+
+    class PluginNumberInput {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el     = $el;
+            this._uid    = ++seq;
+            this._ns     = `.tsni${this._uid}`;
+            this._failed = false;
+            this._hold   = null;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            const el = this.$el[0];
+            const fromAttr = {};
+            ['min', 'max', 'step'].forEach((k) => {
+                const v = el.getAttribute(k);
+                if (v !== null && v !== '' && !isNaN(parseFloat(v))) fromAttr[k] = parseFloat(v);
+            });
+            this.options = $.extend(true, {}, PluginNumberInput.defaults, fromAttr, opts, { wrapper: this.$el });
+            if (!(this.options.step > 0)) this.options.step = 1;
+            this.options.precision = this.options.precision != null
+                ? this.options.precision
+                : Math.max(decimals(this.options.step), isFinite(this.options.min) ? decimals(this.options.min) : 0);
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const o    = self.options;
+
+            if (!self.$el.is('input')) {
+                console.error('PluginNumberInput: the host element must be an <input>.');
+                self._failed = true;
+                self.$el.removeData(instanceName);
+                return this;
+            }
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style       = document.createElement('style');
+                style.id          = STYLE_ID;
+                style.textContent = CSS_TEXT;
+                document.head.appendChild(style);
+            }
+
+            const el = self.$el[0];
+            self._origType = el.getAttribute('type');
+            el.setAttribute('type', 'number');
+            if (isFinite(o.min)) el.setAttribute('min', o.min);
+            if (isFinite(o.max)) el.setAttribute('max', o.max);
+            el.setAttribute('step', o.step);
+            self.$el.addClass('ts-ni-input');
+
+            const layout = o.layout === 'stacked' ? 'stacked' : 'split';
+            self.$wrap = $(`<div class="ts-ni ts-ni--${layout}" role="group"></div>`);
+            if (o.size === 'sm' || o.size === 'lg') self.$wrap.addClass(`ts-ni--${o.size}`);
+            if (o.block) self.$wrap.addClass('ts-ni--block');
+
+            const id = el.id || `ts-ni-${self._uid}`;
+            if (!el.id) el.id = id;
+
+            const btn = (cls, label, icon) => $(`<button type="button" class="ts-ni-btn ${cls}" tabindex="-1" aria-controls="${id}" aria-label="${label}">${icon}</button>`);
+            self.$dec = btn('ts-ni-dec', o.labels.decrease, layout === 'stacked' ? ICON.down : ICON.minus);
+            self.$inc = btn('ts-ni-inc', o.labels.increase, layout === 'stacked' ? ICON.up : ICON.plus);
+
+            self.$wrap.insertBefore(self.$el);
+            const $field = $('<div class="ts-ni-field"></div>').append(self.$el);
+            if (o.unit) $field.append($('<span class="ts-ni-unit" aria-hidden="true"></span>').text(o.unit));
+
+            if (layout === 'stacked') {
+                self.$wrap.append($field, $('<div class="ts-ni-stack"></div>').append(self.$inc, self.$dec));
+            } else {
+                self.$wrap.append(self.$dec, $field, self.$inc);
+            }
+
+            if (el.disabled || el.readOnly) self._applyDisabled(true);
+            self._lastValue = self.getValue();
+            self._syncButtons();
+            return this;
+        }
+
+        events() {
+            const self = this;
+            if (self._failed) return this;
+            const ns = self._ns;
+
+            // Press, hold to repeat
+            const down = (dir) => (e) => {
+                if (e.type === 'mousedown' && e.button !== 0) return;
+                e.preventDefault();                 // keep focus where it is
+                self.$el.trigger('focus');
+                self._startHold(dir);
+            };
+            const stop = () => self._stopHold();
+            const usePointer = typeof window.PointerEvent === 'function';
+            const downEvt = usePointer ? 'pointerdown' : 'mousedown touchstart';
+            self.$dec.on(`${downEvt.split(' ').join(ns + ' ')}${ns}`, down(-1));
+            self.$inc.on(`${downEvt.split(' ').join(ns + ' ')}${ns}`, down(1));
+            $(document).on(`${usePointer ? 'pointerup pointercancel' : 'mouseup touchend touchcancel'}${ns}`, stop);
+            self.$dec.add(self.$inc).on(`${usePointer ? 'pointerleave' : 'mouseleave'}${ns}`, stop);
+
+            self.$el
+                .on(`keydown${ns}`, (e) => self._onKeydown(e))
+                .on(`input${ns}`, () => self._onTyping())
+                .on(`blur${ns}`, () => self._commit('typing'))
+                .on(`wheel${ns}`, (e) => {
+                    if (!self.options.wheel || document.activeElement !== self.$el[0]) return;
+                    e.preventDefault();
+                    const up = (e.originalEvent || e).deltaY < 0;
+                    self._step(up ? 1 : -1, 'wheel');
+                });
+
+            return this;
+        }
+
+        // Value helpers
+
+        _bounds() {
+            return { min: isFinite(this.options.min) ? this.options.min : -Infinity, max: isFinite(this.options.max) ? this.options.max : Infinity };
+        }
+
+        _clamp(v) {
+            const { min, max } = this._bounds();
+            return Math.min(max, Math.max(min, v));
+        }
+
+        _format(v) {
+            return v === null || isNaN(v) ? '' : Number(v).toFixed(this.options.precision).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+        }
+
+        getValue() {
+            const raw = String(this.$el.val()).trim().replace(',', '.');
+            if (raw === '' || isNaN(Number(raw))) return null;
+            return Number(raw);
+        }
+
+        _write(v) {
+            this.$el.val(this._format(v));
+            this._lastValue = v;
+            this._syncButtons();
+        }
+
+        _syncButtons() {
+            const v = this.getValue();
+            const { min, max } = this._bounds();
+            this.$dec.toggleClass('is-disabled', v !== null && v <= min).attr('aria-disabled', v !== null && v <= min ? 'true' : 'false');
+            this.$inc.toggleClass('is-disabled', v !== null && v >= max).attr('aria-disabled', v !== null && v >= max ? 'true' : 'false');
+        }
+
+        _emit(source, previous, silent) {
+            if (silent) return;
+            const el = this.$el[0];
+            el.dispatchEvent(new Event('input',  { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(new CustomEvent(EVENT, {
+                bubbles: true,
+                detail: { instance: this, value: this.getValue(), previousValue: previous, source }
+            }));
+            if (typeof this.options.onChange === 'function') this.options.onChange.call(this, this.getValue());
+        }
+
+        // Moves by n steps from the current value (or from the bound when empty)
+        _step(n, source) {
+            if (this._isLocked()) return this;
+            const o = this.options;
+            const prev = this.getValue();
+            const { min } = this._bounds();
+            let base = prev;
+            if (base === null) base = isFinite(min) ? min - o.step * Math.sign(n) : 0;
+            if (o.snap) base = Math.round(base / o.step) * o.step;
+            const next = this._clamp(Number((base + n * o.step).toFixed(Math.max(o.precision, 8))));
+            if (prev !== null && next === prev) { this._syncButtons(); return this; }
+            this._write(next);
+            this._emit(source, prev, false);
+            return this;
+        }
+
+        increment(n) { return this._step(n === undefined ? 1 : n, 'api'); }
+        decrement(n) { return this._step(-(n === undefined ? 1 : n), 'api'); }
+
+        setValue(v, silent) {
+            const prev = this.getValue();
+            const num = v === null || v === '' || isNaN(Number(v)) ? null : this._clamp(Number(v));
+            this._write(num);
+            if (num !== prev) this._emit('api', prev, !!silent);
+            return this;
+        }
+
+        setMin(n) { this.options.min = n; this.$el.attr('min', n); this._syncButtons(); return this; }
+        setMax(n) { this.options.max = n; this.$el.attr('max', n); this._syncButtons(); return this; }
+        setStep(n) {
+            if (!(n > 0)) return this;
+            this.options.step = n;
+            this.options.precision = Math.max(decimals(n), isFinite(this.options.min) ? decimals(this.options.min) : 0);
+            this.$el.attr('step', n);
+            return this;
+        }
+
+        // Typing and committing
+
+        _onTyping() {
+            const o = this.options;
+            let raw = String(this.$el.val());
+            if (o.precision === 0 && /[.,]/.test(raw)) raw = raw.replace(/[.,].*$/, '');
+            if (raw !== String(this.$el.val())) this.$el.val(raw);
+            this._syncButtons();
+        }
+
+        // Applies the typed text: parse, clamp, format. An empty field stays empty.
+        _commit(source) {
+            const prev = this._lastValue;
+            const v = this.getValue();
+            if (v === null) { this._lastValue = null; this._syncButtons(); return; }
+            const next = this._clamp(this.options.snap ? Math.round(v / this.options.step) * this.options.step : v);
+            this._write(next);
+            if (next !== prev) this._emit(source, prev, false);
+        }
+
+        _onKeydown(e) {
+            const o = this.options;
+            if (e.isComposing) return;
+            const big = e.shiftKey ? 10 : 1;
+            switch (e.key) {
+                case 'ArrowUp':   e.preventDefault(); this._step(big, 'keyboard'); break;
+                case 'ArrowDown': e.preventDefault(); this._step(-big, 'keyboard'); break;
+                case 'PageUp':    e.preventDefault(); this._step(10, 'keyboard'); break;
+                case 'PageDown':  e.preventDefault(); this._step(-10, 'keyboard'); break;
+                case 'Home':
+                    if (isFinite(o.min)) { e.preventDefault(); this.setValue(o.min); }
+                    break;
+                case 'End':
+                    if (isFinite(o.max)) { e.preventDefault(); this.setValue(o.max); }
+                    break;
+                case 'Enter':     this._commit('typing'); break;
+            }
+        }
+
+        // Press and hold: first step now, then repeat, speeding up
+        _startHold(dir) {
+            const self = this;
+            self._stopHold();
+            self._step(dir, 'button');
+            if (!self.options.repeat) return;
+            let n = 0;
+            const tick = () => {
+                self._step(dir, 'button');
+                n++;
+                const interval = Math.max(self.options.holdMinInterval, self.options.holdInterval - n * 4);
+                self._hold = setTimeout(tick, interval);
+            };
+            self._hold = setTimeout(tick, self.options.holdDelay);
+        }
+
+        _stopHold() {
+            clearTimeout(this._hold);
+            this._hold = null;
+        }
+
+        _isLocked() {
+            return this.$el[0].disabled || this.$el[0].readOnly;
+        }
+
+        _applyDisabled(on) {
+            this.$wrap.toggleClass('ts-ni--disabled', !!on);
+            this.$dec.add(this.$inc).attr('aria-disabled', on ? 'true' : 'false');
+        }
+
+        enable()  { this.$el.prop('disabled', false); this._applyDisabled(false); this._syncButtons(); return this; }
+        disable() { this.$el.prop('disabled', true);  this._applyDisabled(true);  return this; }
+
+        destroy() {
+            const self = this;
+            if (self._failed) return this;
+            self._stopHold();
+            $(document).off(self._ns);
+            self.$el.off(self._ns);
+            self.$dec.off(self._ns).remove();
+            self.$inc.off(self._ns).remove();
+            self.$el.removeClass('ts-ni-input').insertBefore(self.$wrap);
+            self.$wrap.remove();
+            if (self._origType === null) self.$el.removeAttr('type'); else self.$el.attr('type', self._origType);
+            self.$el.removeData(instanceName);
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+            return this;
+        }
+    }
+
+    PluginNumberInput.defaults = {
+        min:            null,         // read from the min attribute when not given
+        max:            null,
+        step:           1,            // read from the step attribute when not given
+        precision:      null,         // decimals shown. Defaults to those of step and min
+        layout:         'split',      // 'split' (minus and plus at the sides) or 'stacked' (arrows at the right)
+        size:           'md',         // 'sm' | 'md' | 'lg'
+        block:          false,        // fill the width of the parent
+        unit:           '',           // text shown after the value, such as 'posts'
+        repeat:         true,         // hold a button to repeat
+        holdDelay:      420,          // ms before repeating starts
+        holdInterval:   90,           // ms between repeats, speeding up
+        holdMinInterval: 25,
+        wheel:          false,        // change with the mouse wheel while focused
+        snap:           false,        // round typed values to a multiple of step
+        labels:         { increase: 'Increase', decrease: 'Decrease' },
+        onChange:       null          // function (value) {}
+    };
+
+    $.extend(themestrap, { PluginNumberInput });
+
+    $.fn.themestrapPluginNumberInput = function (opts) {
+        const args = Array.prototype.slice.call(arguments, 1);
+        return this.map(function () {
+            const $this = $(this);
+            const inst  = $this.data(instanceName);
+            if (inst) {
+                if (typeof opts === 'string' && typeof inst[opts] === 'function') {
+                    return inst[opts].apply(inst, args);
+                }
+                return inst;
+            }
+            return new PluginNumberInput($this, typeof opts === 'object' ? opts : undefined);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Time Picker
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginTimePicker';
+    const STYLE_ID     = 'ts-timepicker-styles';
+    const EVENT        = 'ts.timepicker';
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    const ICON_CLOCK = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+
+    const LIGHT = `
+        --tp-h:            var(--ts-tp-h, 2.45rem);
+        --tp-bg:           var(--ts-tp-bg, #ffffff);
+        --tp-border:       var(--ts-tp-border, rgba(0,0,0,.18));
+        --tp-border-focus: var(--ts-tp-border-focus, #00a89f);
+        --tp-radius:       var(--ts-tp-radius, 7px);
+        --tp-text:         var(--ts-tp-text, #1f2937);
+        --tp-muted:        var(--ts-tp-muted, rgba(31,41,55,.55));
+        --tp-pop-bg:       var(--ts-tp-pop-bg, #ffffff);
+        --tp-hover:        var(--ts-tp-hover, rgba(0,0,0,.06));
+        --tp-accent:       var(--ts-tp-accent, #00a89f);
+        --tp-accent-text:  var(--ts-tp-accent-text, #04211f);
+        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px rgba(0,168,159,.20));
+        --tp-shadow:       var(--ts-tp-shadow, 0 12px 32px -6px rgba(0,0,0,.22), 0 4px 10px -4px rgba(0,0,0,.12));
+    `;
+    const DARK = `
+        --tp-bg:           var(--ts-tp-bg, rgba(255,255,255,.03));
+        --tp-border:       var(--ts-tp-border, rgba(255,255,255,.14));
+        --tp-border-focus: var(--ts-tp-border-focus, #00c7be);
+        --tp-text:         var(--ts-tp-text, #d5dfeb);
+        --tp-muted:        var(--ts-tp-muted, rgba(213,223,235,.55));
+        --tp-pop-bg:       var(--ts-tp-pop-bg, #0e2238);
+        --tp-hover:        var(--ts-tp-hover, rgba(255,255,255,.08));
+        --tp-accent:       var(--ts-tp-accent, #00c7be);
+        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px rgba(0,199,190,.22));
+        --tp-shadow:       var(--ts-tp-shadow, 0 12px 32px -6px rgba(0,0,0,.6), 0 4px 10px -4px rgba(0,0,0,.4));
+    `;
+
+    const CSS_TEXT = `
+        .ts-tp { ${LIGHT} }
+        @media (prefers-color-scheme: dark) { .ts-tp { ${DARK} } }
+        html.dark .ts-tp,
+        [data-bs-theme="dark"] .ts-tp { ${DARK} }
+        [data-bs-theme="light"] .ts-tp { ${LIGHT} }
+
+        .ts-tp { position: relative; display: inline-block; color: var(--tp-text); }
+        .ts-tp--block { display: block; }
+        .ts-tp-field {
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+            height: var(--tp-h);
+            padding: 0 .35rem 0 .7rem;
+            background: var(--tp-bg);
+            border: 1px solid var(--tp-border);
+            border-radius: var(--tp-radius);
+            box-sizing: border-box;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .ts-tp-field:focus-within, .ts-tp.is-open .ts-tp-field { border-color: var(--tp-border-focus); box-shadow: var(--tp-ring); }
+        .ts-tp--disabled { opacity: .55; }
+        .ts-tp-icon { display: inline-flex; color: var(--tp-muted); }
+        input.ts-tp-input {
+            flex: 1 1 auto;
+            min-width: 4.5rem;
+            width: 5.5rem;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            box-shadow: none;
+        }
+        input.ts-tp-input::placeholder { color: var(--tp-muted); }
+        .ts-tp--block input.ts-tp-input { width: auto; }
+        .ts-tp-toggle {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 1.9rem; height: 1.9rem; padding: 0; border: 0; border-radius: 5px;
+            background: transparent; color: var(--tp-muted); cursor: pointer;
+        }
+        .ts-tp-toggle:hover { background: var(--tp-hover); color: var(--tp-text); }
+
+        .ts-tp-pop {
+            display: none;
+            position: fixed;
+            z-index: 1070;
+            padding: 8px;
+            background: var(--tp-pop-bg);
+            border: 1px solid var(--tp-border);
+            border-radius: 10px;
+            box-shadow: var(--tp-shadow);
+            box-sizing: border-box;
+        }
+        .ts-tp.is-open > .ts-tp-pop { display: block; }
+        .ts-tp--inline > .ts-tp-pop { display: block; position: static; margin-top: 6px; box-shadow: none; }
+
+        .ts-tp-cols { display: flex; gap: 6px; }
+        .ts-tp-col {
+            position: relative;
+            flex: 1 1 0;
+            min-width: 3.6rem;
+            height: 11.25rem;
+            overflow-y: auto;
+            padding: 2px;
+            border-radius: 8px;
+            outline: none;
+            scrollbar-width: thin;
+            scrollbar-color: var(--tp-border) transparent;
+        }
+        .ts-tp-col:focus-visible { box-shadow: var(--tp-ring); }
+        .ts-tp-item {
+            display: flex; align-items: center; justify-content: center;
+            height: 2rem; border-radius: 6px; cursor: pointer;
+            font-variant-numeric: tabular-nums; user-select: none;
+        }
+        .ts-tp-item:hover { background: var(--tp-hover); }
+        .ts-tp-item[aria-selected="true"] { background: var(--tp-accent); color: var(--tp-accent-text); font-weight: 700; }
+        .ts-tp-foot { display: flex; justify-content: space-between; gap: .5rem; padding: 8px 4px 2px; }
+        .ts-tp-link {
+            padding: 2px 4px; border: 0; background: none; color: var(--tp-accent);
+            font: inherit; font-size: .88em; font-weight: 600; cursor: pointer; border-radius: 4px;
+        }
+        .ts-tp-link:hover { text-decoration: underline; }
+        @media (prefers-reduced-motion: reduce) { .ts-tp-field { transition: none; } }
+    `;
+
+    const pad = (n) => (n < 10 ? '0' : '') + n;
+
+    // Understands "8:30pm", "830", "2030", "8.30 am", "9", "20:15"
+    function parseTime(input) {
+        let s = String(input == null ? '' : input).trim().toLowerCase().replace(/\s+/g, '');
+        if (s === '') return null;
+        let period = '';
+        const pm = s.match(/(a\.?m?\.?|p\.?m?\.?)$/);
+        if (pm) { period = pm[1][0]; s = s.slice(0, s.length - pm[1].length); }
+        let h, m;
+        let x;
+        if ((x = s.match(/^(\d{1,2})[:.h](\d{1,2})$/))) { h = +x[1]; m = +x[2]; }
+        else if ((x = s.match(/^(\d{1,2})$/)))          { h = +x[1]; m = 0; }
+        else if ((x = s.match(/^(\d{3,4})$/)))          { h = +x[1].slice(0, -2); m = +x[1].slice(-2); }
+        else return null;
+        if (period) {
+            if (h < 1 || h > 12) return null;
+            if (period === 'a') h = h === 12 ? 0 : h;
+            else h = h === 12 ? 12 : h + 12;
+        }
+        if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+        return { hour: h, minute: m };
+    }
+
+    class PluginTimePicker {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el     = $el;
+            this._uid    = ++seq;
+            this._ns     = `.tstp${this._uid}`;
+            this._failed = false;
+            this._time   = null;
+            this._open   = false;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginTimePicker.defaults, opts, { wrapper: this.$el });
+            let f = this.options.format;
+            if (f !== '12' && f !== '24') {
+                try { f = new Intl.DateTimeFormat(this.options.locale || undefined, { hour: 'numeric' }).resolvedOptions().hour12 ? '12' : '24'; }
+                catch (e) { f = '24'; }
+            }
+            this.options.format = f;
+            this.options.minuteStep = Math.max(1, Math.min(30, parseInt(this.options.minuteStep, 10) || 5));
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const o    = self.options;
+
+            if (!self.$el.is('input')) {
+                console.error('PluginTimePicker: the host element must be an <input>.');
+                self._failed = true;
+                self.$el.removeData(instanceName);
+                return this;
+            }
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style       = document.createElement('style');
+                style.id          = STYLE_ID;
+                style.textContent = CSS_TEXT;
+                document.head.appendChild(style);
+            }
+
+            const el = self.$el[0];
+            self._origType = el.getAttribute('type');
+            self._origId   = el.id;
+            const baseId   = self._origId || `ts-tp-${self._uid}`;
+            const popId    = `${baseId}-popover`;
+
+            self.$wrap = $('<div class="ts-tp"></div>');
+            if (o.block) self.$wrap.addClass('ts-tp--block');
+            if (o.inline) self.$wrap.addClass('ts-tp--inline');
+
+            self.$input = $(`<input type="text" class="ts-tp-input" inputmode="text" autocomplete="off" spellcheck="false"
+                                    role="combobox" aria-haspopup="dialog" aria-expanded="false" aria-controls="${popId}">`)
+                .attr('placeholder', o.placeholder)
+                .attr('aria-label', el.getAttribute('aria-label') || o.ariaLabel);
+            // The original keeps its id (so $('#id') and .data() work as everywhere else in Themestrap).
+            // Labels that point at it are wired to the visible field instead: click focuses it, and it is named by them.
+            if (self._origId) {
+                self.$input.attr('id', `${self._origId}-input`);
+                self.$labels = $(`label[for="${self._origId}"]`);
+                const ids = [];
+                self.$labels.each(function (i) {
+                    if (!this.id) this.id = `${self._origId}-label-${i}`;
+                    ids.push(this.id);
+                });
+                if (ids.length) self.$input.attr('aria-labelledby', ids.join(' ')).removeAttr('aria-label');
+                self.$labels.on(`click${self._ns}`, (e) => { e.preventDefault(); self.$input.trigger('focus'); });
+            }
+            self.$toggle = $(`<button type="button" class="ts-tp-toggle" tabindex="-1" aria-label="${o.labels.choose}">${ICON_CLOCK}</button>`);
+            self.$field = $('<div class="ts-tp-field"></div>')
+                .append($(`<span class="ts-tp-icon" aria-hidden="true">${ICON_CLOCK}</span>`), self.$input);
+            if (!o.inline) self.$field.append(self.$toggle);
+
+            self.$pop = $(`<div class="ts-tp-pop" id="${popId}" role="dialog" aria-label="${o.labels.choose}"></div>`);
+            self.$cols = $('<div class="ts-tp-cols"></div>');
+            self.$hours = self._column(o.labels.hours);
+            self.$mins  = self._column(o.labels.minutes);
+            self.$cols.append(self.$hours, self.$mins);
+            if (o.format === '12') {
+                self.$period = self._column(o.labels.period);
+                self.$cols.append(self.$period);
+            }
+            self.$pop.append(self.$cols);
+            if (o.showNow) {
+                self.$now  = $(`<button type="button" class="ts-tp-link ts-tp-now">${o.labels.now}</button>`);
+                self.$done = $(`<button type="button" class="ts-tp-link ts-tp-done">${o.labels.done}</button>`);
+                self.$pop.append($('<div class="ts-tp-foot"></div>').append(self.$now, o.inline ? '' : self.$done));
+            }
+
+            self.$wrap.insertBefore(self.$el);
+            self.$wrap.append(self.$el, self.$field, self.$pop);
+            el.setAttribute('type', 'hidden');
+
+            self._buildHours();
+            self._buildPeriod();
+            const initial = parseTime(el.value);
+            self._time = initial;
+            self._renderValue();
+            if (el.disabled) self._applyDisabled(true);
+            if (o.inline) self.$wrap.addClass('is-open');
+            return this;
+        }
+
+        _column(label) {
+            return $(`<div class="ts-tp-col" role="listbox" tabindex="0" aria-label="${label}"></div>`);
+        }
+
+        events() {
+            const self = this;
+            if (self._failed) return this;
+            const ns = self._ns;
+
+            self.$toggle.on(`click${ns}`, () => { self.toggle(); self.$input.trigger('focus'); });
+            self.$input
+                .on(`keydown${ns}`, (e) => self._onFieldKey(e))
+                .on(`blur${ns}`, () => self._commitText('typing'))
+                .on(`click${ns}`, () => { if (self.options.openOnClick) self.open(); });
+
+            // Picking: pointerdown keeps focus in the field and acts at once
+            self.$pop.on(`mousedown${ns}`, (e) => e.preventDefault());
+            self.$pop.on(`click${ns}`, '.ts-tp-item', function () {
+                const $i = $(this);
+                self._pick($i.closest('.ts-tp-col')[0] === self.$hours[0] ? 'h' : ($i.closest('.ts-tp-col')[0] === self.$mins[0] ? 'm' : 'p'), $i.data('v'));
+            });
+            self.$pop.on(`keydown${ns}`, '.ts-tp-col', (e) => self._onColKey(e));
+            if (self.$now) self.$now.on(`click${ns}`, () => self.setNow('now'));
+            if (self.$done) self.$done.on(`click${ns}`, () => { self.close(); self.$input.trigger('focus'); });
+
+            if (!self.options.inline) {
+                $(document).on(`mousedown${ns} touchstart${ns}`, (e) => {
+                    if (self._open && !self.$wrap[0].contains(e.target)) self.close();
+                });
+                $(document).on(`focusin${ns}`, (e) => {
+                    if (self._open && !self.$wrap[0].contains(e.target)) self.close();
+                });
+                $(window).on(`resize${ns}`, () => { if (self._open) self._position(); });
+                document.addEventListener('scroll', self._onScroll = () => { if (self._open) self._position(); }, true);
+            }
+            return this;
+        }
+
+        // Building
+
+        _buildHours() {
+            const o = this.options;
+            const list = o.format === '12' ? Array.from({ length: 12 }, (_, i) => i + 1) : Array.from({ length: 24 }, (_, i) => i);
+            this.$hours.html(list.map((h) => `<div class="ts-tp-item" role="option" data-v="${h}" aria-selected="false">${pad(h)}</div>`).join(''));
+        }
+
+        _buildMinutes() {
+            const o = this.options;
+            const set = [];
+            for (let m = 0; m < 60; m += o.minuteStep) set.push(m);
+            if (this._time && set.indexOf(this._time.minute) === -1) { set.push(this._time.minute); set.sort((a, b) => a - b); }
+            this.$mins.html(set.map((m) => `<div class="ts-tp-item" role="option" data-v="${m}" aria-selected="false">${pad(m)}</div>`).join(''));
+        }
+
+        _buildPeriod() {
+            if (!this.$period) return;
+            const o = this.options;
+            this.$period.html(`<div class="ts-tp-item" role="option" data-v="am" aria-selected="false">${o.labels.am}</div><div class="ts-tp-item" role="option" data-v="pm" aria-selected="false">${o.labels.pm}</div>`);
+        }
+
+        // Value and display
+
+        _display(t) {
+            if (!t) return '';
+            const o = this.options;
+            if (o.format === '24') return `${pad(t.hour)}:${pad(t.minute)}`;
+            const h12 = t.hour % 12 === 0 ? 12 : t.hour % 12;
+            return `${h12}:${pad(t.minute)} ${t.hour < 12 ? o.labels.am : o.labels.pm}`;
+        }
+
+        _canonical(t) { return t ? `${pad(t.hour)}:${pad(t.minute)}` : ''; }
+
+        _renderValue() {
+            const t = this._time;
+            this.$el.val(this._canonical(t));
+            this.$input.val(this._display(t));
+            this._buildMinutes();
+            this._markSelected();
+        }
+
+        _markSelected() {
+            const t = this._time;
+            const o = this.options;
+            const set = ($col, v) => {
+                $col.find('.ts-tp-item').each(function () {
+                    const on = t && String($(this).data('v')) === String(v);
+                    this.setAttribute('aria-selected', on ? 'true' : 'false');
+                });
+            };
+            set(this.$hours, t ? (o.format === '12' ? (t.hour % 12 === 0 ? 12 : t.hour % 12) : t.hour) : null);
+            set(this.$mins, t ? t.minute : null);
+            if (this.$period) set(this.$period, t ? (t.hour < 12 ? 'am' : 'pm') : null);
+            if (this._open) this._centerSelected();
+        }
+
+        _centerSelected() {
+            [this.$hours, this.$mins, this.$period].forEach(($c) => {
+                if (!$c) return;
+                const sel = $c.find('[aria-selected="true"]')[0];
+                if (!sel) { $c[0].scrollTop = 0; return; }
+                $c[0].scrollTop = Math.max(0, sel.offsetTop - ($c[0].clientHeight - sel.offsetHeight) / 2);
+            });
+        }
+
+        _emit(source, previous, silent) {
+            if (silent) return;
+            const el = this.$el[0];
+            const t  = this._time;
+            el.dispatchEvent(new Event('input',  { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(new CustomEvent(`${EVENT}.change`, {
+                bubbles: true,
+                detail: { instance: this, value: this._canonical(t), hour: t ? t.hour : null, minute: t ? t.minute : null, display: this._display(t), source, previousValue: previous }
+            }));
+            if (typeof this.options.onChange === 'function') this.options.onChange.call(this, this._canonical(t));
+        }
+
+        _apply(t, source, silent) {
+            const prev = this._canonical(this._time);
+            this._time = t;
+            this._renderValue();
+            if (this._canonical(t) !== prev) this._emit(source, prev, silent);
+        }
+
+        getValue() { return this._canonical(this._time); }
+        getTime()  { return this._time ? { hour: this._time.hour, minute: this._time.minute } : null; }
+
+        setValue(v, silent) {
+            let t = null;
+            if (v && typeof v === 'object') t = { hour: v.hour, minute: v.minute };
+            else if (v !== '' && v != null) t = parseTime(v);
+            this._apply(t, 'api', !!silent);
+            return this;
+        }
+
+        setNow(source) {
+            const d = new Date();
+            this._apply({ hour: d.getHours(), minute: d.getMinutes() }, source || 'api', false);
+            return this;
+        }
+
+        // Typing
+
+        _commitText(source) {
+            const text = this.$input.val();
+            if (text.trim() === '') { if (this._time) this._apply(null, source, false); return; }
+            const t = parseTime(text);
+            if (t) this._apply(t, source, false);
+            else this._renderValue();           // unreadable: put the last good value back
+        }
+
+        _onFieldKey(e) {
+            if (e.isComposing) return;
+            const o = this.options;
+            if (e.key === 'ArrowDown' && e.altKey) { e.preventDefault(); this.open(); return; }
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                this._commitText('typing');
+                const dir = e.key === 'ArrowUp' ? 1 : -1;
+                const t = this._time || parseTime(o.defaultTime) || { hour: 9, minute: 0 };
+                let total = t.hour * 60 + t.minute + dir * (e.shiftKey ? 60 : o.minuteStep);
+                if (!this._time) total = t.hour * 60 + t.minute;
+                total = ((total % 1440) + 1440) % 1440;
+                this._apply({ hour: Math.floor(total / 60), minute: total % 60 }, 'keyboard', false);
+                return;
+            }
+            if (e.key === 'Enter') { this._commitText('typing'); if (this._open && !o.inline) { e.preventDefault(); this.close(); } return; }
+            if (e.key === 'Escape' && this._open && !o.inline) { e.preventDefault(); e.stopPropagation(); this.close(); }
+        }
+
+        // Picking from the popover
+
+        _pick(part, v) {
+            const o = this.options;
+            const t = this._time ? { hour: this._time.hour, minute: this._time.minute } : (parseTime(o.defaultTime) || { hour: 9, minute: 0 });
+            if (part === 'h') {
+                const h = parseInt(v, 10);
+                if (o.format === '12') t.hour = (h % 12) + (t.hour >= 12 ? 12 : 0); else t.hour = h;
+            } else if (part === 'm') {
+                t.minute = parseInt(v, 10);
+            } else {
+                if (v === 'am' && t.hour >= 12) t.hour -= 12;
+                if (v === 'pm' && t.hour < 12) t.hour += 12;
+            }
+            this._apply(t, 'popover', false);
+        }
+
+        _onColKey(e) {
+            const $col = $(e.currentTarget);
+            const cols = [this.$hours, this.$mins, this.$period].filter(Boolean);
+            const idx = cols.findIndex(($c) => $c[0] === $col[0]);
+            const part = idx === 0 ? 'h' : (idx === 1 ? 'm' : 'p');
+            const items = $col.find('.ts-tp-item');
+            let cur = items.index($col.find('[aria-selected="true"]'));
+            const go = (i) => {
+                const n = Math.max(0, Math.min(items.length - 1, i));
+                this._pick(part, $(items[n]).data('v'));
+            };
+            switch (e.key) {
+                case 'ArrowDown': e.preventDefault(); go(cur < 0 ? 0 : cur + 1); break;
+                case 'ArrowUp':   e.preventDefault(); go(cur < 0 ? 0 : cur - 1); break;
+                case 'Home':      e.preventDefault(); go(0); break;
+                case 'End':       e.preventDefault(); go(items.length - 1); break;
+                case 'ArrowRight': e.preventDefault(); if (cols[idx + 1]) cols[idx + 1][0].focus(); break;
+                case 'ArrowLeft':  e.preventDefault(); if (cols[idx - 1]) cols[idx - 1][0].focus(); break;
+                case 'Enter': case 'Escape':
+                    if (!this.options.inline) { e.preventDefault(); e.stopPropagation(); this.close(); this.$input.trigger('focus'); }
+                    break;
+            }
+        }
+
+        // Open and close
+
+        _position() {
+            const pop = this.$pop[0];
+            if (this.options.inline) return;
+            const r = this.$field[0].getBoundingClientRect();
+            pop.style.minWidth = Math.max(r.width, 0) + 'px';
+            const ph = pop.offsetHeight || 260, pw = pop.offsetWidth || 220;
+            const vh = window.innerHeight, vw = window.innerWidth;
+            const up = vh - r.bottom < ph + 10 && r.top > vh - r.bottom;
+            pop.style.top  = Math.max(8, up ? r.top - ph - 6 : r.bottom + 6) + 'px';
+            pop.style.left = Math.max(8, Math.min(r.left, vw - pw - 8)) + 'px';
+            this.$wrap.toggleClass('ts-tp--up', up);
+        }
+
+        open() {
+            if (this._open || this.$el[0].disabled || this.options.inline) return this;
+            this._open = true;
+            this.$wrap.addClass('is-open');
+            this.$input.attr('aria-expanded', 'true');
+            this._position();
+            this._centerSelected();
+            this.$el[0].dispatchEvent(new CustomEvent(`${EVENT}.open`, { bubbles: true, detail: { instance: this } }));
+            return this;
+        }
+
+        close() {
+            if (!this._open || this.options.inline) return this;
+            this._open = false;
+            this.$wrap.removeClass('is-open');
+            this.$input.attr('aria-expanded', 'false');
+            this.$el[0].dispatchEvent(new CustomEvent(`${EVENT}.close`, { bubbles: true, detail: { instance: this } }));
+            return this;
+        }
+
+        toggle() { return this._open ? this.close() : this.open(); }
+
+        _applyDisabled(on) {
+            this.$wrap.toggleClass('ts-tp--disabled', !!on);
+            this.$input.prop('disabled', !!on);
+            this.$toggle.prop('disabled', !!on);
+        }
+
+        enable()  { this.$el.prop('disabled', false); this._applyDisabled(false); return this; }
+        disable() { this.close(); this.$el.prop('disabled', true); this._applyDisabled(true); return this; }
+
+        destroy() {
+            const self = this;
+            if (self._failed) return this;
+            self.close();
+            $(document).off(self._ns);
+            $(window).off(self._ns);
+            if (self._onScroll) document.removeEventListener('scroll', self._onScroll, true);
+            self.$input.off(self._ns);
+            self.$pop.off(self._ns);
+            self.$el.insertBefore(self.$wrap);
+            self.$wrap.remove();
+            if (self.$labels) self.$labels.off(self._ns);
+            if (self._origType === null) self.$el.removeAttr('type'); else self.$el.attr('type', self._origType);
+            self.$el.removeData(instanceName);
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+            return this;
+        }
+    }
+
+    PluginTimePicker.parse = parseTime;
+
+    PluginTimePicker.defaults = {
+        format:      'auto',        // '12', '24', or 'auto' to follow the visitor's locale
+        locale:      '',            // used when format is 'auto'
+        minuteStep:  5,             // minutes between entries in the popover (typing allows any minute)
+        defaultTime: '09:00',       // used for the parts you have not chosen yet
+        placeholder: 'Time',
+        ariaLabel:   'Time',
+        block:       false,         // fill the width of the parent
+        inline:      false,         // show the columns in the page instead of a popover
+        showNow:     true,          // a "Now" link in the popover
+        openOnClick: true,          // clicking the field opens the popover
+        labels: { choose: 'Choose a time', hours: 'Hours', minutes: 'Minutes', period: 'AM or PM', am: 'AM', pm: 'PM', now: 'Now', done: 'Done' },
+        onChange:    null           // function (value) {}
+    };
+
+    $.extend(themestrap, { PluginTimePicker });
+
+    $.fn.themestrapPluginTimePicker = function (opts) {
+        const args = Array.prototype.slice.call(arguments, 1);
+        return this.map(function () {
+            const $this = $(this);
+            const inst  = $this.data(instanceName);
+            if (inst) {
+                if (typeof opts === 'string' && typeof inst[opts] === 'function') {
+                    return inst[opts].apply(inst, args);
+                }
+                return inst;
+            }
+            return new PluginTimePicker($this, typeof opts === 'object' ? opts : undefined);
         });
     };
 

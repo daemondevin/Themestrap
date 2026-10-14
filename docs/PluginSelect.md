@@ -272,6 +272,8 @@ Fired when the dropdown closes, whether by item selection, Escape key, or an out
 
 Fired when a selection is confirmed. Not fired by `reset()`.
 
+When the value actually changes, the wrapped `<select>` also receives ordinary `input` and `change` events (both bubbling), exactly as a native select would. Form libraries, validators and any existing `$('select').on('change', …)` code therefore keep working. Nothing is fired at initialization, and nothing native is fired when the same value is chosen again.
+
 | `detail` key | Type | Description |
 | - | - | - |
 | `value` | `string` | The newly selected value. |
@@ -279,6 +281,37 @@ Fired when a selection is confirmed. Not fired by `reset()`.
 | `previousValue` | `string` | The value that was selected before this change (`''` if none). |
 
 
+
+## Long lists
+
+The list scrolls (280px by default) and **opens at the selected item**, so a long list such as time zones does not make the reader hunt for the current value. Group long lists with `<optgroup>` so people can find their way, and keep option labels short:
+
+```html
+<div data-plugin-select>
+    <select name="timezone">
+        <optgroup label="Europe">
+            <option value="Europe/Berlin">Berlin</option>
+            <option value="Europe/London">London</option>
+        </optgroup>
+        <optgroup label="America">
+            <option value="America/New_York">New York</option>
+        </optgroup>
+    </select>
+</div>
+```
+
+Typing the first letters of a label jumps to the matching item.
+
+## Naming the control for screen readers
+
+The button shows the current value, so a screen reader hears only "Berlin". When the field has a visible label, point the button at both:
+
+```js
+var trigger = $wrapper.find('.ts-select-trigger')[0];
+trigger.setAttribute('aria-labelledby', 'my-label-id ' + trigger.id);
+```
+
+A `<label>` that wraps the wrapper does not focus the button when its text is clicked. Use a `<span id>` for the label text, as above.
 
 ## CSS Custom Properties
 

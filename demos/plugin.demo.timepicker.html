@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginTimePicker — Live Demo | Themestrap</title>
+<meta name="description" content="A time field with a popover of scrollable hour, minute and AM/PM columns, built to sit beside PluginCalendar. Type "8:30pm" or pick from the columns. ">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system: demo page chrome */
+:root {
+    --ts-navy:         #0a1929;
+    --ts-navy-2:       #0e2238;
+    --ts-orange:       #e8672a;
+    --ts-teal:         #2ab8c8;
+    --ts-cream:        #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', system-ui, sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: var(--ts-font-body);
+    background: var(--ts-navy-2);
+    color: #1a2332;
+    margin: 0;
+}
+
+/* Page header */
+.demo-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+}
+.demo-header h1 {
+    font-family: var(--ts-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+}
+.demo-header p { margin: 0; opacity: .7; font-size: .95rem; max-width: 46rem; }
+.demo-header .badge-pill,
+.demo-header .badge-dep {
+    display: inline-block;
+    font-family: var(--ts-font-mono);
+    font-size: .7rem;
+    padding: .2em .6em;
+    border-radius: 99px;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+.demo-header .badge-pill { background: var(--ts-orange); color: #fff; }
+.demo-header .badge-dep  { color: var(--ts-teal); border: 1px solid var(--ts-teal); }
+
+/* Nav strip */
+.demo-nav {
+    background: var(--ts-navy-2);
+    padding: .6rem 2rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.demo-nav a {
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size: .8rem;
+    font-family: var(--ts-font-mono);
+    transition: color .15s;
+    white-space: nowrap;
+}
+.demo-nav a:hover { color: var(--ts-teal); }
+
+/* Layout */
+.demo-body {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    scroll-margin-top: 1rem;
+}
+.demo-card-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.demo-card-header h2 {
+    font-family: var(--ts-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: .02em;
+}
+.demo-card-header .card-num {
+    font-family: var(--ts-font-mono);
+    font-size: .75rem;
+    color: var(--ts-teal);
+    border: 1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding: .1em .45em;
+    flex-shrink: 0;
+}
+.demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    margin-left: auto;
+    text-align: right;
+}
+
+.demo-blurb {
+    margin: 0;
+    background-color: #142231;
+    padding: 1rem 1.5rem 1rem;
+    font-size: .9rem;
+    color: #b2b7bc;
+}
+.demo-blurb code { font-family: var(--ts-font-mono); font-size: .8rem; color: #b8481a; }
+.demo-blurb kbd {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+    background: #eef1f5;
+    border: 1px solid #d3dae3;
+    border-radius: 4px;
+    padding: .05em .4em;
+    color: #1a2332;
+}
+
+/* Demo stage */
+.demo-stage {
+    padding: 2rem 1.75rem;
+    background: var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+}
+.demo-stage.dark-stage { background: var(--ts-navy); border-bottom-color: rgba(255,255,255,.05); }
+
+/* Snippet block: PluginHighlight renders inside this wrapper */
+.demo-snip { background: #181818; border-top: 1px solid rgba(255,255,255,.05); }
+.demo-snip pre[data-plugin-highlight] {
+    margin: 0;
+    border-radius: 0;
+    font-family: var(--ts-font-mono);
+    font-size: .77rem;
+}
+
+/* Controls */
+.demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: #f4f1ea;
+    border-top: 1px solid #e8e0d4;
+}
+.demo-controls .btn {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+}
+
+/* Live output readout */
+.demo-output {
+    margin: 1rem 0 0;
+    padding: .75rem 1rem;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    color: #9fb3c8;
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3.2rem;
+}
+.demo-output .meta { color: var(--ts-teal); display: block; margin-bottom: .35rem; }
+
+/* Event log */
+.demo-log {
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    padding: .65rem 1.5rem;
+    background: #0d1b2a;
+    color: #8b949e;
+    border-top: 1px solid rgba(255,255,255,.05);
+    min-height: 2.6rem;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.demo-log .log-line  { display: block; }
+.demo-log .log-time  { color: #5a7898; margin-right: .6rem; }
+.demo-log .log-event { color: var(--ts-teal); }
+.demo-log .log-warn  { color: var(--ts-orange); }
+.demo-log .log-hint  { color: #8b949e; }
+
+/* Editor width inside stages */
+.demo-stage .editor-cap { max-width: 720px; }
+
+/* Custom-themed editor for card 07 (tokens set on the wrapper) */
+.re-brand {
+    --ts-re-bg:           #fff7f0;
+    --ts-re-border:       rgba(232,103,42,.35);
+    --ts-re-border-focus: #e8672a;
+    --ts-re-toolbar-bg:   rgba(232,103,42,.08);
+    --ts-re-link:         #b8481a;
+    --ts-re-radius:       14px;
+    --ts-re-padding:      18px 20px;
+}
+
+.demo-footer {
+    text-align: center;
+    padding: 1.5rem 1rem 3rem;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+}
+.demo-footer code { color: var(--ts-teal); font-family: var(--ts-font-mono); }
+</style>
+<style>
+.editor-cap .form-label { font-size: .85rem; color: #9fb3c8; }
+
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+    <div class="container">
+        <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+        <h1>TimePicker <span class="badge-pill">data-plugin-timepicker</span><span class="badge-dep">jQuery only</span></h1>
+        <p>A time field with a popover of scrollable hour, minute and AM/PM columns, built to sit beside PluginCalendar. Type "8:30pm" or pick from the columns. The hidden input always holds 24 hour HH:mm.</p>
+    </div>
+</header>
+
+<nav class="demo-nav" aria-label="Demo sections">
+    <a href="#demo-default">01 default</a>
+    <a href="#demo-24">02 24 hour</a>
+    <a href="#demo-empty">03 empty + keyboard</a>
+    <a href="#demo-inline">04 inline</a>
+    <a href="#demo-api">05 api</a>
+    <a href="#demo-theme">06 theming</a>
+</nav>
+
+<main class="demo-body">
+
+    <section class="demo-card" id="demo-default">
+        <div class="demo-card-header">
+            <span class="card-num">01</span>
+            <h2>Default (12 hour)</h2>
+            <span class="card-tag">data-plugin-timepicker</span>
+        </div>
+        <p class="demo-blurb">Click the field or the clock to open the popover and pick an hour, minutes and AM/PM. Or type: <code>8:30pm</code>, <code>830</code>, <code>20.30</code> and <code>9</code> are all understood. The hidden input always holds the 24 hour value, shown under the field.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="tp-default">Publish time</label>
+                <input type="text" id="tp-default" name="publish_time" value="08:30" class="manual">
+                <div class="demo-output" id="out-default" style="margin-top:.6rem"><span class="meta">hidden input value</span>08:30</div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;input type="text" name="publish_time" value="08:30"
+       data-plugin-timepicker data-plugin-options='{"format": "12"}'&gt;
+</code></pre>
+        </div>
+        <div class="demo-log" id="log-default"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+    <section class="demo-card" id="demo-24">
+        <div class="demo-card-header">
+            <span class="card-num">02</span>
+            <h2>24 Hour, Every 15 Minutes</h2>
+            <span class="card-tag">format: "24" · minuteStep: 15</span>
+        </div>
+        <p class="demo-blurb">The popover lists a minute every <code>minuteStep</code> minutes, but typing accepts any minute: enter <code>07:07</code> and it is added to the list.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="tp-24">Start time</label>
+                <input type="text" id="tp-24" value="14:15" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#start').themestrapPluginTimePicker({ format: '24', minuteStep: 15 });
+</code></pre>
+        </div>
+    </section>
+    <section class="demo-card" id="demo-empty">
+        <div class="demo-card-header">
+            <span class="card-num">03</span>
+            <h2>Empty Start and Keyboard</h2>
+            <span class="card-tag">defaultTime</span>
+        </div>
+        <p class="demo-blurb">An empty field stays empty until you choose. The first pick fills the rest from <code>defaultTime</code>. In the field, <kbd>↑</kbd> <kbd>↓</kbd> change the minutes (<kbd>Shift</kbd> the hour), and <kbd>Alt</kbd>+<kbd>↓</kbd> opens the popover. In the popover, arrows move within and between columns.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="tp-empty">Reminder</label>
+                <input type="text" id="tp-empty" value="" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#reminder').themestrapPluginTimePicker({ placeholder: 'Pick a time', defaultTime: '09:00' });
+</code></pre>
+        </div>
+    </section>
+    <section class="demo-card" id="demo-inline">
+        <div class="demo-card-header">
+            <span class="card-num">04</span>
+            <h2>Inline</h2>
+            <span class="card-tag">inline: true</span>
+        </div>
+        <p class="demo-blurb">Show the columns in the page instead of a popover, for a dedicated "set a time" screen. It updates live.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <input type="text" id="tp-inline" value="18:00" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#alarm').themestrapPluginTimePicker({ inline: true });
+</code></pre>
+        </div>
+    </section>
+    <section class="demo-card" id="demo-api">
+        <div class="demo-card-header">
+            <span class="card-num">05</span>
+            <h2>API and Events</h2>
+            <span class="card-tag">getValue · setValue · setNow</span>
+        </div>
+        <p class="demo-blurb">The events fire on the <strong>original</strong> input, with the canonical value and the display text. <code>ts.timepicker.change</code> reports where the change came from.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="tp-api">Meeting</label>
+                <input type="text" id="tp-api" value="10:00" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+const tp = $('#meeting').data('__pluginTimePicker');
+tp.setValue('8:15pm');     // "20:15"
+tp.setNow();
+document.getElementById('meeting').addEventListener('ts.timepicker.change', function (e) {
+    console.log(e.detail.value, e.detail.display, e.detail.source);   // "20:15", "8:15 PM", "api"
+});
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-set">setValue('8:15pm')</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-now">setNow()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-clear">setValue('')</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-dis">disable()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-en">enable()</button>
+        </div>
+        <div class="demo-log" id="log-api"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+    <section class="demo-card" id="demo-theme">
+        <div class="demo-card-header">
+            <span class="card-num">06</span>
+            <h2>Theming</h2>
+            <span class="card-tag">--ts-tp-*</span>
+        </div>
+        <p class="demo-blurb">Colors are custom properties with light, dark and explicit-light tiers. They are named so the picker can match <code>PluginCalendar</code> on the same page.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <div class="warm"><label class="form-label" for="tp-theme">A warmer picker</label>
+                <input type="text" id="tp-theme" value="19:30" class="manual"></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="css" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+.warm {
+    --ts-tp-accent:       #e8672a;
+    --ts-tp-border-focus: #e8672a;
+    --ts-tp-focus-ring:   0 0 0 3px rgba(232, 103, 42, .25);
+    --ts-tp-radius:       999px;
+}
+</code></pre>
+        </div>
+    </section>
+
+</main>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.timepicker.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+
+<script>
+window.themestrap = window.themestrap || {};
+themestrap.fn = themestrap.fn || {};
+if (typeof themestrap.fn.getOptions !== 'function') {
+    themestrap.fn.getOptions = function (raw) {
+        if (raw && typeof raw === 'object') { return raw; }
+        try { return raw ? JSON.parse(raw) : {}; } catch (err) { return {}; }
+    };
+}
+</script>
+
+<script>
+$(function () {
+
+    function makeLog(sel) {
+        var $log = $(sel), started = false;
+        var stamp = function () { return new Date().toTimeString().slice(0, 8); };
+        return function (label, detail) {
+            if (!started) { $log.empty(); started = true; }
+            var $l = $('<span class="log-line">');
+            $l.append($('<span class="log-time">').text(stamp()));
+            $l.append($('<strong class="log-event">').text(label));
+            if (detail) $l.append(' ').append($('<span>').text(detail));
+            $log.prepend($l); $log.children().slice(30).remove();
+        };
+    }
+
+    $('#tp-default').themestrapPluginTimePicker({ format: '12' });
+    var logD = makeLog('#log-default');
+    document.getElementById('tp-default').addEventListener('ts.timepicker.change', function (e) {
+        logD('ts.timepicker.change', e.detail.value + '  ' + e.detail.display + '  (' + e.detail.source + ')');
+        $('#out-default').empty().append($('<span class="meta">').text('hidden input value')).append(document.createTextNode(e.detail.value || '(empty)'));
+    });
+    $('#tp-24').themestrapPluginTimePicker({ format: '24', minuteStep: 15 });
+    $('#tp-empty').themestrapPluginTimePicker({ placeholder: 'Pick a time', defaultTime: '09:00' });
+    $('#tp-inline').themestrapPluginTimePicker({ inline: true, format: '24' });
+    $('#tp-api').themestrapPluginTimePicker({ format: '12' });
+    var tp = $('#tp-api').data('__pluginTimePicker'), logA = makeLog('#log-api');
+    document.getElementById('tp-api').addEventListener('ts.timepicker.change', function (e) { logA('ts.timepicker.change', e.detail.value + '  ' + e.detail.display + '  (' + e.detail.source + ')'); });
+    $('#btn-set').on('click', function () { tp.setValue('8:15pm'); });
+    $('#btn-now').on('click', function () { tp.setNow(); });
+    $('#btn-clear').on('click', function () { tp.setValue(''); logA('setValue("")', 'value "' + tp.getValue() + '"'); });
+    $('#btn-dis').on('click', function () { tp.disable(); logA('disable()'); });
+    $('#btn-en').on('click', function () { tp.enable(); logA('enable()'); });
+    $('#tp-theme').themestrapPluginTimePicker({ format: '12' });
+
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('pre[data-plugin-highlight]').each(function () {
+            var $pre = $(this);
+            $pre.themestrapPluginHighlight(themestrap.fn.getOptions($pre.data('plugin-options')) || undefined);
+        });
+    }
+});
+</script>
+</body>
+</html>

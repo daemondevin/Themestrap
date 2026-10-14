@@ -562,6 +562,13 @@
             self.$el.addClass('ts-select--open');
             self.$content.addClass('ts-select-content--open');
             self.$trigger.attr('aria-expanded', 'true');
+            // Long lists open at the selected item instead of at the top
+            const $sel = self.$viewport.find('.ts-select-item--selected').first();
+            if ($sel.length) {
+                const v = self.$viewport[0];
+                const delta = $sel[0].getBoundingClientRect().top - v.getBoundingClientRect().top;
+                v.scrollTop = Math.max(0, v.scrollTop + delta - (v.clientHeight - $sel[0].offsetHeight) / 2);
+            }
             self.$content[0].focus();
             self.$el[0].dispatchEvent(new CustomEvent('ts.select.open', {
                 bubbles: true,
@@ -603,6 +610,11 @@
                 bubbles: true,
                 detail:  { value, text: item.text, previousValue: prev }
             }));
+            // The wrapped <select> behaves like a native one: forms, validators and listeners see input and change
+            if (value !== prev) {
+                self.$native[0].dispatchEvent(new Event('input',  { bubbles: true }));
+                self.$native[0].dispatchEvent(new Event('change', { bubbles: true }));
+            }
             return this;
         }
 

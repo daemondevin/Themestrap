@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginNumberInput — Live Demo | Themestrap</title>
+<meta name="description" content="A stepper for number fields: minus and plus buttons that match your other inputs, hold-to-repeat, keyboard control, bounds and a unit label. The real ">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system: demo page chrome */
+:root {
+    --ts-navy:         #0a1929;
+    --ts-navy-2:       #0e2238;
+    --ts-orange:       #e8672a;
+    --ts-teal:         #2ab8c8;
+    --ts-cream:        #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', system-ui, sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: var(--ts-font-body);
+    background: var(--ts-navy-2);
+    color: #1a2332;
+    margin: 0;
+}
+
+/* Page header */
+.demo-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+}
+.demo-header h1 {
+    font-family: var(--ts-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+}
+.demo-header p { margin: 0; opacity: .7; font-size: .95rem; max-width: 46rem; }
+.demo-header .badge-pill,
+.demo-header .badge-dep {
+    display: inline-block;
+    font-family: var(--ts-font-mono);
+    font-size: .7rem;
+    padding: .2em .6em;
+    border-radius: 99px;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+.demo-header .badge-pill { background: var(--ts-orange); color: #fff; }
+.demo-header .badge-dep  { color: var(--ts-teal); border: 1px solid var(--ts-teal); }
+
+/* Nav strip */
+.demo-nav {
+    background: var(--ts-navy-2);
+    padding: .6rem 2rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.demo-nav a {
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size: .8rem;
+    font-family: var(--ts-font-mono);
+    transition: color .15s;
+    white-space: nowrap;
+}
+.demo-nav a:hover { color: var(--ts-teal); }
+
+/* Layout */
+.demo-body {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    scroll-margin-top: 1rem;
+}
+.demo-card-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.demo-card-header h2 {
+    font-family: var(--ts-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: .02em;
+}
+.demo-card-header .card-num {
+    font-family: var(--ts-font-mono);
+    font-size: .75rem;
+    color: var(--ts-teal);
+    border: 1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding: .1em .45em;
+    flex-shrink: 0;
+}
+.demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    margin-left: auto;
+    text-align: right;
+}
+
+.demo-blurb {
+    margin: 0;
+    background-color: #142231;
+    padding: 1rem 1.5rem 1rem;
+    font-size: .9rem;
+    color: #b2b7bc;
+}
+.demo-blurb code { font-family: var(--ts-font-mono); font-size: .8rem; color: #b8481a; }
+.demo-blurb kbd {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+    background: #eef1f5;
+    border: 1px solid #d3dae3;
+    border-radius: 4px;
+    padding: .05em .4em;
+    color: #1a2332;
+}
+
+/* Demo stage */
+.demo-stage {
+    padding: 2rem 1.75rem;
+    background: var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+}
+.demo-stage.dark-stage { background: var(--ts-navy); border-bottom-color: rgba(255,255,255,.05); }
+
+/* Snippet block: PluginHighlight renders inside this wrapper */
+.demo-snip { background: #181818; border-top: 1px solid rgba(255,255,255,.05); }
+.demo-snip pre[data-plugin-highlight] {
+    margin: 0;
+    border-radius: 0;
+    font-family: var(--ts-font-mono);
+    font-size: .77rem;
+}
+
+/* Controls */
+.demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: #f4f1ea;
+    border-top: 1px solid #e8e0d4;
+}
+.demo-controls .btn {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+}
+
+/* Live output readout */
+.demo-output {
+    margin: 1rem 0 0;
+    padding: .75rem 1rem;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    color: #9fb3c8;
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3.2rem;
+}
+.demo-output .meta { color: var(--ts-teal); display: block; margin-bottom: .35rem; }
+
+/* Event log */
+.demo-log {
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    padding: .65rem 1.5rem;
+    background: #0d1b2a;
+    color: #8b949e;
+    border-top: 1px solid rgba(255,255,255,.05);
+    min-height: 2.6rem;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.demo-log .log-line  { display: block; }
+.demo-log .log-time  { color: #5a7898; margin-right: .6rem; }
+.demo-log .log-event { color: var(--ts-teal); }
+.demo-log .log-warn  { color: var(--ts-orange); }
+.demo-log .log-hint  { color: #8b949e; }
+
+/* Editor width inside stages */
+.demo-stage .editor-cap { max-width: 720px; }
+
+/* Custom-themed editor for card 07 (tokens set on the wrapper) */
+.re-brand {
+    --ts-re-bg:           #fff7f0;
+    --ts-re-border:       rgba(232,103,42,.35);
+    --ts-re-border-focus: #e8672a;
+    --ts-re-toolbar-bg:   rgba(232,103,42,.08);
+    --ts-re-link:         #b8481a;
+    --ts-re-radius:       14px;
+    --ts-re-padding:      18px 20px;
+}
+
+.demo-footer {
+    text-align: center;
+    padding: 1.5rem 1rem 3rem;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+}
+.demo-footer code { color: var(--ts-teal); font-family: var(--ts-font-mono); }
+</style>
+<style>
+.editor-cap .form-label { font-size: .85rem; color: #9fb3c8; }
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+    <div class="container">
+        <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+        <h1>NumberInput <span class="badge-pill">data-plugin-numberinput</span><span class="badge-dep">jQuery only</span></h1>
+        <p>A stepper for number fields: minus and plus buttons that match your other inputs, hold-to-repeat, keyboard control, bounds and a unit label. The real input stays in the page, so forms and validation keep working.</p>
+    </div>
+</header>
+
+<nav class="demo-nav" aria-label="Demo sections">
+    <a href="#demo-default">01 default</a>
+    <a href="#demo-unit">02 unit and sizes</a>
+    <a href="#demo-stacked">03 stacked</a>
+    <a href="#demo-api">04 api</a>
+    <a href="#demo-theme">05 theming</a>
+</nav>
+
+<main class="demo-body">
+
+    <section class="demo-card" id="demo-default">
+        <div class="demo-card-header">
+            <span class="card-num">01</span>
+            <h2>Default Stepper</h2>
+            <span class="card-tag">data-plugin-numberinput</span>
+        </div>
+        <p class="demo-blurb">Reads <code>min</code>, <code>max</code> and <code>step</code> from the input. Click the buttons, hold one to repeat, or use the keyboard: <kbd>↑</kbd> <kbd>↓</kbd> one step, <kbd>Shift</kbd> with them (or <kbd>PgUp</kbd> <kbd>PgDn</kbd>) ten, <kbd>Home</kbd> <kbd>End</kbd> the limits. Type a number outside the range and leave the field: it is clamped.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="ni-default">Posts per page</label>
+                <input type="number" id="ni-default" name="per_page" value="8" min="1" max="50" step="1" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;input type="number" name="per_page" value="8" min="1" max="50" data-plugin-numberinput&gt;
+</code></pre>
+        </div>
+        <div class="demo-log" id="log-default"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+    <section class="demo-card" id="demo-unit">
+        <div class="demo-card-header">
+            <span class="card-num">02</span>
+            <h2>Unit Label and Sizes</h2>
+            <span class="card-tag">unit · size · block</span>
+        </div>
+        <p class="demo-blurb">A unit sits inside the field after the value. Three heights match your other inputs, and <code>block</code> fills the width of the parent.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="ni-unit">Image width</label>
+                <input type="number" id="ni-unit" value="640" min="100" max="2000" step="20" class="manual"><br><br>
+                <label class="form-label" for="ni-sm">Small</label>
+                <input type="number" id="ni-sm" value="3" min="0" max="9" class="manual"><br><br>
+                <label class="form-label" for="ni-lg">Large, full width</label>
+                <input type="number" id="ni-lg" value="12" min="0" max="99" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#width').themestrapPluginNumberInput({ unit: 'px' });
+$('#small').themestrapPluginNumberInput({ size: 'sm' });
+$('#large').themestrapPluginNumberInput({ size: 'lg', block: true });
+</code></pre>
+        </div>
+    </section>
+    <section class="demo-card" id="demo-stacked">
+        <div class="demo-card-header">
+            <span class="card-num">03</span>
+            <h2>Stacked Layout and Decimals</h2>
+            <span class="card-tag">layout · step · precision</span>
+        </div>
+        <p class="demo-blurb">The <code>stacked</code> layout puts small arrows at the right, as in a compact form. A <code>step</code> of 0.1 shows one decimal, and the arithmetic never produces values like <code>0.30000000000000004</code>. The mouse wheel works while the field is focused.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="ni-dec">Opacity (wheel enabled)</label>
+                <input type="number" id="ni-dec" value="0.5" min="0" max="1" step="0.1" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#opacity').themestrapPluginNumberInput({ layout: 'stacked', wheel: true });
+</code></pre>
+        </div>
+    </section>
+    <section class="demo-card" id="demo-api">
+        <div class="demo-card-header">
+            <span class="card-num">04</span>
+            <h2>API and Events</h2>
+            <span class="card-tag">getValue · setValue · increment</span>
+        </div>
+        <p class="demo-blurb">Drive the field from your own code. The input fires ordinary <code>input</code> and <code>change</code> events, plus <code>ts.numberinput.change</code> with the source of the change.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <label class="form-label" for="ni-api">Quantity</label>
+                <input type="number" id="ni-api" value="2" min="0" max="20" class="manual">
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+const ni = $('#qty').data('__pluginNumberInput');
+ni.setValue(10);          // clamps to min and max
+ni.increment(5);
+ni.setMax(12);
+document.getElementById('qty').addEventListener('ts.numberinput.change', function (e) {
+    console.log(e.detail.value, e.detail.source);   // 12, "button"
+});
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-set">setValue(10)</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-inc">increment(5)</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-max">setMax(12)</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-dis">disable()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-en">enable()</button>
+        </div>
+        <div class="demo-log" id="log-api"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+    <section class="demo-card" id="demo-theme">
+        <div class="demo-card-header">
+            <span class="card-num">05</span>
+            <h2>Theming</h2>
+            <span class="card-tag">--ts-ni-*</span>
+        </div>
+        <p class="demo-blurb">Colors are custom properties with light, dark and explicit-light tiers. Set them on the field or on <code>:root</code> to restyle every instance.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="editor-cap" style="max-width:26rem">
+                <div class="warm"><label class="form-label" for="ni-theme">A warmer stepper</label>
+                <input type="number" id="ni-theme" value="4" min="0" max="10" class="manual"></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="css" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+.warm {
+    --ts-ni-border-focus: #e8672a;
+    --ts-ni-radius:       999px;
+    --ts-ni-btn-hover:    rgba(232, 103, 42, .25);
+    --ts-ni-focus-ring:   0 0 0 3px rgba(232, 103, 42, .25);
+}
+</code></pre>
+        </div>
+    </section>
+
+</main>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.numberinput.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+
+<script>
+window.themestrap = window.themestrap || {};
+themestrap.fn = themestrap.fn || {};
+if (typeof themestrap.fn.getOptions !== 'function') {
+    themestrap.fn.getOptions = function (raw) {
+        if (raw && typeof raw === 'object') { return raw; }
+        try { return raw ? JSON.parse(raw) : {}; } catch (err) { return {}; }
+    };
+}
+</script>
+
+<script>
+$(function () {
+
+    function makeLog(sel) {
+        var $log = $(sel), started = false;
+        var stamp = function () { return new Date().toTimeString().slice(0, 8); };
+        return function (label, detail) {
+            if (!started) { $log.empty(); started = true; }
+            var $l = $('<span class="log-line">');
+            $l.append($('<span class="log-time">').text(stamp()));
+            $l.append($('<strong class="log-event">').text(label));
+            if (detail) $l.append(' ').append($('<span>').text(detail));
+            $log.prepend($l); $log.children().slice(30).remove();
+        };
+    }
+
+    $('#ni-default').themestrapPluginNumberInput();
+    var logD = makeLog('#log-default'); document.getElementById('ni-default').addEventListener('ts.numberinput.change', function (e) { logD('ts.numberinput.change', e.detail.value + '  (' + e.detail.source + ')'); });
+    $('#ni-unit').themestrapPluginNumberInput({ unit: 'px' });
+    $('#ni-sm').themestrapPluginNumberInput({ size: 'sm' });
+    $('#ni-lg').themestrapPluginNumberInput({ size: 'lg', block: true });
+    $('#ni-dec').themestrapPluginNumberInput({ layout: 'stacked', wheel: true });
+    $('#ni-api').themestrapPluginNumberInput();
+    var ni = $('#ni-api').data('__pluginNumberInput'), logA = makeLog('#log-api');
+    document.getElementById('ni-api').addEventListener('ts.numberinput.change', function (e) { logA('ts.numberinput.change', e.detail.value + '  (' + e.detail.source + ')'); });
+    $('#btn-set').on('click', function () { ni.setValue(10); logA('setValue(10)', 'value ' + ni.getValue()); });
+    $('#btn-inc').on('click', function () { ni.increment(5); logA('increment(5)', 'value ' + ni.getValue()); });
+    $('#btn-max').on('click', function () { ni.setMax(12); logA('setMax(12)', 'value ' + ni.getValue()); });
+    $('#btn-dis').on('click', function () { ni.disable(); logA('disable()'); });
+    $('#btn-en').on('click', function () { ni.enable(); logA('enable()'); });
+    $('#ni-theme').themestrapPluginNumberInput();
+
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('pre[data-plugin-highlight]').each(function () {
+            var $pre = $(this);
+            $pre.themestrapPluginHighlight(themestrap.fn.getOptions($pre.data('plugin-options')) || undefined);
+        });
+    }
+});
+</script>
+</body>
+</html>

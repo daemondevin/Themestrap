@@ -617,5 +617,14 @@
 		themestrap.fn.intObsInit('[data-plugin-tagsinput]:not(.manual)', 'themestrapPluginTagsInput');
 	}
 
+	// TimePicker
+	if (typeof $.fn['themestrapPluginTimePicker'] === 'function' && $('[data-plugin-timepicker]').length) {
+		themestrap.fn.intObsInit('[data-plugin-timepicker]:not(.manual)', 'themestrapPluginTimePicker');
+	}
+
+	// NumberInput
+	if (typeof $.fn['themestrapPluginNumberInput'] === 'function' && $('[data-plugin-numberinput]').length) {
+		themestrap.fn.intObsInit('[data-plugin-numberinput]:not(.manual)', 'themestrapPluginNumberInput');
+	}
 
 })).apply( this, [ jQuery ]);

@@ -346,22 +346,30 @@ ti.clearTags();                          // empties the field, fires no event</c
     <section class="demo-card">
         <div class="demo-card-header">
             <span class="badge-n">5</span>
-            <h2>Recipe: split on paste</h2>
-            <span class="tag-r">recipe</span>
+            <h2>Pasting lists</h2>
+            <span class="tag-r">separators &middot; maxTags &middot; normalize</span>
         </div>
         <div class="demo-card-body">
-            <p>Pasting a list into the field is not split by the plugin itself. This delegated handler splits on commas, semicolons and whitespace and feeds each piece to <code>addTag()</code>. Try pasting <code>a@x.com; b@x.com c@x.com, d@x.com</code>.</p>
+            <p>Paste a list and every item becomes its own tag: <code>a, b, c</code>, one per line, or a column copied from a spreadsheet. A single pasted word is inserted as text, so you can still edit it before pressing Enter. Text that arrives any other way (drag and drop, a phone keyboard) is split the same way. Duplicates and anything over the limit are skipped and reported in the <code>ts.tagsinput.paste</code> event. This field allows 6 tags, ignores case, and strips <code>#</code> and quotes.</p>
             <div class="demo-stage">
-                <label for="d5">Paste a list</label>
-                <input type="text" id="d5" data-plugin-tagsinput data-log="log5">
+                <label for="d5">Keywords</label>
+                <input type="text" id="d5" class="manual" data-log="log5" value="css">
+                <div class="demo-actions" style="margin-top:.6rem">
+                    <button class="btn-d primary" id="d5-sample">Paste a sample list</button>
+                    <button class="btn-d" id="d5-long">Paste 10 tags (over the limit)</button>
+                </div>
             </div>
-<pre class="snip" data-plugin-highlight="javascript"><code>$(document).on('paste', '.ts-tagsinput-field', function (e) {
-    const text = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
-    if (!/[,;\s]/.test(text.trim())) return;   // single value, let the browser handle it
+<pre class="snip" data-plugin-highlight="javascript"><code>$('#keywords').themestrapPluginTagsInput({
+    validateEmail: false,
+    maxTags:       6,
+    ignoreCase:    true,       // "Web" and "web" are one tag
+    normalize:     function (t) { return t.replace(/[#"']/g, '').trim(); }
+    // separators: ',;\n\t'    what ends a tag (a comma always does)
+    // splitOnSpace: 'auto'    follows validateEmail
+});
 
-    e.preventDefault();
-    const ti = $(this).closest('.ts-tagsinput').prev().data('__tagsinput');
-    text.split(/[,;\s]+/).forEach(v =&gt; ti.addTag(v));
+document.getElementById('keywords').addEventListener('ts.tagsinput.paste', function (e) {
+    console.log(e.detail.added, e.detail.skipped);   // skipped: [{ tag, reason: 'duplicate' | 'max' | 'invalid' }]
 });</code></pre>
             <div class="demo-log" id="log5"></div>
         </div>
@@ -537,13 +545,28 @@ themestrap.fn = themestrap.fn || {
     });
 
     // 5 Paste recipe
-    $(document).on('paste', '.ts-tagsinput-field', function (e) {
-        const text = (e.originalEvent.clipboardData || window.clipboardData).getData('text');
-        if (!/[,;\s]/.test(text.trim())) return;
-
-        e.preventDefault();
-        const ti = $(this).closest('.ts-tagsinput').prev().data('__tagsinput');
-        text.split(/[,;\s]+/).forEach(function (v) { ti.addTag(v); });
+    // 5 Pasting lists
+    $('#d5').themestrapPluginTagsInput({
+        validateEmail: false, maxTags: 6, ignoreCase: true,
+        normalize: function (t) { return t.replace(/[#"']/g, '').trim(); }
+    });
+    function fakePaste(text) {
+        const field = document.querySelector('#d5').parentNode.querySelector('.ts-tagsinput-field');
+        field.focus();
+        try {
+            const dt = new DataTransfer(); dt.setData('text/plain', text);
+            field.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        } catch (err) {
+            $('#d5').data('__tagsinput').addTags(text);
+        }
+    }
+    $('#d5-sample').on('click', function () { fakePaste('Web Design, #css; "JavaScript"\nphp\tweb design'); });
+    $('#d5-long').on('click', function () { fakePaste('one, two, three, four, five, six, seven, eight, nine, ten'); });
+    document.addEventListener('ts.tagsinput.paste', function (e) {
+        const id = e.target.getAttribute('data-log');
+        if (!id) return;
+        const sk = e.detail.skipped.map(function (k) { return k.tag + ' (' + k.reason + ')'; });
+        log(id, 'ts.tagsinput.paste', 'added [' + e.detail.added.join(', ') + ']' + (sk.length ? '  skipped [' + sk.join(', ') + ']' : ''));
     });
 
     // 7 Lifecycle

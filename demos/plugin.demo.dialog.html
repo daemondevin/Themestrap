@@ -13,16 +13,7 @@
     <!-- =============================================================================
      SCROLLBAR WIDTH COMPENSATION (recommended — prevents layout shift on open)
      =============================================================================-->
-<script>
-(function () {
-    const outer = document.createElement('div');
-    outer.style.cssText = 'visibility:hidden;overflow:scroll;position:absolute;width:100px';
-    document.body.appendChild(outer);
-    const width = outer.offsetWidth - outer.clientWidth;
-    document.body.removeChild(outer);
-    document.documentElement.style.setProperty('--dialog-scrollbar-width', width + 'px');
-})();
-</script>
+
 <style>
 /* Design tokens */
 :root {
@@ -196,12 +187,41 @@ body { font-family: var(--ff-body); background: var(--bg); color: var(--navy); l
 </div>
 
     </div>
-      <p class="text-center mt-4 mb-5" style="color:var(--ts-muted);font-size:12.5px">
+
+    </div>
+
+  <div class="demo-card" id="prompts-card">
+    <div class="demo-card-header">
+      <div>
+        <div class="demo-card-title">Prompts: confirm() and alert()</div>
+        <div class="demo-card-desc">Replace <code>window.confirm()</code> and <code>window.alert()</code> with real dialogs, with no markup. Both return a Promise.</div>
+      </div>
+    </div>
+
+    <div class="demo-stage">
+<button class="btn btn-primary" id="btn-confirm">Confirm</button>
+<button class="btn btn-danger" id="btn-danger">Destructive confirm</button>
+<button class="btn btn-outline-secondary" id="btn-alert">Alert</button>
+<p class="mt-3 mb-0" id="prompt-result" style="font-size:.9rem;color:var(--ts-muted)">Result: (nothing yet)</p>
+
+<pre class="mt-3"><code>themestrap.PluginDialog.confirm({
+    title:        'Delete this post?',
+    message:      'This removes it from your site for good.',
+    confirmLabel: 'Delete',
+    cancelLabel:  'Keep it',
+    danger:       true            // Cancel is focused first
+}).then(function (yes) {
+    if (yes) { deletePost(); }    // false for Cancel, Escape and the backdrop
+});
+
+themestrap.PluginDialog.alert({ title: 'Saved', message: 'Your changes are live.' })
+    .then(function () { /* dismissed */ });</code></pre>
+    </div>
+  </div>
+</div>
+      <p class="text-center" style="color:var(--ts-muted);font-size:12.5px">
         Themestrap &middot; PluginDialog &middot; part of the Themestrap Component Library
       </p>
-    </div>
-</div>
-
 <script src="../vendor/jquery/jquery.min.js"></script>
 <!-- Themestrap core (must come first; path relative to your install) -->
 <script src="../js/themestrap.js"></script>
@@ -240,6 +260,25 @@ $('#my-custom-closer').on('click', () => dlg.close());
 $('#programmatic-dialog')
     .on('dialog:open',  (e, instance) => console.log('opened', instance))
     .on('dialog:close', (e, instance) => console.log('closed', instance));
+</script>
+<script>
+// Prompts
+(function () {
+    var $out = $('#prompt-result');
+    function show(text) { $out.text('Result: ' + text); }
+    $('#btn-confirm').on('click', function () {
+        themestrap.PluginDialog.confirm({ title: 'Publish this post?', message: 'It will be visible to everyone.', confirmLabel: 'Publish', cancelLabel: 'Not yet' })
+            .then(function (yes) { show(yes ? 'true (confirmed)' : 'false (cancelled, Escape or backdrop)'); });
+    });
+    $('#btn-danger').on('click', function () {
+        themestrap.PluginDialog.confirm({ title: 'Delete this post?', message: 'This removes it from your site for good.\nIt cannot be undone.', confirmLabel: 'Delete', cancelLabel: 'Keep it', danger: true })
+            .then(function (yes) { show(yes ? 'true (deleted)' : 'false (kept)'); });
+    });
+    $('#btn-alert').on('click', function () {
+        themestrap.PluginDialog.alert({ title: 'Saved', message: 'Your changes are live.' })
+            .then(function () { show('alert dismissed'); });
+    });
+})();
 </script>
 </body>
 </html>
