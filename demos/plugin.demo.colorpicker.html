@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PluginColorPicker — Themestrap Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,300&family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+    <style>
+        :root {
+            --demo-bg:          #0e2238;
+            --demo-bg-deep:     #0a1929;
+            --demo-card-bg:     #132234;
+            --demo-card-border: rgba(99, 202, 183, .14);
+            --demo-teal:        #63cab7;
+            --demo-orange:      #e09b2a;
+            --demo-text:        #c4d6e8;
+            --demo-muted:       #5e7f99;
+            --demo-badge-bg:    #63cab7;
+            --demo-badge-fg:    #071828;
+            --demo-tag-bg:      rgba(99, 202, 183, .1);
+            --demo-tag-border:  rgba(99, 202, 183, .25);
+            --demo-code-bg:     #071828;
+            --demo-log-bg:      #0a1929;
+            --demo-log-border:  rgba(255, 255, 255, .06);
+            --demo-sep:         rgba(255, 255, 255, .07);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background: var(--demo-bg);
+            color: var(--demo-text);
+            font-family: 'DM Sans', system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Page header */
+        .demo-page-header {
+            background: linear-gradient(135deg, #071828 0%, #0e2238 60%, #0f2b3d 100%);
+            border-bottom: 1px solid var(--demo-card-border);
+            padding: 56px 0 44px;
+            margin-bottom: 48px;
+        }
+        .demo-page-header .eyebrow {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--demo-teal);
+            margin-bottom: 12px;
+        }
+        .demo-page-header h1 {
+            font-family: 'Fraunces', Georgia, serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 400;
+            color: #e8f4ff;
+            margin: 0 0 12px;
+            line-height: 1.15;
+        }
+        .demo-page-header p {
+            color: var(--demo-muted);
+            font-size: 15px;
+            max-width: 520px;
+            margin: 0;
+        }
+
+        /* Cards */
+        .demo-card {
+            background: var(--demo-card-bg);
+            border: 1px solid var(--demo-card-border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+        .demo-card-header {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--demo-sep);
+        }
+        .demo-badge {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            background: var(--demo-badge-bg);
+            color: var(--demo-badge-fg);
+            font-family: 'Syne', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .demo-card-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: #e0eefa;
+            margin: 0;
+            flex: 1;
+        }
+        .demo-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .demo-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--demo-tag-border);
+            background: var(--demo-tag-bg);
+            color: var(--demo-teal);
+            font-size: 11px;
+            font-family: 'Syne', sans-serif;
+            letter-spacing: .04em;
+        }
+
+        /* Stage */
+        .demo-stage {
+            padding: 32px 24px;
+            border-bottom: 1px solid var(--demo-sep);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .demo-stage label {
+            font-size: 13px;
+            color: var(--demo-muted);
+        }
+
+        /* Format grid for card 3 */
+        .demo-format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 20px;
+            padding: 28px 24px;
+            border-bottom: 1px solid var(--demo-sep);
+        }
+        .demo-format-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .demo-format-label {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--demo-muted);
+        }
+
+        /* Native input (appears beside the picker thumb) */
+        .demo-stage input.cp-input,
+        .demo-format-cell input.cp-input {
+            height: 36px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .1);
+            border-radius: 7px;
+            color: #e0eefa;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            outline: none;
+            transition: border-color .15s;
+            min-width: 0;
+        }
+        .demo-stage input.cp-input:focus,
+        .demo-format-cell input.cp-input:focus { border-color: rgba(99, 202, 183, .5); }
+
+        /* Code snippets */
+        pre.snip {
+            margin: 0;
+            padding: 18px 22px;
+            background: var(--demo-code-bg);
+            border-top: 1px solid var(--demo-sep);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.65;
+            color: #8caec8;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        /* Controls */
+        .demo-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--demo-sep);
+        }
+        .demo-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 32px;
+            padding: 0 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, .1);
+            background: rgba(255, 255, 255, .05);
+            color: #c4d6e8;
+            font-size: 12.5px;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, color .15s;
+        }
+        .demo-btn:hover { background: rgba(99, 202, 183, .1); border-color: rgba(99, 202, 183, .35); color: var(--demo-teal); }
+        .demo-btn.demo-btn-teal { background: rgba(99, 202, 183, .15); border-color: rgba(99, 202, 183, .4); color: var(--demo-teal); }
+        .demo-btn.demo-btn-teal:hover { background: rgba(99, 202, 183, .25); }
+
+        /* Event log */
+        .demo-log {
+            background: var(--demo-log-bg);
+            border-top: 1px solid var(--demo-log-border);
+            padding: 0;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .demo-log-header {
+            padding: 8px 16px;
+            font-size: 10px;
+            font-family: 'Syne', sans-serif;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--demo-muted);
+            border-bottom: 1px solid var(--demo-log-border);
+            position: sticky;
+            top: 0;
+            background: var(--demo-log-bg);
+        }
+        .demo-log-body { padding: 4px 0; }
+        .log-entry {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 3px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+        }
+        .log-entry:hover { background: rgba(255, 255, 255, .025); }
+        .log-time { color: var(--demo-muted); flex-shrink: 0; }
+        .log-event { color: var(--demo-teal); flex-shrink: 0; }
+        .log-value { color: #b0cfe8; word-break: break-all; }
+        .log-empty {
+            padding: 10px 16px;
+            font-size: 12px;
+            color: var(--demo-muted);
+            font-style: italic;
+        }
+
+        /* Page footer */
+        .demo-page-footer {
+            margin-top: 64px;
+            padding: 28px 0;
+            border-top: 1px solid var(--demo-sep);
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--demo-muted);
+        }
+        .demo-page-footer a { color: var(--demo-teal); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <header class="demo-page-header">
+        <div class="container" style="max-width:900px">
+            <p class="eyebrow">Themestrap Component Library</p>
+            <h1>PluginColorPicker</h1>
+            <p>Zero-dependency jQuery color picker with HSV model, alpha channel, preset swatches, EyeDropper API integration, and full keyboard navigation.</p>
+        </div>
+    </header>
+
+    <main class="container" style="max-width:900px">
+
+        <!-- Card 1: Default Usage -->
+        <article class="demo-card">
+            <div class="demo-card-header">
+                <span class="demo-badge">1</span>
+                <h2>Default Usage</h2>
+                <div class="demo-tags">
+                    <span class="demo-tag">hex</span>
+                    <span class="demo-tag">basic</span>
+                </div>
+            </div>
+            <div class="demo-stage">
+                <label for="cp-basic">Accent colour</label>
+                <input class="cp-input" type="text" id="cp-basic" value="#3498db">
+            </div>
+            <pre class="snip" data-plugin-highlight="html">&lt;input type="text" id="cp-basic" value="#3498db"&gt;
+
+&lt;script&gt;
+$('#cp-basic').themestrapPluginColorPicker({
+    onChange: function(val, inst) {
+        console.log('color:', val);
+    }
+});
+&lt;/script&gt;</pre>
+            <div class="demo-log">
+                <div class="demo-log-header">Event log</div>
+                <div class="demo-log-body" id="log-1">
+                    <p class="log-empty">Pick a colour to see events&hellip;</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Card 2: Alpha Channel + Swatches -->
+        <article class="demo-card">
+            <div class="demo-card-header">
+                <span class="demo-badge">2</span>
+                <h2>Alpha Channel &amp; Swatches</h2>
+                <div class="demo-tags">
+                    <span class="demo-tag">rgba</span>
+                    <span class="demo-tag">alpha</span>
+                    <span class="demo-tag">swatches</span>
+                </div>
+            </div>
+            <div class="demo-stage">
+                <label for="cp-alpha">Background</label>
+                <input class="cp-input" type="text" id="cp-alpha" value="rgba(46, 204, 113, 0.75)">
+            </div>
+            <pre class="snip" data-plugin-highlight="js">$('#cp-alpha').themestrapPluginColorPicker({
+    format: 'rgba',
+    alpha:  true,
+    swatches: [
+        '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71',
+        '#1abc9c', '#3498db', '#9b59b6', '#34495e',
+        '#ecf0f1', '#95a5a6'
+    ],
+    closeOnSelect: false,
+});</pre>
+            <div class="demo-log">
+                <div class="demo-log-header">Event log</div>
+                <div class="demo-log-body" id="log-2">
+                    <p class="log-empty">Pick a colour to see events&hellip;</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Card 3: Multiple Formats -->
+        <article class="demo-card">
+            <div class="demo-card-header">
+                <span class="demo-badge">3</span>
+                <h2>Output Formats</h2>
+                <div class="demo-tags">
+                    <span class="demo-tag">hex</span>
+                    <span class="demo-tag">rgb</span>
+                    <span class="demo-tag">hsl</span>
+                    <span class="demo-tag">rgba</span>
+                </div>
+            </div>
+            <div class="demo-format-grid">
+                <div class="demo-format-cell">
+                    <span class="demo-format-label">HEX</span>
+                    <input class="cp-input" type="text" id="cp-hex" value="#9b59b6">
+                </div>
+                <div class="demo-format-cell">
+                    <span class="demo-format-label">RGB</span>
+                    <input class="cp-input" type="text" id="cp-rgb" value="#e67e22">
+                </div>
+                <div class="demo-format-cell">
+                    <span class="demo-format-label">HSL</span>
+                    <input class="cp-input" type="text" id="cp-hsl" value="#1abc9c">
+                </div>
+                <div class="demo-format-cell">
+                    <span class="demo-format-label">RGBA</span>
+                    <input class="cp-input" type="text" id="cp-rgba" value="#e74c3c">
+                </div>
+            </div>
+            <pre class="snip" data-plugin-highlight="js">$('#cp-hex').themestrapPluginColorPicker({ format: 'hex'  });
+$('#cp-rgb').themestrapPluginColorPicker({ format: 'rgb'  });
+$('#cp-hsl').themestrapPluginColorPicker({ format: 'hsl'  });
+$('#cp-rgba').themestrapPluginColorPicker({ format: 'rgba', alpha: true });</pre>
+        </article>
+
+        <!-- Card 4: API Controls -->
+        <article class="demo-card">
+            <div class="demo-card-header">
+                <span class="demo-badge">4</span>
+                <h2>Public API</h2>
+                <div class="demo-tags">
+                    <span class="demo-tag">manual init</span>
+                    <span class="demo-tag">api</span>
+                </div>
+            </div>
+            <div class="demo-stage">
+                <label for="cp-api">Theme colour</label>
+                <input class="cp-input manual" type="text" id="cp-api" value="#f39c12">
+            </div>
+            <pre class="snip" data-plugin-highlight="js">const inst = $('#cp-api').themestrapPluginColorPicker({
+    showEyeDropper: true,
+    swatches: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'],
+    onChange: function(val) { /* ... */ },
+    onOpen:   function()    { /* ... */ },
+    onClose:  function()    { /* ... */ },
+}).data('__pluginColorPicker');
+
+inst.open();
+inst.close();
+inst.toggle();
+inst.setColor('#e74c3c');     // accepts hex, rgb, rgba, hsl, named
+const val = inst.getColor();  // returns current value in configured format
+inst.destroy();</pre>
+            <div class="demo-controls">
+                <button class="demo-btn" id="btn-open">open()</button>
+                <button class="demo-btn" id="btn-close">close()</button>
+                <button class="demo-btn" id="btn-toggle">toggle()</button>
+                <button class="demo-btn demo-btn-teal" id="btn-set-red">setColor('#e74c3c')</button>
+                <button class="demo-btn demo-btn-teal" id="btn-set-blue">setColor('rgb(52,152,219)')</button>
+                <button class="demo-btn" id="btn-get">getColor()</button>
+            </div>
+            <div class="demo-log">
+                <div class="demo-log-header">Event log</div>
+                <div class="demo-log-body" id="log-4">
+                    <p class="log-empty">Use the controls above&hellip;</p>
+                </div>
+            </div>
+        </article>
+
+    </main>
+
+    <footer class="demo-page-footer">
+        <div class="container" style="max-width:900px">
+            Themestrap · PluginColorPicker demo · part of the <a href="https://github.com/daemondevin/Themestrap" target="_blank">Themestrap component library</a>
+        </div>
+    </footer>
+
+    <!-- Themestrap namespace stub -->
+    <script>
+        window.themestrap = window.themestrap || {};
+        themestrap.fn = {
+            getOptions: function(raw) {
+                if (!raw) return {};
+                if (typeof raw === 'object') return raw;
+                try { return JSON.parse(raw.replace(/'/g, '"')); } catch (e) { return {}; }
+            }
+        };
+    </script>
+
+    <script src="../vendor/jquery/jquery.min.js"></script>
+    <script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/components/themestrap.plugin.colorpicker.js"></script>
+    <script src="../js/components/themestrap.plugin.highlight.js"></script>
+
+    <script>
+        // Shared log helper
+        function demoLog($body, event, value, color) {
+            // Remove the empty placeholder on first entry
+            $body.find('.log-empty').remove();
+
+            const now  = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const $row = $('<div class="log-entry"></div>');
+            $row.append(
+                $('<span class="log-time"></span>').text(now),
+                $('<span class="log-event"></span>').text(event),
+                $('<span class="log-value"></span>').text(value || '')
+            );
+            $body.prepend($row);
+
+            // Cap log at 40 entries
+            $body.find('.log-entry').slice(40).remove();
+        }
+
+        $(function() {
+
+            // Card 1 — default hex picker
+            $('#cp-basic').themestrapPluginColorPicker({
+                onChange: function(val) {
+                    demoLog($('#log-1'), 'onChange', val);
+                },
+                onOpen: function() {
+                    demoLog($('#log-1'), 'onOpen', '');
+                },
+                onClose: function() {
+                    demoLog($('#log-1'), 'onClose', '');
+                }
+            });
+
+            // Card 2 — alpha + swatches
+            $('#cp-alpha').themestrapPluginColorPicker({
+                format: 'rgba',
+                alpha:  true,
+                swatches: [
+                    '#e74c3c', '#e67e22', '#f1c40f', '#2ecc71',
+                    '#1abc9c', '#3498db', '#9b59b6', '#34495e',
+                    '#ecf0f1', '#95a5a6'
+                ],
+                closeOnSelect: false,
+                onChange: function(val) {
+                    demoLog($('#log-2'), 'onChange', val);
+                }
+            });
+
+            // Card 3 — format showcase
+            $('#cp-hex').themestrapPluginColorPicker({ format: 'hex'  });
+            $('#cp-rgb').themestrapPluginColorPicker({ format: 'rgb'  });
+            $('#cp-hsl').themestrapPluginColorPicker({ format: 'hsl'  });
+            $('#cp-rgba').themestrapPluginColorPicker({ format: 'rgba', alpha: true });
+
+            // Card 4 — API demo (manual init)
+            $('#cp-api').themestrapPluginColorPicker({
+                showEyeDropper: true,
+                swatches: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'],
+                onChange: function(val) {
+                    demoLog($('#log-4'), 'onChange', val);
+                },
+                onOpen: function() {
+                    demoLog($('#log-4'), 'onOpen', '');
+                },
+                onClose: function() {
+                    demoLog($('#log-4'), 'onClose', '');
+                }
+            });
+
+            // API control buttons
+            $('#btn-open').on('click', function() {
+                $('#cp-api').data('__pluginColorPicker').open();
+                demoLog($('#log-4'), 'open()', '');
+            });
+            $('#btn-close').on('click', function() {
+                $('#cp-api').data('__pluginColorPicker').close();
+                demoLog($('#log-4'), 'close()', '');
+            });
+            $('#btn-toggle').on('click', function() {
+                $('#cp-api').data('__pluginColorPicker').toggle();
+                demoLog($('#log-4'), 'toggle()', '');
+            });
+            $('#btn-set-red').on('click', function() {
+                $('#cp-api').data('__pluginColorPicker').setColor('#e74c3c');
+                demoLog($('#log-4'), 'setColor()', '#e74c3c');
+            });
+            $('#btn-set-blue').on('click', function() {
+                $('#cp-api').data('__pluginColorPicker').setColor('rgb(52, 152, 219)');
+                demoLog($('#log-4'), 'setColor()', 'rgb(52, 152, 219)');
+            });
+            $('#btn-get').on('click', function() {
+                const val = $('#cp-api').data('__pluginColorPicker').getColor();
+                demoLog($('#log-4'), 'getColor()', val);
+            });
+
+            // PluginHighlight on code snippets (no-op if the plugin is not loaded)
+            if ($.isFunction($.fn.themestrapPluginHighlight)) {
+                $('pre.snip').each(function() {
+                    $(this).themestrapPluginHighlight();
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
