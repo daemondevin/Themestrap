@@ -164,27 +164,27 @@
 
 /* Dark mode */
 html.dark [data-hovercard-content] {
-    background: var(--dark-300);
-    color: var(--default);
-    border-color: var(--dark-rgba-50);
+    background: var(--dark-300, #0a0c0d);
+    color: var(--default, #777);
+    border-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5));
     box-shadow:
         0 4px  6px -1px rgba(0,0,0,0.3),
         0 10px 15px -3px rgba(0,0,0,0.4);
 }
 
-html.dark [data-hovercard-content].ts-hc-side-top::after    { border-top-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-top::before   { border-top-color: var(--dark-rgba-50); }
-html.dark [data-hovercard-content].ts-hc-side-bottom::after  { border-bottom-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-bottom::before { border-bottom-color: var(--dark-rgba-50); }
-html.dark [data-hovercard-content].ts-hc-side-left::after   { border-left-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-left::before  { border-left-color: var(--dark-rgba-50); }
-html.dark [data-hovercard-content].ts-hc-side-right::after  { border-right-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-right::before { border-right-color: var(--dark-rgba-50); }
+html.dark [data-hovercard-content].ts-hc-side-top::after    { border-top-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-top::before   { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
+html.dark [data-hovercard-content].ts-hc-side-bottom::after  { border-bottom-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-bottom::before { border-bottom-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
+html.dark [data-hovercard-content].ts-hc-side-left::after   { border-left-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-left::before  { border-left-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
+html.dark [data-hovercard-content].ts-hc-side-right::after  { border-right-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-right::before { border-right-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
 
 html.dark .hc-handle,
 html.dark .hc-meta-label { color: var(--color-grey-300, #9ca3af); }
 html.dark .hc-bio        { color: var(--color-grey-200, #c0c8d4); }
-html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
+html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
 
 @media (prefers-reduced-motion: reduce) {
     [data-hovercard-content] { animation: none !important; }
