@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginDice — Live Demo | Themestrap</title>
+<meta name="description" content="A tray of dice drawn with pure CSS pips: tumbling throws, pick and hold, keyboard and screen reader support. No images and no vendor dependencies.">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system: demo page chrome */
+:root {
+    --ts-navy:         #0a1929;
+    --ts-navy-2:       #0e2238;
+    --ts-orange:       #e8672a;
+    --ts-teal:         #2ab8c8;
+    --ts-cream:        #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', system-ui, sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: var(--ts-font-body);
+    background: var(--ts-navy-2);
+    color: #1a2332;
+    margin: 0;
+}
+
+/* Page header */
+.demo-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+}
+.demo-header h1 {
+    font-family: var(--ts-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+}
+.demo-header p { margin: 0; opacity: .7; font-size: .95rem; max-width: 46rem; }
+.demo-header .badge-pill,
+.demo-header .badge-dep {
+    display: inline-block;
+    font-family: var(--ts-font-mono);
+    font-size: .7rem;
+    padding: .2em .6em;
+    border-radius: 99px;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+.demo-header .badge-pill { background: var(--ts-orange); color: #fff; }
+.demo-header .badge-dep  { color: var(--ts-teal); border: 1px solid var(--ts-teal); }
+
+/* Nav strip */
+.demo-nav {
+    background: var(--ts-navy-2);
+    padding: .6rem 2rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.demo-nav a {
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size: .8rem;
+    font-family: var(--ts-font-mono);
+    transition: color .15s;
+    white-space: nowrap;
+}
+.demo-nav a:hover { color: var(--ts-teal); }
+
+/* Layout */
+.demo-body {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    scroll-margin-top: 1rem;
+}
+.demo-card-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.demo-card-header h2 {
+    font-family: var(--ts-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: .02em;
+}
+.demo-card-header .card-num {
+    font-family: var(--ts-font-mono);
+    font-size: .75rem;
+    color: var(--ts-teal);
+    border: 1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding: .1em .45em;
+    flex-shrink: 0;
+}
+.demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    margin-left: auto;
+    text-align: right;
+}
+
+.demo-blurb {
+    margin: 0;
+    background-color: #142231;
+    padding: 1rem 1.5rem 1rem;
+    font-size: .9rem;
+    color: #b2b7bc;
+}
+.demo-blurb code { font-family: var(--ts-font-mono); font-size: .8rem; color: #b8481a; }
+.demo-blurb kbd {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+    background: #eef1f5;
+    border: 1px solid #d3dae3;
+    border-radius: 4px;
+    padding: .05em .4em;
+    color: #1a2332;
+}
+
+/* Demo stage */
+.demo-stage {
+    padding: 2rem 1.75rem;
+    background: var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+}
+.demo-stage.dark-stage { background: var(--ts-navy); border-bottom-color: rgba(255,255,255,.05); }
+
+/* Snippet block: PluginHighlight renders inside this wrapper */
+.demo-snip { background: #181818; border-top: 1px solid rgba(255,255,255,.05); }
+.demo-snip pre[data-plugin-highlight] {
+    margin: 0;
+    border-radius: 0;
+    font-family: var(--ts-font-mono);
+    font-size: .77rem;
+}
+
+/* Controls */
+.demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: #f4f1ea;
+    border-top: 1px solid #e8e0d4;
+}
+.demo-controls .btn {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+}
+
+/* Live output readout */
+.demo-output {
+    margin: 1rem 0 0;
+    padding: .75rem 1rem;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    color: #9fb3c8;
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3.2rem;
+}
+.demo-output .meta { color: var(--ts-teal); display: block; margin-bottom: .35rem; }
+
+/* Event log */
+.demo-log {
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    padding: .65rem 1.5rem;
+    background: #0d1b2a;
+    color: #8b949e;
+    border-top: 1px solid rgba(255,255,255,.05);
+    min-height: 2.6rem;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.demo-log .log-line  { display: block; }
+.demo-log .log-time  { color: #5a7898; margin-right: .6rem; }
+.demo-log .log-event { color: var(--ts-teal); }
+.demo-log .log-warn  { color: var(--ts-orange); }
+.demo-log .log-hint  { color: #8b949e; }
+
+.demo-footer {
+    text-align: center;
+    padding: 1.5rem 1rem 3rem;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+}
+.demo-footer code { color: var(--ts-teal); font-family: var(--ts-font-mono); }
+</style>
+
+<style>
+.tray-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; }
+.tray-label { font-family: var(--ts-font-mono); font-size: .72rem; color: #9fb3c8; margin: 0 0 .5rem; }
+.score-read { font-family: var(--ts-font-display); color: #fff; font-size: 1.05rem; margin: 1rem 0 0; min-height: 1.6rem; }
+.score-read .muted { color: #9fb3c8; font-family: var(--ts-font-body); font-size: .85rem; }
+.felt { background: radial-gradient(ellipse at center, #1f6b3f 0%, #154d2d 100%); border-radius: 12px; padding: 1.5rem; }
+.casino {
+    --ts-dice-bg:          #b71c1c;
+    --ts-dice-border:      rgba(0,0,0,.35);
+    --ts-dice-pip:         #fff8e1;
+    --ts-dice-pip-one:     #fff8e1;
+    --ts-dice-radius:      6px;
+    --ts-dice-selected:    #ffd54f;
+    --ts-dice-selected-bg: #c62828;
+}
+.ivory {
+    --ts-dice-bg:          #1d2b3a;
+    --ts-dice-border:      #2ab8c8;
+    --ts-dice-pip:         #2ab8c8;
+    --ts-dice-pip-one:     #e8672a;
+    --ts-dice-radius:      50%;
+    --ts-dice-selected:    #e8672a;
+}
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+    <div class="container">
+        <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+        <h1>Dice <span class="badge-pill">data-plugin-dice</span><span class="badge-dep">jQuery only</span></h1>
+        <p>A tray of dice drawn with pure CSS pips. Throw some or all of them with a tumbling animation, let players pick dice by click or keyboard, and set dice aside. No images and no vendor dependencies.</p>
+    </div>
+</header>
+
+<nav class="demo-nav" aria-label="Demo sections">
+    <a href="#demo-basic">01 basic tray</a>
+    <a href="#demo-select">02 pick and hold</a>
+    <a href="#demo-fixed">03 fixed results</a>
+    <a href="#demo-sizes">04 sizes and faces</a>
+    <a href="#demo-theme">05 theming</a>
+</nav>
+
+<main class="demo-body">
+
+    <section class="demo-card" id="demo-basic">
+        <div class="demo-card-header">
+            <span class="card-num">01</span>
+            <h2>Basic Tray</h2>
+            <span class="card-tag">data-plugin-dice · roll()</span>
+        </div>
+        <p class="demo-blurb">Five dice with starting faces. <code>roll()</code> throws every die that is not held and returns a Promise that resolves with all values once they land.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="felt">
+                <div id="dice-basic" data-plugin-dice data-plugin-options='{"count": 5, "values": [1, 2, 3, 4, 5], "center": true}'></div>
+            </div>
+            <p class="score-read" id="read-basic"><span class="muted">Press Roll to throw the dice.</span></p>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;div id="tray" data-plugin-dice
+     data-plugin-options='{"count": 5, "values": [1, 2, 3, 4, 5]}'&gt;&lt;/div&gt;
+
+&lt;script&gt;
+$('#tray').data('__pluginDice').roll().then(function (values) {
+    console.log(values);   // [6, 2, 2, 5, 1]
+});
+&lt;/script&gt;
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-basic-roll">roll()</button>
+        </div>
+        <div class="demo-log" id="log-basic"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <section class="demo-card" id="demo-select">
+        <div class="demo-card-header">
+            <span class="card-num">02</span>
+            <h2>Pick and Hold</h2>
+            <span class="card-tag">selectable · hold · getSelected</span>
+        </div>
+        <p class="demo-blurb">With <code>selectable</code> on, click dice or use the keyboard: <kbd>←</kbd> <kbd>→</kbd> move, <kbd>Space</kbd> picks. Set the picked dice aside with <code>hold()</code> and throw the rest, the way a Farkle turn works.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="felt">
+                <div id="dice-select" class="manual" data-plugin-dice></div>
+            </div>
+            <p class="score-read" id="read-select"><span class="muted">Throw, then pick dice to keep.</span></p>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+const dice = $('#tray').themestrapPluginDice({ count: 6, selectable: true })[0];
+
+document.getElementById('tray').addEventListener('ts.dice.select', function (e) {
+    console.log(e.detail.selection, e.detail.values);   // [0, 3]  [1, 5]
+});
+
+// Keep the picked dice, then throw the others
+dice.hold(dice.getSelected());
+dice.roll();
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-sel-roll">roll()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-sel-hold">hold(getSelected())</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-sel-clear">clearSelection()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-sel-reset">release all</button>
+        </div>
+        <div class="demo-log" id="log-select"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <section class="demo-card" id="demo-fixed">
+        <div class="demo-card-header">
+            <span class="card-num">03</span>
+            <h2>Fixed Results</h2>
+            <span class="card-tag">roll(indexes, values) · setState</span>
+        </div>
+        <p class="demo-blurb">When a server decides the throw, pass the result in: <code>roll([0, 1], [6, 6])</code> tumbles those dice and lands them on the given faces. <code>setState()</code> applies faces and held flags in one call without animation.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="felt">
+                <div id="dice-fixed" data-plugin-dice data-plugin-options='{"count": 3, "values": [null, null, null], "center": true}'></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+const dice = $('#tray').data('__pluginDice');
+
+socket.on('rolled', function (msg) {
+    dice.roll(msg.indexes, msg.values);   // the animation shows the server's result
+});
+
+dice.setState([{ value: 5, held: true }, { value: 1 }, { value: null }]);
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-fix-66">roll([0, 1], [6, 6])</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-fix-111">roll(null, [1, 1, 1])</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-fix-state">setState(…)</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-fix-empty">setValues([null, null, null])</button>
+        </div>
+        <div class="demo-log" id="log-fixed"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <section class="demo-card" id="demo-sizes">
+        <div class="demo-card-header">
+            <span class="card-num">04</span>
+            <h2>Sizes and Faces</h2>
+            <span class="card-tag">size · redOne · emptyFace</span>
+        </div>
+        <p class="demo-blurb">Three sizes, or any size with <code>--ts-dice-size</code>. <code>redOne: false</code> draws the one like every other face. <code>emptyFace: "index"</code> shows faces one to six on dice that have not been thrown, handy for a start screen.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <p class="tray-label">size: "sm", redOne: false</p>
+            <div data-plugin-dice data-plugin-options='{"size": "sm", "redOne": false, "values": [1, 2, 3, 4, 5, 6]}'></div>
+            <p class="tray-label mt-4">size: "lg", emptyFace: "index"</p>
+            <div data-plugin-dice data-plugin-options='{"size": "lg", "count": 3, "emptyFace": "index"}'></div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;div data-plugin-dice data-plugin-options='{"size": "sm", "redOne": false}'&gt;&lt;/div&gt;
+&lt;div data-plugin-dice data-plugin-options='{"size": "lg", "count": 3, "emptyFace": "index"}'&gt;&lt;/div&gt;
+</code></pre>
+        </div>
+    </section>
+
+    <section class="demo-card" id="demo-theme">
+        <div class="demo-card-header">
+            <span class="card-num">05</span>
+            <h2>Theming</h2>
+            <span class="card-tag">--ts-dice-*</span>
+        </div>
+        <p class="demo-blurb">Colors, corners and sizes are custom properties with light, dark and explicit-light tiers. Set them on a wrapper to restyle every tray inside it.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="tray-row">
+                <div class="casino"><p class="tray-label">.casino</p><div id="dice-casino" data-plugin-dice data-plugin-options='{"count": 3, "values": [6, 5, 1], "selectable": true}'></div></div>
+                <div class="ivory"><p class="tray-label">.ivory</p><div id="dice-ivory" data-plugin-dice data-plugin-options='{"count": 3, "values": [3, 4, 1], "selectable": true}'></div></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="css" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+.casino {
+    --ts-dice-bg:          #b71c1c;
+    --ts-dice-pip:         #fff8e1;
+    --ts-dice-pip-one:     #fff8e1;
+    --ts-dice-radius:      6px;
+    --ts-dice-selected:    #ffd54f;
+    --ts-dice-selected-bg: #c62828;
+}
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-theme-roll">roll both</button>
+        </div>
+    </section>
+
+</main>
+
+<footer class="demo-footer">
+    <code>js/components/themestrap.plugin.dice.js</code> · zero vendor dependencies
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.dice.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script src="../js/themestrap.init.js"></script>
+
+<script>
+$(function () {
+
+    function makeLog(sel) {
+        var $log = $(sel), started = false;
+        var stamp = function () { return new Date().toTimeString().slice(0, 8); };
+        return function (label, detail) {
+            if (!started) { $log.empty(); started = true; }
+            var $l = $('<span class="log-line">');
+            $l.append($('<span class="log-time">').text(stamp()));
+            $l.append($('<strong class="log-event">').text(label));
+            if (detail) $l.append(' ').append($('<span>').text(detail));
+            $log.prepend($l); $log.children().slice(30).remove();
+        };
+    }
+
+    // Auto-init runs through IntersectionObserver, so instances are created on demand here too.
+    // The bridge does not read data-plugin-options itself, so they are passed along.
+    function dice(sel, opts) {
+        var $el = $(sel);
+        return $el.themestrapPluginDice(opts || themestrap.fn.getOptions($el.data('plugin-options')))[0];
+    }
+
+    // 01 Basic
+    var basic = dice('#dice-basic'), logB = makeLog('#log-basic');
+    var elB = document.getElementById('dice-basic');
+    elB.addEventListener('ts.dice.roll', function (e) { logB('ts.dice.roll', 'indexes ' + JSON.stringify(e.detail.indexes)); });
+    elB.addEventListener('ts.dice.rolled', function (e) { logB('ts.dice.rolled', 'values ' + JSON.stringify(e.detail.values)); });
+    $('#btn-basic-roll').on('click', function () {
+        basic.roll().then(function (values) {
+            var total = values.reduce(function (a, b) { return a + b; }, 0);
+            $('#read-basic').text('Total ' + total);
+        });
+    });
+
+    // 02 Pick and hold
+    var sel = dice('#dice-select', { count: 6, selectable: true, values: [null, null, null, null, null, null] });
+    var logS = makeLog('#log-select');
+    var elS = document.getElementById('dice-select');
+    function readSelect() {
+        var picked = sel.getSelectedValues();
+        var held = sel.getState().filter(function (d) { return d.held; }).length;
+        $('#read-select').html('');
+        $('#read-select').append($('<span>').text(picked.length ? 'Picked ' + picked.join(', ') : 'Nothing picked'))
+            .append($('<span class="muted">').text('  ·  ' + held + ' set aside'));
+    }
+    elS.addEventListener('ts.dice.select', function (e) {
+        logS('ts.dice.select', 'die ' + e.detail.index + (e.detail.selected ? ' picked' : ' dropped') + ', selection ' + JSON.stringify(e.detail.selection));
+        readSelect();
+    });
+    elS.addEventListener('ts.dice.rolled', function (e) { logS('ts.dice.rolled', JSON.stringify(e.detail.values)); readSelect(); });
+    $('#btn-sel-roll').on('click', function () { sel.roll(); });
+    $('#btn-sel-hold').on('click', function () {
+        var picked = sel.getSelected();
+        sel.hold(picked);
+        logS('hold(' + JSON.stringify(picked) + ')');
+        readSelect();
+    });
+    $('#btn-sel-clear').on('click', function () { sel.clearSelection(); logS('clearSelection()'); readSelect(); });
+    $('#btn-sel-reset').on('click', function () { sel.release([0, 1, 2, 3, 4, 5]); logS('release([0…5])'); readSelect(); });
+
+    // 03 Fixed results
+    var fixed = dice('#dice-fixed'), logF = makeLog('#log-fixed');
+    document.getElementById('dice-fixed').addEventListener('ts.dice.rolled', function (e) { logF('ts.dice.rolled', JSON.stringify(e.detail.values)); });
+    $('#btn-fix-66').on('click', function () { fixed.release([0, 1, 2]); fixed.roll([0, 1], [6, 6]); });
+    $('#btn-fix-111').on('click', function () { fixed.release([0, 1, 2]); fixed.roll(null, [1, 1, 1]); });
+    $('#btn-fix-state').on('click', function () {
+        fixed.setState([{ value: 5, held: true }, { value: 1 }, { value: null }]);
+        logF('setState', JSON.stringify(fixed.getState()));
+    });
+    $('#btn-fix-empty').on('click', function () { fixed.release([0, 1, 2]).setValues([null, null, null]); logF('setValues([null, null, null])'); });
+
+    // 04 and 05
+    $('#demo-sizes [data-plugin-dice]').each(function () { dice(this); });
+    var casino = dice('#dice-casino'), ivory = dice('#dice-ivory');
+    $('#btn-theme-roll').on('click', function () { casino.roll(); ivory.roll(); });
+
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('pre[data-plugin-highlight]').each(function () {
+            var $pre = $(this);
+            $pre.themestrapPluginHighlight(themestrap.fn.getOptions($pre.data('plugin-options')) || undefined);
+        });
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginParticles — Live Demo | Themestrap</title>
+<meta name="description" content="A canvas particle background for heroes and sections: twinkling dots, networks, pointer effects and click bursts. Replaces particles.js with no dependencies.">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system: demo page chrome */
+:root {
+    --ts-navy:         #0a1929;
+    --ts-navy-2:       #0e2238;
+    --ts-orange:       #e8672a;
+    --ts-teal:         #2ab8c8;
+    --ts-cream:        #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', system-ui, sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: var(--ts-font-body);
+    background: var(--ts-navy-2);
+    color: #1a2332;
+    margin: 0;
+}
+
+/* Page header */
+.demo-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+}
+.demo-header h1 {
+    font-family: var(--ts-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+}
+.demo-header p { margin: 0; opacity: .7; font-size: .95rem; max-width: 46rem; }
+.demo-header .badge-pill,
+.demo-header .badge-dep {
+    display: inline-block;
+    font-family: var(--ts-font-mono);
+    font-size: .7rem;
+    padding: .2em .6em;
+    border-radius: 99px;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+.demo-header .badge-pill { background: var(--ts-orange); color: #fff; }
+.demo-header .badge-dep  { color: var(--ts-teal); border: 1px solid var(--ts-teal); }
+
+/* Nav strip */
+.demo-nav {
+    background: var(--ts-navy-2);
+    padding: .6rem 2rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.demo-nav a {
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size: .8rem;
+    font-family: var(--ts-font-mono);
+    transition: color .15s;
+    white-space: nowrap;
+}
+.demo-nav a:hover { color: var(--ts-teal); }
+
+/* Layout */
+.demo-body {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    scroll-margin-top: 1rem;
+}
+.demo-card-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.demo-card-header h2 {
+    font-family: var(--ts-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: .02em;
+}
+.demo-card-header .card-num {
+    font-family: var(--ts-font-mono);
+    font-size: .75rem;
+    color: var(--ts-teal);
+    border: 1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding: .1em .45em;
+    flex-shrink: 0;
+}
+.demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    margin-left: auto;
+    text-align: right;
+}
+
+.demo-blurb {
+    margin: 0;
+    background-color: #142231;
+    padding: 1rem 1.5rem 1rem;
+    font-size: .9rem;
+    color: #b2b7bc;
+}
+.demo-blurb code { font-family: var(--ts-font-mono); font-size: .8rem; color: #b8481a; }
+.demo-blurb kbd {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+    background: #eef1f5;
+    border: 1px solid #d3dae3;
+    border-radius: 4px;
+    padding: .05em .4em;
+    color: #1a2332;
+}
+
+/* Demo stage */
+.demo-stage {
+    padding: 2rem 1.75rem;
+    background: var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+}
+.demo-stage.dark-stage { background: var(--ts-navy); border-bottom-color: rgba(255,255,255,.05); }
+
+/* Snippet block: PluginHighlight renders inside this wrapper */
+.demo-snip { background: #181818; border-top: 1px solid rgba(255,255,255,.05); }
+.demo-snip pre[data-plugin-highlight] {
+    margin: 0;
+    border-radius: 0;
+    font-family: var(--ts-font-mono);
+    font-size: .77rem;
+}
+
+/* Controls */
+.demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: #f4f1ea;
+    border-top: 1px solid #e8e0d4;
+}
+.demo-controls .btn {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+}
+
+/* Live output readout */
+.demo-output {
+    margin: 1rem 0 0;
+    padding: .75rem 1rem;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    color: #9fb3c8;
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3.2rem;
+}
+.demo-output .meta { color: var(--ts-teal); display: block; margin-bottom: .35rem; }
+
+/* Event log */
+.demo-log {
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    padding: .65rem 1.5rem;
+    background: #0d1b2a;
+    color: #8b949e;
+    border-top: 1px solid rgba(255,255,255,.05);
+    min-height: 2.6rem;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.demo-log .log-line  { display: block; }
+.demo-log .log-time  { color: #5a7898; margin-right: .6rem; }
+.demo-log .log-event { color: var(--ts-teal); }
+.demo-log .log-warn  { color: var(--ts-orange); }
+.demo-log .log-hint  { color: #8b949e; }
+
+.demo-footer {
+    text-align: center;
+    padding: 1.5rem 1rem 3rem;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+}
+.demo-footer code { color: var(--ts-teal); font-family: var(--ts-font-mono); }
+</style>
+
+<style>
+.fx-stage {
+    position: relative;
+    height: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--ts-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fx-stage.light { background: linear-gradient(135deg, #eef3f8, #f9f6ef); }
+.fx-stage.night { background: linear-gradient(180deg, #0a1929 0%, #183457 100%); }
+.fx-copy {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: #fff;
+    font-family: var(--ts-font-display);
+    pointer-events: none;
+}
+.fx-copy h3 { font-size: 1.6rem; margin: 0 0 .25rem; font-weight: 700; }
+.fx-copy p { margin: 0; color: #9fb3c8; font-family: var(--ts-font-body); font-size: .9rem; }
+.fx-stage.light .fx-copy { color: #0e2238; }
+.fx-stage.light .fx-copy p { color: #5a7898; }
+.fx-copy .btn { pointer-events: auto; margin-top: .9rem; }
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+    <div class="container">
+        <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+        <h1>Particles <span class="badge-pill">data-plugin-particles</span><span class="badge-dep">jQuery only</span></h1>
+        <p>A canvas particle background for heroes, sections and cards: drifting dots that twinkle, link into a network, react to the pointer and scatter on click. It pauses off screen and in hidden tabs, and holds still for visitors who ask for reduced motion. Replaces particles.js.</p>
+    </div>
+</header>
+
+<nav class="demo-nav" aria-label="Demo sections">
+    <a href="#demo-default">01 default field</a>
+    <a href="#demo-network">02 network and grab</a>
+    <a href="#demo-snow">03 snowfall</a>
+    <a href="#demo-push">04 push and bounce</a>
+    <a href="#demo-api">05 api</a>
+</nav>
+
+<main class="demo-body">
+
+    <section class="demo-card" id="demo-default">
+        <div class="demo-card-header">
+            <span class="card-num">01</span>
+            <h2>Default Field</h2>
+            <span class="card-tag">data-plugin-particles</span>
+        </div>
+        <p class="demo-blurb">Drop the element inside any positioned container. Particles swell away near the pointer (<code>hover.mode: "bubble"</code>) and scatter when you click (<code>click.mode: "repulse"</code>). Content stays clickable because the canvas ignores the pointer.</p>
+
+        <div class="demo-stage">
+            <div class="fx-stage light">
+                <div data-plugin-particles data-plugin-options='{"density": 160, "color": "#0088cc"}'></div>
+                <div class="fx-copy"><h3>Hover and click</h3><p>Particles fade under the pointer and scatter on click.</p></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;section class="hero"&gt;   &lt;!-- any positioned container --&gt;
+    &lt;div data-plugin-particles
+         data-plugin-options='{"density": 160, "color": "#0088cc"}'&gt;&lt;/div&gt;
+    &lt;h1&gt;Hover and click&lt;/h1&gt;
+&lt;/section&gt;
+</code></pre>
+        </div>
+    </section>
+
+    <section class="demo-card" id="demo-network">
+        <div class="demo-card-header">
+            <span class="card-num">02</span>
+            <h2>Network and Grab</h2>
+            <span class="card-tag">links · hover.mode: "grab"</span>
+        </div>
+        <p class="demo-blurb"><code>links.enable</code> joins particles that drift close together. In <code>grab</code> mode the pointer pulls lines from nearby particles.</p>
+
+        <div class="demo-stage">
+            <div class="fx-stage">
+                <div data-plugin-particles data-plugin-options='{"density": 70, "color": "#2ab8c8", "twinkle": {"enable": false}, "opacity": 0.9, "links": {"enable": true, "distance": 120, "opacity": 0.35}, "hover": {"mode": "grab", "distance": 160}, "click": {"mode": null}}'></div>
+                <div class="fx-copy"><h3>Connected</h3><p>Move the pointer through the field.</p></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="json" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+{
+    "density": 70,
+    "color": "#2ab8c8",
+    "links": { "enable": true, "distance": 120, "opacity": 0.35 },
+    "hover": { "mode": "grab", "distance": 160 },
+    "click": { "mode": null }
+}
+</code></pre>
+        </div>
+    </section>
+
+    <section class="demo-card" id="demo-snow">
+        <div class="demo-card-header">
+            <span class="card-num">03</span>
+            <h2>Snowfall</h2>
+            <span class="card-tag">direction · speed</span>
+        </div>
+        <p class="demo-blurb">A <code>direction</code> gives the field a steady drift. Pair it with white, large, low-opacity particles and no pointer effects for snow.</p>
+
+        <div class="demo-stage">
+            <div class="fx-stage night">
+                <div data-plugin-particles data-plugin-options='{"density": 120, "color": "#ffffff", "size": 4, "opacity": 0.7, "speed": 1.2, "direction": "bottom", "twinkle": {"enable": false}, "hover": {"mode": null}, "click": {"mode": null}}'></div>
+                <div class="fx-copy"><h3>Let it snow</h3><p>direction: "bottom"</p></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#snow').themestrapPluginParticles({
+    density: 120, color: '#ffffff', size: 4, opacity: 0.7,
+    speed: 1.2, direction: 'bottom',
+    twinkle: { enable: false }, hover: { mode: null }, click: { mode: null }
+});
+</code></pre>
+        </div>
+    </section>
+
+    <section class="demo-card" id="demo-push">
+        <div class="demo-card-header">
+            <span class="card-num">04</span>
+            <h2>Push and Bounce</h2>
+            <span class="card-tag">click.mode: "push" · outMode · color array</span>
+        </div>
+        <p class="demo-blurb">An array of colors is sampled at random. <code>click.mode: "push"</code> adds particles where you click (up to <code>maxParticles</code>, after which the oldest make room), and <code>outMode: "bounce"</code> keeps everything inside the box.</p>
+
+        <div class="demo-stage">
+            <div class="fx-stage">
+                <div id="fx-push" data-plugin-particles data-plugin-options='{"count": 40, "color": ["#e8672a", "#2ab8c8", "#f5f0e8"], "size": 6, "speed": 1.4, "outMode": "bounce", "twinkle": {"enable": false}, "opacity": 0.9, "hover": {"mode": "repulse", "distance": 120}, "click": {"mode": "push", "count": 6}}'></div>
+                <div class="fx-copy"><h3>Click to add</h3><p>Hover to push particles away.</p></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="json" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+{
+    "count": 40,
+    "color": ["#e8672a", "#2ab8c8", "#f5f0e8"],
+    "size": 6,
+    "outMode": "bounce",
+    "hover": { "mode": "repulse", "distance": 120 },
+    "click": { "mode": "push", "count": 6 }
+}
+</code></pre>
+        </div>
+    </section>
+
+    <section class="demo-card" id="demo-api">
+        <div class="demo-card-header">
+            <span class="card-num">05</span>
+            <h2>API</h2>
+            <span class="card-tag">pause · play · burst · setOptions · refresh</span>
+        </div>
+        <p class="demo-blurb">Control a field from your own code. <code>setOptions()</code> followed by <code>refresh()</code> rebuilds it with new settings. <code>ts.particles.ready</code> fires once the first frame is drawn.</p>
+
+        <div class="demo-stage">
+            <div class="fx-stage">
+                <div id="fx-api" class="manual" data-plugin-particles></div>
+                <div class="fx-copy"><h3>Under control</h3><p>Use the buttons below.</p></div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+const fx = $('#hero-particles').data('__pluginParticles');
+fx.pause();
+fx.play();
+fx.burst(200, 150, 12);
+fx.setOptions({ color: '#e8672a', links: { enable: true } }).refresh();
+</code></pre>
+        </div>
+        <div class="demo-controls">
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-pause">pause()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-play">play()</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-burst">burst(center, 12)</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-orange">setOptions(orange + links)</button>
+            <button type="button" class="btn btn-sm btn-outline-dark" id="btn-teal">setOptions(teal)</button>
+        </div>
+        <div class="demo-log" id="log-api"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+</main>
+
+<footer class="demo-footer">
+    <code>js/components/themestrap.plugin.particles.js</code> · zero vendor dependencies
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.particles.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script src="../js/themestrap.init.js"></script>
+
+<script>
+$(function () {
+
+    function makeLog(sel) {
+        var $log = $(sel), started = false;
+        var stamp = function () { return new Date().toTimeString().slice(0, 8); };
+        return function (label, detail) {
+            if (!started) { $log.empty(); started = true; }
+            var $l = $('<span class="log-line">');
+            $l.append($('<span class="log-time">').text(stamp()));
+            $l.append($('<strong class="log-event">').text(label));
+            if (detail) $l.append(' ').append($('<span>').text(detail));
+            $log.prepend($l); $log.children().slice(30).remove();
+        };
+    }
+
+    var log = makeLog('#log-api');
+    var el = document.getElementById('fx-api');
+    el.addEventListener('ts.particles.ready', function (e) { log('ts.particles.ready', e.detail.count + ' particles'); });
+
+    var fx = $('#fx-api').themestrapPluginParticles({ density: 110, color: '#2ab8c8' })[0];
+    $('#btn-pause').on('click', function () { fx.pause(); log('pause()', 'playing: ' + fx.isPlaying()); });
+    $('#btn-play').on('click', function () { fx.play(); log('play()', 'playing: ' + fx.isPlaying()); });
+    $('#btn-burst').on('click', function () { fx.burst(el.clientWidth / 2, el.clientHeight / 2, 12); log('burst()', '12 particles at the center'); });
+    $('#btn-orange').on('click', function () { fx.setOptions({ color: '#e8672a', links: { enable: true } }).refresh(); log('setOptions().refresh()', 'orange with links'); });
+    $('#btn-teal').on('click', function () { fx.setOptions({ color: '#2ab8c8', links: { enable: false } }).refresh(); log('setOptions().refresh()', 'teal'); });
+
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('pre[data-plugin-highlight]').each(function () {
+            var $pre = $(this);
+            $pre.themestrapPluginHighlight(themestrap.fn.getOptions($pre.data('plugin-options')) || undefined);
+        });
+    }
+});
+</script>
+</body>
+</html>

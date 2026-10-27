@@ -627,4 +627,14 @@
 		themestrap.fn.intObsInit('[data-plugin-numberinput]:not(.manual)', 'themestrapPluginNumberInput');
 	}
 
+	// Dice
+	if (typeof $.fn['themestrapPluginDice'] === 'function' && $('[data-plugin-dice]').length) {
+		themestrap.fn.intObsInit('[data-plugin-dice]:not(.manual)', 'themestrapPluginDice');
+	}
+
+	// Particles
+	if (typeof $.fn['themestrapPluginParticles'] === 'function' && $('[data-plugin-particles]').length) {
+		themestrap.fn.intObsInit('[data-plugin-particles]:not(.manual)', 'themestrapPluginParticles');
+	}
+
 })).apply( this, [ jQuery ]);
