@@ -200,32 +200,32 @@ Each folder in [`showcase/`](showcase/) is a complete project that puts the comp
 #### Starter Templates
  
 **[Launchpad](showcase/Launchpad/)** — A six-page SaaS marketing site (landing, features, pricing, customers, customer story, and about) driven by a single set of design tokens with full light and dark themes. Its [quick start guide](showcase/Launchpad/QUICKSTART.md) covers rebranding and customizing it.  
-_Uses:_ Dark Mode on every page, with Counter and Scroll FX on the landing page.
+- _Uses:_ Dark Mode on every page, with Counter and Scroll FX on the landing page.
  
 **[Pixels](showcase/Pixels/)** — A single-page product landing template with a dismissible notice bar, hero, feature grid, stats, testimonials, pricing, FAQ, contact form, and footer.  
-_Uses:_ Navbar, Sticky, Animate, Scroll FX, Counter, Progress Bar, Accordion, Pricing Toggle, Toast, and Scroll To Top, wired up through `themestrap.init.js`.
+- _Uses:_ Navbar, Sticky, Animate, Scroll FX, Counter, Progress Bar, Accordion, Pricing Toggle, Toast, and Scroll To Top, wired up through `themestrap.init.js`.
  
 **[Procedure](showcase/Procedure/)** — An API reference documentation site with quickstart, authentication, messages, conversations, webhooks, pagination, and errors pages.  
-_Uses:_ Code Rail for the two-column prose and synced code layout, Code Window and Highlight for the code samples, Alert for callouts, Command Menu (⌘K) for search, Scroll Spy and Scroll Shadow for the sidebar, and Dark Mode.
+- _Uses:_ Code Rail for the two-column prose and synced code layout, Code Window and Highlight for the code samples, Alert for callouts, Command Menu (⌘K) for search, Scroll Spy and Scroll Shadow for the sidebar, and Dark Mode.
  
 #### Webapps
  
 **[cod[e]ditor](showcase/cod-e-ditor/)** — An in-browser code editor built on CodeMirror 5 with a desktop-style title bar, file explorer, format settings, and terminal and debugger panels.  
-_Uses:_ Menubar for the File, Edit, View, Settings, and Help menus, Toolbar, Tooltip, Command Menu, and Context Menu.
+- _Uses:_ Menubar for the File, Edit, View, Settings, and Help menus, Toolbar, Tooltip, Command Menu, and Context Menu.
  
 **[Mailbox](showcase/mailbox/)** — An email client with a sign-in page, inbox, message view, and compose screen.  
-_Uses:_ Navigation for the sidebar, Hover Card for message previews, Context Menu for right-click message actions, Command Menu, Dialog for confirmations and settings, Drawer, Calendar, Scrollbar, Loading Overlay, Toast, Dark Mode, plus Tags Input for recipients and Rich Editor for the message body.
+- _Uses:_ Navigation for the sidebar, Hover Card for message previews, Context Menu for right-click message actions, Command Menu, Dialog for confirmations and settings, Drawer, Calendar, Scrollbar, Loading Overlay, Toast, Dark Mode, plus Tags Input for recipients and Rich Editor for the message body.
  
 **[Signal](showcase/signal/)** — A single-page system status dashboard for tracking focus sessions, with an end-of-day countdown, metric charts, and a session log.  
-_Uses:_ Countdown, Chart Circular, Progress Bar, Rating, Tooltip, Toast, and Dark Mode.
+- _Uses:_ Countdown, Chart Circular, Progress Bar, Rating, Tooltip, Toast, and Dark Mode.
  
 **[TSBlog](showcase/TSBlog/)** — A self-hosted PHP blog that stores posts as flat files or in SQLite and is managed entirely from a browser-based admin, with no database or build step to set up.  
-_Uses:_ The admin is built from Auth, Calendar, Time Picker, Select, Number Input, Dialog, Toolbar, Markdown, Markdown Editor, Rich Editor, and Tags Input. The public theme loads only Scroll Shadow, and only on post pages.
+- _Uses:_ The admin is built from Auth, Calendar, Time Picker, Select, Number Input, Dialog, Toolbar, Markdown, Markdown Editor, Rich Editor, and Tags Input. The public theme loads only Scroll Shadow, and only on post pages.
  
 #### Game
  
 **[10,000](showcase/10000/)** — The dice game 10,000 (a.k.a. Farkle or Hot Dice), playable online with friends through a Node.js and socket.io server, or alone in 3D.  
-_Uses:_ Dice for the game board, Particles for the animated background, Drawer for the rules and chat panels, Markdown to render the rules, Dialog, Alert, Tooltip, Loading Overlay, Number Input, Progress Bar, Counter, Collapsible, Scroll Shadow, Scrollbar, and `themestrap.fn.createStorage` to remember each player's name and seat.
+- _Uses:_ Dice for the game board, Particles for the animated background, Drawer for the rules and chat panels, Markdown to render the rules, Dialog, Alert, Tooltip, Loading Overlay, Number Input, Progress Bar, Counter, Collapsible, Scroll Shadow, Scrollbar, and `themestrap.fn.createStorage` to remember each player's name and seat.
 
 ### On the Horizon
 - Rewrite all components with dependencies to be self-contained. (_in progress_)
