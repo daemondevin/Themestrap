@@ -1,3 +1,6 @@
 [submodule "showcase/TSBlog"]
 	path = showcase/TSBlog
 	url = https://github.com/daemondevin/TSBlog.git
+[submodule "showcase/10000"]
+	path = showcase/10000
+	url = https://github.com/daemondevin/10-000.git
