@@ -24,6 +24,7 @@
  *   dice.setState([{ value: 5, held: true }, ...]);
  *   dice.hold([0, 1]); dice.release([0]);
  *   dice.select(2, true); dice.toggle(2); dice.clearSelection();
+ *   dice.setSelected([0, 4]);          // show exactly these as picked, no events, works when not selectable
  *   dice.getSelected();                // [2, 4] indexes
  *   dice.getSelectedValues();          // [1, 5]
  *   dice.setSelectable(true); dice.enable(); dice.disable();
@@ -412,6 +413,21 @@
             this._dice.forEach((d, i) => {
                 if (d.selected) {
                     d.selected = false;
+                    this._paint(i);
+                }
+            });
+            return this;
+        }
+
+        // Shows exactly these dice as picked. Unlike select() it fires no ts.dice.select event
+        // and works while the tray is not selectable, so a game can mirror a choice made
+        // elsewhere, such as another player's picks. Held dice and empty faces are skipped.
+        setSelected(indexes) {
+            const wanted = new Set(toIndexes(indexes));
+            this._dice.forEach((d, i) => {
+                const on = wanted.has(i) && !d.held && d.value !== null;
+                if (d.selected !== on) {
+                    d.selected = on;
                     this._paint(i);
                 }
             });

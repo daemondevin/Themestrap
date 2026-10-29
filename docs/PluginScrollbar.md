@@ -123,7 +123,8 @@ All options can be passed as an object to `$.fn.themestrapPluginScrollbar()` or 
 |---|---|---|---|
 | `forceInit` | `boolean` | `true` | Skip the IntersectionObserver and init immediately. Set `false` for panels that start well below the fold. |
 | `axis` | `string` | `'y'` | Scroll axis. `'y'` vertical, `'x'` horizontal, `'yx'` both. |
-| `theme` | `string` | `'light'` | Visual theme name. See [Themes](#themes). |
+| `theme` | `string` | `'light'` | Visual theme name. See [Themes](#themes). With `darkModeTheme` set, this is the theme for light pages. |
+| `darkModeTheme` | `string \| null` | `null` | Theme to use while the page is dark. The scrollbar then switches between `theme` and `darkModeTheme` by itself. See [Light and Dark Pages](#light-and-dark-pages). |
 | `scrollInertia` | `number` | `950` | Easing animation duration in ms. `0` = instant jump, no animation. |
 | `autoDraggerLength` | `boolean` | `true` | Size the thumb proportionally to the content/viewport ratio. `false` uses the CSS `height`/`width` minimum. |
 | `autoHideScrollbar` | `boolean` | `false` | Fade the scrollbar out when idle; fade in on hover or scroll activity. |
@@ -166,6 +167,7 @@ All options can be passed as an object to `$.fn.themestrapPluginScrollbar()` or 
 | `callbacks.onTotalScrollOffset` | `number` | `0` | How many px from the edge counts as "at the end". |
 | `callbacks.onTotalScrollBack` | `function \| null` | `null` | Called when scroll returns to the start (within `onTotalScrollBackOffset` px). |
 | `callbacks.onTotalScrollBackOffset` | `number` | `0` | How many px from the start counts as "back at the top". |
+| `callbacks.onThemeChange` | `function \| null` | `null` | Called when the theme shown changes, from `setTheme()` or a page theme switch. |
 
 
 ## scrollTo() Targets
@@ -253,6 +255,34 @@ Re-activates a previously disabled scrollbar and calls `update()` to recalculate
 sb.enable();
 ```
 
+### `setTheme(theme [, darkModeTheme])`
+
+Changes the theme in place by swapping the `ts-scrollbar-{theme}` class. Nothing is rebuilt, so the content, the scroll position and the event handlers stay as they are.
+
+| Argument | Effect |
+|---|---|
+| `theme` | New theme for light pages, or for every page when `darkModeTheme` is not set. `null` or `''` leaves it unchanged. |
+| `darkModeTheme` | New theme for dark pages. Leave it out to keep the current one, pass `null` to stop following the page theme. |
+
+```js
+const sb = $('#myPanel').data('__scrollbar');
+
+sb.setTheme('minimal');                   // change the theme now
+sb.setTheme('inset-3', 'inset-3-dark');   // change both, and follow the page theme
+sb.setTheme(null, 'minimal-dark');        // change only the dark page theme
+sb.setTheme(null, null);                  // stop following, always show theme
+```
+
+The new theme shows immediately when it applies to the current page. Calling `setTheme('thin')` on a dark page with a `darkModeTheme` set stores `thin` for light pages and leaves the dark theme on screen.
+
+### `getTheme()`
+
+Returns the name of the theme currently shown (not chainable).
+
+```js
+sb.getTheme(); // 'inset-3-dark'
+```
+
 ### `destroy()`
 
 Completely removes the scrollbar, restores the original inner HTML, unbinds all events, and disconnects the ResizeObserver. After calling `destroy()`, the element can be re-initialized cleanly.
@@ -263,6 +293,8 @@ sb.destroy();
 // Re-init with different options:
 $('#myPanel').themestrapPluginScrollbar({ theme: 'dark' });
 ```
+
+To change only the theme, use `setTheme()` instead: `destroy()` restores the HTML captured at init, so any content added since then is lost and the scroll position goes back to the top.
 
 
 ## Callbacks
@@ -321,6 +353,16 @@ onTotalScroll: function() {
 onTotalScrollOffset: 80, // fire when 80 px from the bottom
 ```
 
+### onThemeChange
+
+Fires when the theme shown changes, whether from `setTheme()` or the page switching between light and dark. The data argument also carries `theme` (now shown), `previous` and `dark` (whether the page is dark).
+
+```js
+onThemeChange: function(data) {
+    console.log(data.previous + ' → ' + data.theme, data.dark ? 'dark page' : 'light page');
+}
+```
+
 ### onTotalScrollBack
 
 Fires when the scroll position returns to or passes `onTotalScrollBackOffset` from the top. Use this to show/hide a "back to top" control.
@@ -332,6 +374,37 @@ onTotalScrollBack: function() {
 onTotalScrollBackOffset: 0,
 ```
 
+
+## Light and Dark Pages
+
+Give the scrollbar a second theme for dark pages and it follows the page by itself:
+
+```html
+<div data-plugin-scrollbar
+     data-plugin-options='{"theme": "inset-3", "darkModeTheme": "inset-3-dark"}'>
+    ...
+</div>
+```
+
+The page counts as dark using the same order as the Themestrap dark mode CSS:
+
+1. `html.dark` or `data-bs-theme="dark"` on `<html>` (what [PluginDarkMode](PluginDarkMode.md) sets) → dark
+2. `data-bs-theme="light"` on `<html>` → light
+3. Neither → the system `prefers-color-scheme` setting
+
+It works with PluginDarkMode, with Bootstrap's own `data-bs-theme`, or with neither. All scrollbars with a `darkModeTheme` share one `MutationObserver` on `<html>` and one media query listener. Both are removed when the last of those scrollbars is destroyed.
+
+Every change also fires a bubbling native event on the element:
+
+```js
+document.addEventListener('ts.scrollbar.theme', (e) => {
+    console.log(e.target.id, e.detail.previous, '→', e.detail.theme, e.detail.dark);
+});
+```
+
+jQuery's `.on()` cannot bind event names that contain dots, so use `addEventListener`.
+
+> **Pick the pair by looking, not by name.** Most `*-dark` themes are dark scrollbars meant for light pages, but `inset-3-dark` is a light thumb on a dark rail, meant for dark pages. Whichever theme reads well on a dark background goes in `darkModeTheme`.
 
 ## Themes
 
@@ -354,7 +427,7 @@ Pass the theme name as the `theme` option.
 
 ### Dark variants
 
-Each light theme has a `*-dark` counterpart that inverts the colour palette from white-on-dark to black-on-light. The full list:
+Each light theme has a `*-dark` counterpart that inverts the colour palette, usually from white-on-dark to black-on-light. The `inset-3` pair is the other way around: `inset-3` has a light rail with a dark thumb, and `inset-3-dark` has a dark rail with a light thumb. The full list:
 
 ```
 dark           dark-2          dark-3

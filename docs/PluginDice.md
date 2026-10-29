@@ -142,6 +142,7 @@ const dice = $('#tray').data('__pluginDice');
 | `getSelected()` | `array` | Indexes of the picked dice |
 | `getSelectedValues()` | `array` | Faces of the picked dice |
 | `clearSelection()` | `this` | Drop every pick |
+| `setSelected(indexes)` | `this` | Show exactly these dice as picked. Fires no `ts.dice.select` and works while the tray is not selectable, for mirroring a pick made elsewhere. Held and empty dice are skipped |
 | `setSelectable(on)` | `this` | Turn picking on or off. Off clears picks |
 | `enable()`, `disable()` | `this` | Pause picking without changing `selectable` |
 | `destroy()` | `this` | Restore the host |
@@ -225,6 +226,24 @@ socket.on('state', function (state) {
     }
 });
 ```
+
+#### Showing another player's picks
+
+The player whose turn it is picks dice on their own tray, and everyone else sees the same dice light up. The watchers' trays stay non-selectable, so `setSelected()` is used instead of `select()`, and nothing is sent back.
+
+```js
+// The player picking
+document.getElementById('tray').addEventListener('ts.dice.select', function (e) {
+    socket.emit('select', { keep: e.detail.selection });
+});
+
+// Everyone else
+socket.on('selection', function (data) {
+    dice.setSelectable(false).setSelected(data.indexes);
+});
+```
+
+Call `setSelected()` after `setSelectable(false)`, because turning picking off clears every pick.
 
 #### Live score of the current pick
 

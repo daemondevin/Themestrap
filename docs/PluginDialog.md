@@ -199,6 +199,31 @@ $('#my-dialog').on('dialog:close', (e, instance) => {
 });
 ```
 
+## Theming and Dark **Mode**
+
+Every color comes from a CSS token, so a dialog can be restyled without touching the plugin. Set them on `:root` for every dialog or on one dialog's root for just that one.
+
+| Token | Light | Dark | Used for |
+|---|---|---|---|
+| `--ts-dlg-bg` | `#ffffff` | `#1e2939` | Panel background |
+| `--ts-dlg-color` | unset (inherits the page color) | `#f3f4f6` | Panel text |
+| `--ts-dlg-text-muted` | `#6b7280` | `#9ca3af` | `[data-dialog-description]` |
+| `--ts-dlg-shadow` | soft shadow | deeper shadow | Panel shadow |
+| `--ts-dlg-backdrop` | `rgba(0, 0, 0, 0.6)` | `rgba(0, 0, 0, 0.7)` | `[data-dialog-backdrop]` |
+| `--ts-dlg-scrollbar` | `rgba(0, 0, 0, 0.2)` | `rgba(255, 255, 255, 0.15)` | WebKit scrollbar thumb |
+
+Dark mode follows the same three tiers as the other Themestrap plugins, so dialogs always agree with PluginDarkMode:
+
+1. `@media (prefers-color-scheme: dark)` when nothing else says otherwise.
+2. `html.dark` or `[data-bs-theme="dark"]`, which PluginDarkMode sets when the user picks dark.
+3. `[data-bs-theme="light"]`, which brings back the light tokens when the user picks light on a system that prefers dark.
+
+```css
+/* Brand colored dialogs, light and dark */
+:root { --ts-dlg-bg: #fdfaf3; }
+html.dark, [data-bs-theme="dark"] { --ts-dlg-bg: #20263a; }
+```
+
 ## Accessibility
 
 > - `role="dialog"` and `aria-modal="true"` are added automatically.
@@ -305,5 +330,7 @@ $(function () {
 **Focus trap relies on visible focusable elements.** The trap queries `a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])` that are not `disabled` or `hidden`. If the panel contains no focusable elements, the panel itself receives `tabindex="-1"` and focus moves there.
 
 **Scroll lock on mobile.** `overflow: hidden` on `<body>` doesn't prevent scrolling the iOS rubber-band / momentum scroll in all browsers. Add `-webkit-overflow-scrolling: touch` on the panel wrapper and `position: fixed; width: 100%` on body if iOS bounce is a problem.
+
+**Dialog stays dark after picking light.** Older builds of the plugin only listened to `prefers-color-scheme`, so a user who chose light on a dark system still got dark dialogs. The current build reads the same `html.dark` and `data-bs-theme` signals as PluginDarkMode; update the plugin file if you see this.
 
 **Two dialogs open simultaneously.** The plugin supports a dialog stack, but both dialogs must be independent `[data-plugin-dialog]` instances (separate IDs). Nesting one dialog inside another's `[data-dialog-panel]` is not supported.

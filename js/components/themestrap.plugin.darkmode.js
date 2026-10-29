@@ -388,7 +388,7 @@
         // (e.g. when MODX needs to know the theme at render time). When
         // enabled, every setTheme/toggle/reset call also writes (or clears)
         // the cookie alongside localStorage.
-        cookieEnabled:    true,
+        cookieEnabled:    false,
         cookieName:       'themestrap-theme',
         cookieMaxAge:     31536000,    // 1 year, in seconds
         cookiePath:       '/',

@@ -69,7 +69,7 @@ On every page load the plugin resolves the initial theme in this priority:
 | `darkClass` | `string` | `'dark'` | Class added to `<html>` in dark mode. Must match the selector your theme CSS uses. |
 | `dataAttribute` | `string\|null` | `'data-theme'` | Attribute set on `<html>` reflecting the current theme. Set to `null` to disable. |
 | `bsThemeAttribute` | `string\|null` | `'data-bs-theme'` | Bootstrap 5.3 theme attribute on `<html>`. Set to `null` to disable. |
-| `cookieEnabled` | `boolean` | `true` | Write a cookie alongside localStorage so the server can read the theme at render time. |
+| `cookieEnabled` | `boolean` | `false` | Write a cookie alongside localStorage so the server can read the theme at render time. Off by default because cookies travel with every request; turn it on when the server needs the theme (a MODX snippet picking a stylesheet, for example). |
 | `cookieName` | `string` | `'themestrap-theme'` | Cookie name. |
 | `cookieMaxAge` | `number` | `31536000` | Cookie `max-age` in seconds (default: 1 year). |
 | `cookiePath` | `string` | `'/'` | Cookie `path`. |
