@@ -211,31 +211,41 @@ $('#my-card').themestrapPluginHoverCard({
 
 ## CSS Custom Properties
 
-The injected stylesheet uses CSS custom properties for colours and sizes. Override them on the `[data-plugin-hovercard]` element or on a parent to retheme without editing the plugin.
+The injected stylesheet has no custom properties: sizes and colors are fixed values on `[data-hovercard-content]`. Override them with a rule of the same or higher specificity. Because the plugin's `<style>` is added at the end of `<head>` on first use, put the root element in your selector so your rule wins regardless of order.
 
 ```css
-/* Example: tighter, more compact cards */
-[data-plugin-hovercard] {
-    --ts-hc-min-width:   200px;
-    --ts-hc-max-width:   280px;
-    --ts-hc-padding:     0.75rem;
-    --ts-hc-radius:      0.5rem;
+/* tighter, more compact cards */
+[data-plugin-hovercard] [data-hovercard-content] {
+    min-width: 200px;
+    max-width: 280px;
+    padding: .75rem;
+    border-radius: .5rem;
 }
 ```
 
-| Variable | Default | Controls |
-|---|---|---|
-| `--ts-hc-min-width` | `240px` | Minimum card width. |
-| `--ts-hc-max-width` | `340px` | Maximum card width. |
-| `--ts-hc-padding` | `1rem` | Inner padding of the card panel. |
-| `--ts-hc-radius` | `0.625rem` | Card border-radius. |
-| `--ts-hc-bg` | `#fff` | Card background colour. |
-| `--ts-hc-border` | `rgba(0,0,0,0.08)` | Card border colour. |
-| `--ts-hc-shadow` | `0 4px 6px…, 0 10px 15px…` | Card box-shadow. |
-| `--ts-hc-color` | `#1a1a2e` | Default text colour inside the card. |
-| `--ts-hc-z` | `9994` | Card z-index. |
+| Property on `[data-hovercard-content]` | Value in the injected CSS |
+|---|---|
+| `min-width` | `240px` |
+| `max-width` | `340px` |
+| `padding` | `1rem` |
+| `border-radius` | `0.625rem` |
+| `background` | `#fff` |
+| `border` | `1px solid rgba(0, 0, 0, 0.08)` |
+| `box-shadow` | `0 4px 6px -1px rgba(0,0,0,.07), 0 10px 15px -3px rgba(0,0,0,.10)` |
+| `color` | `#1a1a2e` |
+| `z-index` | `9994` |
 
-Dark mode is applied automatically when `html.dark` is present via selector overrides in the injected stylesheet. No extra configuration is needed.
+The arrow is drawn with `::before` (border color) and `::after` (fill), colored per side through `.ts-hc-side-{top|bottom|left|right}`. When you change the card's background, change the arrow's fill to match:
+
+```css
+[data-plugin-hovercard] [data-hovercard-content]                         { background: #0e2238; color: #e2eaf4; }
+[data-plugin-hovercard] [data-hovercard-content].ts-hc-side-top::after    { border-top-color: #0e2238; }
+[data-plugin-hovercard] [data-hovercard-content].ts-hc-side-bottom::after { border-bottom-color: #0e2238; }
+[data-plugin-hovercard] [data-hovercard-content].ts-hc-side-left::after   { border-left-color: #0e2238; }
+[data-plugin-hovercard] [data-hovercard-content].ts-hc-side-right::after  { border-right-color: #0e2238; }
+```
+
+Dark mode is applied automatically when `html.dark` is present, through selector overrides in the injected stylesheet (background `var(--dark-300)`, text `var(--default)`, border `var(--dark-rgba-50)`). It does not react to `data-bs-theme="dark"` or to `prefers-color-scheme`; add your own rules for those if your site uses them.
 
 
 ## Keyboard Navigation

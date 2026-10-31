@@ -78,21 +78,22 @@
       <div class="effect-grid">
         <div class="ef-card manual" id="he-mag-1">
           <div class="ef-icon">🧲</div>
-          <div class="ef-label">strength: 0.4<br>(default)</div>
+          <div class="ef-label">Mx 0.15 · My 0.30<br>(default)</div>
         </div>
         <div class="ef-card manual" id="he-mag-2">
           <div class="ef-icon">⚡</div>
-          <div class="ef-label">strength: 0.8<br>(stronger)</div>
+          <div class="ef-label">Mx 0.30 · My 0.50<br>(stronger)</div>
         </div>
         <div class="ef-card manual" id="he-mag-3">
           <div class="ef-icon">🪐</div>
-          <div class="ef-label">strength: 1.4<br>(maximum)</div>
+          <div class="ef-label">Mx 0.50 · My 0.80<br>(strong)</div>
         </div>
       </div>
     </div>
 <pre class="snip">$(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
   effect:   <span class="hl-val">'magnetic'</span>,
-  strength: <span class="hl-val">0.4</span>,  <span class="hl-cmt">// 0–2, default 0.4</span>
+  magneticMx: <span class="hl-val">0.15</span>, <span class="hl-cmt">// horizontal pull, fraction of width</span>
+  magneticMy: <span class="hl-val">0.30</span>, <span class="hl-cmt">// vertical pull, fraction of height</span>
 });</pre>
     <div class="demo-log" id="log-mag"><span class="log-entry">// hover a card to see the pull</span></div>
   </div>
@@ -110,27 +111,27 @@
       <div class="effect-grid">
         <div class="ef-card manual" id="he-3d-1">
           <div class="ef-icon">🎲</div>
-          <div class="ef-label">tiltMax: 15°<br>(default)</div>
+          <div class="ef-label">magneticDeg: 12°<br>(default)</div>
         </div>
         <div class="ef-card manual" id="he-3d-2" style="background:linear-gradient(135deg,#1d3a5f,#0b2040)">
           <div class="ef-icon">🏔️</div>
-          <div class="ef-label">tiltMax: 30°<br>(dramatic)</div>
+          <div class="ef-label">magneticDeg: 25°<br>(dramatic)</div>
         </div>
         <div class="ef-card manual" id="he-3d-glare" style="background:linear-gradient(135deg,#1e2d50,#111e38)">
           <div class="ef-icon">✨</div>
-          <div class="ef-label">glare: true<br>tiltMax: 20°</div>
+          <div class="ef-label">glare: true<br>magneticDeg: 18°</div>
         </div>
       </div>
     </div>
 <pre class="snip">$(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
   effect:  <span class="hl-val">'3d'</span>,
-  tiltMax: 15,    <span class="hl-cmt">// degrees, default 15</span>
+  magneticDeg: 12, <span class="hl-cmt">// max tilt in degrees, default 12</span>
   glare:   <span class="hl-kw">false</span>, <span class="hl-cmt">// reflective highlight overlay</span>
 });
 
 <span class="hl-cmt">// with glare overlay:</span>
 $(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
-  effect: <span class="hl-val">'3d'</span>, tiltMax: 20, glare: <span class="hl-kw">true</span>, glareOpacity: 0.3,
+  effect: <span class="hl-val">'3d'</span>, magneticDeg: 18, glare: <span class="hl-kw">true</span>, glareOpacity: 0.3,
 });</pre>
     <div class="demo-log" id="log-3d"><span class="log-entry">// hover across a card to see the tilt</span></div>
   </div>
@@ -148,18 +149,19 @@ $(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
       <div class="effect-grid">
         <div class="ef-card manual" id="he-comb-1" style="width:200px;height:200px;background:linear-gradient(135deg,#2a1f55,#160f38)">
           <div class="ef-icon" style="font-size:3rem">🪄</div>
-          <div class="ef-label">magnetic-3d<br>strength 0.5 · tilt 20°</div>
+          <div class="ef-label">magnetic-3d<br>Mx 0.2 · My 0.3 · tilt 16°</div>
         </div>
         <div class="ef-card manual" id="he-comb-2" style="width:200px;height:200px;background:linear-gradient(135deg,#1a3a2a,#0c2018)">
           <div class="ef-icon" style="font-size:3rem">🌿</div>
-          <div class="ef-label">magnetic-3d + scale<br>strength 0.6 · tilt 18°</div>
+          <div class="ef-label">magnetic-3d + scale<br>Mx 0.25 · My 0.35 · tilt 14°</div>
         </div>
       </div>
     </div>
 <pre class="snip">$(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
   effect:   <span class="hl-val">'magnetic-3d'</span>,
-  strength: 0.5,  <span class="hl-cmt">// magnetic pull strength</span>
-  tiltMax:  20,   <span class="hl-cmt">// 3D tilt degrees</span>
+  magneticMx:  0.2,  <span class="hl-cmt">// magnetic pull, horizontal</span>
+  magneticMy:  0.3,  <span class="hl-cmt">// magnetic pull, vertical</span>
+  magneticDeg: 16,   <span class="hl-cmt">// 3D tilt degrees</span>
   scale:    1.05, <span class="hl-cmt">// scale up on hover (1 = no scale)</span>
   glare:    <span class="hl-kw">false</span>,
 });</pre>
@@ -184,27 +186,27 @@ $(<span class="hl-val">'.ef-card'</span>).themestrapPluginHoverEffect({
           </tr>
         </thead>
         <tbody>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">effect</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'magnetic'</td><td style="padding:.45rem .75rem;color:#555">'magnetic' | '3d' | 'magnetic-3d'</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">strength</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.4</td><td style="padding:.45rem .75rem;color:#555">Magnetic pull intensity (0–2)</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">tiltMax</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">15</td><td style="padding:.45rem .75rem;color:#555">Max rotation in degrees (3D mode)</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">scale</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">1</td><td style="padding:.45rem .75rem;color:#555">Scale factor on hover (1 = off)</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">glare</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">false</td><td style="padding:.45rem .75rem;color:#555">Reflective glare overlay (3D modes)</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">glareOpacity</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.25</td><td style="padding:.45rem .75rem;color:#555">Glare highlight max opacity</td></tr>
-          <tr><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">transition</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'300ms ease'</td><td style="padding:.45rem .75rem;color:#555">CSS transition for the reset-on-leave snap</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">effect</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'magnetic'</td><td style="padding:.45rem .75rem;color:#555">'magnetic' | '3d' | 'magnetic-3d' | 'none'</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">magneticMx</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.15</td><td style="padding:.45rem .75rem;color:#555">Horizontal pull, as a fraction of the width</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">magneticMy</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.30</td><td style="padding:.45rem .75rem;color:#555">Vertical pull, as a fraction of the height</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">magneticDeg</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">12</td><td style="padding:.45rem .75rem;color:#555">Max tilt in degrees (3D modes)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">perspective</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">800</td><td style="padding:.45rem .75rem;color:#555">Perspective in px for the tilt</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">scale</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">1</td><td style="padding:.45rem .75rem;color:#555">Scale while hovered (1 = off)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">ease</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.15</td><td style="padding:.45rem .75rem;color:#555">Fraction of the distance covered per frame</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">glare</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">false</td><td style="padding:.45rem .75rem;color:#555">Moving highlight overlay</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">glareOpacity</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">0.20</td><td style="padding:.45rem .75rem;color:#555">Highlight strength</td></tr>
+          <tr><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">glareSize</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">80</td><td style="padding:.45rem .75rem;color:#555">Highlight radius, % of the element</td></tr>
         </tbody>
       </table>
     </div>
 <pre class="snip">$(<span class="hl-val">'[data-plugin-hover-effect]'</span>).themestrapPluginHoverEffect();
-<span class="hl-cmt">// OR via data attributes on the element:</span>
-<span class="hl-cmt">// data-hover-effect="3d"</span>
-<span class="hl-cmt">// data-hover-effect-strength="0.6"</span>
-<span class="hl-cmt">// data-hover-effect-tilt-max="20"</span>
-<span class="hl-cmt">// data-hover-effect-glare="true"</span>
-<span class="hl-cmt">// data-hover-effect-scale="1.05"</span>
+<span class="hl-cmt">// OR via data-plugin-options on the element:</span>
+<span class="hl-cmt">// &lt;div data-plugin-hover-effect</span>
+<span class="hl-cmt">//      data-plugin-options='{"effect": "3d", "magneticDeg": 18, "glare": true, "scale": 1.05}'&gt;</span>
 
 <span class="hl-cmt">// Destroy:</span>
 $(<span class="hl-val">'.ef-card'</span>).data(<span class="hl-val">'__hoverEffect'</span>).destroy();</pre>
-    <div class="demo-log" id="log-opts"><span class="log-entry">// all options available via JS or data attributes</span></div>
+    <div class="demo-log" id="log-opts"><span class="log-entry">// all options available via JS or data-plugin-options</span></div>
   </div>
 
 </div>
@@ -218,34 +220,34 @@ $(<span class="hl-val">'.ef-card'</span>).data(<span class="hl-val">'__hoverEffe
 $(function () {
 
   /* Card 01: Magnetic */
-  $('#he-mag-1').themestrapPluginHoverEffect({ effect: 'magnetic', strength: 0.4 });
-  $('#he-mag-2').themestrapPluginHoverEffect({ effect: 'magnetic', strength: 0.8 });
-  $('#he-mag-3').themestrapPluginHoverEffect({ effect: 'magnetic', strength: 1.4 });
+  $('#he-mag-1').themestrapPluginHoverEffect({ effect: 'magnetic' });
+  $('#he-mag-2').themestrapPluginHoverEffect({ effect: 'magnetic', magneticMx: 0.3, magneticMy: 0.5 });
+  $('#he-mag-3').themestrapPluginHoverEffect({ effect: 'magnetic', magneticMx: 0.5, magneticMy: 0.8 });
 
   $('#he-mag-1, #he-mag-2, #he-mag-3').on('mouseenter', function () {
     var id = $(this).attr('id');
-    var str = { 'he-mag-1': '0.4', 'he-mag-2': '0.8', 'he-mag-3': '1.4' }[id];
-    $('#log-mag').html('<span class="log-entry">// mouseenter — strength: ' + str + '</span>');
+    var str = { 'he-mag-1': 'Mx 0.15, My 0.30', 'he-mag-2': 'Mx 0.30, My 0.50', 'he-mag-3': 'Mx 0.50, My 0.80' }[id];
+    $('#log-mag').html('<span class="log-entry">// mouseenter — ' + str + '</span>');
   });
 
   /* Card 02: 3D tilt */
-  $('#he-3d-1').themestrapPluginHoverEffect({ effect: '3d', tiltMax: 15 });
-  $('#he-3d-2').themestrapPluginHoverEffect({ effect: '3d', tiltMax: 30 });
-  $('#he-3d-glare').themestrapPluginHoverEffect({ effect: '3d', tiltMax: 20, glare: true, glareOpacity: 0.3 });
+  $('#he-3d-1').themestrapPluginHoverEffect({ effect: '3d' });
+  $('#he-3d-2').themestrapPluginHoverEffect({ effect: '3d', magneticDeg: 25 });
+  $('#he-3d-glare').themestrapPluginHoverEffect({ effect: '3d', magneticDeg: 18, glare: true, glareOpacity: 0.3 });
 
   $('#he-3d-1, #he-3d-2, #he-3d-glare').on('mouseenter', function () {
     var id = $(this).attr('id');
-    var info = { 'he-3d-1': '15° no glare', 'he-3d-2': '30° no glare', 'he-3d-glare': '20° glare=true' }[id];
+    var info = { 'he-3d-1': '12° no glare', 'he-3d-2': '25° no glare', 'he-3d-glare': '18° glare=true' }[id];
     $('#log-3d').html('<span class="log-entry">// 3D active — ' + info + '</span>');
   });
 
   /* Card 03: Combined */
-  $('#he-comb-1').themestrapPluginHoverEffect({ effect: 'magnetic-3d', strength: 0.5, tiltMax: 20 });
-  $('#he-comb-2').themestrapPluginHoverEffect({ effect: 'magnetic-3d', strength: 0.6, tiltMax: 18, scale: 1.06 });
+  $('#he-comb-1').themestrapPluginHoverEffect({ effect: 'magnetic-3d', magneticMx: 0.2, magneticMy: 0.3, magneticDeg: 16 });
+  $('#he-comb-2').themestrapPluginHoverEffect({ effect: 'magnetic-3d', magneticMx: 0.25, magneticMy: 0.35, magneticDeg: 14, scale: 1.06 });
 
   $('#he-comb-1, #he-comb-2').on('mouseenter', function () {
     var id = $(this).attr('id');
-    var label = id === 'he-comb-1' ? 'magnetic-3d  str=0.5  tilt=20°' : 'magnetic-3d  str=0.6  tilt=18°  scale=1.06';
+    var label = id === 'he-comb-1' ? 'magnetic-3d  Mx=0.2 My=0.3  tilt=16°' : 'magnetic-3d  Mx=0.25 My=0.35  tilt=14°  scale=1.06';
     $('#log-comb').html('<span class="log-entry">// ' + label + '</span>');
   });
 

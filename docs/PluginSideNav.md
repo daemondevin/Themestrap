@@ -12,7 +12,7 @@ Items with `[data-sidenav-has-children]` wrap their `[data-sidenav-sub-items]` l
 
 ### Collapsed tooltip mode
 
-In collapsed (icon-only) mode, each item's label is hidden. If `Bootstrap.Tooltip` is available, the plugin initialises a tooltip on each icon using the label text. In environments without Bootstrap Tooltips the icon is still visible but the label is not.
+In collapsed (icon-only) mode, each item's label is hidden. If `Bootstrap.Tooltip` is available, the plugin initializes a tooltip on each icon using the label text. In environments without Bootstrap Tooltips the icon is still visible but the label is not.
 
 ### Auto-active detection
 
@@ -76,20 +76,45 @@ When `activeOnLoad: true` the plugin compares `window.location.pathname` against
 | `mobileBreakpoint` | number | `null` | Viewport width (px) below which sidebar is treated as mobile. |
 | `collapseOnMobile` | bool | `false` | Auto-collapse below `mobileBreakpoint`. |
 | `forceInit` | bool | `true` | Skip IntersectionObserver — sidebar is layout-critical. |
+| `accY` | number | `0` | IntersectionObserver root margin offset, used by `dynIntObsInit` when `forceInit` is `false`. |
 
 ### CSS custom properties
 
+Declared on `.ts-sidenav`, with a dark set under `html.dark .ts-sidenav`. The `width`, `widthCollapsed` and `duration` options write the first three inline on the root, so set those through options rather than CSS.
+
 ```css
 .ts-sidenav {
-  --ts-sn-width:          260px;
-  --ts-sn-width-mini:      64px;
-  --ts-sn-bg:          #0a1929;
-  --ts-sn-fg:             #fff;
-  --ts-sn-active:      #e8672a;
-  --ts-sn-border:  rgba(255,255,255,.07);
-  --ts-sn-duration:       250ms;
+  --ts-sidenav-width:              260px;
+  --ts-sidenav-width-collapsed:    64px;
+  --ts-sidenav-duration:           250ms;
+  --ts-sidenav-easing:             cubic-bezier(0.4, 0, 0.2, 1);
+
+  --ts-sidenav-bg:                 #0a1929;
+  --ts-sidenav-border-color:       rgba(255, 255, 255, .07);
+  --ts-sidenav-header-bg:          #0a1929;
+  --ts-sidenav-footer-bg:          #0a1929;
+  --ts-sidenav-text:               #fff;
+  --ts-sidenav-text-muted:         rgba(255, 255, 255, .4);
+  --ts-sidenav-icon-color:         #7a9bb8;
+  --ts-sidenav-icon-active-color:  #e8672a;
+  --ts-sidenav-item-hover-bg:      rgba(255, 255, 255, .05);
+  --ts-sidenav-item-active-bg:     rgba(232, 103, 42, .12);
+  --ts-sidenav-item-active-color:  #e8672a;
+  --ts-sidenav-item-active-border: #e8672a;
+  --ts-sidenav-group-title-color:  #7a9bb8;
+  --ts-sidenav-sub-item-indent:    2.75rem;
+  --ts-sidenav-badge-bg:           rgba(255, 255, 255, .08);
+  --ts-sidenav-badge-color:        #fff;
+  --ts-sidenav-badge-active-bg:    #e8672a;
+  --ts-sidenav-badge-active-color: #fff;
+  --ts-sidenav-toggle-color:       #7a9bb8;
+  --ts-sidenav-toggle-hover-bg:    rgba(255, 255, 255, .05);
 }
 ```
+
+The values above are an example navy theme; the shipped defaults come from the Themestrap palette (`--light`, `--primary`, `--grey-*` and so on) with plain fallbacks.
+
+The dark set only applies under `html.dark`. For `data-bs-theme="dark"` or `prefers-color-scheme`, copy the dark values into your own rule.
 
 
 ## [Instance **API**](#instance-api)

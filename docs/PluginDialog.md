@@ -21,10 +21,11 @@ PluginDialog manages a single modal instance. It handles the full accessibility 
 
 ### Open lifecycle
 
-1. Panel receives `.ts-dialog--open` + the entrance animation class.
-2. `<body>` receives `ts-dialog-scroll-lock` (sets `overflow: hidden`).
-3. Focus moves to the first focusable element inside `[data-dialog-panel]`, or the panel itself.
-4. A `focustrap` keydown handler prevents Tab/Shift-Tab from leaving the panel.
+1. The element that had focus is remembered.
+2. `<body>` receives `.ts-scroll-lock` (`overflow: hidden`, plus right padding equal to `--ts-scrollbar-width` so the page does not shift).
+3. The root swaps `.dialog-hidden` for `.dialog-is-open`, `aria-hidden` becomes `false`, and the panel gets `dialog-anim-enter` plus the `animationIn` class.
+4. After 50 ms focus moves to `[data-dialog-autofocus]` if present, otherwise the first focusable element in the dialog, otherwise the root.
+5. A keydown handler keeps Tab and Shift+Tab inside the dialog.
 
 ### Close lifecycle
 
@@ -35,7 +36,7 @@ PluginDialog manages a single modal instance. It handles the full accessibility 
 
 ### Multiple open dialogs
 
-A stack of open dialogs is maintained. Opening a second dialog while one is open pushes the first to the background stack. Closing the top-most dialog pops the stack and restores focus to the previous one.
+There is no dialog stack. Each dialog is independent: opening a second one leaves the first open underneath, and each remembers its own trigger for focus restore. Two things follow from that. Every open dialog listens for Escape on the document, so one press closes all of them. And the scroll lock is a single class on `<body>`, so closing the top dialog unlocks the page while the lower one is still open. Open dialogs one at a time where you can, and give an inner dialog `closeOnEscape: false` if you do nest them.
 
 
 ## Quick **Start**
@@ -144,7 +145,7 @@ Add `.dialog-alert` to `[data-plugin-dialog]` for a compact centered alert varia
 | `animationIn` | `string` | `'fadeIn'` | CSS animation class applied to `[data-dialog-panel]` on open. |
 | `animationOut` | `string` | `'fadeOut'` | CSS animation class applied to `[data-dialog-panel]` on close. |
 | `animationDuration` | `number` | `300` | Maximum animation duration in ms (fallback if `animationend` never fires). |
-| `scrollLock` | `boolean` | `true` | Add `.dialog-scroll-lock` to `<body>` while a dialog is open (prevents layout shift via `--dialog-scrollbar-width`). |
+| `scrollLock` | `boolean` | `true` | Add `.ts-scroll-lock` to `<body>` while the dialog is open. The padding from `--ts-scrollbar-width` (measured by `themestrap.js`) prevents layout shift. |
 | `onOpen` | `function\|null` | `null` | Called after the open animation starts. Receives the dialog element. |
 | `onClose` | `function\|null` | `null` | Called after the close animation finishes. Receives the dialog element. |
 
@@ -231,7 +232,7 @@ html.dark, [data-bs-theme="dark"] { --ts-dlg-bg: #20263a; }
 > - Tab key cycles focus within the panel (focus trap). Shift+Tab cycles backward.
 > - Escape closes the dialog (when `closeOnEscape: true`).
 > - Focus is returned to the triggering element on close.
-> - Scroll-lock compensates exactly for the native scrollbar width via `--dialog-scrollbar-width` (measured once at script load).
+> - Scroll-lock compensates for the native scrollbar width via `--ts-scrollbar-width`, which `themestrap.js` measures and sets on `<html>`.
 
 ## Auto-init (init.js)
 
@@ -333,4 +334,4 @@ $(function () {
 
 **Dialog stays dark after picking light.** Older builds of the plugin only listened to `prefers-color-scheme`, so a user who chose light on a dark system still got dark dialogs. The current build reads the same `html.dark` and `data-bs-theme` signals as PluginDarkMode; update the plugin file if you see this.
 
-**Two dialogs open simultaneously.** The plugin supports a dialog stack, but both dialogs must be independent `[data-plugin-dialog]` instances (separate IDs). Nesting one dialog inside another's `[data-dialog-panel]` is not supported.
+**Two dialogs open simultaneously.** There is no stack (see "Multiple open dialogs"): one Escape closes both, and closing either releases the page's scroll lock. Both must be separate `[data-plugin-dialog]` instances with their own ids; nesting one dialog inside another's `[data-dialog-panel]` is not supported.

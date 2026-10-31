@@ -102,10 +102,9 @@
       </div>
     </div>
 <pre class="snip">$(<span class="hl-val">'#my-grid'</span>).themestrapPluginMasonry({
+  responsive: <span class="hl-kw">false</span>,   <span class="hl-cmt">// use columns and gutter as given</span>
   columns:    3,       <span class="hl-cmt">// number of columns</span>
   gutter:     16,      <span class="hl-cmt">// px gap between items</span>
-  itemsClass: <span class="hl-val">'.masonry-item'</span>,
-  animate:    <span class="hl-kw">true</span>,   <span class="hl-cmt">// fade-in on layout</span>
 });</pre>
     <div class="demo-log" id="log-3col"><span class="log-entry">// masonry layout complete</span></div>
   </div>
@@ -129,9 +128,9 @@
       </div>
     </div>
 <pre class="snip">$(<span class="hl-val">'#msn-02'</span>).themestrapPluginMasonry({
+  responsive: <span class="hl-kw">false</span>,
   columns:    2,
   gutter:     24,
-  itemsClass: <span class="hl-val">'.masonry-item'</span>,
 });</pre>
     <div class="demo-log" id="log-2col"><span class="log-entry">// 2-column layout ready</span></div>
   </div>
@@ -187,18 +186,16 @@ msn.layout();</pre>
           </tr>
         </thead>
         <tbody>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">columns</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">3</td><td style="padding:.45rem .75rem;color:#555">Number of equal-width columns</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">gutter</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">16</td><td style="padding:.45rem .75rem;color:#555">Gap between items in px</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">itemsClass</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">'.masonry-item'</td><td style="padding:.45rem .75rem;color:#555">CSS selector for child items</td></tr>
-          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">animate</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">false</td><td style="padding:.45rem .75rem;color:#555">Fade items in after layout</td></tr>
-          <tr><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">animationDuration</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">400</td><td style="padding:.45rem .75rem;color:#555">Fade animation duration (ms)</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">columns</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">3</td><td style="padding:.45rem .75rem;color:#555">Column count when <code>responsive</code> is off</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">gutter</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">20</td><td style="padding:.45rem .75rem;color:#555">Gap between items in px when <code>responsive</code> is off</td></tr>
+          <tr style="border-bottom:1px solid #edf0f4"><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">responsive</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">{0: 1 col, 576: 2, 768: 2, 992: 3, 1200: 3}</td><td style="padding:.45rem .75rem;color:#555">Breakpoint map of <code>{ columns, gutter }</code>. It always matches, so set it to <code>false</code> to use <code>columns</code> and <code>gutter</code></td></tr>
+          <tr><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono);color:var(--ts-orange)">columnClass</td><td style="padding:.45rem .75rem;font-family:var(--ts-font-mono)">''</td><td style="padding:.45rem .75rem;color:#555">Extra class added to the container</td></tr>
         </tbody>
       </table>
     </div>
 <pre class="snip"><span class="hl-cmt">// Auto-init via data attribute:</span>
 <span class="hl-tag">&lt;div</span> <span class="hl-attr">data-plugin-masonry</span>
-     <span class="hl-attr">data-masonry-columns</span>=<span class="hl-val">"3"</span>
-     <span class="hl-attr">data-masonry-gutter</span>=<span class="hl-val">"16"</span><span class="hl-tag">&gt;</span>
+     <span class="hl-attr">data-plugin-options</span>=<span class="hl-val">'{"responsive": false, "columns": 3, "gutter": 16}'</span><span class="hl-tag">&gt;</span>
   …items…
 <span class="hl-tag">&lt;/div&gt;</span>
 
@@ -206,7 +203,7 @@ msn.layout();</pre>
 <span class="hl-kw">const</span> msn = $(<span class="hl-val">'#grid'</span>).data(<span class="hl-val">'__masonry'</span>);
 msn.layout();     <span class="hl-cmt">// repack all items</span>
 msn.destroy();    <span class="hl-cmt">// restore normal flow</span></pre>
-    <div class="demo-log" id="log-opts"><span class="log-entry">// all options available via JS or data attributes</span></div>
+    <div class="demo-log" id="log-opts"><span class="log-entry">// all options available via JS or data-plugin-options</span></div>
   </div>
 
 </div>
@@ -221,13 +218,13 @@ var _appendCount = 0;
 var _prependCount = 0;
 
 $(function () {
-  $('#msn-01').themestrapPluginMasonry({ columns: 3, gutter: 16, itemsClass: '.masonry-item', animate: true });
+  $('#msn-01').themestrapPluginMasonry({ responsive: false, columns: 3, gutter: 16 });
   log('log-3col', '// 9 items laid out in 3 columns');
 
-  $('#msn-02').themestrapPluginMasonry({ columns: 2, gutter: 24, itemsClass: '.masonry-item', animate: true });
+  $('#msn-02').themestrapPluginMasonry({ responsive: false, columns: 2, gutter: 24 });
   log('log-2col', '// 6 items laid out in 2 columns');
 
-  $('#msn-03').themestrapPluginMasonry({ columns: 3, gutter: 16, itemsClass: '.masonry-item' });
+  $('#msn-03').themestrapPluginMasonry({ responsive: false, columns: 3, gutter: 16 });
   log('log-append', '// 3 initial items — use buttons to add more');
 });
 
@@ -271,7 +268,7 @@ function resetGrid() {
   if (msn) msn.destroy();
   $('#msn-03 .masonry-item:not(:nth-child(-n+3))').remove();
   _appendCount = 0; _prependCount = 0;
-  $('#msn-03').themestrapPluginMasonry({ columns: 3, gutter: 16, itemsClass: '.masonry-item' });
+  $('#msn-03').themestrapPluginMasonry({ responsive: false, columns: 3, gutter: 16 });
   log('log-append', '// reset to 3 initial items');
 }
 

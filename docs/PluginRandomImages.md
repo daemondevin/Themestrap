@@ -79,6 +79,7 @@ const inst = themestrap.PluginRandomImages.init(
 | `stopAtImageIndex` | number\|false | `false` | Stop the loop when `perImageIndex` equals this value. Works best paired with `random: false` to make the target index predictable. |
 | `stopAfterFewSeconds` | number\|false | `false` | Stop the loop after this many milliseconds, via a separate `setTimeout`. Fires independently of swap count. |
 | `stopAfterXTimes` | number\|false | `false` | Stop the loop after this many swap cycles have completed. |
+| `startIndex` | number\|false | `false` | Wrapper mode: index of the image to show first, before the loop starts. Ignored when out of range. |
 | `accY` | number | `0` | Vertical IntersectionObserver trigger offset (px), passed through by `dynIntObsInit`. |
 
 Options go in a single-quoted attribute with double-quoted JSON keys — `themestrap.fn.getOptions()` normalizes quote style and handles malformed JSON gracefully.

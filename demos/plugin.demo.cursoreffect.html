@@ -60,6 +60,17 @@
     }
     .c-swatch:hover { transform: scale(1.08); border-color: rgba(255,255,255,.4); }
     .c-swatch.sel { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.3); }
+    /* Cursor Effect styles (from css/themestrap-elements.css; the plugin injects none) */
+    .cursor-outer { position: fixed; left: 0; top: 0; width: 40px; height: 40px; border: 1px solid var(--ts-teal); border-radius: 100%; pointer-events: none; z-index: 9998; transition: ease-out all .08s .010s; }
+    .cursor-outer.cursor-outer-fit { left: 0 !important; top: 0 !important; }
+    .cursor-inner { position: fixed; left: 17px; top: 17px; width: 6px; height: 6px; background: var(--ts-teal); border-radius: 100%; pointer-events: none; z-index: 9999; transition: all .08s ease-out; }
+    .cursor-inner.cursor-inner-plus { display: flex; align-items: center; justify-content: center; background-color: transparent !important; }
+    .cursor-inner.cursor-inner-plus:before { content: '+'; color: var(--ts-teal); font-size: 1.7rem; }
+    .hide-mouse-cursor, .hide-mouse-cursor a, .hide-mouse-cursor button, .hide-mouse-cursor input, .hide-mouse-cursor textarea { cursor: none !important; }
+    .cursor-effect-size-small .cursor-outer { width: 20px; height: 20px; left: 10px; top: 9px; }
+    .cursor-effect-size-small .cursor-inner { width: 4px; height: 4px; left: 18px; }
+    .cursor-effect-size-big .cursor-outer { width: 60px; height: 60px; left: -9px; top: -10px; }
+    .cursor-effect-size-big .cursor-inner { width: 8px; height: 8px; }
   </style>
 </head>
 <body data-plugin-cursor-effect>
@@ -93,13 +104,14 @@
     </div>
 <pre class="snip"><span class="hl-cmt">// Initialize once on body — the overlay is global</span>
 $(<span class="hl-val">'body'</span>).themestrapPluginCursorEffect({
-  color:   <span class="hl-val">'default'</span>,  <span class="hl-cmt">// colour theme</span>
-  size:    <span class="hl-val">'default'</span>,  <span class="hl-cmt">// 'small' | 'default' | 'big'</span>
-  hideNative: <span class="hl-kw">true</span>,  <span class="hl-cmt">// hide the OS cursor</span>
+  cursorOuterColor: <span class="hl-val">'#2ab8c8'</span>,  <span class="hl-cmt">// ring</span>
+  cursorInnerColor: <span class="hl-val">'#2ab8c8'</span>,  <span class="hl-cmt">// dot</span>
+  size:             <span class="hl-val">'default'</span>,  <span class="hl-cmt">// 'small' | 'default' | 'big'</span>
+  hideMouseCursor:  <span class="hl-kw">true</span>,       <span class="hl-cmt">// hide the OS cursor</span>
 });
 
 <span class="hl-cmt">// The plugin appends .cursor-outer and .cursor-inner to body.</span>
-<span class="hl-cmt">// Styles are injected lazily from build().</span></pre>
+<span class="hl-cmt">// Their styles live in css/themestrap-elements.css.</span></pre>
     <div class="demo-log" id="log-active"><span class="log-entry">// cursor overlay active on page load</span></div>
   </div>
 
@@ -138,11 +150,11 @@ $(<span class="hl-val">'body'</span>).themestrapPluginCursorEffect({
   <div class="demo-card" id="card-colors">
     <div class="demo-card-header">
       <span class="card-num">03</span>
-      <h2>Colour themes — nine built-in options</h2>
-      <span class="card-tag">color option</span>
+      <h2>Colours — any CSS colour for the ring and the dot</h2>
+      <span class="card-tag">cursorOuterColor · cursorInnerColor</span>
     </div>
     <div class="demo-stage">
-      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin:0 0 1.25rem">Click a swatch to reinitialize the cursor with that colour theme</p>
+      <p style="color:rgba(255,255,255,.5);font-size:.82rem;margin:0 0 1.25rem">Click a swatch to reinitialize the cursor with that colour</p>
       <div class="color-swatch-row">
         <div class="c-swatch sel" style="background:#2ab8c8" data-color="default"        onclick="changeColor('default',        this)">default</div>
         <div class="c-swatch"    style="background:#e8672a" data-color="orange"         onclick="changeColor('orange',         this)">orange</div>
@@ -156,7 +168,8 @@ $(<span class="hl-val">'body'</span>).themestrapPluginCursorEffect({
       </div>
     </div>
 <pre class="snip" id="snip-color">$(<span class="hl-val">'body'</span>).themestrapPluginCursorEffect({
-  color: <span class="hl-val">'default'</span>,   <span class="hl-cmt">// teal</span>
+  cursorOuterColor: <span class="hl-val">'#2ab8c8'</span>,
+  cursorInnerColor: <span class="hl-val">'#2ab8c8'</span>,
 });</pre>
     <div class="demo-log" id="log-colors"><span class="log-entry">// click a swatch to switch colour</span></div>
   </div>
@@ -219,17 +232,25 @@ function getCursor() {
 }
 
 function changeColor(color, el) {
+  var hex = rgbToHex($(el).css('background-color'));
   var cursor = getCursor();
   if (cursor) cursor.destroy();
-  $('body').themestrapPluginCursorEffect({ color: color, size: 'default', hideNative: true });
+  $('body').themestrapPluginCursorEffect({ cursorOuterColor: hex, cursorInnerColor: hex, size: 'default', hideMouseCursor: true });
   $('.c-swatch').removeClass('sel');
   $(el).addClass('sel');
   $('#snip-color').html(
     '$(<span class="hl-val">\'body\'</span>).themestrapPluginCursorEffect({\n' +
-    '  color: <span class="hl-val">\'' + color + '\'</span>,\n' +
+    '  cursorOuterColor: <span class="hl-val">\'' + hex + '\'</span>,\n' +
+    '  cursorInnerColor: <span class="hl-val">\'' + hex + '\'</span>,\n' +
     '});'
   );
-  log('log-colors', '// reinitialized with color: "' + color + '"');
+  log('log-colors', '// reinitialized with ' + color + ' (' + hex + ')');
+}
+
+function rgbToHex(rgb) {
+  var m = String(rgb).match(/\d+/g);
+  if (!m) return rgb;
+  return '#' + m.slice(0, 3).map(function (n) { return ('0' + parseInt(n, 10).toString(16)).slice(-2); }).join('');
 }
 
 function setSize(size) {
@@ -248,7 +269,7 @@ function apiCall(method) {
 
 function reinit() {
   if (getCursor()) { log('log-api', '// already initialized', 'warn'); return; }
-  $('body').themestrapPluginCursorEffect({ color: 'default', size: 'default', hideNative: true });
+  $('body').themestrapPluginCursorEffect({ cursorOuterColor: '#2ab8c8', cursorInnerColor: '#2ab8c8', size: 'default', hideMouseCursor: true });
   log('log-api', '// reinitialized');
 }
 

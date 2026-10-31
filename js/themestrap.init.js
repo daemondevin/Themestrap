@@ -191,7 +191,7 @@
 	}
 
 	// Progress Bar
-	if (typeof $.fn['themestrapPluginProgressBar'] === 'function' && ( $('[data-plugin-progress-bar]') || $('[data-appear-progress-animation]').length )) {
+	if (typeof $.fn['themestrapPluginProgressBar'] === 'function' && ( $('[data-plugin-progress-bar]').length || $('[data-appear-progress-animation]').length )) {
 		themestrap.fn.dynIntObsInit( '[data-plugin-progress-bar]:not(.manual), [data-appear-progress-animation]', 'themestrapPluginProgressBar', themestrap.PluginProgressBar.defaults );
 	}
 
@@ -345,24 +345,31 @@
         themestrap.fn.intObsInit('[data-plugin-scroller]:not(.manual)', 'themestrapPluginScroller');
     }
     
-    // Scrollable
-	if (typeof $.fn['nanoScroller'] === 'function' && $('[data-plugin-scrollable]').length) {
-
-		$(() => {
-			$('[data-plugin-scrollable]:not(.manual)').each(function() {
-				const $this = $(this);
-				const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
-				$this.themestrapPluginScrollable(opts);
-			});
-		});
-
-	}
-	
 	// Scroll Shadow
     if (typeof $.fn['themestrapPluginScrollShadow'] === 'function' && $('[data-plugin-scroll-shadow]').length) {
         themestrap.fn.intObsInit('[data-plugin-scroll-shadow]:not(.manual)', 'themestrapPluginScrollShadow');
     }
     
+    // Drawer (DOMReady, so triggers work before the drawer scrolls into view)
+    if (typeof $.fn['themestrapPluginDrawer'] === 'function' && $('[data-plugin-drawer]').length) {
+        $(() => {
+            $('[data-plugin-drawer]:not(.manual)').each(function () {
+                const $this = $(this);
+                const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+                $this.themestrapPluginDrawer(opts);
+            });
+        });
+    }
+
+    // Tooltip (DOMReady, so keyboard focus finds every trigger)
+    if (typeof $.fn['themestrapPluginTooltip'] === 'function' && $('[data-plugin-tooltip]').length) {
+        $(() => {
+            $('[data-plugin-tooltip]:not(.manual)').each(function () {
+                $(this).themestrapPluginTooltip();
+            });
+        });
+    }
+
     // Dialog
     if (typeof $.fn['themestrapPluginDialog'] === 'function' && $('[data-plugin-dialog]').length) {
         $(() => {

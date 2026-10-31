@@ -47,7 +47,7 @@
 
             if (str.startsWith('<svg')) {
                 if (this.options.currentColor) {
-                    // Inline SVG â€” sanitize hardcoded fill/stroke colors to currentColor,
+                    // Inline SVG: sanitize hardcoded fill/stroke colors to currentColor,
                     // leaving fill="none" and stroke="none" untouched.
                     const sanitized = str
                         .replace(/\bfill\s*=\s*"(?!none")[^"]*"/gi, 'fill="currentColor"')
@@ -60,12 +60,17 @@
                 }
             }
 
-            if (/\bfa[-\w]/.test(str)) {
-                // Font Awesome class string e.g. "fa-solid fa-heart"
-                const size = (this.options.size && this.options.size !== 'md') ? ` fa-${this.options.size}` : '';
-                return `<i class="${str.replace(/"/g, '')}${size} icon"></i>`;
+            // Any other markup (an <img>, an emoji in a <span>) is wrapped as is
+            if (str.startsWith('<')) {
+                return `<span class="icon">${str}</span>`;
             }
 
+            // Otherwise it is a class string: Font Awesome, Bootstrap Icons, or your own.
+            // Only Font Awesome gets the fa-{size} modifier.
+            const classes = str.replace(/["<>]/g, '');
+            const isFa    = /(^|\s)fa[-\w]*/.test(classes);
+            const size    = (isFa && this.options.size && this.options.size !== 'md') ? ` fa-${this.options.size}` : '';
+            return `<i class="${classes}${size} icon" aria-hidden="true"></i>`;
         }
 
         build() {
@@ -83,11 +88,8 @@
                 self.$icons = self.$el.find('.icon');
             }
 
-            if (o.interactive) {
-                self.$el.removeClass('disabled');
-            } else {
-                self.$el.addClass('disabled');
-            }
+            self.disabled = !o.interactive;
+            self.$el.toggleClass('disabled', self.disabled);
 
             self.setRating(o.initialRating, true);
 
@@ -97,8 +99,10 @@
         events() {
             const self = this;
 
-            self.$el
+            // Handlers are bound once and stay bound; they ignore input while disabled.
+            self.$el.off('.rating')
                 .on('mouseenter.rating', '.icon', function() {
+                    if (self.disabled) return;
                     const $active = $(this);
                     $active.nextAll().removeClass('selected');
                     self.$el.addClass('selected');
@@ -109,6 +113,7 @@
                     self.$icons.removeClass('selected');
                 })
                 .on('click.rating', '.icon', function() {
+                    if (self.disabled) return;
                     const o = self.options;
                     const current = self.getRating();
                     const rating = self.$icons.index($(this)) + 1;
@@ -131,6 +136,8 @@
             const $partialIcon = rating <= 1 ? $activeIcon : $activeIcon.next();
             const filledPct = (rating % 1) * 100;
 
+            self._rating = Math.max(0, Number(rating) || 0);
+
             self.$el.removeClass('selected');
             self.$icons.removeClass('selected active partial');
 
@@ -146,7 +153,7 @@
                 }
             }
 
-            if (!silent) {
+            if (!silent && typeof self.options.onRate === 'function') {
                 self.options.onRate.call(self.$el[0], rating);
             }
 
@@ -154,7 +161,7 @@
         }
 
         getRating() {
-            return this.$icons.filter('.active').length;
+            return this._rating || 0;
         }
 
         clearRating() {
@@ -162,17 +169,15 @@
         }
 
         enable() {
-            const self = this;
-            self.$el.removeClass('disabled');
-            if (!self.$el.data('eventsbound')) {
-                self.events();
-                self.$el.data('eventsbound', true);
-            }
+            this.disabled = false;
+            this.$el.removeClass('disabled');
             return this;
         }
 
         disable() {
-            this.$el.addClass('disabled').off('.rating');
+            this.disabled = true;
+            this.$el.removeClass('selected').addClass('disabled');
+            this.$icons.removeClass('selected');
             return this;
         }
 

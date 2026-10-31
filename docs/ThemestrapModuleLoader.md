@@ -20,7 +20,7 @@ Themestrap already initializes lazily — `init.js` uses an `IntersectionObserve
 
 ### Reach for it when
 
-- A plugin depends on a **heavy vendor library** — Slider Revolution, Isotope, Owl Carousel — that most pages never use.
+- A plugin depends on a **heavy vendor library** — Slider Revolution, Vivus, jQuery Validation — that most pages never use.
 - You ship **optional, separate-file plugins** rather than one concatenated bundle.
 - Component markup is assembled by MODX and you want each chunk to **carry its own dependency** instead of a global script list.
 
@@ -74,15 +74,14 @@ const loader = themestrap.loader({
 });
 
 loader
-  .define('owl', {
-    src: 'vendor/owl.carousel/js/owl.carousel.min.js',
-    css: 'vendor/owl.carousel/css/owl.carousel.min.css'
+  .define('jquery-pin', {
+    src: 'vendor/jquery-pin/jquery.pin.js'
   })
-  .definePlugin('carousel', {
-    src: 'components/themestrap.plugin.carousel.js',
-    deps: ['owl'],
-    selector: '[data-plugin-carousel]',
-    method: 'themestrapPluginCarousel',
+  .definePlugin('sticky', {
+    src: 'components/themestrap.plugin.sticky.js',
+    deps: ['jquery-pin'],
+    selector: '[data-plugin-sticky]',
+    method: 'themestrapPluginSticky',
     strategy: 'intObs'
   });
 
@@ -92,15 +91,15 @@ $(() => loader.scan());
 ### 2 · Declare the need in markup
 
 ```html
-<!-- data-module = what to fetch · data-plugin-carousel = what init binds to -->
-<div data-module="carousel"
-     data-plugin-carousel
-     data-plugin-options='{"loop": true, "items": 3}'>
-  <!-- slides -->
-</div>
+<!-- data-module = what to fetch · data-plugin-sticky = what init binds to -->
+<aside data-module="sticky"
+       data-plugin-sticky
+       data-plugin-options='{"minWidth": 991}'>
+  <!-- sidebar -->
+</aside>
 ```
 
-When this page loads, the scanner sees `carousel`, fetches Owl's CSS + JS then the plugin, and binds the observer to `[data-plugin-carousel]`. A page without that element fetches none of it.
+When this page loads, the scanner sees `sticky`, fetches jquery.pin then the plugin, and binds the observer to `[data-plugin-sticky]`. A page without that element fetches none of it.
 
 ## Loader API
 
@@ -143,13 +142,13 @@ The config fields in full:
 definePlugin · config
 
 ```js
-loader.definePlugin('chartCircular', {
-  src:           'components/themestrap.plugin.chartcircular.js',
-  deps:          ['easypiechart'],          // vendor modules to fetch first
-  selector:      '[data-plugin-chart-circular]', // what init binds to
-  method:        'themestrapPluginChartCircular',  // the $.fn.* method
-  strategy:      'dynIntObs',             // reads accY off the class defaults
-  defaultsClass: 'PluginChartCircular',    // required for dynIntObs
+loader.definePlugin('icon', {
+  src:           'components/themestrap.plugin.icon.js',
+  deps:          ['vivus', 'jquery-visible'], // vendor modules to fetch first
+  selector:      '[data-icon]',             // what init binds to
+  method:        'themestrapPluginIcon',    // the $.fn.* method
+  strategy:      'dynIntObs',               // reads accY off the class defaults
+  defaultsClass: 'PluginIcon',              // required for dynIntObs
   // manual: false  -> opt out of the :not(.manual) guard (default true)
   // css:    '...'  -> a stylesheet to load alongside the script
   // init:   fn     -> extra setup, run after activation
@@ -191,13 +190,21 @@ themestrap.modules.js · shape
   const loader = themestrap.loader({ basePath: '…', mode: '…' });
 
   // 1 · vendor modules — the third-party libs
-  loader.define('isotope',      { src: 'vendor/isotope/js/isotope.pkgd.min.js' })
-        .define('waitforimages',{ src: 'vendor/waitforimages/js/jquery.waitforimages.js' });
+  loader.define('vivus',          { src: 'vendor/vivus/js/vivus.min.js' })
+        .define('jquery-visible', { src: 'vendor/visible/js/jquery.visible.min.js' });
 
   // 2 · $.fn plugins -> definePlugin
+  loader.definePlugin('icon', {
+    src: 'components/themestrap.plugin.icon.js',
+    deps: ['vivus', 'jquery-visible'],
+    selector: '[data-icon]', method: 'themestrapPluginIcon',
+    strategy: 'dynIntObs', defaultsClass: 'PluginIcon'
+  });
+
+  // 2b · self-contained plugins can be listed too, with no deps,
+  //      so the loader still fetches them on demand
   loader.definePlugin('masonry', {
     src: 'components/themestrap.plugin.masonry.js',
-    deps: ['isotope', 'waitforimages'],
     selector: '[data-plugin-masonry]', method: 'themestrapPluginMasonry', strategy: 'intObs'
   });
 
@@ -212,35 +219,24 @@ A vendor library used by several plugins is defined once and listed in each plug
 
 ## Vendor dependencies
 
-Every component was scanned for the library it actually calls — its `$.isFunction($.fn.X)` guard or direct vendor method. Twenty-six plugins depend on a third-party library across twenty-two libs.
+Every component was scanned for the library it actually calls (its `$.fn.X` guard or a direct vendor call). Thirteen plugins still depend on a third-party library, across ten libraries.
 
-| Vendor library              | Module name                   | Plugins that need it                         |
-|-----------------------------|-------------------------------|----------------------------------------------|
-| Owl Carousel                | `owl`                         | carousel                                     |
-| touchSwipe                  | `touchswipe`                  | carouselLight opt                            |
-| twentytwenty + event.move   | `twentytwenty`                | beforeAfter                                  |
-| Magnific Popup              | `magnific-popup`              | lightbox                                     |
-| Isotope                     | `isotope`                     | masonry, sort                                |
-| waitForImages               | `waitforimages`               | beforeAfter, masonry, sort                   |
-| easyPieChart                | `easypiechart`                | chartCircular                                |
-| The Final Countdown         | `jquery-countdown`            | countdown                                    |
-| countTo                     | `countto`                     | counter                                      |
-| jquery.visible              | `jquery-visible`              | floatElement, parallax, icon, nav            |
-| jquery.cookie               | `jquery-cookie`               | gdpr, gdprWrapper                            |
-| Vivus                       | `vivus`                       | icon                                         |
-| observe-element-in-viewport | `observe-element-in-viewport` | inViewportStyle                              |
-| vide                        | `vide`                        | videoBackground                              |
-| hover3d                     | `hover3d`                     | hoverEffect opt                              |
-| jquery.matchHeight          | `matchheight`                 | matchHeight                                  |
-| jquery.easing               | `jquery-easing`               | progressBar, sectionScroll, scrollToTop, nav |
-| nanoScrollerJS              | `nanoscroller`                | scrollable                                   |
-| jquery.pin                  | `jquery-pin`                  | sticky                                       |
-| jquery-validation           | `jquery-validation`           | validation, newsletter, search               |
-| Slider Revolution           | `rs-plugin`                   | revolutionSlider                             |
+| Vendor library              | Module name                   | Plugins that need it           |
+|-----------------------------|-------------------------------|--------------------------------|
+| jquery.visible              | `jquery-visible`              | icon, nav                      |
+| jquery.cookie               | `jquery-cookie`               | gdprWrapper                    |
+| Vivus                       | `vivus`                       | icon                           |
+| observe-element-in-viewport | `observe-element-in-viewport` | inViewportStyle                |
+| vide                        | `vide`                        | videoBackground                |
+| jquery.matchHeight          | `matchheight`                 | matchHeight                    |
+| jquery.easing               | `jquery-easing`               | sectionScroll, scrollToTop, nav |
+| jquery.pin                  | `jquery-pin`                  | sticky                         |
+| jquery-validation           | `jquery-validation`           | validation, newsletter, search |
+| Slider Revolution           | `rs-plugin`                   | revolutionSlider               |
 
-*opt* marks an optional dependency — `carouselLight` needs touchSwipe only when `swipeEvents` is on; `hoverEffect` needs hover3d only for the `3d` effect (its `magnetic` effect is vanilla).
+These plugins used to need a library and are now self-contained: beforeAfter (TwentyTwenty, waitForImages), carousel (Owl Carousel), chartCircular (easyPieChart), countdown (The Final Countdown), counter (countTo), floatElement and parallax (jquery.visible), gdpr (jquery.cookie), hoverEffect (hover3d), lightbox (Magnific Popup), masonry and sort (Isotope, waitForImages), and progressBar (jquery.easing). The manifest still lists them, with no `deps`, so pages that rely on the loader keep fetching them on demand. carouselLight and scrollable are gone from `js/components/`; use carousel and scrollbar instead.
 
-Library identity is confirmed from source. The `vendor/<lib>/…` file **paths** follow the convention in `PluginBeforeAfter`'s error message and should be checked against your real `vendor/` folder. If `jquery-visible` or `waitforimages` already lives in your core bundle, drop it from the `deps` arrays.
+Library identity is confirmed from source. The `vendor/<lib>/…` file **paths** should be checked against your real `vendor/` folder. If `jquery-visible` or `jquery-easing` already lives in your core bundle, drop it from the `deps` arrays.
 
 ## Rules &amp; gotchas
 
@@ -250,7 +246,7 @@ If the loader manages a plugin, that plugin's file must not also be statically i
 
 ### Shared libraries
 
-`jquery-visible` (four plugins) and `waitforimages` (three) are fetched once and reused. If either is already in your core bundle, remove it from the relevant `deps` so the loader doesn't define a module nothing fetches.
+`jquery-easing` (three plugins) and `jquery-visible` (two) are fetched once and reused. If either is already in your core bundle, remove it from the relevant `deps` so the loader doesn't define a module nothing fetches.
 
 ### Production filenames
 

@@ -245,16 +245,19 @@
                 cssFilter += '[data-page-rel=' + self.$destination.attr('data-current-page') + ']';
             }
 
-            if (self.options.filterFieldText !== '') {
-                cssFilter += '[data-sort-search*=' + self.options.filterFieldText.toLowerCase() + ']';
-            }
+            // Search text is matched in JS, not in a selector, so spaces, quotes and
+            // brackets are safe, and both sides are compared in lowercase
+            const search = String(self.options.filterFieldText || '').trim().toLowerCase();
 
             // Show/hide items natively
             const $allItems = self.$destination.find(self.options.itemSelector);
 
             $allItems.each(function () {
                 const $item = $(this);
-                const show = cssFilter === '' || $item.is(cssFilter);
+                const inFilter = cssFilter === '' || $item.is(cssFilter);
+                const inSearch = search === '' ||
+                    String($item.attr('data-sort-search') || '').toLowerCase().indexOf(search) !== -1;
+                const show = inFilter && inSearch;
 
                 if (show) {
                     $item.css(self.options.visibleStyle).show();

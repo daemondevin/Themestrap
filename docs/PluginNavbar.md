@@ -159,6 +159,14 @@ nav.openDropdown($('.ts-navbar__item--dropdown').first());
 nav.closeDropdowns();
 ```
 
+### `toggleDropdown($li)`
+
+Opens the dropdown if it is closed, closes it if it is open. With `oneOpen: true` every other dropdown closes first. This is what a click on a `.ts-navbar__dropdown-toggle` calls.
+
+```js
+nav.toggleDropdown($('#nav-products'));   // the .ts-navbar__item--dropdown <li>
+```
+
 ### `openMenu()` / `closeMenu()` / `toggleMenu()`
 
 Control the mobile collapse region programmatically.

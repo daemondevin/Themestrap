@@ -59,12 +59,12 @@ $('#myGrid').themestrapPluginMasonry({
 
 | Key | Type | Default | Description |
 |---|---|---|---|
-| `columns` | number | `3` | Fallback column count when no responsive breakpoint matches. |
-| `gutter` | number | `20` | Gap in pixels between columns and rows. Used as fallback when no breakpoint defines it. |
-| `responsive` | object | `{0, 576, 768, 992, 1200}` | Breakpoint map — keys are minimum viewport widths; values are `{ columns, gutter }` objects. |
+| `columns` | number | `3` | Column count when `responsive` is `false` (or a matching breakpoint has no `columns`). |
+| `gutter` | number | `20` | Gap in pixels when `responsive` is `false` (or a matching breakpoint has no `gutter`). |
+| `responsive` | object\|false | `{0, 576, 768, 992, 1200}` | Breakpoint map — keys are minimum viewport widths; values are `{ columns, gutter }` objects. `false` turns it off. |
 | `columnClass` | string | `''` | Extra class added to the container element on init. |
 
-> Per-element overrides go in a single-quoted `data-plugin-options` attribute with double-quoted JSON keys — `themestrap.fn.getOptions()` normalises it and merges it over the defaults.
+> Per-element overrides go in a single-quoted `data-plugin-options` attribute with double-quoted JSON keys — `themestrap.fn.getOptions()` normalizes it and merges it over the defaults.
 
 ### Responsive breakpoints
 
@@ -81,6 +81,13 @@ responsive: {
 ```
 
 The plugin sorts breakpoint keys descending and walks them to find the first whose minimum width is ≤ the current viewport. You can override individual breakpoints without replacing the whole map.
+
+Because the default map starts at `0`, a breakpoint always matches, so **`columns` and `gutter` on their own have no effect**. Options are deep-merged, so passing a smaller map does not remove the default keys either: `{ "responsive": { "0": { "columns": 2 } } }` still gets 3 columns from the `992` and `1200` entries. Either set every breakpoint you care about, or turn the map off:
+
+```html
+<!-- always 2 columns, 24px apart -->
+<div data-plugin-masonry data-plugin-options='{"responsive": false, "columns": 2, "gutter": 24}'> … </div>
+```
 
 
 ## Instance API
@@ -208,6 +215,10 @@ $('[data-bs-toggle="tab"]').on('shown.bs.tab', () => {
 
 Show the container first, or call `instance.layout()` after it becomes visible (e.g. on tab show, modal open).
 
+### `columns` and `gutter` are ignored
+
+The default `responsive` map always matches and wins. Pass `"responsive": false` to use `columns` and `gutter` directly (see Responsive breakpoints).
+
 ### Children must not have conflicting `position`
 
 The layout engine applies `position: absolute` to every direct child. Children that already set `position: fixed` or `position: sticky` will escape the stacking context. Keep those position declarations on inner elements instead.
@@ -218,7 +229,7 @@ Unlike the old Isotope-based version, this plugin waits for images natively befo
 
 ### Masonry is not Sort
 
-PluginMasonry only lays out items — it doesn't filter, sort, or animate item additions. For filterable grids pair it with `PluginSort` (which uses Isotope), or implement your own filter logic that calls `instance.layout()` after toggling item visibility.
+PluginMasonry only lays out items — it doesn't filter, sort, or animate item additions. For filterable grids use `PluginSort` (which has its own native masonry layout), or implement your own filter logic that calls `instance.layout()` after toggling item visibility.
 
 
 ## Upgrading from the Isotope-based version

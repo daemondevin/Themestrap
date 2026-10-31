@@ -173,7 +173,7 @@ $('#login').themestrapPluginAuth({
 });
 ```
 
-Zero-vendor plugins are wired in `themestrap.init.js` (as above), not in `themestrap.modules.js`, which only lists plugins that need a vendor library.
+PluginAuth is wired in `themestrap.init.js` (as above). It has no entry in `themestrap.modules.js`, the on-demand loader manifest.
 
 
 
@@ -269,6 +269,7 @@ Fields in a hidden step are skipped by validation but are still sent, so a code 
 | `messageTarget` | `string` | `'[data-auth-message]'` |
 | `successMessage`, `errorMessage` | `string` | `''`, `'Please check the form for errors.'` |
 | `networkErrorMessage` | `string` | `'Could not reach the server. Please try again.'` |
+| `popupBlockedMessage` | `string` | `'The sign in window was blocked. Please allow pop-ups and try again.'` |
 | `unexpectedResponseMessage` | `string` | `'The server sent a reply this form could not understand.'` |
 | `busyLabel`, `lockedLabel` | `string` | `'Working...'`, `'Try again in %s'` |
 | `showPasswordLabel`, `hidePasswordLabel` | `string` | `'Show'`, `'Hide'` |

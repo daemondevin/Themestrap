@@ -1,345 +1,314 @@
-# PluginParallax Guide
+# PluginParallax
 
-> The most configurable plugin in the suite. At its simplest it gives a section a slow-scrolling background image; with more options it can scrub any CSS property as you scroll, react to the mouse, scale the image, and switch behavior below a width breakpoint.
+Three scroll and pointer effects in one plugin: a background image that drifts or zooms as the section scrolls past, any CSS property scrubbed between two values by scroll position, and layers that shift with the mouse. Updates are throttled to one per animation frame, and no vendor library is needed.
+
+**File:** `js/components/themestrap.plugin.parallax.js`  
+**Demo:** `demos/plugin.demo.parallax.html`  
+**jQuery method:** `$.fn.themestrapPluginParallax`  
+**Data attribute:** `data-plugin-parallax`  
+**Instance key:** `__parallax`  
+**Init strategy:** `intObsInit` via `themestrap.init.js`
+
+> The plugin was rewritten without jQuery Visible. Older notes describe options that no longer exist (`horizontalPosition`, `offset`, `enableOnMobile`, `scrollableParallaxMinWidth`, `startOffset`, `transitionDuration`) and different defaults. This guide matches the current file.
+
 
 
 ## How It Works
 
-PluginParallax has three distinct modes that share one option set:
+Every mode works from one number, **progress**: 0 when the element's top edge reaches the bottom of the viewport, 1 when its bottom edge leaves the top. The plugin recalculates it on window scroll and resize, at most once per frame.
 
-| Mode | Trigger option | What it does |
-|---|---|---|
-| **Background** | *(default)* | Moves an oversized background image slower than the page scroll |
-| **Scrollable** | `scrollableParallax: true` | Scrubs an arbitrary CSS property between two values as the element passes through the viewport |
-| **Mouse** | `mouseParallax: true` | Shifts `.parallax-mouse-object` children in response to pointer movement |
+| Mode | Option | What moves |
+| - | - | - |
+| Background | default | An image layer behind the content, translated or scaled by progress |
+| Scrub | `scrollableParallax: true` | One CSS property on one child, from `cssValueStart` to `cssValueEnd` |
+| Mouse | `mouseParallax: true` | `.parallax-mouse-object` children, offset by pointer position |
 
-Modes are mutually exclusive per element — the first matching branch in `build()` wins and returns early. Do not combine `mouseParallax` and `scrollableParallax` on the same element.
+One mode per element: `mouseParallax` wins over `scrollableParallax`, which wins over the background mode.
 
-### Where the image comes from
+On first use the plugin injects `<style id="themestrap-parallax-styles">`, which also gives every `[data-plugin-parallax]` element `position: relative; overflow: hidden`.
 
-The background image is read from `data-image-src` on the host element, not from a CSS `background-image`. This lets the plugin own the layer it builds and position it independently of the element's own background.
+### Background mode
 
-```html
-<section data-plugin-parallax data-image-src="img/mountains.jpg">
-  <!-- foreground content here -->
-</section>
-```
+1. The image comes from the `imageSrc` option, then `data-image-src`, then the element's own CSS `background-image`.
+2. The element's content is moved into a new `.parallax-content-layer` (above), and a `.parallax-bg-layer` (below) is added with the image, `background-size: cover` and a height of `parallaxHeight`.
+3. The element's own `background-image` is cleared, so the image is not painted twice.
+4. On each update the layer is translated by `(progress − 0.5) × (layer height − element height)`, upward by default or downward with `parallaxDirection: 'bottom'`. The layer is centered when the element is in the middle of its trip.
 
-### Mobile behavior
+With `parallaxScale: true` the layer is the element's height and is scaled from 1 to `1 + speed × 0.5` instead (or the reverse with `parallaxScaleInvert`).
 
-`enableOnMobile` defaults to `true` for the background mode. When `false`, the plugin adds `.parallax-disabled` to the wrapper instead of binding scroll events.
+Updates are skipped while the element is more than 50 px outside the viewport.
 
-The scrollable mode has its own `scrollableParallaxMinWidth` guard (default `991`). Below that pixel width the scrubbing path is skipped entirely and no styles are applied.
+### Scrub mode
 
-### Injected CSS
+The target is the first `.scrollable-parallax-wrapper` inside the element, or else its first child, or else the element itself. On each update its inline `style[cssProperty]` is set to `cssValueStart + (cssValueEnd − cssValueStart) × progress`, followed by `cssValueUnit`.
 
-On first init the plugin lazily injects a `<style id="themestrap-parallax-styles">` block containing:
+### Mouse mode
 
-```css
-.parallax-background { will-change: transform; background-repeat: no-repeat; background-size: cover; }
-.parallax-disabled .parallax-background { transform: none !important; }
-```
+The element gets `.parallax-mouse-host`. On `mousemove` the pointer's position from the element's center is measured from −1 to 1 on each axis, and each `.parallax-mouse-object` is translated by `position × data-value × 8` px. On `mouseleave` the objects return to `translate(0, 0)`.
 
-The guard prevents duplicate injection across multiple instances.
 
 
 ## Quick Start
 
-### Markup contract
+### 1. Include the files
 
 ```html
-<!-- Background-image parallax -->
-<section data-plugin-parallax
-         data-image-src="img/bg.jpg"
-         data-plugin-options='{"speed":1.5,"parallaxHeight":"180%"}'>
-  <div class="container py-5">Foreground content</div>
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="js/themestrap.js"></script>
+<script src="js/components/themestrap.plugin.parallax.js"></script>
+<script src="js/themestrap.init.js"></script>
+```
+
+### 2. Mark it up
+
+```html
+<section data-plugin-parallax data-image-src="img/mountains.jpg"
+         data-plugin-options='{"parallaxHeight": "160%"}'
+         style="min-height: 60vh;">
+    <div class="container py-5 text-white">
+        <h2>Foreground content</h2>
+    </div>
 </section>
 ```
 
-### Automatic initialization
-
-`themestrap.init.js` wires this plugin via `intObsInit()` — lazy, triggered when the element scrolls into the viewport:
+`themestrap.init.js` already wires it:
 
 ```js
-// init.js entry
-if ($.isFunction($.fn['themestrapPluginParallax']) && $('[data-plugin-parallax]').length) {
-    themestrap.fn.intObsInit('[data-plugin-parallax]:not(.manual)', 'themestrapPluginParallax');
-}
+themestrap.fn.intObsInit('[data-plugin-parallax]:not(.manual)', 'themestrapPluginParallax');
 ```
 
-Add the `manual` class to opt an element out of auto-init.
-
-### Manual initialization
+### Manual init
 
 ```js
-$('#mySection').themestrapPluginParallax({
-    speed          : 2,
-    parallaxHeight : '200%',
-});
+$('#hero').themestrapPluginParallax({ imageSrc: 'img/hero.jpg', parallaxDirection: 'bottom' });
 ```
+
+
+
+## Markup Reference
+
+| Attribute or class | On | Role |
+| - | - | - |
+| `data-plugin-parallax` | Host | Marks the element. |
+| `data-image-src` | Host | Background image URL (background mode). |
+| `data-plugin-options` | Host | JSON options. |
+| `.scrollable-parallax-wrapper` | Child | The element to scrub (scrub mode). Optional; the first child is used otherwise. |
+| `.parallax-mouse-object` | Child | A layer that follows the mouse (mouse mode). |
+| `data-value` | `.parallax-mouse-object` | Depth. Unitless; each unit is up to 8 px of travel. Default `3`. |
+
+### Generated markup (background mode)
+
+```html
+<section data-plugin-parallax style="background-image: none;">
+    <div class="parallax-bg-layer" style="background-image: url(img/mountains.jpg); height: 160%; transform: translateY(-48.20px);"></div>
+    <div class="parallax-content-layer">
+        <!-- your original content -->
+    </div>
+</section>
+```
+
 
 
 ## Configuration Options
 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `speed` | number | `1.5` | Parallax movement speed multiplier relative to scroll. Higher = slower movement. |
-| `horizontalPosition` | string | `'50%'` | Horizontal background-position of the parallax layer. |
-| `offset` | number | `0` | Vertical start offset (px) applied to the parallax layer. |
-| `parallaxDirection` | string | `'top'` | Direction the layer travels: `'top'` or `'bottom'`. |
-| `parallaxHeight` | string | `'180%'` | Height of the oversized parallax layer — must exceed `100%` to have slack to scroll through. |
-| `parallaxScale` | bool | `false` | Scale the image as it scrolls for a zoom effect. |
-| `parallaxScaleInvert` | bool | `false` | Invert the scale direction when `parallaxScale` is on. |
-| `scrollableParallax` | bool | `false` | Enable scroll-scrubbed CSS-property mode. |
-| `scrollableParallaxMinWidth` | number | `991` | Minimum window width for scrollable mode; below this falls back to static. |
-| `startOffset` | number | `7` | Divisor controlling how fast the scrub range traverses on scroll. |
-| `transitionDuration` | string | `'200ms'` | CSS transition applied to the scrubbed property. |
-| `cssProperty` | string | `'width'` | Which CSS property the scrollable mode animates. |
-| `cssValueStart` | number | `40` | Scrubbed property value at the start of the scroll range. |
-| `cssValueEnd` | number | `100` | Scrubbed property value at the end of the scroll range. |
-| `cssValueUnit` | string | `'vw'` | Unit appended to the scrubbed value (e.g. `'%'`, `'px'`, `'vw'`). |
-| `mouseParallax` | bool | `false` | Enable pointer-driven parallax on `.parallax-mouse-object` children. |
-| `enableOnMobile` | bool | `true` | Allow background parallax on mobile user-agents. |
+| Option | Type | Default | Description |
+| - | - | - | - |
+| `speed` | `number` | `1.5` | Scale mode only: the image zooms to `1 + speed × 0.5`. It does not affect the translate effect. |
+| `parallaxDirection` | `string` | `'top'` | Background mode: `'top'` moves the image up as the page scrolls down; `'bottom'` moves it down. |
+| `parallaxHeight` | `string` | `'150%'` | Height of the image layer. The extra beyond 100% is how far it travels. |
+| `imageSrc` | `string\|null` | `null` | Background image URL. Wins over `data-image-src`. |
+| `parallaxScale` | `boolean` | `false` | Zoom the image instead of moving it. |
+| `parallaxScaleInvert` | `boolean` | `false` | Start zoomed in and zoom out. |
+| `scrollableParallax` | `boolean` | `false` | Use scrub mode. |
+| `cssProperty` | `string` | `'width'` | Scrub mode: the property to set, in JavaScript form (`'opacity'`, `'letterSpacing'`, `'width'`). |
+| `cssValueStart` | `number` | `0` | Scrub mode: value at progress 0. |
+| `cssValueEnd` | `number` | `100` | Scrub mode: value at progress 1. |
+| `cssValueUnit` | `string` | `'%'` | Scrub mode: unit after the number. `''` for unitless properties. |
+| `mouseParallax` | `boolean` | `false` | Use mouse mode. |
 
-Per-element overrides go in a single-quoted `data-plugin-options` attribute with double-quoted JSON keys — `themestrap.fn.getOptions()` normalizes it and merges it over the defaults:
-
-```html
-<section data-plugin-parallax
-         data-image-src="img/bg.jpg"
-         data-plugin-options='{"speed":2,"parallaxDirection":"bottom"}'>
-```
+The travel distance in background mode is set by `parallaxHeight`: at `150%` on a 400 px section the image moves 200 px over the whole scroll; at `200%` it moves 400 px.
 
 
-## Instance API
 
-Every Themestrap plugin runs the same fluent lifecycle on construction:
-`initialize → setData → setOptions → build`
+## Public API
+
+Read the instance from a fresh selection, never off the init call. The bridge takes options only.
 
 ```js
-// Initialize (or return the existing instance)
-const inst = $('#myEl').themestrapPluginParallax({ speed: 2 });
-
-// Retrieve a previously initialized instance
-const same = $('#myEl').data('__parallax');
-
-// Destroy — removes the background layer, unbinds scroll/resize/mousemove,
-// restores wrapper CSS, and clears the data key
-inst.destroy();
+const px = $('#hero').data('__parallax');
 ```
 
-The jQuery bridge is idempotent: calling `themestrapPluginParallax()` a second time returns the cached instance from `data('__parallax')` rather than building a new one.
+| Method | Returns | Description |
+| - | - | - |
+| `refresh()` | `this` | Recalculates and applies the current position now. Call it after the element's size changes without a window resize (an accordion opening, content loading). Does nothing in mouse mode. |
+| `destroy()` | `this` | Stops updates, removes the listeners, restores the element's original HTML and `style`, and removes the instance. |
 
-### Events
-
-| Event | Fires when |
-|---|---|
-| `scroll.parallax` | The plugin recalculates the layer position on each window scroll tick (background + scrollable modes). |
+To change options, destroy and initialize again.
 
 
-## Modes In Depth
 
-### Mode 1 — Background image parallax (default)
+## Events
 
-The plugin creates a `.parallax-background` div, sets it as an oversized absolute layer, prepends it inside the wrapper, and binds `scroll.parallax resize.parallax` on `window`.
+Both are native `CustomEvent`s dispatched on the host with `bubbles: false`, so listen on the element itself.
 
-On each tick:
-
-```
-yPos   = -(scrollTop - (elTop - 100)) / (speed + 2)
-plxPos = Math.abs(yPos) when negative, else -Math.abs(yPos)
-y      = (plxPos - 50) + offset          // direction: top
-y      = -(plxPos - 50 + offset)         // direction: bottom (offset auto-set to 250)
-transform: translate3d(0, {y}px, 0)
-```
-
-**RTL support:** when `<html dir="rtl">` is present, `rotateY(180deg)` is appended to the transform.
-
-### Mode 2 — Scroll-scrubbed CSS property
-
-Requires a `.scrollable-parallax-wrapper` child inside the host element. The plugin reads `cssProperty`, `cssValueStart`, `cssValueEnd`, and `cssValueUnit` to build a `window.scroll` handler that linearly interpolates the named property as the element passes through the viewport.
-
-The `startOffset` divisor controls sensitivity — smaller values = faster traversal of the value range.
-
-Skipped entirely when `window.width() <= scrollableParallaxMinWidth`.
-
-### Mode 3 — Mouse parallax
-
-No background layer is created. Instead, every child with class `.parallax-mouse-object` is translated based on mouse position, scaled by the element's `data-value` attribute:
+| Event | When | `detail` |
+| - | - | - |
+| `parallax:update` | Each background-mode update while near the viewport | `{ progress, instance }` |
+| `parallax:mouse` | Each pointer move in mouse mode | `{ dx, dy, instance }` (−1 to 1) |
 
 ```js
-x = (clientX * data_value) / 250
-y = (clientY * data_value) / 250
-transform: translateX({x}px) translateY({y}px)
+document.getElementById('hero').addEventListener('parallax:update', function (e) {
+    this.style.setProperty('--hero-progress', e.detail.progress.toFixed(3));
+});
 ```
 
-Negative `data-value` inverts the axis, creating a sense of depth when mixing positive and negative layers.
+Scrub mode fires no event.
 
 
-## Recipe Cookbook
 
-### Basic background parallax
+## CSS Custom Properties
 
-```html
-<section data-plugin-parallax data-image-src="img/bg.jpg">
-  <div class="container py-5">Content</div>
-</section>
+None are defined. Injected styles:
+
+```css
+[data-plugin-parallax] { position: relative; overflow: hidden; }
+.parallax-bg-layer {
+    position: absolute; top: 0; left: 0; width: 100%;
+    background-size: cover; background-repeat: no-repeat; background-position: center center;
+    pointer-events: none; will-change: transform;
+}
+.parallax-mouse-host   { position: relative; overflow: hidden; }
+.parallax-mouse-object { will-change: transform; }
+.parallax-content-layer { position: relative; z-index: 1; }
 ```
 
-### Slow, tall parallax
+Darken the image for legible text:
 
-```html
-<section data-plugin-parallax
-         data-image-src="img/bg.jpg"
-         data-plugin-options='{"speed":3,"parallaxHeight":"250%"}'>
+```css
+#hero .parallax-bg-layer::after { content: ''; position: absolute; inset: 0; background: rgba(10, 25, 41, .55); }
 ```
 
-### Downward-scrolling direction
+Change the focal point:
 
-```html
-<section data-plugin-parallax
-         data-image-src="img/bg.jpg"
-         data-plugin-options='{"parallaxDirection":"bottom"}'>
+```css
+#hero .parallax-bg-layer { background-position: center 30%; }
 ```
 
-### Scale zoom on scroll
+### Reduced motion
 
-```html
-<section data-plugin-parallax
-         data-image-src="img/bg.jpg"
-         data-plugin-options='{"parallaxScale":true}'>
-```
-
-### Scale zoom — inverted (zooms out)
-
-```html
-<section data-plugin-parallax
-         data-image-src="img/bg.jpg"
-         data-plugin-options='{"parallaxScale":true,"parallaxScaleInvert":true}'>
-```
-
-### Scroll-scrubbed width (bar grows on scroll)
-
-```html
-<div data-plugin-parallax
-     data-plugin-options='{
-       "scrollableParallax":true,
-       "cssProperty":"width",
-       "cssValueStart":20,
-       "cssValueEnd":100,
-       "cssValueUnit":"%"
-     }'>
-  <div class="scrollable-parallax-wrapper"></div>
-</div>
-```
-
-### Scroll-scrubbed opacity
-
-```html
-<div data-plugin-parallax
-     data-plugin-options='{
-       "scrollableParallax":true,
-       "cssProperty":"opacity",
-       "cssValueStart":0,
-       "cssValueEnd":1,
-       "cssValueUnit":"",
-       "startOffset":5
-     }'>
-  <div class="scrollable-parallax-wrapper">Fades in as you scroll</div>
-</div>
-```
-
-### Multi-layer mouse parallax
-
-```html
-<div data-plugin-parallax data-plugin-options='{"mouseParallax":true}'>
-  <!-- positive data-value = moves with cursor, negative = moves against -->
-  <img class="parallax-mouse-object" src="layer-back.png"  data-value="2">
-  <img class="parallax-mouse-object" src="layer-mid.png"   data-value="-4">
-  <img class="parallax-mouse-object" src="layer-front.png" data-value="7">
-</div>
-```
-
-### Mobile disabled
-
-```html
-<section data-plugin-parallax
-         data-image-src="img/bg.jpg"
-         data-plugin-options='{"enableOnMobile":false}'>
-```
-
-### Manual init and destroy
+The plugin does not check `prefers-reduced-motion`. Skip it for those users before `themestrap.init.js` runs:
 
 ```js
-// Initialize manually (skips auto-init because of .manual class)
-$('#hero.manual').themestrapPluginParallax({ speed: 2, parallaxHeight: '220%' });
-
-// Get instance later
-const inst = $('#hero').data('__parallax');
-
-// Destroy completely
-inst.destroy();
-
-// Re-initialize with new options
-$('#hero').themestrapPluginParallax({ speed: 1, parallaxDirection: 'bottom' });
-```
-
-
-## init.js Wiring
-
-Add this block to `themestrap.init.js` alongside the other plugin wiring:
-
-```js
-// Parallax
-if ($.isFunction($.fn['themestrapPluginParallax']) && $('[data-plugin-parallax]').length) {
-    themestrap.fn.intObsInit('[data-plugin-parallax]:not(.manual)', 'themestrapPluginParallax');
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    $('[data-plugin-parallax]').addClass('manual').each(function () {
+        const src = $(this).data('image-src');
+        if (src) { $(this).css({ backgroundImage: 'url(' + src + ')', backgroundSize: 'cover' }); }
+    });
 }
 ```
 
-`intObsInit` is the correct strategy here because the plugin reads only `data-plugin-options` for its configuration — no `forceInit` / `accY` merging is needed, so `dynIntObsInit` is not required.
+
+
+## Keyboard Navigation
+
+Parallax is decorative and does not affect focus or keyboard use.
+
+
+
+## ARIA Wiring
+
+None. The image layer is a CSS background, so it is not announced. If the image carries meaning, describe it in the content.
+
+
+
+## Recipes
+
+### Slow drift with a tall layer
+
+```html
+<section data-plugin-parallax data-image-src="img/forest.jpg"
+         data-plugin-options='{"parallaxHeight": "200%"}'> … </section>
+```
+
+### Zoom on scroll
+
+```html
+<section data-plugin-parallax data-image-src="img/city.jpg"
+         data-plugin-options='{"parallaxScale": true, "speed": 0.6}'> … </section>
+```
+
+`speed: 0.6` zooms from 1× to 1.3×.
+
+### A progress bar that grows on scroll
+
+```html
+<div data-plugin-parallax
+     data-plugin-options='{"scrollableParallax": true, "cssProperty": "width", "cssValueStart": 10, "cssValueEnd": 100, "cssValueUnit": "%"}'>
+    <div class="scrollable-parallax-wrapper" style="height: 4px; background: #e8672a;"></div>
+</div>
+```
+
+### Fade in on scroll
+
+```html
+<div data-plugin-parallax
+     data-plugin-options='{"scrollableParallax": true, "cssProperty": "opacity", "cssValueStart": 0, "cssValueEnd": 1, "cssValueUnit": ""}'>
+    <div class="scrollable-parallax-wrapper"> … </div>
+</div>
+```
+
+The value is set across the whole trip, so it reaches 1 only as the element leaves the top. For a fade that completes earlier, use `parallax:update`-style logic of your own, or PluginScrollFx.
+
+### Layered mouse scene
+
+```html
+<div data-plugin-parallax data-plugin-options='{"mouseParallax": true}' style="height: 420px;">
+    <img class="parallax-mouse-object position-absolute" data-value="1" src="img/sky.png" alt="">
+    <img class="parallax-mouse-object position-absolute" data-value="3" src="img/hills.png" alt="">
+    <img class="parallax-mouse-object position-absolute" data-value="6" src="img/tree.png" alt="">
+</div>
+```
+
+Higher values move further and read as closer.
+
 
 
 ## Common Pitfalls
 
-### Image goes in `data-image-src`, not CSS
+### Event handlers inside the section stop working
 
-> [!CAUTION]
-> The parallax background is built from `data-image-src` on the host element. A CSS `background-image` is invisible to the plugin — it will produce an empty layer.
+Background mode rebuilds the content: it reads the element's HTML and writes it back inside `.parallax-content-layer`. Handlers bound directly to elements inside before init are lost, and so are form values and other live state. Initialize first and bind afterward, or use delegated handlers (`$(document).on('click', '#hero .btn', …)`). `destroy()` rebuilds the content again.
 
-```html
-<!-- ✅ Correct -->
-<section data-plugin-parallax data-image-src="img/bg.jpg">
+### `speed` does nothing
 
-<!-- ❌ Wrong — plugin sees no image -->
-<section data-plugin-parallax style="background-image: url(img/bg.jpg)">
-```
+`speed` only affects the zoom in scale mode. For the translate effect, change `parallaxHeight`.
 
-### `parallaxHeight` must exceed 100%
+### The image does not move
 
-> [!WARNING]
-> If `parallaxHeight` is not taller than the container there is no vertical slack for the image to travel through. The effect looks frozen. Keep it above `100%` — the default `180%` works well for most sections.
+The layer moves by the difference between its height and the element's. With `parallaxHeight: '100%'` there is nothing to move. Also check that the element has a height of its own (`min-height`), since the content layer is the only thing giving it size.
 
-### Two modes, one option bag — pick one per element
+### Gaps at the top or bottom of the section
 
-> [!NOTE]
-> `scrollableParallax` and `mouseParallax` are checked first in `build()`. If either is `true`, the function returns early before the background-layer branch runs. Mixing all three on one element will silently activate only mouse mode (checked first).
+With a short `parallaxHeight` and a tall section, the image may not cover the section at the ends of the scroll. Raise `parallaxHeight`.
 
-### Scrollable mode needs a `.scrollable-parallax-wrapper` child
+### The image is clipped wrongly or spills out
 
-> [!NOTE]
-> The scrollable path looks for a `.scrollable-parallax-wrapper` descendant to apply the scrubbed styles to. If the child is absent, `$sw.length` is falsy and no handler is bound.
+The injected `overflow: hidden` on `[data-plugin-parallax]` clips the layer. If your CSS overrides `overflow` on the element, the image shows outside it.
 
-### Mouse `data-value` is unitless
+### Scrub mode changes the wrong element
 
-> [!TIP]
-> Each `.parallax-mouse-object` reads a numeric `data-value` attribute. Omitting it defaults to `NaN` → `0` (no movement). Negative values invert the travel direction, which creates convincing depth layering.
+Without a `.scrollable-parallax-wrapper`, the first child is used, which may be a heading or a wrapper you did not intend. Add the class to the element you mean.
 
-### Destroy before re-init with new options
+### Scrubbed numbers need no unit
 
-> [!TIP]
-> `themestrapPluginParallax()` is idempotent; calling it again on an already-initialized element returns the cached instance unchanged. To apply new options, call `inst.destroy()` first, then re-initialize.
+`cssValueUnit` defaults to `'%'`. For `opacity`, `zIndex` or `flexGrow` set it to `''`, or the browser ignores the value.
 
-```js
-const inst = $('#el').data('__parallax');
-inst.destroy();
-$('#el').themestrapPluginParallax({ speed: 3 });
-```
+### Diagnostic checklist
+
+- [ ] The element has a height of its own.
+- [ ] The image is in `data-image-src` or `imageSrc` (or the element's CSS background).
+- [ ] `parallaxHeight` is above `100%` for the translate effect.
+- [ ] Only one of `mouseParallax` and `scrollableParallax` is set.
+- [ ] Event handlers inside are bound after init, or delegated.
+- [ ] `cssValueUnit` suits the scrubbed property.
+- [ ] Event listeners are on the element itself (the events do not bubble).

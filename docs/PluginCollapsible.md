@@ -12,7 +12,7 @@ The plugin manages a single trigger <--> content pairing. On every state change 
 > 
 > - Panel height pinned to `0`
 > - Trigger `aria-expanded="false"`
-> - State class `ts-collapsible--closed`
+> - No state class: closed is the absence of `ts-collapsible--open`
 
 #### Open state
 

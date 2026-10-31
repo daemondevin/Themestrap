@@ -3,6 +3,9 @@
 (((themestrap = {}, $) => {
 	const instanceName = '__cursorEffect';
 
+	// Each instance gets its own event namespace so destroy() only removes its own handlers.
+	let seq = 0;
+
 	class PluginCursorEffect {
 		constructor($el, opts) {
 			return this.initialize($el, opts);
@@ -14,6 +17,7 @@
 			}
 
 			this.$el = $el;
+			this._ns = '.cursorEffect' + (++seq);
 
 			this
 				.setData()
@@ -284,12 +288,12 @@
 
 			$(document)
 				.on(
-					'mouseenter' + instanceName,
+					'mouseenter' + self._ns,
 					self._hoverSelector,
 					self._mouseenterHandler
 				)
 				.on(
-					'mouseleave' + instanceName,
+					'mouseleave' + self._ns,
 					self._hoverSelector,
 					self._mouseleaveHandler
 				);
@@ -308,7 +312,7 @@
 			};
 
 			$(window).on(
-				'scroll' + instanceName,
+				'scroll' + self._ns,
 				self._scrollHandler
 			);
 
@@ -335,8 +339,8 @@
 				);
 			}
 
-			$(document).off(instanceName);
-			$(window).off(instanceName);
+			$(document).off(self._ns);
+			$(window).off(self._ns);
 
 			// Restore host element.
 			self.$el.removeClass(

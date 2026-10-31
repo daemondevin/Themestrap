@@ -15,33 +15,15 @@
         mode: document.documentElement.dataset.env === 'prod' ? 'prod' : 'dev'
     });
 
-    // Vendor modules (third-party libs)
+    // Vendor modules (third-party libs still used by a plugin below)
     loader
-        .define('jquery-event-move', { src: 'vendor/twentytwenty/js/jquery.event.move.js' })
-        .define('twentytwenty',      { src: 'vendor/twentytwenty/js/jquery.twentytwenty.js',
-                                       css: 'vendor/twentytwenty/css/twentytwenty.css',
-                                       deps: ['jquery-event-move'] })
- 
-        .define('owl',           { src: 'vendor/owl.carousel/js/owl.carousel.min.js',
-                                   css: 'vendor/owl.carousel/css/owl.carousel.min.css' })
-        .define('touchswipe',    { src: 'vendor/touchswipe/js/jquery.touchSwipe.min.js' })
-        .define('magnific-popup',{ src: 'vendor/magnific-popup/js/jquery.magnific-popup.min.js',
-                                   css: 'vendor/magnific-popup/css/magnific-popup.css' })
-        .define('isotope',       { src: 'vendor/isotope/js/isotope.pkgd.min.js' })
-        .define('waitforimages', { src: 'vendor/waitforimages/js/jquery.waitforimages.js' })
-        .define('easypiechart',  { src: 'vendor/easypiechart/js/jquery.easypiechart.min.js' })
-        .define('jquery-countdown', { src: 'vendor/countdown/js/jquery.countdown.min.js' }) // The Final Countdown
-        .define('countto',       { src: 'vendor/countto/js/jquery.countTo.js' })
-        .define('jquery-visible',{ src: 'vendor/visible/js/jquery.visible.min.js' })
-        .define('jquery-cookie', { src: 'vendor/cookie/js/jquery.cookie.js' })
-        .define('hover3d',       { src: 'vendor/hover3d/js/jquery.hover3d.min.js' })
+        .define('jquery-visible',{ src: 'vendor/visible/js/jquery.visible.min.js' })       // icon, nav
+        .define('jquery-cookie', { src: 'vendor/cookie/js/jquery.cookie.js' })             // gdprWrapper
         .define('matchheight',   { src: 'vendor/matchheight/jquery.matchHeight-min.js' })
-        .define('jquery-easing', { src: 'vendor/jquery-easing/jquery.easing.min.js' })
-        .define('vivus',         { src: 'vendor/vivus/js/vivus.min.js' })           // global: Vivus
+        .define('jquery-easing', { src: 'vendor/jquery-easing/jquery.easing.min.js' })     // scrollToTop, nav, sectionScroll
+        .define('vivus',         { src: 'vendor/vivus/js/vivus.min.js' })                  // global: Vivus
         .define('observe-element-in-viewport',
                                  { src: 'vendor/observe-element-in-viewport/dist/index.umd.js' }) // global: observeElementInViewport
-        .define('nanoscroller',  { src: 'vendor/nanoscroller/js/jquery.nanoscroller.min.js',
-                                   css: 'vendor/nanoscroller/css/nanoscroller.css' })
         .define('jquery-pin',    { src: 'vendor/jquery-pin/jquery.pin.js' })
         .define('vide',          { src: 'vendor/vide/js/jquery.vide.min.js' })
         .define('jquery-validation', { src: 'vendor/jquery-validation/js/jquery.validate.min.js' })
@@ -51,68 +33,12 @@
                                    css: 'vendor/rs-plugin/css/settings.css',  // also: layers.css, navigation.css
                                    deps: ['rs-plugin-tools'] });
 
-    // Themestrap plugins (plus viewport init) with a vendor dep
+    // Themestrap plugins with a vendor dependency (plus viewport init)
     loader
-        .definePlugin('carousel', {
-            src: 'components/themestrap.plugin.carousel.js', deps: ['owl'],
-            selector: '[data-plugin-carousel]', method: 'themestrapPluginCarousel', strategy: 'intObs'
-        })
-        .definePlugin('carouselLight', {                       // touchSwipe is optional (swipeEvents)
-            src: 'components/themestrap.plugin.carousellight.js', deps: ['touchswipe'],
-            selector: '[data-plugin-carousel-light]', method: 'themestrapPluginCarouselLight', strategy: 'intObs'
-        })
-        .definePlugin('beforeAfter', {
-            src: 'components/themestrap.plugin.beforeafter.js', deps: ['twentytwenty', 'waitforimages'],
-            selector: '[data-plugin-before-after]', method: 'themestrapPluginBeforeAfter', strategy: 'intObs'
-        })
-        .definePlugin('lightbox', {
-            src: 'components/themestrap.plugin.lightbox.js', deps: ['magnific-popup'],
-            selector: '[data-plugin-lightbox]', method: 'themestrapPluginLightbox',
-            strategy: 'event', event: 'mouseover.trigger.lightbox'
-        })
-        .definePlugin('masonry', {
-            src: 'components/themestrap.plugin.masonry.js', deps: ['isotope', 'waitforimages'],
-            selector: '[data-plugin-masonry]', method: 'themestrapPluginMasonry', strategy: 'intObs'
-        })
-        .definePlugin('sort', {
-            src: 'components/themestrap.plugin.sort.js', deps: ['isotope', 'waitforimages'],
-            selector: '[data-plugin-sort]', method: 'themestrapPluginSort', strategy: 'intObs'  // selector: verify (uses .sort-source/.sort-destination + data-sort-id)
-        })
-        .definePlugin('chartCircular', {
-            src: 'components/themestrap.plugin.chartcircular.js', deps: ['easypiechart'],
-            selector: '[data-plugin-chart-circular]', method: 'themestrapPluginChartCircular',
-            strategy: 'dynIntObs', defaultsClass: 'PluginChartCircular'   // has accY
-        })
-        .definePlugin('countdown', {                           // The Final Countdown — note: file's guard wrongly checks $.fn.countTo
-            src: 'components/themestrap.plugin.countdown.js', deps: ['jquery-countdown'],
-            selector: '[data-plugin-countdown]', method: 'themestrapPluginCountdown', strategy: 'intObs'
-        })
-        .definePlugin('counter', {
-            src: 'components/themestrap.plugin.counter.js', deps: ['countto'],
-            selector: '[data-plugin-counter]', method: 'themestrapPluginCounter',
-            strategy: 'dynIntObs', defaultsClass: 'PluginCounter'        // has accY
-        })
-        .definePlugin('floatElement', {
-            src: 'components/themestrap.plugin.floatelement.js', deps: ['jquery-visible'],
-            selector: '[data-plugin-float-element]', method: 'themestrapPluginFloatElement', strategy: 'intObs'
-        })
-        .definePlugin('parallax', {                            // also uses $.browser.mobile (jquery.browser / Porto core)
-            src: 'components/themestrap.plugin.parallax.js', deps: ['jquery-visible'],
-            selector: '[data-plugin-parallax]', method: 'themestrapPluginParallax', strategy: 'intObs'
-        })
         .definePlugin('icon', {
             src: 'components/themestrap.plugin.icon.js', deps: ['vivus', 'jquery-visible'],
             selector: '[data-icon]', method: 'themestrapPluginIcon',
             strategy: 'dynIntObs', defaultsClass: 'PluginIcon'           // has accY
-        })
-        .definePlugin('progressBar', {
-            src: 'components/themestrap.plugin.progressbar.js', deps: ['jquery-easing'],
-            selector: '[data-appear-progress-animation]', method: 'themestrapPluginProgressBar',
-            strategy: 'dynIntObs', defaultsClass: 'PluginProgressBar'    // has accY
-        })
-        .definePlugin('hoverEffect', {                         // hover3d optional (only the '3d' effect; 'magnetic' is vanilla)
-            src: 'components/themestrap.plugin.hovereffect.js', deps: ['hover3d'],
-            selector: '[data-plugin-hover-effect]', method: 'themestrapPluginHoverEffect', strategy: 'intObs'
         })
         .definePlugin('matchHeight', {
             src: 'components/themestrap.plugin.matchheight.js', deps: ['matchheight'],
@@ -121,10 +47,6 @@
         .definePlugin('sectionScroll', {
             src: 'components/themestrap.plugin.sectionscroll.js', deps: ['jquery-easing'],
             selector: '[data-plugin-section-scroll]', method: 'themestrapPluginSectionScroll', strategy: 'intObs'
-        })
-        .definePlugin('scrollable', {
-            src: 'components/themestrap.plugin.scrollable.js', deps: ['nanoscroller'],
-            selector: '[data-plugin-scrollable]', method: 'themestrapPluginScrollable', strategy: 'intObs' // selector: verify (operates on .scrollable)
         })
         .definePlugin('sticky', {
             src: 'components/themestrap.plugin.sticky.js', deps: ['jquery-pin'],
@@ -138,13 +60,69 @@
             src: 'components/themestrap.plugin.revolutionslider.js', deps: ['rs-plugin'],
             selector: '[data-plugin-revolution-slider]', method: 'themestrapPluginRevolutionSlider', strategy: 'intObs'
         })
-        .definePlugin('gdpr', {
-            src: 'components/themestrap.plugin.gdpr.js', deps: ['jquery-cookie'],
-            selector: '[data-plugin-gdpr]', method: 'themestrapPluginGDPR', strategy: 'intObs'
-        })
         .definePlugin('gdprWrapper', {
             src: 'components/themestrap.plugin.gdprwrapper.js', deps: ['jquery-cookie'],
             selector: '[data-plugin-gdpr-wrapper]', method: 'themestrapPluginGDPRWrapper', strategy: 'intObs'
+        });
+
+    // Themestrap plugins that used to need a vendor library and are now self-contained.
+    // Kept here so pages that rely on the loader still fetch them on demand.
+    loader
+        .definePlugin('carousel', {
+            src: 'components/themestrap.plugin.carousel.js',
+            selector: '[data-plugin-carousel]', method: 'themestrapPluginCarousel', strategy: 'intObs'
+        })
+        .definePlugin('beforeAfter', {
+            src: 'components/themestrap.plugin.beforeafter.js',
+            selector: '[data-plugin-before-after]', method: 'themestrapPluginBeforeAfter', strategy: 'intObs'
+        })
+        .definePlugin('lightbox', {
+            src: 'components/themestrap.plugin.lightbox.js',
+            selector: '[data-plugin-lightbox]', method: 'themestrapPluginLightbox',
+            strategy: 'event', event: 'mouseover.trigger.lightbox'
+        })
+        .definePlugin('masonry', {
+            src: 'components/themestrap.plugin.masonry.js',
+            selector: '[data-plugin-masonry]', method: 'themestrapPluginMasonry', strategy: 'intObs'
+        })
+        .definePlugin('sort', {
+            src: 'components/themestrap.plugin.sort.js',
+            selector: '[data-plugin-sort]', method: 'themestrapPluginSort', strategy: 'intObs'
+        })
+        .definePlugin('chartCircular', {
+            src: 'components/themestrap.plugin.chartcircular.js',
+            selector: '[data-plugin-chart-circular]', method: 'themestrapPluginChartCircular',
+            strategy: 'dynIntObs', defaultsClass: 'PluginChartCircular'
+        })
+        .definePlugin('countdown', {
+            src: 'components/themestrap.plugin.countdown.js',
+            selector: '[data-plugin-countdown]', method: 'themestrapPluginCountdown', strategy: 'intObs'
+        })
+        .definePlugin('counter', {
+            src: 'components/themestrap.plugin.counter.js',
+            selector: '[data-plugin-counter]', method: 'themestrapPluginCounter',
+            strategy: 'dynIntObs', defaultsClass: 'PluginCounter'
+        })
+        .definePlugin('floatElement', {
+            src: 'components/themestrap.plugin.floatelement.js',
+            selector: '[data-plugin-float-element]', method: 'themestrapPluginFloatElement', strategy: 'intObs'
+        })
+        .definePlugin('parallax', {
+            src: 'components/themestrap.plugin.parallax.js',
+            selector: '[data-plugin-parallax]', method: 'themestrapPluginParallax', strategy: 'intObs'
+        })
+        .definePlugin('progressBar', {
+            src: 'components/themestrap.plugin.progressbar.js',
+            selector: '[data-plugin-progress-bar]', method: 'themestrapPluginProgressBar',
+            strategy: 'dynIntObs', defaultsClass: 'PluginProgressBar'    // has forceInit and accY
+        })
+        .definePlugin('hoverEffect', {
+            src: 'components/themestrap.plugin.hovereffect.js',
+            selector: '[data-plugin-hover-effect]', method: 'themestrapPluginHoverEffect', strategy: 'intObs'
+        })
+        .definePlugin('gdpr', {
+            src: 'components/themestrap.plugin.gdpr.js',
+            selector: '[data-plugin-gdpr]', method: 'themestrapPluginGDPR', strategy: 'intObs'
         });
 
     // These expose an object with .initialize(). 

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginDrawer — Live Demo | Themestrap</title>
+<meta name="description" content="An accessible panel that slides in from any edge of the screen, with a backdrop, drag to dismiss, scroll lock and focus trapping.">
+<link rel="icon" type="image/png" href="../img/favicon-96x96.png" sizes="96x96">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=Syne:wght@600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../vendor/bootstrap-icons/bootstrap-icons.min.css">
+<style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+        --navy-900:  #070f1a;
+        --navy-800:  #0a1929;
+        --navy-700:  #0e2238;
+        --navy-600:  #122d4a;
+        --surface:   #112034;
+        --surface-2: #162840;
+        --border:    rgba(255,255,255,.08);
+        --teal:      #20e2d7;
+        --teal-dim:  rgba(32,226,215,.12);
+        --orange:    #f0a028;
+        --orange-dim:rgba(240,160,40,.12);
+        --text:      #e2eaf4;
+        --muted:     #7a9bb8;
+        --mono:      'JetBrains Mono', monospace;
+    }
+
+    body {
+        background: var(--navy-800);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 0 0 80px;
+    }
+    code { font-family: var(--mono); font-size: .86em; color: var(--orange); }
+
+    /* Page header */
+    .page-header {
+        background:
+            radial-gradient(900px 380px at 85% -20%, rgba(32,226,215,.10), transparent 60%),
+            linear-gradient(180deg, var(--navy-900) 0%, var(--navy-800) 100%);
+        border-bottom: 1px solid var(--border);
+        padding: 56px 0 48px;
+        margin-bottom: 56px;
+    }
+    .page-header .eyebrow {
+        font-family: 'Syne', sans-serif;
+        font-size: 11px;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--teal);
+        margin-bottom: 12px;
+    }
+    .page-header h1 {
+        font-family: 'Fraunces', serif;
+        font-weight: 300;
+        font-size: clamp(2rem, 5vw, 3.25rem);
+        line-height: 1.1;
+        margin: 0 0 16px;
+        color: #fff;
+    }
+    .page-header h1 em { color: var(--teal); }
+    .page-header p { color: var(--muted); max-width: 600px; margin: 0; }
+    .hero-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .hero-pills span {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text);
+        background: rgba(255,255,255,.04);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 11px;
+    }
+
+    /* Demo cards */
+    .demo-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 32px;
+    }
+    .demo-card-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px 28px;
+        border-bottom: 1px solid var(--border);
+    }
+    .demo-badge {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--navy-800);
+        background: var(--teal);
+        border-radius: 6px;
+        padding: 3px 8px;
+        flex-shrink: 0;
+    }
+    .demo-card-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        flex: 1;
+    }
+    .demo-tag {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: .06em;
+        color: var(--muted);
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 2px 8px;
+        white-space: nowrap;
+    }
+    .demo-copy { padding: 22px 28px 0; color: var(--muted); margin: 0; max-width: 720px; }
+
+    /* Stage */
+    .demo-stage { padding: 28px; }
+    .launch-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 14px;
+    }
+    .launch {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 18px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--navy-700);
+        color: var(--text);
+        text-align: left;
+        cursor: pointer;
+        transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+    .launch:hover { border-color: rgba(32,226,215,.45); background: var(--navy-600); transform: translateY(-1px); }
+    .launch:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+    .launch .ico {
+        width: 38px; height: 38px;
+        display: grid; place-items: center;
+        border-radius: 10px;
+        background: var(--teal-dim);
+        color: var(--teal);
+        font-size: 18px;
+    }
+    .launch.warm .ico { background: var(--orange-dim); color: var(--orange); }
+    .launch strong { font-family: 'Syne', sans-serif; font-size: 14px; color: #fff; }
+    .launch small { color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+
+    /* Code snippet, rendered by PluginHighlight */
+    .snip {
+        background: var(--navy-900);
+        border-top: 1px solid var(--border);
+        padding: 4px 0;
+        --ts-highlight-bg: var(--navy-900);
+        --ts-highlight-border-radius: 0;
+    }
+    .snip pre { margin: 0; font-size: 12.5px; }
+    .snip pre code { padding: 18px 28px !important; }
+
+    /* Controls bar */
+    .demo-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px 20px;
+        align-items: center;
+        padding: 20px 28px;
+        border-top: 1px solid var(--border);
+        background: var(--surface-2);
+    }
+    .ctrl-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .ctrl-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        margin-right: 2px;
+    }
+    .btn-ctrl {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--navy-700);
+        color: var(--text);
+        cursor: pointer;
+        line-height: 1;
+        transition: background .12s ease, border-color .12s ease;
+    }
+    .btn-ctrl:hover { background: var(--navy-600); border-color: rgba(255,255,255,.18); }
+    .btn-ctrl.accent { border-color: var(--teal); color: var(--teal); }
+    .btn-ctrl.accent:hover { background: var(--teal-dim); }
+    .btn-ctrl.warn { border-color: var(--orange); color: var(--orange); }
+    .btn-ctrl.warn:hover { background: var(--orange-dim); }
+    .check {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-family: var(--mono); font-size: 11.5px; color: var(--text);
+        cursor: pointer; user-select: none;
+    }
+    .check input { accent-color: var(--teal); cursor: pointer; }
+    .dir-select { width: 150px; }
+    .state-pill {
+        font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+        padding: 5px 10px; border-radius: 6px;
+        background: var(--navy-900); border: 1px solid var(--border);
+    }
+    .state-pill em { font-style: normal; color: var(--teal); }
+
+    /* Event log */
+    .demo-log-wrap { padding: 20px 28px 28px; }
+    .demo-log-head {
+        font-family: 'Syne', sans-serif;
+        font-size: 11px; font-weight: 600;
+        letter-spacing: .1em; text-transform: uppercase;
+        color: var(--muted); margin-bottom: 8px;
+    }
+    .demo-log {
+        background: var(--navy-900);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        height: 186px;
+        overflow-y: auto;
+        padding: 10px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--surface) transparent;
+    }
+    .log-empty { font-family: var(--mono); font-size: 12px; color: var(--muted); text-align: center; padding: 60px 0; }
+    .log-entry {
+        display: flex; align-items: baseline; gap: 10px;
+        padding: 5px 6px; border-radius: 6px;
+        font-family: var(--mono); font-size: 11.5px; line-height: 1.4;
+    }
+    .log-entry:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,.04); }
+    .log-time { color: #475569; flex-shrink: 0; font-size: 11px; }
+    .log-evt { flex-shrink: 0; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: .04em; }
+    .log-evt--open  { background: rgba(32,226,215,.15);  color: var(--teal); }
+    .log-evt--close { background: rgba(122,155,184,.12); color: var(--muted); }
+    .log-evt--cb    { background: rgba(240,160,40,.15);  color: var(--orange); }
+    .log-detail { color: #64748b; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .log-detail em { color: #94a3b8; font-style: normal; }
+
+    .page-foot { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 48px; }
+    .page-foot a { color: var(--teal); }
+
+    /* Drawer content
+       The plugin draws the panel but leaves text color to the page.
+       This page is dark, so the light drawers get a dark ink color here. */
+    .drawer-root [data-drawer-panel] { color: #1f2937; font-family: 'DM Sans', sans-serif; }
+    .drawer-root[data-bs-theme="dark"] [data-drawer-panel],
+    .drawer-brand [data-drawer-panel] { color: #e2eaf4; }
+    .drawer-root [data-drawer-title] { font-family: 'Syne', sans-serif; }
+    .drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .drawer-head .btn-close { flex-shrink: 0; margin-top: 2px; }
+    .drawer-side-pad { padding-top: .5rem; }
+    .sheet-wrap { max-width: 560px; margin: 0 auto; }
+
+    .share-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+    .share-grid button {
+        display: flex; flex-direction: column; align-items: center; gap: 6px;
+        padding: 12px 6px; border-radius: 12px;
+        border: 1px solid #e5e7eb; background: #f9fafb; color: #374151;
+        font-size: 12.5px; cursor: pointer;
+    }
+    .share-grid button:hover { background: #f3f4f6; }
+    .share-grid i { font-size: 20px; }
+
+    .nav-list { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+    .nav-list a {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 12px; border-radius: 8px;
+        color: #374151; text-decoration: none;
+    }
+    .nav-list a:hover, .nav-list a:focus-visible { background: #f3f4f6; }
+    .nav-list a.active { background: #ecfeff; color: #0e7490; font-weight: 600; }
+
+    .release { border-left: 2px solid #e5e7eb; padding: 0 0 18px 16px; margin-left: 6px; position: relative; }
+    .release::before {
+        content: ''; position: absolute; left: -6px; top: 6px;
+        width: 10px; height: 10px; border-radius: 50%;
+        background: #20b2aa; box-shadow: 0 0 0 3px #fff;
+    }
+    .release h3 { font-size: .95rem; font-weight: 600; margin: 0 0 4px; }
+    .release p  { margin: 0; color: #6b7280; font-size: .9rem; }
+
+    .announce { display: flex; gap: 14px; align-items: center; max-width: 720px; margin: 0 auto; padding-bottom: .25rem; }
+    .announce .ico { font-size: 28px; color: #0e7490; }
+
+    .drawer-brand { --ts-drw-bg: #0e2238; --ts-drw-overlay: rgba(4, 10, 20, .72); --ts-drw-radius: 1.5rem; --ts-drw-handle: rgba(32,226,215,.55); --ts-drw-handle-hover: #20e2d7; --ts-drw-text-muted: #7a9bb8; --ts-drw-side-w: min(420px, 90vw); }
+    .drawer-brand .plan {
+        border: 1px solid rgba(255,255,255,.1); border-radius: 14px;
+        padding: 14px 16px; margin-bottom: 10px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-brand .plan strong { color: #fff; }
+    .drawer-brand .plan span { color: #20e2d7; font-family: var(--mono); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+    <div class="container">
+        <p class="eyebrow">Themestrap / Components</p>
+        <h1>Plugin<em>Drawer</em></h1>
+        <p>A panel that slides in from any edge of the screen. It brings its own backdrop, locks page scroll, traps focus, closes on Escape, and can be dragged away by its handle. Built for mobile sheets, side navigation and filter panels.</p>
+        <div class="hero-pills">
+            <span>bottom · top · left · right</span>
+            <span>drag to dismiss</span>
+            <span>focus trap</span>
+            <span>scroll lock</span>
+            <span>--ts-drw-* tokens</span>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Card 01: Directions -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <span class="demo-badge">01</span>
+            <span class="demo-card-title">Four Directions</span>
+            <span class="demo-tag">direction</span>
+        </div>
+        <p class="demo-copy">
+            Each button opens a drawer through <code>data-drawer-open="id"</code>. Bottom and top drawers get a drag handle automatically. Side drawers have none, so they close with the backdrop, the close button or Escape.
+        </p>
+
+        <div class="demo-stage">
+            <div class="launch-grid">
+                <button type="button" class="launch" data-drawer-open="drw-bottom">
+                    <span class="ico"><i class="bi bi-box-arrow-up"></i></span>
+                    <strong>Bottom sheet</strong>
+                    <small>The default. A share sheet with a grab handle.</small>
+                </button>
+                <button type="button" class="launch" data-drawer-open="drw-top">
+                    <span class="ico"><i class="bi bi-box-arrow-down"></i></span>
+                    <strong>Top</strong>
+                    <small>An announcement. The handle sits on its bottom edge.</small>
+                </button>
+                <button type="button" class="launch" data-drawer-open="drw-left">
+                    <span class="ico"><i class="bi bi-box-arrow-right"></i></span>
+                    <strong>Left</strong>
+                    <small>Side navigation for small screens.</small>
+                </button>
+                <button type="button" class="launch" data-drawer-open="drw-right">
+                    <span class="ico"><i class="bi bi-box-arrow-left"></i></span>
+                    <strong>Right</strong>
+                    <small>A filter panel with a PluginSelect inside.</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>&lt;!-- Trigger, anywhere on the page --&gt;
+&lt;button data-drawer-open="share-sheet"&gt;Share&lt;/button&gt;
+
+&lt;!-- Drawer root --&gt;
+&lt;div data-plugin-drawer id="share-sheet"
+     data-plugin-options='{"direction": "bottom"}'&gt;
+    &lt;div data-drawer-backdrop&gt;&lt;/div&gt;
+    &lt;div data-drawer-panel&gt;
+        &lt;h2 data-drawer-title&gt;Share this page&lt;/h2&gt;
+        &lt;p data-drawer-description&gt;Send a link or copy it.&lt;/p&gt;
+        ...
+        &lt;button data-drawer-close&gt;Cancel&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Side drawers only change the direction --&gt;
+&lt;div data-plugin-drawer id="side-nav"
+     data-plugin-options='{"direction": "left"}'&gt; ... &lt;/div&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- Card 02: Drag + long content -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <span class="demo-badge">02</span>
+            <span class="demo-card-title">Drag to Dismiss &amp; Long Content</span>
+            <span class="demo-tag">dragThreshold · velocityThreshold</span>
+        </div>
+        <p class="demo-copy">
+            Grab the handle and pull down. Let go past a quarter of the panel's height, or flick it quickly, and it closes. Anything less snaps back. The handle stays pinned while the content scrolls, and dragging only ever starts from the handle, so scrolling the list never closes the sheet by accident.
+        </p>
+
+        <div class="demo-stage">
+            <div class="launch-grid">
+                <button type="button" class="launch" data-drawer-open="drw-long">
+                    <span class="ico"><i class="bi bi-hand-index-thumb"></i></span>
+                    <strong>Release notes</strong>
+                    <small>A tall, scrolling bottom sheet. Try a drag and a flick.</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>&lt;div data-plugin-drawer id="release-notes"
+     data-plugin-options='{"dragThreshold": 0.25, "velocityThreshold": 0.6}'&gt;
+    &lt;div data-drawer-panel&gt;
+        &lt;!-- The handle is injected here, as the first child --&gt;
+        &lt;h2 data-drawer-title&gt;What's new&lt;/h2&gt;
+        ...
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- Card 03: Modal choice -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <span class="demo-badge">03</span>
+            <span class="demo-card-title">Requires a Choice</span>
+            <span class="demo-tag">closeOnBackdrop · closeOnEscape · draggable</span>
+        </div>
+        <p class="demo-copy">
+            Turn off the backdrop click, Escape and the handle, and the only way out is a button inside the panel. Use this when the reader must decide before carrying on.
+        </p>
+
+        <div class="demo-stage">
+            <div class="launch-grid">
+                <button type="button" class="launch warm" data-drawer-open="drw-strict">
+                    <span class="ico"><i class="bi bi-shield-check"></i></span>
+                    <strong>Updated terms</strong>
+                    <small>Backdrop, Escape and drag are all off.</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>&lt;div data-plugin-drawer id="terms"
+     data-plugin-options='{
+        "closeOnBackdrop": false,
+        "closeOnEscape":   false,
+        "showHandle":      false,
+        "draggable":       false
+     }'&gt;
+    ...
+&lt;/div&gt;</code></pre>
+        </div>
+    </div>
+
+    <!-- Card 04: Theming -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <span class="demo-badge">04</span>
+            <span class="demo-card-title">Theming &amp; Dark Mode</span>
+            <span class="demo-tag">--ts-drw-* · data-bs-theme</span>
+        </div>
+        <p class="demo-copy">
+            Every color, radius, size and timing comes from a <code>--ts-drw-*</code> token. Set them on <code>:root</code> for every drawer, or on one drawer's root for just that one. Dark mode follows the same three tiers as PluginDarkMode, so <code>data-bs-theme="dark"</code> on a drawer, or on <code>&lt;html&gt;</code>, is enough.
+        </p>
+
+        <div class="demo-stage">
+            <div class="launch-grid">
+                <button type="button" class="launch" data-drawer-open="drw-brand">
+                    <span class="ico"><i class="bi bi-palette"></i></span>
+                    <strong>Brand tokens</strong>
+                    <small>Navy panel, teal handle, larger radius.</small>
+                </button>
+                <button type="button" class="launch" data-drawer-open="drw-dark">
+                    <span class="ico"><i class="bi bi-moon-stars"></i></span>
+                    <strong>Dark mode</strong>
+                    <small>The built-in dark tokens, through data-bs-theme.</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="snip">
+<pre data-plugin-highlight="css" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>/* One branded drawer */
+#upgrade-sheet {
+    --ts-drw-bg:           #0e2238;
+    --ts-drw-overlay:      rgba(4, 10, 20, .72);
+    --ts-drw-radius:       1.5rem;
+    --ts-drw-handle:       rgba(32, 226, 215, .55);
+    --ts-drw-handle-hover: #20e2d7;
+    --ts-drw-side-w:       min(420px, 90vw);
+}
+
+/* The panel inherits the page's text color, so set one to match */
+#upgrade-sheet [data-drawer-panel] { color: #e2eaf4; }</code></pre>
+        </div>
+    </div>
+
+    <!-- Card 05: API playground -->
+    <div class="demo-card">
+        <div class="demo-card-header">
+            <span class="demo-badge">05</span>
+            <span class="demo-card-title">JavaScript API</span>
+            <span class="demo-tag">open · close · toggle · destroy · events</span>
+        </div>
+        <p class="demo-copy">
+            This drawer has the <code>.manual</code> class, so the page initializes it from the controls below. Change the options and press <em>Apply</em> to rebuild it. Every drawer on the page writes to the event log.
+        </p>
+
+        <div class="demo-controls">
+            <div class="ctrl-group">
+                <span class="ctrl-label">direction</span>
+                <div id="api-direction" class="dir-select" data-plugin-select>
+                    <select name="direction" aria-label="Direction">
+                        <option value="bottom" selected>bottom</option>
+                        <option value="top">top</option>
+                        <option value="left">left</option>
+                        <option value="right">right</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ctrl-group">
+                <label class="check"><input type="checkbox" id="opt-backdrop" checked> backdrop</label>
+                <label class="check"><input type="checkbox" id="opt-closeOnBackdrop" checked> closeOnBackdrop</label>
+                <label class="check"><input type="checkbox" id="opt-closeOnEscape" checked> closeOnEscape</label>
+                <label class="check"><input type="checkbox" id="opt-scrollLock" checked> scrollLock</label>
+                <label class="check"><input type="checkbox" id="opt-draggable" checked> draggable</label>
+            </div>
+        </div>
+
+        <div class="demo-controls">
+            <div class="ctrl-group">
+                <span class="ctrl-label">API</span>
+                <button type="button" class="btn-ctrl accent" id="btn-open">open()</button>
+                <button type="button" class="btn-ctrl" id="btn-toggle">toggle()</button>
+                <button type="button" class="btn-ctrl" id="btn-auto">open, then close after 2s</button>
+                <button type="button" class="btn-ctrl" id="btn-reverse">close, reopen mid-slide</button>
+                <button type="button" class="btn-ctrl warn" id="btn-apply">Apply options</button>
+            </div>
+            <div class="ctrl-group" style="margin-left: auto;">
+                <span class="state-pill">isOpen: <em id="api-state">false</em></span>
+            </div>
+        </div>
+
+        <div class="demo-log-wrap">
+            <div class="demo-log-head">Event log, every drawer on this page</div>
+            <div class="demo-log" id="demo-log" aria-live="polite">
+                <div class="log-empty">Open a drawer and its events appear here…</div>
+            </div>
+        </div>
+
+        <div class="snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>// Manual init (the element carries .manual)
+$('#api-drawer').themestrapPluginDrawer({
+    direction: 'right',
+    onOpen:  function ($el) { console.log('opening', $el.attr('id')); },
+    onClose: function ($el) { console.log('closed',  $el.attr('id')); }
+});
+
+// Always read the instance from a fresh selection
+const drw = $('#api-drawer').data('__pluginDrawer');
+
+drw.open();
+drw.close();
+drw.toggle();
+drw.close(); drw.open();   // open() during the close slides it straight back in
+drw.isOpen;            // true while open; false as soon as a close starts
+
+// jQuery events fire on the drawer root and bubble
+$(document).on('drawer:open drawer:close', '[data-plugin-drawer]', function (e, instance) {
+    console.log(e.type, this.id, instance.options.direction);
+});
+
+// Rebuild with new options (destroy() removes the handle it injected)
+drw.destroy();
+$('#api-drawer').themestrapPluginDrawer({ direction: 'left' });</code></pre>
+        </div>
+    </div>
+
+    <p class="page-foot">
+        Themestrap · PluginDrawer · part of the <a href="https://github.com/daemondevin/Themestrap" target="_blank" rel="noopener">Themestrap component library</a>
+    </p>
+</div>
+
+
+<!-- Drawers -->
+
+<div data-plugin-drawer id="drw-bottom">
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="sheet-wrap">
+            <h2 data-drawer-title>Share this page</h2>
+            <p data-drawer-description>Send a link to someone, or copy it for later.</p>
+            <div class="share-grid">
+                <button type="button" data-drawer-close><i class="bi bi-envelope"></i>Email</button>
+                <button type="button" data-drawer-close><i class="bi bi-chat-dots"></i>Message</button>
+                <button type="button" data-drawer-close><i class="bi bi-link-45deg"></i>Copy link</button>
+                <button type="button" data-drawer-close><i class="bi bi-qr-code"></i>QR code</button>
+            </div>
+            <button type="button" class="btn btn-light w-100" data-drawer-close>Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-drawer id="drw-top" data-plugin-options='{"direction": "top"}'>
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="announce">
+            <i class="bi bi-megaphone ico" aria-hidden="true"></i>
+            <div class="flex-grow-1">
+                <h2 data-drawer-title class="mb-1">Scheduled maintenance</h2>
+                <p data-drawer-description class="mb-0">The dashboard will be read-only on Sunday from 02:00 to 03:00 UTC.</p>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-drawer-close>Got it</button>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-drawer id="drw-left" data-plugin-options='{"direction": "left"}'>
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="drawer-head drawer-side-pad">
+            <h2 data-drawer-title>Menu</h2>
+            <button type="button" class="btn-close" data-drawer-close aria-label="Close menu"></button>
+        </div>
+        <p data-drawer-description>Tab moves through the links and stays inside the drawer.</p>
+        <nav aria-label="Main">
+            <ul class="nav-list">
+                <li><a href="#" class="active" aria-current="page"><i class="bi bi-house"></i> Home</a></li>
+                <li><a href="#"><i class="bi bi-grid"></i> Components</a></li>
+                <li><a href="#"><i class="bi bi-journal-text"></i> Guides</a></li>
+                <li><a href="#"><i class="bi bi-palette2"></i> Theming</a></li>
+                <li><a href="#"><i class="bi bi-github"></i> Source</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<div data-plugin-drawer id="drw-right" data-plugin-options='{"direction": "right"}'>
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="drawer-head drawer-side-pad">
+            <h2 data-drawer-title>Filters</h2>
+            <button type="button" class="btn-close" data-drawer-close aria-label="Close filters"></button>
+        </div>
+        <p data-drawer-description>Narrow the list of components.</p>
+        <div class="mb-3">
+            <label class="form-label fw-semibold" id="sort-label">Sort by</label>
+            <div id="filter-sort" data-plugin-select>
+                <select name="sort" aria-labelledby="sort-label">
+                    <option value="popular" selected>Most popular</option>
+                    <option value="newest">Newest</option>
+                    <option value="az">Name, A to Z</option>
+                </select>
+            </div>
+        </div>
+        <fieldset class="mb-4">
+            <legend class="form-label fw-semibold fs-6">Category</legend>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="cat-forms" checked><label class="form-check-label" for="cat-forms">Forms</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="cat-nav"><label class="form-check-label" for="cat-nav">Navigation</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="cat-overlay" checked><label class="form-check-label" for="cat-overlay">Overlays</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="cat-media"><label class="form-check-label" for="cat-media">Media</label></div>
+        </fieldset>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary flex-fill" data-drawer-close>Reset</button>
+            <button type="button" class="btn btn-dark flex-fill" data-drawer-close>Show 24 results</button>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-drawer id="drw-long" data-plugin-options='{"dragThreshold": 0.25, "velocityThreshold": 0.6}'>
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="sheet-wrap">
+            <div class="drawer-head">
+                <h2 data-drawer-title>What's new</h2>
+                <button type="button" class="btn-close" data-drawer-close aria-label="Close"></button>
+            </div>
+            <p data-drawer-description>Scroll the list, then drag the handle down to dismiss.</p>
+            <div class="release"><h3>Drawer</h3><p>Slides in from any edge, with drag to dismiss on top and bottom sheets.</p></div>
+            <div class="release"><h3>Dialog prompts</h3><p><code>confirm()</code> and <code>alert()</code> that return a Promise, with no markup to write.</p></div>
+            <div class="release"><h3>Select</h3><p>Opens at the selected item, so long lists keep their place.</p></div>
+            <div class="release"><h3>Scrollbar</h3><p>A zero-dependency replacement for the old custom scrollbar library.</p></div>
+            <div class="release"><h3>Dark mode</h3><p>Every plugin now reads <code>html.dark</code> and <code>data-bs-theme</code>.</p></div>
+            <div class="release"><h3>Carousel</h3><p>A seamless loop, drag, fade or slide, dots, thumbnails and autoplay progress.</p></div>
+            <div class="release"><h3>TagsInput</h3><p>Paste a list and it becomes tags, one per comma or line.</p></div>
+            <div class="release"><h3>RichEditor</h3><p>A toolbar that follows the selection, and clean HTML out.</p></div>
+            <div class="release"><h3>TimePicker</h3><p>Type a time such as 8:30pm, or pick it from the columns.</p></div>
+            <div class="release"><h3>Particles</h3><p>A lightweight canvas background that pauses when off screen.</p></div>
+            <div class="release"><h3>Module loader</h3><p>Fetches plugins and their vendor files only when the page needs them.</p></div>
+            <button type="button" class="btn btn-dark w-100 mt-2" data-drawer-close>Close</button>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-drawer id="drw-strict"
+     data-plugin-options='{"closeOnBackdrop": false, "closeOnEscape": false, "showHandle": false, "draggable": false}'>
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="sheet-wrap pt-4">
+            <h2 data-drawer-title>We've updated our terms</h2>
+            <p data-drawer-description>Clicking outside or pressing Escape does nothing here. Pick one of the buttons to continue.</p>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary flex-fill" data-drawer-close>Remind me later</button>
+                <button type="button" class="btn btn-dark flex-fill" data-drawer-close>Accept</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-drawer id="drw-brand" class="drawer-brand" data-plugin-options='{"direction": "right"}'>
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="drawer-head drawer-side-pad">
+            <h2 data-drawer-title>Upgrade your plan</h2>
+            <button type="button" class="btn-close btn-close-white" data-drawer-close aria-label="Close"></button>
+        </div>
+        <p data-drawer-description>The colors on this drawer come from tokens set on its root.</p>
+        <div class="plan"><strong>Starter</strong><span>$0</span></div>
+        <div class="plan"><strong>Pro</strong><span>$12 / mo</span></div>
+        <div class="plan"><strong>Team</strong><span>$29 / mo</span></div>
+        <button type="button" class="btn btn-info w-100 mt-3" data-drawer-close>Choose Pro</button>
+    </div>
+</div>
+
+<div data-plugin-drawer id="drw-dark" data-bs-theme="dark">
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="sheet-wrap">
+            <h2 data-drawer-title>Dark sheet</h2>
+            <p data-drawer-description>The plugin's own dark tokens, switched on by <code>data-bs-theme="dark"</code> on the drawer root.</p>
+            <button type="button" class="btn btn-outline-light w-100" data-drawer-close>Close</button>
+        </div>
+    </div>
+</div>
+
+<div data-plugin-drawer id="api-drawer" class="manual">
+    <div data-drawer-backdrop></div>
+    <div data-drawer-panel>
+        <div class="sheet-wrap drawer-side-pad">
+            <div class="drawer-head">
+                <h2 data-drawer-title>Playground drawer</h2>
+                <button type="button" class="btn-close" data-drawer-close aria-label="Close"></button>
+            </div>
+            <p data-drawer-description>Built from the controls on the page. Direction: <strong id="api-dir-label">bottom</strong>.</p>
+            <label for="api-note" class="form-label">A field, to try the focus trap</label>
+            <input id="api-note" type="text" class="form-control mb-3" placeholder="Tab cycles inside the drawer">
+            <button type="button" class="btn btn-dark w-100" data-drawer-close>Close</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script src="../js/components/themestrap.plugin.select.js"></script>
+<script src="../js/components/themestrap.plugin.drawer.js"></script>
+
+<script>
+$(function () {
+
+    /* Code snippets */
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('[data-plugin-highlight]:not(.manual)').each(function () {
+            $(this).themestrapPluginHighlight();
+        });
+    }
+
+    /* Selects (the filter drawer and the direction control) */
+    $('[data-plugin-select]:not(.manual)').each(function () {
+        $(this).themestrapPluginSelect();
+    });
+
+    /* Drawers, wired the same way init.js does it: on DOMReady, before any trigger can fire */
+    $('[data-plugin-drawer]:not(.manual)').each(function () {
+        const $this = $(this);
+        const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+        $this.themestrapPluginDrawer(opts);
+    });
+
+    /* Event log */
+    const $log = $('#demo-log');
+
+    function addLog(kind, label, detail) {
+        const now = new Date();
+        const pad = (n, l) => String(n).padStart(l || 2, '0');
+        const ts  = pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) + '.' + pad(now.getMilliseconds(), 3);
+
+        const $entry = $('<div class="log-entry"></div>')
+            .append($('<span class="log-time"></span>').text(ts))
+            .append($('<span class="log-evt"></span>').addClass('log-evt--' + kind).text(label))
+            .append($('<span class="log-detail"></span>').html(detail));
+
+        $log.find('.log-empty').remove();
+        $log.prepend($entry);
+
+        const $entries = $log.find('.log-entry');
+        if ($entries.length > 24) { $entries.last().remove(); }
+    }
+
+    $(document).on('drawer:open drawer:close', '[data-plugin-drawer]', function (e, instance) {
+        const kind = e.type === 'drawer:open' ? 'open' : 'close';
+        addLog(kind, e.type, '#<em>' + this.id + '</em>  direction: <em>' + instance.options.direction + '</em>');
+        if (this.id === 'api-drawer') { $('#api-state').text(String(instance.isOpen)); }
+    });
+
+    /* API playground */
+    const $api = $('#api-drawer');
+
+    function readOptions() {
+        const dirSel = $('#api-direction').data('__pluginSelect');
+        const opts = {
+            direction: dirSel ? dirSel.getValue() : 'bottom',
+            onOpen:  function ($el) { addLog('cb', 'onOpen',  'callback for #<em>' + $el.attr('id') + '</em>'); },
+            onClose: function ($el) { addLog('cb', 'onClose', 'callback for #<em>' + $el.attr('id') + '</em>'); }
+        };
+        ['backdrop', 'closeOnBackdrop', 'closeOnEscape', 'scrollLock', 'draggable'].forEach(function (key) {
+            opts[key] = $('#opt-' + key).prop('checked');
+        });
+        return opts;
+    }
+
+    function buildApiDrawer() {
+        const existing = $api.data('__pluginDrawer');
+        if (existing) {
+            existing.destroy();
+        }
+        const opts = readOptions();
+        $api.themestrapPluginDrawer(opts);
+        $('#api-dir-label').text(opts.direction);
+        $('#api-state').text('false');
+    }
+
+    function api() {
+        return $('#api-drawer').data('__pluginDrawer');
+    }
+
+    buildApiDrawer();
+
+    $('#btn-open').on('click', function () { api().open(); });
+    $('#btn-toggle').on('click', function () { api().toggle(); });
+    $('#btn-auto').on('click', function () {
+        api().open();
+        setTimeout(function () { api().close(); }, 2000);
+    });
+    $('#btn-reverse').on('click', function () {
+        const d = api();
+        if (!d.isOpen) { d.open(); }
+        /* wait for the open to settle, close, then reverse it halfway through the slide */
+        setTimeout(function () {
+            d.close();
+            setTimeout(function () {
+                d.open();
+                addLog('cb', 'reversed', 'open() during the close transition');
+            }, d.options.transitionDuration / 2);
+        }, 500);
+    });
+    $('#btn-apply').on('click', function () {
+        buildApiDrawer();
+        addLog('cb', 'rebuilt', 'direction: <em>' + api().options.direction + '</em>');
+    });
+});
+</script>
+</body>
+</html>

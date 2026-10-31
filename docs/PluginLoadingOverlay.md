@@ -534,7 +534,7 @@ const loader = $('body').themestrapPluginLoadingOverlay({
     autoHide: 0,
     progress: true,
     progressValue: 0,
-    lockScroll: true,
+    scrollLock: true,
     zIndex: 10000
 });
 ```

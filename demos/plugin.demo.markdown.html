@@ -722,9 +722,9 @@ ORDER BY revenue DESC;
         <div id="demo-hlo" data-plugin-markdown class="manual">
 ```typescript
 // TypeScript — interfaces, generics, optional chaining
-interface Plugin<T extends HTMLElement = HTMLElement> {
-  readonly $el: JQuery<T>;
-  options:  Record<string, unknown>;
+interface Plugin&lt;T extends HTMLElement = HTMLElement&gt; {
+  readonly $el: JQuery&lt;T&gt;;
+  options:  Record&lt;string, unknown&gt;;
   build():  this;
   destroy(): this;
 }

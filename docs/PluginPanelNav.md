@@ -41,10 +41,10 @@ The `activeIndicator` option controls how the current item is flagged:
 
 ### Markup contract
 
-The root carries `data-plugin-panel-nav`. Inside, an optional actions header, then a body holding one or more lists. Items are `<li>` elements; parents nest a `[data-panelnav-child-items]` list:
+The root carries `data-plugin-panelnav`. Inside, an optional actions header, then a body holding one or more lists. Items are `<li>` elements; parents nest a `[data-panelnav-child-items]` list:
 
 ```html
-<nav data-plugin-panel-nav
+<nav data-plugin-panelnav
      data-plugin-options='{"activeIndicator":"caret"}'>
 
   <div data-panelnav-actions>
@@ -81,7 +81,7 @@ The root carries `data-plugin-panel-nav`. Inside, an optional actions header, th
 
 | Attribute | Element | Notes |
 |-----------|---------|-------|
-| `data-plugin-panel-nav` | root | Marks the root `<nav>`. Required for auto-init. |
+| `data-plugin-panelnav` | root | Marks the root `<nav>`. Required for auto-init. |
 | `data-panelnav-actions` | region | Optional header row (title + custom actions). |
 | `data-panelnav-actions-title` | el | Title text inside the actions header. |
 | `data-panelnav-body` | region | Scroll container wrapping the lists. Required for `fill` mode. |
@@ -103,13 +103,13 @@ The root carries `data-plugin-panel-nav`. Inside, an optional actions header, th
 
 ```js
 // Manual init
-$('[data-plugin-panel-nav]').themestrapPluginPanelNav({
+$('[data-plugin-panelnav]').themestrapPluginPanelNav({
     activeIndicator: 'caret',
     accordion: true
 });
 
 // Auto-init (already wired in themestrap.init.js)
-$('[data-plugin-panel-nav]:not(.manual)').each(function () {
+$('[data-plugin-panelnav]:not(.manual)').each(function () {
   const opts = themestrap.fn.getOptions($(this).data('plugin-options'));
   $(this).themestrapPluginPanelNav(opts);
 });
@@ -129,11 +129,6 @@ $('[data-plugin-panel-nav]:not(.manual)').each(function () {
 | `fill` | bool | `false` | Full-height rail with an internal scroll body. Requires a `[data-panelnav-body]` wrapper. |
 | `activeIndicator` | string | `'caret'` | One of `caret`, `bar`, `both`, `none`. |
 | `accordion` | bool | `false` | Only one drawer open at a time — opening a sibling closes the rest. |
-| `collapsible` | bool | `false` | Enable rail collapse (mini mode). Injects a chevron toggle into the actions header. |
-| `collapsed` | bool | `false` | Start collapsed. Requires `collapsible`. |
-| `collapsedWidth` | string | `'64px'` | Width of the collapsed icon rail (any CSS length). |
-| `expandOnHover` | bool | `false` | While collapsed, temporarily expand to full width on hover. Requires `collapsible`. |
-| `collapseToggleLabel` | string | `'Toggle navigation'` | Accessible `aria-label` for the collapse-toggle button. |
 | `autoExpandActive` | bool | `true` | Open ancestor drawers of pre-marked active items on load. |
 | `activeOnLoad` | bool | `true` | Detect the active leaf from the current page URL on load. |
 | `width` | string | `'280px'` | Panel width (any CSS length). |
@@ -141,6 +136,7 @@ $('[data-plugin-panel-nav]:not(.manual)').each(function () {
 | `duration` | string | `'240ms'` | Drawer + indicator transition duration. |
 | `accent` | string | `''` | Accent color override. Empty inherits the theme primary. |
 | `forceInit` | bool | `true` | Skip IntersectionObserver — the rail is layout-critical, so init immediately. |
+| `accY` | number | `0` | IntersectionObserver root margin offset, used by `dynIntObsInit` when `forceInit` is `false`. |
 
 ### CSS custom property overrides
 
@@ -162,60 +158,17 @@ Every color and dimension is a `--ts-pn-*` custom property on the root:
 ```
 
 > [!WARNING]
-> `activeOnLoad` matches the current page URL against each leaf's real `href` (origin + normalised path). Parent rows use `href="#"` by design — they are disclosure toggles, not links — so they are never matched as the active leaf. Pre-mark a parent branch with `data-panelnav-active` if you need it highlighted.
+> `activeOnLoad` matches the current page URL against each leaf's real `href` (origin + normalized path). Parent rows use `href="#"` by design — they are disclosure toggles, not links — so they are never matched as the active leaf. Pre-mark a parent branch with `data-panelnav-active` if you need it highlighted.
 
 
-## [Rail **Collapse**](#collapse)
-
-Set `collapsible: true` and the panel can shrink to a narrow icon-only rail. A chevron toggle button is injected into the actions header, and the whole panel animates between `width` and `collapsedWidth`. Labels, metadata, carets and section titles fade to icons only; the active bar still shows.
-
-```html
-<nav data-plugin-panel-nav
-     data-plugin-options='{"collapsible":true}'>
-  <div data-panelnav-actions>
-    <span data-panelnav-actions-title>Console</span>
-    <!-- the chevron toggle is injected here automatically -->
-  </div>
-  <div data-panelnav-body>
-    <ul data-panelnav-list>...</ul>
-  </div>
-</nav>
-```
-
-### Collapse options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `collapsible` | bool | `false` | Master switch. Adds the toggle button and enables the collapse API. |
-| `collapsed` | bool | `false` | Start in the collapsed state (no first-paint animation). |
-| `collapsedWidth` | string | `'64px'` | Width of the collapsed rail. |
-| `expandOnHover` | bool | `false` | While collapsed, restore full width + contents on hover; collapses again on mouse-out. |
-| `collapseToggleLabel` | string | `'Toggle navigation'` | The button's `aria-label`. |
-
-### Driving it from code
-
-```js
-const inst = $('#appNav').data('__pluginPanelNav');
-
-inst.collapse();        // shrink to the icon rail
-inst.expand();          // back to full width
-inst.toggleCollapse();  // flip
-inst.isCollapsed();     // => true | false
-
-// React to state changes
-$('#appNav').on('collapse.ts.panelnav', (e, d) => {
-  document.body.classList.toggle('nav-mini', d.collapsed);
-});
-```
-
-> [!TIP]
-> All of mini mode is driven by a single `ts-panel-nav--collapsed` class on the root — the JS only toggles that one class, and the injected stylesheet does the rest.
+> [!NOTE]
+> Earlier versions of this guide described a collapsible icon rail (`collapsible`, `collapsed`, `collapsedWidth`, `expandOnHover`, `collapse()`, `toggleCollapse()`). The plugin has no such feature; those options are ignored. For a collapsible rail, use PluginSideNav or PluginVerticalNav.
 
 
 ## [Instance **API**](#instance-api)
 
 ```js
-const inst = $('[data-plugin-panel-nav]')
+const inst = $('[data-plugin-panelnav]')
                .data('__pluginPanelNav');
 
 const $settings = $('#nav-settings'); // an <li>
@@ -232,19 +185,15 @@ inst.setActive($('#nav-api-keys'));
 | `collapseAll()` | this | Close every drawer in the panel. |
 | `setActive($item)` | this | Mark a leaf active, clear the previous active item, set `aria-current`, and open all ancestor drawers. |
 | `getActive()` | jQuery | Return the currently active item (may be an empty set). |
-| `collapse()` | this | Collapse the panel to the mini/icon-only rail. Requires `collapsible`. |
-| `expand()` | this | Expand the panel back to full width. |
-| `toggleCollapse()` | this | Toggle between collapsed and expanded. |
-| `isCollapsed()` | bool | Whether the panel is currently collapsed. |
-| `refresh()` | instance | Destroy and re-initialise with the same options. Returns the new instance. |
+| `refresh()` | instance | Destroy and re-initialize with the same options. Returns the new instance. |
 | `destroy()` | this | Full teardown — removes classes, injected nodes, drawers, ARIA attributes, and handlers. |
 
 ### Events
 
-The panel emits two namespaced events on the root element:
+The panel emits two namespaced jQuery events on the root element:
 
 ```js
-const $nav = $('[data-plugin-panel-nav]');
+const $nav = $('[data-plugin-panelnav]');
 
 // Fired when a leaf is clicked
 $nav.on('item.ts.panelnav', (e, d) => {
@@ -261,7 +210,6 @@ $nav.on('drawer-toggle.ts.panelnav', (e, d) => {
 |-------|-----------|-------------|
 | `item.ts.panelnav` | `{$item, $link, href}` | A leaf row was clicked. Plugin has already applied active state by the time this fires. |
 | `drawer-toggle.ts.panelnav` | `{$item, open}` | A parent drawer finished toggling. `open` is the new boolean state. |
-| `collapse.ts.panelnav` | `{collapsed}` | The rail collapsed or expanded. `collapsed` is the new boolean state. |
 
 > [!NOTE]
 > Leaf clicks on real anchors with a valid `href` are _not_ prevented — the browser still navigates. The event fires first so you can hook analytics or a SPA router. For SPA use, call `e.preventDefault()` in your `item.ts.panelnav` handler and route via `d.href` yourself.
@@ -272,7 +220,7 @@ $nav.on('drawer-toggle.ts.panelnav', (e, d) => {
 #### App left rail (full height)
 
 ```html
-<nav data-plugin-panel-nav
+<nav data-plugin-panelnav
      data-plugin-options='{"fill":true,"bordered":true}'
      style="height:100vh;">
   <div data-panelnav-actions>
@@ -287,14 +235,14 @@ $nav.on('drawer-toggle.ts.panelnav', (e, d) => {
 #### One drawer open at a time
 
 ```js
-$('[data-plugin-panel-nav]')
+$('[data-plugin-panelnav]')
   .themestrapPluginPanelNav({ accordion: true });
 ```
 
 #### Dark rail with teal accent
 
 ```html
-<nav data-plugin-panel-nav
+<nav data-plugin-panelnav
      data-plugin-options='{"dark":true,"accent":"#2ab8c8"}'>
   <div data-panelnav-body>
     <ul data-panelnav-list>...</ul>
@@ -334,7 +282,7 @@ $('#nav-inbox')
 ### Diagnostic checklist
 
 > - Is `<style id="ts-panel-nav-styles">` present in `<head>`?
-> - Does the root carry `data-plugin-panel-nav` and did init run (check for `.ts-panel-nav`)?
+> - Does the root carry `data-plugin-panelnav` and did init run (check for `.ts-panel-nav`)?
 > - Are parent items giving their child list `data-panelnav-child-items` (not just a bare `<ul>`)?
 > - Do parent rows use `href="#"` rather than a real URL?
 > - For `fill` mode — are the lists inside `[data-panelnav-body]`?

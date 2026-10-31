@@ -204,6 +204,9 @@
             const $imgAfter  = $imgs.eq(1).clone();
 
             const doInit = () => {
+                // destroy() may have run while the image was still loading
+                if (self._destroyed || self.$handle) return;
+
                 const nw = $imgs[0].naturalWidth  || 800;
                 const nh = $imgs[0].naturalHeight || 600;
 
@@ -235,13 +238,21 @@
                 self.isVertical = isVertical;
 
                 self._setPosition(pct);
+
+                // events() was called before the slider existed; bind now
+                if (self._eventsPending) {
+                    self._eventsPending = false;
+                    self.events();
+                }
             };
 
             const img = $imgs[0];
             if (img.complete && img.naturalWidth) {
                 doInit();
             } else {
-                $imgs[0].addEventListener('load', doInit, { once: true });
+                // A broken image still gets a working slider (with the 4:3 fallback ratio)
+                $imgs[0].addEventListener('load',  doInit, { once: true });
+                $imgs[0].addEventListener('error', doInit, { once: true });
             }
 
             return this;
@@ -296,6 +307,13 @@
             const $wrap = self.options.wrapper;
             const ns = self.eventNamespace;
             let dragging = false;
+
+            // The slider is built once the first image has loaded. Until then
+            // there is nothing to bind to, so build() calls back in here later.
+            if (!self.$handle) {
+                self._eventsPending = true;
+                return this;
+            }
 
             $wrap.on(`mousedown${ns} touchstart${ns}`, (e) => {
                 if (self.options.move_with_handle_only) return;
@@ -355,6 +373,8 @@
 
         destroy() {
             const ns = this.eventNamespace;
+            this._destroyed = true;
+            this._eventsPending = false;
             $(document).off(ns);
             this.options.wrapper
                 .removeClass('ts-ba-wrap ts-ba-vertical')

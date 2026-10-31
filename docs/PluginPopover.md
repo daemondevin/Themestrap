@@ -1,352 +1,361 @@
-# Popover Guide
+# PluginPopover
 
-Themestrap's anchor-positioned popover plugin — accessible, CSS-arrow-decorated popovers with portal mode, dark mode, mutual exclusion, focus trapping, and full keyboard dismissal.
+A click-to-open panel anchored to a trigger, with an arrow, side and alignment control, a flip when the trigger is near the viewport edge, Escape and click-outside closing, an optional focus trap, and a portal mode that escapes `overflow: hidden` containers. Only one popover is open at a time.
 
-A lightweight, accessible popover primitive. Wrap a trigger and a content panel in `[data-plugin-popover]`, and the plugin handles positioning (with viewport-flip fallback), a CSS arrow, focus trapping, Escape dismissal, click-outside closing, and mutual exclusion so only one popover can be open at a time. An optional portal mode moves the content panel to `<body>` at open time so `overflow: hidden` ancestors can't clip it.
-
-
-## [How It **Works**](#how-it-works)
-
-PluginPopover coordinates three concerns: positioning (CSS anchor or manual `getBoundingClientRect` fallback), ARIA wiring (trigger ↔ panel relationship), and mutual exclusion (only one popover open per page at a time).
-
-### Closed state
-
-> The content panel has `display: none` and no transform or position rules. The trigger carries `aria-expanded="false"` and `aria-haspopup="dialog"`. The document-level click listener is armed and waiting.
->
-> - Panel: `display: none`, no inline `top`/`left`
-> - Trigger: `aria-expanded="false"`
-> - Global click listener: active (checks for outside-click)
-
-### Open state
-
-> The panel is moved to its placement position (CSS `anchor()` or manual pixel values), receives `.ts-popover--open` and the entrance animation class, and is focused at `[data-popover-close]` (if present) or the panel itself. The body receives `ts-popover-open` so external CSS can dim the page if desired.
->
-> - Panel: `.ts-popover--open`, `aria-hidden="false"`
-> - Trigger: `aria-expanded="true"`, `aria-controls` set
-> - Body: `.ts-popover-open`
-
-### Mutual exclusion
-
-Only one popover may be open at a time. The plugin dispatches a `ts-popover-opened` custom event on `document` when any instance opens. All other instances listen for this event and close themselves before the new one finishes opening.
-
-> [!NOTE]
-> **Event name uses hyphens, not colons.** <br>
-> jQuery's `.off()` uses `.` as a namespace separator and `:` in event names causes silent parsing failures. The plugin uses `ts-popover-opened` (hyphenated) for all mutual-exclusion dispatch.
-
-### Portal mode
-
-When `portaling: true` and the popover opens, the content panel is detached from its original parent and appended to `<body>`. Its original parent is cached in `_$originalParent`. When the popover closes the panel is restored. This lets the popover escape any ancestor with `overflow: hidden` or a clipping stacking context.
+**File:** `js/components/themestrap.plugin.popover.js`  
+**Demo:** `demos/plugin.demo.popover.html`  
+**jQuery method:** `$.fn.themestrapPluginPopover`  
+**Data attribute:** `data-plugin-popover`  
+**Instance key:** `__pluginPopover`  
+**Init strategy:** DOMReady `$().each()` via `themestrap.init.js`
 
 
-## [Quick **Start**](#quick-start)
 
-### Markup contract
+## How It Works
 
-Wrap a trigger and a content panel together inside the root element:
+On `build()` the plugin:
+
+1. Injects its stylesheet once (`<style id="ts-popover-styles">`).
+2. Finds the trigger: a `[data-popover-trigger]` inside the root, or else a `[data-popover-trigger="{root id}"]` anywhere on the page.
+3. Finds the first `[data-popover-content]` inside the root (it warns in the console and stops when there is none).
+4. Gives the panel an id, `role="dialog"`, `aria-modal` (from `modal`) and `aria-labelledby` pointing at `[data-popover-title]` when present; gives the trigger `aria-haspopup="dialog"`, `aria-expanded="false"` and `aria-controls`.
+5. Adds `.ts-pop-arrow` to the panel when `arrow` is on.
+6. With `portaling: true`, moves the panel to `<body>` straight away. It stays there until `destroy()`.
+
+### Opening
+
+1. `ts-popover-opened` is triggered on `document`; every other open popover closes itself.
+2. The panel gets `.ts-pop-visible` and is positioned (see Placement).
+3. The `animationIn` class plays, and is removed when the animation ends.
+4. The trigger gets `aria-expanded="true"`.
+5. After 30 ms focus moves to the first visible focusable element in the panel, or to the panel itself (with `tabindex="-1"`).
+6. `onOpen` runs and `popover:open` fires.
+
+### Closing
+
+1. `isOpen` becomes `false` and the trigger gets `aria-expanded="false"` at once.
+2. The `animationOut` class plays.
+3. When it ends (or after `animationDuration + 30` ms) the panel loses `.ts-pop-visible` and its position, `onClose` runs and `popover:close` fires.
+
+Escape also returns focus to the trigger. Closing by any other route leaves focus where it is.
+
+### Placement
+
+Without portaling, the panel is `position: absolute` inside the root (which the CSS makes `position: relative; display: inline-block`), placed beside the trigger on `side` and lined up by `align`. With portaling it is placed with page coordinates on `<body>`. The position is recalculated on every window scroll and resize while open.
+
+**Flip:** before placing, the plugin checks the trigger's distance from the viewport edge on the chosen side. If it is less than 200 px plus `offset`, the panel goes on the opposite side instead. The check uses that fixed 200 px, not the panel's real size, so a tall panel can still run off-screen and a short one can flip when it would have fitted.
+
+The arrow is a CSS triangle on the panel's `::before` (border) and `::after` (fill), pointed by `.ts-pop-side-{side}`. The plugin moves it to stay under the trigger's center by writing a small `<style class="ts-pop-arrow-style">` into the panel.
+
+
+
+## Quick Start
+
+### 1. Include the files
 
 ```html
-<div data-plugin-popover
-     data-plugin-options='{"side":"bottom","align":"start"}'>
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="js/themestrap.js"></script>
+<script src="js/components/themestrap.plugin.popover.js"></script>
+<script src="js/themestrap.init.js"></script>
+```
 
-  <button data-popover-trigger type="button">
-    Open Popover
-  </button>
+### 2. Mark it up
 
-  <div data-popover-content>
-    <button data-popover-close type="button" aria-label="Close">×</button>
-    <strong>Popover Title</strong>
-    <p>Some descriptive text.</p>
-    <a href="/learn-more">Learn more -></a>
-  </div>
+```html
+<div data-plugin-popover data-plugin-options='{"side": "bottom", "align": "start"}'>
+    <button type="button" data-popover-trigger class="btn btn-light">Details</button>
 
+    <div data-popover-content>
+        <h4 data-popover-title class="h6">Shipping</h4>
+        <p class="mb-0">Free over $50. Most orders arrive in 2 to 4 days.</p>
+    </div>
 </div>
 ```
 
-### Init
+`themestrap.init.js` already wires it:
 
 ```js
-// Manual init
-$('[data-plugin-popover]').themestrapPluginPopover({
-    side:  'bottom',
-    align: 'start'
+$('[data-plugin-popover]:not(.manual)').each(function () {
+    const $this = $(this);
+    const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+    $this.themestrapPluginPopover(opts);
 });
-
-// Auto-init wired in themestrap.init.js
-if ($.isFunction($.fn['themestrapPluginPopover']) &&
-    $('[data-plugin-popover]').length) {
-  themestrap.fn.intObsInit(
-    '[data-plugin-popover]:not(.manual)',
-    'themestrapPluginPopover'
-  );
-}
 ```
 
-> [!TIP]
->  The plugin injects one stylesheet per page (`<style id="ts-popover-styles">`). Colors, shadow, and border-radius are all `--ts-pop-*` CSS custom properties — override them on the root element or globally rather than modifying the injected sheet.
+### Manual init
+
+```js
+$('#share').themestrapPluginPopover({ side: 'top', align: 'center', modal: true });
+```
 
 
-## [Configuration **Options**](#options)
+
+## Markup Reference
+
+| Attribute | On | Role |
+| - | - | - |
+| `data-plugin-popover` | Root | Marks the popover. |
+| `data-plugin-options` | Root | JSON options. |
+| `data-popover-trigger` | Inside the root | The button that toggles the panel. |
+| `data-popover-trigger="id"` | Anywhere | A trigger outside the root, pointing at the root's `id`. Only the first match is used. |
+| `data-popover-content` | Inside the root | The panel. **Required.** |
+| `data-popover-title` | Inside the panel | Becomes the panel's accessible name. |
+
+### Trigger outside the root
+
+```html
+<button type="button" data-popover-trigger="settings-pop">Settings</button>
+
+<div data-plugin-popover id="settings-pop" data-plugin-options='{"side": "right", "portaling": true}'>
+    <div data-popover-content>…</div>
+</div>
+```
+
+Positioning measures the trigger, so for a trigger outside the root use `portaling: true`; without it the panel is placed relative to the root, not the trigger.
+
+### Classes the plugin sets
+
+| Class | On | When |
+| - | - | - |
+| `.ts-pop-visible` | Panel | Open, or closing |
+| `.ts-pop-arrow` | Panel | `arrow: true` |
+| `.ts-pop-side-top` `-bottom` `-left` `-right` | Panel | The side actually used, while open |
+| `ts-pop-in`, `ts-pop-out` | Panel | During the open and close animations (the `animationIn` and `animationOut` options) |
+
+
+
+## Configuration Options
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `side` | string | `'bottom'` | Preferred placement side: `top`, `bottom`, `left`, `right`. Flips automatically when the popover would overflow the viewport. |
-| `align` | string | `'start'` | Alignment along the cross axis: `start`, `center`, `end`. |
-| `offset` | number | `8` | Gap in px between the trigger's edge and the popover panel. |
-| `arrow` | bool | `true` | Render a CSS arrow pointing from the panel toward the trigger. |
-| `portaling` | bool | `false` | On open, move the content panel to `<body>` so it escapes `overflow:hidden` ancestors. Restored on close. |
-| `closeOnOutsideClick` | bool | `true` | Click anywhere outside the root to close. |
-| `closeOnEscape` | bool | `true` | Press `Escape` to close. Focus returns to the trigger. |
-| `dark` | bool | `false` | Dark color scheme. |
-| `animationIn` | string | `'ts-popover-in'` | CSS class added to the panel on open. |
-| `animationOut` | string | `'ts-popover-out'` | CSS class added to the panel on close (removed after `animationDuration`). |
-| `animationDuration` | number | `160` | Fallback timeout in ms in case `animationend` never fires. |
-| `onOpen` | function | `null` | Callback after the panel opens. Receives `(instance)`. |
-| `onClose` | function | `null` | Callback after the panel finishes closing. Receives `(instance)`. |
+| - | - | - | - |
+| `side` | `string` | `'bottom'` | `top`, `bottom`, `left` or `right`. Flips near the viewport edge (see Placement). |
+| `align` | `string` | `'start'` | `start`, `center` or `end`, along the side. |
+| `offset` | `number` | `8` | Gap in px between trigger and panel. |
+| `arrow` | `boolean` | `true` | Draw the arrow. |
+| `portaling` | `boolean` | `false` | Move the panel to `<body>` at init, to escape `overflow: hidden` and stacking contexts. |
+| `closeOnEscape` | `boolean` | `true` | Escape closes and returns focus to the trigger. |
+| `closeOnOutside` | `boolean` | `true` | A click outside the root, the panel and the trigger closes. |
+| `animationIn` | `string` | `'ts-pop-in'` | Class played on open. The built-in animations slide from the side used. |
+| `animationOut` | `string` | `'ts-pop-out'` | Class played on close. |
+| `animationDuration` | `number` | `200` | Fallback in ms if `animationend` never fires. |
+| `modal` | `boolean` | `false` | Trap Tab inside the panel and set `aria-modal="true"`. |
+| `onOpen` | `function\|null` | `null` | Called on open. `this` is the instance. |
+| `onClose` | `function\|null` | `null` | Called after closing. `this` is the instance. |
 
-### CSS custom property overrides
+Earlier versions of this guide listed `closeOnOutsideClick` and `dark`. Neither exists: the option is `closeOnOutside`, and dark mode follows `html.dark` automatically.
+
+
+
+## Public API
+
+Read the instance from a fresh selection, never off the init call. The bridge takes options only.
+
+```js
+const pop = $('#share').data('__pluginPopover');
+```
+
+| Member | Returns | Description |
+| - | - | - |
+| `open()` | `this` | Opens, closing any other open popover. |
+| `close()` | `this` | Closes with the exit animation. |
+| `toggle()` | `this` | Opens or closes. |
+| `update()` | `this` | Recomputes the position while open. Call it after the panel's content changes size. |
+| `destroy()` | `this` | Removes all listeners, moves a portaled panel back into the root, and clears the plugin's ARIA, classes and instance. |
+| `isOpen` | `boolean` | A property, not a method: `true` while open. |
+
+
+
+## Events
+
+Both are jQuery events fired on the root, with the instance as the second argument. Listen with `.on()`.
+
+| Event | When |
+| - | - |
+| `popover:open` | As the panel opens |
+| `popover:close` | After the close animation |
+
+```js
+$('#share')
+    .on('popover:open',  (e, pop) => console.log('opened', pop.$el.attr('id')))
+    .on('popover:close', (e, pop) => console.log('closed'));
+```
+
+Mutual exclusion uses a jQuery event on `document`, `ts-popover-opened`, with the opening popover's internal id as its argument. You can listen to it with `$(document).on('ts-popover-opened', …)`; `addEventListener` does not see it.
+
+
+
+## CSS Custom Properties
+
+The panel's look is fixed values in the injected stylesheet:
+
+| Property on `[data-popover-content]` | Value |
+| - | - |
+| `min-width` / `max-width` | `14rem` / `22rem` |
+| `padding` | `1rem` |
+| `background` | `#fff` |
+| `border` | `1px solid rgba(0, 0, 0, 0.08)` |
+| `border-radius` | `0.5rem` |
+| `box-shadow` | `0 4px 6px -1px rgba(0,0,0,.07), 0 10px 15px -3px rgba(0,0,0,.10)` |
+| `color` | `#1a1a2e` |
+| `z-index` | `9995` |
+
+The only custom properties are `--ts-pop-arrow-x` and `--ts-pop-arrow-y`, which the plugin writes itself.
+
+Override with more specific selectors. The plugin's `<style>` is added at the end of `<head>`, so include an id or the root in your selector. Remember the arrow fill when changing the background:
 
 ```css
-/* Global override */
-.ts-popover {
-  --ts-pop-bg:      #fff;
-  --ts-pop-border:  rgba(0,0,0,.08);
-  --ts-pop-shadow:  0 8px 32px rgba(0,0,0,.12);
-  --ts-pop-radius:  10px;
-  --ts-pop-offset:  8px;     /* mirrors the `offset` option */
-  --ts-pop-arrow:   8px;     /* arrow size */
-}
+#share [data-popover-content]                          { background: #0e2238; color: #e2eaf4; max-width: 18rem; }
+#share [data-popover-content].ts-pop-side-bottom::after { border-bottom-color: #0e2238; }
+#share [data-popover-content].ts-pop-side-top::after    { border-top-color: #0e2238; }
+```
 
-/* Per-instance dark override */
-.pricing-card [data-plugin-popover] {
-  --ts-pop-bg:     #0e2238;
-  --ts-pop-border: rgba(255,255,255,.1);
-  --ts-pop-fg:     #f0e6d3;
+With `portaling: true` the panel is a child of `<body>`, so select it by its own id or a class you give it, not through the root.
+
+### Dark mode
+
+`html.dark [data-popover-content]` switches to `var(--dark-300)` with a `var(--dark-rgba-50)` border, arrows included. There are no rules for `data-bs-theme="dark"` or `prefers-color-scheme`; add your own if your site uses them.
+
+### Reduced motion
+
+There is no reduced-motion rule. Turn the animations off:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+    [data-popover-content].ts-pop-in,
+    [data-popover-content].ts-pop-out { animation: none; }
 }
 ```
 
 
-## [Placement **System**](#placement)
 
-### Side + align pairs
+## Keyboard Navigation
 
-| `side` | `align` | Result |
-|--------|---------|--------|
-| `bottom` | `start` | Panel below trigger, left-aligned |
-| `bottom` | `center` | Panel below trigger, centered |
-| `bottom` | `end` | Panel below trigger, right-aligned |
-| `top` | `start` | Panel above trigger, left-aligned |
-| `left` | `center` | Panel left of trigger, vertically centered |
-| `right` | `end` | Panel right of trigger, bottom-aligned |
+| Key | Action |
+| - | - |
+| `Enter` / `Space` on the trigger | Toggles the popover (it is a button). |
+| `Tab` | Moves through the panel. With `modal: true` it wraps from the last focusable element to the first; otherwise it leaves the panel. |
+| `Shift` + `Tab` | Backwards; wraps with `modal: true`. |
+| `Escape` | Closes and returns focus to the trigger. |
 
-### Viewport-flip logic
-
-Before positioning, the plugin checks whether the panel would overflow its preferred side. If it would:
-
-1. Try the opposite side (`bottom` -> `top`, `left` -> `right`).
-2. If that also overflows, fall back to the original side and let the panel clip (rarely reached with `offset: 8`).
-
-The flip is silent — no class is added, no event fires. It recalculates on every open.
-
-### CSS Anchor API (progressive enhancement)
-
-When the browser supports `CSS.supports('anchor-name', '--x')`, the plugin uses CSS `anchor()` for positioning — zero JavaScript layout math, sub-pixel accurate, reflows automatically when the trigger moves. On unsupported browsers it falls back to manual `getBoundingClientRect()` calculations.
+Focus moves into the panel on open. Without `modal`, tabbing out of the panel leaves it open; it closes on the next outside click.
 
 
-## [Portal **Mode**](#portal)
 
-Use portal mode whenever an ancestor of the popover root has `overflow: hidden`, a CSS `transform`, or a stacking context that would clip the panel.
+## ARIA Wiring
+
+```
+[button data-popover-trigger]
+    aria-haspopup="dialog"
+    aria-expanded="false | true"
+    aria-controls="{panel id}"
+
+[div data-popover-content]
+    id="pop-content-{n}-{rand}"       when it had none
+    role="dialog"
+    aria-modal="false | true"         from the modal option
+    aria-labelledby="{title id}"      when [data-popover-title] exists
+```
+
+Give panels without a visible title an `aria-label`.
+
+
+
+## Recipes
+
+### Help icon
 
 ```html
-<!-- overflow:hidden ancestor clips the popover panel without portaling -->
-<div style="overflow:hidden; position:relative">
-  <div data-plugin-popover
-       data-plugin-options='{"portaling":true,"side":"right"}'>
-    <button data-popover-trigger>Info</button>
-    <div data-popover-content>…</div>
-  </div>
+<div data-plugin-popover data-plugin-options='{"side": "top", "align": "center"}'>
+    <button type="button" data-popover-trigger class="btn btn-sm btn-link" aria-label="Help">
+        <i class="fas fa-question-circle"></i>
+    </button>
+    <div data-popover-content aria-label="Help">
+        <p class="mb-0">Use an ISO 8601 date, such as 2026-12-31.</p>
+    </div>
 </div>
 ```
 
-### What portaling does
+### Inside a scrolling table
 
-1. **On open:** `data-popover-content` is detached and appended to `<body>`. Its `originalParent` is cached on the instance as `_$originalParent`.
-2. **While open:** The panel is positioned with `position: fixed` and pixel values computed from the trigger's `getBoundingClientRect()`.
-3. **On close:** The panel is re-attached to `_$originalParent` at its original DOM position.
-
-> [!WARNING]
->  In portal mode the panel is removed from its original DOM position while open. Any CSS that inherits from the popover root (custom property overrides, cascade) will be lost when the panel is on `<body>`. Pass styles via the panel element's own `style` attribute or via a global rule.
-
-> [!WARNING]
->  Restoring the panel to `_$originalParent` on close is what prevents orphaned DOM nodes. Always call `destroy()` before removing the popover root from the DOM — `destroy()` calls `close()` first, which restores the panel before the root is gone.
-
-
-## [Instance **API**](#instance-api)
-
-```js
-const pop = $('[data-plugin-popover]').data('__pluginPopover');
-
-pop.open();
-pop.close();
-pop.toggle();
-pop.destroy();
+```html
+<div class="table-responsive">
+    …
+    <div data-plugin-popover data-plugin-options='{"portaling": true, "side": "left"}'>
+        <button type="button" data-popover-trigger>Actions</button>
+        <div data-popover-content>…</div>
+    </div>
+</div>
 ```
 
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `open()` | this | Show the popover. If another popover is open, mutual exclusion closes it first. |
-| `close()` | this | Hide the popover. Runs the exit animation, then restores the portal panel if applicable. |
-| `toggle()` | this | Open if closed; close if open. |
-| `isOpen()` | bool | Whether the panel is currently visible. |
-| `destroy()` | this | Close, restore portal, unbind all listeners, clear ARIA, and remove the instance from data. |
+### A form that keeps focus inside
 
-### Events
-
-Lifecycle events bubble from the root element:
-
-```js
-$('[data-plugin-popover]')
-  .on('popover:open',   (e, inst) => console.log('opened'))
-  .on('popover:close',  (e, inst) => console.log('closed'));
+```html
+<div data-plugin-popover id="rename" data-plugin-options='{"modal": true}'>
+    <button type="button" data-popover-trigger>Rename</button>
+    <div data-popover-content>
+        <h4 data-popover-title class="h6">Rename file</h4>
+        <input class="form-control mb-2" value="report.pdf">
+        <button type="button" class="btn btn-primary btn-sm" id="rename-save">Save</button>
+    </div>
+</div>
 ```
 
-| Event | Arguments | Fires |
-|-------|-----------|-------|
-| `popover:open` | `(e, instance)` | After the panel is positioned and the entrance animation starts. |
-| `popover:close` | `(e, instance)` | After the exit animation completes and the panel is hidden. |
+```js
+$('#rename-save').on('click', function () {
+    save();
+    $('#rename').data('__pluginPopover').close();
+});
+```
 
-
-## [Mutual **Exclusion**](#mutual-exclusion)
-
-All popover instances on a page share a single mutual exclusion channel via a custom DOM event dispatched on `document`.
-
-When `open()` runs:
-1. The instance dispatches `ts-popover-opened` on `document` with a reference to itself.
-2. Every other live instance listens for this event and calls `close()` on itself if it is currently open.
-3. The new instance then positions and shows its panel.
-
-This requires no shared registry — instances are self-managing. Adding a new popover to the page does not require touching any existing code.
+### Content that loads after opening
 
 ```js
-// Listen for any popover opening anywhere on the page
-document.addEventListener('ts-popover-opened', (e) => {
-    console.log('a popover opened', e.detail?.instance);
+$('#profile').on('popover:open', async function (e, pop) {
+    const html = await fetch('/profile/card').then(r => r.text());
+    pop.$content.html(html);
+    pop.update();
 });
 ```
 
 
-## [Focus **Management**](#focus)
 
-The plugin applies a minimal focus trap while a popover is open.
+## Common Pitfalls
 
-- **On open:** Focus moves to `[data-popover-close]` if present, otherwise to the panel element itself (which receives `tabindex="-1"` during the transition).
-- **Tab / Shift+Tab:** Constrained to focusable elements inside `[data-popover-content]`.
-- **Escape:** Closes the popover and returns focus to the trigger.
-- **On close:** Focus is explicitly returned to the trigger element (`[data-popover-trigger]`).
+### Clicks inside the panel do not reach document handlers
 
-> [!NOTE]
-> Hover cards and decorative popovers that should _not_ trap focus can opt out by adding `data-popover-no-trap` to the content panel. Focus then moves freely even while the popover is open.
+The panel stops click propagation so that clicking inside it does not count as an outside click. As a side effect, delegated handlers on `document` (such as `$(document).on('click', '.copy-btn', …)`) never see clicks inside a popover. Bind handlers to the panel or its children directly.
 
+### The panel is clipped
 
-## [Recipe **Cookbook**](#recipes)
+An ancestor with `overflow: hidden`, `overflow: auto` or `clip` cuts the panel off. Use `portaling: true`.
 
-#### Simple info tooltip
+### Styles set on the root do not reach a portaled panel
 
-```html
-<div data-plugin-popover
-     data-plugin-options='{"side":"top","align":"center","arrow":true}'>
-  <button data-popover-trigger type="button"
-          class="btn btn-sm btn-icon" aria-label="Help">
-    <i class="fas fa-question-circle"></i>
-  </button>
-  <div data-popover-content style="max-width:220px">
-    <p class="mb-0">This field expects an ISO 8601 date string.</p>
-  </div>
-</div>
-```
+A portaled panel lives in `<body>` from init onward, so it no longer inherits from the root or its ancestors. Style it through its own id or class.
 
-#### Rich card popover (portal mode)
+### The panel opens on the wrong side
 
-```html
-<div data-plugin-popover
-     data-plugin-options='{"portaling":true,"side":"right","align":"start"}'>
+The flip uses a fixed 200 px threshold rather than measuring the panel. Pick the side with the most room for that spot, or call `update()` after layout changes.
 
-  <button data-popover-trigger class="avatar-btn">
-    <img src="/avatar.jpg" class="avatar" alt="Profile">
-  </button>
+### `isOpen()` throws "not a function"
 
-  <div data-popover-content class="profile-card">
-    <button data-popover-close class="btn-close" aria-label="Close"></button>
-    <img src="/avatar.jpg" class="avatar-lg" alt="">
-    <h5>Alexandra Chen</h5>
-    <p class="text-muted">Product Designer</p>
-    <a href="/profile" class="btn btn-sm btn-primary">View Profile</a>
-  </div>
+`isOpen` is a property. Use `pop.isOpen`.
 
-</div>
-```
+### Options from older notes do nothing
 
-#### Dark popover
+`closeOnOutsideClick` and `dark` do not exist. Use `closeOnOutside`, and `html.dark` for dark panels.
 
-```html
-<div data-plugin-popover
-     data-plugin-options='{"dark":true,"side":"bottom"}'>
-  <button data-popover-trigger>Settings</button>
-  <div data-popover-content>
-    <ul class="list-unstyled mb-0">
-      <li><a href="/settings">Preferences</a></li>
-      <li><a href="/logout">Sign out</a></li>
-    </ul>
-  </div>
-</div>
-```
+### Removing a portaled popover leaves its panel behind
 
-#### Programmatic control
-
-```js
-const pop = $('#infoPopover').data('__pluginPopover');
-
-// Open after a delay
-setTimeout(() => pop.open(), 2000);
-
-// Close from an external button
-$('#dismiss').on('click', () => pop.close());
-
-// Toggle on a keyboard shortcut
-$(document).on('keydown', e => {
-  if (e.key === 'i' && e.metaKey) pop.toggle();
-});
-```
-
-#### React to open/close
-
-```js
-$('[data-plugin-popover]')
-  .on('popover:open', (e, inst) => {
-    analytics.track('popover_open', { id: inst.$root.attr('id') });
-  })
-  .on('popover:close', (e, inst) => {
-    analytics.track('popover_close', { id: inst.$root.attr('id') });
-  });
-```
-
-
-## [Common **Pitfalls**](#pitfalls)
-
-**Panel clipped by `overflow: hidden`.** Any ancestor between the popover root and `<body>` with `overflow: hidden` (or `overflow: clip`) will clip the panel. Enable portal mode (`portaling: true`) to escape it.
-
-**CSS cascade lost in portal mode.** When portaled, the panel is a direct child of `<body>`. Custom properties set on the popover root or any ancestor are no longer inherited. Pass per-instance overrides on the `[data-popover-content]` element's own `style` attribute, or write a global rule.
-
-**Mutual exclusion uses `ts-popover-opened` (hyphenated).** If you are manually dispatching or listening for this event, use hyphens — not colons. jQuery's `.off()` parsing treats `:` as a namespace separator and will silently fail to unbind.
-
-**Destroying the root without calling `destroy()`.** If you remove `[data-plugin-popover]` from the DOM while the popover is open and `portaling: true`, the content panel (now on `<body>`) becomes an orphan. Always call `instance.destroy()` before removing the root element from the DOM.
-
-**Arrow misaligned on `align: center`.** Arrow centering depends on the content panel having a defined width. If the panel grows to fit content without a `max-width` or explicit `width`, the arrow may drift. Set `max-width` on `[data-popover-content]` for centered or end-aligned popovers.
+Call `destroy()` before removing the root. It moves the panel back into the root, so it is removed with it.
 
 ### Diagnostic checklist
 
-> - Is `<style id="ts-popover-styles">` present in `<head>` after init?
-> - Does `$('[data-plugin-popover]').data('__pluginPopover')` return an instance?
-> - Is `aria-expanded` toggling on the trigger? If not, click events are not wired.
-> - Is the panel clipped? Enable `portaling: true`.
-> - Are two popovers opening simultaneously? Check for duplicate `ts-popover-opened` listener removal in `destroy()`.
-> - Is `closeOnOutsideClick` preventing a trigger inside a modal from working? Wrap both in the same root element so the outside-click boundary is correct.
+- [ ] `<style id="ts-popover-styles">` is in `<head>` after init.
+- [ ] `$('#id').data('__pluginPopover')` returns an instance.
+- [ ] `[data-popover-content]` is inside the root.
+- [ ] `aria-expanded` toggles on the trigger when clicked.
+- [ ] Clipped panels use `portaling: true`.
+- [ ] Options use the real names (`closeOnOutside`, `modal`).
+- [ ] Event listeners use jQuery `.on()`.

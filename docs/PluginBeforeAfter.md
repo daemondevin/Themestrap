@@ -182,7 +182,7 @@ This means both images fill the comparison area and are cropped as necessary to 
 
 If the first image has already loaded, initialization occurs immediately.
 
-If it has not loaded yet, the plugin waits for its `load` event before constructing the comparison. 
+If it has not loaded yet, the plugin waits for its `load` event before constructing the comparison. A failed image (its `error` event) builds the comparison too, with a 4:3 fallback ratio, so a broken URL never leaves a dead slider. Mouse, touch and keyboard handlers are bound once the comparison exists; earlier builds bound them straight away and threw on a cold cache. Calling `destroy()` while the image is still loading cancels the build.
 
 The first image's natural dimensions are used to establish the wrapper's aspect ratio:
 
