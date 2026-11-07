@@ -1,6 +1,7 @@
 // Section Scroll
 (((themestrap = {}, $) => {
     const instanceName = '__sectionScroll';
+    let uid = 0;
 
     class PluginSectionScroll {
         constructor($el, opts) {
@@ -13,6 +14,9 @@
 			}
 
 			this.$el = $el;
+			this._ns = '.tssectionscroll' + (++uid);
+			this._timers = [];
+			this._saved = [];
 
 			this
 				.setData()
@@ -47,6 +51,13 @@
 				self.$header = $('#header');
 			}
 
+			// Remember everything this plugin restyles so destroy() can put it back
+			self._htmlHadOverflow = $('html').hasClass('overflow-hidden');
+			self._save($('.section-scroll'), ['style', 'class']);
+			self._save(self.$header, ['style']);
+			self._save($('#header .header-nav, #header .header-nav-features, #header .header-social-icons'), ['class']);
+			self._save($('#header .header-logo img'), ['src']);
+
 			// Turn the section full height or not depeding on the content size
 			self.updateSectionsHeight();
 
@@ -63,7 +74,7 @@
 			
 	        let flag = false, scrollableFlag = false, touchDirection = '', touchstartY = 0, touchendY = 0;
 
-	        $(window).on('touchstart', ({changedTouches}) => {
+	        $(window).on('touchstart' + self._ns, ({changedTouches}) => {
 			    touchstartY = changedTouches[0].screenY;
 			});
 
@@ -74,7 +85,7 @@
 
         	if( $(window).width() < 992 ) {
 	    		$('html').removeClass('overflow-hidden');
-			    $(window).on('scroll', () => {
+			    $(window).on('scroll' + self._ns, () => {
 
 		    		let index = 0;
 		    		$('.section-scroll').each(function(){
@@ -95,7 +106,7 @@
 		    		
 			    });
 
-			    $(window).on('section.scroll.mobile.change.header.color', ({currentSection}) => {
+			    $(window).on('section.scroll.mobile.change.header.color' + self._ns, ({currentSection}) => {
 			    	if( typeof currentSection == 'undefined' ) {
 			    		return;
 			    	}
@@ -122,7 +133,7 @@
 			    });
         	}
 
-	        $(window).on(wheelEvent, ({target, originalEvent}) => {
+	        $(window).on(wheelEvent.split(' ').map(type => type + self._ns).join(' '), ({target, originalEvent}) => {
                 if( $(window).width() < 992 ) {
 	        		return;
 	        	}
@@ -167,7 +178,7 @@
             	}
 
                 if( $(window).width() < 992 && $('html').hasClass('touch') ) {
-				    setTimeout(() => {
+				    self._later(() => {
 					    if( $('.section-wrapper').eq( self.getCurrentIndex() ).find('.section-scroll').hasClass('section-scroll-scrollable') ) {
 					    	$('html').removeClass('overflow-hidden');
 					    } else {
@@ -184,10 +195,10 @@
 		        		if(wheelDirection || touchDirection == 'up') {
 		        			if( ( $(window).scrollTop() + $(window).height() ) >= nextSectionOffsetTop ) {
 		        				flag = true;
-								setTimeout(() => {
+								self._later(() => {
 									$(window).trigger('section.scroll.change.header.color');
 
-					            	setTimeout(() => {
+					            	self._later(() => {
 										flag = false;
 									}, 500);
 								}, 1000);
@@ -214,7 +225,7 @@
 
 					        		if( ( $(window).scrollTop() + $(window).height() ) >= nextSectionOffsetTop ) {
 					        			scrollableFlag = true;
-										setTimeout(() => {
+										self._later(() => {
 											$(window).trigger('section.scroll.change.header.color');
 							            	scrollableFlag = false;
 										}, 500);
@@ -225,10 +236,10 @@
 					    } else {
 					    	if( $(window).scrollTop() <= $currentSection.offset().top ) {
 					    		flag = true;
-								setTimeout(() => {
+								self._later(() => {
 									$(window).trigger('section.scroll.change.header.color');
 
-					            	setTimeout(() => {
+					            	self._later(() => {
 										flag = false;
 									}, 500);
 								}, 1000);
@@ -255,7 +266,7 @@
 
 					        		if( $(window).scrollTop() <= $currentSection.offset().top ) {
 					        			scrollableFlag = true;
-										setTimeout(() => {
+										self._later(() => {
 											$(window).trigger('section.scroll.change.header.color');
 							            	scrollableFlag = false;
 										}, 500);
@@ -283,7 +294,7 @@
 				   		// Change Section Active Class
 			   			self.changeSectionActiveState( $nextSection );
 
-				   		setTimeout(() => {
+				   		self._later(() => {
 				   			// Move to the next section
 	        				self.moveTo( $nextSection.offset().top );
 
@@ -300,7 +311,7 @@
 				   			// Move to the next section
 	        				self.moveTo( $currentSection.offset().top - $(window).height() );
 				   		} else {
-					        setTimeout(() => {
+					        self._later(() => {
 					   			// Move to the next section
 		        				self.moveTo( $nextSection.offset().top );
 
@@ -336,7 +347,7 @@
 	            		transition: 'ease transform 600ms, ease opacity 600ms',
 	            	});
 
-					setTimeout(() => {
+					self._later(() => {
 						$currentSection.css({
 		            		position: 'relative',
 		            		opacity: 1,
@@ -345,7 +356,7 @@
 
 						$(window).trigger('section.scroll.change.header.color');
 
-		            	setTimeout(() => {
+		            	self._later(() => {
 							flag = false;
 						}, 500);
 					}, 1000);
@@ -363,7 +374,7 @@
 	        }
 
 	        // First Load
-	        setTimeout(() => {
+	        self._later(() => {
 		        if( $(window.location.hash).get(0) ) {
 		        	self.moveTo( $(window.location.hash).parent().offset().top );
 
@@ -451,7 +462,7 @@
    				scrollTop: $scrollTopValue
    			}, 1000, 'easeOutQuint');
 
-   			setTimeout(() => {
+   			self._later(() => {
 	   			self.updateHash();
    			}, 500);
 
@@ -506,6 +517,7 @@
         	}
 
         	$('.body').append( dotsNav );
+        	self.$dotsNav = dotsNav;
 
         	dotsNav.find('a[data-nav-id]').on('click touchstart', function(e){
         		e.preventDefault();
@@ -521,7 +533,7 @@
 			    	transition: 'ease opacity 500ms'
 			    });
 
-        		setTimeout(() => {
+        		self._later(() => {
 	        		self.moveTo( $('.section-wrapper').eq( $this.data('nav-id') ).offset().top )
 
 		   			$('.section-wrapper').removeClass('active');
@@ -531,7 +543,7 @@
 	        			opacity: 1
 	        		});
 
-	        		setTimeout(() => {
+	        		self._later(() => {
 		        		$('.section-scroll').css({ opacity: 1 });
 
 		        		$(window).trigger('section.scroll.change.header.color');
@@ -549,11 +561,11 @@
         events() {
 			const self = this;
 
-			$(window).on('section.scroll.ready', () => {
+			$(window).on('section.scroll.ready' + self._ns, () => {
 				$(window).scrollTop(0);
 			});
 
-			$(window).on('section.scroll.change.header.color', () => {
+			$(window).on('section.scroll.change.header.color' + self._ns, () => {
 		    	const headerColor = $('.section-wrapper').eq( self.getCurrentIndex() ).find('.section-scroll').data('section-scroll-header-color');
 		    	
 		    	$('#header .header-nav').removeClass('header-nav-light-text header-nav-dark-text').addClass('header-nav-' + headerColor + '-text');
@@ -574,18 +586,74 @@
 		    	});
 		    });
 
-			$(document).ready(() => {
-			    $(window).afterResize(() => {
+			// Debounced resize of our own: vendor afterResize keeps one global callback,
+			// so a second plugin using it would silently replace this one
+			$(window).on('resize' + self._ns, () => {
+				clearTimeout(self._resizeTimer);
+				self._resizeTimer = setTimeout(() => {
 			    	self.updateSectionsHeight();
 
 			    	if( $(window).width() < 992 ) {
 			    		$('html').removeClass('overflow-hidden');
 			    	}
-			    });
+				}, 500);
 			});
 
 		    return this;
 		}
+
+        _later(fn, delay) {
+			const id = setTimeout(() => {
+				this._timers = this._timers.filter(t => t !== id);
+				fn();
+			}, delay);
+			this._timers.push(id);
+
+			return id;
+		}
+
+        _save($els, attrs) {
+			$els.each((i, el) => {
+				attrs.forEach(attr => this._saved.push([el, attr, el.getAttribute(attr)]));
+			});
+		}
+
+        /**
+         * Unbind every handler, stop pending timers and scroll animation, remove the
+         * dots navigation and section wrappers, and restore the header and sections.
+         * @returns {PluginSectionScroll}
+         */
+        destroy() {
+            $(window).off(this._ns);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+            clearTimeout(this._resizeTimer);
+            $('body, html').stop(true);
+
+            if (this.$dotsNav) {
+                this.$dotsNav.remove();
+                this.$dotsNav = null;
+            }
+
+            $(this.options.targetClass).filter((i, el) => $(el).parent().hasClass('section-wrapper')).unwrap();
+
+            this._saved.forEach(([el, attr, value]) => {
+                if (value === null) {
+                    el.removeAttribute(attr);
+                } else {
+                    el.setAttribute(attr, value);
+                }
+            });
+            this._saved = [];
+
+            if ($('html').hasClass('overflow-hidden') !== this._htmlHadOverflow) {
+                $('html').toggleClass('overflow-hidden', this._htmlHadOverflow);
+            }
+
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginSectionScroll.defaults = {
@@ -601,17 +669,20 @@
 		PluginSectionScroll
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginSectionScroll = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginSectionScroll = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginSectionScroll($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginSectionScroll($this, opts);
 		});
 	};
 })).apply(this, [window.themestrap, jQuery]);

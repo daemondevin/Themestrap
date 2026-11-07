@@ -34,6 +34,16 @@ PluginIcon replaces an `<img>` tag with an inline `<svg>` by fetching the image 
 | `accY` | number | `0` | IntersectionObserver Y offset. |
 
 
+## [Public **API**](#api)
+
+`destroy()` aborts a pending SVG request, removes the plugin's scroll handlers and timers, and puts the original `<img>` back with its class and style. Once the SVG has loaded, the instance lives on the `.animated-icon` wrapper that replaced the image, so call it there:
+
+```js
+$('.animated-icon').themestrapPluginIcon('destroy');   // after the SVG loaded
+$('img[data-icon]').themestrapPluginIcon('destroy');   // before it loaded
+```
+
+
 ## [Common **Pitfalls**](#pitfalls)
 
 **CORS.** The AJAX fetch uses `$.get()`. SVG files on a different origin will fail unless CORS headers are set. Host SVGs on the same origin as the page.

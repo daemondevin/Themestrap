@@ -45,6 +45,7 @@
 			// Single Slider Class
 			if(this.options.wrapper.find('> ul > li').length == 1) {
 				this.options.wrapper.addClass('slider-single-slide');
+				this._addedSingle = true;
 
 				// Remove Bullets
 				// this.options.navigation.bullets.enable = false;
@@ -58,7 +59,10 @@
 
 			// Full Screen Class
 			if(this.options.sliderLayout == 'fullscreen') {
-				this.options.wrapper.closest('.slider-container').addClass('fullscreen-slider');
+				const $container = this.options.wrapper.closest('.slider-container');
+				if (!$container.hasClass('fullscreen-slider')) {
+					this._$fullscreen = $container.addClass('fullscreen-slider');
+				}
 			}
 			
 			// Initialize Revolution Slider
@@ -131,6 +135,31 @@
 
 			return this;
 		}
+
+        /**
+         * Kill the slider through Revolution's own revkill() when it is loaded, then remove
+         * the classes this plugin added. Revolution's revkill() also removes the slider markup.
+         * @returns {PluginRevolutionSlider}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (typeof $el.revkill === 'function') {
+                try { $el.revkill(); } catch (e) { /* slider never finished building */ }
+            }
+
+            if (this._addedSingle) {
+                $el.removeClass('slider-single-slide');
+            }
+            if (this._$fullscreen) {
+                this._$fullscreen.removeClass('fullscreen-slider');
+                this._$fullscreen = null;
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginRevolutionSlider.defaults = {
@@ -326,17 +355,20 @@
 		PluginRevolutionSlider
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginRevolutionSlider = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginRevolutionSlider = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginRevolutionSlider($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginRevolutionSlider($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);

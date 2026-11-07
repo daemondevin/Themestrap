@@ -1,6 +1,7 @@
 // Toggle
 (((themestrap = {}, $) => {
     const instanceName = '__toggle';
+    let uid = 0;
 
     class PluginToggle {
         constructor($el, opts) {
@@ -13,6 +14,7 @@
 			}
 
 			this.$el = $el;
+			this._ns = '.tstoggle' + (++uid);
 
 			this
 				.setData()
@@ -66,7 +68,7 @@
             let previewParAnimateHeight = 0;
             let toggleContent = null;
 
-            $el.find('> label, > .toggle-title').click(function({originalEvent}) {
+            $el.find('> label, > .toggle-title').on('click' + self._ns, function({originalEvent}) {
                 const $this = $(this);
                 const parentSection = $this.parent();
                 const parentWrapper = $this.parents('.toggle');
@@ -124,6 +126,22 @@
 				}
             });
         }
+
+        /**
+         * Unbind the title handlers and finish any running animation.
+         * Open and closed items stay as they are.
+         * @returns {PluginToggle}
+         */
+        destroy() {
+            const $items = this.$el.find('> .toggle');
+
+            $items.find('> label, > .toggle-title').off(this._ns);
+            $items.find('> p, > .toggle-content').stop(true, true);
+
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginToggle.defaults = {
@@ -136,17 +154,20 @@
 		PluginToggle
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginToggle = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginToggle = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginToggle($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginToggle($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);

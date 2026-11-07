@@ -922,8 +922,16 @@ html.dark .ts-navbar,
 
     $.extend(themestrap, { PluginNavbar });
 
-    $.fn.themestrapPluginNavbar = function (opts) {
+    $.fn.themestrapPluginNavbar = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);

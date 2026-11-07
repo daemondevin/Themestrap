@@ -8,12 +8,17 @@
         }
 
         initialize($el, opts) {
+			if ($el.data(instanceName)) {
+				return this;
+			}
 
-			if( document.querySelector( opts.target ) == null ) {
-				return false;
+			const targetSelector = (opts && opts.target) || PluginScrollSpy.defaults.target;
+			if( document.querySelector( targetSelector ) == null ) {
+				return this;
 			}
 
 			this.$el = $el;
+			this.observers = [];
 
 			this
 				.setData()
@@ -167,8 +172,24 @@
 				observer.observe( $(this)[0] );
 			});
 
+			self.observers.push(observer);
+
 			return this;
 		}
+
+        /**
+         * Disconnect every section observer. The nav links keep whichever
+         * active class they had at the time.
+         * @returns {PluginScrollSpy}
+         */
+        destroy() {
+            this.observers.forEach(observer => observer.disconnect());
+            this.observers = [];
+
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginScrollSpy.defaults = {
@@ -180,17 +201,20 @@
 		PluginScrollSpy
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginScrollSpy = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginScrollSpy = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginScrollSpy($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginScrollSpy($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);

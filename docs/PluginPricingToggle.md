@@ -23,7 +23,9 @@ The thumb position is handled entirely by CSS: when `[data-pt-track][aria-presse
 
 ### CSS custom properties
 
-On `build()`, the plugin writes all geometry and colour options as CSS custom properties directly onto the host element's inline style. This means pure-CSS themes can override them at any cascade level (`[data-plugin-pricingtoggle]`, a class, or `:root`) and the plugin values act as per-instance defaults, not globals.
+On `build()`, the plugin writes the geometry and colour options you pass as CSS custom properties on the host element's inline style. Options you leave out (the default for all of them) are not written, so the stylesheet values apply and can be overridden at any cascade level (`[data-plugin-pricingtoggle]`, a class, or `:root`). With a skin loaded, the colours follow the skin. The two durations are always written, because the price fade timing in JavaScript has to match the CSS transition.
+
+> **Renamed tokens.** These were called `--pt-*` before. The old names still work: the stylesheet reads `--ts-pricing-track-bg` first and falls back to `--pt-track-bg`. New code should use `--ts-pricing-*`; the old names will be removed in a future major version.
 
 
 ## Quick Start
@@ -162,9 +164,9 @@ Options merge: `PluginPricingToggle.defaults → opts argument → data-plugin-o
 
 | Option | Type | Default | Description |
 |:-------|:-----|:--------|:------------|
-| `duration` | number | `250` | Thumb slide and label colour transition duration in milliseconds. Applied as `--pt-duration`. |
+| `duration` | number | `250` | Thumb slide and label colour transition duration in milliseconds. Applied as `--ts-pricing-duration`. |
 | `animatePrices` | bool | `true` | Crossfade `[data-pt-price]` elements by toggling `.pt-fading` (opacity 0), updating the text, then removing the class. |
-| `priceFadeDuration` | number | `160` | Duration of the price crossfade in milliseconds. Applied as `--pt-price-duration`. |
+| `priceFadeDuration` | number | `160` | Duration of the price crossfade in milliseconds. Applied as `--ts-pricing-price-duration`. |
 
 ### Geometry
 
@@ -172,10 +174,10 @@ All geometry values are CSS length strings — passed directly as CSS custom pro
 
 | Option | Default | CSS property |
 |:-------|:--------|:-------------|
-| `trackWidth` | `'44px'` | `--pt-track-width` |
-| `trackHeight` | `'24px'` | `--pt-track-height` |
-| `thumbSize` | `'18px'` | `--pt-thumb-size` |
-| `thumbInset` | `'3px'` | `--pt-thumb-inset` |
+| `trackWidth` | `null` (CSS: `44px`) | `--ts-pricing-track-width` |
+| `trackHeight` | `null` (CSS: `24px`) | `--ts-pricing-track-height` |
+| `thumbSize` | `null` (CSS: `18px`) | `--ts-pricing-thumb-size` |
+| `thumbInset` | `null` (CSS: `3px`) | `--ts-pricing-thumb-inset` |
 
 ### Colours
 
@@ -183,12 +185,12 @@ All colour values are CSS colour strings — passed directly as CSS custom prope
 
 | Option | Default | CSS property | Controls |
 |:-------|:--------|:-------------|:---------|
-| `trackColor` | `'#3b82f6'` | `--pt-track-bg` | Track background |
-| `thumbColor` | `'#ffffff'` | `--pt-thumb-bg` | Thumb fill |
-| `labelMutedColor` | `'#64748b'` | `--pt-label-muted` | Inactive label text |
-| `labelActiveColor` | `'#0f172a'` | `--pt-label-active` | Active label text |
-| `badgeBg` | `'rgba(34,197,94,.12)'` | `--pt-badge-bg` | Savings badge background |
-| `badgeColor` | `'#16a34a'` | `--pt-badge-color` | Savings badge text |
+| `trackColor` | `null` (skin accent, else `#3b82f6`) | `--ts-pricing-track-bg` | Track background |
+| `thumbColor` | `null` (skin surface, else `#fff`) | `--ts-pricing-thumb-bg` | Thumb fill |
+| `labelMutedColor` | `null` (skin dim text, else `#64748b`) | `--ts-pricing-label-muted` | Inactive label text |
+| `labelActiveColor` | `null` (skin strong text, else `#0f172a`) | `--ts-pricing-label-active` | Active label text |
+| `badgeBg` | `null` (skin success tint, else `rgba(34,197,94,.12)`) | `--ts-pricing-badge-bg` | Savings badge background |
+| `badgeColor` | `null` (skin success, else `#16a34a`) | `--ts-pricing-badge-color` | Savings badge text |
 
 ### Accessibility
 
@@ -210,16 +212,16 @@ Since all options are written as CSS custom properties on the host element, you 
 ```css
 /* Global defaults */
 [data-plugin-pricingtoggle] {
-  --pt-track-width:    56px;
-  --pt-track-height:   30px;
-  --pt-thumb-size:     24px;
-  --pt-thumb-inset:    3px;
-  --pt-track-bg:       #e8672a;
-  --pt-duration:       200ms;
+  --ts-pricing-track-width:    56px;
+  --ts-pricing-track-height:   30px;
+  --ts-pricing-thumb-size:     24px;
+  --ts-pricing-thumb-inset:    3px;
+  --ts-pricing-track-bg:       #e8672a;
+  --ts-pricing-duration:       200ms;
 }
 
 /* Per-wrapper override via inline style */
-<div data-plugin-pricingtoggle style="--pt-track-bg: #2ab8c8">…</div>
+<div data-plugin-pricingtoggle style="--ts-pricing-track-bg: #2ab8c8">…</div>
 ```
 
 
@@ -444,5 +446,5 @@ $('[data-plugin-pricingtoggle]')
 - [ ] Does `$('[data-plugin-pricingtoggle]').data('__pricingToggle')` return an instance?
 - [ ] Are price elements updating? Check `data-pt-primary` and `data-pt-secondary` are both present.
 - [ ] Are multiple toggles interfering? Verify `group` options and `data-pt-group` attributes match.
-- [ ] Is the thumb not animating? Check `--pt-duration` isn't being overridden to `0` by a parent CSS rule.
+- [ ] Is the thumb not animating? Check `--ts-pricing-duration` isn't being overridden to `0` by a parent CSS rule.
 - [ ] Is the savings badge not appearing? It needs `[data-pt-savings-badge]` as a child of `[data-pt-label-secondary]` — not `[data-pt-label-primary]`.

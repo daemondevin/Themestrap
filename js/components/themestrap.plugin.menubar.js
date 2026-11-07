@@ -999,8 +999,16 @@ html.dark [data-plugin-menubar],
 
     $.extend(themestrap, { PluginMenubar });
 
-    $.fn.themestrapPluginMenubar = function(opts) {
+    $.fn.themestrapPluginMenubar = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) return $this.data(instanceName);
             return new PluginMenubar($this, opts);

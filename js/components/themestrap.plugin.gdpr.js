@@ -338,8 +338,16 @@
 		PluginGDPRWrapper
 	});
 	
-	$.fn.themestrapPluginGDPR = function(opts) {
+	$.fn.themestrapPluginGDPR = function(opts, ...args) {
 		return this.map(function() {
+			if (typeof opts === 'string') {
+				const instance = $(this).data(gdprInstanceName);
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
+			}
+
 			const $this = $(this);
 			if ($this.data(gdprInstanceName)) {
 				return $this.data(gdprInstanceName);
@@ -349,8 +357,16 @@
 		});
 	};
 
-	$.fn.themestrapPluginGDPRWrapper = function(opts) {
+	$.fn.themestrapPluginGDPRWrapper = function(opts, ...args) {
 		return this.map(function() {
+			if (typeof opts === 'string') {
+				const instance = $(this).data(wrapperInstanceName);
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
+			}
+
 			const $this = $(this);
 			if ($this.data(wrapperInstanceName)) {
 				return $this.data(wrapperInstanceName);

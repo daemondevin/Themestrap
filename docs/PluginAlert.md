@@ -20,7 +20,9 @@ On `build()` the plugin:
 
 ### Token cascade
 
-Every variant (`alert-ts-info`, `alert-ts-success`, etc.) defines nine CSS custom properties on itself (`--alert-ts-bg`, `--alert-ts-border`, `--alert-ts-icon`, `--alert-ts-title`, `--alert-ts-text`, `--alert-ts-action`, `--alert-ts-action-hover`, `--alert-ts-close`, `--alert-ts-close-hover`). All structural rules reference only these variables, so swapping the variant class changes the entire colour scheme atomically. Dark-mode overrides are provided for all eleven variants under `html.dark`.
+Every variant (`alert-ts-info`, `alert-ts-success`, etc.) defines nine CSS custom properties on itself (`--ts-alert-bg`, `--ts-alert-border`, `--ts-alert-icon`, `--ts-alert-title`, `--ts-alert-text`, `--ts-alert-action`, `--ts-alert-action-hover`, `--ts-alert-close`, `--ts-alert-close-hover`). All structural rules reference only these variables, so swapping the variant class changes the entire colour scheme atomically. Dark-mode overrides are provided for all eleven variants under `html.dark`.
+
+> **Renamed tokens.** These were called `--alert-ts-*` before. The old names still work: the stylesheet reads `--alert-ts-bg` first and falls back to `--ts-alert-bg`, so existing overrides keep winning. New code should use `--ts-alert-*`; the old names will be removed in a future major version.
 
 ### Pause-on-hover
 

@@ -2320,8 +2320,16 @@
 
     $.extend(themestrap, { PluginScrollbar });
 
-    $.fn.themestrapPluginScrollbar = function(opts) {
+    $.fn.themestrapPluginScrollbar = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             // Fall back to data-plugin-options for manual calls without explicit opts

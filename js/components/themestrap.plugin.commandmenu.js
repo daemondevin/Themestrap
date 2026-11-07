@@ -127,38 +127,38 @@
              *  .command-menu element, or via theme skins (dark mode, brand colors).
              */
             :root {
-                --command-bg:              var(--ts-skin-surface, var(--light, #fff));
-                --command-fg:              var(--ts-skin-text, var(--default, #777));
-                --command-muted:           var(--ts-skin-text-dim, var(--light-rgba-60, rgba(255, 255, 255, 0.6)));
-                --command-border:          var(--ts-skin-border, var(--light-rgba-80, rgba(255, 255, 255, 0.8)));
-                --command-border-strong:   var(--ts-skin-border-strong, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
-                --command-hover:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
-                --command-active-bg:       var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
-                --command-active-fg:       var(--ts-skin-text-strong, var(--dark, #0a0c0d));
-                --command-accent:          var(--ts-skin-accent, var(--primary, #0088CC));
-                --command-backdrop:        var(--ts-skin-overlay, var(--dark-rgba-90, rgba(33, 37, 41, 0.9)));
-                --command-radius:          var(--ts-skin-radius-sm, var(--border-radius, 4px));
-                --command-radius-item:     var(--ts-skin-radius, var(--border-radius2x, 8px));
-                --command-shadow:          var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.32),
+                --ts-cmd-bg:              var(--ts-skin-surface, var(--light, #fff));
+                --ts-cmd-fg:              var(--ts-skin-text, var(--default, #777));
+                --ts-cmd-muted:           var(--ts-skin-text-dim, var(--light-rgba-60, rgba(255, 255, 255, 0.6)));
+                --ts-cmd-border:          var(--ts-skin-border, var(--light-rgba-80, rgba(255, 255, 255, 0.8)));
+                --ts-cmd-border-strong:   var(--ts-skin-border-strong, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+                --ts-cmd-hover:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --ts-cmd-active-bg:       var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --ts-cmd-active-fg:       var(--ts-skin-text-strong, var(--dark, #0a0c0d));
+                --ts-cmd-accent:          var(--ts-skin-accent, var(--primary, #0088CC));
+                --ts-cmd-backdrop:        var(--ts-skin-overlay, var(--dark-rgba-90, rgba(33, 37, 41, 0.9)));
+                --ts-cmd-radius:          var(--ts-skin-radius-sm, var(--border-radius, 4px));
+                --ts-cmd-radius-item:     var(--ts-skin-radius, var(--border-radius2x, 8px));
+                --ts-cmd-shadow:          var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.32),
                                            0 4px 12px -4px rgba(0, 0, 0, 0.16));
-                --command-panel-width:     min(96vw, 640px);
-                --command-list-max-h:      min(60vh, 480px);
-                --command-z:               1080;
-                --command-font:            var(--ts-skin-font, inherit);
+                --ts-cmd-panel-width:     min(96vw, 640px);
+                --ts-cmd-list-max-h:      min(60vh, 480px);
+                --ts-cmd-z:               1080;
+                --ts-cmd-font:            var(--ts-skin-font, inherit);
             }
 
             /* Dark variant */
             html.dark .command-menu, .command-menu.command-dark {
-                --command-bg:             var(--dark-300, #0a0c0d);
-                --command-fg:             var(--grey, #969696);
-                --command-muted:          var(--dark--300, #383f45);
-                --command-border:         var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
-                --command-border-strong:  var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
-                --command-hover:          var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-                --command-active-bg:      var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-                --command-active-fg:      var(--light, #fff);
-                --command-backdrop:       var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
-                --command-shadow:         var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.6),
+                --ts-cmd-bg:             var(--dark-300, #0a0c0d);
+                --ts-cmd-fg:             var(--grey, #969696);
+                --ts-cmd-muted:          var(--dark--300, #383f45);
+                --ts-cmd-border:         var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
+                --ts-cmd-border-strong:  var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
+                --ts-cmd-hover:          var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --ts-cmd-active-bg:      var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --ts-cmd-active-fg:      var(--light, #fff);
+                --ts-cmd-backdrop:       var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
+                --ts-cmd-shadow:         var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.6),
                                           0 4px 12px -4px rgba(0, 0, 0, 0.4));
             }
 
@@ -172,13 +172,13 @@
             .command-menu {
                 position: fixed;
                 inset: 0;
-                z-index: var(--command-z);
+                z-index: var(--command-z, var(--ts-cmd-z));
                 display: flex;
                 align-items: flex-start;
                 justify-content: center;
                 padding: clamp(40px, 12vh, 120px) 16px 16px;
-                font-family: var(--command-font);
-                color: var(--command-fg);
+                font-family: var(--command-font, var(--ts-cmd-font));
+                color: var(--command-fg, var(--ts-cmd-fg));
                 pointer-events: auto;
             }
 
@@ -191,7 +191,7 @@
             .command-menu [data-command-backdrop] {
                 position: absolute;
                 inset: 0;
-                background: var(--command-backdrop);
+                background: var(--command-backdrop, var(--ts-cmd-backdrop));
                 -webkit-backdrop-filter: blur(4px);
                 backdrop-filter: blur(4px);
                 animation: command-fade-in 180ms ease both;
@@ -204,12 +204,12 @@
             /* Panel */
             .command-menu [data-command-panel] {
                 position: relative;
-                width: var(--command-panel-width);
-                background: var(--command-bg);
-                color: var(--command-fg);
-                border: 1px solid var(--command-border);
-                border-radius: var(--command-radius);
-                box-shadow: var(--command-shadow);
+                width: var(--command-panel-width, var(--ts-cmd-panel-width));
+                background: var(--command-bg, var(--ts-cmd-bg));
+                color: var(--command-fg, var(--ts-cmd-fg));
+                border: 1px solid var(--command-border, var(--ts-cmd-border));
+                border-radius: var(--command-radius, var(--ts-cmd-radius));
+                box-shadow: var(--command-shadow, var(--ts-cmd-shadow));
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
@@ -218,9 +218,9 @@
             }
 
             /* Panel size variants */
-            .command-menu [data-command-panel].command-sm  { --command-panel-width: min(96vw, 440px); }
-            .command-menu [data-command-panel].command-lg  { --command-panel-width: min(96vw, 800px); }
-            .command-menu [data-command-panel].command-xl  { --command-panel-width: min(96vw, 960px); }
+            .command-menu [data-command-panel].command-sm  { --ts-cmd-panel-width: min(96vw, 440px); }
+            .command-menu [data-command-panel].command-lg  { --ts-cmd-panel-width: min(96vw, 800px); }
+            .command-menu [data-command-panel].command-xl  { --ts-cmd-panel-width: min(96vw, 960px); }
 
             /* Search row */
             .command-menu [data-command-search] {
@@ -228,12 +228,12 @@
                 align-items: center;
                 gap: 12px;
                 padding: 14px 18px;
-                border-bottom: 1px solid var(--command-border);
+                border-bottom: 1px solid var(--command-border, var(--ts-cmd-border));
             }
 
             .command-menu [data-command-search] > i,
             .command-menu [data-command-search] > svg {
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 16px;
                 flex: 0 0 auto;
                 pointer-events: none;
@@ -245,7 +245,7 @@
                 border: 0;
                 outline: 0;
                 background: transparent;
-                color: var(--command-fg);
+                color: var(--command-fg, var(--ts-cmd-fg));
                 font-size: 15px;
                 line-height: 1.5;
                 padding: 4px 0;
@@ -253,15 +253,15 @@
             }
 
             .command-menu [data-command-input]::placeholder {
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 opacity: 1;
             }
 
             /* Optional close shortcut hint inside the search row */
             .command-menu [data-command-search] kbd {
-                background: var(--command-hover);
-                border: 1px solid var(--command-border);
-                color: var(--command-muted);
+                background: var(--command-hover, var(--ts-cmd-hover));
+                border: 1px solid var(--command-border, var(--ts-cmd-border));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 border-radius: 4px;
                 padding: 2px 6px;
                 font-size: 10.5px;
@@ -275,16 +275,16 @@
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 6px;
-                max-height: var(--command-list-max-h);
+                max-height: var(--command-list-max-h, var(--ts-cmd-list-max-h));
                 scrollbar-width: thin;
-                scrollbar-color: var(--command-border-strong) transparent;
+                scrollbar-color: var(--command-border-strong, var(--ts-cmd-border-strong)) transparent;
             }
 
             .command-menu [data-command-list]::-webkit-scrollbar {
                 width: 8px;
             }
             .command-menu [data-command-list]::-webkit-scrollbar-thumb {
-                background: var(--command-border-strong);
+                background: var(--command-border-strong, var(--ts-cmd-border-strong));
                 border-radius: 8px;
             }
 
@@ -302,13 +302,13 @@
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.06em;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 user-select: none;
             }
 
             /* Visual separator between groups */
             .command-menu [data-command-group] + [data-command-group] {
-                border-top: 1px solid var(--command-border);
+                border-top: 1px solid var(--command-border, var(--ts-cmd-border));
                 margin-top: 6px;
                 padding-top: 8px;
             }
@@ -325,7 +325,7 @@
                 align-items: center;
                 gap: 12px;
                 padding: 9px 10px;
-                border-radius: var(--command-radius-item);
+                border-radius: var(--command-radius-item, var(--ts-cmd-radius-item));
                 font-size: 14px;
                 line-height: 1.4;
                 cursor: pointer;
@@ -340,13 +340,13 @@
             .command-menu [data-command-item]:hover,
             .command-menu [data-command-item].command-item-active,
             .command-menu [data-command-item][aria-selected="true"] {
-                background: var(--command-active-bg);
-                color: var(--command-active-fg);
+                background: var(--command-active-bg, var(--ts-cmd-active-bg));
+                color: var(--command-active-fg, var(--ts-cmd-active-fg));
                 outline: none;
             }
 
             .command-menu [data-command-item]:focus-visible {
-                outline: 2px solid var(--command-accent);
+                outline: 2px solid var(--command-accent, var(--ts-cmd-accent));
                 outline-offset: -2px;
             }
 
@@ -362,14 +362,14 @@
                 flex: 0 0 18px;
                 width: 18px;
                 text-align: center;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 15px;
                 transition: color 80ms ease;
             }
 
             .command-menu [data-command-item].command-item-active [data-command-icon],
             .command-menu [data-command-item]:hover [data-command-icon] {
-                color: var(--command-active-fg);
+                color: var(--command-active-fg, var(--ts-cmd-active-fg));
             }
 
             /* Item label + description column */
@@ -385,7 +385,7 @@
             .command-menu [data-command-item] [data-command-description] {
                 display: block;
                 font-size: 12px;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-weight: 400;
                 margin-top: 1px;
                 overflow: hidden;
@@ -428,7 +428,7 @@
                 display: inline-flex;
                 align-items: center;
                 gap: 3px;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 11.5px;
                 font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
                 font-weight: 500;
@@ -436,9 +436,9 @@
 
             .command-menu [data-command-item] [data-command-shortcut] kbd,
             .command-menu [data-command-item] kbd[data-command-shortcut] {
-                background: var(--command-hover);
-                border: 1px solid var(--command-border);
-                color: var(--command-muted);
+                background: var(--command-hover, var(--ts-cmd-hover));
+                border: 1px solid var(--command-border, var(--ts-cmd-border));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 border-radius: 4px;
                 padding: 2px 6px;
                 font-size: 10.5px;
@@ -453,7 +453,7 @@
                 display: inline-block;
                 padding: 2px 8px;
                 border-radius: 999px;
-                background: var(--command-accent);
+                background: var(--command-accent, var(--ts-cmd-accent));
                 color: var(--ts-skin-on-accent, #fff);
                 font-size: 10.5px;
                 font-weight: 600;
@@ -465,14 +465,14 @@
             .command-menu [data-command-empty] {
                 padding: 36px 16px;
                 text-align: center;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 14px;
                 line-height: 1.5;
             }
 
             .command-menu [data-command-empty] strong {
                 display: block;
-                color: var(--command-fg);
+                color: var(--command-fg, var(--ts-cmd-fg));
                 font-weight: 600;
                 margin-bottom: 4px;
             }
@@ -484,9 +484,9 @@
                 align-items: center;
                 gap: 14px;
                 padding: 8px 14px;
-                border-top: 1px solid var(--command-border);
-                background: var(--command-hover);
-                color: var(--command-muted);
+                border-top: 1px solid var(--command-border, var(--ts-cmd-border));
+                background: var(--command-hover, var(--ts-cmd-hover));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 11.5px;
                 flex-wrap: wrap;
             }
@@ -499,15 +499,15 @@
             }
 
             .command-menu [data-command-footer] kbd {
-                background: var(--command-bg);
-                border: 1px solid var(--command-border-strong);
-                color: var(--command-muted);
+                background: var(--command-bg, var(--ts-cmd-bg));
+                border: 1px solid var(--command-border-strong, var(--ts-cmd-border-strong));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 border-radius: 4px;
                 padding: 2px 6px;
                 font-size: 10.5px;
                 line-height: 1;
                 font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
-                box-shadow: 0 1px 0 var(--command-border);
+                box-shadow: 0 1px 0 var(--command-border, var(--ts-cmd-border));
             }
 
             /* External trigger button preset */
@@ -521,9 +521,9 @@
                 align-items: center;
                 gap: 10px;
                 padding: 6px 10px 6px 12px;
-                background: var(--command-bg, var(--ts-skin-surface, #fff));
-                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
-                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
+                background: var(--command-bg, var(--ts-cmd-bg, var(--ts-skin-surface, #fff)));
+                color: var(--command-muted, var(--ts-cmd-muted, var(--ts-skin-text-dim, #64748b)));
+                border: 1px solid var(--command-border, var(--ts-cmd-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12))));
                 border-radius: 8px;
                 font-size: 13px;
                 line-height: 1.4;
@@ -533,8 +533,8 @@
             }
 
             .command-trigger:hover {
-                border-color: var(--command-border-strong, var(--ts-skin-border-strong, rgba(15, 23, 42, 0.2)));
-                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.04)));
+                border-color: var(--command-border-strong, var(--ts-cmd-border-strong, var(--ts-skin-border-strong, rgba(15, 23, 42, 0.2))));
+                background: var(--command-hover, var(--ts-cmd-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.04))));
             }
 
             .command-trigger .command-trigger-label {
@@ -549,9 +549,9 @@
             }
 
             .command-trigger .command-trigger-shortcut kbd {
-                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.06)));
-                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
-                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
+                background: var(--command-hover, var(--ts-cmd-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.06))));
+                border: 1px solid var(--command-border, var(--ts-cmd-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12))));
+                color: var(--command-muted, var(--ts-cmd-muted, var(--ts-skin-text-dim, #64748b)));
                 border-radius: 4px;
                 padding: 1px 5px;
                 font-size: 10.5px;
@@ -1501,8 +1501,16 @@
 
     $.extend(themestrap, { PluginCommandMenu });
 
-    $.fn.themestrapPluginCommandMenu = function (opts) {
+    $.fn.themestrapPluginCommandMenu = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);

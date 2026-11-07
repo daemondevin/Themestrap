@@ -1,5 +1,6 @@
 (((themestrap = {}, $) => {
     const instanceName = '__animate';
+    let uid = 0;
 
     class PluginAnimate {
         constructor($el, opts) {
@@ -12,6 +13,10 @@
 			}
 
 			this.$el = $el;
+			this._ns = '.tsanimate' + (++uid);
+			this._origClass = $el.attr('class');
+			this._origStyle = $el.attr('style');
+			this._timers = [];
 
 			this
 				.setData()
@@ -54,7 +59,7 @@
 			}
 
 			if ($('body').hasClass('loading-overlay-showing')) {
-				$(window).on('loading.overlay.ready', () => {
+				$(window).on('loading.overlay.ready' + self._ns, () => {
 					self.animate();
 				});
 			} else {
@@ -95,13 +100,13 @@
 
 				// Inside Carousel
 				if ($el.closest('.owl-carousel').get(0)) {
-					setTimeout(() => {
-						$el.closest('.owl-carousel').on('change.owl.carousel', () => {
+					self._timers.push(setTimeout(() => {
+						$el.closest('.owl-carousel').on('change.owl.carousel' + self._ns, () => {
 							self.options.firstLoadNoAnim = false;
 							$el.removeData('__animate');
 							$el.themestrapPluginAnimate(self.options);
 						});
-					}, 500);
+					}, 500));
 				}
 
 				return this;
@@ -128,6 +133,36 @@
 
             return this;
         }
+
+        /**
+         * Undo everything build() and animate() did: handlers, pending timers,
+         * the animation classes and the inline delay/duration styles.
+         * @returns {PluginAnimate}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            $(window).off(this._ns);
+            $el.closest('.owl-carousel').off(this._ns);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            $el.stop(true);
+            if (this._origClass === undefined) {
+                $el.removeAttr('class');
+            } else {
+                $el.attr('class', this._origClass);
+            }
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginAnimate.defaults = {
@@ -144,16 +179,20 @@
 		PluginAnimate
 	});
 
-    $.fn.themestrapPluginAnimate = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginAnimate = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginAnimate($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginAnimate($this, opts);
 		});
 	};
 })).apply(this, [window.themestrap, jQuery]);

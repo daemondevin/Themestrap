@@ -87,42 +87,42 @@
         [data-pt-track] {
             position: relative;
             display: inline-block;
-            width: var(--pt-track-width, 44px);
-            height: var(--pt-track-height, 24px);
+            width: var(--ts-pricing-track-width, var(--pt-track-width, 44px));
+            height: var(--ts-pricing-track-height, var(--pt-track-height, 24px));
             border-radius: 9999px;
-            background: var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
+            background: var(--ts-pricing-track-bg, var(--pt-track-bg, var(--ts-skin-accent, #3b82f6)));
             border: none;
             cursor: pointer;
             padding: 0;
-            transition: background var(--pt-duration, 250ms) ease;
+            transition: background var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease;
             flex-shrink: 0;
         }
         [data-pt-track]:focus-visible {
-            outline: 2px solid var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
+            outline: 2px solid var(--ts-pricing-track-bg, var(--pt-track-bg, var(--ts-skin-accent, #3b82f6)));
             outline-offset: 3px;
         }
 
         /* Thumb */
         [data-pt-thumb] {
             position: absolute;
-            top: var(--pt-thumb-inset, 3px);
-            left: var(--pt-thumb-inset, 3px);
-            width: var(--pt-thumb-size, 18px);
-            height: var(--pt-thumb-size, 18px);
+            top: var(--ts-pricing-thumb-inset, var(--pt-thumb-inset, 3px));
+            left: var(--ts-pricing-thumb-inset, var(--pt-thumb-inset, 3px));
+            width: var(--ts-pricing-thumb-size, var(--pt-thumb-size, 18px));
+            height: var(--ts-pricing-thumb-size, var(--pt-thumb-size, 18px));
             border-radius: 50%;
-            background: var(--pt-thumb-bg, var(--ts-skin-surface, #fff));
+            background: var(--ts-pricing-thumb-bg, var(--pt-thumb-bg, var(--ts-skin-surface, #fff)));
             box-shadow: var(--ts-skin-shadow, 0 1px 4px rgba(0, 0, 0, .25));
-            transition: left var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1),
-                        background var(--pt-duration, 250ms) ease;
+            transition: left var(--ts-pricing-duration, var(--pt-duration, 250ms)) cubic-bezier(.16, 1, .3, 1),
+                        background var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease;
             pointer-events: none;
         }
 
         /* Secondary (active / "on") state: slide thumb to the right */
         [data-pt-track][aria-pressed="true"] [data-pt-thumb] {
             left: calc(
-                var(--pt-track-width, 44px)
-                - var(--pt-thumb-size, 18px)
-                - var(--pt-thumb-inset, 3px)
+                var(--ts-pricing-track-width, var(--pt-track-width, 44px))
+                - var(--ts-pricing-thumb-size, var(--pt-thumb-size, 18px))
+                - var(--ts-pricing-thumb-inset, var(--pt-thumb-inset, 3px))
             );
         }
 
@@ -134,20 +134,20 @@
             gap: .35rem;
             font-size: .875rem;
             font-weight: 600;
-            color: var(--pt-label-muted, var(--ts-skin-text-dim, #64748b));
-            transition: color var(--pt-duration, 250ms) ease;
+            color: var(--ts-pricing-label-muted, var(--pt-label-muted, var(--ts-skin-text-dim, #64748b)));
+            transition: color var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease;
             cursor: pointer;
         }
         [data-pt-label-primary].is-active,
         [data-pt-label-secondary].is-active {
-            color: var(--pt-label-active, var(--ts-skin-text-strong, #0f172a));
+            color: var(--ts-pricing-label-active, var(--pt-label-active, var(--ts-skin-text-strong, #0f172a)));
         }
 
         /* Savings badge — hidden in primary state, shown in secondary */
         [data-pt-savings-badge] {
             display: inline-block;
-            background: var(--pt-badge-bg, var(--ts-skin-success-soft, rgba(34, 197, 94, .12)));
-            color: var(--pt-badge-color, var(--ts-skin-success, #16a34a));
+            background: var(--ts-pricing-badge-bg, var(--pt-badge-bg, var(--ts-skin-success-soft, rgba(34, 197, 94, .12))));
+            color: var(--ts-pricing-badge-color, var(--pt-badge-color, var(--ts-skin-success, #16a34a)));
             font-size: .6875rem;
             font-weight: 700;
             padding: 2px 7px;
@@ -155,8 +155,8 @@
             letter-spacing: .02em;
             opacity: 0;
             transform: scale(.8) translateY(2px);
-            transition: opacity var(--pt-duration, 250ms) ease,
-                        transform var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1);
+            transition: opacity var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease,
+                        transform var(--ts-pricing-duration, var(--pt-duration, 250ms)) cubic-bezier(.16, 1, .3, 1);
             pointer-events: none;
         }
         [data-pt-label-secondary].is-active [data-pt-savings-badge] {
@@ -167,7 +167,7 @@
         /* Price targets: crossfade between values */
         [data-pt-price] {
             display: inline-block;
-            transition: opacity var(--pt-price-duration, 180ms) ease;
+            transition: opacity var(--ts-pricing-price-duration, var(--pt-price-duration, 180ms)) ease;
         }
         [data-pt-price].pt-fading {
             opacity: 0;
@@ -277,21 +277,21 @@
             }
             this.$track.attr('role', 'switch');
 
-            // Apply CSS custom properties from options so pure-CSS themes
-            // can pick them up without any extra JS.
+            // Write the options that were given as inline custom properties. Options
+            // left null are skipped, so stylesheet values and the skin still apply.
             $el.css({
-                '--pt-track-width':      o.trackWidth,
-                '--pt-track-height':     o.trackHeight,
-                '--pt-thumb-size':       o.thumbSize,
-                '--pt-thumb-inset':      o.thumbInset,
-                '--pt-track-bg':         o.trackColor,
-                '--pt-thumb-bg':         o.thumbColor,
-                '--pt-duration':         o.duration + 'ms',
-                '--pt-price-duration':   o.priceFadeDuration + 'ms',
-                '--pt-label-muted':      o.labelMutedColor,
-                '--pt-label-active':     o.labelActiveColor,
-                '--pt-badge-bg':         o.badgeBg,
-                '--pt-badge-color':      o.badgeColor,
+                '--ts-pricing-track-width':      o.trackWidth,
+                '--ts-pricing-track-height':     o.trackHeight,
+                '--ts-pricing-thumb-size':       o.thumbSize,
+                '--ts-pricing-thumb-inset':      o.thumbInset,
+                '--ts-pricing-track-bg':         o.trackColor,
+                '--ts-pricing-thumb-bg':         o.thumbColor,
+                '--ts-pricing-duration':         o.duration + 'ms',
+                '--ts-pricing-price-duration':   o.priceFadeDuration + 'ms',
+                '--ts-pricing-label-muted':      o.labelMutedColor,
+                '--ts-pricing-label-active':     o.labelActiveColor,
+                '--ts-pricing-badge-bg':         o.badgeBg,
+                '--ts-pricing-badge-color':      o.badgeColor,
             });
 
             // Apply initial visual state without emitting events.
@@ -439,19 +439,21 @@
         // Thumb slide duration (also used for label color transition).
         duration: 250,                   // ms
 
-        // Track / thumb geometry expressed as CSS values.
-        trackWidth:  '44px',
-        trackHeight: '24px',
-        thumbSize:   '18px',
-        thumbInset:  '3px',
+        // Track / thumb geometry expressed as CSS values. Left null the stylesheet
+        // values apply: 44px, 24px, 18px and 3px.
+        trackWidth:  null,
+        trackHeight: null,
+        thumbSize:   null,
+        thumbInset:  null,
 
-        // Colors (applied as CSS custom properties).
-        trackColor:       '#3b82f6',
-        thumbColor:       '#ffffff',
-        labelMutedColor:  '#64748b',
-        labelActiveColor: '#0f172a',
-        badgeBg:          'rgba(34,197,94,.12)',
-        badgeColor:       '#16a34a',
+        // Colors (applied as CSS custom properties). Left null they follow the
+        // skin, falling back to #3b82f6, #fff, #64748b, #0f172a and a green badge.
+        trackColor:       null,
+        thumbColor:       null,
+        labelMutedColor:  null,
+        labelActiveColor: null,
+        badgeBg:          null,
+        badgeColor:       null,
 
         // Accessible labels for the track button.
         ariaLabelPrimary:   'Switch to annual billing',
@@ -464,8 +466,16 @@
 
     $.extend(themestrap, { PluginPricingToggle });
 
-    $.fn.themestrapPluginPricingToggle = function (opts) {
+    $.fn.themestrapPluginPricingToggle = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {

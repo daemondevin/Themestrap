@@ -1,4 +1,3 @@
-// Accordion
 /**
  * Themestrap Accordion Plugin
  *
@@ -663,8 +662,16 @@
 
     $.extend(themestrap, { PluginAccordion });
 
-    $.fn.themestrapPluginAccordion = function (opts) {
+    $.fn.themestrapPluginAccordion = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -675,7 +682,6 @@
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Account
 // Account
 (((themestrap = {}, $) => {
     let initialized = false;
@@ -761,7 +767,6 @@
 })).apply(this, [window.themestrap, jQuery]);
 
 // Alert
-// Alert
 (((themestrap = {}, $) => {
     const instanceName = '__pluginAlert';
 
@@ -771,135 +776,135 @@
     // so loading this script never adds CSS to pages that don't use the plugin.
     const CSS_TEXT = `/* Themestrap — PluginAlert */
 .alert-ts-primary {
-    --alert-ts-bg           : var(--primary-rgba-10);
-    --alert-ts-border       : var(--primary);
-    --alert-ts-icon         : var(--primary);
-    --alert-ts-title        : var(--primary-300);
-    --alert-ts-text         : var(--primary-200);
-    --alert-ts-action       : var(--primary-200);
-    --alert-ts-action-hover : var(--primary-300);
-    --alert-ts-close        : var(--primary--200);
-    --alert-ts-close-hover  : var(--primary-300);
+    --ts-alert-bg           : var(--primary-rgba-10);
+    --ts-alert-border       : var(--primary);
+    --ts-alert-icon         : var(--primary);
+    --ts-alert-title        : var(--primary-300);
+    --ts-alert-text         : var(--primary-200);
+    --ts-alert-action       : var(--primary-200);
+    --ts-alert-action-hover : var(--primary-300);
+    --ts-alert-close        : var(--primary--200);
+    --ts-alert-close-hover  : var(--primary-300);
 }
 
 .alert-ts-secondary {
-    --alert-ts-bg           : var(--secondary-rgba-10);
-    --alert-ts-border       : var(--secondary);
-    --alert-ts-icon         : var(--secondary);
-    --alert-ts-title        : var(--secondary-300);
-    --alert-ts-text         : var(--secondary-200);
-    --alert-ts-action       : var(--secondary-200);
-    --alert-ts-action-hover : var(--secondary-300);
-    --alert-ts-close        : var(--secondary--200);
-    --alert-ts-close-hover  : var(--secondary-300);
+    --ts-alert-bg           : var(--secondary-rgba-10);
+    --ts-alert-border       : var(--secondary);
+    --ts-alert-icon         : var(--secondary);
+    --ts-alert-title        : var(--secondary-300);
+    --ts-alert-text         : var(--secondary-200);
+    --ts-alert-action       : var(--secondary-200);
+    --ts-alert-action-hover : var(--secondary-300);
+    --ts-alert-close        : var(--secondary--200);
+    --ts-alert-close-hover  : var(--secondary-300);
 }
 
 .alert-ts-tertiary {
-    --alert-ts-bg           : var(--tertiary-rgba-10);
-    --alert-ts-border       : var(--tertiary);
-    --alert-ts-icon         : var(--tertiary);
-    --alert-ts-title        : var(--tertiary-300);
-    --alert-ts-text         : var(--tertiary-200);
-    --alert-ts-action       : var(--tertiary-200);
-    --alert-ts-action-hover : var(--tertiary-300);
-    --alert-ts-close        : var(--tertiary--200);
-    --alert-ts-close-hover  : var(--tertiary-300);
+    --ts-alert-bg           : var(--tertiary-rgba-10);
+    --ts-alert-border       : var(--tertiary);
+    --ts-alert-icon         : var(--tertiary);
+    --ts-alert-title        : var(--tertiary-300);
+    --ts-alert-text         : var(--tertiary-200);
+    --ts-alert-action       : var(--tertiary-200);
+    --ts-alert-action-hover : var(--tertiary-300);
+    --ts-alert-close        : var(--tertiary--200);
+    --ts-alert-close-hover  : var(--tertiary-300);
 }
 
 .alert-ts-quaternary {
-    --alert-ts-bg           : var(--quaternary-rgba-10);
-    --alert-ts-border       : var(--quaternary);
-    --alert-ts-icon         : var(--quaternary);
-    --alert-ts-title        : var(--quaternary-300);
-    --alert-ts-text         : var(--quaternary-200);
-    --alert-ts-action       : var(--quaternary-200);
-    --alert-ts-action-hover : var(--quaternary-300);
-    --alert-ts-close        : var(--quaternary--200);
-    --alert-ts-close-hover  : var(--quaternary-300);
+    --ts-alert-bg           : var(--quaternary-rgba-10);
+    --ts-alert-border       : var(--quaternary);
+    --ts-alert-icon         : var(--quaternary);
+    --ts-alert-title        : var(--quaternary-300);
+    --ts-alert-text         : var(--quaternary-200);
+    --ts-alert-action       : var(--quaternary-200);
+    --ts-alert-action-hover : var(--quaternary-300);
+    --ts-alert-close        : var(--quaternary--200);
+    --ts-alert-close-hover  : var(--quaternary-300);
 }
 
 .alert-ts-light {
-    --alert-ts-bg           : var(--light-100);
-    --alert-ts-border       : var(--grey-800);
-    --alert-ts-icon         : var(--light-300);
-    --alert-ts-title        : var(--dark-300);
-    --alert-ts-text         : var(--dark-200);
-    --alert-ts-action       : var(--dark-200);
-    --alert-ts-action-hover : var(--dark-300);
-    --alert-ts-close        : var(--dark--200);
-    --alert-ts-close-hover  : var(--dark-300);
+    --ts-alert-bg           : var(--light-100);
+    --ts-alert-border       : var(--grey-800);
+    --ts-alert-icon         : var(--light-300);
+    --ts-alert-title        : var(--dark-300);
+    --ts-alert-text         : var(--dark-200);
+    --ts-alert-action       : var(--dark-200);
+    --ts-alert-action-hover : var(--dark-300);
+    --ts-alert-close        : var(--dark--200);
+    --ts-alert-close-hover  : var(--dark-300);
 }
 
 .alert-ts-dark {
-    --alert-ts-bg           : var(--dark--300);
-    --alert-ts-border       : var(--dark-300);
-    --alert-ts-icon         : var(--dark-300);
-    --alert-ts-title        : var(--light-300);
-    --alert-ts-text         : var(--light-200);
-    --alert-ts-action       : var(--light-200);
-    --alert-ts-action-hover : var(--light-300);
-    --alert-ts-close        : var(--light--200);
-    --alert-ts-close-hover  : var(--light-300);
+    --ts-alert-bg           : var(--dark--300);
+    --ts-alert-border       : var(--dark-300);
+    --ts-alert-icon         : var(--dark-300);
+    --ts-alert-title        : var(--light-300);
+    --ts-alert-text         : var(--light-200);
+    --ts-alert-action       : var(--light-200);
+    --ts-alert-action-hover : var(--light-300);
+    --ts-alert-close        : var(--light--200);
+    --ts-alert-close-hover  : var(--light-300);
 }
 
 .alert-ts-info {
-    --alert-ts-bg           : var(--ts-skin-info-soft, #eff6ff);
-    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
-    --alert-ts-icon         : var(--ts-skin-info, #3b82f6);
-    --alert-ts-title        : var(--ts-skin-text-strong, #1e40af);
-    --alert-ts-text         : var(--ts-skin-text, #1d4ed8);
-    --alert-ts-action       : var(--ts-skin-info, #1d4ed8);
-    --alert-ts-action-hover : var(--ts-skin-info, #1e40af);
-    --alert-ts-close        : var(--ts-skin-info, #93c5fd);
-    --alert-ts-close-hover  : var(--ts-skin-text, #1d4ed8);
+    --ts-alert-bg           : var(--ts-skin-info-soft, #eff6ff);
+    --ts-alert-border       : var(--ts-skin-info, #3b82f6);
+    --ts-alert-icon         : var(--ts-skin-info, #3b82f6);
+    --ts-alert-title        : var(--ts-skin-text-strong, #1e40af);
+    --ts-alert-text         : var(--ts-skin-text, #1d4ed8);
+    --ts-alert-action       : var(--ts-skin-info, #1d4ed8);
+    --ts-alert-action-hover : var(--ts-skin-info, #1e40af);
+    --ts-alert-close        : var(--ts-skin-info, #93c5fd);
+    --ts-alert-close-hover  : var(--ts-skin-text, #1d4ed8);
 }
 
 .alert-ts-success {
-    --alert-ts-bg           : var(--ts-skin-success-soft, #f0fdf4);
-    --alert-ts-border       : var(--ts-skin-success, #22c55e);
-    --alert-ts-icon         : var(--ts-skin-success, #22c55e);
-    --alert-ts-title        : var(--ts-skin-text-strong, #14532d);
-    --alert-ts-text         : var(--ts-skin-text, #15803d);
-    --alert-ts-action       : var(--ts-skin-success, #15803d);
-    --alert-ts-action-hover : var(--ts-skin-success, #14532d);
-    --alert-ts-close        : var(--ts-skin-success, #86efac);
-    --alert-ts-close-hover  : var(--ts-skin-text, #15803d);
+    --ts-alert-bg           : var(--ts-skin-success-soft, #f0fdf4);
+    --ts-alert-border       : var(--ts-skin-success, #22c55e);
+    --ts-alert-icon         : var(--ts-skin-success, #22c55e);
+    --ts-alert-title        : var(--ts-skin-text-strong, #14532d);
+    --ts-alert-text         : var(--ts-skin-text, #15803d);
+    --ts-alert-action       : var(--ts-skin-success, #15803d);
+    --ts-alert-action-hover : var(--ts-skin-success, #14532d);
+    --ts-alert-close        : var(--ts-skin-success, #86efac);
+    --ts-alert-close-hover  : var(--ts-skin-text, #15803d);
 }
 
 .alert-ts-warning {
-    --alert-ts-bg           : var(--ts-skin-warning-soft, #fffbeb);
-    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-icon         : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-title        : var(--ts-skin-text-strong, #78350f);
-    --alert-ts-text         : var(--ts-skin-text, #92400e);
-    --alert-ts-action       : var(--ts-skin-warning, #92400e);
-    --alert-ts-action-hover : var(--ts-skin-warning, #78350f);
-    --alert-ts-close        : var(--ts-skin-warning, #fcd34d);
-    --alert-ts-close-hover  : var(--ts-skin-text, #92400e);
+    --ts-alert-bg           : var(--ts-skin-warning-soft, #fffbeb);
+    --ts-alert-border       : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-icon         : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-title        : var(--ts-skin-text-strong, #78350f);
+    --ts-alert-text         : var(--ts-skin-text, #92400e);
+    --ts-alert-action       : var(--ts-skin-warning, #92400e);
+    --ts-alert-action-hover : var(--ts-skin-warning, #78350f);
+    --ts-alert-close        : var(--ts-skin-warning, #fcd34d);
+    --ts-alert-close-hover  : var(--ts-skin-text, #92400e);
 }
 
 .alert-ts-danger {
-    --alert-ts-bg           : var(--ts-skin-danger-soft, #fef2f2);
-    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
-    --alert-ts-icon         : var(--ts-skin-danger, #ef4444);
-    --alert-ts-title        : var(--ts-skin-text-strong, #7f1d1d);
-    --alert-ts-text         : var(--ts-skin-text, #991b1b);
-    --alert-ts-action       : var(--ts-skin-danger, #991b1b);
-    --alert-ts-action-hover : var(--ts-skin-danger, #7f1d1d);
-    --alert-ts-close        : var(--ts-skin-danger, #fca5a5);
-    --alert-ts-close-hover  : var(--ts-skin-text, #991b1b);
+    --ts-alert-bg           : var(--ts-skin-danger-soft, #fef2f2);
+    --ts-alert-border       : var(--ts-skin-danger, #ef4444);
+    --ts-alert-icon         : var(--ts-skin-danger, #ef4444);
+    --ts-alert-title        : var(--ts-skin-text-strong, #7f1d1d);
+    --ts-alert-text         : var(--ts-skin-text, #991b1b);
+    --ts-alert-action       : var(--ts-skin-danger, #991b1b);
+    --ts-alert-action-hover : var(--ts-skin-danger, #7f1d1d);
+    --ts-alert-close        : var(--ts-skin-danger, #fca5a5);
+    --ts-alert-close-hover  : var(--ts-skin-text, #991b1b);
 }
 
 .alert-ts-neutral {
-    --alert-ts-bg           : var(--ts-skin-surface, #f9fafb);
-    --alert-ts-border       : var(--ts-skin-border, #6b7280);
-    --alert-ts-icon         : var(--ts-skin-text-dim, #6b7280);
-    --alert-ts-title        : var(--ts-skin-text-strong, #111827);
-    --alert-ts-text         : var(--ts-skin-text, #374151);
-    --alert-ts-action       : var(--ts-skin-text-strong, #374151);
-    --alert-ts-action-hover : var(--ts-skin-text-strong, #111827);
-    --alert-ts-close        : var(--ts-skin-text-dim, #d1d5db);
-    --alert-ts-close-hover  : var(--ts-skin-text, #374151);
+    --ts-alert-bg           : var(--ts-skin-surface, #f9fafb);
+    --ts-alert-border       : var(--ts-skin-border, #6b7280);
+    --ts-alert-icon         : var(--ts-skin-text-dim, #6b7280);
+    --ts-alert-title        : var(--ts-skin-text-strong, #111827);
+    --ts-alert-text         : var(--ts-skin-text, #374151);
+    --ts-alert-action       : var(--ts-skin-text-strong, #374151);
+    --ts-alert-action-hover : var(--ts-skin-text-strong, #111827);
+    --ts-alert-close        : var(--ts-skin-text-dim, #d1d5db);
+    --ts-alert-close-hover  : var(--ts-skin-text, #374151);
 }
 
 
@@ -911,8 +916,8 @@
     padding          : 1rem 1rem 1rem 1.25rem;
     border-radius    : 0.5rem;
     border-width     : 0;
-    border-left      : 4px solid var(--alert-ts-border);
-    background-color : var(--alert-ts-bg);
+    border-left      : 4px solid var(--alert-ts-border, var(--ts-alert-border));
+    background-color : var(--alert-ts-bg, var(--ts-alert-bg));
     position         : relative;
     overflow         : hidden;   /* clips countdown bar */
 }
@@ -936,10 +941,10 @@
 .alert.alert-ts[class*="alert-info"],
 .alert.alert-ts[class*="alert-light"],
 .alert.alert-ts[class*="alert-dark"] {
-    background-color : var(--alert-ts-bg);
+    background-color : var(--alert-ts-bg, var(--ts-alert-bg));
     border-color     : transparent;
-    border-left-color: var(--alert-ts-border);
-    color            : var(--alert-ts-text);
+    border-left-color: var(--alert-ts-border, var(--ts-alert-border));
+    color            : var(--alert-ts-text, var(--ts-alert-text));
 }
 
 
@@ -948,7 +953,7 @@
     flex-shrink    : 0;
     width          : 1.25rem;   /* 20 px */
     height         : 1.25rem;
-    color          : var(--alert-ts-icon);
+    color          : var(--alert-ts-icon, var(--ts-alert-icon));
     margin-top     : 1px;       /* optical alignment with first line of text */
 }
 
@@ -968,14 +973,14 @@
     font-size   : 0.975rem;   /* 14 px */
     font-weight : 600;
     line-height : 1.4;
-    color       : var(--alert-ts-title);
+    color       : var(--alert-ts-title, var(--ts-alert-title));
     margin      : 0 0 0.25rem;
 }
 
 .alert-ts-text {
     font-size   : 0.975rem;
     line-height : 1.5;
-    color       : var(--alert-ts-text);
+    color       : var(--alert-ts-text, var(--ts-alert-text));
 }
 
 .alert-ts-text p:last-child {
@@ -1010,28 +1015,28 @@
 
 /* Primary action — filled */
 .alert-ts-action-primary {
-    background-color : var(--alert-ts-action);
-    border-color     : var(--alert-ts-action);
+    background-color : var(--alert-ts-action, var(--ts-alert-action));
+    border-color     : var(--alert-ts-action, var(--ts-alert-action));
     color            : var(--ts-skin-on-accent, #fff);
 }
 
 .alert-ts-action-primary:hover,
 .alert-ts-action-primary:focus-visible {
-    background-color : var(--alert-ts-action-hover);
-    border-color     : var(--alert-ts-action-hover);
+    background-color : var(--alert-ts-action-hover, var(--ts-alert-action-hover));
+    border-color     : var(--alert-ts-action-hover, var(--ts-alert-action-hover));
     color            : var(--ts-skin-on-accent, #fff);
 }
 
 /* Secondary action — ghost / outlined */
 .alert-ts-action-secondary {
     background-color : transparent;
-    border-color     : var(--alert-ts-action);
-    color            : var(--alert-ts-action);
+    border-color     : var(--alert-ts-action, var(--ts-alert-action));
+    color            : var(--alert-ts-action, var(--ts-alert-action));
 }
 
 .alert-ts-action-secondary:hover,
 .alert-ts-action-secondary:focus-visible {
-    background-color : var(--alert-ts-action);
+    background-color : var(--alert-ts-action, var(--ts-alert-action));
     color            : var(--ts-skin-on-accent, #fff);
 }
 
@@ -1039,19 +1044,19 @@
 .alert-ts-action-link {
     background  : none;
     border-color: transparent;
-    color       : var(--alert-ts-action);
+    color       : var(--alert-ts-action, var(--ts-alert-action));
     padding-left : 0;
     padding-right: 0;
 }
 
 .alert-ts-action-link:hover,
 .alert-ts-action-link:focus-visible {
-    color           : var(--alert-ts-action-hover);
+    color           : var(--alert-ts-action-hover, var(--ts-alert-action-hover));
     text-decoration : underline;
 }
 
 .alert-ts-action:focus-visible {
-    outline        : 2px solid var(--alert-ts-border);
+    outline        : 2px solid var(--alert-ts-border, var(--ts-alert-border));
     outline-offset : 2px;
 }
 
@@ -1069,7 +1074,7 @@
     background       : none;
     border           : none;
     border-radius    : 0.375rem;
-    color            : var(--alert-ts-close);
+    color            : var(--alert-ts-close, var(--ts-alert-close));
     cursor           : pointer;
     transition       : color 0.15s ease, background-color 0.15s ease;
 }
@@ -1081,14 +1086,14 @@
 }
 
 .alert-ts-close:hover {
-    color            : var(--alert-ts-close-hover);
-    background-color : color-mix(in srgb, var(--alert-ts-border) 12%, transparent);
+    color            : var(--alert-ts-close-hover, var(--ts-alert-close-hover));
+    background-color : color-mix(in srgb, var(--alert-ts-border, var(--ts-alert-border)) 12%, transparent);
 }
 
 .alert-ts-close:focus-visible {
-    outline        : 2px solid var(--alert-ts-border);
+    outline        : 2px solid var(--alert-ts-border, var(--ts-alert-border));
     outline-offset : 2px;
-    color          : var(--alert-ts-close-hover);
+    color          : var(--alert-ts-close-hover, var(--ts-alert-close-hover));
 }
 
 
@@ -1099,7 +1104,7 @@
     left             : 0;
     width            : 100%;
     height           : 3px;
-    background-color : var(--alert-ts-border);
+    background-color : var(--alert-ts-border, var(--ts-alert-border));
     opacity          : 0.45;
     transform        : scaleX(1);
     transform-origin : left center;
@@ -1146,63 +1151,63 @@
 
 /* Dark-mode palette */
 html.dark .alert-ts-info {
-    --alert-ts-bg           : var(--ts-skin-info-soft, #172554);
-    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
-    --alert-ts-icon         : var(--ts-skin-info, #60a5fa);
-    --alert-ts-title        : var(--ts-skin-text-strong, #bfdbfe);
-    --alert-ts-text         : var(--ts-skin-text, #93c5fd);
-    --alert-ts-action       : var(--ts-skin-info, #93c5fd);
-    --alert-ts-action-hover : var(--ts-skin-info, #bfdbfe);
-    --alert-ts-close        : var(--ts-skin-info, #3b82f6);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bfdbfe);
+    --ts-alert-bg           : var(--ts-skin-info-soft, #172554);
+    --ts-alert-border       : var(--ts-skin-info, #3b82f6);
+    --ts-alert-icon         : var(--ts-skin-info, #60a5fa);
+    --ts-alert-title        : var(--ts-skin-text-strong, #bfdbfe);
+    --ts-alert-text         : var(--ts-skin-text, #93c5fd);
+    --ts-alert-action       : var(--ts-skin-info, #93c5fd);
+    --ts-alert-action-hover : var(--ts-skin-info, #bfdbfe);
+    --ts-alert-close        : var(--ts-skin-info, #3b82f6);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #bfdbfe);
 }
 
 html.dark .alert-ts-success {
-    --alert-ts-bg           : var(--ts-skin-success-soft, #052e16);
-    --alert-ts-border       : var(--ts-skin-success, #22c55e);
-    --alert-ts-icon         : var(--ts-skin-success, #4ade80);
-    --alert-ts-title        : var(--ts-skin-text-strong, #bbf7d0);
-    --alert-ts-text         : var(--ts-skin-on-accent, #86efac);
-    --alert-ts-action       : var(--ts-skin-success, #86efac);
-    --alert-ts-action-hover : var(--ts-skin-success, #bbf7d0);
-    --alert-ts-close        : var(--ts-skin-success, #22c55e);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bbf7d0);
+    --ts-alert-bg           : var(--ts-skin-success-soft, #052e16);
+    --ts-alert-border       : var(--ts-skin-success, #22c55e);
+    --ts-alert-icon         : var(--ts-skin-success, #4ade80);
+    --ts-alert-title        : var(--ts-skin-text-strong, #bbf7d0);
+    --ts-alert-text         : var(--ts-skin-on-accent, #86efac);
+    --ts-alert-action       : var(--ts-skin-success, #86efac);
+    --ts-alert-action-hover : var(--ts-skin-success, #bbf7d0);
+    --ts-alert-close        : var(--ts-skin-success, #22c55e);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #bbf7d0);
 }
 
 html.dark .alert-ts-warning {
-    --alert-ts-bg           : var(--ts-skin-warning-soft, #27170a);
-    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-icon         : var(--ts-skin-warning, #fbbf24);
-    --alert-ts-title        : var(--ts-skin-text-strong, #fde68a);
-    --alert-ts-text         : var(--ts-skin-on-accent, #fcd34d);
-    --alert-ts-action       : var(--ts-skin-warning, #fcd34d);
-    --alert-ts-action-hover : var(--ts-skin-warning, #fde68a);
-    --alert-ts-close        : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fde68a);
+    --ts-alert-bg           : var(--ts-skin-warning-soft, #27170a);
+    --ts-alert-border       : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-icon         : var(--ts-skin-warning, #fbbf24);
+    --ts-alert-title        : var(--ts-skin-text-strong, #fde68a);
+    --ts-alert-text         : var(--ts-skin-on-accent, #fcd34d);
+    --ts-alert-action       : var(--ts-skin-warning, #fcd34d);
+    --ts-alert-action-hover : var(--ts-skin-warning, #fde68a);
+    --ts-alert-close        : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #fde68a);
 }
 
 html.dark .alert-ts-danger {
-    --alert-ts-bg           : var(--ts-skin-danger-soft, #2d0a0a);
-    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
-    --alert-ts-icon         : var(--ts-skin-danger, #f87171);
-    --alert-ts-title        : var(--ts-skin-text-strong, #fecaca);
-    --alert-ts-text         : var(--ts-skin-text, #fca5a5);
-    --alert-ts-action       : var(--ts-skin-danger, #fca5a5);
-    --alert-ts-action-hover : var(--ts-skin-danger, #fecaca);
-    --alert-ts-close        : var(--ts-skin-danger, #ef4444);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fecaca);
+    --ts-alert-bg           : var(--ts-skin-danger-soft, #2d0a0a);
+    --ts-alert-border       : var(--ts-skin-danger, #ef4444);
+    --ts-alert-icon         : var(--ts-skin-danger, #f87171);
+    --ts-alert-title        : var(--ts-skin-text-strong, #fecaca);
+    --ts-alert-text         : var(--ts-skin-text, #fca5a5);
+    --ts-alert-action       : var(--ts-skin-danger, #fca5a5);
+    --ts-alert-action-hover : var(--ts-skin-danger, #fecaca);
+    --ts-alert-close        : var(--ts-skin-danger, #ef4444);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #fecaca);
 }
 
 html.dark .alert-ts-neutral {
-    --alert-ts-bg           : var(--ts-skin-surface, #111827);
-    --alert-ts-border       : var(--ts-skin-border, #6b7280);
-    --alert-ts-icon         : var(--ts-skin-text-dim, #9ca3af);
-    --alert-ts-title        : var(--ts-skin-text-strong, #f9fafb);
-    --alert-ts-text         : var(--ts-skin-text, #d1d5db);
-    --alert-ts-action       : var(--ts-skin-text-strong, #d1d5db);
-    --alert-ts-action-hover : var(--ts-skin-text-strong, #f9fafb);
-    --alert-ts-close        : var(--ts-skin-text-dim, #6b7280);
-    --alert-ts-close-hover  : var(--ts-skin-text, #f9fafb);
+    --ts-alert-bg           : var(--ts-skin-surface, #111827);
+    --ts-alert-border       : var(--ts-skin-border, #6b7280);
+    --ts-alert-icon         : var(--ts-skin-text-dim, #9ca3af);
+    --ts-alert-title        : var(--ts-skin-text-strong, #f9fafb);
+    --ts-alert-text         : var(--ts-skin-text, #d1d5db);
+    --ts-alert-action       : var(--ts-skin-text-strong, #d1d5db);
+    --ts-alert-action-hover : var(--ts-skin-text-strong, #f9fafb);
+    --ts-alert-close        : var(--ts-skin-text-dim, #6b7280);
+    --ts-alert-close-hover  : var(--ts-skin-text, #f9fafb);
 }
 
 .alert.alert-ts {
@@ -1709,6 +1714,206 @@ html.dark .alert-ts-neutral {
 
 // Animate
 (((themestrap = {}, $) => {
+    const instanceName = '__animate';
+    let uid = 0;
+
+    class PluginAnimate {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+			if ($el.data(instanceName)) {
+				return this;
+			}
+
+			this.$el = $el;
+			this._ns = '.tsanimate' + (++uid);
+			this._origClass = $el.attr('class');
+			this._origStyle = $el.attr('style');
+			this._timers = [];
+
+			this
+				.setData()
+				.setOptions(opts)
+				.build();
+
+			return this;
+		}
+
+        setData() {
+			this.$el.data(instanceName, this);
+
+			return this;
+		}
+
+        setOptions(opts) {
+			this.options = $.extend(true, {}, PluginAnimate.defaults, opts, {
+				wrapper: this.$el
+			});
+
+			return this;
+		}
+
+        build() {
+			const self = this;
+
+			// Flag Class Only
+			// - Useful for simple animations like hightlight
+			// - Less process and memory
+			if( self.options.flagClassOnly ) {
+				const delay = self.options.wrapper.attr('data-appear-animation-delay') ? self.options.wrapper.attr('data-appear-animation-delay') : self.options.delay;
+				
+				self.options.wrapper.css({
+					'animation-delay': delay + 'ms',
+					'transition-delay': delay + 'ms'
+				});
+				self.options.wrapper.addClass( self.options.wrapper.attr('data-appear-animation') );
+
+				return this;
+			}
+
+			if ($('body').hasClass('loading-overlay-showing')) {
+				$(window).on('loading.overlay.ready' + self._ns, () => {
+					self.animate();
+				});
+			} else {
+				self.animate();
+			}
+
+			return this;
+		}
+
+        animate() {
+            const self = this;
+            const $el = this.options.wrapper;
+            let delay = 0;
+            let duration = this.options.duration;
+            const elTopDistance = $el.offset().top;
+            const windowTopDistance = $(window).scrollTop();
+
+            // If has appear animation elements inside a SVG. 
+            // Intersection Observer API do not check elements inside SVG's, so we need initialize trough top parent SVG
+            if ($el.data('appear-animation-svg')) {
+				$el.find('[data-appear-animation]').each(function(){
+                    const $this = $(this);
+                    let opts;
+
+                    const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
+                    if (pluginOptions)
+						opts = pluginOptions;
+
+                    $this.themestrapPluginAnimate(opts);
+                });
+
+				return this;
+			}
+
+            // No animation at the first load of page. This is good for performance
+            if (self.options.firstLoadNoAnim) {
+				$el.removeClass('appear-animation');
+
+				// Inside Carousel
+				if ($el.closest('.owl-carousel').get(0)) {
+					self._timers.push(setTimeout(() => {
+						$el.closest('.owl-carousel').on('change.owl.carousel' + self._ns, () => {
+							self.options.firstLoadNoAnim = false;
+							$el.removeData('__animate');
+							$el.themestrapPluginAnimate(self.options);
+						});
+					}, 500));
+				}
+
+				return this;
+			}
+
+            $el.addClass('appear-animation animated');
+
+            if (!$('html').hasClass('no-csstransitions') && $(window).width() > self.options.minWindowWidth && elTopDistance >= windowTopDistance || self.options.forceAnimation == true) {
+				delay = ($el.attr('data-appear-animation-delay') ? $el.attr('data-appear-animation-delay') : self.options.delay);
+				duration = ($el.attr('data-appear-animation-duration') ? $el.attr('data-appear-animation-duration') : self.options.duration);
+
+				if (duration != '750ms') {
+					$el.css('animation-duration', duration);
+				}
+
+				$el.css('animation-delay', delay + 'ms');
+				$el.addClass($el.attr('data-appear-animation') + ' appear-animation-visible');
+				
+				$el.trigger('animation:show');
+
+			} else {
+				$el.addClass('appear-animation-visible');
+			}
+
+            return this;
+        }
+
+        /**
+         * Undo everything build() and animate() did: handlers, pending timers,
+         * the animation classes and the inline delay/duration styles.
+         * @returns {PluginAnimate}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            $(window).off(this._ns);
+            $el.closest('.owl-carousel').off(this._ns);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            $el.stop(true);
+            if (this._origClass === undefined) {
+                $el.removeAttr('class');
+            } else {
+                $el.attr('class', this._origClass);
+            }
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
+    }
+
+    PluginAnimate.defaults = {
+		accX: 0,
+		accY: -80,
+		delay: 100,
+		duration: '750ms',
+		minWindowWidth: 0,
+		forceAnimation: false,
+		flagClassOnly: false
+	};
+
+    $.extend(themestrap, {
+		PluginAnimate
+	});
+
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginAnimate = function(opts, ...args) {
+		return this.map(function() {
+			const $this = $(this);
+			const instance = $this.data(instanceName);
+
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
+			}
+
+			return instance || new PluginAnimate($this, opts);
+		});
+	};
+})).apply(this, [window.themestrap, jQuery]);
+
+// Animatedcontent
+(((themestrap = {}, $) => {
     const instanceName = '__animatedContent';
 
     class PluginAnimatedContent {
@@ -1905,8 +2110,16 @@ html.dark .alert-ts-neutral {
 	});
 
     // jquery plugin
-    $.fn.themestrapPluginAnimatedContent = function(opts) {
+    $.fn.themestrapPluginAnimatedContent = function(opts, ...args) {
 		return this.map(function() {
+			if (typeof opts === 'string') {
+				const instance = $(this).data(instanceName);
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
+			}
+
 			const $this = $(this);
 
 			if ($this.data(instanceName)) {
@@ -1919,7 +2132,6 @@ html.dark .alert-ts-neutral {
 	}
 })).apply(this, [window.themestrap, jQuery]);
 
-// Auth
 /**
  * Themestrap Auth
  *
@@ -3097,8 +3309,16 @@ html.dark .alert-ts-neutral {
 
     $.extend(themestrap, { PluginAuth });
 
-    $.fn.themestrapPluginAuth = function (opts) {
+    $.fn.themestrapPluginAuth = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -3109,7 +3329,6 @@ html.dark .alert-ts-neutral {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Before/After
 // Before/After
 (((themestrap = {}, $) => {
     const instanceName = '__beforeafter';
@@ -3515,8 +3734,16 @@ html.dark .alert-ts-neutral {
         PluginBeforeAfter
     });
 
-    $.fn.themestrapPluginBeforeAfter = function(opts) {
+    $.fn.themestrapPluginBeforeAfter = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -3527,7 +3754,6 @@ html.dark .alert-ts-neutral {
     };
 })).apply(this, [window.themestrap, jQuery]);
 
-// Calendar
 // Calendar
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCalendar';
@@ -4295,8 +4521,16 @@ html.dark .alert-ts-neutral {
 
     $.extend(themestrap, { PluginCalendar });
 
-    $.fn.themestrapPluginCalendar = function(opts) {
+    $.fn.themestrapPluginCalendar = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -4307,7 +4541,6 @@ html.dark .alert-ts-neutral {
     };
 })).apply(this, [window.themestrap, jQuery]);
 
-// Carousel
 // Carousel
 (((themestrap = {}, $) => {
     const instanceName = '__carousel';
@@ -4419,9 +4652,15 @@ html.dark .alert-ts-neutral {
             }
 
             // Propagate speed + easing to CSS so transitions can pick them up
-            $el[0].style.setProperty('--tsc-speed', opts.speed + 'ms');
-            $el[0].style.setProperty('--tsc-easing', opts.easing);
-            if (opts.gap) $el[0].style.setProperty('--tsc-gap', opts.gap + 'px');
+            // Set the old --tsc-* names too: the stylesheet reads them first, so inline
+            // options keep beating stylesheet overrides written with either name
+            const setVar = (name, value) => {
+                $el[0].style.setProperty('--ts-carousel-' + name, value);
+                $el[0].style.setProperty('--tsc-' + name, value);
+            };
+            setVar('speed', opts.speed + 'ms');
+            setVar('easing', opts.easing);
+            if (opts.gap) setVar('gap', opts.gap + 'px');
 
             // ARIA on root
             $el.attr({
@@ -5357,36 +5596,36 @@ html.dark .alert-ts-neutral {
 
     PluginCarousel.css = `
 .tsc-carousel {
-    --tsc-speed:               500ms;
-    --tsc-easing:              cubic-bezier(0.4, 0, 0.2, 1);
-    --tsc-nav-size:            46px;
-    --tsc-nav-offset:          -23px;
-    --tsc-nav-bg:              var(--ts-skin-surface, rgba(0,0,0,.5));
-    --tsc-nav-bg-hover:        var(--ts-skin-elevated, rgba(0,0,0,.78));
-    --tsc-nav-color:           var(--ts-skin-text, #fff);
-    --tsc-nav-radius:          50%;
-    --tsc-nav-icon:            20px;
-    --tsc-nav-border:          none;
-    --tsc-nav-shadow:          var(--ts-skin-shadow, 0 2px 8px rgba(0,0,0,.25));
-    --tsc-dot-size:            8px;
-    --tsc-dot-gap:             8px;
-    --tsc-dot-color:           var(--ts-skin-border-strong, rgba(0,0,0,.22));
-    --tsc-dot-active-color:    var(--ts-skin-accent, var(--primary, #0d6efd));
-    --tsc-dot-line-w:          22px;
-    --tsc-dot-line-h:          3px;
-    --tsc-dot-num-size:        28px;
-    --tsc-progress-h:          3px;
-    --tsc-progress-bg:         var(--ts-skin-surface-2, rgba(0,0,0,.1));
-    --tsc-progress-color:      var(--ts-skin-accent, var(--primary, #0d6efd));
-    --tsc-counter-color:       var(--ts-skin-text-dim, var(--grey-600, #6c757d));
-    --tsc-thumb-size:          72px;
-    --tsc-thumb-gap:           6px;
-    --tsc-thumb-radius:        var(--ts-skin-radius, 6px);
-    --tsc-thumb-opacity:       .5;
-    --tsc-thumb-opacity-hover: 1;
-    --tsc-thumb-border:        2px solid transparent;
-    --tsc-thumb-border-active: 2px solid var(--primary, var(--ts-skin-accent, #0d6efd));
-    --tsc-gap:                 0px;
+    --ts-carousel-speed:               500ms;
+    --ts-carousel-easing:              cubic-bezier(0.4, 0, 0.2, 1);
+    --ts-carousel-nav-size:            46px;
+    --ts-carousel-nav-offset:          -23px;
+    --ts-carousel-nav-bg:              var(--ts-skin-surface, rgba(0,0,0,.5));
+    --ts-carousel-nav-bg-hover:        var(--ts-skin-elevated, rgba(0,0,0,.78));
+    --ts-carousel-nav-color:           var(--ts-skin-text, #fff);
+    --ts-carousel-nav-radius:          50%;
+    --ts-carousel-nav-icon:            20px;
+    --ts-carousel-nav-border:          none;
+    --ts-carousel-nav-shadow:          var(--ts-skin-shadow, 0 2px 8px rgba(0,0,0,.25));
+    --ts-carousel-dot-size:            8px;
+    --ts-carousel-dot-gap:             8px;
+    --ts-carousel-dot-color:           var(--ts-skin-border-strong, rgba(0,0,0,.22));
+    --ts-carousel-dot-active-color:    var(--ts-skin-accent, var(--primary, #0d6efd));
+    --ts-carousel-dot-line-w:          22px;
+    --ts-carousel-dot-line-h:          3px;
+    --ts-carousel-dot-num-size:        28px;
+    --ts-carousel-progress-h:          3px;
+    --ts-carousel-progress-bg:         var(--ts-skin-surface-2, rgba(0,0,0,.1));
+    --ts-carousel-progress-color:      var(--ts-skin-accent, var(--primary, #0d6efd));
+    --ts-carousel-counter-color:       var(--ts-skin-text-dim, var(--grey-600, #6c757d));
+    --ts-carousel-thumb-size:          72px;
+    --ts-carousel-thumb-gap:           6px;
+    --ts-carousel-thumb-radius:        var(--ts-skin-radius, 6px);
+    --ts-carousel-thumb-opacity:       .5;
+    --ts-carousel-thumb-opacity-hover: 1;
+    --ts-carousel-thumb-border:        2px solid transparent;
+    --ts-carousel-thumb-border-active: 2px solid var(--primary, var(--ts-skin-accent, #0d6efd));
+    --ts-carousel-gap:                 0px;
 
     position: relative;
     z-index: 1;
@@ -5461,13 +5700,13 @@ html.dark .alert-ts-neutral {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: var(--tsc-nav-size);
-    height: var(--tsc-nav-size);
-    border-radius: var(--tsc-nav-radius);
-    background: var(--tsc-nav-bg);
-    border: var(--tsc-nav-border);
-    color: var(--tsc-nav-color);
-    box-shadow: var(--tsc-nav-shadow);
+    width: var(--tsc-nav-size, var(--ts-carousel-nav-size));
+    height: var(--tsc-nav-size, var(--ts-carousel-nav-size));
+    border-radius: var(--tsc-nav-radius, var(--ts-carousel-nav-radius));
+    background: var(--tsc-nav-bg, var(--ts-carousel-nav-bg));
+    border: var(--tsc-nav-border, var(--ts-carousel-nav-border));
+    color: var(--tsc-nav-color, var(--ts-carousel-nav-color));
+    box-shadow: var(--tsc-nav-shadow, var(--ts-carousel-nav-shadow));
     cursor: pointer;
     padding: 0;
     line-height: 1;
@@ -5475,10 +5714,10 @@ html.dark .alert-ts-neutral {
     outline: none;
 }
 .tsc-btn:hover {
-    background: var(--tsc-nav-bg-hover);
+    background: var(--tsc-nav-bg-hover, var(--ts-carousel-nav-bg-hover));
 }
 .tsc-btn:focus-visible {
-    outline: 2px solid var(--tsc-nav-color);
+    outline: 2px solid var(--tsc-nav-color, var(--ts-carousel-nav-color));
     outline-offset: 2px;
 }
 .tsc-btn.tsc-btn-disabled {
@@ -5486,16 +5725,16 @@ html.dark .alert-ts-neutral {
     pointer-events: none;
 }
 .tsc-btn svg {
-    width: var(--tsc-nav-icon);
-    height: var(--tsc-nav-icon);
+    width: var(--tsc-nav-icon, var(--ts-carousel-nav-icon));
+    height: var(--tsc-nav-icon, var(--ts-carousel-nav-icon));
     pointer-events: none;
     display: block;
 }
-.tsc-prev { left:  var(--tsc-nav-offset); }
-.tsc-next { right: var(--tsc-nav-offset); }
+.tsc-prev { left:  var(--tsc-nav-offset, var(--ts-carousel-nav-offset)); }
+.tsc-next { right: var(--tsc-nav-offset, var(--ts-carousel-nav-offset)); }
 
-.tsc-carousel.tsc-rtl .tsc-prev { left: auto; right: var(--tsc-nav-offset); }
-.tsc-carousel.tsc-rtl .tsc-next { right: auto; left: var(--tsc-nav-offset); }
+.tsc-carousel.tsc-rtl .tsc-prev { left: auto; right: var(--tsc-nav-offset, var(--ts-carousel-nav-offset)); }
+.tsc-carousel.tsc-rtl .tsc-next { right: auto; left: var(--tsc-nav-offset, var(--ts-carousel-nav-offset)); }
 
 .tsc-carousel.tsc-vertical .tsc-nav {
     /* Constrain the absolute overlay to the trackOuter, not the whole carousel */
@@ -5518,7 +5757,7 @@ html.dark .alert-ts-neutral {
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: var(--tsc-dot-gap);
+    gap: var(--tsc-dot-gap, var(--ts-carousel-dot-gap));
     padding: 14px 0 4px;
 }
 .tsc-dot {
@@ -5538,15 +5777,15 @@ html.dark .alert-ts-neutral {
 }
 .tsc-dot-pip {
     display: block;
-    width: var(--tsc-dot-size);
-    height: var(--tsc-dot-size);
+    width: var(--tsc-dot-size, var(--ts-carousel-dot-size));
+    height: var(--tsc-dot-size, var(--ts-carousel-dot-size));
     border-radius: 50%;
-    background: var(--tsc-dot-color);
+    background: var(--tsc-dot-color, var(--ts-carousel-dot-color));
     transition: background .25s ease, transform .25s ease, width .25s ease;
 }
 .tsc-dot.tsc-dot-active .tsc-dot-pip,
 .tsc-dot:hover .tsc-dot-pip {
-    background: var(--tsc-dot-active-color);
+    background: var(--tsc-dot-active-color, var(--ts-carousel-dot-active-color));
 }
 .tsc-dot.tsc-dot-active .tsc-dot-pip {
     transform: scale(1.4);
@@ -5554,22 +5793,22 @@ html.dark .alert-ts-neutral {
 
 /* Dot type: line */
 .tsc-dots-line .tsc-dot-pip {
-    width: var(--tsc-dot-line-w);
-    height: var(--tsc-dot-line-h);
+    width: var(--tsc-dot-line-w, var(--ts-carousel-dot-line-w));
+    height: var(--tsc-dot-line-h, var(--ts-carousel-dot-line-h));
     border-radius: 2px;
     transform: none !important;
 }
 .tsc-dots-line .tsc-dot.tsc-dot-active .tsc-dot-pip {
-    width: calc(var(--tsc-dot-line-w) * 2);
+    width: calc(var(--tsc-dot-line-w, var(--ts-carousel-dot-line-w)) * 2);
 }
 
 /* Dot type: number */
 .tsc-dots-number .tsc-dot {
-    width: var(--tsc-dot-num-size);
-    height: var(--tsc-dot-num-size);
+    width: var(--tsc-dot-num-size, var(--ts-carousel-dot-num-size));
+    height: var(--tsc-dot-num-size, var(--ts-carousel-dot-num-size));
     border-radius: 50%;
-    border: 1.5px solid var(--tsc-dot-color);
-    color: var(--tsc-dot-color);
+    border: 1.5px solid var(--tsc-dot-color, var(--ts-carousel-dot-color));
+    color: var(--tsc-dot-color, var(--ts-carousel-dot-color));
     font-size: .7rem;
     font-weight: 600;
     line-height: 1;
@@ -5577,8 +5816,8 @@ html.dark .alert-ts-neutral {
     transition: background .2s ease, border-color .2s ease, color .2s ease;
 }
 .tsc-dots-number .tsc-dot.tsc-dot-active {
-    background: var(--tsc-dot-active-color);
-    border-color: var(--tsc-dot-active-color);
+    background: var(--tsc-dot-active-color, var(--ts-carousel-dot-active-color));
+    border-color: var(--tsc-dot-active-color, var(--ts-carousel-dot-active-color));
     color: var(--ts-skin-on-accent, #fff);
 }
 
@@ -5587,7 +5826,7 @@ html.dark .alert-ts-neutral {
     text-align: center;
     padding: 8px 0 4px;
     font-size: .82rem;
-    color: var(--tsc-counter-color);
+    color: var(--tsc-counter-color, var(--ts-carousel-counter-color));
     letter-spacing: .06em;
     line-height: 1;
 }
@@ -5598,47 +5837,47 @@ html.dark .alert-ts-neutral {
 /* Progress bar */
 .tsc-progress {
     width: 100%;
-    height: var(--tsc-progress-h);
-    background: var(--tsc-progress-bg);
+    height: var(--tsc-progress-h, var(--ts-carousel-progress-h));
+    background: var(--tsc-progress-bg, var(--ts-carousel-progress-bg));
     overflow: hidden;
     flex-shrink: 0;
 }
 .tsc-progress-bar {
     height: 100%;
     width: 0%;
-    background: var(--tsc-progress-color);
+    background: var(--tsc-progress-color, var(--ts-carousel-progress-color));
 }
 
 /* Thumbnail strip */
 .tsc-thumbs {
     display: flex;
-    gap: var(--tsc-thumb-gap);
+    gap: var(--tsc-thumb-gap, var(--ts-carousel-thumb-gap));
     justify-content: center;
     flex-wrap: wrap;
     padding: 8px 0 0;
 }
 .tsc-thumb {
-    flex: 0 0 var(--tsc-thumb-size);
-    width: var(--tsc-thumb-size);
-    height: var(--tsc-thumb-size);
-    border-radius: var(--tsc-thumb-radius);
-    border: var(--tsc-thumb-border);
+    flex: 0 0 var(--tsc-thumb-size, var(--ts-carousel-thumb-size));
+    width: var(--tsc-thumb-size, var(--ts-carousel-thumb-size));
+    height: var(--tsc-thumb-size, var(--ts-carousel-thumb-size));
+    border-radius: var(--tsc-thumb-radius, var(--ts-carousel-thumb-radius));
+    border: var(--tsc-thumb-border, var(--ts-carousel-thumb-border));
     overflow: hidden;
     padding: 0;
     cursor: pointer;
-    opacity: var(--tsc-thumb-opacity);
+    opacity: var(--tsc-thumb-opacity, var(--ts-carousel-thumb-opacity));
     background: var(--grey-200, #e9ecef);
     transition: opacity .2s ease, border-color .2s ease;
     outline: none;
 }
-.tsc-thumb:hover { opacity: var(--tsc-thumb-opacity-hover); }
+.tsc-thumb:hover { opacity: var(--tsc-thumb-opacity-hover, var(--ts-carousel-thumb-opacity-hover)); }
 .tsc-thumb:focus-visible {
     outline: 2px solid var(--primary, #0d6efd);
     outline-offset: 2px;
 }
 .tsc-thumb.tsc-thumb-active {
-    opacity: var(--tsc-thumb-opacity-hover);
-    border: var(--tsc-thumb-border-active);
+    opacity: var(--tsc-thumb-opacity-hover, var(--ts-carousel-thumb-opacity-hover));
+    border: var(--tsc-thumb-border-active, var(--ts-carousel-thumb-border-active));
 }
 .tsc-thumb img {
     width: 100%;
@@ -5663,7 +5902,7 @@ html.dark .alert-ts-neutral {
     width: 100%;
     opacity: 0;
     z-index: 0;
-    transition: opacity var(--tsc-speed) var(--tsc-easing);
+    transition: opacity var(--tsc-speed, var(--ts-carousel-speed)) var(--tsc-easing, var(--ts-carousel-easing));
 }
 .tsc-trans-fade .tsc-item.tsc-active {
     opacity: 1;
@@ -5672,7 +5911,7 @@ html.dark .alert-ts-neutral {
 .tsc-trans-fade .tsc-item.tsc-fade-leave {
     opacity: 0;
     z-index: 2;
-    transition: opacity var(--tsc-speed) var(--tsc-easing);
+    transition: opacity var(--tsc-speed, var(--ts-carousel-speed)) var(--tsc-easing, var(--ts-carousel-easing));
 }
 
 /* Zoom transition */
@@ -5683,8 +5922,8 @@ html.dark .alert-ts-neutral {
     opacity: 0;
     z-index: 0;
     transform: scale(1);
-    transition: opacity var(--tsc-speed) var(--tsc-easing),
-                transform var(--tsc-speed) var(--tsc-easing);
+    transition: opacity var(--tsc-speed, var(--ts-carousel-speed)) var(--tsc-easing, var(--ts-carousel-easing)),
+                transform var(--tsc-speed, var(--ts-carousel-speed)) var(--tsc-easing, var(--ts-carousel-easing));
 }
 .tsc-trans-zoom .tsc-item.tsc-active {
     opacity: 1;
@@ -5697,7 +5936,7 @@ html.dark .alert-ts-neutral {
     transform: scale(.96);
 }
 .tsc-trans-zoom .tsc-item.tsc-zoom-enter {
-    animation: tsc-zoom-enter-kf var(--tsc-speed) var(--tsc-easing) both;
+    animation: tsc-zoom-enter-kf var(--tsc-speed, var(--ts-carousel-speed)) var(--tsc-easing, var(--ts-carousel-easing)) both;
     z-index: 1;
 }
 @keyframes tsc-zoom-enter-kf {
@@ -5711,24 +5950,24 @@ html.dark .alert-ts-neutral {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
     .tsc-carousel {
-        --tsc-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
-        --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
-        --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
-        --tsc-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
+        --ts-carousel-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
+        --ts-carousel-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
+        --ts-carousel-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
+        --ts-carousel-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
     }
 }
 html.dark .tsc-carousel,
 [data-bs-theme="dark"] .tsc-carousel {
-    --tsc-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
-    --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
-    --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
-    --tsc-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
+    --ts-carousel-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
+    --ts-carousel-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
+    --ts-carousel-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
+    --ts-carousel-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
 }
 [data-bs-theme="light"] .tsc-carousel {
-    --tsc-dot-color:        var(--ts-skin-border-strong, rgba(0,0,0,.22));
-    --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #0d6efd));
-    --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.1));
-    --tsc-counter-color:    var(--ts-skin-text-dim, var(--grey-600, #6c757d));
+    --ts-carousel-dot-color:        var(--ts-skin-border-strong, rgba(0,0,0,.22));
+    --ts-carousel-dot-active-color: var(--ts-skin-accent, var(--primary, #0d6efd));
+    --ts-carousel-progress-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.1));
+    --ts-carousel-counter-color:    var(--ts-skin-text-dim, var(--grey-600, #6c757d));
 }
 `;
 
@@ -7534,7 +7773,6 @@ html.dark .tscp-carousel,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Chart Circular
-// Chart Circular
 (((themestrap = {}, $) => {
     const instanceName = '__chartCircular';
 
@@ -7751,8 +7989,16 @@ html.dark .tscp-carousel,
         PluginChartCircular
     });
 
-    $.fn.themestrapPluginChartCircular = function(opts) {
+    $.fn.themestrapPluginChartCircular = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -8136,8 +8382,16 @@ html.dark .tscp-carousel,
 
     $.extend(themestrap, { PluginCodeRail });
 
-    $.fn.themestrapPluginCodeRail = function (opts) {
+    $.fn.themestrapPluginCodeRail = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -8148,7 +8402,6 @@ html.dark .tscp-carousel,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Code Window
 /**
  * Themestrap Code Window Plugin
  *
@@ -8726,8 +8979,16 @@ html:not(.dark) .ts-code-window {
 
     $.extend(themestrap, { PluginCodeWindow });
 
-    $.fn.themestrapPluginCodeWindow = function (opts) {
+    $.fn.themestrapPluginCodeWindow = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -8739,7 +9000,6 @@ html:not(.dark) .ts-code-window {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Collapsible
 // Collapsible
 (((themestrap = {}, $) => {
 
@@ -9134,8 +9394,16 @@ html:not(.dark) .ts-code-window {
 
     $.extend(themestrap, { PluginCollapsible });
 
-    $.fn.themestrapPluginCollapsible = function(opts) {
+    $.fn.themestrapPluginCollapsible = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -9277,38 +9545,38 @@ html:not(.dark) .ts-code-window {
              *  .command-menu element, or via theme skins (dark mode, brand colors).
              */
             :root {
-                --command-bg:              var(--ts-skin-surface, var(--light, #fff));
-                --command-fg:              var(--ts-skin-text, var(--default, #777));
-                --command-muted:           var(--ts-skin-text-dim, var(--light-rgba-60, rgba(255, 255, 255, 0.6)));
-                --command-border:          var(--ts-skin-border, var(--light-rgba-80, rgba(255, 255, 255, 0.8)));
-                --command-border-strong:   var(--ts-skin-border-strong, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
-                --command-hover:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
-                --command-active-bg:       var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
-                --command-active-fg:       var(--ts-skin-text-strong, var(--dark, #0a0c0d));
-                --command-accent:          var(--ts-skin-accent, var(--primary, #0088CC));
-                --command-backdrop:        var(--ts-skin-overlay, var(--dark-rgba-90, rgba(33, 37, 41, 0.9)));
-                --command-radius:          var(--ts-skin-radius-sm, var(--border-radius, 4px));
-                --command-radius-item:     var(--ts-skin-radius, var(--border-radius2x, 8px));
-                --command-shadow:          var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.32),
+                --ts-cmd-bg:              var(--ts-skin-surface, var(--light, #fff));
+                --ts-cmd-fg:              var(--ts-skin-text, var(--default, #777));
+                --ts-cmd-muted:           var(--ts-skin-text-dim, var(--light-rgba-60, rgba(255, 255, 255, 0.6)));
+                --ts-cmd-border:          var(--ts-skin-border, var(--light-rgba-80, rgba(255, 255, 255, 0.8)));
+                --ts-cmd-border-strong:   var(--ts-skin-border-strong, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+                --ts-cmd-hover:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --ts-cmd-active-bg:       var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --ts-cmd-active-fg:       var(--ts-skin-text-strong, var(--dark, #0a0c0d));
+                --ts-cmd-accent:          var(--ts-skin-accent, var(--primary, #0088CC));
+                --ts-cmd-backdrop:        var(--ts-skin-overlay, var(--dark-rgba-90, rgba(33, 37, 41, 0.9)));
+                --ts-cmd-radius:          var(--ts-skin-radius-sm, var(--border-radius, 4px));
+                --ts-cmd-radius-item:     var(--ts-skin-radius, var(--border-radius2x, 8px));
+                --ts-cmd-shadow:          var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.32),
                                            0 4px 12px -4px rgba(0, 0, 0, 0.16));
-                --command-panel-width:     min(96vw, 640px);
-                --command-list-max-h:      min(60vh, 480px);
-                --command-z:               1080;
-                --command-font:            var(--ts-skin-font, inherit);
+                --ts-cmd-panel-width:     min(96vw, 640px);
+                --ts-cmd-list-max-h:      min(60vh, 480px);
+                --ts-cmd-z:               1080;
+                --ts-cmd-font:            var(--ts-skin-font, inherit);
             }
 
             /* Dark variant */
             html.dark .command-menu, .command-menu.command-dark {
-                --command-bg:             var(--dark-300, #0a0c0d);
-                --command-fg:             var(--grey, #969696);
-                --command-muted:          var(--dark--300, #383f45);
-                --command-border:         var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
-                --command-border-strong:  var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
-                --command-hover:          var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-                --command-active-bg:      var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-                --command-active-fg:      var(--light, #fff);
-                --command-backdrop:       var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
-                --command-shadow:         var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.6),
+                --ts-cmd-bg:             var(--dark-300, #0a0c0d);
+                --ts-cmd-fg:             var(--grey, #969696);
+                --ts-cmd-muted:          var(--dark--300, #383f45);
+                --ts-cmd-border:         var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
+                --ts-cmd-border-strong:  var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
+                --ts-cmd-hover:          var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --ts-cmd-active-bg:      var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
+                --ts-cmd-active-fg:      var(--light, #fff);
+                --ts-cmd-backdrop:       var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
+                --ts-cmd-shadow:         var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.6),
                                           0 4px 12px -4px rgba(0, 0, 0, 0.4));
             }
 
@@ -9322,13 +9590,13 @@ html:not(.dark) .ts-code-window {
             .command-menu {
                 position: fixed;
                 inset: 0;
-                z-index: var(--command-z);
+                z-index: var(--command-z, var(--ts-cmd-z));
                 display: flex;
                 align-items: flex-start;
                 justify-content: center;
                 padding: clamp(40px, 12vh, 120px) 16px 16px;
-                font-family: var(--command-font);
-                color: var(--command-fg);
+                font-family: var(--command-font, var(--ts-cmd-font));
+                color: var(--command-fg, var(--ts-cmd-fg));
                 pointer-events: auto;
             }
 
@@ -9341,7 +9609,7 @@ html:not(.dark) .ts-code-window {
             .command-menu [data-command-backdrop] {
                 position: absolute;
                 inset: 0;
-                background: var(--command-backdrop);
+                background: var(--command-backdrop, var(--ts-cmd-backdrop));
                 -webkit-backdrop-filter: blur(4px);
                 backdrop-filter: blur(4px);
                 animation: command-fade-in 180ms ease both;
@@ -9354,12 +9622,12 @@ html:not(.dark) .ts-code-window {
             /* Panel */
             .command-menu [data-command-panel] {
                 position: relative;
-                width: var(--command-panel-width);
-                background: var(--command-bg);
-                color: var(--command-fg);
-                border: 1px solid var(--command-border);
-                border-radius: var(--command-radius);
-                box-shadow: var(--command-shadow);
+                width: var(--command-panel-width, var(--ts-cmd-panel-width));
+                background: var(--command-bg, var(--ts-cmd-bg));
+                color: var(--command-fg, var(--ts-cmd-fg));
+                border: 1px solid var(--command-border, var(--ts-cmd-border));
+                border-radius: var(--command-radius, var(--ts-cmd-radius));
+                box-shadow: var(--command-shadow, var(--ts-cmd-shadow));
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
@@ -9368,9 +9636,9 @@ html:not(.dark) .ts-code-window {
             }
 
             /* Panel size variants */
-            .command-menu [data-command-panel].command-sm  { --command-panel-width: min(96vw, 440px); }
-            .command-menu [data-command-panel].command-lg  { --command-panel-width: min(96vw, 800px); }
-            .command-menu [data-command-panel].command-xl  { --command-panel-width: min(96vw, 960px); }
+            .command-menu [data-command-panel].command-sm  { --ts-cmd-panel-width: min(96vw, 440px); }
+            .command-menu [data-command-panel].command-lg  { --ts-cmd-panel-width: min(96vw, 800px); }
+            .command-menu [data-command-panel].command-xl  { --ts-cmd-panel-width: min(96vw, 960px); }
 
             /* Search row */
             .command-menu [data-command-search] {
@@ -9378,12 +9646,12 @@ html:not(.dark) .ts-code-window {
                 align-items: center;
                 gap: 12px;
                 padding: 14px 18px;
-                border-bottom: 1px solid var(--command-border);
+                border-bottom: 1px solid var(--command-border, var(--ts-cmd-border));
             }
 
             .command-menu [data-command-search] > i,
             .command-menu [data-command-search] > svg {
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 16px;
                 flex: 0 0 auto;
                 pointer-events: none;
@@ -9395,7 +9663,7 @@ html:not(.dark) .ts-code-window {
                 border: 0;
                 outline: 0;
                 background: transparent;
-                color: var(--command-fg);
+                color: var(--command-fg, var(--ts-cmd-fg));
                 font-size: 15px;
                 line-height: 1.5;
                 padding: 4px 0;
@@ -9403,15 +9671,15 @@ html:not(.dark) .ts-code-window {
             }
 
             .command-menu [data-command-input]::placeholder {
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 opacity: 1;
             }
 
             /* Optional close shortcut hint inside the search row */
             .command-menu [data-command-search] kbd {
-                background: var(--command-hover);
-                border: 1px solid var(--command-border);
-                color: var(--command-muted);
+                background: var(--command-hover, var(--ts-cmd-hover));
+                border: 1px solid var(--command-border, var(--ts-cmd-border));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 border-radius: 4px;
                 padding: 2px 6px;
                 font-size: 10.5px;
@@ -9425,16 +9693,16 @@ html:not(.dark) .ts-code-window {
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 6px;
-                max-height: var(--command-list-max-h);
+                max-height: var(--command-list-max-h, var(--ts-cmd-list-max-h));
                 scrollbar-width: thin;
-                scrollbar-color: var(--command-border-strong) transparent;
+                scrollbar-color: var(--command-border-strong, var(--ts-cmd-border-strong)) transparent;
             }
 
             .command-menu [data-command-list]::-webkit-scrollbar {
                 width: 8px;
             }
             .command-menu [data-command-list]::-webkit-scrollbar-thumb {
-                background: var(--command-border-strong);
+                background: var(--command-border-strong, var(--ts-cmd-border-strong));
                 border-radius: 8px;
             }
 
@@ -9452,13 +9720,13 @@ html:not(.dark) .ts-code-window {
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.06em;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 user-select: none;
             }
 
             /* Visual separator between groups */
             .command-menu [data-command-group] + [data-command-group] {
-                border-top: 1px solid var(--command-border);
+                border-top: 1px solid var(--command-border, var(--ts-cmd-border));
                 margin-top: 6px;
                 padding-top: 8px;
             }
@@ -9475,7 +9743,7 @@ html:not(.dark) .ts-code-window {
                 align-items: center;
                 gap: 12px;
                 padding: 9px 10px;
-                border-radius: var(--command-radius-item);
+                border-radius: var(--command-radius-item, var(--ts-cmd-radius-item));
                 font-size: 14px;
                 line-height: 1.4;
                 cursor: pointer;
@@ -9490,13 +9758,13 @@ html:not(.dark) .ts-code-window {
             .command-menu [data-command-item]:hover,
             .command-menu [data-command-item].command-item-active,
             .command-menu [data-command-item][aria-selected="true"] {
-                background: var(--command-active-bg);
-                color: var(--command-active-fg);
+                background: var(--command-active-bg, var(--ts-cmd-active-bg));
+                color: var(--command-active-fg, var(--ts-cmd-active-fg));
                 outline: none;
             }
 
             .command-menu [data-command-item]:focus-visible {
-                outline: 2px solid var(--command-accent);
+                outline: 2px solid var(--command-accent, var(--ts-cmd-accent));
                 outline-offset: -2px;
             }
 
@@ -9512,14 +9780,14 @@ html:not(.dark) .ts-code-window {
                 flex: 0 0 18px;
                 width: 18px;
                 text-align: center;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 15px;
                 transition: color 80ms ease;
             }
 
             .command-menu [data-command-item].command-item-active [data-command-icon],
             .command-menu [data-command-item]:hover [data-command-icon] {
-                color: var(--command-active-fg);
+                color: var(--command-active-fg, var(--ts-cmd-active-fg));
             }
 
             /* Item label + description column */
@@ -9535,7 +9803,7 @@ html:not(.dark) .ts-code-window {
             .command-menu [data-command-item] [data-command-description] {
                 display: block;
                 font-size: 12px;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-weight: 400;
                 margin-top: 1px;
                 overflow: hidden;
@@ -9578,7 +9846,7 @@ html:not(.dark) .ts-code-window {
                 display: inline-flex;
                 align-items: center;
                 gap: 3px;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 11.5px;
                 font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
                 font-weight: 500;
@@ -9586,9 +9854,9 @@ html:not(.dark) .ts-code-window {
 
             .command-menu [data-command-item] [data-command-shortcut] kbd,
             .command-menu [data-command-item] kbd[data-command-shortcut] {
-                background: var(--command-hover);
-                border: 1px solid var(--command-border);
-                color: var(--command-muted);
+                background: var(--command-hover, var(--ts-cmd-hover));
+                border: 1px solid var(--command-border, var(--ts-cmd-border));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 border-radius: 4px;
                 padding: 2px 6px;
                 font-size: 10.5px;
@@ -9603,7 +9871,7 @@ html:not(.dark) .ts-code-window {
                 display: inline-block;
                 padding: 2px 8px;
                 border-radius: 999px;
-                background: var(--command-accent);
+                background: var(--command-accent, var(--ts-cmd-accent));
                 color: var(--ts-skin-on-accent, #fff);
                 font-size: 10.5px;
                 font-weight: 600;
@@ -9615,14 +9883,14 @@ html:not(.dark) .ts-code-window {
             .command-menu [data-command-empty] {
                 padding: 36px 16px;
                 text-align: center;
-                color: var(--command-muted);
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 14px;
                 line-height: 1.5;
             }
 
             .command-menu [data-command-empty] strong {
                 display: block;
-                color: var(--command-fg);
+                color: var(--command-fg, var(--ts-cmd-fg));
                 font-weight: 600;
                 margin-bottom: 4px;
             }
@@ -9634,9 +9902,9 @@ html:not(.dark) .ts-code-window {
                 align-items: center;
                 gap: 14px;
                 padding: 8px 14px;
-                border-top: 1px solid var(--command-border);
-                background: var(--command-hover);
-                color: var(--command-muted);
+                border-top: 1px solid var(--command-border, var(--ts-cmd-border));
+                background: var(--command-hover, var(--ts-cmd-hover));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 font-size: 11.5px;
                 flex-wrap: wrap;
             }
@@ -9649,15 +9917,15 @@ html:not(.dark) .ts-code-window {
             }
 
             .command-menu [data-command-footer] kbd {
-                background: var(--command-bg);
-                border: 1px solid var(--command-border-strong);
-                color: var(--command-muted);
+                background: var(--command-bg, var(--ts-cmd-bg));
+                border: 1px solid var(--command-border-strong, var(--ts-cmd-border-strong));
+                color: var(--command-muted, var(--ts-cmd-muted));
                 border-radius: 4px;
                 padding: 2px 6px;
                 font-size: 10.5px;
                 line-height: 1;
                 font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
-                box-shadow: 0 1px 0 var(--command-border);
+                box-shadow: 0 1px 0 var(--command-border, var(--ts-cmd-border));
             }
 
             /* External trigger button preset */
@@ -9671,9 +9939,9 @@ html:not(.dark) .ts-code-window {
                 align-items: center;
                 gap: 10px;
                 padding: 6px 10px 6px 12px;
-                background: var(--command-bg, var(--ts-skin-surface, #fff));
-                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
-                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
+                background: var(--command-bg, var(--ts-cmd-bg, var(--ts-skin-surface, #fff)));
+                color: var(--command-muted, var(--ts-cmd-muted, var(--ts-skin-text-dim, #64748b)));
+                border: 1px solid var(--command-border, var(--ts-cmd-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12))));
                 border-radius: 8px;
                 font-size: 13px;
                 line-height: 1.4;
@@ -9683,8 +9951,8 @@ html:not(.dark) .ts-code-window {
             }
 
             .command-trigger:hover {
-                border-color: var(--command-border-strong, var(--ts-skin-border-strong, rgba(15, 23, 42, 0.2)));
-                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.04)));
+                border-color: var(--command-border-strong, var(--ts-cmd-border-strong, var(--ts-skin-border-strong, rgba(15, 23, 42, 0.2))));
+                background: var(--command-hover, var(--ts-cmd-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.04))));
             }
 
             .command-trigger .command-trigger-label {
@@ -9699,9 +9967,9 @@ html:not(.dark) .ts-code-window {
             }
 
             .command-trigger .command-trigger-shortcut kbd {
-                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.06)));
-                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
-                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
+                background: var(--command-hover, var(--ts-cmd-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.06))));
+                border: 1px solid var(--command-border, var(--ts-cmd-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12))));
+                color: var(--command-muted, var(--ts-cmd-muted, var(--ts-skin-text-dim, #64748b)));
                 border-radius: 4px;
                 padding: 1px 5px;
                 font-size: 10.5px;
@@ -10651,8 +10919,16 @@ html:not(.dark) .ts-code-window {
 
     $.extend(themestrap, { PluginCommandMenu });
 
-    $.fn.themestrapPluginCommandMenu = function (opts) {
+    $.fn.themestrapPluginCommandMenu = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -10663,7 +10939,6 @@ html:not(.dark) .ts-code-window {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Context Menu
 // Context Menu
 (((themestrap = {}, $) => {
     const instanceName = '__pluginContextMenu';
@@ -11232,8 +11507,16 @@ html.dark .ts-ctx-separator,
     $.extend(themestrap, { PluginContextMenu });
 
     // jQuery plugin method
-    $.fn.themestrapPluginContextMenu = function(opts) {
+    $.fn.themestrapPluginContextMenu = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -11246,7 +11529,6 @@ html.dark .ts-ctx-separator,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Countdown
 // Countdown
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCountdown';
@@ -11567,8 +11849,16 @@ html.dark .ts-ctx-separator,
 
     $.extend(themestrap, { PluginCountdown });
 
-    $.fn.themestrapPluginCountdown = function(opts) {
+    $.fn.themestrapPluginCountdown = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -11582,7 +11872,6 @@ html.dark .ts-ctx-separator,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Counter
 // Counter
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCounter';
@@ -11818,8 +12107,16 @@ html.dark .ts-ctx-separator,
         PluginCounter
     });
 
-    $.fn.themestrapPluginCounter = function(opts) {
+    $.fn.themestrapPluginCounter = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -11831,8 +12128,6 @@ html.dark .ts-ctx-separator,
     };
 
 })).apply(this, [window.themestrap, jQuery]);
-
-// CursorEffect
 
 // CursorEffect
 (((themestrap = {}, $) => {
@@ -12216,8 +12511,16 @@ html.dark .ts-ctx-separator,
 		PluginCursorEffect
 	});
 
-	$.fn.themestrapPluginCursorEffect = function(opts) {
+	$.fn.themestrapPluginCursorEffect = function(opts, ...args) {
 		return this.map(function () {
+			if (typeof opts === 'string') {
+				const instance = $(this).data(instanceName);
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
+			}
+
 			const $this = $(this);
 
 			if ($this.data(instanceName)) {
@@ -12644,8 +12947,16 @@ html.dark .ts-ctx-separator,
 
     $.extend(themestrap, { PluginDarkMode });
 
-    $.fn.themestrapPluginDarkMode = function (opts) {
+    $.fn.themestrapPluginDarkMode = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -13434,8 +13745,16 @@ html.dark,
 
     $.extend(themestrap, { PluginDialog });
 
-    $.fn.themestrapPluginDialog = function (opts) {
+    $.fn.themestrapPluginDialog = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -14298,8 +14617,16 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 
     $.extend(themestrap, { PluginDrawer });
 
-    $.fn.themestrapPluginDrawer = function (opts) {
+    $.fn.themestrapPluginDrawer = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -14310,7 +14637,6 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Float Element
 // Float Element
 (((themestrap = {}, $) => {
     const instanceName = '__floatElement';
@@ -14643,7 +14969,6 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
     };
 })).apply(this, [window.themestrap, jQuery]);
 
-// GDPR
 // GDPR
 (((themestrap = {}, $) => {
 
@@ -14984,8 +15309,16 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 		PluginGDPRWrapper
 	});
 	
-	$.fn.themestrapPluginGDPR = function(opts) {
+	$.fn.themestrapPluginGDPR = function(opts, ...args) {
 		return this.map(function() {
+			if (typeof opts === 'string') {
+				const instance = $(this).data(gdprInstanceName);
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
+			}
+
 			const $this = $(this);
 			if ($this.data(gdprInstanceName)) {
 				return $this.data(gdprInstanceName);
@@ -14995,8 +15328,16 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 		});
 	};
 
-	$.fn.themestrapPluginGDPRWrapper = function(opts) {
+	$.fn.themestrapPluginGDPRWrapper = function(opts, ...args) {
 		return this.map(function() {
+			if (typeof opts === 'string') {
+				const instance = $(this).data(wrapperInstanceName);
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
+			}
+
 			const $this = $(this);
 			if ($this.data(wrapperInstanceName)) {
 				return $this.data(wrapperInstanceName);
@@ -15008,7 +15349,6 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Syntax Highlight
 /**
  * Themestrap Syntax Highlight Plugin
  * Wraps highlight.js core with lazy ESM loading, language aliases, promise
@@ -16216,8 +16556,16 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 
     $.extend(themestrap, { PluginHighlight });
 
-    $.fn.themestrapPluginHighlight = function (opts) {
+    $.fn.themestrapPluginHighlight = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -16899,7 +17247,6 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Hover Effect
 /**
  * Themestrap — PluginHoverEffect
  *
@@ -17676,9 +18023,9 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 })).apply(this, [window.themestrap, jQuery]);
 
 // Icon
-// Icon
 (((themestrap = {}, $) => {
     const instanceName = '__icon';
+    let uid = 0;
 
     class PluginIcon {
         constructor($el, opts) {
@@ -17691,6 +18038,10 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 			}
 
 			this.$el = $el;
+			this._ns = '.tsicon' + (++uid);
+			this._origClass = $el.attr('class');
+			this._origStyle = $el.attr('style');
+			this._timers = [];
 
 			this
 				.setData()
@@ -17752,9 +18103,10 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 			const fileName = $el.attr('src');
 
 			if(fileName.split('.').pop() == 'svg') {
-				const SVGContent = $.get({
+				self._xhr = $.get({
 					url: fileName, 
 					success(data, status, {responseText}) {
+						self._xhr = null;
 						const iconWrapper = self.options.fadeIn ? $('<div class="animated-icon animated fadeIn">'+ responseText +'</div>') : $('<div class="animated-icon animated">'+ responseText +'</div>'), uniqid = 'icon_' + Math.floor(Math.random() * 26) + Date.now();
 
 						// Add ID
@@ -17781,6 +18133,10 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 
 						$el.replaceWith(iconWrapper);
 
+						// replaceWith drops the img's data, so the instance lives on the wrapper from here on
+						self.$icon = iconWrapper;
+						iconWrapper.data(instanceName, self);
+
 						if( self.options.extraClass ) {
 							iconWrapper.addClass( self.options.extraClass );
 						}
@@ -17796,7 +18152,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 
 						$el = iconWrapper;
 
-						const icon = new Vivus(uniqid, {start: 'manual', type: 'sync', selfDestroy: true, duration, onReady({el}) {
+						const icon = self.vivus = new Vivus(uniqid, {start: 'manual', type: 'sync', selfDestroy: true, duration, onReady({el}) {
 							const styleElement = document.createElementNS("http://www.w3.org/2000/svg", "style");
 							let animateStyle = '';
 
@@ -17822,9 +18178,9 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 
 						// Isn't animated
 						if( !self.options.animated ) {
-							setTimeout(() => {
+							self._timers.push(setTimeout(() => {
 								icon.finish();
-							}, 10);
+							}, 10));
 							$el.css({ opacity: 1 });
 						}
 
@@ -17839,7 +18195,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 							}
 
 							// On Scroll
-							$(window).on('scroll', () => {
+							$(window).on('scroll' + self._ns, () => {
 								if( $el.visible( true ) ) {
 									self.startIconAnimation( icon, $el );
 								}
@@ -17850,11 +18206,11 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 							$el.css({ opacity: 1 });
 							icon.finish();
 							
-							$(window).on('themestrap.plugin.icon.svg.ready', () => {
-								setTimeout(() => {
+							$(window).on('themestrap.plugin.icon.svg.ready' + self._ns, () => {
+								self._timers.push(setTimeout(() => {
 									icon.el.setAttribute('class', 'finished');
 									icon.finish();
-								}, 300);
+								}, 300));
 							});
 							
 						}
@@ -17880,11 +18236,53 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 			$({to:0}).animate({to:1}, self.options.delay, () => {
 				icon.play(1);
 
-				setTimeout(() => {
+				self._timers.push(setTimeout(() => {
 					icon.el.setAttribute('class', 'finished');
-				}, icon.duration * 5 );
+				}, icon.duration * 5 ));
 			});
 		}
+
+        /**
+         * Put the original <img> back in place of the inline SVG and drop all handlers and timers.
+         * Call it on the img before the SVG loads, or on the .animated-icon wrapper after.
+         * @returns {PluginIcon}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (this._xhr) {
+                this._xhr.abort();
+                this._xhr = null;
+            }
+            $(window).off(this._ns);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            if (this.vivus && typeof this.vivus.destroy === 'function') {
+                try { this.vivus.destroy(); } catch (e) { /* already self destroyed */ }
+            }
+            this.vivus = null;
+
+            if (this.$icon) {
+                this.$icon.replaceWith($el);
+                this.$icon = null;
+            }
+
+            if (this._origClass === undefined) {
+                $el.removeAttr('class');
+            } else {
+                $el.attr('class', this._origClass);
+            }
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginIcon.defaults = {
@@ -17902,22 +18300,24 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 		PluginIcon
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginIcon = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginIcon = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginIcon($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginIcon($this, opts);
 		});
 	};
 })).apply(this, [window.themestrap, jQuery]);
 
-// In Viewport Style
 // In Viewport Style
 (((themestrap = {}, $) => {
     const instanceName = '__inviewportstyle';
@@ -17933,6 +18333,8 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 			}
 
 			this.$el = $el;
+			this._origClass = $el.attr('class');
+			this._origStyle = $el.attr('style');
 
 			this
 				.setData()
@@ -17960,7 +18362,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 			self.$el.css(self.options.style);
 
 		    if (typeof window.IntersectionObserver === 'function') {
-			    const un = observeElementInViewport.observeElementInViewport(
+			    self._unobserve = observeElementInViewport.observeElementInViewport(
 			        el, () => {
 			        	self.$el.css(self.options.styleIn);
 			        	self.$el
@@ -17982,6 +18384,34 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 
 			return this;
 		}
+
+        /**
+         * Stop observing and restore the element's original class and style attributes.
+         * @returns {PluginInViewportStyle}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (typeof this._unobserve === 'function') {
+                this._unobserve();
+                this._unobserve = null;
+            }
+
+            if (this._origClass === undefined) {
+                $el.removeAttr('class');
+            } else {
+                $el.attr('class', this._origClass);
+            }
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginInViewportStyle.defaults = {
@@ -17990,8 +18420,8 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 		modTop: '-200px',
 		modBottom: '-200px',
 		style: {'transition': 'all 1s ease-in-out'},
-		styleIn: '',
-		styleOut: '',
+		styleIn: {},
+		styleOut: {},
 		classIn: '',
 		classOut: ''
 	};
@@ -18001,22 +18431,24 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 		PluginInViewportStyle
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginInViewportStyle = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginInViewportStyle = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginInViewportStyle($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginInViewportStyle($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);
 
-// Lightbox
 // Lightbox
 (((themestrap = {}, $) => {
     const instanceName = '__pluginLightbox';
@@ -18594,8 +19026,16 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
         PluginLightbox
     });
 
-    $.fn.themestrapPluginLightbox = function(opts) {
+    $.fn.themestrapPluginLightbox = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -18607,7 +19047,6 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Loading Overlay
 // Loading Overlay
 (((themestrap = {}, $) => {
 
@@ -19233,8 +19672,16 @@ html.dark .ts-lo-overlay,
 
     $.extend(themestrap, { PluginLoadingOverlay });
 
-    $.fn.themestrapPluginLoadingOverlay = function(opts) {
+    $.fn.themestrapPluginLoadingOverlay = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -19956,8 +20403,16 @@ html.dark .ts-lo-overlay,
 
     $.extend(themestrap, { PluginLockscreen });
 
-    $.fn.themestrapPluginLockscreen = function(opts) {
+    $.fn.themestrapPluginLockscreen = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -19968,7 +20423,6 @@ html.dark .ts-lo-overlay,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Markdown
 /**
  * Themestrap GFM Markdown Plugin
  * Parses GitHub Flavored Markdown into HTML, entirely client-side, with no
@@ -20887,8 +21341,16 @@ html.dark .ts-lo-overlay,
 
     $.extend(themestrap, { PluginMarkdown });
 
-    $.fn.themestrapPluginMarkdown = function(opts) {
+    $.fn.themestrapPluginMarkdown = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -20900,7 +21362,6 @@ html.dark .ts-lo-overlay,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Masonry
 // Masonry
 (((themestrap = {}, $) => {
     const instanceName = '__masonry';
@@ -21196,8 +21657,16 @@ html.dark .ts-lo-overlay,
     $.extend(themestrap, { PluginMasonry });
 
     // jQuery bridge
-    $.fn.themestrapPluginMasonry = function(opts) {
+    $.fn.themestrapPluginMasonry = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -21209,7 +21678,6 @@ html.dark .ts-lo-overlay,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Match Height
 // Match Height
 (((themestrap = {}, $) => {
     const instanceName = '__matchHeight';
@@ -21259,6 +21727,27 @@ html.dark .ts-lo-overlay,
 
 			return this;
 		}
+
+        /**
+         * Release the element from its matchHeight group and clear the height it was given.
+         * @returns {PluginMatchHeight}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (typeof $.fn.matchHeight === 'function') {
+                $el.matchHeight({ remove: true, property: this.options.property });
+
+                // matchHeight leaves empty groups behind, drop them so resize stops visiting them
+                if ($.fn.matchHeight._groups) {
+                    $.fn.matchHeight._groups = $.fn.matchHeight._groups.filter(group => group.elements.length);
+                }
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginMatchHeight.defaults = {
@@ -21273,19 +21762,22 @@ html.dark .ts-lo-overlay,
 		PluginMatchHeight
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginMatchHeight = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginMatchHeight = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginMatchHeight($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginMatchHeight($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);
 
 // Menubar
@@ -22290,8 +22782,16 @@ html.dark [data-plugin-menubar],
 
     $.extend(themestrap, { PluginMenubar });
 
-    $.fn.themestrapPluginMenubar = function(opts) {
+    $.fn.themestrapPluginMenubar = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) return $this.data(instanceName);
             return new PluginMenubar($this, opts);
@@ -22300,7 +22800,6 @@ html.dark [data-plugin-menubar],
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Nav
 // Nav
 (((themestrap = {}, $) => {
     let initialized = false;
@@ -24015,8 +24514,16 @@ html.dark .ts-navbar,
 
     $.extend(themestrap, { PluginNavbar });
 
-    $.fn.themestrapPluginNavbar = function (opts) {
+    $.fn.themestrapPluginNavbar = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -24028,7 +24535,6 @@ html.dark .ts-navbar,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Navigation
 /**
  * Themestrap PluginNavigation
  * 
@@ -26038,8 +26544,16 @@ html.dark .ts-navbar,
 
     $.extend(themestrap, { PluginNavigation });
 
-    $.fn.themestrapPluginNavigation = function(opts) {
+    $.fn.themestrapPluginNavigation = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -26189,7 +26703,7 @@ html.dark .ts-navbar,
 }
 
 [data-navmenu-trigger]:focus-visible {
-    outline: 2px solid var(--ts-nav-focus-ring, currentColor);
+    outline: 2px solid var(--ts-nm-focus-ring, var(--ts-nav-focus-ring, currentColor));
     outline-offset: 2px;
 }
 
@@ -26236,7 +26750,7 @@ html.dark .ts-navbar,
 }
 
 [data-navmenu-link]:focus-visible {
-    outline: 2px solid var(--ts-nav-focus-ring, currentColor);
+    outline: 2px solid var(--ts-nm-focus-ring, var(--ts-nav-focus-ring, currentColor));
     outline-offset: 2px;
 }
 
@@ -26246,8 +26760,8 @@ html.dark .ts-navbar,
     top: calc(100% + .5rem);
     left: 0;
     min-width: 220px;
-    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #fff));
-    border: 1px solid var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08)));
+    background: var(--ts-nm-content-bg, var(--ts-nav-content-bg, var(--ts-skin-surface, #fff)));
+    border: 1px solid var(--ts-nm-content-border, var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08))));
     border-radius: .5rem;
     box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
     padding: .5rem;
@@ -26279,8 +26793,8 @@ html.dark .ts-navbar,
     left: 0;
     min-width: 220px;
     overflow: hidden;
-    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #fff));
-    border: 1px solid var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08)));
+    background: var(--ts-nm-content-bg, var(--ts-nav-content-bg, var(--ts-skin-surface, #fff)));
+    border: 1px solid var(--ts-nm-content-border, var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08))));
     border-radius: .5rem;
     box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
     z-index: 1050;
@@ -26342,7 +26856,7 @@ html.dark .ts-navbar,
 }
 
 [data-navmenu-list-item]:focus-visible {
-    outline: 2px solid var(--ts-nav-focus-ring, currentColor);
+    outline: 2px solid var(--ts-nm-focus-ring, var(--ts-nav-focus-ring, currentColor));
     outline-offset: 2px;
 }
 
@@ -26353,7 +26867,7 @@ html.dark .ts-navbar,
     width: 2.25rem;
     height: 2.25rem;
     border-radius: .375rem;
-    background-color: var(--ts-nav-icon-bg, color-mix(in srgb, currentColor 8%, transparent));
+    background-color: var(--ts-nm-icon-bg, var(--ts-nav-icon-bg, color-mix(in srgb, currentColor 8%, transparent)));
     flex-shrink: 0;
     font-size: 1.1rem;
     line-height: 1;
@@ -26369,20 +26883,20 @@ html.dark .ts-navbar,
 [data-navmenu-list-item-desc] {
     font-size: .8125rem;
     line-height: 1.4;
-    color: var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(0,0,0,.55)));
+    color: var(--ts-nm-muted, var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(0,0,0,.55))));
     margin: 0;
 }
 
 /* Dark-mode overrides */
 html.dark [data-navmenu-content],
 html.dark [data-navmenu-viewport] {
-    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #1c1c1e));
-    border-color: var(--ts-nav-content-border, var(--ts-skin-border, rgba(255,255,255,.1)));
+    background: var(--ts-nm-content-bg, var(--ts-nav-content-bg, var(--ts-skin-surface, #1c1c1e)));
+    border-color: var(--ts-nm-content-border, var(--ts-nav-content-border, var(--ts-skin-border, rgba(255,255,255,.1))));
     box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.4));
 }
 
 html.dark [data-navmenu-list-item-desc] {
-    color: var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(255,255,255,.55)));
+    color: var(--ts-nm-muted, var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(255,255,255,.55))));
 }
 `;
 
@@ -26775,8 +27289,16 @@ html.dark [data-navmenu-list-item-desc] {
 
     $.extend(themestrap, { PluginNavmenu });
 
-    $.fn.themestrapPluginNavmenu = function(opts) {
+    $.fn.themestrapPluginNavmenu = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -26788,7 +27310,6 @@ html.dark [data-navmenu-list-item-desc] {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Newsletter
 // Newsletter
 (((themestrap = {}, $) => {
     let initialized = false;
@@ -27394,8 +27915,16 @@ html.dark [data-navmenu-list-item-desc] {
 
     $.extend(themestrap, { PluginOtp });
 
-    $.fn.themestrapPluginOtp = function(opts) {
+    $.fn.themestrapPluginOtp = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -27406,7 +27935,6 @@ html.dark [data-navmenu-list-item-desc] {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Panel Nav
 /**
  * Themestrap Panel Navigation
  *
@@ -28453,8 +28981,16 @@ html.dark [data-navmenu-list-item-desc] {
 
     $.extend(themestrap, { PluginPanelNav });
 
-    $.fn.themestrapPluginPanelNav = function(opts) {
+    $.fn.themestrapPluginPanelNav = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -28466,7 +29002,6 @@ html.dark [data-navmenu-list-item-desc] {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Parallax
 // Parallax
 (((themestrap = {}, $) => {
 
@@ -28811,8 +29346,16 @@ html.dark [data-navmenu-list-item-desc] {
 
     $.extend(themestrap, { PluginParallax });
 
-    $.fn.themestrapPluginParallax = function(opts) {
+    $.fn.themestrapPluginParallax = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) return $this.data(instanceName);
             return new PluginParallax($this, opts);
@@ -29583,8 +30126,16 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 
     $.extend(themestrap, { PluginPopover });
 
-    $.fn.themestrapPluginPopover = function (opts) {
+    $.fn.themestrapPluginPopover = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -29597,7 +30148,497 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 
 })).apply(this, [window.themestrap, jQuery]);
 
+/**
+ * Themestrap Pricing Toggle
+ *
+ * Drives a billing-period switcher (e.g. Monthly ↔ Annual) that:
+ *   - Animates a pill/thumb inside a track between two positions.
+ *   - Broadcasts a namespaced jQuery event so any number of listeners on the
+ *     page can react (price spans, feature lists, badge visibility, etc.).
+ *   - Supports an optional savings badge shown only in the secondary state.
+ *   - Exposes a clean programmatic API and full ARIA semantics.
+ *   - Integrates with PluginCounter so animated price figures recount when the
+ *     period switches (opt-in via options.animatePrices).
+ *   - Fires CSS custom-property updates on the host element so pure-CSS
+ *     themes can react without any JavaScript of their own.
+ *
+ *  Markup 
+ *
+ *   <!-- Minimal: two labels + a track wrapper containing a thumb -->
+ *   <div data-plugin-pricingtoggle>
+ *     <span data-pt-label-primary>Monthly</span>
+ *     <button data-pt-track aria-pressed="false" type="button">
+ *       <span data-pt-thumb></span>
+ *     </button>
+ *     <span data-pt-label-secondary>
+ *       Annual
+ *       <span data-pt-savings-badge>−20%</span>
+ *     </span>
+ *   </div>
+ *
+ *   <!-- Price targets anywhere on the page (not required to be inside the
+ *        toggle wrapper). Each element declares both values via data attrs. -->
+ *   <span data-pt-price data-pt-primary="$29" data-pt-secondary="$23"></span>
+ *
+ *   <!-- Per-element options override defaults: -->
+ *   <div data-plugin-pricingtoggle
+ *        data-plugin-options='{"duration":200,"activeClass":"is-annual"}'>
+ *
+ *  Events 
+ *
+ *   The toggle element emits two namespaced events. Both carry the same
+ *   detail object:  { state, isPrimary, isSecondary, instance }
+ *
+ *   ts-pricingtoggle-changed   — fires on every state change (after DOM update)
+ *   ts-pricingtoggle-primary   — fires only when reverting to primary state
+ *   ts-pricingtoggle-secondary — fires only when entering secondary state
+ *
+ *   Usage:
+ *     $('[data-plugin-pricingtoggle]').on('ts-pricingtoggle-changed', (e, detail) => {
+ *       console.log(detail.state); // 'primary' | 'secondary'
+ *     });
+ *
+ * Programmatic API 
+ *
+ *   const pt = $('[data-plugin-pricingtoggle]').data('__pricingToggle');
+ *   pt.setState('secondary');   // set to a specific state
+ *   pt.toggle();                // flip current state
+ *   pt.getState();              // → 'primary' | 'secondary'
+ *   pt.destroy();               // remove all handlers + data
+ *
+ * Init.js wiring 
+ *
+ *   if (typeof $.fn['themestrapPluginPricingToggle'] === 'function' && $('[data-plugin-pricingtoggle]').length) {
+ *       $(() => {
+ *           $('[data-plugin-pricingtoggle]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginPricingToggle(opts);
+ *           });
+ *       });
+ *   }
+ */
 // Pricing Toggle
+(((themestrap = {}, $) => {
+    const instanceName = '__pricingToggle';
+
+    // CSS injected once per page
+    const STYLE_ID = 'themestrap-pricingtoggle-styles';
+
+    const CSS = `
+        [data-plugin-pricingtoggle] {
+            display: inline-flex;
+            align-items: center;
+            gap: .75rem;
+            user-select: none;
+        }
+
+        /* Track */
+        [data-pt-track] {
+            position: relative;
+            display: inline-block;
+            width: var(--ts-pricing-track-width, var(--pt-track-width, 44px));
+            height: var(--ts-pricing-track-height, var(--pt-track-height, 24px));
+            border-radius: 9999px;
+            background: var(--ts-pricing-track-bg, var(--pt-track-bg, var(--ts-skin-accent, #3b82f6)));
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: background var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease;
+            flex-shrink: 0;
+        }
+        [data-pt-track]:focus-visible {
+            outline: 2px solid var(--ts-pricing-track-bg, var(--pt-track-bg, var(--ts-skin-accent, #3b82f6)));
+            outline-offset: 3px;
+        }
+
+        /* Thumb */
+        [data-pt-thumb] {
+            position: absolute;
+            top: var(--ts-pricing-thumb-inset, var(--pt-thumb-inset, 3px));
+            left: var(--ts-pricing-thumb-inset, var(--pt-thumb-inset, 3px));
+            width: var(--ts-pricing-thumb-size, var(--pt-thumb-size, 18px));
+            height: var(--ts-pricing-thumb-size, var(--pt-thumb-size, 18px));
+            border-radius: 50%;
+            background: var(--ts-pricing-thumb-bg, var(--pt-thumb-bg, var(--ts-skin-surface, #fff)));
+            box-shadow: var(--ts-skin-shadow, 0 1px 4px rgba(0, 0, 0, .25));
+            transition: left var(--ts-pricing-duration, var(--pt-duration, 250ms)) cubic-bezier(.16, 1, .3, 1),
+                        background var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease;
+            pointer-events: none;
+        }
+
+        /* Secondary (active / "on") state: slide thumb to the right */
+        [data-pt-track][aria-pressed="true"] [data-pt-thumb] {
+            left: calc(
+                var(--ts-pricing-track-width, var(--pt-track-width, 44px))
+                - var(--ts-pricing-thumb-size, var(--pt-thumb-size, 18px))
+                - var(--ts-pricing-thumb-inset, var(--pt-thumb-inset, 3px))
+            );
+        }
+
+        /* Labels */
+        [data-pt-label-primary],
+        [data-pt-label-secondary] {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--ts-pricing-label-muted, var(--pt-label-muted, var(--ts-skin-text-dim, #64748b)));
+            transition: color var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease;
+            cursor: pointer;
+        }
+        [data-pt-label-primary].is-active,
+        [data-pt-label-secondary].is-active {
+            color: var(--ts-pricing-label-active, var(--pt-label-active, var(--ts-skin-text-strong, #0f172a)));
+        }
+
+        /* Savings badge — hidden in primary state, shown in secondary */
+        [data-pt-savings-badge] {
+            display: inline-block;
+            background: var(--ts-pricing-badge-bg, var(--pt-badge-bg, var(--ts-skin-success-soft, rgba(34, 197, 94, .12))));
+            color: var(--ts-pricing-badge-color, var(--pt-badge-color, var(--ts-skin-success, #16a34a)));
+            font-size: .6875rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            letter-spacing: .02em;
+            opacity: 0;
+            transform: scale(.8) translateY(2px);
+            transition: opacity var(--ts-pricing-duration, var(--pt-duration, 250ms)) ease,
+                        transform var(--ts-pricing-duration, var(--pt-duration, 250ms)) cubic-bezier(.16, 1, .3, 1);
+            pointer-events: none;
+        }
+        [data-pt-label-secondary].is-active [data-pt-savings-badge] {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Price targets: crossfade between values */
+        [data-pt-price] {
+            display: inline-block;
+            transition: opacity var(--ts-pricing-price-duration, var(--pt-price-duration, 180ms)) ease;
+        }
+        [data-pt-price].pt-fading {
+            opacity: 0;
+        }
+    `;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const $style = $('<style>').attr({ id: STYLE_ID, type: 'text/css' }).text(CSS);
+        $('head').append($style);
+    }
+
+    /**
+     * Update every [data-pt-price] element on the page whose scope matches
+     * this toggle instance. Scoping: if the price element has a
+     * [data-pt-group] attribute it must equal the toggle's group option.
+     */
+    function updatePrices(opts, state) {
+        const isPrimary = state === 'primary';
+        const group = opts.group || null;
+
+        $('[data-pt-price]').each(function () {
+            const $price = $(this);
+            const elGroup = $price.data('pt-group') || null;
+
+            // Scope: only update elements that belong to the same group,
+            // OR elements with no group when no group is configured.
+            if (group !== elGroup) return;
+
+            const primary   = $price.data('pt-primary')   ?? '';
+            const secondary = $price.data('pt-secondary') ?? '';
+            const next = isPrimary ? primary : secondary;
+
+            if (opts.animatePrices) {
+                $price.addClass('pt-fading');
+                setTimeout(() => {
+                    $price.text(next).removeClass('pt-fading');
+                }, opts.priceFadeDuration);
+            } else {
+                $price.text(next);
+            }
+        });
+    }
+
+    class PluginPricingToggle {
+
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return $el.data(instanceName);
+            }
+
+            this.$el = $el;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            const attrOpts = themestrap.fn.getOptions(this.$el.data('plugin-options'));
+
+            this.options = $.extend(true, {}, PluginPricingToggle.defaults, opts, attrOpts, {
+                wrapper: this.$el,
+            });
+
+            // Resolve initial state from markup if not forced via options.
+            // If the track is already aria-pressed="true" we start secondary.
+            if (!this.options.initialState) {
+                const $track = this.$el.find('[data-pt-track]');
+                this.options.initialState =
+                    $track.attr('aria-pressed') === 'true' ? 'secondary' : 'primary';
+            }
+
+            this._state = this.options.initialState;
+            return this;
+        }
+
+        build() {
+            injectStyles();
+
+            const o = this.options;
+            const $el = this.$el;
+
+            // Cache sub-element references (supports zero or one of each).
+            this.$track         = $el.find('[data-pt-track]');
+            this.$thumb         = $el.find('[data-pt-thumb]');
+            this.$labelPrimary  = $el.find('[data-pt-label-primary]');
+            this.$labelSecondary= $el.find('[data-pt-label-secondary]');
+            this.$savingsBadge  = $el.find('[data-pt-savings-badge]');
+
+            // Ensure the track button has the right type & ARIA role.
+            if (this.$track.is('button') && !this.$track.attr('type')) {
+                this.$track.attr('type', 'button');
+            }
+            this.$track.attr('role', 'switch');
+
+            // Write the options that were given as inline custom properties. Options
+            // left null are skipped, so stylesheet values and the skin still apply.
+            $el.css({
+                '--ts-pricing-track-width':      o.trackWidth,
+                '--ts-pricing-track-height':     o.trackHeight,
+                '--ts-pricing-thumb-size':       o.thumbSize,
+                '--ts-pricing-thumb-inset':      o.thumbInset,
+                '--ts-pricing-track-bg':         o.trackColor,
+                '--ts-pricing-thumb-bg':         o.thumbColor,
+                '--ts-pricing-duration':         o.duration + 'ms',
+                '--ts-pricing-price-duration':   o.priceFadeDuration + 'ms',
+                '--ts-pricing-label-muted':      o.labelMutedColor,
+                '--ts-pricing-label-active':     o.labelActiveColor,
+                '--ts-pricing-badge-bg':         o.badgeBg,
+                '--ts-pricing-badge-color':      o.badgeColor,
+            });
+
+            // Apply initial visual state without emitting events.
+            this._applyState(this._state, { silent: true });
+
+            // Set initial price values.
+            updatePrices(o, this._state);
+
+            return this;
+        }
+
+        events() {
+            const self = this;
+
+            // Track click / keyboard.
+            self.$track.on('click.pricingtoggle', function () {
+                self.toggle();
+            });
+
+            // Label clicks also toggle.
+            self.$labelPrimary.on('click.pricingtoggle', function () {
+                if (self._state !== 'primary') self.setState('primary');
+            });
+            self.$labelSecondary.on('click.pricingtoggle', function () {
+                if (self._state !== 'secondary') self.setState('secondary');
+            });
+
+            // Keyboard: Space / Enter on non-button tracks.
+            if (!self.$track.is('button')) {
+                self.$track.on('keydown.pricingtoggle', function (e) {
+                    if (e.key === ' ' || e.key === 'Enter' || e.key === 'Spacebar') {
+                        e.preventDefault();
+                        self.toggle();
+                    }
+                });
+            }
+
+            return this;
+        }
+
+        /**
+         * Apply visual state to all sub-elements.
+         * @param {string}  state   'primary' | 'secondary'
+         * @param {object}  opts
+         * @param {boolean} opts.silent  suppress jQuery event emission
+         */
+        _applyState(state, { silent = false } = {}) {
+            const o  = this.options;
+            const isSecondary = state === 'secondary';
+
+            // ARIA
+            this.$track.attr('aria-pressed', isSecondary ? 'true' : 'false');
+
+            // Labels
+            this.$labelPrimary
+                .toggleClass('is-active', !isSecondary)
+                .toggleClass(o.activeClass, !isSecondary);
+            this.$labelSecondary
+                .toggleClass('is-active', isSecondary)
+                .toggleClass(o.activeClass, isSecondary);
+
+            // Host element class hook for external CSS.
+            this.$el.toggleClass(o.activeClass, isSecondary);
+
+            // Accessible labels on track button.
+            if (this.$track.length) {
+                this.$track.attr(
+                    'aria-label',
+                    isSecondary ? o.ariaLabelSecondary : o.ariaLabelPrimary,
+                );
+            }
+
+            if (!silent) {
+                updatePrices(o, state);
+                this._emit(state);
+                if (typeof o.onChange === 'function') {
+                    o.onChange.call(this, state, this);
+                }
+            }
+
+            return this;
+        }
+
+        /** Build and fire the three namespaced jQuery events. */
+        _emit(state) {
+            const detail = {
+                state,
+                isPrimary:   state === 'primary',
+                isSecondary: state === 'secondary',
+                instance: this,
+            };
+            this.$el.trigger('ts-pricingtoggle-changed',   [detail]);
+            this.$el.trigger('ts-pricingtoggle-' + state,  [detail]);
+        }
+
+        /**
+         * Set the toggle to a specific state.
+         * @param {'primary'|'secondary'} state
+         */
+        setState(state) {
+            if (state !== 'primary' && state !== 'secondary') return this;
+            if (state === this._state) return this;
+            this._state = state;
+            this._applyState(state);
+            return this;
+        }
+
+        /** Flip the current state. */
+        toggle() {
+            return this.setState(this._state === 'primary' ? 'secondary' : 'primary');
+        }
+
+        /** Return the current state string. */
+        getState() {
+            return this._state;
+        }
+
+        /** Tear down: remove handlers + instance data. */
+        destroy() {
+            this.$track.off('.pricingtoggle');
+            this.$labelPrimary.off('.pricingtoggle');
+            this.$labelSecondary.off('.pricingtoggle');
+            this.$el.off('.pricingtoggle').removeData(instanceName);
+            return this;
+        }
+    }
+
+    PluginPricingToggle.defaults = {
+        // Starting state. 'primary' = left/off, 'secondary' = right/on.
+        // If null the plugin reads aria-pressed from the [data-pt-track] element.
+        initialState: null,
+
+        // Class added to the wrapper and the active label. Useful for theming.
+        activeClass: 'is-secondary',
+
+        // Group key — scope [data-pt-price] updates to elements with a
+        // matching [data-pt-group] attribute. Null = unscoped (updates all
+        // price elements without a group attribute).
+        group: null,
+
+        // Price animation: crossfade price spans when switching state.
+        animatePrices:     true,
+        priceFadeDuration: 160,          // ms for the opacity fade
+
+        // Thumb slide duration (also used for label color transition).
+        duration: 250,                   // ms
+
+        // Track / thumb geometry expressed as CSS values. Left null the stylesheet
+        // values apply: 44px, 24px, 18px and 3px.
+        trackWidth:  null,
+        trackHeight: null,
+        thumbSize:   null,
+        thumbInset:  null,
+
+        // Colors (applied as CSS custom properties). Left null they follow the
+        // skin, falling back to #3b82f6, #fff, #64748b, #0f172a and a green badge.
+        trackColor:       null,
+        thumbColor:       null,
+        labelMutedColor:  null,
+        labelActiveColor: null,
+        badgeBg:          null,
+        badgeColor:       null,
+
+        // Accessible labels for the track button.
+        ariaLabelPrimary:   'Switch to annual billing',
+        ariaLabelSecondary: 'Switch to monthly billing',
+
+        // Optional callback fired on every state change.
+        // Signature: function(state, instance) {}
+        onChange: null,
+    };
+
+    $.extend(themestrap, { PluginPricingToggle });
+
+    $.fn.themestrapPluginPricingToggle = function (opts, ...args) {
+        return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
+            const $this = $(this);
+
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            }
+
+            return new PluginPricingToggle($this, opts);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Progressbar
 /**
  * Themestrap Progress Bar Plugin
  * Animated progress bars with scroll-triggered fill, color variants,
@@ -30107,7 +31148,6 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Random Images
 // Random Images
 (((themestrap = {}, $) => {
 
@@ -31005,8 +32045,16 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
      * jQuery bridge
      */
 
-    $.fn.themestrapPluginRandomImages = function (opts) {
+    $.fn.themestrapPluginRandomImages = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -31079,7 +32127,6 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Rating
 // Rating
 (((themestrap = {}, $) => {
     const instanceName = '__rating';
@@ -31284,8 +32331,16 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
         PluginRating 
     });
     
-    $.fn.themestrapPluginRating = function(opts) {
+    $.fn.themestrapPluginRating = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -31297,7 +32352,6 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
     };
 })).apply(this, [window.themestrap, jQuery]);
 
-// Read More
 // Read More
 (((themestrap = {}, $) => {
     const instanceName = '__readmore';
@@ -31600,7 +32654,6 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Revolution Slider
-// Revolution Slider
 (((themestrap = {}, $) => {
     const instanceName = '__revolution';
 
@@ -31647,6 +32700,7 @@ html.dark .ts-readmore-overlay {
 			// Single Slider Class
 			if(this.options.wrapper.find('> ul > li').length == 1) {
 				this.options.wrapper.addClass('slider-single-slide');
+				this._addedSingle = true;
 
 				// Remove Bullets
 				// this.options.navigation.bullets.enable = false;
@@ -31660,7 +32714,10 @@ html.dark .ts-readmore-overlay {
 
 			// Full Screen Class
 			if(this.options.sliderLayout == 'fullscreen') {
-				this.options.wrapper.closest('.slider-container').addClass('fullscreen-slider');
+				const $container = this.options.wrapper.closest('.slider-container');
+				if (!$container.hasClass('fullscreen-slider')) {
+					this._$fullscreen = $container.addClass('fullscreen-slider');
+				}
 			}
 			
 			// Initialize Revolution Slider
@@ -31733,6 +32790,31 @@ html.dark .ts-readmore-overlay {
 
 			return this;
 		}
+
+        /**
+         * Kill the slider through Revolution's own revkill() when it is loaded, then remove
+         * the classes this plugin added. Revolution's revkill() also removes the slider markup.
+         * @returns {PluginRevolutionSlider}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (typeof $el.revkill === 'function') {
+                try { $el.revkill(); } catch (e) { /* slider never finished building */ }
+            }
+
+            if (this._addedSingle) {
+                $el.removeClass('slider-single-slide');
+            }
+            if (this._$fullscreen) {
+                this._$fullscreen.removeClass('fullscreen-slider');
+                this._$fullscreen = null;
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginRevolutionSlider.defaults = {
@@ -31928,19 +33010,22 @@ html.dark .ts-readmore-overlay {
 		PluginRevolutionSlider
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginRevolutionSlider = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginRevolutionSlider = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginRevolutionSlider($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginRevolutionSlider($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);
 
 // Scrollable
@@ -32053,7 +33138,6 @@ html.dark .ts-readmore-overlay {
 	});
 })).apply(this, [window.themestrap, jQuery]);
 
-// Scrollbar
 /**
  * Themestrap Plugin Scrollbar
  *
@@ -34376,8 +35460,16 @@ html.dark .ts-readmore-overlay {
 
     $.extend(themestrap, { PluginScrollbar });
 
-    $.fn.themestrapPluginScrollbar = function(opts) {
+    $.fn.themestrapPluginScrollbar = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             // Fall back to data-plugin-options for manual calls without explicit opts
@@ -34396,7 +35488,6 @@ html.dark .ts-readmore-overlay {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Scroller
 /**
  * Scroller
  *
@@ -34921,8 +36012,16 @@ html.dark .ts-readmore-overlay {
     });
 
     // jquery plugin
-    $.fn.themestrapPluginScroller = function(opts) {
+    $.fn.themestrapPluginScroller = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -34949,6 +36048,12 @@ html.dark .ts-readmore-overlay {
 
             this.$el = $el;
             this.el = $el[0];
+            this._origStyle = $el.attr('style');
+            this._origTheme = $el.attr('data-theme');
+            this._timers = [];
+
+            // setData() below only measures, so the instance is stored here
+            $el.data(instanceName, this);
 
             this.options = [];
             this.scrollingFx = [];
@@ -35025,7 +36130,7 @@ html.dark .ts-readmore-overlay {
                 this.observer[i].observe(this.el);
 
                 // Initial run
-                setTimeout(() => this.update(i));
+                this._timers.push(setTimeout(() => this.update(i)));
             });
         }
 
@@ -35046,7 +36151,8 @@ html.dark .ts-readmore-overlay {
             } else {
                 if (!this.scrollingFx[index]) return;
 
-                window.removeEventListener('scroll', this.scrollingFx[index]);
+                (this.scrollableElement || window)
+                    .removeEventListener('scroll', this.scrollingFx[index]);
                 this.scrollingFx[index] = null;
             }
         }
@@ -35168,12 +36274,10 @@ html.dark .ts-readmore-overlay {
         }
 
         bindResize() {
-            let timeout;
+            this._onResize = () => {
+                clearTimeout(this._resizeTimer);
 
-            window.addEventListener('resize', () => {
-                clearTimeout(timeout);
-
-                timeout = setTimeout(() => {
+                this._resizeTimer = setTimeout(() => {
                     this.setData();
 
                     this.deltaScrolling = this.deltaScrolling.map((_, i) => {
@@ -35184,11 +36288,51 @@ html.dark .ts-readmore-overlay {
 
                     this.dispatch('scrollFxResized');
                 }, 500);
-            });
+            };
+
+            window.addEventListener('resize', this._onResize);
         }
 
         dispatch(name) {
             this.el.dispatchEvent(new CustomEvent(name));
+        }
+
+        /**
+         * Disconnect the observers, remove the scroll and resize listeners and
+         * restore the element's original style and data-theme.
+         * @returns {PluginScrollFx}
+         */
+        destroy() {
+            const target = this.scrollableElement || window;
+
+            this.observer.forEach(observer => observer && observer.disconnect());
+            this.scrollingFx.forEach(handler => handler && target.removeEventListener('scroll', handler));
+            this.observer = [];
+            this.scrollingFx = [];
+
+            if (this._onResize) {
+                window.removeEventListener('resize', this._onResize);
+                this._onResize = null;
+            }
+            clearTimeout(this._resizeTimer);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            this.el.classList.remove('scroll-fx--theme-transition');
+            if (this._origStyle === undefined) {
+                this.$el.removeAttr('style');
+            } else {
+                this.$el.attr('style', this._origStyle);
+            }
+            if (this._origTheme === undefined) {
+                this.$el.removeAttr('data-theme');
+            } else {
+                this.$el.attr('data-theme', this._origTheme);
+            }
+
+            this.$el.removeData(instanceName);
+
+            return this;
         }
     }
     
@@ -35197,32 +36341,32 @@ html.dark .ts-readmore-overlay {
 		PluginScrollFx
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginScrollFx = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginScrollFx = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginScrollFx($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginScrollFx($this, opts);
 		});
-	}
+	};
 
     // Auto-init
-    $('.js-scroll-fx').each(function () {
-        const $this = $(this);
-        const instance = new PluginScrollFx($this);
-        $this.data(instanceName, instance);
+    $('.js-scroll-fx:not(.manual)').each(function () {
+        $(this).themestrapPluginScrollFx();
     });
 
     themestrap.ScrollFx = PluginScrollFx;
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Scroll Shadow
 /**
  * Themestrap ScrollShadow
  *
@@ -35802,8 +36946,16 @@ html.dark .ts-readmore-overlay {
 
     $.extend(themestrap, { PluginScrollShadow });
 
-    $.fn.themestrapPluginScrollShadow = function(opts) {
+    $.fn.themestrapPluginScrollShadow = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -35816,7 +36968,6 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Scroll Spy
-// Scroll Spy
 (((themestrap = {}, $) => {
     const instanceName = '__scrollSpy';
 
@@ -35826,12 +36977,17 @@ html.dark .ts-readmore-overlay {
         }
 
         initialize($el, opts) {
+			if ($el.data(instanceName)) {
+				return this;
+			}
 
-			if( document.querySelector( opts.target ) == null ) {
-				return false;
+			const targetSelector = (opts && opts.target) || PluginScrollSpy.defaults.target;
+			if( document.querySelector( targetSelector ) == null ) {
+				return this;
 			}
 
 			this.$el = $el;
+			this.observers = [];
 
 			this
 				.setData()
@@ -35985,8 +37141,24 @@ html.dark .ts-readmore-overlay {
 				observer.observe( $(this)[0] );
 			});
 
+			self.observers.push(observer);
+
 			return this;
 		}
+
+        /**
+         * Disconnect every section observer. The nav links keep whichever
+         * active class they had at the time.
+         * @returns {PluginScrollSpy}
+         */
+        destroy() {
+            this.observers.forEach(observer => observer.disconnect());
+            this.observers = [];
+
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginScrollSpy.defaults = {
@@ -35998,22 +37170,24 @@ html.dark .ts-readmore-overlay {
 		PluginScrollSpy
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginScrollSpy = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginScrollSpy = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginScrollSpy($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginScrollSpy($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);
 
-// Scroll to Top
 // Scroll to Top
 (((themestrap = {}, $) => {
     $.extend(themestrap, {
@@ -36134,7 +37308,6 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Search
-// Search
 (((themestrap = {}, $) => {
     let initialized = false;
 
@@ -36205,9 +37378,9 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Section Scroll
-// Section Scroll
 (((themestrap = {}, $) => {
     const instanceName = '__sectionScroll';
+    let uid = 0;
 
     class PluginSectionScroll {
         constructor($el, opts) {
@@ -36220,6 +37393,9 @@ html.dark .ts-readmore-overlay {
 			}
 
 			this.$el = $el;
+			this._ns = '.tssectionscroll' + (++uid);
+			this._timers = [];
+			this._saved = [];
 
 			this
 				.setData()
@@ -36254,6 +37430,13 @@ html.dark .ts-readmore-overlay {
 				self.$header = $('#header');
 			}
 
+			// Remember everything this plugin restyles so destroy() can put it back
+			self._htmlHadOverflow = $('html').hasClass('overflow-hidden');
+			self._save($('.section-scroll'), ['style', 'class']);
+			self._save(self.$header, ['style']);
+			self._save($('#header .header-nav, #header .header-nav-features, #header .header-social-icons'), ['class']);
+			self._save($('#header .header-logo img'), ['src']);
+
 			// Turn the section full height or not depeding on the content size
 			self.updateSectionsHeight();
 
@@ -36270,7 +37453,7 @@ html.dark .ts-readmore-overlay {
 			
 	        let flag = false, scrollableFlag = false, touchDirection = '', touchstartY = 0, touchendY = 0;
 
-	        $(window).on('touchstart', ({changedTouches}) => {
+	        $(window).on('touchstart' + self._ns, ({changedTouches}) => {
 			    touchstartY = changedTouches[0].screenY;
 			});
 
@@ -36281,7 +37464,7 @@ html.dark .ts-readmore-overlay {
 
         	if( $(window).width() < 992 ) {
 	    		$('html').removeClass('overflow-hidden');
-			    $(window).on('scroll', () => {
+			    $(window).on('scroll' + self._ns, () => {
 
 		    		let index = 0;
 		    		$('.section-scroll').each(function(){
@@ -36302,7 +37485,7 @@ html.dark .ts-readmore-overlay {
 		    		
 			    });
 
-			    $(window).on('section.scroll.mobile.change.header.color', ({currentSection}) => {
+			    $(window).on('section.scroll.mobile.change.header.color' + self._ns, ({currentSection}) => {
 			    	if( typeof currentSection == 'undefined' ) {
 			    		return;
 			    	}
@@ -36329,7 +37512,7 @@ html.dark .ts-readmore-overlay {
 			    });
         	}
 
-	        $(window).on(wheelEvent, ({target, originalEvent}) => {
+	        $(window).on(wheelEvent.split(' ').map(type => type + self._ns).join(' '), ({target, originalEvent}) => {
                 if( $(window).width() < 992 ) {
 	        		return;
 	        	}
@@ -36374,7 +37557,7 @@ html.dark .ts-readmore-overlay {
             	}
 
                 if( $(window).width() < 992 && $('html').hasClass('touch') ) {
-				    setTimeout(() => {
+				    self._later(() => {
 					    if( $('.section-wrapper').eq( self.getCurrentIndex() ).find('.section-scroll').hasClass('section-scroll-scrollable') ) {
 					    	$('html').removeClass('overflow-hidden');
 					    } else {
@@ -36391,10 +37574,10 @@ html.dark .ts-readmore-overlay {
 		        		if(wheelDirection || touchDirection == 'up') {
 		        			if( ( $(window).scrollTop() + $(window).height() ) >= nextSectionOffsetTop ) {
 		        				flag = true;
-								setTimeout(() => {
+								self._later(() => {
 									$(window).trigger('section.scroll.change.header.color');
 
-					            	setTimeout(() => {
+					            	self._later(() => {
 										flag = false;
 									}, 500);
 								}, 1000);
@@ -36421,7 +37604,7 @@ html.dark .ts-readmore-overlay {
 
 					        		if( ( $(window).scrollTop() + $(window).height() ) >= nextSectionOffsetTop ) {
 					        			scrollableFlag = true;
-										setTimeout(() => {
+										self._later(() => {
 											$(window).trigger('section.scroll.change.header.color');
 							            	scrollableFlag = false;
 										}, 500);
@@ -36432,10 +37615,10 @@ html.dark .ts-readmore-overlay {
 					    } else {
 					    	if( $(window).scrollTop() <= $currentSection.offset().top ) {
 					    		flag = true;
-								setTimeout(() => {
+								self._later(() => {
 									$(window).trigger('section.scroll.change.header.color');
 
-					            	setTimeout(() => {
+					            	self._later(() => {
 										flag = false;
 									}, 500);
 								}, 1000);
@@ -36462,7 +37645,7 @@ html.dark .ts-readmore-overlay {
 
 					        		if( $(window).scrollTop() <= $currentSection.offset().top ) {
 					        			scrollableFlag = true;
-										setTimeout(() => {
+										self._later(() => {
 											$(window).trigger('section.scroll.change.header.color');
 							            	scrollableFlag = false;
 										}, 500);
@@ -36490,7 +37673,7 @@ html.dark .ts-readmore-overlay {
 				   		// Change Section Active Class
 			   			self.changeSectionActiveState( $nextSection );
 
-				   		setTimeout(() => {
+				   		self._later(() => {
 				   			// Move to the next section
 	        				self.moveTo( $nextSection.offset().top );
 
@@ -36507,7 +37690,7 @@ html.dark .ts-readmore-overlay {
 				   			// Move to the next section
 	        				self.moveTo( $currentSection.offset().top - $(window).height() );
 				   		} else {
-					        setTimeout(() => {
+					        self._later(() => {
 					   			// Move to the next section
 		        				self.moveTo( $nextSection.offset().top );
 
@@ -36543,7 +37726,7 @@ html.dark .ts-readmore-overlay {
 	            		transition: 'ease transform 600ms, ease opacity 600ms',
 	            	});
 
-					setTimeout(() => {
+					self._later(() => {
 						$currentSection.css({
 		            		position: 'relative',
 		            		opacity: 1,
@@ -36552,7 +37735,7 @@ html.dark .ts-readmore-overlay {
 
 						$(window).trigger('section.scroll.change.header.color');
 
-		            	setTimeout(() => {
+		            	self._later(() => {
 							flag = false;
 						}, 500);
 					}, 1000);
@@ -36570,7 +37753,7 @@ html.dark .ts-readmore-overlay {
 	        }
 
 	        // First Load
-	        setTimeout(() => {
+	        self._later(() => {
 		        if( $(window.location.hash).get(0) ) {
 		        	self.moveTo( $(window.location.hash).parent().offset().top );
 
@@ -36658,7 +37841,7 @@ html.dark .ts-readmore-overlay {
    				scrollTop: $scrollTopValue
    			}, 1000, 'easeOutQuint');
 
-   			setTimeout(() => {
+   			self._later(() => {
 	   			self.updateHash();
    			}, 500);
 
@@ -36713,6 +37896,7 @@ html.dark .ts-readmore-overlay {
         	}
 
         	$('.body').append( dotsNav );
+        	self.$dotsNav = dotsNav;
 
         	dotsNav.find('a[data-nav-id]').on('click touchstart', function(e){
         		e.preventDefault();
@@ -36728,7 +37912,7 @@ html.dark .ts-readmore-overlay {
 			    	transition: 'ease opacity 500ms'
 			    });
 
-        		setTimeout(() => {
+        		self._later(() => {
 	        		self.moveTo( $('.section-wrapper').eq( $this.data('nav-id') ).offset().top )
 
 		   			$('.section-wrapper').removeClass('active');
@@ -36738,7 +37922,7 @@ html.dark .ts-readmore-overlay {
 	        			opacity: 1
 	        		});
 
-	        		setTimeout(() => {
+	        		self._later(() => {
 		        		$('.section-scroll').css({ opacity: 1 });
 
 		        		$(window).trigger('section.scroll.change.header.color');
@@ -36756,11 +37940,11 @@ html.dark .ts-readmore-overlay {
         events() {
 			const self = this;
 
-			$(window).on('section.scroll.ready', () => {
+			$(window).on('section.scroll.ready' + self._ns, () => {
 				$(window).scrollTop(0);
 			});
 
-			$(window).on('section.scroll.change.header.color', () => {
+			$(window).on('section.scroll.change.header.color' + self._ns, () => {
 		    	const headerColor = $('.section-wrapper').eq( self.getCurrentIndex() ).find('.section-scroll').data('section-scroll-header-color');
 		    	
 		    	$('#header .header-nav').removeClass('header-nav-light-text header-nav-dark-text').addClass('header-nav-' + headerColor + '-text');
@@ -36781,18 +37965,74 @@ html.dark .ts-readmore-overlay {
 		    	});
 		    });
 
-			$(document).ready(() => {
-			    $(window).afterResize(() => {
+			// Debounced resize of our own: vendor afterResize keeps one global callback,
+			// so a second plugin using it would silently replace this one
+			$(window).on('resize' + self._ns, () => {
+				clearTimeout(self._resizeTimer);
+				self._resizeTimer = setTimeout(() => {
 			    	self.updateSectionsHeight();
 
 			    	if( $(window).width() < 992 ) {
 			    		$('html').removeClass('overflow-hidden');
 			    	}
-			    });
+				}, 500);
 			});
 
 		    return this;
 		}
+
+        _later(fn, delay) {
+			const id = setTimeout(() => {
+				this._timers = this._timers.filter(t => t !== id);
+				fn();
+			}, delay);
+			this._timers.push(id);
+
+			return id;
+		}
+
+        _save($els, attrs) {
+			$els.each((i, el) => {
+				attrs.forEach(attr => this._saved.push([el, attr, el.getAttribute(attr)]));
+			});
+		}
+
+        /**
+         * Unbind every handler, stop pending timers and scroll animation, remove the
+         * dots navigation and section wrappers, and restore the header and sections.
+         * @returns {PluginSectionScroll}
+         */
+        destroy() {
+            $(window).off(this._ns);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+            clearTimeout(this._resizeTimer);
+            $('body, html').stop(true);
+
+            if (this.$dotsNav) {
+                this.$dotsNav.remove();
+                this.$dotsNav = null;
+            }
+
+            $(this.options.targetClass).filter((i, el) => $(el).parent().hasClass('section-wrapper')).unwrap();
+
+            this._saved.forEach(([el, attr, value]) => {
+                if (value === null) {
+                    el.removeAttribute(attr);
+                } else {
+                    el.setAttribute(attr, value);
+                }
+            });
+            this._saved = [];
+
+            if ($('html').hasClass('overflow-hidden') !== this._htmlHadOverflow) {
+                $('html').toggleClass('overflow-hidden', this._htmlHadOverflow);
+            }
+
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginSectionScroll.defaults = {
@@ -36808,22 +38048,24 @@ html.dark .ts-readmore-overlay {
 		PluginSectionScroll
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginSectionScroll = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginSectionScroll = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginSectionScroll($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginSectionScroll($this, opts);
 		});
 	};
 })).apply(this, [window.themestrap, jQuery]);
 
-// Select
 // Select
 (((themestrap = {}, $) => {
 
@@ -37513,7 +38755,6 @@ html.dark .ts-readmore-overlay {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// SideNav
 // SideNav
 (((themestrap = {}, $) => {
 
@@ -38976,8 +40217,16 @@ html.dark .ts-sidenav {
 
     $.extend(themestrap, { PluginSideNav });
 
-    $.fn.themestrapPluginSideNav = function(opts) {
+    $.fn.themestrapPluginSideNav = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -38989,7 +40238,6 @@ html.dark .ts-sidenav {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Sort
 // Sort
 (((themestrap = {}, $) => {
     const instanceName = '__sort';
@@ -39398,8 +40646,16 @@ html.dark .ts-sidenav {
     });
 
     // jquery plugin
-    $.fn.themestrapPluginSort = function (opts) {
+    $.fn.themestrapPluginSort = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -39411,7 +40667,6 @@ html.dark .ts-sidenav {
     };
 })).apply(this, [window.themestrap, jQuery]);
 
-// Splash Screen
 // Splash Screen
 (((themestrap = {}, $) => {
     const instanceName = '__splashScreen';
@@ -39891,8 +41146,16 @@ html.dark .ts-sidenav {
 
     $.extend(themestrap, { PluginSplashScreen });
 
-    $.fn.themestrapPluginSplashScreen = function(opts) {
+    $.fn.themestrapPluginSplashScreen = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -39906,9 +41169,9 @@ html.dark .ts-sidenav {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Sticky
-// Sticky
 (((themestrap = {}, $) => {
     const instanceName = '__sticky';
+    let uid = 0;
 
     class PluginSticky {
         constructor($el, opts) {
@@ -39921,6 +41184,9 @@ html.dark .ts-sidenav {
 			}
 
 			this.$el = $el;
+			this._ns = '.tssticky' + (++uid);
+			this._origStyle = $el.attr('style');
+			this._timers = [];
 
 			this
 				.setData()
@@ -39952,21 +41218,35 @@ html.dark .ts-sidenav {
 
 			const self = this, $window = $(window);
 			
-			self.options.wrapper.pin(self.options);
+			self._repin();
 
-			if( self.options.wrapper.hasClass('sticky-wrapper-transparent') ) {
-				self.options.wrapper.parent().addClass('position-absolute w-100');
+			if( self.options.wrapper.hasClass('sticky-wrapper-transparent') && !self._$classedParent ) {
+				const $parent = self.options.wrapper.parent();
+				const added = ['position-absolute', 'w-100'].filter(cls => !$parent.hasClass(cls));
+
+				$parent.addClass(added.join(' '));
+				self._$classedParent = $parent;
+				self._addedParentClasses = added;
 			}
 
-			$window.afterResize(() => {
-				self.options.wrapper.removeAttr('style').removeData('pin');
-				self.options.wrapper.pin(self.options);
-				$window.trigger('scroll');
+			// Debounced resize of our own: vendor afterResize keeps one global callback,
+			// so a second plugin using it would silently replace this one
+			$window.off('resize' + self._ns).on('resize' + self._ns, () => {
+				clearTimeout(self._resizeTimer);
+				self._resizeTimer = setTimeout(() => {
+					self._repin();
+					$window.trigger('scroll');
+				}, 500);
 			});
 
 			// Change Logo Src
 			if( self.options.wrapper.find('img').attr('data-change-src') ) {
 				const $logo = self.options.wrapper.find('img'), logoSrc = $logo.attr('src'), logoNewSrc = $logo.attr('data-change-src');
+
+				if (!self._$logo) {
+					self._$logo = $logo;
+					self._logoSrc = logoSrc;
+				}
 
 				self.changeLogoSrc = activate => {
 					if(activate) {
@@ -39980,6 +41260,38 @@ html.dark .ts-sidenav {
 			return this;
 		}
 
+        /**
+         * Pin the element afresh. jquery.pin binds scroll, resize and load handlers on
+         * window on every call and offers no way to remove them, so the handlers each
+         * call adds are recorded here and removed before the next call and on destroy().
+         */
+        _repin() {
+            const $wrapper = this.options.wrapper;
+            const types = ['scroll', 'resize', 'load'];
+            const handlers = () => {
+                const events = $._data(window, 'events') || {};
+                return types.map(type => (events[type] || []).map(h => h.handler));
+            };
+
+            this._unpin();
+            $wrapper.css({ width: '', left: '', top: '', position: '' });
+
+            const before = handlers();
+            $wrapper.pin(this.options);
+            const after = handlers();
+
+            this._pinHandlers = [];
+            types.forEach((type, i) => {
+                after[i].filter(fn => !before[i].includes(fn)).forEach(fn => this._pinHandlers.push([type, fn]));
+            });
+        }
+
+        _unpin() {
+            (this._pinHandlers || []).forEach(([type, fn]) => $(window).off(type, fn));
+            this._pinHandlers = [];
+            this.options.wrapper.removeData('pin');
+        }
+
         events() {
             const self = this;
             const $window = $(window);
@@ -39988,7 +41300,7 @@ html.dark .ts-sidenav {
             let stickyActivateFlag = true;
             let stickyDeactivateFlag = false;
 
-            $window.on('scroll sticky.effect.active', () => {
+            $window.on('scroll' + self._ns + ' sticky.effect.active' + self._ns, () => {
 				if( self.options.wrapper.hasClass( classToCheck ) ) {		
 					if( stickyActivateFlag ) {			
 						if( $logo.attr('data-change-src') ) {
@@ -40020,7 +41332,7 @@ html.dark .ts-sidenav {
 					$window.trigger('sticky.effect.active');
 				}
 
-				$window.on('scroll', () => {
+				$window.on('scroll' + self._ns, () => {
 					if( self.options.stickyStartEffectAt < $window.scrollTop() ) {	
 						self.options.wrapper.addClass('sticky-effect-active');
 						isGoingUp = true;
@@ -40044,24 +41356,76 @@ html.dark .ts-sidenav {
             // Refresh Sticky Plugin if click in a data-toggle="collapse"
             if( $('[data-bs-toggle="collapse"]').get(0) ) {
 
-				$('[data-bs-toggle="collapse"]').on('click', () => {
-					setTimeout(() => {
+				$('[data-bs-toggle="collapse"]').on('click' + self._ns, () => {
+					self._timers.push(setTimeout(() => {
 						self.build();
 						$(window).trigger('scroll');
-					}, 1000);
+					}, 1000));
 				});
 
 			}
 
 			// Visibility Issue
-			document.addEventListener('visibilitychange', () => {
+			self._onVisibility = () => {
 				$(window).trigger('resize');
-			});
+			};
+			document.addEventListener('visibilitychange', self._onVisibility);
 
-			setInterval(() => {
+			self._interval = setInterval(() => {
 				$(window).trigger('resize');
 			}, 1000);
 
+			return this;
+        }
+
+        /**
+         * Unpin the element, unbind every handler, stop the refresh interval and
+         * put back the classes, inline style and logo src it started with.
+         * @returns {PluginSticky}
+         */
+        destroy() {
+            const $el = this.$el;
+            const $window = $(window);
+
+            clearInterval(this._interval);
+            clearTimeout(this._resizeTimer);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            $window.off(this._ns);
+            $(document).find('[data-bs-toggle="collapse"]').off(this._ns);
+            if (this._onVisibility) {
+                document.removeEventListener('visibilitychange', this._onVisibility);
+                this._onVisibility = null;
+            }
+
+            this._unpin();
+
+            if ($el.parent().is('.pin-wrapper')) {
+                $el.unwrap();
+            }
+            if (this._$classedParent && this._addedParentClasses.length) {
+                this._$classedParent.removeClass(this._addedParentClasses.join(' '));
+            }
+            this._$classedParent = null;
+
+            $el.removeClass([this.options.activeClass, 'sticky-effect-active'].join(' '));
+            $el.find('.sticky-body').removeClass('position-fixed');
+
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            if (this._$logo) {
+                this._$logo.attr('src', this._logoSrc);
+                this._$logo = null;
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
         }
     }
 
@@ -40075,22 +41439,24 @@ html.dark .ts-sidenav {
 		PluginSticky
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginSticky = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginSticky = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginSticky($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
-			
+
+			return instance || new PluginSticky($this, opts);
 		});
-	}
+	};
 })).apply(this, [ window.themestrap, jQuery ]);
 
-// Sticky Header
 // Sticky Header
 (((themestrap = {}, $) => {
     let initialized = false;
@@ -40618,7 +41984,6 @@ html.dark .ts-sidenav {
 	});
 })).apply(this, [window.themestrap, jQuery]);
 
-// TagsInput
 /**
  * Themestrap TagsInput
  *
@@ -41029,8 +42394,16 @@ html.dark .ts-sidenav {
 
     $.extend(themestrap, { PluginTagsInput });
 
-    $.fn.themestrapPluginTagsInput = function(opts) {
+    $.fn.themestrapPluginTagsInput = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -41329,8 +42702,16 @@ html.dark .ts-sidenav {
 
     $.extend(themestrap, { PluginToast });
 
-    $.fn.themestrapPluginToast = function (opts) {
+    $.fn.themestrapPluginToast = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -41344,9 +42725,9 @@ html.dark .ts-sidenav {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Toggle
-// Toggle
 (((themestrap = {}, $) => {
     const instanceName = '__toggle';
+    let uid = 0;
 
     class PluginToggle {
         constructor($el, opts) {
@@ -41359,6 +42740,7 @@ html.dark .ts-sidenav {
 			}
 
 			this.$el = $el;
+			this._ns = '.tstoggle' + (++uid);
 
 			this
 				.setData()
@@ -41412,7 +42794,7 @@ html.dark .ts-sidenav {
             let previewParAnimateHeight = 0;
             let toggleContent = null;
 
-            $el.find('> label, > .toggle-title').click(function({originalEvent}) {
+            $el.find('> label, > .toggle-title').on('click' + self._ns, function({originalEvent}) {
                 const $this = $(this);
                 const parentSection = $this.parent();
                 const parentWrapper = $this.parents('.toggle');
@@ -41470,6 +42852,22 @@ html.dark .ts-sidenav {
 				}
             });
         }
+
+        /**
+         * Unbind the title handlers and finish any running animation.
+         * Open and closed items stay as they are.
+         * @returns {PluginToggle}
+         */
+        destroy() {
+            const $items = this.$el.find('> .toggle');
+
+            $items.find('> label, > .toggle-title').off(this._ns);
+            $items.find('> p, > .toggle-content').stop(true, true);
+
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginToggle.defaults = {
@@ -41482,22 +42880,24 @@ html.dark .ts-sidenav {
 		PluginToggle
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginToggle = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginToggle = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginToggle($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginToggle($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);
 
-// Toolbar
 // Toolbar
 (((themestrap = {}, $) => {
     const instanceName = '__pluginToolbar';
@@ -42846,7 +44246,6 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Tree
-// Tree
 (((themestrap = {}, $) => {
     const instanceName = '__pluginTree';
     const STYLE_ID     = 'ts-tree-styles';
@@ -43756,8 +45155,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
     $.extend(themestrap, { PluginTree });
 
-    $.fn.themestrapPluginTree = function(opts) {
+    $.fn.themestrapPluginTree = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -43769,7 +45176,6 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Validation
 // Validation
 (((themestrap = {}, $) => {
     $.extend(themestrap, {
@@ -43853,7 +45259,6 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 	});
 })).apply(this, [window.themestrap, jQuery]);
 
-// Vertical Navigation
 /**
  * Vertical Navigation Plugin
  *
@@ -44648,8 +46053,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
     $.extend(themestrap, { PluginVerticalNav });
 
-    $.fn.themestrapPluginVerticalNav = function(opts) {
+    $.fn.themestrapPluginVerticalNav = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -44662,9 +46075,9 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Video Background
-// Video Background
 (((themestrap = {}, $) => {
     const instanceName = '__videobackground';
+    let uid = 0;
 
     class PluginVideoBackground {
         constructor($el, opts) {
@@ -44672,7 +46085,14 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         }
 
         initialize($el, opts) {
+			if ($el.data(instanceName)) {
+				return this;
+			}
+
 			this.$el = $el;
+			this._ns = '.tsvideobg' + (++uid);
+			this._origStyle = $el.attr('style');
+			this._timers = [];
 
 			this
 				.setData()
@@ -44705,13 +46125,12 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 				return this;
 			}
 
-			if (this.options.overlay) {
+			if (this.options.overlay && !this.$overlay) {
 
 				const overlayClass = this.options.overlayClass;
 
-				this.options.wrapper.prepend(
-					$('<div />').addClass(overlayClass)
-				);
+				this.$overlay = $('<div />').addClass(overlayClass);
+				this.options.wrapper.prepend(this.$overlay);
 			}
 
 			this.options.wrapper
@@ -44724,7 +46143,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
 			// Initialize Vide inside a carousel
 			if( self.options.wrapper.closest('.owl-carousel').get(0) ) {
-				self.options.wrapper.closest('.owl-carousel').on('initialized.owl.carousel', () => {
+				self.options.wrapper.closest('.owl-carousel').off(self._ns).on('initialized.owl.carousel' + self._ns, () => {
 					$('.owl-item.cloned')
 						.find('[data-plugin-video-background] .vide-video-wrapper')
 						.remove();
@@ -44745,7 +46164,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 			if( $playButton.get(0) ) {
 				const $playWrapper = self.options.wrapper.find('.video-background-play-wrapper');
 
-				self.options.wrapper.find('.video-background-play').on('click', e => {
+				self.options.wrapper.find('.video-background-play').off(self._ns).on('click' + self._ns, e => {
 					e.preventDefault();
 
 					if( $playWrapper.get(0) ) {
@@ -44763,9 +46182,9 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 						});
 					}
 
-					setTimeout(() => {
+					self._timers.push(setTimeout(() => {
 						self.options.wrapper.find('video')[0].play();
-					}, 500)
+					}, 500));
 				});
 			}
 
@@ -44799,12 +46218,49 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 			const self = this;
 
 			// Initialize
-			self.options.wrapper.on('video.background.initialize', () => {
+			self.options.wrapper.on('video.background.initialize' + self._ns, () => {
 				self.build();
 			});
 
 			return this;
 		}
+
+        /**
+         * Tear down Vide (video and poster wrapper), remove the overlay this plugin
+         * added, unbind its handlers and restore the element's inline style.
+         * @returns {PluginVideoBackground}
+         */
+        destroy() {
+            const $el = this.$el;
+            const $carousel = $el.closest('.owl-carousel');
+
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            $el.off(this._ns);
+            $el.find('.video-background-play').off(this._ns);
+            $carousel.off(this._ns);
+
+            const vide = $el.data('vide');
+            if (vide && typeof vide.destroy === 'function') {
+                vide.destroy();
+            }
+
+            if (this.$overlay) {
+                this.$overlay.remove();
+                this.$overlay = null;
+            }
+
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginVideoBackground.defaults = {
@@ -44824,22 +46280,24 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 		PluginVideoBackground
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginVideoBackground = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginVideoBackground = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginVideoBackground($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginVideoBackground($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);
 
-// Wizard
 /**
  * Themestrap Wizard Plugin
  * Accessible multi-step form wizard / onboarding stepper
@@ -44954,18 +46412,18 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     const CSS_TEXT = `
         /* Themestrap Wizard */
         :root {
-            --wizard-accent:           var(--ts-skin-accent, var(--color-primary, #e8672a));
-            --wizard-accent-subtle:    color-mix(in srgb, var(--wizard-accent) 12%, transparent);
-            --wizard-muted:            var(--ts-skin-text-dim, #94a3b8);
-            --wizard-fg:               var(--ts-skin-text, #0f172a);
-            --wizard-bg:               var(--ts-skin-surface, #ffffff);
-            --wizard-border:           var(--ts-skin-border, rgba(15, 23, 42, 0.10));
-            --wizard-border-strong:    var(--ts-skin-border-strong, rgba(15, 23, 42, 0.20));
-            --wizard-step-size:        32px;
-            --wizard-step-font:        var(--ts-skin-font, .8125rem);
-            --wizard-radius:           var(--ts-skin-radius, var(--border-radius, 6px));
-            --wizard-duration:         300ms;
-            --wizard-ease:             cubic-bezier(.16, 1, .3, 1);
+            --ts-wizard-accent:           var(--ts-skin-accent, var(--color-primary, #e8672a));
+            --ts-wizard-accent-subtle:    color-mix(in srgb, var(--wizard-accent, var(--ts-wizard-accent)) 12%, transparent);
+            --ts-wizard-muted:            var(--ts-skin-text-dim, #94a3b8);
+            --ts-wizard-fg:               var(--ts-skin-text, #0f172a);
+            --ts-wizard-bg:               var(--ts-skin-surface, #ffffff);
+            --ts-wizard-border:           var(--ts-skin-border, rgba(15, 23, 42, 0.10));
+            --ts-wizard-border-strong:    var(--ts-skin-border-strong, rgba(15, 23, 42, 0.20));
+            --ts-wizard-step-size:        32px;
+            --ts-wizard-step-font:        var(--ts-skin-font, .8125rem);
+            --ts-wizard-radius:           var(--ts-skin-radius, var(--border-radius, 6px));
+            --ts-wizard-duration:         300ms;
+            --ts-wizard-ease:             cubic-bezier(.16, 1, .3, 1);
         }
 
         /* Root */
@@ -45003,52 +46461,52 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         [data-wizard-indicator]:not(:last-child)::after {
             content: '';
             position: absolute;
-            top: calc(var(--wizard-step-size) / 2);
-            left: calc(50% + var(--wizard-step-size) / 2 + 4px);
-            right: calc(-50% + var(--wizard-step-size) / 2 + 4px);
+            top: calc(var(--wizard-step-size, var(--ts-wizard-step-size)) / 2);
+            left: calc(50% + var(--wizard-step-size, var(--ts-wizard-step-size)) / 2 + 4px);
+            right: calc(-50% + var(--wizard-step-size, var(--ts-wizard-step-size)) / 2 + 4px);
             height: 2px;
-            background: var(--wizard-border-strong);
+            background: var(--wizard-border-strong, var(--ts-wizard-border-strong));
             z-index: 0;
-            transition: background var(--wizard-duration) ease;
+            transition: background var(--wizard-duration, var(--ts-wizard-duration)) ease;
         }
 
         [data-wizard-indicator].wiz-completed:not(:last-child)::after,
         [data-wizard-indicator].wiz-active:not(:last-child)::after {
-            background: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
         }
 
         /* Bubble */
         [data-wizard-indicator-bubble] {
-            width: var(--wizard-step-size);
-            height: var(--wizard-step-size);
+            width: var(--wizard-step-size, var(--ts-wizard-step-size));
+            height: var(--wizard-step-size, var(--ts-wizard-step-size));
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: var(--wizard-step-font);
+            font-size: var(--wizard-step-font, var(--ts-wizard-step-font));
             font-weight: 600;
-            border: 2px solid var(--wizard-border-strong);
-            background: var(--wizard-bg);
-            color: var(--wizard-muted);
+            border: 2px solid var(--wizard-border-strong, var(--ts-wizard-border-strong));
+            background: var(--wizard-bg, var(--ts-wizard-bg));
+            color: var(--wizard-muted, var(--ts-wizard-muted));
             position: relative;
             z-index: 1;
             transition:
-                background var(--wizard-duration) ease,
-                border-color var(--wizard-duration) ease,
-                color var(--wizard-duration) ease,
-                box-shadow var(--wizard-duration) ease;
+                background var(--wizard-duration, var(--ts-wizard-duration)) ease,
+                border-color var(--wizard-duration, var(--ts-wizard-duration)) ease,
+                color var(--wizard-duration, var(--ts-wizard-duration)) ease,
+                box-shadow var(--wizard-duration, var(--ts-wizard-duration)) ease;
         }
 
         [data-wizard-indicator].wiz-active [data-wizard-indicator-bubble] {
-            background: var(--wizard-accent);
-            border-color: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
+            border-color: var(--wizard-accent, var(--ts-wizard-accent));
             color: var(--ts-skin-on-accent, #fff);
-            box-shadow: 0 0 0 4px var(--wizard-accent-subtle);
+            box-shadow: 0 0 0 4px var(--wizard-accent-subtle, var(--ts-wizard-accent-subtle));
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-bubble] {
-            background: var(--wizard-accent);
-            border-color: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
+            border-color: var(--wizard-accent, var(--ts-wizard-accent));
             color: var(--ts-skin-on-accent, #fff);
         }
 
@@ -45070,19 +46528,19 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         [data-wizard-indicator-label] {
             font-size: .6875rem;
             font-weight: 600;
-            color: var(--wizard-muted);
+            color: var(--wizard-muted, var(--ts-wizard-muted));
             text-transform: uppercase;
             letter-spacing: .04em;
             line-height: 1.2;
-            transition: color var(--wizard-duration) ease;
+            transition: color var(--wizard-duration, var(--ts-wizard-duration)) ease;
         }
 
         [data-wizard-indicator].wiz-active [data-wizard-indicator-label] {
-            color: var(--wizard-accent);
+            color: var(--wizard-accent, var(--ts-wizard-accent));
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-label] {
-            color: var(--wizard-fg);
+            color: var(--wizard-fg, var(--ts-wizard-fg));
         }
 
         [data-wizard-indicator][aria-disabled="true"] {
@@ -45093,7 +46551,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         /* Progress bar */
         [data-wizard-progress] {
             height: 4px;
-            background: var(--wizard-border);
+            background: var(--wizard-border, var(--ts-wizard-border));
             border-radius: 9999px;
             overflow: hidden;
             margin: 12px 0;
@@ -45101,9 +46559,9 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
         [data-wizard-progress-bar] {
             height: 100%;
-            background: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
             border-radius: 9999px;
-            transition: width var(--wizard-duration) var(--wizard-ease);
+            transition: width var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease));
             width: 0%;
         }
 
@@ -45125,16 +46583,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
         /* Slide-in animations (class-driven by JS) */
         [data-wizard-step].wiz-enter-left {
-            animation: wiz-slide-in-left var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-in-left var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
         [data-wizard-step].wiz-enter-right {
-            animation: wiz-slide-in-right var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-in-right var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
         [data-wizard-step].wiz-leave-left {
-            animation: wiz-slide-out-left var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-out-left var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
         [data-wizard-step].wiz-leave-right {
-            animation: wiz-slide-out-right var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-out-right var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
 
         @keyframes wiz-slide-in-left {
@@ -45736,8 +47194,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
     $.extend(themestrap, { PluginWizard });
 
-    $.fn.themestrapPluginWizard = function (opts) {
+    $.fn.themestrapPluginWizard = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);
@@ -45748,7 +47214,6 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Rich Editor
 /**
  * Themestrap RichEditor
  * 
@@ -47108,8 +48573,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
     $.extend(themestrap, { PluginRichEditor });
 
-    $.fn.themestrapPluginRichEditor = function(opts) {
+    $.fn.themestrapPluginRichEditor = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -47122,7 +48595,6 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Number Input
 /**
  * Themestrap NumberInput
  *
@@ -47643,7 +49115,6 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Time Picker
 /**
  * Themestrap TimePicker
  *
@@ -48284,168 +49755,6 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Animate
-(((themestrap = {}, $) => {
-    const instanceName = '__animate';
-
-    class PluginAnimate {
-        constructor($el, opts) {
-            return this.initialize($el, opts);
-        }
-
-        initialize($el, opts) {
-			if ($el.data(instanceName)) {
-				return this;
-			}
-
-			this.$el = $el;
-
-			this
-				.setData()
-				.setOptions(opts)
-				.build();
-
-			return this;
-		}
-
-        setData() {
-			this.$el.data(instanceName, this);
-
-			return this;
-		}
-
-        setOptions(opts) {
-			this.options = $.extend(true, {}, PluginAnimate.defaults, opts, {
-				wrapper: this.$el
-			});
-
-			return this;
-		}
-
-        build() {
-			const self = this;
-
-			// Flag Class Only
-			// - Useful for simple animations like hightlight
-			// - Less process and memory
-			if( self.options.flagClassOnly ) {
-				const delay = self.options.wrapper.attr('data-appear-animation-delay') ? self.options.wrapper.attr('data-appear-animation-delay') : self.options.delay;
-				
-				self.options.wrapper.css({
-					'animation-delay': delay + 'ms',
-					'transition-delay': delay + 'ms'
-				});
-				self.options.wrapper.addClass( self.options.wrapper.attr('data-appear-animation') );
-
-				return this;
-			}
-
-			if ($('body').hasClass('loading-overlay-showing')) {
-				$(window).on('loading.overlay.ready', () => {
-					self.animate();
-				});
-			} else {
-				self.animate();
-			}
-
-			return this;
-		}
-
-        animate() {
-            const self = this;
-            const $el = this.options.wrapper;
-            let delay = 0;
-            let duration = this.options.duration;
-            const elTopDistance = $el.offset().top;
-            const windowTopDistance = $(window).scrollTop();
-
-            // If has appear animation elements inside a SVG. 
-            // Intersection Observer API do not check elements inside SVG's, so we need initialize trough top parent SVG
-            if ($el.data('appear-animation-svg')) {
-				$el.find('[data-appear-animation]').each(function(){
-                    const $this = $(this);
-                    let opts;
-
-                    const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
-                    if (pluginOptions)
-						opts = pluginOptions;
-
-                    $this.themestrapPluginAnimate(opts);
-                });
-
-				return this;
-			}
-
-            // No animation at the first load of page. This is good for performance
-            if (self.options.firstLoadNoAnim) {
-				$el.removeClass('appear-animation');
-
-				// Inside Carousel
-				if ($el.closest('.owl-carousel').get(0)) {
-					setTimeout(() => {
-						$el.closest('.owl-carousel').on('change.owl.carousel', () => {
-							self.options.firstLoadNoAnim = false;
-							$el.removeData('__animate');
-							$el.themestrapPluginAnimate(self.options);
-						});
-					}, 500);
-				}
-
-				return this;
-			}
-
-            $el.addClass('appear-animation animated');
-
-            if (!$('html').hasClass('no-csstransitions') && $(window).width() > self.options.minWindowWidth && elTopDistance >= windowTopDistance || self.options.forceAnimation == true) {
-				delay = ($el.attr('data-appear-animation-delay') ? $el.attr('data-appear-animation-delay') : self.options.delay);
-				duration = ($el.attr('data-appear-animation-duration') ? $el.attr('data-appear-animation-duration') : self.options.duration);
-
-				if (duration != '750ms') {
-					$el.css('animation-duration', duration);
-				}
-
-				$el.css('animation-delay', delay + 'ms');
-				$el.addClass($el.attr('data-appear-animation') + ' appear-animation-visible');
-				
-				$el.trigger('animation:show');
-
-			} else {
-				$el.addClass('appear-animation-visible');
-			}
-
-            return this;
-        }
-    }
-
-    PluginAnimate.defaults = {
-		accX: 0,
-		accY: -80,
-		delay: 100,
-		duration: '750ms',
-		minWindowWidth: 0,
-		forceAnimation: false,
-		flagClassOnly: false
-	};
-
-    $.extend(themestrap, {
-		PluginAnimate
-	});
-
-    $.fn.themestrapPluginAnimate = function(opts) {
-		return this.map(function() {
-			const $this = $(this);
-
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginAnimate($this, opts);
-			}
-
-		});
-	};
-})).apply(this, [window.themestrap, jQuery]);
-
-// Colorpicker
 // Color Picker
 (((themestrap = {}, $) => {
 
@@ -49350,7 +50659,6 @@ html.dark,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Dice
 /**
  * Themestrap Dice
  *
@@ -50005,7 +51313,6 @@ html.dark,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Emoticon
 /**
  * Themestrap Emoticon
  *
@@ -51246,8 +52553,16 @@ html.dark,
     });
 
     // jQuery plugin method
-    $.fn.themestrapPluginEmoticon = function (opts) {
+    $.fn.themestrapPluginEmoticon = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -51259,7 +52574,6 @@ html.dark,
     };
 })).apply(this, [window.themestrap, jQuery]);
 
-// Markdowneditor
 /**
  * Themestrap MarkdownEditor
  *
@@ -52258,8 +53572,16 @@ html.dark,
 
     $.extend(themestrap, { PluginMarkdownEditor });
 
-    $.fn.themestrapPluginMarkdownEditor = function(opts) {
+    $.fn.themestrapPluginMarkdownEditor = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {
@@ -52272,7 +53594,6 @@ html.dark,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Particles
 /**
  * Themestrap Particles
  *
@@ -52831,488 +54152,6 @@ html.dark,
 
 })).apply(this, [window.themestrap, jQuery]);
 
-// Pricingtoggle
-/**
- * Themestrap Pricing Toggle
- *
- * Drives a billing-period switcher (e.g. Monthly ↔ Annual) that:
- *   - Animates a pill/thumb inside a track between two positions.
- *   - Broadcasts a namespaced jQuery event so any number of listeners on the
- *     page can react (price spans, feature lists, badge visibility, etc.).
- *   - Supports an optional savings badge shown only in the secondary state.
- *   - Exposes a clean programmatic API and full ARIA semantics.
- *   - Integrates with PluginCounter so animated price figures recount when the
- *     period switches (opt-in via options.animatePrices).
- *   - Fires CSS custom-property updates on the host element so pure-CSS
- *     themes can react without any JavaScript of their own.
- *
- *  Markup 
- *
- *   <!-- Minimal: two labels + a track wrapper containing a thumb -->
- *   <div data-plugin-pricingtoggle>
- *     <span data-pt-label-primary>Monthly</span>
- *     <button data-pt-track aria-pressed="false" type="button">
- *       <span data-pt-thumb></span>
- *     </button>
- *     <span data-pt-label-secondary>
- *       Annual
- *       <span data-pt-savings-badge>−20%</span>
- *     </span>
- *   </div>
- *
- *   <!-- Price targets anywhere on the page (not required to be inside the
- *        toggle wrapper). Each element declares both values via data attrs. -->
- *   <span data-pt-price data-pt-primary="$29" data-pt-secondary="$23"></span>
- *
- *   <!-- Per-element options override defaults: -->
- *   <div data-plugin-pricingtoggle
- *        data-plugin-options='{"duration":200,"activeClass":"is-annual"}'>
- *
- *  Events 
- *
- *   The toggle element emits two namespaced events. Both carry the same
- *   detail object:  { state, isPrimary, isSecondary, instance }
- *
- *   ts-pricingtoggle-changed   — fires on every state change (after DOM update)
- *   ts-pricingtoggle-primary   — fires only when reverting to primary state
- *   ts-pricingtoggle-secondary — fires only when entering secondary state
- *
- *   Usage:
- *     $('[data-plugin-pricingtoggle]').on('ts-pricingtoggle-changed', (e, detail) => {
- *       console.log(detail.state); // 'primary' | 'secondary'
- *     });
- *
- * Programmatic API 
- *
- *   const pt = $('[data-plugin-pricingtoggle]').data('__pricingToggle');
- *   pt.setState('secondary');   // set to a specific state
- *   pt.toggle();                // flip current state
- *   pt.getState();              // → 'primary' | 'secondary'
- *   pt.destroy();               // remove all handlers + data
- *
- * Init.js wiring 
- *
- *   if (typeof $.fn['themestrapPluginPricingToggle'] === 'function' && $('[data-plugin-pricingtoggle]').length) {
- *       $(() => {
- *           $('[data-plugin-pricingtoggle]:not(.manual)').each(function () {
- *               const $this = $(this);
- *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
- *               $this.themestrapPluginPricingToggle(opts);
- *           });
- *       });
- *   }
- */
-// Pricing Toggle
-(((themestrap = {}, $) => {
-    const instanceName = '__pricingToggle';
-
-    // CSS injected once per page
-    const STYLE_ID = 'themestrap-pricingtoggle-styles';
-
-    const CSS = `
-        [data-plugin-pricingtoggle] {
-            display: inline-flex;
-            align-items: center;
-            gap: .75rem;
-            user-select: none;
-        }
-
-        /* Track */
-        [data-pt-track] {
-            position: relative;
-            display: inline-block;
-            width: var(--pt-track-width, 44px);
-            height: var(--pt-track-height, 24px);
-            border-radius: 9999px;
-            background: var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            transition: background var(--pt-duration, 250ms) ease;
-            flex-shrink: 0;
-        }
-        [data-pt-track]:focus-visible {
-            outline: 2px solid var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
-            outline-offset: 3px;
-        }
-
-        /* Thumb */
-        [data-pt-thumb] {
-            position: absolute;
-            top: var(--pt-thumb-inset, 3px);
-            left: var(--pt-thumb-inset, 3px);
-            width: var(--pt-thumb-size, 18px);
-            height: var(--pt-thumb-size, 18px);
-            border-radius: 50%;
-            background: var(--pt-thumb-bg, var(--ts-skin-surface, #fff));
-            box-shadow: var(--ts-skin-shadow, 0 1px 4px rgba(0, 0, 0, .25));
-            transition: left var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1),
-                        background var(--pt-duration, 250ms) ease;
-            pointer-events: none;
-        }
-
-        /* Secondary (active / "on") state: slide thumb to the right */
-        [data-pt-track][aria-pressed="true"] [data-pt-thumb] {
-            left: calc(
-                var(--pt-track-width, 44px)
-                - var(--pt-thumb-size, 18px)
-                - var(--pt-thumb-inset, 3px)
-            );
-        }
-
-        /* Labels */
-        [data-pt-label-primary],
-        [data-pt-label-secondary] {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            font-size: .875rem;
-            font-weight: 600;
-            color: var(--pt-label-muted, var(--ts-skin-text-dim, #64748b));
-            transition: color var(--pt-duration, 250ms) ease;
-            cursor: pointer;
-        }
-        [data-pt-label-primary].is-active,
-        [data-pt-label-secondary].is-active {
-            color: var(--pt-label-active, var(--ts-skin-text-strong, #0f172a));
-        }
-
-        /* Savings badge — hidden in primary state, shown in secondary */
-        [data-pt-savings-badge] {
-            display: inline-block;
-            background: var(--pt-badge-bg, var(--ts-skin-success-soft, rgba(34, 197, 94, .12)));
-            color: var(--pt-badge-color, var(--ts-skin-success, #16a34a));
-            font-size: .6875rem;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 9999px;
-            letter-spacing: .02em;
-            opacity: 0;
-            transform: scale(.8) translateY(2px);
-            transition: opacity var(--pt-duration, 250ms) ease,
-                        transform var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1);
-            pointer-events: none;
-        }
-        [data-pt-label-secondary].is-active [data-pt-savings-badge] {
-            opacity: 1;
-            transform: none;
-        }
-
-        /* Price targets: crossfade between values */
-        [data-pt-price] {
-            display: inline-block;
-            transition: opacity var(--pt-price-duration, 180ms) ease;
-        }
-        [data-pt-price].pt-fading {
-            opacity: 0;
-        }
-    `;
-
-    function injectStyles() {
-        if (document.getElementById(STYLE_ID)) return;
-        const $style = $('<style>').attr({ id: STYLE_ID, type: 'text/css' }).text(CSS);
-        $('head').append($style);
-    }
-
-    /**
-     * Update every [data-pt-price] element on the page whose scope matches
-     * this toggle instance. Scoping: if the price element has a
-     * [data-pt-group] attribute it must equal the toggle's group option.
-     */
-    function updatePrices(opts, state) {
-        const isPrimary = state === 'primary';
-        const group = opts.group || null;
-
-        $('[data-pt-price]').each(function () {
-            const $price = $(this);
-            const elGroup = $price.data('pt-group') || null;
-
-            // Scope: only update elements that belong to the same group,
-            // OR elements with no group when no group is configured.
-            if (group !== elGroup) return;
-
-            const primary   = $price.data('pt-primary')   ?? '';
-            const secondary = $price.data('pt-secondary') ?? '';
-            const next = isPrimary ? primary : secondary;
-
-            if (opts.animatePrices) {
-                $price.addClass('pt-fading');
-                setTimeout(() => {
-                    $price.text(next).removeClass('pt-fading');
-                }, opts.priceFadeDuration);
-            } else {
-                $price.text(next);
-            }
-        });
-    }
-
-    class PluginPricingToggle {
-
-        constructor($el, opts) {
-            return this.initialize($el, opts);
-        }
-
-        initialize($el, opts) {
-            if ($el.data(instanceName)) {
-                return $el.data(instanceName);
-            }
-
-            this.$el = $el;
-
-            this
-                .setData()
-                .setOptions(opts)
-                .build()
-                .events();
-
-            return this;
-        }
-
-        setData() {
-            this.$el.data(instanceName, this);
-            return this;
-        }
-
-        setOptions(opts) {
-            const attrOpts = themestrap.fn.getOptions(this.$el.data('plugin-options'));
-
-            this.options = $.extend(true, {}, PluginPricingToggle.defaults, opts, attrOpts, {
-                wrapper: this.$el,
-            });
-
-            // Resolve initial state from markup if not forced via options.
-            // If the track is already aria-pressed="true" we start secondary.
-            if (!this.options.initialState) {
-                const $track = this.$el.find('[data-pt-track]');
-                this.options.initialState =
-                    $track.attr('aria-pressed') === 'true' ? 'secondary' : 'primary';
-            }
-
-            this._state = this.options.initialState;
-            return this;
-        }
-
-        build() {
-            injectStyles();
-
-            const o = this.options;
-            const $el = this.$el;
-
-            // Cache sub-element references (supports zero or one of each).
-            this.$track         = $el.find('[data-pt-track]');
-            this.$thumb         = $el.find('[data-pt-thumb]');
-            this.$labelPrimary  = $el.find('[data-pt-label-primary]');
-            this.$labelSecondary= $el.find('[data-pt-label-secondary]');
-            this.$savingsBadge  = $el.find('[data-pt-savings-badge]');
-
-            // Ensure the track button has the right type & ARIA role.
-            if (this.$track.is('button') && !this.$track.attr('type')) {
-                this.$track.attr('type', 'button');
-            }
-            this.$track.attr('role', 'switch');
-
-            // Apply CSS custom properties from options so pure-CSS themes
-            // can pick them up without any extra JS.
-            $el.css({
-                '--pt-track-width':      o.trackWidth,
-                '--pt-track-height':     o.trackHeight,
-                '--pt-thumb-size':       o.thumbSize,
-                '--pt-thumb-inset':      o.thumbInset,
-                '--pt-track-bg':         o.trackColor,
-                '--pt-thumb-bg':         o.thumbColor,
-                '--pt-duration':         o.duration + 'ms',
-                '--pt-price-duration':   o.priceFadeDuration + 'ms',
-                '--pt-label-muted':      o.labelMutedColor,
-                '--pt-label-active':     o.labelActiveColor,
-                '--pt-badge-bg':         o.badgeBg,
-                '--pt-badge-color':      o.badgeColor,
-            });
-
-            // Apply initial visual state without emitting events.
-            this._applyState(this._state, { silent: true });
-
-            // Set initial price values.
-            updatePrices(o, this._state);
-
-            return this;
-        }
-
-        events() {
-            const self = this;
-
-            // Track click / keyboard.
-            self.$track.on('click.pricingtoggle', function () {
-                self.toggle();
-            });
-
-            // Label clicks also toggle.
-            self.$labelPrimary.on('click.pricingtoggle', function () {
-                if (self._state !== 'primary') self.setState('primary');
-            });
-            self.$labelSecondary.on('click.pricingtoggle', function () {
-                if (self._state !== 'secondary') self.setState('secondary');
-            });
-
-            // Keyboard: Space / Enter on non-button tracks.
-            if (!self.$track.is('button')) {
-                self.$track.on('keydown.pricingtoggle', function (e) {
-                    if (e.key === ' ' || e.key === 'Enter' || e.key === 'Spacebar') {
-                        e.preventDefault();
-                        self.toggle();
-                    }
-                });
-            }
-
-            return this;
-        }
-
-        /**
-         * Apply visual state to all sub-elements.
-         * @param {string}  state   'primary' | 'secondary'
-         * @param {object}  opts
-         * @param {boolean} opts.silent  suppress jQuery event emission
-         */
-        _applyState(state, { silent = false } = {}) {
-            const o  = this.options;
-            const isSecondary = state === 'secondary';
-
-            // ARIA
-            this.$track.attr('aria-pressed', isSecondary ? 'true' : 'false');
-
-            // Labels
-            this.$labelPrimary
-                .toggleClass('is-active', !isSecondary)
-                .toggleClass(o.activeClass, !isSecondary);
-            this.$labelSecondary
-                .toggleClass('is-active', isSecondary)
-                .toggleClass(o.activeClass, isSecondary);
-
-            // Host element class hook for external CSS.
-            this.$el.toggleClass(o.activeClass, isSecondary);
-
-            // Accessible labels on track button.
-            if (this.$track.length) {
-                this.$track.attr(
-                    'aria-label',
-                    isSecondary ? o.ariaLabelSecondary : o.ariaLabelPrimary,
-                );
-            }
-
-            if (!silent) {
-                updatePrices(o, state);
-                this._emit(state);
-                if (typeof o.onChange === 'function') {
-                    o.onChange.call(this, state, this);
-                }
-            }
-
-            return this;
-        }
-
-        /** Build and fire the three namespaced jQuery events. */
-        _emit(state) {
-            const detail = {
-                state,
-                isPrimary:   state === 'primary',
-                isSecondary: state === 'secondary',
-                instance: this,
-            };
-            this.$el.trigger('ts-pricingtoggle-changed',   [detail]);
-            this.$el.trigger('ts-pricingtoggle-' + state,  [detail]);
-        }
-
-        /**
-         * Set the toggle to a specific state.
-         * @param {'primary'|'secondary'} state
-         */
-        setState(state) {
-            if (state !== 'primary' && state !== 'secondary') return this;
-            if (state === this._state) return this;
-            this._state = state;
-            this._applyState(state);
-            return this;
-        }
-
-        /** Flip the current state. */
-        toggle() {
-            return this.setState(this._state === 'primary' ? 'secondary' : 'primary');
-        }
-
-        /** Return the current state string. */
-        getState() {
-            return this._state;
-        }
-
-        /** Tear down: remove handlers + instance data. */
-        destroy() {
-            this.$track.off('.pricingtoggle');
-            this.$labelPrimary.off('.pricingtoggle');
-            this.$labelSecondary.off('.pricingtoggle');
-            this.$el.off('.pricingtoggle').removeData(instanceName);
-            return this;
-        }
-    }
-
-    PluginPricingToggle.defaults = {
-        // Starting state. 'primary' = left/off, 'secondary' = right/on.
-        // If null the plugin reads aria-pressed from the [data-pt-track] element.
-        initialState: null,
-
-        // Class added to the wrapper and the active label. Useful for theming.
-        activeClass: 'is-secondary',
-
-        // Group key — scope [data-pt-price] updates to elements with a
-        // matching [data-pt-group] attribute. Null = unscoped (updates all
-        // price elements without a group attribute).
-        group: null,
-
-        // Price animation: crossfade price spans when switching state.
-        animatePrices:     true,
-        priceFadeDuration: 160,          // ms for the opacity fade
-
-        // Thumb slide duration (also used for label color transition).
-        duration: 250,                   // ms
-
-        // Track / thumb geometry expressed as CSS values.
-        trackWidth:  '44px',
-        trackHeight: '24px',
-        thumbSize:   '18px',
-        thumbInset:  '3px',
-
-        // Colors (applied as CSS custom properties).
-        trackColor:       '#3b82f6',
-        thumbColor:       '#ffffff',
-        labelMutedColor:  '#64748b',
-        labelActiveColor: '#0f172a',
-        badgeBg:          'rgba(34,197,94,.12)',
-        badgeColor:       '#16a34a',
-
-        // Accessible labels for the track button.
-        ariaLabelPrimary:   'Switch to annual billing',
-        ariaLabelSecondary: 'Switch to monthly billing',
-
-        // Optional callback fired on every state change.
-        // Signature: function(state, instance) {}
-        onChange: null,
-    };
-
-    $.extend(themestrap, { PluginPricingToggle });
-
-    $.fn.themestrapPluginPricingToggle = function (opts) {
-        return this.map(function () {
-            const $this = $(this);
-
-            if ($this.data(instanceName)) {
-                return $this.data(instanceName);
-            }
-
-            return new PluginPricingToggle($this, opts);
-        });
-    };
-
-})).apply(this, [window.themestrap, jQuery]);
-
-// Transfer
 /**
  * Themestrap Transfer Plugin
  * Live progress for downloads, uploads, file copies and other long jobs:
@@ -53864,8 +54703,16 @@ html.dark,
         PluginTransfer
     });
 
-    $.fn.themestrapPluginTransfer = function (opts) {
+    $.fn.themestrapPluginTransfer = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {

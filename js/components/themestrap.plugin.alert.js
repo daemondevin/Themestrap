@@ -8,135 +8,135 @@
     // so loading this script never adds CSS to pages that don't use the plugin.
     const CSS_TEXT = `/* Themestrap — PluginAlert */
 .alert-ts-primary {
-    --alert-ts-bg           : var(--primary-rgba-10);
-    --alert-ts-border       : var(--primary);
-    --alert-ts-icon         : var(--primary);
-    --alert-ts-title        : var(--primary-300);
-    --alert-ts-text         : var(--primary-200);
-    --alert-ts-action       : var(--primary-200);
-    --alert-ts-action-hover : var(--primary-300);
-    --alert-ts-close        : var(--primary--200);
-    --alert-ts-close-hover  : var(--primary-300);
+    --ts-alert-bg           : var(--primary-rgba-10);
+    --ts-alert-border       : var(--primary);
+    --ts-alert-icon         : var(--primary);
+    --ts-alert-title        : var(--primary-300);
+    --ts-alert-text         : var(--primary-200);
+    --ts-alert-action       : var(--primary-200);
+    --ts-alert-action-hover : var(--primary-300);
+    --ts-alert-close        : var(--primary--200);
+    --ts-alert-close-hover  : var(--primary-300);
 }
 
 .alert-ts-secondary {
-    --alert-ts-bg           : var(--secondary-rgba-10);
-    --alert-ts-border       : var(--secondary);
-    --alert-ts-icon         : var(--secondary);
-    --alert-ts-title        : var(--secondary-300);
-    --alert-ts-text         : var(--secondary-200);
-    --alert-ts-action       : var(--secondary-200);
-    --alert-ts-action-hover : var(--secondary-300);
-    --alert-ts-close        : var(--secondary--200);
-    --alert-ts-close-hover  : var(--secondary-300);
+    --ts-alert-bg           : var(--secondary-rgba-10);
+    --ts-alert-border       : var(--secondary);
+    --ts-alert-icon         : var(--secondary);
+    --ts-alert-title        : var(--secondary-300);
+    --ts-alert-text         : var(--secondary-200);
+    --ts-alert-action       : var(--secondary-200);
+    --ts-alert-action-hover : var(--secondary-300);
+    --ts-alert-close        : var(--secondary--200);
+    --ts-alert-close-hover  : var(--secondary-300);
 }
 
 .alert-ts-tertiary {
-    --alert-ts-bg           : var(--tertiary-rgba-10);
-    --alert-ts-border       : var(--tertiary);
-    --alert-ts-icon         : var(--tertiary);
-    --alert-ts-title        : var(--tertiary-300);
-    --alert-ts-text         : var(--tertiary-200);
-    --alert-ts-action       : var(--tertiary-200);
-    --alert-ts-action-hover : var(--tertiary-300);
-    --alert-ts-close        : var(--tertiary--200);
-    --alert-ts-close-hover  : var(--tertiary-300);
+    --ts-alert-bg           : var(--tertiary-rgba-10);
+    --ts-alert-border       : var(--tertiary);
+    --ts-alert-icon         : var(--tertiary);
+    --ts-alert-title        : var(--tertiary-300);
+    --ts-alert-text         : var(--tertiary-200);
+    --ts-alert-action       : var(--tertiary-200);
+    --ts-alert-action-hover : var(--tertiary-300);
+    --ts-alert-close        : var(--tertiary--200);
+    --ts-alert-close-hover  : var(--tertiary-300);
 }
 
 .alert-ts-quaternary {
-    --alert-ts-bg           : var(--quaternary-rgba-10);
-    --alert-ts-border       : var(--quaternary);
-    --alert-ts-icon         : var(--quaternary);
-    --alert-ts-title        : var(--quaternary-300);
-    --alert-ts-text         : var(--quaternary-200);
-    --alert-ts-action       : var(--quaternary-200);
-    --alert-ts-action-hover : var(--quaternary-300);
-    --alert-ts-close        : var(--quaternary--200);
-    --alert-ts-close-hover  : var(--quaternary-300);
+    --ts-alert-bg           : var(--quaternary-rgba-10);
+    --ts-alert-border       : var(--quaternary);
+    --ts-alert-icon         : var(--quaternary);
+    --ts-alert-title        : var(--quaternary-300);
+    --ts-alert-text         : var(--quaternary-200);
+    --ts-alert-action       : var(--quaternary-200);
+    --ts-alert-action-hover : var(--quaternary-300);
+    --ts-alert-close        : var(--quaternary--200);
+    --ts-alert-close-hover  : var(--quaternary-300);
 }
 
 .alert-ts-light {
-    --alert-ts-bg           : var(--light-100);
-    --alert-ts-border       : var(--grey-800);
-    --alert-ts-icon         : var(--light-300);
-    --alert-ts-title        : var(--dark-300);
-    --alert-ts-text         : var(--dark-200);
-    --alert-ts-action       : var(--dark-200);
-    --alert-ts-action-hover : var(--dark-300);
-    --alert-ts-close        : var(--dark--200);
-    --alert-ts-close-hover  : var(--dark-300);
+    --ts-alert-bg           : var(--light-100);
+    --ts-alert-border       : var(--grey-800);
+    --ts-alert-icon         : var(--light-300);
+    --ts-alert-title        : var(--dark-300);
+    --ts-alert-text         : var(--dark-200);
+    --ts-alert-action       : var(--dark-200);
+    --ts-alert-action-hover : var(--dark-300);
+    --ts-alert-close        : var(--dark--200);
+    --ts-alert-close-hover  : var(--dark-300);
 }
 
 .alert-ts-dark {
-    --alert-ts-bg           : var(--dark--300);
-    --alert-ts-border       : var(--dark-300);
-    --alert-ts-icon         : var(--dark-300);
-    --alert-ts-title        : var(--light-300);
-    --alert-ts-text         : var(--light-200);
-    --alert-ts-action       : var(--light-200);
-    --alert-ts-action-hover : var(--light-300);
-    --alert-ts-close        : var(--light--200);
-    --alert-ts-close-hover  : var(--light-300);
+    --ts-alert-bg           : var(--dark--300);
+    --ts-alert-border       : var(--dark-300);
+    --ts-alert-icon         : var(--dark-300);
+    --ts-alert-title        : var(--light-300);
+    --ts-alert-text         : var(--light-200);
+    --ts-alert-action       : var(--light-200);
+    --ts-alert-action-hover : var(--light-300);
+    --ts-alert-close        : var(--light--200);
+    --ts-alert-close-hover  : var(--light-300);
 }
 
 .alert-ts-info {
-    --alert-ts-bg           : var(--ts-skin-info-soft, #eff6ff);
-    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
-    --alert-ts-icon         : var(--ts-skin-info, #3b82f6);
-    --alert-ts-title        : var(--ts-skin-text-strong, #1e40af);
-    --alert-ts-text         : var(--ts-skin-text, #1d4ed8);
-    --alert-ts-action       : var(--ts-skin-info, #1d4ed8);
-    --alert-ts-action-hover : var(--ts-skin-info, #1e40af);
-    --alert-ts-close        : var(--ts-skin-info, #93c5fd);
-    --alert-ts-close-hover  : var(--ts-skin-text, #1d4ed8);
+    --ts-alert-bg           : var(--ts-skin-info-soft, #eff6ff);
+    --ts-alert-border       : var(--ts-skin-info, #3b82f6);
+    --ts-alert-icon         : var(--ts-skin-info, #3b82f6);
+    --ts-alert-title        : var(--ts-skin-text-strong, #1e40af);
+    --ts-alert-text         : var(--ts-skin-text, #1d4ed8);
+    --ts-alert-action       : var(--ts-skin-info, #1d4ed8);
+    --ts-alert-action-hover : var(--ts-skin-info, #1e40af);
+    --ts-alert-close        : var(--ts-skin-info, #93c5fd);
+    --ts-alert-close-hover  : var(--ts-skin-text, #1d4ed8);
 }
 
 .alert-ts-success {
-    --alert-ts-bg           : var(--ts-skin-success-soft, #f0fdf4);
-    --alert-ts-border       : var(--ts-skin-success, #22c55e);
-    --alert-ts-icon         : var(--ts-skin-success, #22c55e);
-    --alert-ts-title        : var(--ts-skin-text-strong, #14532d);
-    --alert-ts-text         : var(--ts-skin-text, #15803d);
-    --alert-ts-action       : var(--ts-skin-success, #15803d);
-    --alert-ts-action-hover : var(--ts-skin-success, #14532d);
-    --alert-ts-close        : var(--ts-skin-success, #86efac);
-    --alert-ts-close-hover  : var(--ts-skin-text, #15803d);
+    --ts-alert-bg           : var(--ts-skin-success-soft, #f0fdf4);
+    --ts-alert-border       : var(--ts-skin-success, #22c55e);
+    --ts-alert-icon         : var(--ts-skin-success, #22c55e);
+    --ts-alert-title        : var(--ts-skin-text-strong, #14532d);
+    --ts-alert-text         : var(--ts-skin-text, #15803d);
+    --ts-alert-action       : var(--ts-skin-success, #15803d);
+    --ts-alert-action-hover : var(--ts-skin-success, #14532d);
+    --ts-alert-close        : var(--ts-skin-success, #86efac);
+    --ts-alert-close-hover  : var(--ts-skin-text, #15803d);
 }
 
 .alert-ts-warning {
-    --alert-ts-bg           : var(--ts-skin-warning-soft, #fffbeb);
-    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-icon         : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-title        : var(--ts-skin-text-strong, #78350f);
-    --alert-ts-text         : var(--ts-skin-text, #92400e);
-    --alert-ts-action       : var(--ts-skin-warning, #92400e);
-    --alert-ts-action-hover : var(--ts-skin-warning, #78350f);
-    --alert-ts-close        : var(--ts-skin-warning, #fcd34d);
-    --alert-ts-close-hover  : var(--ts-skin-text, #92400e);
+    --ts-alert-bg           : var(--ts-skin-warning-soft, #fffbeb);
+    --ts-alert-border       : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-icon         : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-title        : var(--ts-skin-text-strong, #78350f);
+    --ts-alert-text         : var(--ts-skin-text, #92400e);
+    --ts-alert-action       : var(--ts-skin-warning, #92400e);
+    --ts-alert-action-hover : var(--ts-skin-warning, #78350f);
+    --ts-alert-close        : var(--ts-skin-warning, #fcd34d);
+    --ts-alert-close-hover  : var(--ts-skin-text, #92400e);
 }
 
 .alert-ts-danger {
-    --alert-ts-bg           : var(--ts-skin-danger-soft, #fef2f2);
-    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
-    --alert-ts-icon         : var(--ts-skin-danger, #ef4444);
-    --alert-ts-title        : var(--ts-skin-text-strong, #7f1d1d);
-    --alert-ts-text         : var(--ts-skin-text, #991b1b);
-    --alert-ts-action       : var(--ts-skin-danger, #991b1b);
-    --alert-ts-action-hover : var(--ts-skin-danger, #7f1d1d);
-    --alert-ts-close        : var(--ts-skin-danger, #fca5a5);
-    --alert-ts-close-hover  : var(--ts-skin-text, #991b1b);
+    --ts-alert-bg           : var(--ts-skin-danger-soft, #fef2f2);
+    --ts-alert-border       : var(--ts-skin-danger, #ef4444);
+    --ts-alert-icon         : var(--ts-skin-danger, #ef4444);
+    --ts-alert-title        : var(--ts-skin-text-strong, #7f1d1d);
+    --ts-alert-text         : var(--ts-skin-text, #991b1b);
+    --ts-alert-action       : var(--ts-skin-danger, #991b1b);
+    --ts-alert-action-hover : var(--ts-skin-danger, #7f1d1d);
+    --ts-alert-close        : var(--ts-skin-danger, #fca5a5);
+    --ts-alert-close-hover  : var(--ts-skin-text, #991b1b);
 }
 
 .alert-ts-neutral {
-    --alert-ts-bg           : var(--ts-skin-surface, #f9fafb);
-    --alert-ts-border       : var(--ts-skin-border, #6b7280);
-    --alert-ts-icon         : var(--ts-skin-text-dim, #6b7280);
-    --alert-ts-title        : var(--ts-skin-text-strong, #111827);
-    --alert-ts-text         : var(--ts-skin-text, #374151);
-    --alert-ts-action       : var(--ts-skin-text-strong, #374151);
-    --alert-ts-action-hover : var(--ts-skin-text-strong, #111827);
-    --alert-ts-close        : var(--ts-skin-text-dim, #d1d5db);
-    --alert-ts-close-hover  : var(--ts-skin-text, #374151);
+    --ts-alert-bg           : var(--ts-skin-surface, #f9fafb);
+    --ts-alert-border       : var(--ts-skin-border, #6b7280);
+    --ts-alert-icon         : var(--ts-skin-text-dim, #6b7280);
+    --ts-alert-title        : var(--ts-skin-text-strong, #111827);
+    --ts-alert-text         : var(--ts-skin-text, #374151);
+    --ts-alert-action       : var(--ts-skin-text-strong, #374151);
+    --ts-alert-action-hover : var(--ts-skin-text-strong, #111827);
+    --ts-alert-close        : var(--ts-skin-text-dim, #d1d5db);
+    --ts-alert-close-hover  : var(--ts-skin-text, #374151);
 }
 
 
@@ -148,8 +148,8 @@
     padding          : 1rem 1rem 1rem 1.25rem;
     border-radius    : 0.5rem;
     border-width     : 0;
-    border-left      : 4px solid var(--alert-ts-border);
-    background-color : var(--alert-ts-bg);
+    border-left      : 4px solid var(--alert-ts-border, var(--ts-alert-border));
+    background-color : var(--alert-ts-bg, var(--ts-alert-bg));
     position         : relative;
     overflow         : hidden;   /* clips countdown bar */
 }
@@ -173,10 +173,10 @@
 .alert.alert-ts[class*="alert-info"],
 .alert.alert-ts[class*="alert-light"],
 .alert.alert-ts[class*="alert-dark"] {
-    background-color : var(--alert-ts-bg);
+    background-color : var(--alert-ts-bg, var(--ts-alert-bg));
     border-color     : transparent;
-    border-left-color: var(--alert-ts-border);
-    color            : var(--alert-ts-text);
+    border-left-color: var(--alert-ts-border, var(--ts-alert-border));
+    color            : var(--alert-ts-text, var(--ts-alert-text));
 }
 
 
@@ -185,7 +185,7 @@
     flex-shrink    : 0;
     width          : 1.25rem;   /* 20 px */
     height         : 1.25rem;
-    color          : var(--alert-ts-icon);
+    color          : var(--alert-ts-icon, var(--ts-alert-icon));
     margin-top     : 1px;       /* optical alignment with first line of text */
 }
 
@@ -205,14 +205,14 @@
     font-size   : 0.975rem;   /* 14 px */
     font-weight : 600;
     line-height : 1.4;
-    color       : var(--alert-ts-title);
+    color       : var(--alert-ts-title, var(--ts-alert-title));
     margin      : 0 0 0.25rem;
 }
 
 .alert-ts-text {
     font-size   : 0.975rem;
     line-height : 1.5;
-    color       : var(--alert-ts-text);
+    color       : var(--alert-ts-text, var(--ts-alert-text));
 }
 
 .alert-ts-text p:last-child {
@@ -247,28 +247,28 @@
 
 /* Primary action — filled */
 .alert-ts-action-primary {
-    background-color : var(--alert-ts-action);
-    border-color     : var(--alert-ts-action);
+    background-color : var(--alert-ts-action, var(--ts-alert-action));
+    border-color     : var(--alert-ts-action, var(--ts-alert-action));
     color            : var(--ts-skin-on-accent, #fff);
 }
 
 .alert-ts-action-primary:hover,
 .alert-ts-action-primary:focus-visible {
-    background-color : var(--alert-ts-action-hover);
-    border-color     : var(--alert-ts-action-hover);
+    background-color : var(--alert-ts-action-hover, var(--ts-alert-action-hover));
+    border-color     : var(--alert-ts-action-hover, var(--ts-alert-action-hover));
     color            : var(--ts-skin-on-accent, #fff);
 }
 
 /* Secondary action — ghost / outlined */
 .alert-ts-action-secondary {
     background-color : transparent;
-    border-color     : var(--alert-ts-action);
-    color            : var(--alert-ts-action);
+    border-color     : var(--alert-ts-action, var(--ts-alert-action));
+    color            : var(--alert-ts-action, var(--ts-alert-action));
 }
 
 .alert-ts-action-secondary:hover,
 .alert-ts-action-secondary:focus-visible {
-    background-color : var(--alert-ts-action);
+    background-color : var(--alert-ts-action, var(--ts-alert-action));
     color            : var(--ts-skin-on-accent, #fff);
 }
 
@@ -276,19 +276,19 @@
 .alert-ts-action-link {
     background  : none;
     border-color: transparent;
-    color       : var(--alert-ts-action);
+    color       : var(--alert-ts-action, var(--ts-alert-action));
     padding-left : 0;
     padding-right: 0;
 }
 
 .alert-ts-action-link:hover,
 .alert-ts-action-link:focus-visible {
-    color           : var(--alert-ts-action-hover);
+    color           : var(--alert-ts-action-hover, var(--ts-alert-action-hover));
     text-decoration : underline;
 }
 
 .alert-ts-action:focus-visible {
-    outline        : 2px solid var(--alert-ts-border);
+    outline        : 2px solid var(--alert-ts-border, var(--ts-alert-border));
     outline-offset : 2px;
 }
 
@@ -306,7 +306,7 @@
     background       : none;
     border           : none;
     border-radius    : 0.375rem;
-    color            : var(--alert-ts-close);
+    color            : var(--alert-ts-close, var(--ts-alert-close));
     cursor           : pointer;
     transition       : color 0.15s ease, background-color 0.15s ease;
 }
@@ -318,14 +318,14 @@
 }
 
 .alert-ts-close:hover {
-    color            : var(--alert-ts-close-hover);
-    background-color : color-mix(in srgb, var(--alert-ts-border) 12%, transparent);
+    color            : var(--alert-ts-close-hover, var(--ts-alert-close-hover));
+    background-color : color-mix(in srgb, var(--alert-ts-border, var(--ts-alert-border)) 12%, transparent);
 }
 
 .alert-ts-close:focus-visible {
-    outline        : 2px solid var(--alert-ts-border);
+    outline        : 2px solid var(--alert-ts-border, var(--ts-alert-border));
     outline-offset : 2px;
-    color          : var(--alert-ts-close-hover);
+    color          : var(--alert-ts-close-hover, var(--ts-alert-close-hover));
 }
 
 
@@ -336,7 +336,7 @@
     left             : 0;
     width            : 100%;
     height           : 3px;
-    background-color : var(--alert-ts-border);
+    background-color : var(--alert-ts-border, var(--ts-alert-border));
     opacity          : 0.45;
     transform        : scaleX(1);
     transform-origin : left center;
@@ -383,63 +383,63 @@
 
 /* Dark-mode palette */
 html.dark .alert-ts-info {
-    --alert-ts-bg           : var(--ts-skin-info-soft, #172554);
-    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
-    --alert-ts-icon         : var(--ts-skin-info, #60a5fa);
-    --alert-ts-title        : var(--ts-skin-text-strong, #bfdbfe);
-    --alert-ts-text         : var(--ts-skin-text, #93c5fd);
-    --alert-ts-action       : var(--ts-skin-info, #93c5fd);
-    --alert-ts-action-hover : var(--ts-skin-info, #bfdbfe);
-    --alert-ts-close        : var(--ts-skin-info, #3b82f6);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bfdbfe);
+    --ts-alert-bg           : var(--ts-skin-info-soft, #172554);
+    --ts-alert-border       : var(--ts-skin-info, #3b82f6);
+    --ts-alert-icon         : var(--ts-skin-info, #60a5fa);
+    --ts-alert-title        : var(--ts-skin-text-strong, #bfdbfe);
+    --ts-alert-text         : var(--ts-skin-text, #93c5fd);
+    --ts-alert-action       : var(--ts-skin-info, #93c5fd);
+    --ts-alert-action-hover : var(--ts-skin-info, #bfdbfe);
+    --ts-alert-close        : var(--ts-skin-info, #3b82f6);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #bfdbfe);
 }
 
 html.dark .alert-ts-success {
-    --alert-ts-bg           : var(--ts-skin-success-soft, #052e16);
-    --alert-ts-border       : var(--ts-skin-success, #22c55e);
-    --alert-ts-icon         : var(--ts-skin-success, #4ade80);
-    --alert-ts-title        : var(--ts-skin-text-strong, #bbf7d0);
-    --alert-ts-text         : var(--ts-skin-on-accent, #86efac);
-    --alert-ts-action       : var(--ts-skin-success, #86efac);
-    --alert-ts-action-hover : var(--ts-skin-success, #bbf7d0);
-    --alert-ts-close        : var(--ts-skin-success, #22c55e);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bbf7d0);
+    --ts-alert-bg           : var(--ts-skin-success-soft, #052e16);
+    --ts-alert-border       : var(--ts-skin-success, #22c55e);
+    --ts-alert-icon         : var(--ts-skin-success, #4ade80);
+    --ts-alert-title        : var(--ts-skin-text-strong, #bbf7d0);
+    --ts-alert-text         : var(--ts-skin-on-accent, #86efac);
+    --ts-alert-action       : var(--ts-skin-success, #86efac);
+    --ts-alert-action-hover : var(--ts-skin-success, #bbf7d0);
+    --ts-alert-close        : var(--ts-skin-success, #22c55e);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #bbf7d0);
 }
 
 html.dark .alert-ts-warning {
-    --alert-ts-bg           : var(--ts-skin-warning-soft, #27170a);
-    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-icon         : var(--ts-skin-warning, #fbbf24);
-    --alert-ts-title        : var(--ts-skin-text-strong, #fde68a);
-    --alert-ts-text         : var(--ts-skin-on-accent, #fcd34d);
-    --alert-ts-action       : var(--ts-skin-warning, #fcd34d);
-    --alert-ts-action-hover : var(--ts-skin-warning, #fde68a);
-    --alert-ts-close        : var(--ts-skin-warning, #f59e0b);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fde68a);
+    --ts-alert-bg           : var(--ts-skin-warning-soft, #27170a);
+    --ts-alert-border       : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-icon         : var(--ts-skin-warning, #fbbf24);
+    --ts-alert-title        : var(--ts-skin-text-strong, #fde68a);
+    --ts-alert-text         : var(--ts-skin-on-accent, #fcd34d);
+    --ts-alert-action       : var(--ts-skin-warning, #fcd34d);
+    --ts-alert-action-hover : var(--ts-skin-warning, #fde68a);
+    --ts-alert-close        : var(--ts-skin-warning, #f59e0b);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #fde68a);
 }
 
 html.dark .alert-ts-danger {
-    --alert-ts-bg           : var(--ts-skin-danger-soft, #2d0a0a);
-    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
-    --alert-ts-icon         : var(--ts-skin-danger, #f87171);
-    --alert-ts-title        : var(--ts-skin-text-strong, #fecaca);
-    --alert-ts-text         : var(--ts-skin-text, #fca5a5);
-    --alert-ts-action       : var(--ts-skin-danger, #fca5a5);
-    --alert-ts-action-hover : var(--ts-skin-danger, #fecaca);
-    --alert-ts-close        : var(--ts-skin-danger, #ef4444);
-    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fecaca);
+    --ts-alert-bg           : var(--ts-skin-danger-soft, #2d0a0a);
+    --ts-alert-border       : var(--ts-skin-danger, #ef4444);
+    --ts-alert-icon         : var(--ts-skin-danger, #f87171);
+    --ts-alert-title        : var(--ts-skin-text-strong, #fecaca);
+    --ts-alert-text         : var(--ts-skin-text, #fca5a5);
+    --ts-alert-action       : var(--ts-skin-danger, #fca5a5);
+    --ts-alert-action-hover : var(--ts-skin-danger, #fecaca);
+    --ts-alert-close        : var(--ts-skin-danger, #ef4444);
+    --ts-alert-close-hover  : var(--ts-skin-on-accent, #fecaca);
 }
 
 html.dark .alert-ts-neutral {
-    --alert-ts-bg           : var(--ts-skin-surface, #111827);
-    --alert-ts-border       : var(--ts-skin-border, #6b7280);
-    --alert-ts-icon         : var(--ts-skin-text-dim, #9ca3af);
-    --alert-ts-title        : var(--ts-skin-text-strong, #f9fafb);
-    --alert-ts-text         : var(--ts-skin-text, #d1d5db);
-    --alert-ts-action       : var(--ts-skin-text-strong, #d1d5db);
-    --alert-ts-action-hover : var(--ts-skin-text-strong, #f9fafb);
-    --alert-ts-close        : var(--ts-skin-text-dim, #6b7280);
-    --alert-ts-close-hover  : var(--ts-skin-text, #f9fafb);
+    --ts-alert-bg           : var(--ts-skin-surface, #111827);
+    --ts-alert-border       : var(--ts-skin-border, #6b7280);
+    --ts-alert-icon         : var(--ts-skin-text-dim, #9ca3af);
+    --ts-alert-title        : var(--ts-skin-text-strong, #f9fafb);
+    --ts-alert-text         : var(--ts-skin-text, #d1d5db);
+    --ts-alert-action       : var(--ts-skin-text-strong, #d1d5db);
+    --ts-alert-action-hover : var(--ts-skin-text-strong, #f9fafb);
+    --ts-alert-close        : var(--ts-skin-text-dim, #6b7280);
+    --ts-alert-close-hover  : var(--ts-skin-text, #f9fafb);
 }
 
 .alert.alert-ts {

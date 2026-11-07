@@ -2,12 +2,12 @@
 
 A custom cursor: a ring that follows the mouse with a dot at its center. The ring can snap around buttons and cards, the dot can turn into a plus sign, and the native cursor can be hidden.
 
-**File:** `js/components/themestrap.plugin.cursoreffect.js`  
-**Demo:** `demos/plugin.demo.cursoreffect.html`  
-**jQuery method:** `$.fn.themestrapPluginCursorEffect`  
-**Data attribute:** `data-plugin-cursor-effect`  
-**Instance key:** `__cursorEffect`  
-**Init strategy:** `intObsInit` via `themestrap.init.js`
+> **File:** `js/components/themestrap.plugin.cursoreffect.js`  
+> **Demo:** `demos/plugin.demo.cursoreffect.html`  
+> **jQuery method:** `$.fn.themestrapPluginCursorEffect`  
+> **Data attribute:** `data-plugin-cursor-effect`  
+> **Instance key:** `__cursorEffect`  
+> **Init strategy:** `intObsInit` via `themestrap.init.js`
 
 
 

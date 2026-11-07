@@ -2,12 +2,12 @@
 
 A live countdown to a date, in days, hours, minutes and seconds. Digits roll like an odometer using pure CSS, and four layouts cover the common cases: labels under the numbers, labels beside them, a compact clock, and boxed tiles. No vendor library is needed.
 
-**File:** `js/components/themestrap.plugin.countdown.js`  
-**Demo:** `demos/plugin.demo.countdown.html`  
-**jQuery method:** `$.fn.themestrapPluginCountdown`  
-**Data attribute:** `data-plugin-countdown`  
-**Instance key:** `__pluginCountdown`  
-**Init strategy:** `intObsInit` via `themestrap.init.js`
+> **File:** `js/components/themestrap.plugin.countdown.js`  
+> **Demo:** `demos/plugin.demo.countdown.html`  
+> **jQuery method:** `$.fn.themestrapPluginCountdown`  
+> **Data attribute:** `data-plugin-countdown`  
+> **Instance key:** `__pluginCountdown`  
+> **Init strategy:** `intObsInit` via `themestrap.init.js`
 
 > Earlier versions wrapped the jQuery Countdown library and used options such as `textDay`, `numberClass` and `insertHTMLbefore`. Those are gone. See "Migrating from the old plugin" at the end.
 

@@ -47,6 +47,27 @@
 
 			return this;
 		}
+
+        /**
+         * Release the element from its matchHeight group and clear the height it was given.
+         * @returns {PluginMatchHeight}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (typeof $.fn.matchHeight === 'function') {
+                $el.matchHeight({ remove: true, property: this.options.property });
+
+                // matchHeight leaves empty groups behind, drop them so resize stops visiting them
+                if ($.fn.matchHeight._groups) {
+                    $.fn.matchHeight._groups = $.fn.matchHeight._groups.filter(group => group.elements.length);
+                }
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginMatchHeight.defaults = {
@@ -61,17 +82,20 @@
 		PluginMatchHeight
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginMatchHeight = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginMatchHeight = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginMatchHeight($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginMatchHeight($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);

@@ -2,12 +2,12 @@
 
 A star rating, or a rating with any icon you like. It shows fractional values with a partial fill, highlights icons as the pointer sweeps across them, can be cleared, and reports every change through a callback.
 
-**File:** `js/components/themestrap.plugin.rating.js`  
-**Demo:** `demos/plugin.demo.rating.html`  
-**jQuery method:** `$.fn.themestrapPluginRating`  
-**Data attribute:** `data-plugin-rating`  
-**Instance key:** `__rating`  
-**Init strategy:** `intObsInit` via `themestrap.init.js`
+> **File:** `js/components/themestrap.plugin.rating.js`  
+> **Demo:** `demos/plugin.demo.rating.html`  
+> **jQuery method:** `$.fn.themestrapPluginRating`  
+> **Data attribute:** `data-plugin-rating`  
+> **Instance key:** `__rating`  
+> **Init strategy:** `intObsInit` via `themestrap.init.js`
 
 
 

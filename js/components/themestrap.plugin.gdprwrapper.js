@@ -11,6 +11,8 @@
 			const self = this;
 
 			this.$el = $el;
+			this._origHtml = $el.html();
+			this._hadShow = $el.hasClass('show');
 
 			this
 				.setData()
@@ -39,12 +41,12 @@
 
 			if( $.cookie( 'themestrap-gdpr-preferences' ) && $.cookie( 'themestrap-gdpr-preferences' ).includes(self.options.checkCookie) ) {
 
-				$.ajax({
+				self._xhr = $.ajax({
 					url: self.options.ajaxURL,
 					cache: false,
 					complete({responseText}) {
-					
-						setTimeout(() => {
+						self._xhr = null;
+						self._timer = setTimeout(() => {
 
 							self.options.wrapper.html(responseText).addClass('show');
 
@@ -60,6 +62,23 @@
 			return this;
 
 		}
+
+        /**
+         * Abort a pending request, put back the original markup and drop the instance.
+         * @returns {PluginGDPRWrapper}
+         */
+        destroy() {
+            if (this._xhr) {
+                this._xhr.abort();
+                this._xhr = null;
+            }
+            clearTimeout(this._timer);
+
+            this.$el.html(this._origHtml).toggleClass('show', this._hadShow);
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginGDPRWrapper.defaults = {
@@ -71,17 +90,20 @@
 		PluginGDPRWrapper
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginGDPRWrapper = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginGDPRWrapper = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginGDPRWrapper($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginGDPRWrapper($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);

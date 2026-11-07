@@ -32,7 +32,16 @@ PluginInViewportStyle uses the `observeElementInViewport` helper to watch an ele
 | `modTop` | string | `'-200px'` | Top root margin modifier. |
 | `modBottom` | string | `'-200px'` | Bottom root margin modifier. |
 | `style` | object | `{'transition': 'all 1s ease-in-out'}` | Initial CSS styles applied on init. |
-| `styleIn` | object/string | `''` | CSS styles to apply when in viewport. |
-| `styleOut` | object/string | `''` | CSS styles to apply when out of viewport. |
+| `styleIn` | object | `{}` | CSS styles to apply when in viewport. |
+| `styleOut` | object | `{}` | CSS styles to apply when out of viewport. |
 | `classIn` | string | `''` | Class to add when in viewport (removes `classOut`). |
 | `classOut` | string | `''` | Class to add when out of viewport (removes `classIn`). |
+
+
+## [Public **API**](#api)
+
+`destroy()` stops observing the element and restores its original `class` and `style` attributes:
+
+```js
+$('#hero').themestrapPluginInViewportStyle('destroy');
+```

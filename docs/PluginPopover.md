@@ -2,12 +2,12 @@
 
 A click-to-open panel anchored to a trigger, with an arrow, side and alignment control, a flip when the trigger is near the viewport edge, Escape and click-outside closing, an optional focus trap, and a portal mode that escapes `overflow: hidden` containers. Only one popover is open at a time.
 
-**File:** `js/components/themestrap.plugin.popover.js`  
-**Demo:** `demos/plugin.demo.popover.html`  
-**jQuery method:** `$.fn.themestrapPluginPopover`  
-**Data attribute:** `data-plugin-popover`  
-**Instance key:** `__pluginPopover`  
-**Init strategy:** DOMReady `$().each()` via `themestrap.init.js`
+> **File:** `js/components/themestrap.plugin.popover.js`  
+> **Demo:** `demos/plugin.demo.popover.html`  
+> **jQuery method:** `$.fn.themestrapPluginPopover`  
+> **Data attribute:** `data-plugin-popover`  
+> **Instance key:** `__pluginPopover`  
+> **Init strategy:** DOMReady `$().each()` via `themestrap.init.js`
 
 
 

@@ -2,10 +2,10 @@
 
 A custom select component that replaces the browser's native `<select>` with a fully styled, fully accessible dropdown while keeping the original element in the DOM for form submission and browser autofill compatibility.
 
-**File:** `js/components/themestrap.plugin.select.js`  
-**Demo:** `demos/plugin.demo.select.html`  
-**Data attribute:** `data-plugin-select`  
-**Instance key:** `__pluginSelect`
+> **File:** `js/components/themestrap.plugin.select.js`  
+> **Demo:** `demos/plugin.demo.select.html`  
+> **Data attribute:** `data-plugin-select`  
+> **Instance key:** `__pluginSelect`
 
 
 

@@ -11,6 +11,12 @@
 
             this.$el = $el;
             this.el = $el[0];
+            this._origStyle = $el.attr('style');
+            this._origTheme = $el.attr('data-theme');
+            this._timers = [];
+
+            // setData() below only measures, so the instance is stored here
+            $el.data(instanceName, this);
 
             this.options = [];
             this.scrollingFx = [];
@@ -87,7 +93,7 @@
                 this.observer[i].observe(this.el);
 
                 // Initial run
-                setTimeout(() => this.update(i));
+                this._timers.push(setTimeout(() => this.update(i)));
             });
         }
 
@@ -108,7 +114,8 @@
             } else {
                 if (!this.scrollingFx[index]) return;
 
-                window.removeEventListener('scroll', this.scrollingFx[index]);
+                (this.scrollableElement || window)
+                    .removeEventListener('scroll', this.scrollingFx[index]);
                 this.scrollingFx[index] = null;
             }
         }
@@ -230,12 +237,10 @@
         }
 
         bindResize() {
-            let timeout;
+            this._onResize = () => {
+                clearTimeout(this._resizeTimer);
 
-            window.addEventListener('resize', () => {
-                clearTimeout(timeout);
-
-                timeout = setTimeout(() => {
+                this._resizeTimer = setTimeout(() => {
                     this.setData();
 
                     this.deltaScrolling = this.deltaScrolling.map((_, i) => {
@@ -246,11 +251,51 @@
 
                     this.dispatch('scrollFxResized');
                 }, 500);
-            });
+            };
+
+            window.addEventListener('resize', this._onResize);
         }
 
         dispatch(name) {
             this.el.dispatchEvent(new CustomEvent(name));
+        }
+
+        /**
+         * Disconnect the observers, remove the scroll and resize listeners and
+         * restore the element's original style and data-theme.
+         * @returns {PluginScrollFx}
+         */
+        destroy() {
+            const target = this.scrollableElement || window;
+
+            this.observer.forEach(observer => observer && observer.disconnect());
+            this.scrollingFx.forEach(handler => handler && target.removeEventListener('scroll', handler));
+            this.observer = [];
+            this.scrollingFx = [];
+
+            if (this._onResize) {
+                window.removeEventListener('resize', this._onResize);
+                this._onResize = null;
+            }
+            clearTimeout(this._resizeTimer);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            this.el.classList.remove('scroll-fx--theme-transition');
+            if (this._origStyle === undefined) {
+                this.$el.removeAttr('style');
+            } else {
+                this.$el.attr('style', this._origStyle);
+            }
+            if (this._origTheme === undefined) {
+                this.$el.removeAttr('data-theme');
+            } else {
+                this.$el.attr('data-theme', this._origTheme);
+            }
+
+            this.$el.removeData(instanceName);
+
+            return this;
         }
     }
     
@@ -259,25 +304,26 @@
 		PluginScrollFx
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginScrollFx = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginScrollFx = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginScrollFx($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginScrollFx($this, opts);
 		});
-	}
+	};
 
     // Auto-init
-    $('.js-scroll-fx').each(function () {
-        const $this = $(this);
-        const instance = new PluginScrollFx($this);
-        $this.data(instanceName, instance);
+    $('.js-scroll-fx:not(.manual)').each(function () {
+        $(this).themestrapPluginScrollFx();
     });
 
     themestrap.ScrollFx = PluginScrollFx;

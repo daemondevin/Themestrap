@@ -2,12 +2,12 @@
 
 An animated ring chart for a single percentage, drawn on a HiDPI-aware `<canvas>`. The ring fills from 0 to its value when it scrolls into view, with an optional track, tick marks and a counting number in the middle. No vendor library is needed.
 
-**File:** `js/components/themestrap.plugin.chartcircular.js`  
-**Demo:** `demos/plugin.demo.chartcircular.html`  
-**jQuery method:** `$.fn.themestrapPluginChartCircular`  
-**Data attribute:** `data-plugin-chart-circular`, or the `.circular-bar-chart` class  
-**Instance key:** `__chartCircular`  
-**Init strategy:** `dynIntObsInit` via `themestrap.init.js`
+> **File:** `js/components/themestrap.plugin.chartcircular.js`  
+> **Demo:** `demos/plugin.demo.chartcircular.html`  
+> **jQuery method:** `$.fn.themestrapPluginChartCircular`  
+> **Data attribute:** `data-plugin-chart-circular`, or the `.circular-bar-chart` class  
+> **Instance key:** `__chartCircular`  
+> **Init strategy:** `dynIntObsInit` via `themestrap.init.js`
 
 > Earlier versions wrapped easyPieChart. The chart is now drawn by the plugin itself, so the easyPieChart vendor file is no longer needed and `themestrap.modules.js` no longer loads it. A function for `barColor` and the `accY` default are gone with it; see Pitfalls.
 

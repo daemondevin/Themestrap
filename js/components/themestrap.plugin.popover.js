@@ -759,8 +759,16 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 
     $.extend(themestrap, { PluginPopover });
 
-    $.fn.themestrapPluginPopover = function (opts) {
+    $.fn.themestrapPluginPopover = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
 
             if ($this.data(instanceName)) {

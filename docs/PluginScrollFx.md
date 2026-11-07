@@ -117,6 +117,17 @@ By default, scroll position is read from `window`. To track horizontal scroll wi
 > **Warning:** The plugin reads from `scrollLeft`/`clientWidth` on the named scrollable element. It must be a real scroll container — `overflow-x: scroll` (or `auto`) with a fixed width.
 
 
+## [Public **API**](#api)
+
+Elements with `.js-scroll-fx` initialize on load; add `.manual` to skip that and call `$(el).themestrapPluginScrollFx()` yourself.
+
+`destroy()` disconnects the observers, removes the scroll and resize listeners, and restores the element's original `style` and `data-theme`:
+
+```js
+$('.js-scroll-fx').themestrapPluginScrollFx('destroy');
+```
+
+
 ## [Recipe **Cookbook**](#recipes)
 
 #### Classic fade + rise on entry

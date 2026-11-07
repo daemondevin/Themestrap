@@ -13,6 +13,8 @@
 			}
 
 			this.$el = $el;
+			this._origClass = $el.attr('class');
+			this._origStyle = $el.attr('style');
 
 			this
 				.setData()
@@ -40,7 +42,7 @@
 			self.$el.css(self.options.style);
 
 		    if (typeof window.IntersectionObserver === 'function') {
-			    const un = observeElementInViewport.observeElementInViewport(
+			    self._unobserve = observeElementInViewport.observeElementInViewport(
 			        el, () => {
 			        	self.$el.css(self.options.styleIn);
 			        	self.$el
@@ -62,6 +64,34 @@
 
 			return this;
 		}
+
+        /**
+         * Stop observing and restore the element's original class and style attributes.
+         * @returns {PluginInViewportStyle}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (typeof this._unobserve === 'function') {
+                this._unobserve();
+                this._unobserve = null;
+            }
+
+            if (this._origClass === undefined) {
+                $el.removeAttr('class');
+            } else {
+                $el.attr('class', this._origClass);
+            }
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginInViewportStyle.defaults = {
@@ -70,8 +100,8 @@
 		modTop: '-200px',
 		modBottom: '-200px',
 		style: {'transition': 'all 1s ease-in-out'},
-		styleIn: '',
-		styleOut: '',
+		styleIn: {},
+		styleOut: {},
 		classIn: '',
 		classOut: ''
 	};
@@ -81,17 +111,20 @@
 		PluginInViewportStyle
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginInViewportStyle = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginInViewportStyle = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginInViewportStyle($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginInViewportStyle($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);

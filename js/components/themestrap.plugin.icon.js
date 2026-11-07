@@ -1,6 +1,7 @@
 // Icon
 (((themestrap = {}, $) => {
     const instanceName = '__icon';
+    let uid = 0;
 
     class PluginIcon {
         constructor($el, opts) {
@@ -13,6 +14,10 @@
 			}
 
 			this.$el = $el;
+			this._ns = '.tsicon' + (++uid);
+			this._origClass = $el.attr('class');
+			this._origStyle = $el.attr('style');
+			this._timers = [];
 
 			this
 				.setData()
@@ -74,9 +79,10 @@
 			const fileName = $el.attr('src');
 
 			if(fileName.split('.').pop() == 'svg') {
-				const SVGContent = $.get({
+				self._xhr = $.get({
 					url: fileName, 
 					success(data, status, {responseText}) {
+						self._xhr = null;
 						const iconWrapper = self.options.fadeIn ? $('<div class="animated-icon animated fadeIn">'+ responseText +'</div>') : $('<div class="animated-icon animated">'+ responseText +'</div>'), uniqid = 'icon_' + Math.floor(Math.random() * 26) + Date.now();
 
 						// Add ID
@@ -103,6 +109,10 @@
 
 						$el.replaceWith(iconWrapper);
 
+						// replaceWith drops the img's data, so the instance lives on the wrapper from here on
+						self.$icon = iconWrapper;
+						iconWrapper.data(instanceName, self);
+
 						if( self.options.extraClass ) {
 							iconWrapper.addClass( self.options.extraClass );
 						}
@@ -118,7 +128,7 @@
 
 						$el = iconWrapper;
 
-						const icon = new Vivus(uniqid, {start: 'manual', type: 'sync', selfDestroy: true, duration, onReady({el}) {
+						const icon = self.vivus = new Vivus(uniqid, {start: 'manual', type: 'sync', selfDestroy: true, duration, onReady({el}) {
 							const styleElement = document.createElementNS("http://www.w3.org/2000/svg", "style");
 							let animateStyle = '';
 
@@ -144,9 +154,9 @@
 
 						// Isn't animated
 						if( !self.options.animated ) {
-							setTimeout(() => {
+							self._timers.push(setTimeout(() => {
 								icon.finish();
-							}, 10);
+							}, 10));
 							$el.css({ opacity: 1 });
 						}
 
@@ -161,7 +171,7 @@
 							}
 
 							// On Scroll
-							$(window).on('scroll', () => {
+							$(window).on('scroll' + self._ns, () => {
 								if( $el.visible( true ) ) {
 									self.startIconAnimation( icon, $el );
 								}
@@ -172,11 +182,11 @@
 							$el.css({ opacity: 1 });
 							icon.finish();
 							
-							$(window).on('themestrap.plugin.icon.svg.ready', () => {
-								setTimeout(() => {
+							$(window).on('themestrap.plugin.icon.svg.ready' + self._ns, () => {
+								self._timers.push(setTimeout(() => {
 									icon.el.setAttribute('class', 'finished');
 									icon.finish();
-								}, 300);
+								}, 300));
 							});
 							
 						}
@@ -202,11 +212,53 @@
 			$({to:0}).animate({to:1}, self.options.delay, () => {
 				icon.play(1);
 
-				setTimeout(() => {
+				self._timers.push(setTimeout(() => {
 					icon.el.setAttribute('class', 'finished');
-				}, icon.duration * 5 );
+				}, icon.duration * 5 ));
 			});
 		}
+
+        /**
+         * Put the original <img> back in place of the inline SVG and drop all handlers and timers.
+         * Call it on the img before the SVG loads, or on the .animated-icon wrapper after.
+         * @returns {PluginIcon}
+         */
+        destroy() {
+            const $el = this.$el;
+
+            if (this._xhr) {
+                this._xhr.abort();
+                this._xhr = null;
+            }
+            $(window).off(this._ns);
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            if (this.vivus && typeof this.vivus.destroy === 'function') {
+                try { this.vivus.destroy(); } catch (e) { /* already self destroyed */ }
+            }
+            this.vivus = null;
+
+            if (this.$icon) {
+                this.$icon.replaceWith($el);
+                this.$icon = null;
+            }
+
+            if (this._origClass === undefined) {
+                $el.removeAttr('class');
+            } else {
+                $el.attr('class', this._origClass);
+            }
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginIcon.defaults = {
@@ -224,17 +276,20 @@
 		PluginIcon
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginIcon = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginIcon = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginIcon($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginIcon($this, opts);
 		});
 	};
 })).apply(this, [window.themestrap, jQuery]);

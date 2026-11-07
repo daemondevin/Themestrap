@@ -135,7 +135,7 @@
 }
 
 [data-navmenu-trigger]:focus-visible {
-    outline: 2px solid var(--ts-nav-focus-ring, currentColor);
+    outline: 2px solid var(--ts-nm-focus-ring, var(--ts-nav-focus-ring, currentColor));
     outline-offset: 2px;
 }
 
@@ -182,7 +182,7 @@
 }
 
 [data-navmenu-link]:focus-visible {
-    outline: 2px solid var(--ts-nav-focus-ring, currentColor);
+    outline: 2px solid var(--ts-nm-focus-ring, var(--ts-nav-focus-ring, currentColor));
     outline-offset: 2px;
 }
 
@@ -192,8 +192,8 @@
     top: calc(100% + .5rem);
     left: 0;
     min-width: 220px;
-    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #fff));
-    border: 1px solid var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08)));
+    background: var(--ts-nm-content-bg, var(--ts-nav-content-bg, var(--ts-skin-surface, #fff)));
+    border: 1px solid var(--ts-nm-content-border, var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08))));
     border-radius: .5rem;
     box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
     padding: .5rem;
@@ -225,8 +225,8 @@
     left: 0;
     min-width: 220px;
     overflow: hidden;
-    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #fff));
-    border: 1px solid var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08)));
+    background: var(--ts-nm-content-bg, var(--ts-nav-content-bg, var(--ts-skin-surface, #fff)));
+    border: 1px solid var(--ts-nm-content-border, var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08))));
     border-radius: .5rem;
     box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
     z-index: 1050;
@@ -288,7 +288,7 @@
 }
 
 [data-navmenu-list-item]:focus-visible {
-    outline: 2px solid var(--ts-nav-focus-ring, currentColor);
+    outline: 2px solid var(--ts-nm-focus-ring, var(--ts-nav-focus-ring, currentColor));
     outline-offset: 2px;
 }
 
@@ -299,7 +299,7 @@
     width: 2.25rem;
     height: 2.25rem;
     border-radius: .375rem;
-    background-color: var(--ts-nav-icon-bg, color-mix(in srgb, currentColor 8%, transparent));
+    background-color: var(--ts-nm-icon-bg, var(--ts-nav-icon-bg, color-mix(in srgb, currentColor 8%, transparent)));
     flex-shrink: 0;
     font-size: 1.1rem;
     line-height: 1;
@@ -315,20 +315,20 @@
 [data-navmenu-list-item-desc] {
     font-size: .8125rem;
     line-height: 1.4;
-    color: var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(0,0,0,.55)));
+    color: var(--ts-nm-muted, var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(0,0,0,.55))));
     margin: 0;
 }
 
 /* Dark-mode overrides */
 html.dark [data-navmenu-content],
 html.dark [data-navmenu-viewport] {
-    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #1c1c1e));
-    border-color: var(--ts-nav-content-border, var(--ts-skin-border, rgba(255,255,255,.1)));
+    background: var(--ts-nm-content-bg, var(--ts-nav-content-bg, var(--ts-skin-surface, #1c1c1e)));
+    border-color: var(--ts-nm-content-border, var(--ts-nav-content-border, var(--ts-skin-border, rgba(255,255,255,.1))));
     box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.4));
 }
 
 html.dark [data-navmenu-list-item-desc] {
-    color: var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(255,255,255,.55)));
+    color: var(--ts-nm-muted, var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(255,255,255,.55))));
 }
 `;
 
@@ -721,8 +721,16 @@ html.dark [data-navmenu-list-item-desc] {
 
     $.extend(themestrap, { PluginNavmenu });
 
-    $.fn.themestrapPluginNavmenu = function(opts) {
+    $.fn.themestrapPluginNavmenu = function(opts, ...args) {
         return this.map(function() {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);

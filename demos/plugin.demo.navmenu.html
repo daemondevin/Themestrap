@@ -203,9 +203,9 @@ pre.snip .kw  { color: #c084fc; }
 .nav-wrap.dark-nav {
     background: var(--ts-navy);
     border-color: rgba(255,255,255,.08);
-    --ts-nav-content-bg: #0e2238;
-    --ts-nav-content-border: rgba(255,255,255,.1);
-    --ts-nav-muted: rgba(255,255,255,.5);
+    --ts-nm-content-bg: #0e2238;
+    --ts-nm-content-border: rgba(255,255,255,.1);
+    --ts-nm-muted: rgba(255,255,255,.5);
 }
 .nav-wrap.dark-nav .nav-logo { color: #fff; }
 
@@ -389,7 +389,7 @@ pre.snip .kw  { color: #c084fc; }
           <p class="lead-sm">
             Setting <code>openOn: "click"</code> makes every panel toggle on click — better for
             touch devices or keyboard-first users. Panels pick up dark colours via
-            <code>--ts-nav-content-bg</code> and <code>--ts-nav-content-border</code> set on the
+            <code>--ts-nm-content-bg</code> and <code>--ts-nm-content-border</code> set on the
             parent element.
           </p>
 
@@ -458,7 +458,7 @@ pre.snip .kw  { color: #c084fc; }
           </div>
 
 <pre class="snip"><span class="c1">&lt;!-- Dark colours via CSS custom properties on a parent --&gt;</span>
-&lt;<span class="tag">div</span> <span class="att">style</span>=<span class="val">"--ts-nav-content-bg:#0e2238;--ts-nav-content-border:rgba(255,255,255,.1)"</span>&gt;
+&lt;<span class="tag">div</span> <span class="att">style</span>=<span class="val">"--ts-nm-content-bg:#0e2238;--ts-nm-content-border:rgba(255,255,255,.1)"</span>&gt;
   &lt;<span class="tag">nav</span> <span class="att">data-plugin-navmenu</span>
        <span class="att">data-plugin-options</span>=<span class="val">'{"openOn":"click"}'</span>&gt;
     …

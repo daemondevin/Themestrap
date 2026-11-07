@@ -112,18 +112,18 @@
     const CSS_TEXT = `
         /* Themestrap Wizard */
         :root {
-            --wizard-accent:           var(--ts-skin-accent, var(--color-primary, #e8672a));
-            --wizard-accent-subtle:    color-mix(in srgb, var(--wizard-accent) 12%, transparent);
-            --wizard-muted:            var(--ts-skin-text-dim, #94a3b8);
-            --wizard-fg:               var(--ts-skin-text, #0f172a);
-            --wizard-bg:               var(--ts-skin-surface, #ffffff);
-            --wizard-border:           var(--ts-skin-border, rgba(15, 23, 42, 0.10));
-            --wizard-border-strong:    var(--ts-skin-border-strong, rgba(15, 23, 42, 0.20));
-            --wizard-step-size:        32px;
-            --wizard-step-font:        var(--ts-skin-font, .8125rem);
-            --wizard-radius:           var(--ts-skin-radius, var(--border-radius, 6px));
-            --wizard-duration:         300ms;
-            --wizard-ease:             cubic-bezier(.16, 1, .3, 1);
+            --ts-wizard-accent:           var(--ts-skin-accent, var(--color-primary, #e8672a));
+            --ts-wizard-accent-subtle:    color-mix(in srgb, var(--wizard-accent, var(--ts-wizard-accent)) 12%, transparent);
+            --ts-wizard-muted:            var(--ts-skin-text-dim, #94a3b8);
+            --ts-wizard-fg:               var(--ts-skin-text, #0f172a);
+            --ts-wizard-bg:               var(--ts-skin-surface, #ffffff);
+            --ts-wizard-border:           var(--ts-skin-border, rgba(15, 23, 42, 0.10));
+            --ts-wizard-border-strong:    var(--ts-skin-border-strong, rgba(15, 23, 42, 0.20));
+            --ts-wizard-step-size:        32px;
+            --ts-wizard-step-font:        var(--ts-skin-font, .8125rem);
+            --ts-wizard-radius:           var(--ts-skin-radius, var(--border-radius, 6px));
+            --ts-wizard-duration:         300ms;
+            --ts-wizard-ease:             cubic-bezier(.16, 1, .3, 1);
         }
 
         /* Root */
@@ -161,52 +161,52 @@
         [data-wizard-indicator]:not(:last-child)::after {
             content: '';
             position: absolute;
-            top: calc(var(--wizard-step-size) / 2);
-            left: calc(50% + var(--wizard-step-size) / 2 + 4px);
-            right: calc(-50% + var(--wizard-step-size) / 2 + 4px);
+            top: calc(var(--wizard-step-size, var(--ts-wizard-step-size)) / 2);
+            left: calc(50% + var(--wizard-step-size, var(--ts-wizard-step-size)) / 2 + 4px);
+            right: calc(-50% + var(--wizard-step-size, var(--ts-wizard-step-size)) / 2 + 4px);
             height: 2px;
-            background: var(--wizard-border-strong);
+            background: var(--wizard-border-strong, var(--ts-wizard-border-strong));
             z-index: 0;
-            transition: background var(--wizard-duration) ease;
+            transition: background var(--wizard-duration, var(--ts-wizard-duration)) ease;
         }
 
         [data-wizard-indicator].wiz-completed:not(:last-child)::after,
         [data-wizard-indicator].wiz-active:not(:last-child)::after {
-            background: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
         }
 
         /* Bubble */
         [data-wizard-indicator-bubble] {
-            width: var(--wizard-step-size);
-            height: var(--wizard-step-size);
+            width: var(--wizard-step-size, var(--ts-wizard-step-size));
+            height: var(--wizard-step-size, var(--ts-wizard-step-size));
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: var(--wizard-step-font);
+            font-size: var(--wizard-step-font, var(--ts-wizard-step-font));
             font-weight: 600;
-            border: 2px solid var(--wizard-border-strong);
-            background: var(--wizard-bg);
-            color: var(--wizard-muted);
+            border: 2px solid var(--wizard-border-strong, var(--ts-wizard-border-strong));
+            background: var(--wizard-bg, var(--ts-wizard-bg));
+            color: var(--wizard-muted, var(--ts-wizard-muted));
             position: relative;
             z-index: 1;
             transition:
-                background var(--wizard-duration) ease,
-                border-color var(--wizard-duration) ease,
-                color var(--wizard-duration) ease,
-                box-shadow var(--wizard-duration) ease;
+                background var(--wizard-duration, var(--ts-wizard-duration)) ease,
+                border-color var(--wizard-duration, var(--ts-wizard-duration)) ease,
+                color var(--wizard-duration, var(--ts-wizard-duration)) ease,
+                box-shadow var(--wizard-duration, var(--ts-wizard-duration)) ease;
         }
 
         [data-wizard-indicator].wiz-active [data-wizard-indicator-bubble] {
-            background: var(--wizard-accent);
-            border-color: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
+            border-color: var(--wizard-accent, var(--ts-wizard-accent));
             color: var(--ts-skin-on-accent, #fff);
-            box-shadow: 0 0 0 4px var(--wizard-accent-subtle);
+            box-shadow: 0 0 0 4px var(--wizard-accent-subtle, var(--ts-wizard-accent-subtle));
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-bubble] {
-            background: var(--wizard-accent);
-            border-color: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
+            border-color: var(--wizard-accent, var(--ts-wizard-accent));
             color: var(--ts-skin-on-accent, #fff);
         }
 
@@ -228,19 +228,19 @@
         [data-wizard-indicator-label] {
             font-size: .6875rem;
             font-weight: 600;
-            color: var(--wizard-muted);
+            color: var(--wizard-muted, var(--ts-wizard-muted));
             text-transform: uppercase;
             letter-spacing: .04em;
             line-height: 1.2;
-            transition: color var(--wizard-duration) ease;
+            transition: color var(--wizard-duration, var(--ts-wizard-duration)) ease;
         }
 
         [data-wizard-indicator].wiz-active [data-wizard-indicator-label] {
-            color: var(--wizard-accent);
+            color: var(--wizard-accent, var(--ts-wizard-accent));
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-label] {
-            color: var(--wizard-fg);
+            color: var(--wizard-fg, var(--ts-wizard-fg));
         }
 
         [data-wizard-indicator][aria-disabled="true"] {
@@ -251,7 +251,7 @@
         /* Progress bar */
         [data-wizard-progress] {
             height: 4px;
-            background: var(--wizard-border);
+            background: var(--wizard-border, var(--ts-wizard-border));
             border-radius: 9999px;
             overflow: hidden;
             margin: 12px 0;
@@ -259,9 +259,9 @@
 
         [data-wizard-progress-bar] {
             height: 100%;
-            background: var(--wizard-accent);
+            background: var(--wizard-accent, var(--ts-wizard-accent));
             border-radius: 9999px;
-            transition: width var(--wizard-duration) var(--wizard-ease);
+            transition: width var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease));
             width: 0%;
         }
 
@@ -283,16 +283,16 @@
 
         /* Slide-in animations (class-driven by JS) */
         [data-wizard-step].wiz-enter-left {
-            animation: wiz-slide-in-left var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-in-left var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
         [data-wizard-step].wiz-enter-right {
-            animation: wiz-slide-in-right var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-in-right var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
         [data-wizard-step].wiz-leave-left {
-            animation: wiz-slide-out-left var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-out-left var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
         [data-wizard-step].wiz-leave-right {
-            animation: wiz-slide-out-right var(--wizard-duration) var(--wizard-ease) both;
+            animation: wiz-slide-out-right var(--wizard-duration, var(--ts-wizard-duration)) var(--wizard-ease, var(--ts-wizard-ease)) both;
         }
 
         @keyframes wiz-slide-in-left {
@@ -894,8 +894,16 @@
 
     $.extend(themestrap, { PluginWizard });
 
-    $.fn.themestrapPluginWizard = function (opts) {
+    $.fn.themestrapPluginWizard = function (opts, ...args) {
         return this.map(function () {
+            if (typeof opts === 'string') {
+                const instance = $(this).data(instanceName);
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
             const $this = $(this);
             if ($this.data(instanceName)) {
                 return $this.data(instanceName);

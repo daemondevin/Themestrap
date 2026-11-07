@@ -1,6 +1,7 @@
 // Video Background
 (((themestrap = {}, $) => {
     const instanceName = '__videobackground';
+    let uid = 0;
 
     class PluginVideoBackground {
         constructor($el, opts) {
@@ -8,7 +9,14 @@
         }
 
         initialize($el, opts) {
+			if ($el.data(instanceName)) {
+				return this;
+			}
+
 			this.$el = $el;
+			this._ns = '.tsvideobg' + (++uid);
+			this._origStyle = $el.attr('style');
+			this._timers = [];
 
 			this
 				.setData()
@@ -41,13 +49,12 @@
 				return this;
 			}
 
-			if (this.options.overlay) {
+			if (this.options.overlay && !this.$overlay) {
 
 				const overlayClass = this.options.overlayClass;
 
-				this.options.wrapper.prepend(
-					$('<div />').addClass(overlayClass)
-				);
+				this.$overlay = $('<div />').addClass(overlayClass);
+				this.options.wrapper.prepend(this.$overlay);
 			}
 
 			this.options.wrapper
@@ -60,7 +67,7 @@
 
 			// Initialize Vide inside a carousel
 			if( self.options.wrapper.closest('.owl-carousel').get(0) ) {
-				self.options.wrapper.closest('.owl-carousel').on('initialized.owl.carousel', () => {
+				self.options.wrapper.closest('.owl-carousel').off(self._ns).on('initialized.owl.carousel' + self._ns, () => {
 					$('.owl-item.cloned')
 						.find('[data-plugin-video-background] .vide-video-wrapper')
 						.remove();
@@ -81,7 +88,7 @@
 			if( $playButton.get(0) ) {
 				const $playWrapper = self.options.wrapper.find('.video-background-play-wrapper');
 
-				self.options.wrapper.find('.video-background-play').on('click', e => {
+				self.options.wrapper.find('.video-background-play').off(self._ns).on('click' + self._ns, e => {
 					e.preventDefault();
 
 					if( $playWrapper.get(0) ) {
@@ -99,9 +106,9 @@
 						});
 					}
 
-					setTimeout(() => {
+					self._timers.push(setTimeout(() => {
 						self.options.wrapper.find('video')[0].play();
-					}, 500)
+					}, 500));
 				});
 			}
 
@@ -135,12 +142,49 @@
 			const self = this;
 
 			// Initialize
-			self.options.wrapper.on('video.background.initialize', () => {
+			self.options.wrapper.on('video.background.initialize' + self._ns, () => {
 				self.build();
 			});
 
 			return this;
 		}
+
+        /**
+         * Tear down Vide (video and poster wrapper), remove the overlay this plugin
+         * added, unbind its handlers and restore the element's inline style.
+         * @returns {PluginVideoBackground}
+         */
+        destroy() {
+            const $el = this.$el;
+            const $carousel = $el.closest('.owl-carousel');
+
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+
+            $el.off(this._ns);
+            $el.find('.video-background-play').off(this._ns);
+            $carousel.off(this._ns);
+
+            const vide = $el.data('vide');
+            if (vide && typeof vide.destroy === 'function') {
+                vide.destroy();
+            }
+
+            if (this.$overlay) {
+                this.$overlay.remove();
+                this.$overlay = null;
+            }
+
+            if (this._origStyle === undefined) {
+                $el.removeAttr('style');
+            } else {
+                $el.attr('style', this._origStyle);
+            }
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginVideoBackground.defaults = {
@@ -160,17 +204,20 @@
 		PluginVideoBackground
 	});
 
-    // jquery plugin
-    $.fn.themestrapPluginVideoBackground = function(opts) {
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginVideoBackground = function(opts, ...args) {
 		return this.map(function() {
 			const $this = $(this);
+			const instance = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginVideoBackground($this, opts);
+			if (typeof opts === 'string') {
+				if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+					return instance[opts](...args);
+				}
+				return instance;
 			}
 
+			return instance || new PluginVideoBackground($this, opts);
 		});
-	}
+	};
 })).apply(this, [window.themestrap, jQuery]);

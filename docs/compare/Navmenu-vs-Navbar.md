@@ -1228,12 +1228,14 @@ Uses generic data attributes:
 and a relatively small set of custom properties:
 
 ```text
---ts-nav-focus-ring
---ts-nav-content-bg
---ts-nav-content-border
---ts-nav-icon-bg
---ts-nav-muted
+--ts-nm-focus-ring
+--ts-nm-content-bg
+--ts-nm-content-border
+--ts-nm-icon-bg
+--ts-nm-muted
 ```
+
+(These were `--ts-nav-*` before, which collided with Navigation's tokens. The old names are still read as a fallback.)
 
 Its styling is therefore fairly component-neutral.
 

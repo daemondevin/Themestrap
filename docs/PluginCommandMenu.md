@@ -293,6 +293,33 @@ $('#projects-cmd').on('command:open', async () => {
 });
 ```
 
+## [CSS **Custom Properties**](#css-custom-properties)
+
+The injected stylesheet declares these on `:root`, with a dark set under `html.dark .command-menu` and `.command-menu.command-dark`. Override them on `:root` or on the `.command-menu` element. With a skin loaded the colors follow it.
+
+| Property | Light default | Used for |
+| - | - | - |
+| `--ts-cmd-bg` | `--ts-skin-surface`, else `#fff` | Panel background |
+| `--ts-cmd-fg` | `--ts-skin-text`, else `#777` | Item text |
+| `--ts-cmd-muted` | `--ts-skin-text-dim` | Group labels, hints, empty state |
+| `--ts-cmd-border` | `--ts-skin-border` | Panel and separator borders |
+| `--ts-cmd-border-strong` | `--ts-skin-border-strong` | Search field border |
+| `--ts-cmd-hover` | `--ts-skin-elevated` | Hovered item |
+| `--ts-cmd-active-bg` | `--ts-skin-elevated` | Keyboard-selected item |
+| `--ts-cmd-active-fg` | `--ts-skin-text-strong` | Keyboard-selected item text |
+| `--ts-cmd-accent` | `--ts-skin-accent`, else `#0088CC` | Icons and focus |
+| `--ts-cmd-backdrop` | `--ts-skin-overlay` | Page dimmer behind the panel |
+| `--ts-cmd-shadow` | `--ts-skin-shadow` | Panel shadow |
+| `--ts-cmd-radius` | `--ts-skin-radius-sm`, else `4px` | Panel corners |
+| `--ts-cmd-radius-item` | `--ts-skin-radius`, else `8px` | Item corners |
+| `--ts-cmd-panel-width` | `min(96vw, 640px)` | Panel width |
+| `--ts-cmd-list-max-h` | `min(60vh, 480px)` | Result list height |
+| `--ts-cmd-z` | `1080` | Stacking order |
+| `--ts-cmd-font` | `--ts-skin-font`, else `inherit` | Font stack |
+
+> **Renamed tokens.** These were called `--command-*` before. The old names still work: the stylesheet reads `--command-bg` first and falls back to `--ts-cmd-bg`, so existing overrides keep winning. New code should use `--ts-cmd-*`; the old names will be removed in a future major version.
+
+
 ## [Common **Pitfalls**](#pitfalls)
 
 Five things that have tripped real integrations. Read first.

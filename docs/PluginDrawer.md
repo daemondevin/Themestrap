@@ -2,12 +2,12 @@
 
 An accessible panel that slides in from any edge of the screen: bottom (the default), top, left or right. It brings its own backdrop, locks page scroll, traps focus, closes on Escape, and bottom and top drawers can be dragged away by their handle.
 
-**File:** `js/components/themestrap.plugin.drawer.js`  
-**Demo:** `demos/plugin.demo.drawer.html`  
-**jQuery method:** `$.fn.themestrapPluginDrawer`  
-**Data attribute:** `data-plugin-drawer`  
-**Instance key:** `__pluginDrawer`  
-**Init strategy:** DOMReady `$().each()`, so every drawer is ready before a trigger can be clicked.
+> **File:** `js/components/themestrap.plugin.drawer.js`  
+> **Demo:** `demos/plugin.demo.drawer.html`  
+> **jQuery method:** `$.fn.themestrapPluginDrawer`  
+> **Data attribute:** `data-plugin-drawer`  
+> **Instance key:** `__pluginDrawer`  
+> **Init strategy:** DOMReady `$().each()`, so every drawer is ready before a trigger can be clicked.
 
 
 

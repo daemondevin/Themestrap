@@ -2,12 +2,12 @@
 
 Small text labels that appear next to an element on hover, keyboard focus or tap. They are positioned with JavaScript, flip to the other side when there is no room, stay inside the viewport, and are linked to their trigger for screen readers.
 
-**File:** `js/components/themestrap.plugin.tooltip.js`  
-**Demo:** `demos/plugin.demo.tooltip.html`  
-**jQuery method:** `$.fn.themestrapPluginTooltip`  
-**Data attribute:** `data-plugin-tooltip`  
-**Instance key:** `__pluginTooltip`  
-**Init strategy:** DOMReady `$().each()`
+> **File:** `js/components/themestrap.plugin.tooltip.js`  
+> **Demo:** `demos/plugin.demo.tooltip.html`  
+> **jQuery method:** `$.fn.themestrapPluginTooltip`  
+> **Data attribute:** `data-plugin-tooltip`  
+> **Instance key:** `__pluginTooltip`  
+> **Init strategy:** DOMReady `$().each()`
 
 
 

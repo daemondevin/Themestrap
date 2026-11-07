@@ -202,21 +202,23 @@ The wizard's appearance is controlled entirely through CSS custom properties on 
 
 | Property | Default | Description |
 |---|---|---|
-| `--wizard-accent` | `var(--color-primary, #e8672a)` | Bubble fill, progress bar, active connector line. |
-| `--wizard-accent-subtle` | 12 % tint of accent | Focus ring and active bubble glow. |
-| `--wizard-muted` | `#94a3b8` | Inactive bubble text and connector lines. |
-| `--wizard-fg` | `#0f172a` | Completed indicator label colour. |
-| `--wizard-bg` | `#ffffff` | Bubble background when not active/completed. |
-| `--wizard-border` | `rgba(15,23,42,.10)` | Default border on bubbles and progress track. |
-| `--wizard-border-strong` | `rgba(15,23,42,.20)` | Stronger border on inactive bubbles. |
-| `--wizard-step-size` | `32px` | Indicator bubble diameter. |
-| `--wizard-duration` | `300ms` | CSS transition duration for indicator and progress animation. |
-| `--wizard-ease` | `cubic-bezier(.16,1,.3,1)` | Easing for progress bar transition. |
+| `--ts-wizard-accent` | `var(--color-primary, #e8672a)` | Bubble fill, progress bar, active connector line. |
+| `--ts-wizard-accent-subtle` | 12 % tint of accent | Focus ring and active bubble glow. |
+| `--ts-wizard-muted` | `#94a3b8` | Inactive bubble text and connector lines. |
+| `--ts-wizard-fg` | `#0f172a` | Completed indicator label colour. |
+| `--ts-wizard-bg` | `#ffffff` | Bubble background when not active/completed. |
+| `--ts-wizard-border` | `rgba(15,23,42,.10)` | Default border on bubbles and progress track. |
+| `--ts-wizard-border-strong` | `rgba(15,23,42,.20)` | Stronger border on inactive bubbles. |
+| `--ts-wizard-step-size` | `32px` | Indicator bubble diameter. |
+| `--ts-wizard-duration` | `300ms` | CSS transition duration for indicator and progress animation. |
+| `--ts-wizard-ease` | `cubic-bezier(.16,1,.3,1)` | Easing for progress bar transition. |
+
+> **Renamed tokens.** These were called `--wizard-*` before. The old names still work: the stylesheet reads `--wizard-accent` first and falls back to `--ts-wizard-accent`, so existing overrides keep winning. New code should use `--ts-wizard-*`; the old names will be removed in a future major version.
 
 ### Per-instance theming example
 
 ```html
-<div data-plugin-wizard style="--wizard-accent: #2ab8c8">
+<div data-plugin-wizard style="--ts-wizard-accent: #2ab8c8">
   …
 </div>
 ```
@@ -353,10 +355,10 @@ On each page load the wizard opens at the last-visited step. All earlier steps a
 <div data-plugin-wizard id="wiz-signup">…</div>
 
 <!-- Secondary flow: teal -->
-<div data-plugin-wizard id="wiz-settings" style="--wizard-accent:#2ab8c8">…</div>
+<div data-plugin-wizard id="wiz-settings" style="--ts-wizard-accent:#2ab8c8">…</div>
 
 <!-- Purple for a premium upsell flow -->
-<div data-plugin-wizard id="wiz-upgrade" style="--wizard-accent:#7c3aed">…</div>
+<div data-plugin-wizard id="wiz-upgrade" style="--ts-wizard-accent:#7c3aed">…</div>
 ```
 
 

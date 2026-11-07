@@ -29,7 +29,7 @@ PluginAnimatedContent splits the element's text content into individual characte
 ## [Configuration **Options**](#options)
 
 | Option | Type | Default | Description |
-|--|||-|
+| - | - | - | - |
 | `contentType` | string | `'letter'` | `'letter'` or `'word'`. |
 | `animationName` | string | `'fadeIn'` | CSS animation class. Use `'typeWriter'` for the letter-mode typewriter effect. |
 | `animationSpeed` | number | `50` | Delay between each letter/word in ms. |

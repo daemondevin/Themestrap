@@ -1286,53 +1286,57 @@ The generated stylesheet uses CSS custom properties, allowing the appearance to 
 Some of the primary variables include:
 
 ```css
---tscp-nav-size
---tscp-nav-bg
---tscp-nav-bg-hover
---tscp-nav-color
---tscp-nav-radius
---tscp-nav-icon
---tscp-nav-shadow
+--ts-carousel-nav-size
+--ts-carousel-nav-bg
+--ts-carousel-nav-bg-hover
+--ts-carousel-nav-color
+--ts-carousel-nav-radius
+--ts-carousel-nav-icon
+--ts-carousel-nav-shadow
 
---tscp-dot-size
---tscp-dot-gap
---tscp-dot-color
---tscp-dot-active-color
---tscp-dot-line-w
---tscp-dot-line-h
---tscp-dot-num-size
+--ts-carousel-dot-size
+--ts-carousel-dot-gap
+--ts-carousel-dot-color
+--ts-carousel-dot-active-color
+--ts-carousel-dot-line-w
+--ts-carousel-dot-line-h
+--ts-carousel-dot-num-size
 
---tscp-progress-h
---tscp-progress-bg
---tscp-progress-color
+--ts-carousel-progress-h
+--ts-carousel-progress-bg
+--ts-carousel-progress-color
 
---tscp-counter-color
+--ts-carousel-counter-color
 
---tscp-thumb-size
---tscp-thumb-gap
---tscp-thumb-radius
---tscp-thumb-opacity
---tscp-thumb-opacity-hover
---tscp-thumb-border
---tscp-thumb-border-active
+--ts-carousel-thumb-size
+--ts-carousel-thumb-gap
+--ts-carousel-thumb-radius
+--ts-carousel-thumb-opacity
+--ts-carousel-thumb-opacity-hover
+--ts-carousel-thumb-border
+--ts-carousel-thumb-border-active
 
---tscp-gap
+--ts-carousel-gap
 ```
 
 For example:
 
 ```css
 #my-carousel {
-    --tscp-nav-size: 40px;
-    --tscp-nav-bg: rgba(0, 0, 0, .65);
-    --tscp-nav-bg-hover: rgba(0, 0, 0, .9);
+    --ts-carousel-nav-size: 40px;
+    --ts-carousel-nav-bg: rgba(0, 0, 0, .65);
+    --ts-carousel-nav-bg-hover: rgba(0, 0, 0, .9);
 
-    --tscp-dot-size: 10px;
-    --tscp-dot-active-color: #0088cc;
+    --ts-carousel-dot-size: 10px;
+    --ts-carousel-dot-active-color: #0088cc;
 
-    --tscp-thumb-size: 80px;
+    --ts-carousel-thumb-size: 80px;
 }
 ```
+
+`speed`, `easing` and `gap` from the options are written inline as `--ts-carousel-speed`, `--ts-carousel-easing` and `--ts-carousel-gap`.
+
+> **Renamed tokens.** These were called `--tsc-*` before (and listed here as `--tscp-*`, which never matched the code). The old names still work: the stylesheet reads `--tsc-nav-bg` first and falls back to `--ts-carousel-nav-bg`, so existing overrides keep winning. New code should use `--ts-carousel-*`; the old names will be removed in a future major version.
 
 
 
@@ -1601,7 +1605,7 @@ The user-facing counter and ARIA labels remain one-based.
 The plugin injects its stylesheet once using:
 
 ```text
-ts-carousel-pro-styles
+ts-carousel-styles
 ```
 
 The stylesheet is removed when the final `PluginCarousel` instance is destroyed.

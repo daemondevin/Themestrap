@@ -388,6 +388,21 @@ $('#help-btn').on('click', () => nav.toggle(2));
 ```
 
 
+## [CSS **Custom Properties**](#css-custom-properties)
+
+Nav Menu declares no tokens of its own. Its stylesheet reads these hooks, which you set on the menu or any ancestor; unset, they fall back to the skin and then to the built-in value.
+
+| Property | Fallback | Used for |
+| - | - | - |
+| `--ts-nm-content-bg` | `--ts-skin-surface`, else `#fff` (`#1c1c1e` dark) | Dropdown panel background |
+| `--ts-nm-content-border` | `--ts-skin-border` | Dropdown panel border |
+| `--ts-nm-muted` | `--ts-skin-text-dim` | Link descriptions |
+| `--ts-nm-icon-bg` | 8% of the text color | Icon tiles |
+| `--ts-nm-focus-ring` | `currentColor` | Keyboard focus outline |
+
+> **Renamed tokens.** These were read as `--ts-nav-*` before, which are PluginNavigation's own token names, so a page using both plugins restyled Nav Menu by accident whenever it themed Navigation. The `--ts-nm-*` names are read first; the `--ts-nav-*` names are still read as a fallback, so existing pages look the same. Move your overrides to `--ts-nm-*`: once the old names are dropped in a future major version, Navigation's tokens will stop reaching Nav Menu.
+
+
 ## [Common **Pitfalls**](#pitfalls)
 
 **No items found — panels never open.** The plugin only manages `[data-navmenu-item]` elements that contain **both** a `[data-navmenu-trigger]` **and** a `[data-navmenu-content]` child. Items with only one of those (plain link items) are skipped silently. Check your markup nesting.
