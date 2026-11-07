@@ -11,6 +11,9 @@ This repository does not currently include semantic version tags or package meta
 - `docs/ThemestrapSkins.md` and `demos/plugin.demo.skins.html`
 - The standard Penner easing curves in `themestrap.js`, defined only when jquery.easing hasn't already provided them
 - PluginToast: its own lazily injected stylesheet with `--ts-toast-*` tokens, and `destroy()`
+- `destroy()` for Animate, GDPR Wrapper, Icon, In Viewport Style, Match Height, Revolution Slider, Scroll FX, Scroll Spy, Section Scroll, Sticky, Toggle and Video Background. Each one removes its handlers, timers and observers, undoes the markup and classes it added, and can be initialized again afterwards
+- Every plugin bridge takes a method name: `$(el).themestrapPluginX('destroy')` calls `destroy()` on the instance, with any extra arguments passed through
+- Command Menu and Nav Menu docs list their CSS custom properties
 
 ### Changed
 - Every plugin with injected CSS routes its themable values through `--ts-skin-*` tokens, keeping its previous value as the fallback, so pages without a skin render unchanged
@@ -19,12 +22,30 @@ This repository does not currently include semantic version tags or package meta
 - PluginHighlight's syntax colors follow the skin's Base16 slots
 - `themestrap.bundle.js` rebuilt from the current component files; it now includes Color Picker, Dice, Emoticon, Markdown Editor, Particles, Pricing Toggle and Transfer
 - `themestrap.modules.js` no longer lists jquery.easing as a dependency of Section Scroll, Scroll To Top and Nav
+- Token families renamed to the `--ts-<plugin>-*` pattern. The old names keep working as aliases until the next major version:
+  - Alert `--alert-ts-*` → `--ts-alert-*`
+  - Carousel `--tsc-*` → `--ts-carousel-*`
+  - Command Menu `--command-*` → `--ts-cmd-*`
+  - Wizard `--wizard-*` → `--ts-wizard-*`
+  - Pricing Toggle `--pt-*` → `--ts-pricing-*`
+  - Nav Menu `--ts-nav-*` → `--ts-nm-*`
+- For the four families a plugin declares itself (Alert, Carousel, Command Menu, Wizard), the old name is read first, so existing overrides keep beating the built-in value. A side effect: an old-name override set on an ancestor (for example `:root { --alert-ts-bg: ... }`) used to be shadowed by the plugin's own declaration and now takes effect
+- Pricing Toggle's color and geometry options default to `null` and are only written inline when given, so stylesheet overrides and skins reach it. Its track now uses the skin accent
+- Section Scroll and Sticky use their own debounced resize handler instead of vendor afterResize, which holds a single global callback (the second plugin to use it replaced the first)
+- Scroll FX auto-init skips elements with `.manual`, like every other plugin
 
 ### Fixed
 - jQuery 4 compatibility: every `$.isFunction()` call (plugins, core, init, docs, demos and showcase) replaced with a `typeof` check
 - `themestrap.js` hash scrolling threw `easing is not a function` without jquery.easing
 - PluginToast's countdown bar never animated (rendered `hljs-toast-progress-bar`, looked for `toast-progress-bar`)
 - PluginCommandMenu squeezed an item's label to zero width when the item also had a description
+- PluginSticky added three window handlers through jquery.pin on every re-pin, and it re-pins every second, so scroll handlers piled up for as long as the page was open. The handlers from each pin are now removed before the next
+- PluginScrollFx removed its scroll listener from `window` even when it was bound to a custom scroll container
+- PluginScrollSpy threw when called without options, and had no re-init guard
+- PluginVideoBackground had no re-init guard and added another overlay each time it rebuilt
+- PluginInViewportStyle threw on every viewport change when `styleIn` or `styleOut` was left at its default
+- PluginCarousel's guide listed its tokens as `--tscp-*` and its style id as `ts-carousel-pro-styles`; the code uses neither
+- `themestrap.bundle.js` repeated section header comments, and the rebuild script added more on each run
 
 
 ## [1.0.2] - 2026-10-11
