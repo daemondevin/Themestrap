@@ -173,7 +173,7 @@ acc.destroy();        // restore original markup
 ### init.js Wiring
 
 ```js
-if ($.isFunction($.fn['themestrapPluginAccordion']) && $('[data-plugin-accordion]').length) {
+if (typeof $.fn['themestrapPluginAccordion'] === 'function' && $('[data-plugin-accordion]').length) {
     themestrap.fn.intObsInit('[data-plugin-accordion]:not(.manual)', 'themestrapPluginAccordion');
 }
 ```
@@ -1455,7 +1455,7 @@ Wraps highlight.js core with lazy ESM dynamic imports, language aliases, promise
 ### init.js Wiring
 
 ```js
-if ($.isFunction($.fn['themestrapPluginHighlight']) && $('[data-plugin-highlight]').length) {
+if (typeof $.fn['themestrapPluginHighlight'] === 'function' && $('[data-plugin-highlight]').length) {
     themestrap.fn.intObsInit('[data-plugin-highlight]:not(.manual)', 'themestrapPluginHighlight');
 }
 ```

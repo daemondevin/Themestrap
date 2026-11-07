@@ -158,7 +158,7 @@ Until a user makes a manual choice, the plugin tracks `prefers-color-scheme` cha
 ## Auto-init (init.js)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginDarkMode']) && $('[data-plugin-darkmode]').length) {
+if (typeof $.fn['themestrapPluginDarkMode'] === 'function' && $('[data-plugin-darkmode]').length) {
     themestrap.fn.intObsInit('[data-plugin-darkmode]:not(.manual)', 'themestrapPluginDarkMode');
 }
 ```

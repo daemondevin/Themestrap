@@ -239,7 +239,7 @@ html.dark, [data-bs-theme="dark"] { --ts-dlg-bg: #20263a; }
 Dialogs must be initialized on DOMReady, before any trigger button can fire:
 
 ```js
-if ($.isFunction($.fn['themestrapPluginDialog']) && $('[data-plugin-dialog]').length) {
+if (typeof $.fn['themestrapPluginDialog'] === 'function' && $('[data-plugin-dialog]').length) {
     $(() => {
         $('[data-plugin-dialog]:not(.manual)').each(function () {
             const $this = $(this);

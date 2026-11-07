@@ -81,7 +81,7 @@ Some **bold** text, *italic*, and a [link](https://example.com).
 
 ```js
 // Markdown
-if ($.isFunction($.fn['themestrapPluginMarkdown']) && $('[data-plugin-markdown]').length) {
+if (typeof $.fn['themestrapPluginMarkdown'] === 'function' && $('[data-plugin-markdown]').length) {
     themestrap.fn.intObsInit('[data-plugin-markdown]:not(.manual)', 'themestrapPluginMarkdown');
 }
 ```
@@ -562,7 +562,7 @@ $('#docs')
 - [ ] Are table rows missing — did you include the `|---|---|` separator row?
 - [ ] For sanitize issues: does toggling `sanitize: false` reveal missing HTML?
 - [ ] Is Markdown indented 4+ spaces in the HTML source? Those lines are parsed as indented code blocks.
-- [ ] Are code blocks unstyled despite PluginHighlight being loaded? Check `$.isFunction($.fn.themestrapPluginHighlight)` in the console — must be `true` at render time.
+- [ ] Are code blocks unstyled despite PluginHighlight being loaded? Check `typeof $.fn.themestrapPluginHighlight === 'function'` in the console — must be `true` at render time.
 - [ ] Are fenced blocks missing a language identifier (`` ``` `` with no word after)? Those get no `language-*` class and are skipped by `_highlightBlocks()`.
 - [ ] Is `highlight: false` set somewhere in a `data-plugin-options` attribute? That disables the integration for that element.
 - [ ] Did a re-render produce duplicate toolbars? Check for a PluginHighlight instance on the same `<pre>` created outside PluginMarkdown.

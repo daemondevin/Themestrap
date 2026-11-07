@@ -143,7 +143,7 @@ Accordion-style FAQ
     <i class="fas fa-chevron-down"></i>
   </button>
   <div data-collapsible-content="q1">
-    <p>Themestrap is a Porto/Bootstrap-based UI kit…</p>
+    <p>Themestrap is a original/Bootstrap-based UI kit…</p>
   </div>
 </div>
 

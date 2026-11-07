@@ -1,0 +1,294 @@
+/* Themestrap skin: Venom
+ * Base16 Black Metal (Venom) by metalelf0, as read by PluginAccordion. Light mode is derived.
+ *
+ * Load one skin in place of default.css:
+ *   <link rel="stylesheet" href="css/skins/venom.css">
+ *
+ * The first half sets the original palette that themestrap.css reads (--primary, --dark, ...).
+ * The second half sets the --ts-skin-* tokens every Themestrap plugin reads, once for
+ * light mode and once for dark mode, using the same three dark-mode tiers as the plugins.
+ * See docs/ThemestrapSkins.md for what each token is for.
+ */
+
+/* General */
+:root {
+	--border-radius: 10px;
+	--border-radius2x: 14px;
+	--default: #666666;
+}
+/* Skin Colors */
+:root {
+	--primary: #b23a31;
+	--primary-100: #9e332b;
+	--primary-200: #943029;
+	--primary-300: #8a2d26;
+	--primary--100: #c64137;
+	--primary--200: #ca493f;
+	--primary--300: #cd5249;
+	--primary-rgba-0: rgba(178, 58, 49, 0);
+	--primary-rgba-10: rgba(178, 58, 49, 0.1);
+	--primary-rgba-20: rgba(178, 58, 49, 0.2);
+	--primary-rgba-30: rgba(178, 58, 49, 0.3);
+	--primary-rgba-40: rgba(178, 58, 49, 0.4);
+	--primary-rgba-50: rgba(178, 58, 49, 0.5);
+	--primary-rgba-60: rgba(178, 58, 49, 0.6);
+	--primary-rgba-70: rgba(178, 58, 49, 0.7);
+	--primary-rgba-80: rgba(178, 58, 49, 0.8);
+	--primary-rgba-90: rgba(178, 58, 49, 0.9);
+	--secondary: #a3312a;
+	--secondary-100: #8f2b25;
+	--secondary-200: #852822;
+	--secondary-300: #7a2520;
+	--secondary--100: #b7372f;
+	--secondary--200: #c13a32;
+	--secondary--300: #cb3e35;
+	--secondary-rgba-0: rgba(163, 49, 42, 0);
+	--secondary-rgba-10: rgba(163, 49, 42, 0.1);
+	--secondary-rgba-20: rgba(163, 49, 42, 0.2);
+	--secondary-rgba-30: rgba(163, 49, 42, 0.3);
+	--secondary-rgba-40: rgba(163, 49, 42, 0.4);
+	--secondary-rgba-50: rgba(163, 49, 42, 0.5);
+	--secondary-rgba-60: rgba(163, 49, 42, 0.6);
+	--secondary-rgba-70: rgba(163, 49, 42, 0.7);
+	--secondary-rgba-80: rgba(163, 49, 42, 0.8);
+	--secondary-rgba-90: rgba(163, 49, 42, 0.9);
+	--tertiary: #6f8597;
+	--tertiary-100: #637889;
+	--tertiary-200: #5e7282;
+	--tertiary-300: #586b7b;
+	--tertiary--100: #7e92a2;
+	--tertiary--200: #8598a7;
+	--tertiary--300: #8d9eac;
+	--tertiary-rgba-0: rgba(111, 133, 151, 0);
+	--tertiary-rgba-10: rgba(111, 133, 151, 0.1);
+	--tertiary-rgba-20: rgba(111, 133, 151, 0.2);
+	--tertiary-rgba-30: rgba(111, 133, 151, 0.3);
+	--tertiary-rgba-40: rgba(111, 133, 151, 0.4);
+	--tertiary-rgba-50: rgba(111, 133, 151, 0.5);
+	--tertiary-rgba-60: rgba(111, 133, 151, 0.6);
+	--tertiary-rgba-70: rgba(111, 133, 151, 0.7);
+	--tertiary-rgba-80: rgba(111, 133, 151, 0.8);
+	--tertiary-rgba-90: rgba(111, 133, 151, 0.9);
+	--quaternary: #262626;
+	--quaternary-100: #191919;
+	--quaternary-200: #131313;
+	--quaternary-300: #0c0c0c;
+	--quaternary--100: #333333;
+	--quaternary--200: #393939;
+	--quaternary--300: #404040;
+	--quaternary-rgba-0: rgba(38, 38, 38, 0);
+	--quaternary-rgba-10: rgba(38, 38, 38, 0.1);
+	--quaternary-rgba-20: rgba(38, 38, 38, 0.2);
+	--quaternary-rgba-30: rgba(38, 38, 38, 0.3);
+	--quaternary-rgba-40: rgba(38, 38, 38, 0.4);
+	--quaternary-rgba-50: rgba(38, 38, 38, 0.5);
+	--quaternary-rgba-60: rgba(38, 38, 38, 0.6);
+	--quaternary-rgba-70: rgba(38, 38, 38, 0.7);
+	--quaternary-rgba-80: rgba(38, 38, 38, 0.8);
+	--quaternary-rgba-90: rgba(38, 38, 38, 0.9);
+	--dark: #121212;
+	--dark-100: #050505;
+	--dark-200: #000000;
+	--dark-300: #000000;
+	--dark--100: #1f1f1f;
+	--dark--200: #252525;
+	--dark--300: #2c2c2c;
+	--dark-rgba-0: rgba(18, 18, 18, 0);
+	--dark-rgba-10: rgba(18, 18, 18, 0.1);
+	--dark-rgba-20: rgba(18, 18, 18, 0.2);
+	--dark-rgba-30: rgba(18, 18, 18, 0.3);
+	--dark-rgba-40: rgba(18, 18, 18, 0.4);
+	--dark-rgba-50: rgba(18, 18, 18, 0.5);
+	--dark-rgba-60: rgba(18, 18, 18, 0.6);
+	--dark-rgba-70: rgba(18, 18, 18, 0.7);
+	--dark-rgba-80: rgba(18, 18, 18, 0.8);
+	--dark-rgba-90: rgba(18, 18, 18, 0.9);
+	--light: #fefdfd;
+	--light-100: #f5ecec;
+	--light-200: #f1e4e4;
+	--light-300: #eddbdb;
+	--light--100: #ffffff;
+	--light--200: #ffffff;
+	--light--300: #ffffff;
+	--light-rgba-0: rgba(254, 253, 253, 0);
+	--light-rgba-10: rgba(254, 253, 253, 0.1);
+	--light-rgba-20: rgba(254, 253, 253, 0.2);
+	--light-rgba-30: rgba(254, 253, 253, 0.3);
+	--light-rgba-40: rgba(254, 253, 253, 0.4);
+	--light-rgba-50: rgba(254, 253, 253, 0.5);
+	--light-rgba-60: rgba(254, 253, 253, 0.6);
+	--light-rgba-70: rgba(254, 253, 253, 0.7);
+	--light-rgba-80: rgba(254, 253, 253, 0.8);
+	--light-rgba-90: rgba(254, 253, 253, 0.9);
+}
+/* Skin Colors - Inverse */
+:root {
+	--primary-inverse: #ffffff;
+	--secondary-inverse: #ffffff;
+	--tertiary-inverse: #121212;
+	--quaternary-inverse: #ffffff;
+	--dark-inverse: #ffffff;
+	--light-inverse: #666666;
+}
+/* Grey Colors */
+:root {
+	--grey: #b0b0ae;
+	--grey-100: #f4f3f1;
+	--grey-200: #eeedeb;
+	--grey-300: #eae9e7;
+	--grey-400: #e5e4e3;
+	--grey-500: #e1e0de;
+	--grey-600: #d8d7d6;
+	--grey-700: #cfcecd;
+	--grey-800: #bcbbba;
+	--grey-900: #a9a8a7;
+	--grey-1000: #959594;
+}
+
+/* Central tokens: light mode (and explicit data-bs-theme="light") */
+:root,
+[data-bs-theme="light"] {
+    --ts-skin-bg:            #faf9f7;
+    --ts-skin-surface:       #fefdfd;
+    --ts-skin-surface-2:     #f1f1f1;
+    --ts-skin-elevated:      #ececec;
+    --ts-skin-overlay:       rgba(6, 6, 6, 0.5);
+    --ts-skin-border:        #dbdbdb;
+    --ts-skin-border-strong: #bdbdbd;
+    --ts-skin-text:          #383838;
+    --ts-skin-text-strong:   #1a1a1a;
+    --ts-skin-text-dim:      #666666;
+    --ts-skin-text-faint:    #999999;
+    --ts-skin-accent:        #b23a31;
+    --ts-skin-accent-hover:  #943029;
+    --ts-skin-accent-soft:   rgba(178, 58, 49, 0.12);
+    --ts-skin-on-accent:     #ffffff;
+    --ts-skin-ring:          rgba(178, 58, 49, 0.4);
+    --ts-skin-success:       #5f8787;
+    --ts-skin-success-soft:  rgba(95, 135, 135, 0.12);
+    --ts-skin-warning:       #a88a4f;
+    --ts-skin-warning-soft:  rgba(168, 138, 79, 0.12);
+    --ts-skin-danger:        #a3312a;
+    --ts-skin-danger-soft:   rgba(163, 49, 42, 0.12);
+    --ts-skin-info:          #6f8597;
+    --ts-skin-info-soft:     rgba(111, 133, 151, 0.12);
+    --ts-skin-inverse:       #121212;
+    --ts-skin-on-inverse:    #ffffff;
+    --ts-skin-code-bg:       #121212;
+    --ts-skin-code-text:     #c1c1c1;
+    --ts-skin-code-comment:  #4f4f4f;
+    --ts-skin-code-keyword:  #999999;
+    --ts-skin-code-string:   #f8f7f2;
+    --ts-skin-code-number:   #aaaaaa;
+    --ts-skin-code-function: #888888;
+    --ts-skin-code-title:    #af3631;
+    --ts-skin-code-variable: #5f8787;
+    --ts-skin-code-builtin:  #aaaaaa;
+    --ts-skin-code-tag:      #999999;
+    --ts-skin-code-operator: #c1c1c1;
+    --ts-skin-code-meta:     #646464;
+    --ts-skin-shadow:        0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px -8px rgba(0, 0, 0, 0.18);
+    --ts-skin-shadow-lg:     0 24px 56px -12px rgba(0, 0, 0, 0.28), 0 4px 12px -4px rgba(0, 0, 0, 0.12);
+    --ts-skin-radius-sm:     6px;
+    --ts-skin-radius:        10px;
+    --ts-skin-radius-lg:     14px;
+}
+
+/* Central tokens: dark mode, system preference */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-bs-theme="light"]) {
+        --ts-skin-bg:            #0c0c0c;
+        --ts-skin-surface:       #121212;
+        --ts-skin-surface-2:     #181818;
+        --ts-skin-elevated:      #1c1c1c;
+        --ts-skin-overlay:       rgba(6, 6, 6, 0.7);
+        --ts-skin-border:        #333333;
+        --ts-skin-border-strong: #444444;
+        --ts-skin-text:          #c1c1c1;
+        --ts-skin-text-strong:   #f8f7f2;
+        --ts-skin-text-dim:      #999999;
+        --ts-skin-text-faint:    #666666;
+        --ts-skin-accent:        #b23a31;
+        --ts-skin-accent-hover:  #c4544a;
+        --ts-skin-accent-soft:   rgba(178, 58, 49, 0.24);
+        --ts-skin-on-accent:     #f8f7f2;
+        --ts-skin-ring:          rgba(196, 84, 74, 0.5);
+        --ts-skin-success:       #5f8787;
+        --ts-skin-success-soft:  rgba(95, 135, 135, 0.18);
+        --ts-skin-warning:       #a88a4f;
+        --ts-skin-warning-soft:  rgba(168, 138, 79, 0.18);
+        --ts-skin-danger:        #a3312a;
+        --ts-skin-danger-soft:   rgba(163, 49, 42, 0.2);
+        --ts-skin-info:          #6f8597;
+        --ts-skin-info-soft:     rgba(111, 133, 151, 0.18);
+        --ts-skin-inverse:       #f8f7f2;
+        --ts-skin-on-inverse:    #0c0c0c;
+        --ts-skin-code-bg:       #121212;
+        --ts-skin-code-text:     #c1c1c1;
+        --ts-skin-code-comment:  #4f4f4f;
+        --ts-skin-code-keyword:  #999999;
+        --ts-skin-code-string:   #f8f7f2;
+        --ts-skin-code-number:   #aaaaaa;
+        --ts-skin-code-function: #888888;
+        --ts-skin-code-title:    #af3631;
+        --ts-skin-code-variable: #5f8787;
+        --ts-skin-code-builtin:  #aaaaaa;
+        --ts-skin-code-tag:      #999999;
+        --ts-skin-code-operator: #c1c1c1;
+        --ts-skin-code-meta:     #646464;
+        --ts-skin-shadow:        0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -10px rgba(0, 0, 0, 0.7);
+        --ts-skin-shadow-lg:     0 28px 60px -12px rgba(0, 0, 0, 0.75), 0 4px 14px -4px rgba(0, 0, 0, 0.5);
+        --ts-skin-radius-sm:     6px;
+        --ts-skin-radius:        10px;
+        --ts-skin-radius-lg:     14px;
+    }
+}
+
+/* Central tokens: dark mode, explicit (PluginDarkMode sets both) */
+html.dark,
+[data-bs-theme="dark"] {
+    --ts-skin-bg:            #0c0c0c;
+    --ts-skin-surface:       #121212;
+    --ts-skin-surface-2:     #181818;
+    --ts-skin-elevated:      #1c1c1c;
+    --ts-skin-overlay:       rgba(6, 6, 6, 0.7);
+    --ts-skin-border:        #333333;
+    --ts-skin-border-strong: #444444;
+    --ts-skin-text:          #c1c1c1;
+    --ts-skin-text-strong:   #f8f7f2;
+    --ts-skin-text-dim:      #999999;
+    --ts-skin-text-faint:    #666666;
+    --ts-skin-accent:        #b23a31;
+    --ts-skin-accent-hover:  #c4544a;
+    --ts-skin-accent-soft:   rgba(178, 58, 49, 0.24);
+    --ts-skin-on-accent:     #f8f7f2;
+    --ts-skin-ring:          rgba(196, 84, 74, 0.5);
+    --ts-skin-success:       #5f8787;
+    --ts-skin-success-soft:  rgba(95, 135, 135, 0.18);
+    --ts-skin-warning:       #a88a4f;
+    --ts-skin-warning-soft:  rgba(168, 138, 79, 0.18);
+    --ts-skin-danger:        #a3312a;
+    --ts-skin-danger-soft:   rgba(163, 49, 42, 0.2);
+    --ts-skin-info:          #6f8597;
+    --ts-skin-info-soft:     rgba(111, 133, 151, 0.18);
+    --ts-skin-inverse:       #f8f7f2;
+    --ts-skin-on-inverse:    #0c0c0c;
+    --ts-skin-code-bg:       #121212;
+    --ts-skin-code-text:     #c1c1c1;
+    --ts-skin-code-comment:  #4f4f4f;
+    --ts-skin-code-keyword:  #999999;
+    --ts-skin-code-string:   #f8f7f2;
+    --ts-skin-code-number:   #aaaaaa;
+    --ts-skin-code-function: #888888;
+    --ts-skin-code-title:    #af3631;
+    --ts-skin-code-variable: #5f8787;
+    --ts-skin-code-builtin:  #aaaaaa;
+    --ts-skin-code-tag:      #999999;
+    --ts-skin-code-operator: #c1c1c1;
+    --ts-skin-code-meta:     #646464;
+    --ts-skin-shadow:        0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -10px rgba(0, 0, 0, 0.7);
+    --ts-skin-shadow-lg:     0 28px 60px -12px rgba(0, 0, 0, 0.75), 0 4px 14px -4px rgba(0, 0, 0, 0.5);
+    --ts-skin-radius-sm:     6px;
+    --ts-skin-radius:        10px;
+    --ts-skin-radius-lg:     14px;
+}

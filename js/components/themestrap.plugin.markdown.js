@@ -79,7 +79,7 @@
  *
  * Auto-init wiring for themestrap.init.js:
  *
- *   if ($.isFunction($.fn['themestrapPluginMarkdown']) && $('[data-plugin-markdown]').length) {
+ *   if (typeof $.fn['themestrapPluginMarkdown'] === 'function' && $('[data-plugin-markdown]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-markdown]:not(.manual)', 'themestrapPluginMarkdown');
  *   }
  */
@@ -93,15 +93,15 @@
     const CSS_TEXT = `
 /* Themestrap — PluginMarkdown */
 .ts-markdown {
-    --ts-md-font:         inherit;
-    --ts-md-code-font:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-    --ts-md-code-bg:      rgba(0,0,0,.06);
-    --ts-md-border:       rgba(0,0,0,.15);
-    --ts-md-quote-border: #0a1929;
-    --ts-md-link:         #2ab8c8;
-    --ts-md-link-hover:   #e8672a;
-    --ts-md-table-stripe: rgba(0,0,0,.03);
-    --ts-md-hr:           rgba(0,0,0,.15);
+    --ts-md-font:         var(--ts-skin-font, inherit);
+    --ts-md-code-font:    var(--ts-skin-font-mono, 'JetBrains Mono', 'Fira Code', 'Courier New', monospace);
+    --ts-md-code-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.06));
+    --ts-md-border:       var(--ts-skin-border, rgba(0,0,0,.15));
+    --ts-md-quote-border: var(--ts-skin-border, #0a1929);
+    --ts-md-link:         var(--ts-skin-accent, #2ab8c8);
+    --ts-md-link-hover:   var(--ts-skin-accent-hover, #e8672a);
+    --ts-md-table-stripe: var(--ts-skin-surface-2, rgba(0,0,0,.03));
+    --ts-md-hr:           var(--ts-skin-border, rgba(0,0,0,.15));
     --ts-md-heading-mt:   1.5em;
     line-height: 1.7;
     font-family: var(--ts-md-font);
@@ -121,7 +121,7 @@
 .ts-markdown h3 { font-size: 1.25em; }
 .ts-markdown h4 { font-size: 1.1em;  }
 .ts-markdown h5 { font-size: 1em;    }
-.ts-markdown h6 { font-size: .875em; color: #666;  }
+.ts-markdown h6 { font-size: .875em; color: var(--ts-skin-text-dim, #666);  }
 
 /* Paragraphs & text */
 .ts-markdown p { margin: 0 0 1em; }
@@ -160,8 +160,8 @@
     margin: 0 0 1em;
     padding: .5em 1em;
     border-left: 4px solid var(--ts-md-quote-border);
-    color: #555;
-    background: rgba(0,0,0,.03);
+    color: var(--ts-skin-text-dim, #555);
+    background: var(--ts-skin-surface-2, rgba(0,0,0,.03));
     border-radius: 0 4px 4px 0;
 }
 .ts-markdown blockquote > p:last-child { margin-bottom: 0; }
@@ -194,7 +194,7 @@
     padding: .5em .8em;
     text-align: left;
 }
-.ts-markdown th { background: rgba(0,0,0,.06); font-weight: 700; }
+.ts-markdown th { background: var(--ts-skin-surface-2, rgba(0,0,0,.06)); font-weight: 700; }
 .ts-markdown tbody tr:nth-child(even) td { background: var(--ts-md-table-stripe); }
 
 /* Horizontal rule */
@@ -209,7 +209,7 @@
 
 /* Loading / error states */
 .ts-markdown-loading { opacity: .5; font-style: italic; }
-.ts-markdown-error   { color: #c0392b; font-style: italic; font-size: .9em; }
+.ts-markdown-error   { color: var(--ts-skin-danger, #c0392b); font-style: italic; font-size: .9em; }
 `;
 
     function injectStyles() {
@@ -775,7 +775,7 @@
          */
         _highlightBlocks() {
             if (!this.options.highlight) return this;
-            if (!$.isFunction($.fn.themestrapPluginHighlight)) return this;
+            if (typeof $.fn.themestrapPluginHighlight !== 'function') return this;
  
             // Tear down any highlight instances from the previous render pass
             // before creating new ones (re-render scenario).

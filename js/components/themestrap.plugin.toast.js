@@ -1,6 +1,67 @@
 (((themestrap = {}, $) => {
     const instanceName = '__toast';
 
+    // Toast stylesheet, injected once on the first toast. Bootstrap's .toast does the layout;
+    // these rules route its colors through --ts-toast-* tokens, which read the active skin's
+    // --ts-skin-* tokens and otherwise fall back to Bootstrap's own values (the previous look).
+    const STYLE_ID = 'ts-toast-styles';
+    const CSS_TEXT = `
+/* Themestrap: PluginToast */
+.ts-toast {
+    --ts-toast-bg:      var(--ts-skin-surface, rgba(var(--bs-body-bg-rgb), 0.85));
+    --ts-toast-text:    var(--ts-skin-text);    /* no fallback: inherits from the page, as Bootstrap does */
+    --ts-toast-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color));
+    --ts-toast-border:  var(--ts-skin-border, var(--bs-border-color-translucent));
+    --ts-toast-radius:  var(--ts-skin-radius-lg, var(--bs-border-radius));
+    --ts-toast-shadow:  var(--ts-skin-shadow, var(--bs-box-shadow));
+    --ts-toast-icon:    var(--ts-skin-accent, #0088cc);
+    --ts-toast-icon-2:  var(--ts-skin-text-dim, #777);
+    --ts-toast-track:   var(--ts-skin-border, rgba(0, 0, 0, 0.08));
+    --ts-toast-success: var(--ts-skin-success, rgb(var(--bs-success-rgb)));
+    --ts-toast-danger:  var(--ts-skin-danger, rgb(var(--bs-danger-rgb)));
+    --ts-toast-warning: var(--ts-skin-warning, rgb(var(--bs-warning-rgb)));
+    --ts-toast-info:    var(--ts-skin-info, rgb(var(--bs-info-rgb)));
+    --ts-toast-dark:    var(--ts-skin-text-strong, rgb(var(--bs-dark-rgb)));
+    --ts-toast-light:   var(--ts-skin-text-dim, rgb(var(--bs-secondary-rgb)));
+
+    --bs-toast-bg:                 var(--ts-toast-bg);
+    --bs-toast-header-bg:          var(--ts-toast-bg);
+    --bs-toast-color:              var(--ts-toast-text);
+    --bs-toast-header-color:       var(--ts-toast-muted);
+    --bs-toast-header-border-color: var(--ts-toast-border);
+    --bs-toast-border-radius:      var(--ts-toast-radius);
+    --bs-toast-box-shadow:         var(--ts-toast-shadow);
+}
+.ts-toast--success .toast-header { color: var(--ts-toast-success); }
+.ts-toast--danger  .toast-header { color: var(--ts-toast-danger); }
+.ts-toast--warning .toast-header { color: var(--ts-toast-warning); }
+.ts-toast--info    .toast-header { color: var(--ts-toast-info); }
+.ts-toast--dark    .toast-header { color: var(--ts-toast-dark); }
+.ts-toast--light   .toast-header { color: var(--ts-toast-light); }
+.ts-toast-icon .ts-toast-i1 { stroke: var(--ts-toast-icon); }
+.ts-toast-icon .ts-toast-i2 { stroke: var(--ts-toast-icon-2); }
+.ts-toast-progress {
+    height: 3px;
+    background: var(--ts-toast-track);
+    border-radius: 0 0 var(--ts-toast-radius) var(--ts-toast-radius);
+    overflow: hidden;
+}
+.ts-toast-progress-bar {
+    height: 100%;
+    width: 100%;
+    background: currentColor;
+    opacity: .45;
+}
+`;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = CSS_TEXT;
+        (document.head || document.documentElement).appendChild(style);
+    }
+
     // Container registry
     // one container div per position, lazily created.
     const containers = {};
@@ -8,7 +69,7 @@
     function getContainer(position) {
         if (containers[position]) return containers[position];
 
-        const [y, x] = position.split('-');   // e.g. 'top-end' ? ['top', 'end']
+        const [y, x] = position.split('-');   // e.g. 'top-end' -> ['top', 'end']
 
         const yClass = {
             top:    'top-0',
@@ -32,24 +93,18 @@
 
     // Icon map
     const typeIcons = {
-        success: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" stroke="#0088cc"></path><path d="M9 12l2 2l4 -4" stroke="#777"></path></g></svg>`,
-        danger:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" stroke="#0088cc"></path><path d="M12 8v4" stroke="#777"></path><path d="M12 16h.01" stroke="#777"></path></g></svg>`,
-        warning: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M12 9v4" stroke="#777"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" stroke="#0088cc"></path><path d="M12 16h.01" stroke="#777"></path></g></svg>`,
-        info:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" stroke="#0088cc"></path><path d="M12 9h.01" stroke="#777"></path><path d="M11 12h1v4h1" stroke="#777"></path></g></svg>`,
-        dark:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"></path></g></svg>`,
-        light:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" stroke="#0088cc"></path><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" stroke="#777"></path></g></svg>`,
+        success: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" class="ts-toast-i1"></path><path d="M9 12l2 2l4 -4" class="ts-toast-i2"></path></g></svg>`,
+        danger:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" class="ts-toast-i1"></path><path d="M12 8v4" class="ts-toast-i2"></path><path d="M12 16h.01" class="ts-toast-i2"></path></g></svg>`,
+        warning: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M12 9v4" class="ts-toast-i2"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" class="ts-toast-i1"></path><path d="M12 16h.01" class="ts-toast-i2"></path></g></svg>`,
+        info:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" class="ts-toast-i1"></path><path d="M12 9h.01" class="ts-toast-i2"></path><path d="M11 12h1v4h1" class="ts-toast-i2"></path></g></svg>`,
+        dark:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"></path></g></svg>`,
+        light:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" class="ts-toast-i1"></path><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" class="ts-toast-i2"></path></g></svg>`,
     };
 
     // Header color map: Bootstrap contextual text + bg combos for the
     // icon/title row, keeping the body neutral white.
-    const typeHeaderClass = {
-        success: 'text-success',
-        danger:  'text-danger',
-        warning: 'text-warning',
-        info:    'text-info',
-        dark:    'text-dark',
-        light:   'text-secondary',
-    };
+    // Header color per type comes from the stylesheet (.ts-toast--{type}); see CSS_TEXT.
+    const TYPES = ['success', 'danger', 'warning', 'info', 'dark', 'light'];
 
     class PluginToast {
 
@@ -103,20 +158,22 @@
                 ? `<img src="${o.icon}" width="16" height="16" alt="" />`
                 : (typeIcons[o.type] ?? '');
 
-            const headerClass = typeHeaderClass[o.type] ?? '';
+            injectStyles();
+
+            const typeClass = TYPES.includes(o.type) ? `ts-toast--${o.type}` : '';
 
             const timestamp = o.timestamp
                 ? `<small class="text-body-secondary ms-auto">${o.timestamp}</small>`
                 : '';
 
             const progress = o.autohide && o.progress
-                ? `<div class="hljs-toast-progress"><div class="hljs-toast-progress-bar"></div></div>`
+                ? `<div class="toast-progress ts-toast-progress"><div class="toast-progress-bar ts-toast-progress-bar"></div></div>`
                 : '';
 
             const $toast = $(`
-                <div class="toast align-items-stretch border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header ${headerClass}">
-                        <span class="me-2 d-flex">${icon}</span>
+                <div class="toast ts-toast ${typeClass} align-items-stretch border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <span class="ts-toast-icon me-2 d-flex">${icon}</span>
                         <strong class="me-auto">${o.title}</strong>
                         ${timestamp}
                         ${o.dismissible ? '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' : ''}
@@ -158,6 +215,8 @@
             // Remove from DOM after Bootstrap fires hidden event.
             $toast[0].addEventListener('hidden.bs.toast', () => {
                 $toast.remove();
+                // Static show() mounts a hidden anchor; drop it with the toast.
+                if (self._ownsAnchor) self.$el.remove();
                 // Clean up empty container.
                 if ($container.children().length === 0) {
                     $container.remove();
@@ -190,11 +249,22 @@
             return this;
         }
 
+        // Same teardown name every other plugin uses: remove the toast now, without the hide animation.
+        destroy() {
+            this._bsToast?.dispose();
+            this.$toast?.remove();
+            if (this._ownsAnchor) this.$el.remove();
+            this.$el.removeData(instanceName);
+            return this;
+        }
+
         // Fire-and-forget: PluginToast.show({ title: '', body: '', type: 'success' })
         // No element needed, mounts to a detached anchor appended to body.
         static show(opts) {
             const $anchor = $('<div />').appendTo('body').hide();
-            return new PluginToast($anchor, opts);
+            const toast = new PluginToast($anchor, opts);
+            toast._ownsAnchor = true;
+            return toast;
         }
     }
 

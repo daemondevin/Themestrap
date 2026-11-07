@@ -98,7 +98,7 @@
  *   command:select  — when an item is activated (before navigation)    (instance, $item, payload)
  *
  * Init.js wiring (DOMReady-immediate — must be ready before any trigger fires):
- *   if ($.isFunction($.fn['themestrapPluginCommandMenu']) && $('[data-plugin-command-menu]').length) {
+ *   if (typeof $.fn['themestrapPluginCommandMenu'] === 'function' && $('[data-plugin-command-menu]').length) {
  *       $(() => {
  *           $('[data-plugin-command-menu]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -127,24 +127,24 @@
              *  .command-menu element, or via theme skins (dark mode, brand colors).
              */
             :root {
-                --command-bg:              var(--light, #fff);
-                --command-fg:              var(--default, #777);
-                --command-muted:           var(--light-rgba-60, rgba(255, 255, 255, 0.6));
-                --command-border:          var(--light-rgba-80, rgba(255, 255, 255, 0.8));
-                --command-border-strong:   var(--light-rgba-20, rgba(255, 255, 255, 0.2));
-                --command-hover:           var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-                --command-active-bg:       var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-                --command-active-fg:       var(--dark, #0a0c0d);
-                --command-accent:          var(--primary, #0088CC);
-                --command-backdrop:        var(--dark-rgba-90, rgba(33, 37, 41, 0.9));
-                --command-radius:          var(--border-radius, 4px);
-                --command-radius-item:     var(--border-radius2x, 8px);
-                --command-shadow:          0 24px 56px -12px rgba(0, 0, 0, 0.32),
-                                           0 4px 12px -4px rgba(0, 0, 0, 0.16);
+                --command-bg:              var(--ts-skin-surface, var(--light, #fff));
+                --command-fg:              var(--ts-skin-text, var(--default, #777));
+                --command-muted:           var(--ts-skin-text-dim, var(--light-rgba-60, rgba(255, 255, 255, 0.6)));
+                --command-border:          var(--ts-skin-border, var(--light-rgba-80, rgba(255, 255, 255, 0.8)));
+                --command-border-strong:   var(--ts-skin-border-strong, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+                --command-hover:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --command-active-bg:       var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --command-active-fg:       var(--ts-skin-text-strong, var(--dark, #0a0c0d));
+                --command-accent:          var(--ts-skin-accent, var(--primary, #0088CC));
+                --command-backdrop:        var(--ts-skin-overlay, var(--dark-rgba-90, rgba(33, 37, 41, 0.9)));
+                --command-radius:          var(--ts-skin-radius-sm, var(--border-radius, 4px));
+                --command-radius-item:     var(--ts-skin-radius, var(--border-radius2x, 8px));
+                --command-shadow:          var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.32),
+                                           0 4px 12px -4px rgba(0, 0, 0, 0.16));
                 --command-panel-width:     min(96vw, 640px);
                 --command-list-max-h:      min(60vh, 480px);
                 --command-z:               1080;
-                --command-font:            inherit;
+                --command-font:            var(--ts-skin-font, inherit);
             }
 
             /* Dark variant */
@@ -158,8 +158,8 @@
                 --command-active-bg:      var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
                 --command-active-fg:      var(--light, #fff);
                 --command-backdrop:       var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
-                --command-shadow:         0 24px 56px -12px rgba(0, 0, 0, 0.6),
-                                          0 4px 12px -4px rgba(0, 0, 0, 0.4);
+                --command-shadow:         var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.6),
+                                          0 4px 12px -4px rgba(0, 0, 0, 0.4));
             }
 
             body.ts-scroll-lock {
@@ -404,13 +404,19 @@
 
             .command-menu [data-command-item]:has([data-command-description]) {
                 align-items: center;
+                /* Let the description take its own line under the label instead of
+                   squeezing the label to zero width on the same row */
+                flex-wrap: wrap;
+                row-gap: 0;
             }
 
             /* Wrap label + description in an inline column when both are present */
             .command-menu [data-command-item] [data-command-label] + [data-command-description] {
-                /* If author puts description after label without a wrapper, force it onto its own line */
-                width: 100%;
-                flex: 1 0 100%;
+                /* If author puts description after label without a wrapper, force it onto its own line,
+                   after any shortcut or badge (order), indented to line up with the label */
+                order: 1;
+                width: calc(100% - 30px);
+                flex: 1 0 calc(100% - 30px);
                 margin-top: 2px;
                 margin-left: 30px;   /* align with label, accounting for icon column */
             }
@@ -448,7 +454,7 @@
                 padding: 2px 8px;
                 border-radius: 999px;
                 background: var(--command-accent);
-                color: #fff;
+                color: var(--ts-skin-on-accent, #fff);
                 font-size: 10.5px;
                 font-weight: 600;
                 letter-spacing: 0.02em;
@@ -515,9 +521,9 @@
                 align-items: center;
                 gap: 10px;
                 padding: 6px 10px 6px 12px;
-                background: var(--command-bg, #fff);
-                color: var(--command-muted, #64748b);
-                border: 1px solid var(--command-border, rgba(15, 23, 42, 0.12));
+                background: var(--command-bg, var(--ts-skin-surface, #fff));
+                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
+                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
                 border-radius: 8px;
                 font-size: 13px;
                 line-height: 1.4;
@@ -527,8 +533,8 @@
             }
 
             .command-trigger:hover {
-                border-color: var(--command-border-strong, rgba(15, 23, 42, 0.2));
-                background: var(--command-hover, rgba(15, 23, 42, 0.04));
+                border-color: var(--command-border-strong, var(--ts-skin-border-strong, rgba(15, 23, 42, 0.2)));
+                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.04)));
             }
 
             .command-trigger .command-trigger-label {
@@ -543,9 +549,9 @@
             }
 
             .command-trigger .command-trigger-shortcut kbd {
-                background: var(--command-hover, rgba(15, 23, 42, 0.06));
-                border: 1px solid var(--command-border, rgba(15, 23, 42, 0.12));
-                color: var(--command-muted, #64748b);
+                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.06)));
+                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
+                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
                 border-radius: 4px;
                 padding: 1px 5px;
                 font-size: 10.5px;

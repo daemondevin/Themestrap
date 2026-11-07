@@ -848,7 +848,7 @@ tb.<span class="hl-fn">destroy</span>();   <span class="hl-cmt">// restores init
 (function ($) {
 
     /* Auto-init all non-manual toolbars */
-    if ($.isFunction($.fn['themestrapPluginToolbar']) && $('[data-plugin-toolbar]').length) {
+    if (typeof $.fn['themestrapPluginToolbar'] === 'function' && $('[data-plugin-toolbar]').length) {
         themestrap.fn.intObsInit('[data-plugin-toolbar]:not(.manual)', 'themestrapPluginToolbar');
     }
 

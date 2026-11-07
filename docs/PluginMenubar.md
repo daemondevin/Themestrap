@@ -308,7 +308,7 @@ Dark mode is applied automatically when `html.dark` is present (set by PluginDar
 Add to `themestrap.init.js` for auto-initialization:
 
 ```js
-if ($.isFunction($.fn['themestrapPluginMenubar']) && $('[data-plugin-menubar]').length) {
+if (typeof $.fn['themestrapPluginMenubar'] === 'function' && $('[data-plugin-menubar]').length) {
     $(() => {
         $('[data-plugin-menubar]:not(.manual)').each(function () {
             const $this = $(this);

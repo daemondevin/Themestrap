@@ -58,7 +58,7 @@
  *
  * themestrap.init.js wiring:
  *   // Vertical Navigation
- *   if ($.isFunction($.fn['themestrapPluginVerticalNav']) && $('[data-plugin-vertical-nav]').length) {
+ *   if (typeof $.fn['themestrapPluginVerticalNav'] === 'function' && $('[data-plugin-vertical-nav]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-vertical-nav]:not(.manual)', 'themestrapPluginVerticalNav');
  *   }
  */
@@ -78,23 +78,23 @@
  */
 /* Custom Properties */
 .ts-vertical-nav {
-    --ts-vn-bg:              var(--dark);
-    --ts-vn-border:          #393c41;
+    --ts-vn-bg:              var(--ts-skin-surface, var(--dark));
+    --ts-vn-border:          var(--ts-skin-border, #393c41);
 
     --ts-vn-width:           220px;
     --ts-vn-width-collapsed: 56px;
     --ts-vn-transition:      260ms cubic-bezier(.4, 0, .2, 1);
 
-    --ts-vn-link-color:        var(--default);
-    --ts-vn-link-hover-color:  var(--primary);
-    --ts-vn-link-hover-bg:     rgba(255, 255, 255, .08);
-    --ts-vn-link-active-color: var(--primary);
-    --ts-vn-link-active-bg:    rgba(255, 255, 255, .14);
-    --ts-vn-link-active-mark:  var(--primary);
+    --ts-vn-link-color:        var(--ts-skin-text, var(--default));
+    --ts-vn-link-hover-color:  var(--ts-skin-accent-hover, var(--primary));
+    --ts-vn-link-hover-bg:     var(--ts-skin-elevated, rgba(255, 255, 255, .08));
+    --ts-vn-link-active-color: var(--ts-skin-accent, var(--primary));
+    --ts-vn-link-active-bg:    var(--ts-skin-elevated, rgba(255, 255, 255, .14));
+    --ts-vn-link-active-mark:  var(--ts-skin-accent, var(--primary));
 
     --ts-vn-icon-size:   1.125rem;   /* 18 px */
-    --ts-vn-icon-color:  rgba(255, 255, 255, .60);
-    --ts-vn-icon-active: var(--primary);
+    --ts-vn-icon-color:  var(--ts-skin-text-dim, rgba(255, 255, 255, .60));
+    --ts-vn-icon-active: var(--ts-skin-accent, var(--primary));
 
     --ts-vn-header-height: 56px;
     --ts-vn-item-height:   36px;
@@ -102,10 +102,10 @@
 
     --ts-vn-group-indent: 2.5rem;   /* children indented past icon column */
 
-    --ts-vn-divider-color: var(--grey-200);
+    --ts-vn-divider-color: var(--ts-skin-border, var(--grey-200));
 
-    --ts-vn-focus-ring: 0 0 0 2px #49afd9;
-    --ts-vn-radius:     4px;
+    --ts-vn-focus-ring: 0 0 0 2px var(--ts-skin-ring, #49afd9);
+    --ts-vn-radius:     var(--ts-skin-radius-sm, 4px);
 }
 /* Root nav element */
 .ts-vertical-nav {
@@ -143,7 +143,7 @@
 .ts-vn-brand {
     font-size:     .875rem;
     font-weight:   600;
-    color:         #fff;
+    color:         var(--ts-skin-text, #fff);
     opacity:       1;
     transition:    opacity var(--ts-vn-transition),
                    max-width var(--ts-vn-transition);
@@ -231,7 +231,7 @@
 }
 
 .ts-vn-body::-webkit-scrollbar       { width: 4px; }
-.ts-vn-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+.ts-vn-body::-webkit-scrollbar-thumb { background: var(--ts-skin-border-strong, rgba(255,255,255,.15)); border-radius: 4px; }
 /* Shared link / button row styles */
 .ts-vn-link,
 .ts-vn-group-trigger {
@@ -386,7 +386,7 @@
     font-weight:  600;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color:          rgba(255, 255, 255, .40);
+    color:          var(--ts-skin-text-dim, rgba(255, 255, 255, .40));
     white-space:    nowrap;
     overflow:       hidden;
     opacity:        1;
@@ -420,12 +420,12 @@
     --ts-vn-border:          var(--grey-200);
 
     --ts-vn-link-color:        var(--dark);
-    --ts-vn-link-hover-color:  #000;
-    --ts-vn-link-hover-bg:     rgba(0, 0, 0, .05);
-    --ts-vn-link-active-color: #000;
+    --ts-vn-link-hover-color:  var(--ts-skin-text-strong, #000);
+    --ts-vn-link-hover-bg:     var(--ts-skin-elevated, rgba(0, 0, 0, .05));
+    --ts-vn-link-active-color: var(--ts-skin-text-strong, #000);
     --ts-vn-link-active-bg:    var(--primary-rgba-10);
 
-    --ts-vn-icon-color:  #6a7e90;
+    --ts-vn-icon-color:  var(--ts-skin-text-dim, #6a7e90);
     --ts-vn-divider-color: var(--grey-200);
 }
 

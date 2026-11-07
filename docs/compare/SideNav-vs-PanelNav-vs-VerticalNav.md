@@ -454,12 +454,12 @@ Accessibility gaps worth knowing:
 
 ```js
 // VerticalNav: IntersectionObserver based
-if ($.isFunction($.fn['themestrapPluginVerticalNav']) && $('[data-plugin-vertical-nav]').length) {
+if (typeof $.fn['themestrapPluginVerticalNav'] === 'function' && $('[data-plugin-vertical-nav]').length) {
     themestrap.fn.intObsInit('[data-plugin-vertical-nav]:not(.manual)', 'themestrapPluginVerticalNav');
 }
 
 // SideNav: direct DOM ready loop
-if ($.isFunction($.fn['themestrapPluginSideNav']) && $('[data-plugin-sidenav]').length) {
+if (typeof $.fn['themestrapPluginSideNav'] === 'function' && $('[data-plugin-sidenav]').length) {
     $(() => {
         $('[data-plugin-sidenav]:not(.manual)').each(function() {
             const $this = $(this);
@@ -470,7 +470,7 @@ if ($.isFunction($.fn['themestrapPluginSideNav']) && $('[data-plugin-sidenav]').
 }
 
 // PanelNav: direct DOM ready loop
-if ($.isFunction($.fn['themestrapPluginPanelNav']) && $('[data-plugin-panelnav]').length) {
+if (typeof $.fn['themestrapPluginPanelNav'] === 'function' && $('[data-plugin-panelnav]').length) {
     $(() => {
         $('[data-plugin-panelnav]:not(.manual)').each(function() {
             const $this = $(this);

@@ -30,7 +30,7 @@ Add `data-plugin-lightbox` to any anchor or element to have it picked up automat
 
 ```js
 // Lightbox
-if ($.isFunction($.fn['themestrapPluginLightbox']) && $('[data-plugin-lightbox]').length) {
+if (typeof $.fn['themestrapPluginLightbox'] === 'function' && $('[data-plugin-lightbox]').length) {
     themestrap.fn.execOnceThroughEvent(
         '[data-plugin-lightbox]:not(.manual)',
         'mouseover.trigger.lightbox',

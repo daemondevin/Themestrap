@@ -32,7 +32,7 @@
 			},
 
 			build() {
-				if (!($.isFunction($.fn.validate))) {
+				if (typeof $.fn.validate !== 'function') {
 					return this;
 				}
 

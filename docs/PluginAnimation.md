@@ -21,7 +21,7 @@ PluginAnimate watches an element with an IntersectionObserver. When the element 
 ### Init.js Wiring
 
 ```js
-if ($.isFunction($.fn['themestrapPluginAnimate'])
+if (typeof $.fn['themestrapPluginAnimate'] === 'function'
     && $('[data-appear-animation]').length) {
   themestrap.fn.intObsInit(
     '[data-appear-animation]:not(.manual)',

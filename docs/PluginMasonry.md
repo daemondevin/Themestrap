@@ -129,7 +129,7 @@ These are not part of the public API but useful for debugging:
 
 ## Loading Overlay
 
-If the grid container has a `.masonry-loader` ancestor, the plugin automatically injects a `.bounce-loader` spinner and controls its visibility classes while waiting for images. This is the same loader pattern used across all Themestrap masonry layouts in Porto.
+If the grid container has a `.masonry-loader` ancestor, the plugin automatically injects a `.bounce-loader` spinner and controls its visibility classes while waiting for images. 
 
 ```html
 <div class="masonry-loader masonry-loader-showing">

@@ -108,24 +108,24 @@
     let instanceCount = 0;
 
     const LIGHT_TOKENS = `
-        --au-invalid:   var(--ts-au-invalid, #dc3545);
-        --au-valid:     var(--ts-au-valid, #198754);
-        --au-muted:     var(--ts-au-muted, #6c757d);
-        --au-track:     var(--ts-au-track, #e9ecef);
-        --au-warn-bg:   var(--ts-au-warn-bg, #fff3cd);
-        --au-warn-text: var(--ts-au-warn-text, #664d03);
-        --au-info-bg:   var(--ts-au-info-bg, #e7f1ff);
-        --au-info-text: var(--ts-au-info-text, #0a3c7d);
+        --au-invalid:   var(--ts-au-invalid, var(--ts-skin-danger, #dc3545));
+        --au-valid:     var(--ts-au-valid, var(--ts-skin-success, #198754));
+        --au-muted:     var(--ts-au-muted, var(--ts-skin-text-dim, #6c757d));
+        --au-track:     var(--ts-au-track, var(--ts-skin-surface-2, #e9ecef));
+        --au-warn-bg:   var(--ts-au-warn-bg, var(--ts-skin-warning-soft, #fff3cd));
+        --au-warn-text: var(--ts-au-warn-text, var(--ts-skin-warning, #664d03));
+        --au-info-bg:   var(--ts-au-info-bg, var(--ts-skin-info-soft, #e7f1ff));
+        --au-info-text: var(--ts-au-info-text, var(--ts-skin-info, #0a3c7d));
     `;
     const DARK_TOKENS = `
-        --au-invalid:   var(--ts-au-invalid, #f87171);
-        --au-valid:     var(--ts-au-valid, #4ade80);
-        --au-muted:     var(--ts-au-muted, #9fb3c8);
-        --au-track:     var(--ts-au-track, rgba(255,255,255,.12));
-        --au-warn-bg:   var(--ts-au-warn-bg, rgba(251,191,36,.15));
-        --au-warn-text: var(--ts-au-warn-text, #fbbf24);
-        --au-info-bg:   var(--ts-au-info-bg, rgba(96,165,250,.15));
-        --au-info-text: var(--ts-au-info-text, #93c5fd);
+        --au-invalid:   var(--ts-au-invalid, var(--ts-skin-danger, #f87171));
+        --au-valid:     var(--ts-au-valid, var(--ts-skin-success, #4ade80));
+        --au-muted:     var(--ts-au-muted, var(--ts-skin-text-dim, #9fb3c8));
+        --au-track:     var(--ts-au-track, var(--ts-skin-surface-2, rgba(255,255,255,.12)));
+        --au-warn-bg:   var(--ts-au-warn-bg, var(--ts-skin-warning-soft, rgba(251,191,36,.15)));
+        --au-warn-text: var(--ts-au-warn-text, var(--ts-skin-warning, #fbbf24));
+        --au-info-bg:   var(--ts-au-info-bg, var(--ts-skin-info-soft, rgba(96,165,250,.15)));
+        --au-info-text: var(--ts-au-info-text, var(--ts-skin-info, #93c5fd));
     `;
 
     // Rules use :where() where Bootstrap supplies the same thing, so the framework always wins
@@ -162,10 +162,10 @@
         .auth-strength { display: flex; align-items: center; gap: 4px; margin-top: 6px; height: 22px; }
         .auth-strength .auth-strength-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--au-track); transition: background-color .2s ease; }
         .auth-strength[data-score="0"] .auth-strength-bar--on,
-        .auth-strength[data-score="1"] .auth-strength-bar--on { background: #dc3545; }
-        .auth-strength[data-score="2"] .auth-strength-bar--on { background: #f0ad00; }
-        .auth-strength[data-score="3"] .auth-strength-bar--on { background: #0dcaf0; }
-        .auth-strength[data-score="4"] .auth-strength-bar--on { background: #198754; }
+        .auth-strength[data-score="1"] .auth-strength-bar--on { background: var(--ts-skin-danger, #dc3545); }
+        .auth-strength[data-score="2"] .auth-strength-bar--on { background: var(--ts-skin-warning, #f0ad00); }
+        .auth-strength[data-score="3"] .auth-strength-bar--on { background: var(--ts-skin-info, #0dcaf0); }
+        .auth-strength[data-score="4"] .auth-strength-bar--on { background: var(--ts-skin-success, #198754); }
         .auth-strength .auth-strength-label { margin-left: 8px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--au-muted); min-width: 64px; }
 
         .auth-capslock { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 10px; background: var(--au-warn-bg); color: var(--au-warn-text); font-size: 11px; font-weight: 600; letter-spacing: .03em; }

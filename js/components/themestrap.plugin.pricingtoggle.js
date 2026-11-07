@@ -58,7 +58,7 @@
  *
  * Init.js wiring 
  *
- *   if ($.isFunction($.fn['themestrapPluginPricingToggle']) && $('[data-plugin-pricingtoggle]').length) {
+ *   if (typeof $.fn['themestrapPluginPricingToggle'] === 'function' && $('[data-plugin-pricingtoggle]').length) {
  *       $(() => {
  *           $('[data-plugin-pricingtoggle]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -90,7 +90,7 @@
             width: var(--pt-track-width, 44px);
             height: var(--pt-track-height, 24px);
             border-radius: 9999px;
-            background: var(--pt-track-bg, #3b82f6);
+            background: var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
             border: none;
             cursor: pointer;
             padding: 0;
@@ -98,7 +98,7 @@
             flex-shrink: 0;
         }
         [data-pt-track]:focus-visible {
-            outline: 2px solid var(--pt-track-bg, #3b82f6);
+            outline: 2px solid var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
             outline-offset: 3px;
         }
 
@@ -110,8 +110,8 @@
             width: var(--pt-thumb-size, 18px);
             height: var(--pt-thumb-size, 18px);
             border-radius: 50%;
-            background: var(--pt-thumb-bg, #fff);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+            background: var(--pt-thumb-bg, var(--ts-skin-surface, #fff));
+            box-shadow: var(--ts-skin-shadow, 0 1px 4px rgba(0, 0, 0, .25));
             transition: left var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1),
                         background var(--pt-duration, 250ms) ease;
             pointer-events: none;
@@ -134,20 +134,20 @@
             gap: .35rem;
             font-size: .875rem;
             font-weight: 600;
-            color: var(--pt-label-muted, #64748b);
+            color: var(--pt-label-muted, var(--ts-skin-text-dim, #64748b));
             transition: color var(--pt-duration, 250ms) ease;
             cursor: pointer;
         }
         [data-pt-label-primary].is-active,
         [data-pt-label-secondary].is-active {
-            color: var(--pt-label-active, #0f172a);
+            color: var(--pt-label-active, var(--ts-skin-text-strong, #0f172a));
         }
 
         /* Savings badge — hidden in primary state, shown in secondary */
         [data-pt-savings-badge] {
             display: inline-block;
-            background: var(--pt-badge-bg, rgba(34, 197, 94, .12));
-            color: var(--pt-badge-color, #16a34a);
+            background: var(--pt-badge-bg, var(--ts-skin-success-soft, rgba(34, 197, 94, .12)));
+            color: var(--pt-badge-color, var(--ts-skin-success, #16a34a));
             font-size: .6875rem;
             font-weight: 700;
             padding: 2px 7px;

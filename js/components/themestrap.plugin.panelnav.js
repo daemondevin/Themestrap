@@ -28,24 +28,24 @@
     --ts-pn-font-size:          0.875rem;
 
     /* Colours — override via CSS or data-plugin-options */
-    --ts-pn-bg:                 #ffffff;
-    --ts-pn-border-color:       #e6e9ee;
+    --ts-pn-bg:                 var(--ts-skin-surface, #ffffff);
+    --ts-pn-border-color:       var(--ts-skin-border, #e6e9ee);
 
-    --ts-pn-text:               #1c1f23;
-    --ts-pn-text-muted:         #6b7785;
-    --ts-pn-icon-color:         #6b7785;
+    --ts-pn-text:               var(--ts-skin-text, #1c1f23);
+    --ts-pn-text-muted:         var(--ts-skin-text-dim, #6b7785);
+    --ts-pn-icon-color:         var(--ts-skin-text-dim, #6b7785);
 
-    --ts-pn-accent:             var(--color-primary, #2470de);
-    --ts-pn-item-hover-bg:      #f4f6f8;
+    --ts-pn-accent:             var(--ts-skin-accent, var(--color-primary, #2470de));
+    --ts-pn-item-hover-bg:      var(--ts-skin-elevated, #f4f6f8);
     --ts-pn-item-active-bg:     transparent;
-    --ts-pn-item-active-text:   var(--ts-pn-accent);
-    --ts-pn-item-active-icon:   var(--ts-pn-accent);
-    --ts-pn-active-bar:         var(--ts-pn-accent);
+    --ts-pn-item-active-text:   var(--ts-skin-accent, var(--ts-pn-accent));
+    --ts-pn-item-active-icon:   var(--ts-skin-accent, var(--ts-pn-accent));
+    --ts-pn-active-bar:         var(--ts-skin-accent, var(--ts-pn-accent));
 
-    --ts-pn-section-title:      #8a93a0;
-    --ts-pn-metadata-color:     #8a93a0;
+    --ts-pn-section-title:      var(--ts-skin-text-strong, #8a93a0);
+    --ts-pn-metadata-color:     var(--ts-skin-text-dim, #8a93a0);
 
-    --ts-pn-focus-ring:         var(--ts-pn-accent);
+    --ts-pn-focus-ring:         var(--ts-skin-ring, var(--ts-pn-accent));
 
     box-sizing: border-box;
     width: var(--ts-pn-width);
@@ -63,21 +63,21 @@
 
 /* Dark variant */
 .ts-panel-nav--dark {
-    --ts-pn-bg:                 #10151c;
-    --ts-pn-border-color:       #232c38;
+    --ts-pn-bg:                 var(--ts-skin-surface, #10151c);
+    --ts-pn-border-color:       var(--ts-skin-border, #232c38);
 
-    --ts-pn-text:               #e7ecf2;
-    --ts-pn-text-muted:         #8794a3;
-    --ts-pn-icon-color:         #8794a3;
+    --ts-pn-text:               var(--ts-skin-text, #e7ecf2);
+    --ts-pn-text-muted:         var(--ts-skin-text-dim, #8794a3);
+    --ts-pn-icon-color:         var(--ts-skin-text-dim, #8794a3);
 
-    --ts-pn-accent:             #6fa8ff;
-    --ts-pn-item-hover-bg:      #1a212b;
-    --ts-pn-item-active-text:   #9cc4ff;
-    --ts-pn-item-active-icon:   #9cc4ff;
-    --ts-pn-active-bar:         #6fa8ff;
+    --ts-pn-accent:             var(--ts-skin-accent, #6fa8ff);
+    --ts-pn-item-hover-bg:      var(--ts-skin-elevated, #1a212b);
+    --ts-pn-item-active-text:   var(--ts-skin-accent, #9cc4ff);
+    --ts-pn-item-active-icon:   var(--ts-skin-accent, #9cc4ff);
+    --ts-pn-active-bar:         var(--ts-skin-accent, #6fa8ff);
 
-    --ts-pn-section-title:      #6b7785;
-    --ts-pn-metadata-color:     #6b7785;
+    --ts-pn-section-title:      var(--ts-skin-text-strong, #6b7785);
+    --ts-pn-metadata-color:     var(--ts-skin-text-dim, #6b7785);
 }
 
 /* Full-height variant (when used as a left rail) */

@@ -39,7 +39,7 @@
  *   --ts-ni-muted, --ts-ni-btn-bg, --ts-ni-btn-hover, --ts-ni-focus-ring, --ts-ni-width
  *
  * Init.js wiring:
- *   if ($.isFunction($.fn['themestrapPluginNumberInput']) && $('[data-plugin-numberinput]').length) {
+ *   if (typeof $.fn['themestrapPluginNumberInput'] === 'function' && $('[data-plugin-numberinput]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-numberinput]:not(.manual)', 'themestrapPluginNumberInput');
  *   }
  */
@@ -61,25 +61,25 @@
 
     const LIGHT = `
         --ni-h:            var(--ts-ni-h, 2.45rem);
-        --ni-bg:           var(--ts-ni-bg, #ffffff);
-        --ni-border:       var(--ts-ni-border, rgba(0,0,0,.18));
-        --ni-border-focus: var(--ts-ni-border-focus, #00a89f);
-        --ni-radius:       var(--ts-ni-radius, 7px);
-        --ni-text:         var(--ts-ni-text, #1f2937);
-        --ni-muted:        var(--ts-ni-muted, rgba(31,41,55,.55));
-        --ni-btn-bg:       var(--ts-ni-btn-bg, rgba(0,0,0,.035));
-        --ni-btn-hover:    var(--ts-ni-btn-hover, rgba(0,0,0,.09));
-        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px rgba(0,168,159,.20));
+        --ni-bg:           var(--ts-ni-bg, var(--ts-skin-surface, #ffffff));
+        --ni-border:       var(--ts-ni-border, var(--ts-skin-border, rgba(0,0,0,.18)));
+        --ni-border-focus: var(--ts-ni-border-focus, var(--ts-skin-accent, #00a89f));
+        --ni-radius:       var(--ts-ni-radius, var(--ts-skin-radius, 7px));
+        --ni-text:         var(--ts-ni-text, var(--ts-skin-text, #1f2937));
+        --ni-muted:        var(--ts-ni-muted, var(--ts-skin-text-dim, rgba(31,41,55,.55)));
+        --ni-btn-bg:       var(--ts-ni-btn-bg, var(--ts-skin-surface-2, rgba(0,0,0,.035)));
+        --ni-btn-hover:    var(--ts-ni-btn-hover, var(--ts-skin-elevated, rgba(0,0,0,.09)));
+        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,168,159,.20)));
     `;
     const DARK = `
-        --ni-bg:           var(--ts-ni-bg, rgba(255,255,255,.03));
-        --ni-border:       var(--ts-ni-border, rgba(255,255,255,.14));
-        --ni-border-focus: var(--ts-ni-border-focus, #00c7be);
-        --ni-text:         var(--ts-ni-text, #d5dfeb);
-        --ni-muted:        var(--ts-ni-muted, rgba(213,223,235,.55));
-        --ni-btn-bg:       var(--ts-ni-btn-bg, rgba(255,255,255,.05));
-        --ni-btn-hover:    var(--ts-ni-btn-hover, rgba(255,255,255,.12));
-        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px rgba(0,199,190,.22));
+        --ni-bg:           var(--ts-ni-bg, var(--ts-skin-surface-2, rgba(255,255,255,.03)));
+        --ni-border:       var(--ts-ni-border, var(--ts-skin-border, rgba(255,255,255,.14)));
+        --ni-border-focus: var(--ts-ni-border-focus, var(--ts-skin-accent, #00c7be));
+        --ni-text:         var(--ts-ni-text, var(--ts-skin-text, #d5dfeb));
+        --ni-muted:        var(--ts-ni-muted, var(--ts-skin-text-dim, rgba(213,223,235,.55)));
+        --ni-btn-bg:       var(--ts-ni-btn-bg, var(--ts-skin-surface-2, rgba(255,255,255,.05)));
+        --ni-btn-hover:    var(--ts-ni-btn-hover, var(--ts-skin-elevated, rgba(255,255,255,.12)));
+        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,199,190,.22)));
     `;
 
     const CSS_TEXT = `

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PluginTransfer · Themestrap</title>
+  <link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+  <style>
+    body { padding: 2.5rem 0 4rem; }
+    .doc { max-width: 920px; margin: 0 auto; padding: 0 1.25rem; }
+    .doc h2 { margin-top: 2.75rem; font-size: 1.35rem; }
+    .doc h3 { margin-top: 1.75rem; font-size: 1.05rem; }
+    .demo { border: 1px solid var(--bs-border-color); border-radius: .6rem; padding: 1.25rem; margin: 1rem 0; }
+    .demo + pre { margin-top: -.5rem; }
+    .demo .controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+    pre { background: var(--bs-tertiary-bg); border-radius: .5rem; padding: 1rem; font-size: .82rem; }
+    table { font-size: .9rem; }
+    td code, th code { white-space: nowrap; }
+    .themed .ts-transfer {
+      --ts-transfer-bar: #ea580c;
+      --ts-transfer-done: #16a34a;
+      --ts-transfer-height: 8px;
+      --ts-transfer-radius: 2px;
+    }
+    #log { height: 7.5rem; overflow-y: auto; font-size: .8rem; }
+  </style>
+</head>
+<body>
+<div class="doc">
+
+  <p class="text-body-secondary mb-1">Themestrap component</p>
+  <h1>PluginTransfer</h1>
+  <p class="lead">Live progress for downloads, uploads, file copies and other long jobs. It shows bytes done and total, a smoothed speed, time left, job states, an indeterminate mode and an optional cancel button.</p>
+  <p>It has no vendor dependencies. The plugin builds its own markup and injects its CSS once, on first use. Any part with nothing to show hides itself, so the same element works as a single bar or a full status block.</p>
+
+  <h2>Live demo</h2>
+
+  <h3>Download with known size</h3>
+  <div class="demo">
+    <div id="demo-download" data-plugin-transfer
+         data-plugin-options='{"label": "ubuntu-26.04.1-desktop-amd64.iso", "total": 6227886080, "cancelable": true}'></div>
+    <div class="controls">
+      <button class="btn btn-primary btn-sm" id="dl-start">Start</button>
+      <button class="btn btn-outline-secondary btn-sm" id="dl-pause">Pause</button>
+      <button class="btn btn-outline-secondary btn-sm" id="dl-verify">Verify (indeterminate)</button>
+      <button class="btn btn-outline-success btn-sm" id="dl-done">Done</button>
+      <button class="btn btn-outline-danger btn-sm" id="dl-fail">Fail</button>
+      <button class="btn btn-outline-secondary btn-sm" id="dl-reset">Reset</button>
+    </div>
+  </div>
+<pre><code>&lt;div id="demo-download" data-plugin-transfer
+     data-plugin-options='{"label": "ubuntu-26.04.1-desktop-amd64.iso", "total": 6227886080, "cancelable": true}'&gt;&lt;/div&gt;
+
+const t = $('#demo-download').data('__pluginTransfer');
+t.update(bytesSoFar);                 // speed and time left are derived
+t.setIndeterminate(true).setMessage('Verifying checksum…');
+t.setState('done', 'Checksum OK');</code></pre>
+
+  <h3>Unknown total</h3>
+  <p>With no <code>total</code>, a running transfer animates its bar and shows bytes and speed only.</p>
+  <div class="demo">
+    <div id="demo-stream" data-plugin-transfer data-plugin-options='{"label": "Streaming backup", "units": "si"}'></div>
+    <div class="controls">
+      <button class="btn btn-primary btn-sm" id="st-start">Start</button>
+      <button class="btn btn-outline-success btn-sm" id="st-done">Done</button>
+    </div>
+  </div>
+
+  <h3>Compact bar with custom theme</h3>
+  <div class="demo themed">
+    <div id="demo-compact" data-plugin-transfer
+         data-plugin-options='{"showBytes": false, "showSpeed": false, "showEta": false}'></div>
+    <div class="controls">
+      <button class="btn btn-primary btn-sm" id="cp-start">Run</button>
+    </div>
+  </div>
+<pre><code>.themed .ts-transfer {
+    --ts-transfer-bar: #ea580c;
+    --ts-transfer-done: #16a34a;
+    --ts-transfer-height: 8px;
+    --ts-transfer-radius: 2px;
+}</code></pre>
+
+  <h3>Event log</h3>
+  <pre id="log" aria-live="polite"></pre>
+
+  <h2>Installation</h2>
+  <ol>
+    <li>Copy <code>themestrap.plugin.transfer.js</code> to <code>js/components/</code> and include it after <code>themestrap.js</code>.</li>
+    <li>Add the init block to <code>themestrap.init.js</code>. Initialize right away at DOM ready rather than through an IntersectionObserver. Producers call <code>update()</code> whether or not the element has scrolled into view, and an instance that doesn't exist yet would drop those updates. For the same reason, don't list it in <code>themestrap.modules.js</code>.</li>
+  </ol>
+<pre><code>// Transfer
+if (typeof $.fn['themestrapPluginTransfer'] === 'function' &amp;&amp; $('[data-plugin-transfer]').length) {
+    $(() =&gt; {
+        $('[data-plugin-transfer]:not(.manual)').each(function () {
+            const $this = $(this);
+            const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+            $this.themestrapPluginTransfer(opts);
+        });
+    });
+}</code></pre>
+  <p>Elements created later, or marked <code>.manual</code>, are initialized with <code>$('#el').themestrapPluginTransfer({ … })</code>.</p>
+
+  <h2>Options</h2>
+  <div class="table-responsive">
+  <table class="table table-sm align-middle">
+    <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>label</code></td><td><code>''</code></td><td>Heading text. Always inserted as text, never HTML.</td></tr>
+      <tr><td><code>message</code></td><td><code>''</code></td><td>Initial message line.</td></tr>
+      <tr><td><code>total</code></td><td><code>null</code></td><td>Total bytes. <code>null</code> or <code>0</code> means unknown.</td></tr>
+      <tr><td><code>done</code></td><td><code>0</code></td><td>Bytes already done, for a resumed transfer.</td></tr>
+      <tr><td><code>units</code></td><td><code>'iec'</code></td><td><code>'iec'</code> (KiB, MiB, powers of 1024) or <code>'si'</code> (kB, MB, powers of 1000).</td></tr>
+      <tr><td><code>decimals</code></td><td><code>1</code></td><td>Decimals for byte and speed values.</td></tr>
+      <tr><td><code>showPercent</code>, <code>showBytes</code>, <code>showSpeed</code>, <code>showEta</code></td><td><code>true</code></td><td>Toggle each readout.</td></tr>
+      <tr><td><code>cancelable</code></td><td><code>false</code></td><td>Render a cancel button that fires <code>transfer:cancel</code>.</td></tr>
+      <tr><td><code>cancelText</code></td><td><code>'Cancel'</code></td><td>Button text.</td></tr>
+      <tr><td><code>smoothing</code></td><td><code>0.3</code></td><td>Weight of the newest sample in the speed's moving average (0 to 1).</td></tr>
+      <tr><td><code>sampleMs</code></td><td><code>400</code></td><td>Minimum time between speed samples.</td></tr>
+      <tr><td><code>stateText</code></td><td>see source</td><td>Default message per state, e.g. <code>{ paused: 'Paused' }</code>.</td></tr>
+      <tr><td><code>onProgress</code></td><td><code>null</code></td><td><code>function(info)</code>, called after each <code>update()</code>.</td></tr>
+      <tr><td><code>onState</code></td><td><code>null</code></td><td><code>function(state, previous)</code>.</td></tr>
+      <tr><td><code>onCancel</code></td><td><code>null</code></td><td><code>function()</code>. Return <code>false</code> to keep the button enabled.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Methods</h2>
+  <p>Get the instance with <code>$('#el').data('__pluginTransfer')</code>. Every method except <code>getInfo()</code> returns the instance, so calls chain.</p>
+  <div class="table-responsive">
+  <table class="table table-sm align-middle">
+    <thead><tr><th>Method</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>update(done)</code><br><code>update(done, total)</code><br><code>update({ done, total, speed })</code></td><td>Report progress. Without <code>speed</code>, the speed is derived from successive calls. A smaller <code>done</code> (restart, next file) resets the speed sampling. Moves an idle or paused transfer to <code>running</code>.</td></tr>
+      <tr><td><code>setIndeterminate(bool)</code></td><td>Unknown progress, e.g. verifying or waiting on a server. Turned off by the next <code>update()</code> with a known total.</td></tr>
+      <tr><td><code>setState(state, message?)</code></td><td><code>idle</code>, <code>running</code>, <code>paused</code>, <code>done</code>, <code>failed</code> or <code>cancelled</code>. <code>done</code> fills the bar and hides the cancel button. The message defaults to <code>stateText[state]</code>.</td></tr>
+      <tr><td><code>setLabel(text)</code></td><td>Change the heading.</td></tr>
+      <tr><td><code>setMessage(text)</code></td><td>Change the message line. <code>''</code> clears it.</td></tr>
+      <tr><td><code>getInfo()</code></td><td><code>{ done, total, percent, speed, eta, state }</code></td></tr>
+      <tr><td><code>reset()</code></td><td>Back to idle with zero bytes, keeping the options.</td></tr>
+      <tr><td><code>destroy()</code></td><td>Remove handlers and restore the element's original markup and classes.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Static helpers</h3>
+<pre><code>themestrap.PluginTransfer.formatBytes(1536);          // "1.5 KiB"
+themestrap.PluginTransfer.formatBytes(1500, 'si');    // "1.5 kB"
+themestrap.PluginTransfer.formatDuration(97);         // "1m 37s"</code></pre>
+
+  <h2>Events</h2>
+  <div class="table-responsive">
+  <table class="table table-sm align-middle">
+    <thead><tr><th>Event</th><th>Arguments</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><code>transfer:progress</code></td><td><code>instance, info</code></td><td>After each <code>update()</code>.</td></tr>
+      <tr><td><code>transfer:state</code></td><td><code>instance, state, previous</code></td><td>When the state changes.</td></tr>
+      <tr><td><code>transfer:complete</code></td><td><code>instance</code></td><td>State became <code>done</code>.</td></tr>
+      <tr><td><code>transfer:cancel</code></td><td><code>instance</code></td><td>The cancel button was clicked. The plugin only reports the click: your code stops the job and then calls <code>setState('cancelled')</code>.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Theming</h2>
+  <p>The defaults are declared with <code>:where(.ts-transfer)</code>, which has zero specificity. A plain <code>.ts-transfer { … }</code> rule in your theme therefore wins, whatever the load order. When no token is set, colors fall back to Bootstrap's variables, so dark mode with <code>data-bs-theme</code> just works.</p>
+  <div class="table-responsive">
+  <table class="table table-sm align-middle">
+    <thead><tr><th>Token</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>--ts-transfer-bar</code></td><td><code>var(--bs-primary)</code></td></tr>
+      <tr><td><code>--ts-transfer-track</code></td><td><code>rgba(127,127,127,.2)</code></td></tr>
+      <tr><td><code>--ts-transfer-done</code></td><td><code>var(--bs-success)</code></td></tr>
+      <tr><td><code>--ts-transfer-failed</code></td><td><code>var(--bs-danger)</code></td></tr>
+      <tr><td><code>--ts-transfer-paused</code></td><td><code>var(--bs-warning)</code> (also cancelled)</td></tr>
+      <tr><td><code>--ts-transfer-muted</code></td><td><code>var(--bs-secondary-color)</code></td></tr>
+      <tr><td><code>--ts-transfer-height</code>, <code>--ts-transfer-radius</code>, <code>--ts-transfer-gap</code></td><td><code>4px</code>, <code>999px</code>, <code>6px</code></td></tr>
+      <tr><td><code>--ts-transfer-font</code>, <code>--ts-transfer-mono</code></td><td><code>inherit</code>, system monospace</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>State classes on the root: <code>.is-idle</code>, <code>.is-running</code>, <code>.is-paused</code>, <code>.is-done</code>, <code>.is-failed</code>, <code>.is-cancelled</code>, plus <code>.is-indeterminate</code> and <code>.is-unknown</code> (running without a total). <code>prefers-reduced-motion</code> stops the animations.</p>
+
+  <h2>Wiring to a real download</h2>
+<pre><code>const t = $('#dl').themestrapPluginTransfer({ label: file.name, cancelable: true })[0];
+const controller = new AbortController();
+$('#dl').on('transfer:cancel', () =&gt; controller.abort());
+
+const res = await fetch(url, { signal: controller.signal });
+const total = Number(res.headers.get('Content-Length')) || null;
+const reader = res.body.getReader();
+let done = 0;
+try {
+    for (;;) {
+        const { value, done: finished } = await reader.read();
+        if (finished) break;
+        done += value.length;
+        t.update(done, total);
+    }
+    t.setState('done');
+} catch (e) {
+    t.setState(e.name === 'AbortError' ? 'cancelled' : 'failed', e.message);
+}</code></pre>
+
+</div>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.transfer.js"></script>
+<script>
+    // Init exactly as themestrap.init.js would.
+    $('[data-plugin-transfer]:not(.manual)').each(function () {
+        const $this = $(this);
+        const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+        $this.themestrapPluginTransfer(opts);
+    });
+
+    const log = (msg) => {
+        const el = document.getElementById('log');
+        el.textContent += `${new Date().toLocaleTimeString()}  ${msg}\n`;
+        el.scrollTop = el.scrollHeight;
+    };
+    $(document).on('transfer:state', (e, inst, state, prev) => log(`#${e.target.id} state ${prev} > ${state}`));
+    $(document).on('transfer:complete', (e) => log(`#${e.target.id} complete`));
+
+    // Simulated download: speed varies a little so the moving average shows.
+    function simulate(id, step, { stop } = {}) {
+        const t = $(id).data('__pluginTransfer');
+        clearInterval(t._demoTimer);
+        t._demoTimer = setInterval(() => {
+            if (t.state !== 'running' && t.state !== 'idle') { clearInterval(t._demoTimer); return; }
+            const next = t.done + step * (0.6 + Math.random() * 0.8);
+            if (t.total && next >= t.total) {
+                t.update(t.total);
+                clearInterval(t._demoTimer);
+                if (!stop) t.setState('done', 'Checksum OK');
+                return;
+            }
+            t.update(next);
+        }, 120);
+        return t;
+    }
+
+    const dl = () => $('#demo-download').data('__pluginTransfer');
+    $('#dl-start').on('click', () => { if (dl().state !== 'running') simulate('#demo-download', 45e6); });
+    $('#dl-pause').on('click', () => dl().setState('paused'));
+    $('#dl-verify').on('click', () => { clearInterval(dl()._demoTimer); dl().setIndeterminate(true).setMessage('Verifying checksum…'); });
+    $('#dl-done').on('click', () => { clearInterval(dl()._demoTimer); dl().setState('done', 'Checksum OK'); });
+    $('#dl-fail').on('click', () => { clearInterval(dl()._demoTimer); dl().setState('failed', 'Connection reset by peer'); });
+    $('#dl-reset').on('click', () => { clearInterval(dl()._demoTimer); dl().reset(); });
+    $('#demo-download').on('transfer:cancel', (e, t) => {
+        clearInterval(t._demoTimer);
+        log('#demo-download cancel clicked');
+        setTimeout(() => t.setState('cancelled', 'Cancelled, partial file kept'), 300);
+    });
+
+    $('#st-start').on('click', () => simulate('#demo-stream', 3e6));
+    $('#st-done').on('click', () => { const t = $('#demo-stream').data('__pluginTransfer'); clearInterval(t._demoTimer); t.setState('done'); });
+
+    $('#cp-start').on('click', () => {
+        const t = $('#demo-compact').data('__pluginTransfer');
+        t.reset();
+        t.update(0, 100);
+        simulate('#demo-compact', 4);
+    });
+</script>
+</body>
+</html>

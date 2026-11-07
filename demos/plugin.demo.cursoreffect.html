@@ -213,7 +213,7 @@ cursor.destroy();             <span class="hl-cmt">// remove overlay + restore n
 <script>
 $(function () {
   /* Init on page load */
-  if ($.isFunction($.fn['themestrapPluginCursorEffect']) && $('[data-plugin-cursor-effect]').length ) {
+  if (typeof $.fn['themestrapPluginCursorEffect'] === 'function' && $('[data-plugin-cursor-effect]').length ) {
 	themestrap.fn.intObsInit( '[data-plugin-cursor-effect]:not(.manual)', 'themestrapPluginCursorEffect' );
   }
   log('log-active', '// cursor initialized — color:"default" size:"default"');

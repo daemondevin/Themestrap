@@ -80,7 +80,7 @@ $('[data-plugin-code-window]').themestrapPluginCodeWindow({
 });
  
 // Auto-init (wire this block into themestrap.init.js)
-if ($.isFunction($.fn['themestrapPluginCodeWindow']) && $('[data-plugin-code-window]').length) {
+if (typeof $.fn['themestrapPluginCodeWindow'] === 'function' && $('[data-plugin-code-window]').length) {
   themestrap.fn.intObsInit('[data-plugin-code-window]:not(.manual)', 'themestrapPluginCodeWindow');
 }
 ```

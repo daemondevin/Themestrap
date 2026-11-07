@@ -38,7 +38,7 @@
  *   --ts-tp-focus-ring, --ts-tp-shadow
  *
  * Init.js wiring:
- *   if ($.isFunction($.fn['themestrapPluginTimePicker']) && $('[data-plugin-timepicker]').length) {
+ *   if (typeof $.fn['themestrapPluginTimePicker'] === 'function' && $('[data-plugin-timepicker]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-timepicker]:not(.manual)', 'themestrapPluginTimePicker');
  *   }
  */
@@ -55,30 +55,30 @@
 
     const LIGHT = `
         --tp-h:            var(--ts-tp-h, 2.45rem);
-        --tp-bg:           var(--ts-tp-bg, #ffffff);
-        --tp-border:       var(--ts-tp-border, rgba(0,0,0,.18));
-        --tp-border-focus: var(--ts-tp-border-focus, #00a89f);
-        --tp-radius:       var(--ts-tp-radius, 7px);
-        --tp-text:         var(--ts-tp-text, #1f2937);
-        --tp-muted:        var(--ts-tp-muted, rgba(31,41,55,.55));
-        --tp-pop-bg:       var(--ts-tp-pop-bg, #ffffff);
-        --tp-hover:        var(--ts-tp-hover, rgba(0,0,0,.06));
-        --tp-accent:       var(--ts-tp-accent, #00a89f);
-        --tp-accent-text:  var(--ts-tp-accent-text, #04211f);
-        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px rgba(0,168,159,.20));
-        --tp-shadow:       var(--ts-tp-shadow, 0 12px 32px -6px rgba(0,0,0,.22), 0 4px 10px -4px rgba(0,0,0,.12));
+        --tp-bg:           var(--ts-tp-bg, var(--ts-skin-surface, #ffffff));
+        --tp-border:       var(--ts-tp-border, var(--ts-skin-border, rgba(0,0,0,.18)));
+        --tp-border-focus: var(--ts-tp-border-focus, var(--ts-skin-accent, #00a89f));
+        --tp-radius:       var(--ts-tp-radius, var(--ts-skin-radius, 7px));
+        --tp-text:         var(--ts-tp-text, var(--ts-skin-text, #1f2937));
+        --tp-muted:        var(--ts-tp-muted, var(--ts-skin-text-dim, rgba(31,41,55,.55)));
+        --tp-pop-bg:       var(--ts-tp-pop-bg, var(--ts-skin-surface, #ffffff));
+        --tp-hover:        var(--ts-tp-hover, var(--ts-skin-elevated, rgba(0,0,0,.06)));
+        --tp-accent:       var(--ts-tp-accent, var(--ts-skin-accent, #00a89f));
+        --tp-accent-text:  var(--ts-tp-accent-text, var(--ts-skin-on-accent, #04211f));
+        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,168,159,.20)));
+        --tp-shadow:       var(--ts-tp-shadow, var(--ts-skin-shadow, 0 12px 32px -6px rgba(0,0,0,.22), 0 4px 10px -4px rgba(0,0,0,.12)));
     `;
     const DARK = `
-        --tp-bg:           var(--ts-tp-bg, rgba(255,255,255,.03));
-        --tp-border:       var(--ts-tp-border, rgba(255,255,255,.14));
-        --tp-border-focus: var(--ts-tp-border-focus, #00c7be);
-        --tp-text:         var(--ts-tp-text, #d5dfeb);
-        --tp-muted:        var(--ts-tp-muted, rgba(213,223,235,.55));
-        --tp-pop-bg:       var(--ts-tp-pop-bg, #0e2238);
-        --tp-hover:        var(--ts-tp-hover, rgba(255,255,255,.08));
-        --tp-accent:       var(--ts-tp-accent, #00c7be);
-        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px rgba(0,199,190,.22));
-        --tp-shadow:       var(--ts-tp-shadow, 0 12px 32px -6px rgba(0,0,0,.6), 0 4px 10px -4px rgba(0,0,0,.4));
+        --tp-bg:           var(--ts-tp-bg, var(--ts-skin-surface-2, rgba(255,255,255,.03)));
+        --tp-border:       var(--ts-tp-border, var(--ts-skin-border, rgba(255,255,255,.14)));
+        --tp-border-focus: var(--ts-tp-border-focus, var(--ts-skin-accent, #00c7be));
+        --tp-text:         var(--ts-tp-text, var(--ts-skin-text, #d5dfeb));
+        --tp-muted:        var(--ts-tp-muted, var(--ts-skin-text-dim, rgba(213,223,235,.55)));
+        --tp-pop-bg:       var(--ts-tp-pop-bg, var(--ts-skin-surface, #0e2238));
+        --tp-hover:        var(--ts-tp-hover, var(--ts-skin-elevated, rgba(255,255,255,.08)));
+        --tp-accent:       var(--ts-tp-accent, var(--ts-skin-accent, #00c7be));
+        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,199,190,.22)));
+        --tp-shadow:       var(--ts-tp-shadow, var(--ts-skin-shadow, 0 12px 32px -6px rgba(0,0,0,.6), 0 4px 10px -4px rgba(0,0,0,.4)));
     `;
 
     const CSS_TEXT = `

@@ -19,7 +19,7 @@ PluginSort is initialized on the **filter list** (the source). On `build()` it:
 
 1. Injects a small stylesheet once (`<style id="themestrap-sort-styles">`).
 2. Finds the grid (the destination): the `.sort-destination` element with the same `data-sort-id` as the source. Without one it stops.
-3. Equalizes the heights of `span.thumb-info-caption p` paragraphs in the grid, so Porto thumb-info cards line up.
+3. Equalizes the heights of `span.thumb-info-caption p` paragraphs in the grid, so thumb-info cards line up.
 4. Shows a bounce loader if the grid sits inside `.sort-destination-loader`.
 5. Binds the search field, if `filterFieldId` names one.
 6. Waits until every `<img>` in the grid has loaded (or failed), then lays the grid out, binds the filter links and hash handling, and hides the loader. The loader is removed after 3 seconds regardless.

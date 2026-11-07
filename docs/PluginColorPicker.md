@@ -91,7 +91,7 @@ If the `<input>` has no `value`, the plugin reads `data-color` as the starting c
 
 ```js
 // Color Picker
-if ($.isFunction($.fn['themestrapPluginColorPicker']) && $('[data-plugin-color-picker]').length) {
+if (typeof $.fn['themestrapPluginColorPicker'] === 'function' && $('[data-plugin-color-picker]').length) {
     themestrap.fn.intObsInit('[data-plugin-color-picker]:not(.manual)', 'themestrapPluginColorPicker');
 }
 ```

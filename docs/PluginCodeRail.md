@@ -141,7 +141,7 @@ Override these on the root element or in your site CSS:
 ## Auto-init (init.js)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginCodeRail']) && $('[data-plugin-code-rail]').length) {
+if (typeof $.fn['themestrapPluginCodeRail'] === 'function' && $('[data-plugin-code-rail]').length) {
     themestrap.fn.intObsInit('[data-plugin-code-rail]:not(.manual)', 'themestrapPluginCodeRail');
 }
 ```

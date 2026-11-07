@@ -51,7 +51,7 @@
  *   dialog:close  — after close animation ends     (receives instance as arg)
  *
  * Init.js wiring (DOMReady-immediate — dialogs must be ready before any trigger fires):
- *   if ($.isFunction($.fn['themestrapPluginDialog']) && $('[data-plugin-dialog]').length) {
+ *   if (typeof $.fn['themestrapPluginDialog'] === 'function' && $('[data-plugin-dialog]').length) {
  *       $(() => {
  *           $('[data-plugin-dialog]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -113,11 +113,11 @@
  * --ts-dlg-scrollbar   WebKit scrollbar thumb
  */
 :root {
-    --ts-dlg-bg         : #ffffff;
-    --ts-dlg-text-muted : #6b7280;
-    --ts-dlg-shadow     : 0 20px 60px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12);
-    --ts-dlg-backdrop   : rgba(0, 0, 0, 0.6);
-    --ts-dlg-scrollbar  : rgba(0, 0, 0, 0.2);
+    --ts-dlg-bg         : var(--ts-skin-surface, #ffffff);
+    --ts-dlg-text-muted : var(--ts-skin-text-dim, #6b7280);
+    --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12));
+    --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.6));
+    --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.2));
 }
 
 .dialog-root {
@@ -307,34 +307,34 @@ body.ts-scroll-lock {
 /* Dark mode, tier 1: system preference */
 @media (prefers-color-scheme: dark) {
     :root {
-        --ts-dlg-bg         : #1e2939;
-        --ts-dlg-color      : #f3f4f6;
-        --ts-dlg-text-muted : #9ca3af;
-        --ts-dlg-shadow     : 0 20px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3);
-        --ts-dlg-backdrop   : rgba(0, 0, 0, 0.7);
-        --ts-dlg-scrollbar  : rgba(255, 255, 255, 0.15);
+        --ts-dlg-bg         : var(--ts-skin-surface, #1e2939);
+        --ts-dlg-color      : var(--ts-skin-text, #f3f4f6);
+        --ts-dlg-text-muted : var(--ts-skin-text-dim, #9ca3af);
+        --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3));
+        --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.7));
+        --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
     }
 }
 
 /* Dark mode, tier 2: explicit class or attribute (PluginDarkMode sets both on <html>) */
 html.dark,
 [data-bs-theme="dark"] {
-    --ts-dlg-bg         : #1e2939;
-    --ts-dlg-color      : #f3f4f6;
-    --ts-dlg-text-muted : #9ca3af;
-    --ts-dlg-shadow     : 0 20px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3);
-    --ts-dlg-backdrop   : rgba(0, 0, 0, 0.7);
-    --ts-dlg-scrollbar  : rgba(255, 255, 255, 0.15);
+    --ts-dlg-bg         : var(--ts-skin-surface, #1e2939);
+    --ts-dlg-color      : var(--ts-skin-text, #f3f4f6);
+    --ts-dlg-text-muted : var(--ts-skin-text-dim, #9ca3af);
+    --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3));
+    --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.7));
+    --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
 }
 
 /* Dark mode, tier 3: explicit light override on a system that prefers dark */
 [data-bs-theme="light"] {
-    --ts-dlg-bg         : #ffffff;
+    --ts-dlg-bg         : var(--ts-skin-surface, #ffffff);
     --ts-dlg-color      : initial;
-    --ts-dlg-text-muted : #6b7280;
-    --ts-dlg-shadow     : 0 20px 60px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12);
-    --ts-dlg-backdrop   : rgba(0, 0, 0, 0.6);
-    --ts-dlg-scrollbar  : rgba(0, 0, 0, 0.2);
+    --ts-dlg-text-muted : var(--ts-skin-text-dim, #6b7280);
+    --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12));
+    --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.6));
+    --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.2));
 }
 
 /* Prompts built by PluginDialog.confirm() and PluginDialog.alert() */

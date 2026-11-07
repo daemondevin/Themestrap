@@ -8,11 +8,11 @@
 .ts-calendar {
     display: inline-flex;
     flex-direction: column;
-    font-family: var(--font-ui, system-ui, sans-serif);
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 13px;
-    color: var(--text-normal, #c0c0c0);
-    background: var(--bg-raised, #252627);
-    border: 1px solid var(--border-soft, rgba(255,255,255,0.12));
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
+    background: var(--ts-skin-surface, var(--bg-raised, #252627));
+    border: 1px solid var(--ts-skin-border, var(--border-soft, rgba(255,255,255,0.12)));
     border-radius: 8px;
     padding: 14px 12px;
     user-select: none;
@@ -31,7 +31,7 @@
     text-align: center;
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-bright, #f0f0f0);
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
     letter-spacing: 0.03em;
 }
 
@@ -43,22 +43,22 @@
     width: 26px;
     height: 26px;
     padding: 0 0 1px;
-    border: 1px solid var(--border-soft, rgba(255,255,255,0.12));
+    border: 1px solid var(--ts-skin-border, var(--border-soft, rgba(255,255,255,0.12)));
     border-radius: 5px;
     background: transparent;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
     font-size: 18px;
     line-height: 1;
     cursor: pointer;
     transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 .ts-cal-nav:hover {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
-    border-color: var(--border-mid, rgba(255,255,255,0.20));
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
+    border-color: var(--ts-skin-border-strong, var(--border-mid, rgba(255,255,255,0.20)));
 }
 .ts-cal-nav:focus-visible {
-    outline: 2px solid var(--accent-cyan, #5ecfdb);
+    outline: 2px solid var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     outline-offset: 2px;
 }
 
@@ -76,7 +76,7 @@
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
 }
 
 .ts-cal-cell {
@@ -84,7 +84,7 @@
     text-align: center;
 }
 .ts-cal-cell--in-range {
-    background: rgba(94,207,219,0.10);
+    background: var(--ts-cal-accent-soft, var(--ts-skin-accent-soft, rgba(94,207,219,0.10)));
 }
 .ts-cal-cell--range-start {
     background: linear-gradient(to right, transparent 50%, rgba(94,207,219,0.10) 50%);
@@ -105,31 +105,31 @@
     border: none;
     border-radius: 6px;
     background: transparent;
-    color: var(--text-normal, #c0c0c0);
-    font-family: var(--font-ui, system-ui, sans-serif);
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 12.5px;
     cursor: pointer;
     transition: background 0.1s, color 0.1s;
 }
 .ts-cal-day:hover:not([disabled]) {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
 }
 .ts-cal-day:focus-visible {
-    outline: 2px solid var(--accent-cyan, #5ecfdb);
+    outline: 2px solid var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     outline-offset: 1px;
     z-index: 1;
 }
 
 .ts-cal-day--outside {
-    color: var(--text-dim, rgba(255,255,255,0.18));
+    color: var(--ts-skin-text-faint, var(--text-dim, rgba(255,255,255,0.18)));
 }
 .ts-cal-day--outside:hover:not([disabled]) {
-    color: var(--text-muted, rgba(255,255,255,0.40));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.40)));
 }
 
 .ts-cal-day--today {
-    color: var(--accent-cyan, #5ecfdb);
+    color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     font-weight: 600;
 }
 .ts-cal-day--today::after {
@@ -141,46 +141,46 @@
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: var(--accent-cyan, #5ecfdb);
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 
 .ts-cal-day--disabled {
-    color: var(--text-dim, rgba(255,255,255,0.18));
+    color: var(--ts-skin-text-faint, var(--text-dim, rgba(255,255,255,0.18)));
     cursor: not-allowed;
     opacity: 0.45;
     pointer-events: none;
 }
 
 .ts-cal-day--selected {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     font-weight: 600;
 }
 .ts-cal-day--selected:hover {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     opacity: 0.9;
 }
 .ts-cal-day--selected.ts-cal-day--today::after {
-    background: #0d0e0f;
+    background: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
 }
 
 .ts-cal-day--range-start,
 .ts-cal-day--range-end {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     font-weight: 600;
     border-radius: 6px;
 }
 .ts-cal-day--range-start:hover,
 .ts-cal-day--range-end:hover {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     opacity: 0.9;
 }
 .ts-cal-day--range-start.ts-cal-day--today::after,
 .ts-cal-day--range-end.ts-cal-day--today::after {
-    background: #0d0e0f;
+    background: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
 }
 
 .ts-cal-footer {
@@ -188,22 +188,22 @@
     justify-content: center;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid var(--border-dim, rgba(255,255,255,0.06));
+    border-top: 1px solid var(--ts-skin-border, var(--border-dim, rgba(255,255,255,0.06)));
 }
 .ts-cal-today-btn {
     padding: 4px 14px;
-    border: 1px solid var(--border-soft, rgba(255,255,255,0.12));
+    border: 1px solid var(--ts-skin-border, var(--border-soft, rgba(255,255,255,0.12)));
     border-radius: 4px;
     background: transparent;
-    color: var(--text-muted, rgba(255,255,255,0.35));
-    font-family: var(--font-ui, system-ui, sans-serif);
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 11.5px;
     cursor: pointer;
     transition: background 0.12s, color 0.12s;
 }
 .ts-cal-today-btn:hover {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
 }
     `;
 

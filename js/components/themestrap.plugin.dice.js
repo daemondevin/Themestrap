@@ -72,26 +72,26 @@
     };
 
     const LIGHT = `
-        --dc-bg:           var(--ts-dice-bg, #fffdf8);
-        --dc-border:       var(--ts-dice-border, rgba(0,0,0,.16));
-        --dc-pip:          var(--ts-dice-pip, #1b1f24);
-        --dc-pip-one:      var(--ts-dice-pip-one, #c62828);
-        --dc-shadow:       var(--ts-dice-shadow, 0 2px 0 rgba(0,0,0,.12), 0 6px 14px rgba(0,0,0,.10));
-        --dc-selected:     var(--ts-dice-selected, #21a366);
-        --dc-selected-bg:  var(--ts-dice-selected-bg, #e3f7ec);
-        --dc-held-bg:      var(--ts-dice-held-bg, #d9dde3);
-        --dc-ring:         var(--ts-dice-focus-ring, 0 0 0 3px rgba(0,168,159,.35));
+        --dc-bg:           var(--ts-dice-bg, var(--ts-skin-surface, #fffdf8));
+        --dc-border:       var(--ts-dice-border, var(--ts-skin-border, rgba(0,0,0,.16)));
+        --dc-pip:          var(--ts-dice-pip, var(--ts-skin-text-strong, #1b1f24));
+        --dc-pip-one:      var(--ts-dice-pip-one, var(--ts-skin-accent, #c62828));
+        --dc-shadow:       var(--ts-dice-shadow, var(--ts-skin-shadow, 0 2px 0 rgba(0,0,0,.12), 0 6px 14px rgba(0,0,0,.10)));
+        --dc-selected:     var(--ts-dice-selected, var(--ts-skin-accent, #21a366));
+        --dc-selected-bg:  var(--ts-dice-selected-bg, var(--ts-skin-accent-soft, #e3f7ec));
+        --dc-held-bg:      var(--ts-dice-held-bg, var(--ts-skin-surface-2, #d9dde3));
+        --dc-ring:         var(--ts-dice-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,168,159,.35)));
     `;
     const DARK = `
-        --dc-bg:           var(--ts-dice-bg, #f4f1ea);
-        --dc-border:       var(--ts-dice-border, rgba(255,255,255,.22));
-        --dc-pip:          var(--ts-dice-pip, #14181d);
-        --dc-pip-one:      var(--ts-dice-pip-one, #d32f2f);
-        --dc-shadow:       var(--ts-dice-shadow, 0 2px 0 rgba(0,0,0,.45), 0 8px 18px rgba(0,0,0,.35));
-        --dc-selected:     var(--ts-dice-selected, #2fd08a);
-        --dc-selected-bg:  var(--ts-dice-selected-bg, #d4f5e4);
-        --dc-held-bg:      var(--ts-dice-held-bg, #7d8794);
-        --dc-ring:         var(--ts-dice-focus-ring, 0 0 0 3px rgba(0,199,190,.45));
+        --dc-bg:           var(--ts-dice-bg, var(--ts-skin-surface, #f4f1ea));
+        --dc-border:       var(--ts-dice-border, var(--ts-skin-border, rgba(255,255,255,.22)));
+        --dc-pip:          var(--ts-dice-pip, var(--ts-skin-text-strong, #14181d));
+        --dc-pip-one:      var(--ts-dice-pip-one, var(--ts-skin-accent, #d32f2f));
+        --dc-shadow:       var(--ts-dice-shadow, var(--ts-skin-shadow, 0 2px 0 rgba(0,0,0,.45), 0 8px 18px rgba(0,0,0,.35)));
+        --dc-selected:     var(--ts-dice-selected, var(--ts-skin-accent, #2fd08a));
+        --dc-selected-bg:  var(--ts-dice-selected-bg, var(--ts-skin-accent-soft, #d4f5e4));
+        --dc-held-bg:      var(--ts-dice-held-bg, var(--ts-skin-surface-2, #7d8794));
+        --dc-ring:         var(--ts-dice-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,199,190,.45)));
     `;
 
     const pipRules = Object.keys(FACES).map((v) =>

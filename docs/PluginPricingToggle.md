@@ -67,7 +67,7 @@ Price elements can live anywhere on the page — they do not need to be inside t
 ### Auto-init wiring (`themestrap.init.js`)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginPricingToggle']) && $('[data-plugin-pricingtoggle]').length) {
+if (typeof $.fn['themestrapPluginPricingToggle'] === 'function' && $('[data-plugin-pricingtoggle]').length) {
     $(() => {
         $('[data-plugin-pricingtoggle]:not(.manual)').each(function () {
             const $this = $(this);

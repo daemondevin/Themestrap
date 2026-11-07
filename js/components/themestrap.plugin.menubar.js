@@ -92,7 +92,7 @@
  *
  * Init.js wiring:
  *
- *   if ($.isFunction($.fn['themestrapPluginMenubar']) && $('[data-plugin-menubar]').length) {
+ *   if (typeof $.fn['themestrapPluginMenubar'] === 'function' && $('[data-plugin-menubar]').length) {
  *       $(() => {
  *           $('[data-plugin-menubar]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -112,19 +112,19 @@
     const CSS_TEXT = `
 /* Themestrap Menubar */
 [data-plugin-menubar] {
-    --ts-mb-fg:               #0f172a;
-    --ts-mb-muted:            #64748b;
-    --ts-mb-hover-bg:         rgba(0,0,0,.06);
-    --ts-mb-active-bg:        rgba(0,0,0,.09);
-    --ts-mb-focus-ring:       #e8672a;
-    --ts-mb-content-bg:       #ffffff;
-    --ts-mb-content-border:   rgba(0,0,0,.08);
-    --ts-mb-content-shadow:   0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
-    --ts-mb-item-hover-bg:    rgba(0,0,0,.05);
-    --ts-mb-separator:        rgba(0,0,0,.08);
-    --ts-mb-indicator-color:  #0f172a;
-    --ts-mb-radius:           5px;
-    --ts-mb-content-radius:   8px;
+    --ts-mb-fg:               var(--ts-skin-text, #0f172a);
+    --ts-mb-muted:            var(--ts-skin-text-dim, #64748b);
+    --ts-mb-hover-bg:         var(--ts-skin-elevated, rgba(0,0,0,.06));
+    --ts-mb-active-bg:        var(--ts-skin-elevated, rgba(0,0,0,.09));
+    --ts-mb-focus-ring:       var(--ts-skin-ring, #e8672a);
+    --ts-mb-content-bg:       var(--ts-skin-surface, #ffffff);
+    --ts-mb-content-border:   var(--ts-skin-border, rgba(0,0,0,.08));
+    --ts-mb-content-shadow:   var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
+    --ts-mb-item-hover-bg:    var(--ts-skin-elevated, rgba(0,0,0,.05));
+    --ts-mb-separator:        var(--ts-skin-border, rgba(0,0,0,.08));
+    --ts-mb-indicator-color:  var(--ts-skin-text, #0f172a);
+    --ts-mb-radius:           var(--ts-skin-radius, 5px);
+    --ts-mb-content-radius:   var(--ts-skin-radius, 8px);
     --ts-mb-font-size:        .875rem;
     --ts-mb-z:                1050;
 
@@ -348,16 +348,16 @@
 
 html.dark [data-plugin-menubar],
 [data-plugin-menubar].ts-mb-dark {
-    --ts-mb-fg:              #f1f5f9;
-    --ts-mb-muted:           #94a3b8;
-    --ts-mb-hover-bg:        rgba(255,255,255,.07);
-    --ts-mb-active-bg:       rgba(255,255,255,.11);
-    --ts-mb-content-bg:      #1e293b;
-    --ts-mb-content-border:  rgba(255,255,255,.10);
-    --ts-mb-content-shadow:  0 4px 24px rgba(0,0,0,.45), 0 1px 4px rgba(0,0,0,.2);
-    --ts-mb-item-hover-bg:   rgba(255,255,255,.07);
-    --ts-mb-separator:       rgba(255,255,255,.09);
-    --ts-mb-indicator-color: #f1f5f9;
+    --ts-mb-fg:              var(--ts-skin-text, #f1f5f9);
+    --ts-mb-muted:           var(--ts-skin-text-dim, #94a3b8);
+    --ts-mb-hover-bg:        var(--ts-skin-elevated, rgba(255,255,255,.07));
+    --ts-mb-active-bg:       var(--ts-skin-elevated, rgba(255,255,255,.11));
+    --ts-mb-content-bg:      var(--ts-skin-surface, #1e293b);
+    --ts-mb-content-border:  var(--ts-skin-border, rgba(255,255,255,.10));
+    --ts-mb-content-shadow:  var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.45), 0 1px 4px rgba(0,0,0,.2));
+    --ts-mb-item-hover-bg:   var(--ts-skin-elevated, rgba(255,255,255,.07));
+    --ts-mb-separator:       var(--ts-skin-border, rgba(255,255,255,.09));
+    --ts-mb-indicator-color: var(--ts-skin-text, #f1f5f9);
 }
 
 @media (prefers-reduced-motion: reduce) {

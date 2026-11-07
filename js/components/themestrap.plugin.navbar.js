@@ -15,7 +15,7 @@
  *   </nav>
  *
  * Init.js wiring (add to themestrap.init.js):
- *   if ($.isFunction($.fn['themestrapPluginNavbar']) && $('[data-plugin-navbar]').length) {
+ *   if (typeof $.fn['themestrapPluginNavbar'] === 'function' && $('[data-plugin-navbar]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-navbar]:not(.manual)', 'themestrapPluginNavbar');
  *   }
  */
@@ -29,28 +29,28 @@
         style.textContent = `
 :root {
     /* Semantic surface tokens — LIGHT palette defaults */
-    --ts-navbar-bg:                 var(--light, #ffffff);
-    --ts-navbar-border:             var(--light--200, #ececec);
-    --ts-navbar-logo-color:         var(--primary, #0088CC);
-    --ts-navbar-link-color:         var(--primary, #0088CC);
-    --ts-navbar-link-hover:         var(--primary-100, #0077b3);
-    --ts-navbar-link-current:       var(--primary-300, #006699);
-    --ts-navbar-accent:             var(--secondary, #e36159);   
-    --ts-navbar-accent-hover:       var(--secondary-100, #df4c43);
-    --ts-navbar-hover-bg:           var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-    --ts-navbar-menu-bg:            var(--light, #ffffff);
-    --ts-navbar-menu-border:        var(--light--200, #ececec);
-    --ts-navbar-menu-link:          var(--primary, #0088CC);
-    --ts-navbar-menu-link-hover:    var(--primary-100, #0077b3);
-    --ts-navbar-menu-heading:       var(--default, #777);
-    --ts-navbar-toggle-color:       var(--primary, #0088CC);
-    --ts-navbar-shadow:             0 1px 2px var(--dark-rgba-60, rgba(33, 37, 41, 0.6)),
-                                    0 8px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1));;
+    --ts-navbar-bg:                 var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-navbar-border:             var(--ts-skin-border, var(--light--200, #ececec));
+    --ts-navbar-logo-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-hover:         var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-link-current:       var(--ts-skin-accent, var(--primary-300, #006699));
+    --ts-navbar-accent:             var(--ts-skin-accent, var(--secondary, #e36159));   
+    --ts-navbar-accent-hover:       var(--ts-skin-accent-hover, var(--secondary-100, #df4c43));
+    --ts-navbar-hover-bg:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+    --ts-navbar-menu-bg:            var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-navbar-menu-border:        var(--ts-skin-border, var(--light--200, #ececec));
+    --ts-navbar-menu-link:          var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-menu-link-hover:    var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-menu-heading:       var(--ts-skin-text-strong, var(--default, #777));
+    --ts-navbar-toggle-color:       var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-shadow:             var(--ts-skin-shadow, 0 1px 2px var(--dark-rgba-60, rgba(33, 37, 41, 0.6)),
+                                    0 8px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)));;
 
     /* Sizing & motion */
     --ts-navbar-height:        56px;
     --ts-navbar-accent-size:   3px;
-    --ts-navbar-radius:        8px;
+    --ts-navbar-radius:        var(--ts-skin-radius, 8px);
     --ts-navbar-transition:    150ms ease;
     --ts-navbar-sticky-top:    0px;
     --ts-navbar-z:             1020;
@@ -58,21 +58,21 @@
 
 html.dark .ts-navbar,
 .ts-navbar[data-ts-navbar-palette="dark"] {
-    --ts-navbar-bg:                 var(--dark, #212529);
-    --ts-navbar-border:             var(--dark--200, #101214);
-    --ts-navbar-logo-color:         var(--primary, #0088CC);
-    --ts-navbar-link-color:         var(--primary, #0088CC);
-    --ts-navbar-link-hover:         var(--primary-100, #0077b3);
-    --ts-navbar-link-current:       var(--primary-300, #006699);
-    --ts-navbar-hover-bg:           var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-    --ts-navbar-menu-bg:            var(--dark, #212529);
-    --ts-navbar-menu-border:        var(--dark--200, #101214);
-    --ts-navbar-menu-link:          var(--primary, #0088CC);
-    --ts-navbar-menu-link-hover:    var(--primary-100, #0077b3);
-    --ts-navbar-menu-heading:       var(--default, #777);
-    --ts-navbar-toggle-color:       var(--primary, #0088CC);
-    --ts-navbar-shadow:             0 1px 2px rgba(0,0,0,.3),
-                                    0 8px 24px rgba(0,0,0,.35);
+    --ts-navbar-bg:                 var(--ts-skin-surface, var(--dark, #212529));
+    --ts-navbar-border:             var(--ts-skin-border, var(--dark--200, #101214));
+    --ts-navbar-logo-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-hover:         var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-link-current:       var(--ts-skin-accent, var(--primary-300, #006699));
+    --ts-navbar-hover-bg:           var(--ts-skin-elevated, var(--dark-rgba-10, rgba(33, 37, 41, 0.1)));
+    --ts-navbar-menu-bg:            var(--ts-skin-surface, var(--dark, #212529));
+    --ts-navbar-menu-border:        var(--ts-skin-border, var(--dark--200, #101214));
+    --ts-navbar-menu-link:          var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-menu-link-hover:    var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-menu-heading:       var(--ts-skin-text-strong, var(--default, #777));
+    --ts-navbar-toggle-color:       var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-shadow:             var(--ts-skin-shadow, 0 1px 2px rgba(0,0,0,.3),
+                                    0 8px 24px rgba(0,0,0,.35));
 }
 
 .ts-navbar {
@@ -362,12 +362,12 @@ html.dark .ts-navbar,
 .ts-navbar__btn--primary {
     background: var(--ts-navbar-accent);
     border-color: var(--ts-navbar-accent);
-    color: #fff;
+    color: var(--ts-skin-on-accent, #fff);
 }
 .ts-navbar__btn--primary:hover {
     background: var(--ts-navbar-accent-hover);
     border-color: var(--ts-navbar-accent-hover);
-    color: #fff;
+    color: var(--ts-skin-on-accent, #fff);
 }
 .ts-navbar__btn--ghost {
     background: transparent;

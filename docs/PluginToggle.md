@@ -9,7 +9,7 @@ A list of rows that open and close with a jQuery slide. Each row has a title and
 **Instance key:** `__toggle`  
 **Init strategy:** `intObsInit` via `themestrap.init.js`
 
-> PluginToggle is the original Porto-era component. For new work, PluginAccordion (one open at a time, ARIA, keyboard, events) and PluginCollapsible (a single disclosure) are the fuller options. PluginToggle stays for existing markup and for the preview-paragraph style.
+> PluginToggle is the original earlier component. For new work, PluginAccordion (one open at a time, ARIA, keyboard, events) and PluginCollapsible (a single disclosure) are the fuller options. PluginToggle stays for existing markup and for the preview-paragraph style.
 
 
 
@@ -25,7 +25,7 @@ A click toggles `.active` on the row, then:
 - **Opening:** the preview paragraph (a direct `<p>` child, if any) animates to its natural height and gets `.preview-active`, and `.toggle-content` slides down.
 - **Closing:** the preview animates to height 0 and loses `.preview-active`, and `.toggle-content` slides up.
 
-In accordion mode, when a row opens, the plugin looks for the open row inside the nearest `.toggle` ancestors of the clicked title, which is why **the wrapper itself must carry the `.toggle` class** for accordion mode (Porto's original markup does this). It then waits for its slide to finish and then triggers a click on the title of the row that was open before, closing it. Clicking the already open row does nothing, so one row always stays open once any has been opened. Accordion mode also halves `duration` for the clicks.
+In accordion mode, when a row opens, the plugin looks for the open row inside the nearest `.toggle` ancestors of the clicked title, which is why **the wrapper itself must carry the `.toggle` class** for accordion mode. It then waits for its slide to finish and then triggers a click on the title of the row that was open before, closing it. Clicking the already open row does nothing, so one row always stays open once any has been opened. Accordion mode also halves `duration` for the clicks.
 
 **The plugin injects no CSS.** The `.toggle` styles come from `themestrap-elements.css`, including dark-mode rules in `themestrap.css`. The demo page carries a compact stand-alone set.
 

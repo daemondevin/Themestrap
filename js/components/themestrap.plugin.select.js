@@ -12,65 +12,65 @@
     const CSS = `
         .ts-select {
             --ts-select-h:                2.25rem;
-            --ts-select-trigger-bg:       var(--bs-body-bg, #fff);
-            --ts-select-trigger-border:   var(--bs-border-color, #dee2e6);
-            --ts-select-trigger-radius:   0.375rem;
-            --ts-select-trigger-color:    var(--bs-body-color, #212529);
-            --ts-select-trigger-muted:    var(--bs-secondary-color, #6c757d);
-            --ts-select-trigger-dim-bg:   var(--bs-secondary-bg, #e9ecef);
-            --ts-select-focus-ring:       0 0 0 0.25rem rgba(13,110,253,.25);
-            --ts-select-focus-border:     #86b7fe;
-            --ts-select-content-bg:       var(--bs-body-bg, #fff);
-            --ts-select-content-border:   var(--bs-border-color, #dee2e6);
-            --ts-select-content-radius:   0.5rem;
-            --ts-select-content-shadow:   0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
+            --ts-select-trigger-bg:       var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-trigger-border:   var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-trigger-radius:   var(--ts-skin-radius, 0.375rem);
+            --ts-select-trigger-color:    var(--ts-skin-text, var(--bs-body-color, #212529));
+            --ts-select-trigger-muted:    var(--ts-skin-text-dim, var(--bs-secondary-color, #6c757d));
+            --ts-select-trigger-dim-bg:   var(--ts-skin-surface, var(--bs-secondary-bg, #e9ecef));
+            --ts-select-focus-ring:       0 0 0 0.25rem var(--ts-skin-ring, rgba(13,110,253,.25));
+            --ts-select-focus-border:     var(--ts-skin-accent, #86b7fe);
+            --ts-select-content-bg:       var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-content-border:   var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-content-radius:   var(--ts-skin-radius, 0.5rem);
+            --ts-select-content-shadow:   var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06));
             --ts-select-content-z:        1050;
             --ts-select-item-h:           2rem;
-            --ts-select-item-radius:      0.25rem;
-            --ts-select-item-color:       var(--bs-body-color, #212529);
-            --ts-select-item-hover-bg:    var(--bs-tertiary-bg, #f8f9fa);
-            --ts-select-separator-bg:     var(--bs-border-color, #dee2e6);
+            --ts-select-item-radius:      var(--ts-skin-radius-sm, 0.25rem);
+            --ts-select-item-color:       var(--ts-skin-text, var(--bs-body-color, #212529));
+            --ts-select-item-hover-bg:    var(--ts-skin-elevated, var(--bs-tertiary-bg, #f8f9fa));
+            --ts-select-separator-bg:     var(--ts-skin-border, var(--bs-border-color, #dee2e6));
             position: relative;
             display: block;
         }
 
         @media (prefers-color-scheme: dark) {
             .ts-select {
-                --ts-select-trigger-bg:      var(--bs-body-bg, #212529);
-                --ts-select-trigger-border:  var(--bs-border-color, #495057);
-                --ts-select-trigger-color:   var(--bs-body-color, #dee2e6);
-                --ts-select-trigger-muted:   var(--bs-secondary-color, #adb5bd);
-                --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #343a40);
-                --ts-select-content-bg:      var(--bs-body-bg, #1a1d20);
-                --ts-select-content-border:  var(--bs-border-color, #495057);
-                --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3);
-                --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #2b2f33);
+                --ts-select-trigger-bg:      var(--ts-skin-surface, var(--bs-body-bg, #212529));
+                --ts-select-trigger-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+                --ts-select-trigger-color:   var(--ts-skin-text, var(--bs-body-color, #dee2e6));
+                --ts-select-trigger-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color, #adb5bd));
+                --ts-select-trigger-dim-bg:  var(--ts-skin-surface, var(--bs-secondary-bg, #343a40));
+                --ts-select-content-bg:      var(--ts-skin-surface, var(--bs-body-bg, #1a1d20));
+                --ts-select-content-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+                --ts-select-content-shadow:  var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3));
+                --ts-select-item-hover-bg:   var(--ts-skin-elevated, var(--bs-tertiary-bg, #2b2f33));
             }
         }
 
         html.dark .ts-select,
         [data-bs-theme="dark"] .ts-select {
-            --ts-select-trigger-bg:      var(--bs-body-bg, #212529);
-            --ts-select-trigger-border:  var(--bs-border-color, #495057);
-            --ts-select-trigger-color:   var(--bs-body-color, #dee2e6);
-            --ts-select-trigger-muted:   var(--bs-secondary-color, #adb5bd);
-            --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #343a40);
-            --ts-select-content-bg:      var(--bs-body-bg, #1a1d20);
-            --ts-select-content-border:  var(--bs-border-color, #495057);
-            --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3);
-            --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #2b2f33);
+            --ts-select-trigger-bg:      var(--ts-skin-surface, var(--bs-body-bg, #212529));
+            --ts-select-trigger-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+            --ts-select-trigger-color:   var(--ts-skin-text, var(--bs-body-color, #dee2e6));
+            --ts-select-trigger-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color, #adb5bd));
+            --ts-select-trigger-dim-bg:  var(--ts-skin-surface, var(--bs-secondary-bg, #343a40));
+            --ts-select-content-bg:      var(--ts-skin-surface, var(--bs-body-bg, #1a1d20));
+            --ts-select-content-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+            --ts-select-content-shadow:  var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3));
+            --ts-select-item-hover-bg:   var(--ts-skin-elevated, var(--bs-tertiary-bg, #2b2f33));
         }
 
         [data-bs-theme="light"] .ts-select {
-            --ts-select-trigger-bg:      var(--bs-body-bg, #fff);
-            --ts-select-trigger-border:  var(--bs-border-color, #dee2e6);
-            --ts-select-trigger-color:   var(--bs-body-color, #212529);
-            --ts-select-trigger-muted:   var(--bs-secondary-color, #6c757d);
-            --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #e9ecef);
-            --ts-select-content-bg:      var(--bs-body-bg, #fff);
-            --ts-select-content-border:  var(--bs-border-color, #dee2e6);
-            --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
-            --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #f8f9fa);
+            --ts-select-trigger-bg:      var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-trigger-border:  var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-trigger-color:   var(--ts-skin-text, var(--bs-body-color, #212529));
+            --ts-select-trigger-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color, #6c757d));
+            --ts-select-trigger-dim-bg:  var(--ts-skin-surface, var(--bs-secondary-bg, #e9ecef));
+            --ts-select-content-bg:      var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-content-border:  var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-content-shadow:  var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06));
+            --ts-select-item-hover-bg:   var(--ts-skin-elevated, var(--bs-tertiary-bg, #f8f9fa));
         }
 
         /* hide the native select — stays in DOM for form submission */

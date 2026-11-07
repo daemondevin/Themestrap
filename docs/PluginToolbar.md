@@ -296,7 +296,7 @@ The plugin injects its `<style id="ts-toolbar-styles">` tag lazily on first `bui
 Add to `themestrap.init.js` for page-wide auto-initialization:
 
 ```js
-if ($.isFunction($.fn['themestrapPluginToolbar']) && $('[data-plugin-toolbar]').length) {
+if (typeof $.fn['themestrapPluginToolbar'] === 'function' && $('[data-plugin-toolbar]').length) {
     themestrap.fn.intObsInit('[data-plugin-toolbar]:not(.manual)', 'themestrapPluginToolbar');
 }
 ```

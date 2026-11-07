@@ -34,7 +34,7 @@ $('#my-otp').themestrapPluginOtp({ length: 6 });
 ### Auto-init wiring (`themestrap.init.js`)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginOtp']) && $('[data-plugin-otp]').length) {
+if (typeof $.fn['themestrapPluginOtp'] === 'function' && $('[data-plugin-otp]').length) {
     $(() => {
         $('[data-plugin-otp]:not(.manual)').each(function () {
             const $this = $(this);

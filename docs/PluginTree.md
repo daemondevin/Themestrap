@@ -68,7 +68,7 @@ const tree = $('#my-tree').themestrapPluginTree()[0];
 
 ```js
 // Tree
-if ($.isFunction($.fn['themestrapPluginTree']) && $('[data-plugin-tree]').length) {
+if (typeof $.fn['themestrapPluginTree'] === 'function' && $('[data-plugin-tree]').length) {
     themestrap.fn.intObsInit('[data-plugin-tree]:not(.manual)', 'themestrapPluginTree');
 }
 ```
@@ -533,7 +533,7 @@ Add this block to `themestrap.init.js` to enable automatic initialization for an
 
 ```js
 // Tree
-if ($.isFunction($.fn['themestrapPluginTree']) && $('[data-plugin-tree]').length) {
+if (typeof $.fn['themestrapPluginTree'] === 'function' && $('[data-plugin-tree]').length) {
     themestrap.fn.intObsInit('[data-plugin-tree]:not(.manual)', 'themestrapPluginTree');
 }
 ```

@@ -6,35 +6,35 @@
 
     const CSS_TEXT = `/* Themestrap — PluginToolbar */
 .ts-toolbar {
-    --ts-tb-bg:            #f4f6f8;
-    --ts-tb-border:        rgba(0,0,0,.1);
-    --ts-tb-shadow:        0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --ts-tb-bg:            var(--ts-skin-surface, #f4f6f8);
+    --ts-tb-border:        var(--ts-skin-border, rgba(0,0,0,.1));
+    --ts-tb-shadow:        var(--ts-skin-shadow, 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05));
     --ts-tb-pad:           4px;
     --ts-tb-gap:           2px;
-    --ts-tb-radius:        8px;
+    --ts-tb-radius:        var(--ts-skin-radius, 8px);
 
     --ts-tb-item-h:        34px;
     --ts-tb-item-px:       10px;
-    --ts-tb-item-radius:   5px;
-    --ts-tb-item-fg:       #374151;
-    --ts-tb-item-hover-bg: rgba(0,0,0,.06);
-    --ts-tb-item-hover-fg: #111827;
-    --ts-tb-item-active-bg: rgba(0,0,0,.09);
-    --ts-tb-item-font:     0.875rem;
+    --ts-tb-item-radius:   var(--ts-skin-radius, 5px);
+    --ts-tb-item-fg:       var(--ts-skin-text, #374151);
+    --ts-tb-item-hover-bg: var(--ts-skin-elevated, rgba(0,0,0,.06));
+    --ts-tb-item-hover-fg: var(--ts-skin-text-strong, #111827);
+    --ts-tb-item-active-bg: var(--ts-skin-elevated, rgba(0,0,0,.09));
+    --ts-tb-item-font:     var(--ts-skin-font, 0.875rem);
 
-    --ts-tb-on-bg:         #e8672a;
-    --ts-tb-on-fg:         #fff;
-    --ts-tb-on-hover-bg:   #d2541b;
+    --ts-tb-on-bg:         var(--ts-skin-accent, #e8672a);
+    --ts-tb-on-fg:         var(--ts-skin-on-accent, #fff);
+    --ts-tb-on-hover-bg:   var(--ts-skin-accent-hover, #d2541b);
 
-    --ts-tb-focus-ring:    #e8672a;
+    --ts-tb-focus-ring:    var(--ts-skin-ring, #e8672a);
     --ts-tb-focus-offset:  2px;
 
-    --ts-tb-sep-color:     rgba(0,0,0,.12);
+    --ts-tb-sep-color:     var(--ts-skin-border, rgba(0,0,0,.12));
     --ts-tb-sep-size:      1px;
     --ts-tb-sep-margin:    4px;
 
-    --ts-tb-group-bg:      rgba(0,0,0,.05);
-    --ts-tb-group-radius:  6px;
+    --ts-tb-group-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.05));
+    --ts-tb-group-radius:  var(--ts-skin-radius, 6px);
     --ts-tb-group-gap:     1px;
 
     --ts-tb-disabled-opacity: .4;
@@ -43,19 +43,19 @@
 /* Dark theme — forced via class or auto via html.dark */
 .ts-toolbar--dark,
 html.dark .ts-toolbar:not(.ts-toolbar--light) {
-    --ts-tb-bg:            #0e2238;
-    --ts-tb-border:        rgba(255,255,255,.08);
-    --ts-tb-shadow:        0 2px 8px rgba(0,0,0,.45);
-    --ts-tb-item-fg:       rgba(255,255,255,.72);
-    --ts-tb-item-hover-bg: rgba(255,255,255,.08);
-    --ts-tb-item-hover-fg: #fff;
-    --ts-tb-item-active-bg: rgba(255,255,255,.12);
-    --ts-tb-on-bg:         #2ab8c8;
-    --ts-tb-on-fg:         #0a1929;
-    --ts-tb-on-hover-bg:   #1e9aaa;
-    --ts-tb-focus-ring:    #2ab8c8;
-    --ts-tb-sep-color:     rgba(255,255,255,.1);
-    --ts-tb-group-bg:      rgba(255,255,255,.06);
+    --ts-tb-bg:            var(--ts-skin-surface, #0e2238);
+    --ts-tb-border:        var(--ts-skin-border, rgba(255,255,255,.08));
+    --ts-tb-shadow:        var(--ts-skin-shadow, 0 2px 8px rgba(0,0,0,.45));
+    --ts-tb-item-fg:       var(--ts-skin-text, rgba(255,255,255,.72));
+    --ts-tb-item-hover-bg: var(--ts-skin-elevated, rgba(255,255,255,.08));
+    --ts-tb-item-hover-fg: var(--ts-skin-text-strong, #fff);
+    --ts-tb-item-active-bg: var(--ts-skin-elevated, rgba(255,255,255,.12));
+    --ts-tb-on-bg:         var(--ts-skin-accent, #2ab8c8);
+    --ts-tb-on-fg:         var(--ts-skin-text-strong, #0a1929);
+    --ts-tb-on-hover-bg:   var(--ts-skin-accent-hover, #1e9aaa);
+    --ts-tb-focus-ring:    var(--ts-skin-ring, #2ab8c8);
+    --ts-tb-sep-color:     var(--ts-skin-border, rgba(255,255,255,.1));
+    --ts-tb-group-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.06));
 }
 
 /* Root */
@@ -229,14 +229,14 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 .ts-toolbar--sm {
     --ts-tb-item-h   : 28px;
     --ts-tb-item-px  : 8px;
-    --ts-tb-item-font: 0.8125rem;
+    --ts-tb-item-font: var(--ts-skin-font, 0.8125rem);
     --ts-tb-pad      : 3px;
 }
 
 .ts-toolbar--lg {
     --ts-tb-item-h   : 40px;
     --ts-tb-item-px  : 14px;
-    --ts-tb-item-font: 0.9375rem;
+    --ts-tb-item-font: var(--ts-skin-font, 0.9375rem);
     --ts-tb-pad      : 5px;
 }
 
@@ -508,7 +508,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 /* jQuery event for backward compatibility */
                 $el.trigger('toolbar:toggle', [value, pressed, $item, $group, self]);
 
-                if ($.isFunction(o.onToggle)) {
+                if (typeof o.onToggle === 'function') {
                     o.onToggle.call(self, value, pressed, $group[0]);
                 }
             });
@@ -526,7 +526,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
                 $el.trigger('toolbar:button', [value, $btn, self]);
 
-                if ($.isFunction(o.onButton)) {
+                if (typeof o.onButton === 'function') {
                     o.onButton.call(self, value, $btn[0]);
                 }
             });
@@ -544,7 +544,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
                 $el.trigger('toolbar:link', [value, $link, self]);
 
-                if ($.isFunction(o.onLink)) {
+                if (typeof o.onLink === 'function') {
                     o.onLink.call(self, value, $link[0]);
                 }
             });
@@ -724,7 +724,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     const args = Array.prototype.slice.call(arguments, 1);
                     instance[opts].apply(instance, args);
                 }

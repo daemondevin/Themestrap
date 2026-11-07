@@ -33,10 +33,10 @@
 .ts-scroller {
     --ts-scroller-size:        8px;
     --ts-scroller-gutter:      2px;
-    --ts-scroller-radius:      8px;
+    --ts-scroller-radius:      var(--ts-skin-radius, 8px);
     --ts-scroller-track:       transparent;
-    --ts-scroller-thumb:       rgba(10, 25, 41, 0.28);
-    --ts-scroller-thumb-hover: rgba(10, 25, 41, 0.5);
+    --ts-scroller-thumb:       var(--ts-skin-border-strong, rgba(10, 25, 41, 0.28));
+    --ts-scroller-thumb-hover: var(--ts-skin-text-faint, rgba(10, 25, 41, 0.5));
     position: relative;
     overflow: hidden;
 }

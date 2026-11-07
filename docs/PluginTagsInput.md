@@ -55,7 +55,7 @@ It must load after `themestrap.js` (or any script that defines `window.themestra
 
 ```js
 // TagsInput
-if ($.isFunction($.fn['themestrapPluginTagsInput']) && $('[data-plugin-tagsinput]').length) {
+if (typeof $.fn['themestrapPluginTagsInput'] === 'function' && $('[data-plugin-tagsinput]').length) {
     themestrap.fn.intObsInit('[data-plugin-tagsinput]:not(.manual)', 'themestrapPluginTagsInput');
 }
 ```

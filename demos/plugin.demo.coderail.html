@@ -34,7 +34,7 @@ pre.snip .kw { color: #c678dd; } pre.snip .fn { color: #61afef; } pre.snip .str 
 <script src="../js/themestrap.js"></script>
 <script src="../js/components/themestrap.plugin.coderail.js"></script>
 <script>
-  if ($.isFunction($.fn['themestrapPluginCodeRail']) && $('[data-plugin-code-rail]').length) {
+  if (typeof $.fn['themestrapPluginCodeRail'] === 'function' && $('[data-plugin-code-rail]').length) {
     themestrap.fn.intObsInit('[data-plugin-code-rail]:not(.manual)', 'themestrapPluginCodeRail');
 }
 </script>

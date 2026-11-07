@@ -52,7 +52,7 @@
  *   cr.destroy();          // restore original markup
  *
  *   // Code Rail (init.js wiring)
- *   if ($.isFunction($.fn['themestrapPluginCodeRail']) && $('[data-plugin-code-rail]').length) {
+ *   if (typeof $.fn['themestrapPluginCodeRail'] === 'function' && $('[data-plugin-code-rail]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-code-rail]:not(.manual)', 'themestrapPluginCodeRail');
  *   }
  */

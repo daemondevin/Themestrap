@@ -644,7 +644,7 @@ themestrap.js — add inside the file, after the last existing plugin block
  *
  * Init.js wiring 
  *
- *   if ($.isFunction($.fn['themestrapPluginMyPlugin']) && $('[data-plugin-my-plugin]').length) {
+ *   if (typeof $.fn['themestrapPluginMyPlugin'] === 'function' && $('[data-plugin-my-plugin]').length) {
  *       themestrap.fn.dynIntObsInit('[data-plugin-my-plugin]:not(.manual)', 'themestrapPluginMyPlugin', themestrap.PluginMyPlugin.defaults);
  *   }
  */
@@ -782,7 +782,7 @@ themestrap.init.js — choose the appropriate strategy
 
 ```
 // Option A: intObsInit (simple, no defaults merge) 
-if ($.isFunction($.fn['themestrapPluginMyPlugin'])
+if (typeof $.fn['themestrapPluginMyPlugin'] === 'function'
         && $('[data-plugin-my-plugin]').length) {
     themestrap.fn.intObsInit(
         '[data-plugin-my-plugin]:not(.manual)',
@@ -791,7 +791,7 @@ if ($.isFunction($.fn['themestrapPluginMyPlugin'])
 }
 
 // Option B: dynIntObsInit (defaults merge, accY/forceInit support) 
-if ($.isFunction($.fn['themestrapPluginMyPlugin'])
+if (typeof $.fn['themestrapPluginMyPlugin'] === 'function'
         && $('[data-plugin-my-plugin]').length) {
     themestrap.fn.dynIntObsInit(
         '[data-plugin-my-plugin]:not(.manual)',
@@ -801,7 +801,7 @@ if ($.isFunction($.fn['themestrapPluginMyPlugin'])
 }
 
 // Option C: DOMReady (must run immediately, no observer)
-if ($.isFunction($.fn['themestrapPluginMyPlugin'])
+if (typeof $.fn['themestrapPluginMyPlugin'] === 'function'
         && $('[data-plugin-my-plugin]').length) {
     $(() => {
         $('[data-plugin-my-plugin]:not(.manual)').each(function() {
@@ -813,7 +813,7 @@ if ($.isFunction($.fn['themestrapPluginMyPlugin'])
 }
 
 // Option D: event-lazy (init on first interaction) 
-if ($.isFunction($.fn['themestrapPluginMyPlugin'])
+if (typeof $.fn['themestrapPluginMyPlugin'] === 'function'
         && $('[data-plugin-my-plugin]').length) {
     themestrap.fn.execOnceTroughEvent(
         '[data-plugin-my-plugin]:not(.manual)',
@@ -828,7 +828,7 @@ if ($.isFunction($.fn['themestrapPluginMyPlugin'])
 ```
 
 > [!TIP]
-> **Always guard with `$.isFunction($.fn[…])`.**<br>
+> **Always guard with `typeof $.fn[…] === 'function'`.**<br>
 > Plugin files are loaded conditionally depending on the page. The guard prevents init.js from crashing on pages that don't include the plugin's script file.
 
 ## [Extending Existing Plugins](#extending)
@@ -948,7 +948,7 @@ If your `destroy()` implementation calls `self.$el.removeData(instanceName)`, th
 
 > - Is `themestrap.js` loading *before* `themestrap.init.js`?
 > - Is the plugin's script file included on this page?
-> - Does the `$.isFunction($.fn['themestrapPlugin…'])` guard in init.js pass?
+> - Does the `typeof $.fn['themestrapPlugin…'] === 'function'` guard in init.js pass?
 > - Does the element match the selector (including any `:not(.manual)`)?
 > - Has `setData()` been called before any early-return in the chain?
 > - Is the third arg to `dynIntObsInit` the live static `themestrap.PluginFoo.defaults`?

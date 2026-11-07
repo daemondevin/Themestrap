@@ -48,7 +48,7 @@
  *
  * Init.js wiring 
  *
- *   if ($.isFunction($.fn['themestrapPluginMyPlugin']) && $('[data-plugin-my-plugin]').length) {
+ *   if (typeof $.fn['themestrapPluginMyPlugin'] === 'function' && $('[data-plugin-my-plugin]').length) {
  *       themestrap.fn.dynIntObsInit('[data-plugin-my-plugin]:not(.manual)', 'themestrapPluginMyPlugin', themestrap.PluginMyPlugin.defaults);
  *   }
  */

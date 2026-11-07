@@ -54,7 +54,7 @@
 			build() {
 				const self = this;
 
-				if (!($.isFunction($.validator))) {
+				if (!(typeof $.validator === 'function')) {
 					return this;
 				}
 

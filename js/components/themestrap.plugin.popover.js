@@ -61,7 +61,7 @@
  *
  * Init.js wiring
  *
- *   if ($.isFunction($.fn['themestrapPluginPopover']) && $('[data-plugin-popover]').length) {
+ *   if (typeof $.fn['themestrapPluginPopover'] === 'function' && $('[data-plugin-popover]').length) {
  *       $(() => {
  *           $('[data-plugin-popover]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -104,15 +104,15 @@
     z-index: 9995;
     min-width: 14rem;
     max-width: 22rem;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--ts-pop-surface, var(--ts-skin-surface, #fff));
+    border: 1px solid var(--ts-pop-border, var(--ts-skin-border, rgba(0, 0, 0, 0.08)));
     border-radius: 0.5rem;
     box-shadow:
-        0 4px  6px -1px rgba(0, 0, 0, 0.07),
-        0 10px 15px -3px rgba(0, 0, 0, 0.10);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0, 0, 0, 0.07),
+        0 10px 15px -3px rgba(0, 0, 0, 0.10));
     padding: 1rem;
     line-height: 1.5;
-    color: #1a1a2e;
+    color: var(--ts-pop-text, var(--ts-skin-text, #1a1a2e));
 
     /* Hidden by default */
     display: none;
@@ -150,20 +150,20 @@
 }
 
 /* Bottom arrow (popover is above trigger) */
-[data-popover-content].ts-pop-side-top::after  { top: 100%; border-top-color: #fff; }
-[data-popover-content].ts-pop-side-top::before { top: calc(100% + 1px); border-top-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-top::after  { top: 100%; border-top-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-top::before { top: calc(100% + 1px); border-top-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Top arrow (popover is below trigger) */
-[data-popover-content].ts-pop-side-bottom::after  { bottom: 100%; border-bottom-color: #fff; }
-[data-popover-content].ts-pop-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-bottom::after  { bottom: 100%; border-bottom-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Right arrow (popover is left of trigger) */
-[data-popover-content].ts-pop-side-left::after  { left: 100%; border-left-color: #fff; }
-[data-popover-content].ts-pop-side-left::before { left: calc(100% + 1px); border-left-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-left::after  { left: 100%; border-left-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-left::before { left: calc(100% + 1px); border-left-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Left arrow (popover is right of trigger) */
-[data-popover-content].ts-pop-side-right::after  { right: 100%; border-right-color: #fff; }
-[data-popover-content].ts-pop-side-right::before { right: calc(100% + 1px); border-right-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-right::after  { right: 100%; border-right-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-right::before { right: calc(100% + 1px); border-right-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Animations */
 @keyframes tsPopIn {
@@ -218,14 +218,14 @@
 [data-popover-content].ts-pop-side-right.ts-pop-in  { animation-name: tsPopInRight; }
 [data-popover-content].ts-pop-side-right.ts-pop-out { animation-name: tsPopOutRight; }
 
-/* Dark mode — uses Porto/Themestrap CSS custom properties set by html.dark */
+/* Dark mode — uses Themestrap CSS custom properties set by html.dark */
 html.dark [data-popover-content] {
     background: var(--dark-300);
     color: var(--default);
     border-color: var(--dark-rgba-50);
     box-shadow:
-        0 4px  6px -1px rgba(0, 0, 0, 0.3),
-        0 10px 15px -3px rgba(0, 0, 0, 0.4);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0, 0, 0, 0.3),
+        0 10px 15px -3px rgba(0, 0, 0, 0.4));
 }
 
 html.dark [data-popover-content].ts-pop-side-top::after    { border-top-color: var(--dark-300); }

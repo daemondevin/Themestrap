@@ -22,7 +22,7 @@ Add the following block to `themestrap.init.js` alongside the other plugin wirin
 
 ```js
 // Scrollbar
-if ($.isFunction($.fn['themestrapPluginScrollbar']) && $('[data-plugin-scrollbar]').length) {
+if (typeof $.fn['themestrapPluginScrollbar'] === 'function' && $('[data-plugin-scrollbar]').length) {
     themestrap.fn.dynIntObsInit(
         '[data-plugin-scrollbar]:not(.manual)',
         'themestrapPluginScrollbar',

@@ -540,7 +540,7 @@ for plaintext — line numbers and copy still work.</code></pre>
         </div>
 
         <pre class="snip"><span class="cm">/* Auto-init (via themestrap.init.js) */</span>
-<span class="kw">if</span> ($.isFunction($.fn[<span class="str">'themestrapPluginHighlight'</span>]) &amp;&amp; $(<span class="str">'[data-plugin-highlight]'</span>).length) {
+<span class="kw">if</span> (typeof $.fn[<span class="str">'themestrapPluginHighlight'</span>] === 'function' &amp;&amp; $(<span class="str">'[data-plugin-highlight]'</span>).length) {
     themestrap.fn.<span class="fn">intObsInit</span>(<span class="str">'[data-plugin-highlight]:not(.manual)'</span>, <span class="str">'themestrapPluginHighlight'</span>);
 }
 

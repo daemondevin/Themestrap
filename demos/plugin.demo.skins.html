@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Skins | Themestrap demo</title>
+
+    <!-- Apply the saved theme and skin before anything paints -->
+    <script>
+        (function () {
+            try {
+                var s = localStorage.getItem('themestrap-theme'),
+                    d = matchMedia('(prefers-color-scheme: dark)').matches,
+                    t = s || (d ? 'dark' : 'light'),
+                    h = document.documentElement;
+                if (t === 'dark') h.classList.add('dark');
+                h.setAttribute('data-theme', t);
+                h.setAttribute('data-bs-theme', t);
+                var skin = localStorage.getItem('themestrap-demo-skin') || 'venom';
+                document.write('<link id="skin-css" rel="stylesheet" href="../css/skins/' + skin.replace(/[^a-z-]/g, '') + '.css">');
+            } catch (e) {
+                document.write('<link id="skin-css" rel="stylesheet" href="../css/skins/venom.css">');
+            }
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <style>
+        /* The page itself is painted with the skin tokens, so switching skins repaints everything */
+        :root {
+            --demo-bg: var(--ts-skin-bg, #f6f7f9);
+            --demo-surface: var(--ts-skin-surface, #ffffff);
+            --demo-surface-2: var(--ts-skin-surface-2, #f1f3f5);
+            --demo-border: var(--ts-skin-border, #e2e6ea);
+            --demo-text: var(--ts-skin-text, #1f2937);
+            --demo-strong: var(--ts-skin-text-strong, #0a1929);
+            --demo-dim: var(--ts-skin-text-dim, #5b6676);
+            --demo-accent: var(--ts-skin-accent, #0088cc);
+            --demo-radius: var(--ts-skin-radius-lg, 12px);
+        }
+
+        body {
+            margin: 0;
+            background: var(--demo-bg);
+            color: var(--demo-text);
+            font-family: 'DM Sans', system-ui, sans-serif;
+            transition: background-color .2s ease, color .2s ease;
+        }
+
+        h1, h2, h3 {
+            color: var(--demo-strong);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .85em;
+            color: var(--demo-strong);
+        }
+
+        .demo-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .demo-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .demo-head h1 {
+            margin: 0 0 6px;
+            font-family: 'Syne', 'DM Sans', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .demo-head p {
+            max-width: 60ch;
+            margin: 0;
+            color: var(--demo-dim);
+        }
+
+        .demo-controls {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+        }
+
+        .demo-controls label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--demo-dim);
+        }
+
+        .demo-controls .ts-select {
+            min-width: 220px;
+        }
+
+        .theme-btn {
+            display: inline-grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            color: var(--demo-text);
+            background: var(--demo-surface);
+            border: 1px solid var(--demo-border);
+            border-radius: var(--ts-skin-radius, 8px);
+            cursor: pointer;
+        }
+
+        .theme-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Live palette strip */
+        .swatches {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+
+        .swatch {
+            padding: 8px;
+            background: var(--demo-surface);
+            border: 1px solid var(--demo-border);
+            border-radius: var(--ts-skin-radius, 8px);
+        }
+
+        .swatch i {
+            display: block;
+            height: 34px;
+            margin-bottom: 6px;
+            border-radius: var(--ts-skin-radius-sm, 4px);
+            box-shadow: inset 0 0 0 1px rgba(127, 127, 127, .25);
+        }
+
+        .swatch b {
+            display: block;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--demo-strong);
+        }
+
+        .swatch code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .68rem;
+            color: var(--demo-dim);
+        }
+
+        /* Component grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+
+        .card-demo {
+            padding: 20px;
+            background: var(--demo-surface);
+            border: 1px solid var(--demo-border);
+            border-radius: var(--demo-radius);
+            box-shadow: var(--ts-skin-shadow, none);
+        }
+
+        .card-demo h2 {
+            margin: 0 0 14px;
+            font-size: .95rem;
+            font-weight: 700;
+        }
+
+        .card-demo h2 small {
+            margin-left: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            font-weight: 400;
+            color: var(--demo-dim);
+        }
+
+        @media (min-width: 760px) {
+            .card-demo--wide {
+                grid-column: span 2;
+            }
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .field > label {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--demo-strong);
+        }
+
+        .stack > * + * {
+            margin-top: 10px;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn-skin {
+            padding: 8px 14px;
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--ts-skin-on-accent, #fff);
+            background: var(--demo-accent);
+            border: 1px solid var(--demo-accent);
+            border-radius: var(--ts-skin-radius, 8px);
+            cursor: pointer;
+        }
+
+        .btn-skin--ghost {
+            color: var(--demo-text);
+            background: transparent;
+            border-color: var(--demo-border);
+        }
+
+        .btn-skin:hover {
+            filter: brightness(1.06);
+        }
+
+        .demo-foot {
+            margin-top: 32px;
+            font-size: .85rem;
+            color: var(--demo-dim);
+        }
+
+        .demo-foot code {
+            color: var(--demo-strong);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-shell">
+        <header class="demo-head">
+            <div>
+                <h1>Skins</h1>
+                <p>One stylesheet in <code>css/skins/</code> sets the colors every Themestrap plugin reads. Pick a skin and switch modes; nothing below is styled per skin.</p>
+            </div>
+            <div class="demo-controls">
+                <div>
+                    <label for="skin-pick">Skin</label>
+                    <div data-plugin-select class="manual" id="skin-select">
+                        <select id="skin-pick">
+                            <optgroup label="Themestrap">
+                                <option value="default">Default (plugin built-ins)</option>
+                                <option value="venom">Venom</option>
+                            </optgroup>
+                            <optgroup label="Base16">
+                                <option value="solarized">Solarized</option>
+                                <option value="gruvbox">Gruvbox</option>
+                                <option value="one">One</option>
+                                <option value="tomorrow">Tomorrow</option>
+                                <option value="nord">Nord</option>
+                                <option value="dracula">Dracula</option>
+                                <option value="rose-pine">Rosé Pine</option>
+                                <option value="catppuccin">Catppuccin</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" class="theme-btn" data-plugin-darkmode></button>
+            </div>
+        </header>
+
+        <section class="swatches" id="swatches" aria-label="Active skin tokens"></section>
+
+        <main class="grid">
+            <section class="card-demo">
+                <h2>Accordion <small>PluginAccordion</small></h2>
+                <div data-plugin-accordion data-plugin-options='{"exclusive": true, "openIndex": 0}'>
+                    <div data-accordion-item>
+                        <button type="button" data-accordion-trigger>What does a skin change?</button>
+                        <div data-accordion-panel>
+                            <p>Surfaces, borders, text, the accent, status colors, shadows and radii, for every plugin at once.</p>
+                        </div>
+                    </div>
+                    <div data-accordion-item>
+                        <button type="button" data-accordion-trigger>Does dark mode still work?</button>
+                        <div data-accordion-panel>
+                            <p>Yes. Each skin defines both modes and listens for the same signals as PluginDarkMode.</p>
+                        </div>
+                    </div>
+                    <div data-accordion-item>
+                        <button type="button" data-accordion-trigger>What if I load no skin?</button>
+                        <div data-accordion-panel>
+                            <p>Every plugin falls back to the colors it always had.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card-demo stack">
+                <h2>Alerts <small>PluginAlert</small></h2>
+                <div class="alert alert-info" data-plugin-alert data-plugin-options='{"title": "Heads up"}'>A new version of the docs is available.</div>
+                <div class="alert alert-success" data-plugin-alert data-plugin-options='{"title": "Saved"}'>Your profile changes are live.</div>
+                <div class="alert alert-warning" data-plugin-alert>Your trial ends in 3 days.</div>
+                <div class="alert alert-danger" data-plugin-alert data-plugin-options='{"dismissible": true}'>The upload failed. Try a smaller file.</div>
+            </section>
+
+            <section class="card-demo">
+                <h2>Form controls <small>Select · Number · Tags · Time</small></h2>
+                <div class="field">
+                    <label for="region">Region</label>
+                    <div data-plugin-select>
+                        <select id="region">
+                            <option value="">Choose a region</option>
+                            <optgroup label="Americas">
+                                <option>US East</option>
+                                <option>US West</option>
+                            </optgroup>
+                            <optgroup label="Europe">
+                                <option>EU West</option>
+                                <option>EU Central</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="replicas">Replicas</label>
+                    <input type="number" id="replicas" value="3" min="1" max="12" data-plugin-numberinput data-plugin-options='{"unit": "pods"}'>
+                </div>
+                <div class="field">
+                    <label for="notify">Notify</label>
+                    <input type="text" id="notify" value="ada@example.com, grace@example.com" data-plugin-tagsinput>
+                </div>
+                <div class="field">
+                    <label for="deploy-time">Deploy at</label>
+                    <input type="text" id="deploy-time" value="09:30" data-plugin-timepicker>
+                </div>
+            </section>
+
+            <section class="card-demo">
+                <h2>Calendar <small>PluginCalendar</small></h2>
+                <div data-plugin-calendar data-plugin-options='{"mode": "range", "showFooter": true}'></div>
+            </section>
+
+            <section class="card-demo">
+                <h2>One-time code <small>PluginOtp</small></h2>
+                <div data-plugin-otp data-plugin-options='{"length": 6, "separator": "-", "size": "sm", "label": "Verification code", "hint": "Enter the code we sent to your phone."}'></div>
+                <h2 class="mt-4">Feedback <small>PluginTooltip · PluginToast</small></h2>
+                <div class="btn-row">
+                    <button type="button" class="btn-skin" data-plugin-tooltip="Publishes to production" data-toast="success">Publish</button>
+                    <button type="button" class="btn-skin btn-skin--ghost" data-plugin-tooltip="Shows an error toast" data-plugin-options='{"location": "bottom"}' data-toast="danger">Fail</button>
+                    <button type="button" class="btn-skin btn-skin--ghost" data-toast="info">Info</button>
+                </div>
+            </section>
+
+            <section class="card-demo card-demo--wide">
+                <h2>Code <small>PluginCodeWindow · PluginHighlight</small></h2>
+                <div data-plugin-code-window data-plugin-options='{"chrome": "mac", "glow": false}'>
+<pre data-code-window-tab="skin.js" data-plugin-highlight="javascript"><code>// Swap the skin stylesheet at runtime
+function useSkin(name) {
+  const link = document.getElementById('skin-css');
+  link.href = `css/skins/${name}.css`;
+  localStorage.setItem('skin', name);
+  return true;
+}</code></pre>
+<pre data-code-window-tab="skin.css" data-plugin-highlight="css"><code>:root {
+  --ts-skin-accent: #e8672a;
+  --ts-skin-radius: 10px;
+}
+html.dark { --ts-skin-accent: #ff8a4c; }</code></pre>
+                </div>
+            </section>
+        </main>
+
+        <p class="demo-foot">Load one skin in place of <code>default.css</code>: <code>&lt;link rel="stylesheet" href="css/skins/nord.css"&gt;</code>. See <code>docs/ThemestrapSkins.md</code> for the token reference.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/themestrap.js"></script>
+    <script src="../js/components/themestrap.plugin.darkmode.js"></script>
+    <script src="../js/components/themestrap.plugin.select.js"></script>
+    <script src="../js/components/themestrap.plugin.accordion.js"></script>
+    <script src="../js/components/themestrap.plugin.alert.js"></script>
+    <script src="../js/components/themestrap.plugin.calendar.js"></script>
+    <script src="../js/components/themestrap.plugin.numberinput.js"></script>
+    <script src="../js/components/themestrap.plugin.tagsinput.js"></script>
+    <script src="../js/components/themestrap.plugin.timepicker.js"></script>
+    <script src="../js/components/themestrap.plugin.otp.js"></script>
+    <script src="../js/components/themestrap.plugin.tooltip.js"></script>
+    <script src="../js/components/themestrap.plugin.toast.js"></script>
+    <script src="../js/components/themestrap.plugin.highlight.js"></script>
+    <script src="../js/components/themestrap.plugin.codewindow.js"></script>
+    <script src="../js/themestrap.init.js"></script>
+    <script>
+        $(function () {
+            const TOKENS = ['bg', 'surface', 'surface-2', 'elevated', 'border', 'text', 'text-strong', 'text-dim',
+                'accent', 'accent-soft', 'on-accent', 'success', 'warning', 'danger', 'info', 'inverse', 'code-bg'];
+            const $pick = $('#skin-pick');
+            const link = document.getElementById('skin-css');
+            const current = (link.getAttribute('href').match(/skins\/([a-z-]+)\.css/) || [])[1] || 'venom';
+
+            function paintSwatches() {
+                const cs = getComputedStyle(document.documentElement);
+                $('#swatches').html(TOKENS.map(function (t) {
+                    const v = cs.getPropertyValue('--ts-skin-' + t).trim();
+                    return '<div class="swatch"><i style="background:' + (v || 'transparent') + '"></i><b>' + t + '</b><code>' + (v || 'not set') + '</code></div>';
+                }).join(''));
+            }
+
+            $pick.val(current);
+            $('#skin-select').themestrapPluginSelect();
+
+            $pick.on('change', function () {
+                const name = this.value;
+                link.addEventListener('load', paintSwatches, { once: true });
+                link.href = '../css/skins/' + name + '.css';
+                try { localStorage.setItem('themestrap-demo-skin', name); } catch (e) {}
+            });
+
+            $(document).on('click', '[data-toast]', function () {
+                const type = $(this).attr('data-toast');
+                const copy = {
+                    success: ['Published', 'Release 1.0.2 is live in production.'],
+                    danger: ['Upload failed', 'The file is larger than 20 MB.'],
+                    info: ['Skin active', 'Every plugin on this page reads the same tokens.']
+                }[type];
+                themestrap.PluginToast.show({ title: copy[0], body: copy[1], type: type, position: 'bottom-end' });
+            });
+
+            // Repaint swatches when the mode flips (PluginDarkMode updates the <html> class)
+            new MutationObserver(paintSwatches).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-bs-theme'] });
+            paintSwatches();
+        });
+    </script>
+</body>
+</html>

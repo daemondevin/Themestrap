@@ -795,7 +795,7 @@ overlay.show();
 <script>
 $(function () {
 
-    if ($.isFunction($.fn['themestrapPluginHighlight']) && $('[data-plugin-highlight]').length) {
+    if (typeof $.fn['themestrapPluginHighlight'] === 'function' && $('[data-plugin-highlight]').length) {
         themestrap.fn.intObsInit('[data-plugin-highlight]:not(.manual)', 'themestrapPluginHighlight');
     }
 

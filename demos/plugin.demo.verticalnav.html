@@ -576,7 +576,7 @@ table.api-table tr:last-child td { border-bottom: none; }
     <p class="demo-label">themestrap.init.js wiring</p>
 
     <pre><code><span class="token-comment">// Vertical Navigation</span>
-<span class="token-key">if</span> ($.isFunction($.fn[<span class="token-string">'themestrapPluginVerticalNav'</span>]) &amp;&amp; $(<span class="token-string">'[data-plugin-vertical-nav]'</span>).length) {
+<span class="token-key">if</span> (typeof $.fn[<span class="token-string">'themestrapPluginVerticalNav'</span>] === 'function' &amp;&amp; $(<span class="token-string">'[data-plugin-vertical-nav]'</span>).length) {
     themestrap.fn.intObsInit(<span class="token-string">'[data-plugin-vertical-nav]:not(.manual)'</span>, <span class="token-string">'themestrapPluginVerticalNav'</span>);
 }</code></pre>
 
@@ -642,7 +642,7 @@ table.api-table tr:last-child td { border-bottom: none; }
 <script>
 $(function() {
     // Vertical Navigation
-    if ($.isFunction($.fn['themestrapPluginVerticalNav']) && $('[data-plugin-vertical-nav]').length) {
+    if (typeof $.fn['themestrapPluginVerticalNav'] === 'function' && $('[data-plugin-vertical-nav]').length) {
         themestrap.fn.intObsInit('[data-plugin-vertical-nav]:not(.manual)', 'themestrapPluginVerticalNav');
     }
 });

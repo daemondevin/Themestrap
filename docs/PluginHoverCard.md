@@ -44,7 +44,7 @@ HoverCard must be wired on DOMReady — hover events need to be registered befor
 
 ```js
 // HoverCard
-if ($.isFunction($.fn['themestrapPluginHoverCard']) && $('[data-plugin-hovercard]').length) {
+if (typeof $.fn['themestrapPluginHoverCard'] === 'function' && $('[data-plugin-hovercard]').length) {
     $(() => {
         $('[data-plugin-hovercard]:not(.manual)').each(function () {
             const $this = $(this);

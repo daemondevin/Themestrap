@@ -38,7 +38,7 @@
 		}
 
         build() {
-			if (!($.isFunction($.fn.pin))) {
+			if (!(typeof $.fn.pin === 'function')) {
 				return this;
 			}
 

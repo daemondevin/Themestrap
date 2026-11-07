@@ -26,6 +26,7 @@ A tooltip shouldn't require a compilation step. A loading indicator shouldn't re
 * **Programmatic control** — access component instances from JavaScript when needed.
 * **Lazy initialization** — components can initialize through `IntersectionObserver`.
 * **Lazy CSS injection** — components can inject their required styles when first used.
+* **Skins** — one stylesheet in `css/skins/` recolors every component, in light and dark mode.
 * **Destroy & reinitialize** — plugins expose lifecycle control for dynamic applications.
 * **Module Loader** — optionally fetch plugins and their dependencies only when required.
 * **CMS-friendly** — works naturally with server-rendered and template-driven markup.
@@ -101,6 +102,29 @@ This makes components particularly convenient in CMS templates, where markup can
 ```
 
 Requires the component to implement `destroy()`.
+
+## Skins
+
+Every component reads its colors, shadows and radii from shared `--ts-skin-*` tokens, so one stylesheet decides how the whole site looks. Load one skin in place of `css/skins/default.css`:
+
+```html
+<link rel="stylesheet" href="css/skins/nord.css">
+```
+
+| Skin | File | Palette |
+| --- | --- | --- |
+| Default | `default.css` | Default colors; each component keeps its own built-in look |
+| Venom | `venom.css` | Base16 Black Metal (Venom): near-black surfaces, a blood-red accent |
+| Solarized | `solarized.css` | Base16 Solarized Light and Dark |
+| Gruvbox | `gruvbox.css` | Base16 Gruvbox Light and Dark |
+| One | `one.css` | Base16 One Light and OneDark |
+| Tomorrow | `tomorrow.css` | Base16 Tomorrow and Tomorrow Night |
+| Nord | `nord.css` | Base16 Nord |
+| Dracula | `dracula.css` | Base16 Dracula |
+| Rosé Pine | `rose-pine.css` | Base16 Rosé Pine Dawn and Rosé Pine |
+| Catppuccin | `catppuccin.css` | Base16 Catppuccin Latte and Mocha |
+
+Each skin covers light and dark mode and also sets the original palette (`--primary`, `--dark`, ...) that `themestrap.css` uses. Without a skin, every component falls back to the exact colors it had before. See the [skins guide](docs/ThemestrapSkins.md) for the token reference and how to write your own, and [`demos/plugin.demo.skins.html`](demos/plugin.demo.skins.html) to try them.
 
 ## Programmatic Usage
 
@@ -411,11 +435,12 @@ Examples include:
 | `observe-element-in-viewport` | In-Viewport Style              |
 | `vide`                        | Video Background               |
 | `jquery.matchHeight`          | Match Height                   |
-| `jquery.easing`               | Section Scroll, Scroll To Top  |
 | `jquery.pin`                  | Sticky                         |
 | `jquery-validation`           | Validation, Newsletter, Search |
 
 The [module loader](#module-loader) can manage these dependencies when components are loaded dynamically.
+
+The standard easing curves (`easeOutQuad`, `easeOutQuint`, `easeOutBack` and the rest of the jquery.easing set) are built into `themestrap.js`, so Section Scroll, Scroll To Top and hash scrolling no longer need jquery.easing. If jquery.easing is loaded anyway, its curves take precedence.
 
 ## Documentation
 
@@ -423,6 +448,7 @@ The [module loader](#module-loader) can manage these dependencies when component
 
 * [Themestrap Architecture](docs/ThemestrapArchitecture.md)
 * [Module Loader](docs/ThemestrapModuleLoader.md)
+* [Skins and design tokens](docs/ThemestrapSkins.md)
 * [Plugin Skeleton](docs/ThemestrapPluginSkeleton.js)
 
 ### Components

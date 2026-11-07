@@ -37,7 +37,7 @@
         build() {
 			const self = this;
 
-			if (!($.isFunction($.fn.vide)) || (!this.options.path)) {
+			if (!(typeof $.fn.vide === 'function') || (!this.options.path)) {
 				return this;
 			}
 

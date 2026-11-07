@@ -548,7 +548,7 @@ inst.destroy();</pre>
             });
 
             // PluginHighlight on code snippets (no-op if the plugin is not loaded)
-            if ($.isFunction($.fn.themestrapPluginHighlight)) {
+            if (typeof $.fn.themestrapPluginHighlight === 'function') {
                 $('pre.snip').each(function() {
                     $(this).themestrapPluginHighlight();
                 });

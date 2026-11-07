@@ -1864,7 +1864,7 @@ const $item = $sb.find('#mb-nav-more');
 $sb.data('__pluginNavigation').openGroup($item);
 
     // HoverCard
-    if ($.isFunction($.fn['themestrapPluginHoverCard']) && $('[data-plugin-hovercard]').length) {
+    if (typeof $.fn['themestrapPluginHoverCard'] === 'function' && $('[data-plugin-hovercard]').length) {
         $(() => {
             $('[data-plugin-hovercard]:not(.manual)').each(function () {
                 const $this = $(this);

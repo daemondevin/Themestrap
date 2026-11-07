@@ -233,7 +233,7 @@ Override in your theme CSS or on the element:
 ## Auto-init (init.js)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginNavbar']) && $('[data-plugin-navbar]').length) {
+if (typeof $.fn['themestrapPluginNavbar'] === 'function' && $('[data-plugin-navbar]').length) {
     themestrap.fn.intObsInit('[data-plugin-navbar]:not(.manual)', 'themestrapPluginNavbar');
 }
 ```

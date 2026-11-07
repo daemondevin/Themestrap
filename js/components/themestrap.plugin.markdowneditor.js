@@ -43,7 +43,7 @@
  * same server-side renderer as the published site.
  *
  * Init.js wiring:
- *   if ($.isFunction($.fn['themestrapPluginMarkdownEditor']) && $('[data-plugin-markdowneditor]').length) {
+ *   if (typeof $.fn['themestrapPluginMarkdownEditor'] === 'function' && $('[data-plugin-markdowneditor]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-markdowneditor]:not(.manual)', 'themestrapPluginMarkdownEditor');
  *   }
  */
@@ -60,27 +60,27 @@
     const MOD    = IS_MAC ? '\u2318' : 'Ctrl+';
 
     const LIGHT_TOKENS = `
-        --me-bg:          var(--ts-me-bg, #ffffff);
-        --me-border:      var(--ts-me-border, rgba(0,0,0,.14));
-        --me-toolbar-bg:  var(--ts-me-toolbar-bg, rgba(0,0,0,.035));
-        --me-text:        var(--ts-me-text, #1f2937);
-        --me-muted:       var(--ts-me-muted, rgba(31,41,55,.55));
-        --me-preview-bg:  var(--ts-me-preview-bg, rgba(0,0,0,.02));
-        --me-code-bg:     var(--ts-me-code-bg, rgba(0,0,0,.06));
-        --me-link:        var(--ts-me-link, #0b8a83);
-        --me-accent:      var(--ts-me-border-focus, #00a89f);
+        --me-bg:          var(--ts-me-bg, var(--ts-skin-surface, #ffffff));
+        --me-border:      var(--ts-me-border, var(--ts-skin-border, rgba(0,0,0,.14)));
+        --me-toolbar-bg:  var(--ts-me-toolbar-bg, var(--ts-skin-surface-2, rgba(0,0,0,.035)));
+        --me-text:        var(--ts-me-text, var(--ts-skin-text, #1f2937));
+        --me-muted:       var(--ts-me-muted, var(--ts-skin-text-dim, rgba(31,41,55,.55)));
+        --me-preview-bg:  var(--ts-me-preview-bg, var(--ts-skin-surface-2, rgba(0,0,0,.02)));
+        --me-code-bg:     var(--ts-me-code-bg, var(--ts-skin-surface-2, rgba(0,0,0,.06)));
+        --me-link:        var(--ts-me-link, var(--ts-skin-accent, #0b8a83));
+        --me-accent:      var(--ts-me-border-focus, var(--ts-skin-accent, #00a89f));
     `;
 
     const DARK_TOKENS = `
-        --me-bg:          var(--ts-me-bg, rgba(255,255,255,.02));
-        --me-border:      var(--ts-me-border, rgba(255,255,255,.10));
-        --me-toolbar-bg:  var(--ts-me-toolbar-bg, rgba(0,0,0,.20));
-        --me-text:        var(--ts-me-text, #cdd8e6);
-        --me-muted:       var(--ts-me-muted, rgba(205,216,230,.55));
-        --me-preview-bg:  var(--ts-me-preview-bg, rgba(255,255,255,.03));
-        --me-code-bg:     var(--ts-me-code-bg, rgba(255,255,255,.08));
-        --me-link:        var(--ts-me-link, #00c7be);
-        --me-accent:      var(--ts-me-border-focus, #00c7be);
+        --me-bg:          var(--ts-me-bg, var(--ts-skin-surface-2, rgba(255,255,255,.02)));
+        --me-border:      var(--ts-me-border, var(--ts-skin-border, rgba(255,255,255,.10)));
+        --me-toolbar-bg:  var(--ts-me-toolbar-bg, var(--ts-skin-surface, rgba(0,0,0,.20)));
+        --me-text:        var(--ts-me-text, var(--ts-skin-text, #cdd8e6));
+        --me-muted:       var(--ts-me-muted, var(--ts-skin-text-dim, rgba(205,216,230,.55)));
+        --me-preview-bg:  var(--ts-me-preview-bg, var(--ts-skin-surface-2, rgba(255,255,255,.03)));
+        --me-code-bg:     var(--ts-me-code-bg, var(--ts-skin-surface-2, rgba(255,255,255,.08)));
+        --me-link:        var(--ts-me-link, var(--ts-skin-accent, #00c7be));
+        --me-accent:      var(--ts-me-border-focus, var(--ts-skin-accent, #00c7be));
     `;
 
     const INJECTED_CSS = `
@@ -98,7 +98,7 @@
             flex-direction: column;
             background: var(--me-bg);
             border: 1px solid var(--me-border);
-            border-radius: var(--ts-me-radius, 6px);
+            border-radius: var(--ts-me-radius, var(--ts-skin-radius, 6px));
             overflow: hidden;
             transition: border-color .15s, box-shadow .15s;
         }
@@ -110,7 +110,7 @@
         .ts-mdeditor.ts-me-disabled .ts-toolbar { pointer-events: none; }
 
         .ts-mdeditor .ts-toolbar {
-            --ts-tb-bg:     var(--me-toolbar-bg);
+            --ts-tb-bg:     var(--ts-skin-surface, var(--me-toolbar-bg));
             --ts-tb-border: transparent;
             --ts-tb-shadow: none;
             --ts-tb-radius: 0;
@@ -121,7 +121,7 @@
             border-bottom: 1px solid var(--me-border);
         }
         .ts-mdeditor .ts-toolbar [data-toolbar-toggle-item][aria-pressed="true"] {
-            --ts-tb-on-bg: var(--me-accent);
+            --ts-tb-on-bg: var(--ts-skin-accent, var(--me-accent));
         }
         .ts-me-spacer { flex: 1 1 auto; }
 
@@ -149,7 +149,7 @@
             resize: none;
             background: transparent;
             color: var(--me-text);
-            font-family: var(--ts-me-font, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+            font-family: var(--ts-me-font, var(--ts-skin-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace));
             font-size: var(--ts-me-font-size, 15px);
             line-height: var(--ts-me-line-height, 1.7);
             tab-size: 4;

@@ -366,20 +366,20 @@
 /* 9. DEFAULT (LIGHT) THEME COLOURS */
 
 .ts-scrollbox-scrollTools .ts-scrollbox-draggerRail {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--ts-sb-border-strong, var(--ts-skin-border-strong, rgba(0, 0, 0, 0.4)));
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger .ts-scrollbox-dragger-bar {
-    background-color: rgba(255, 255, 255, 0.75);
+    background-color: var(--ts-sb-border-strong, var(--ts-skin-border-strong, rgba(255, 255, 255, 0.75)));
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger:hover .ts-scrollbox-dragger-bar {
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: var(--ts-sb-text-faint, var(--ts-skin-text-faint, rgba(255, 255, 255, 0.85)));
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger.ts-scrollbox-dragger-onDrag .ts-scrollbox-dragger-bar,
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger:active .ts-scrollbox-dragger-bar {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--ts-sb-text-faint, var(--ts-skin-text-faint, rgba(255, 255, 255, 0.9)));
 }
 
 /* Button hover / active opacity (arrow colour is set below) */
@@ -418,28 +418,28 @@
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonUp::after {
     border-width: 0 5px 7px;
     border-style: solid;
-    border-color: transparent transparent rgba(255, 255, 255, 0.9);
+    border-color: transparent transparent var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9)));
     margin-top: -2px;
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonDown::after {
     border-width: 7px 5px 0;
     border-style: solid;
-    border-color: rgba(255, 255, 255, 0.9) transparent transparent;
+    border-color: var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9))) transparent transparent;
     margin-top: 2px;
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonLeft::after {
     border-width: 5px 7px 5px 0;
     border-style: solid;
-    border-color: transparent rgba(255, 255, 255, 0.9) transparent transparent;
+    border-color: transparent var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9))) transparent transparent;
     margin-left: -2px;
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonRight::after {
     border-width: 5px 0 5px 7px;
     border-style: solid;
-    border-color: transparent transparent transparent rgba(255, 255, 255, 0.9);
+    border-color: transparent transparent transparent var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9)));
     margin-left: 2px;
 }
 

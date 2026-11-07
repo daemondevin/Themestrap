@@ -7,7 +7,7 @@
 $(function () {
 
     /* Dark Mode */
-    if ($.isFunction($.fn.themestrapPluginDarkMode)) {
+    if (typeof $.fn.themestrapPluginDarkMode === 'function') {
         $('[data-plugin-darkmode]').each(function () {
             $(this).themestrapPluginDarkMode();
         });
@@ -88,17 +88,17 @@ $(function () {
     });
 
     /* Counter animation (stat blocks) */
-	if ($.isFunction($.fn['themestrapPluginCounter']) && ( $('[data-plugin-counter]').length || $('.counters [data-to]').length )) {
+	if (typeof $.fn['themestrapPluginCounter'] === 'function' && ( $('[data-plugin-counter]').length || $('.counters [data-to]').length )) {
 		themestrap.fn.dynIntObsInit( '[data-plugin-counter]:not(.manual), .counters [data-to]', 'themestrapPluginCounter', themestrap.PluginCounter.defaults );
 	}
 
     /* ScrollFx entrance animations */
-    if ($.isFunction($.fn.themestrapPluginScrollFx)) {
+    if (typeof $.fn.themestrapPluginScrollFx === 'function') {
         themestrap.fn.intObsInit('[data-plugin-scrollfx]:not(.manual)', 'themestrapPluginScrollFx');
     }
 
     /* Toast notifications */
-    if ($.isFunction($.fn.themestrapPluginToast)) {
+    if (typeof $.fn.themestrapPluginToast === 'function') {
         $('[data-plugin-toast]').each(function () {
             $(this).themestrapPluginToast();
         });

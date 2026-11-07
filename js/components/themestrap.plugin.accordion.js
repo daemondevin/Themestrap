@@ -8,12 +8,12 @@
  * set of headers reveal/hide their own bodies and you want exclusive-open,
  * keyboard navigation, and a clean height transition out of the box.
  *
- * Visuals are themed with the Themestrap "Venom" palette (Base16 Black Metal /
- * Venom-inspired): near-black surfaces, hairline borders, cream headings, and a
- * single deep blood-red accent. Tokens resolve from global --ts-venom-* custom
- * properties when present, and fall back to baked-in literals otherwise, so the
- * component looks right standalone and inherits a site-wide palette if one is
- * defined.
+ * Out of the box it uses the Venom palette (Base16 Black Metal / Venom-inspired):
+ * near-black surfaces, hairline borders, cream headings, and a single deep
+ * blood-red accent. Tokens resolve from the active skin's --ts-skin-* custom
+ * properties (css/skins/*.css) when present, and fall back to those Venom
+ * literals otherwise, so the component looks right standalone and follows the
+ * site's skin when one is loaded.
  *
  * All CSS is contained in this file and injected ONCE per page, lazily, on the
  * first build() — loading the script never adds styles to pages that don't use
@@ -83,7 +83,7 @@
  *   acc.destroy();        // restore original markup
  *
  *   // init.js wiring
- *   if ($.isFunction($.fn['themestrapPluginAccordion']) && $('[data-plugin-accordion]').length) {
+ *   if (typeof $.fn['themestrapPluginAccordion'] === 'function' && $('[data-plugin-accordion]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-accordion]:not(.manual)', 'themestrapPluginAccordion');
  *   }
  */
@@ -97,22 +97,22 @@
     const STYLE_ID = 'ts-accordion-styles';
 
     const CSS_TEXT = `
-/* Themestrap — PluginAccordion (Venom palette) */
+/* Themestrap — PluginAccordion (Venom palette by default) */
 .ts-accordion {
-    /* Palette tokens: prefer global --ts-venom-* if defined, else fall back. */
-    --ts-acc-bg:        var(--ts-venom-surface,      #121212);
-    --ts-acc-bg-hover:  var(--ts-venom-elevated,     #1c1c1c);
-    --ts-acc-bg-open:   var(--ts-venom-surface-2,    #181818);
-    --ts-acc-border:    var(--ts-venom-border,       #333333);
-    --ts-acc-hairline:  var(--ts-venom-muted,        #444444);
-    --ts-acc-text:      var(--ts-venom-text,         #c1c1c1);
-    --ts-acc-heading:   var(--ts-venom-text-strong,  #f8f7f2);
-    --ts-acc-muted:     var(--ts-venom-text-dim,     #999999);
-    --ts-acc-accent:    var(--ts-venom-accent,       #79241f);
-    --ts-acc-accent-2:  var(--ts-venom-accent-hover, #a3312a);
-    --ts-acc-ring:      var(--ts-venom-ring,         rgba(163, 49, 42, .55));
+    /* Palette tokens: prefer the active skin's --ts-skin-* tokens if defined, else fall back. */
+    --ts-acc-bg:        var(--ts-skin-surface,      #121212);
+    --ts-acc-bg-hover:  var(--ts-skin-elevated,     #1c1c1c);
+    --ts-acc-bg-open:   var(--ts-skin-surface-2,    #181818);
+    --ts-acc-border:    var(--ts-skin-border,       #333333);
+    --ts-acc-hairline:  var(--ts-skin-border-strong,        #444444);
+    --ts-acc-text:      var(--ts-skin-text,         #c1c1c1);
+    --ts-acc-heading:   var(--ts-skin-text-strong,  #f8f7f2);
+    --ts-acc-muted:     var(--ts-skin-text-dim,     #999999);
+    --ts-acc-accent:    var(--ts-skin-accent,       #79241f);
+    --ts-acc-accent-2:  var(--ts-skin-accent-hover, #a3312a);
+    --ts-acc-ring:      var(--ts-skin-ring,         rgba(163, 49, 42, .55));
 
-    --ts-acc-radius:    10px;
+    --ts-acc-radius:    var(--ts-skin-radius-lg, 10px);
     --ts-acc-duration:  320ms;
     --ts-acc-easing:    cubic-bezier(.16, 1, .3, 1);
     --ts-acc-icon-rot:  180deg;

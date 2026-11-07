@@ -126,7 +126,7 @@
 					delay = delay + self.options.animationSpeed;
 				});
 
-                if ($.isFunction($.fn['themestrapPluginAnimate']) && $('.animated-words-item[data-appear-animation]').length) {
+                if (typeof $.fn['themestrapPluginAnimate'] === 'function' && $('.animated-words-item[data-appear-animation]').length) {
 					themestrap.fn.dynIntObsInit( '.animated-words-item[data-appear-animation]', 'themestrapPluginAnimate', themestrap.PluginAnimate.defaults );
 				}
 

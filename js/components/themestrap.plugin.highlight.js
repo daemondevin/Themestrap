@@ -109,7 +109,7 @@
  *
  * Auto-init via themestrap.init.js (requires data-plugin-highlight on the <pre>):
  *
- *   if ($.isFunction($.fn['themestrapPluginHighlight']) && $('[data-plugin-highlight]').length) {
+ *   if (typeof $.fn['themestrapPluginHighlight'] === 'function' && $('[data-plugin-highlight]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-highlight]:not(.manual)', 'themestrapPluginHighlight');
  *   }
  */
@@ -150,16 +150,16 @@
         /* Custom Property Definitions */
         :root {
             /* Code block */
-            --ts-highlight-bg:             var(--light-100, #f2f2f2);
-            --ts-highlight-color:          var(--dark--300, #383f45);
-            --ts-highlight-border-radius:  0.5em;
+            --ts-highlight-bg:             var(--ts-skin-code-bg, var(--light-100, #f2f2f2));
+            --ts-highlight-color:          var(--ts-skin-code-text, var(--dark--300, #383f45));
+            --ts-highlight-border-radius:  var(--ts-skin-radius, 0.5em);
             --ts-highlight-padding:        1em;
  
             /* Header strip (.code-highlight-header / .topfix) */
-            --ts-highlight-header-bg:      var(--dark--300, #383f45);
+            --ts-highlight-header-bg:      var(--ts-skin-code-bg, var(--dark--300, #383f45));
  
             /* Text selection inside a block */
-            --ts-highlight-selection-bg:    var(--light-inverse, #777);
+            --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, var(--light-inverse, #777));
             --ts-highlight-selection-color: var(--dark-inverse, #fff);
  
             /* Line-number gutter */
@@ -179,68 +179,68 @@
             --ts-highlight-copy-hover-opacity:  0.75;
             --ts-highlight-copy-top:            12px;
             --ts-highlight-copy-right:          10px;
-            --ts-highlight-copy-success:        #4caf50;
+            --ts-highlight-copy-success:        var(--ts-skin-success, #4caf50);
  
             /* Syntax token colours — light-mode defaults.
                Only comment, tag, and operator differ in dark mode;
                the remaining eight are identical across both themes. */
-            --ts-highlight-token-comment:  #b8b8b8;
-            --ts-highlight-token-tag:      #585858;
-            --ts-highlight-token-operator: #383838;
-            --ts-highlight-token-variable: #ab4642;
-            --ts-highlight-token-number:   #dc9656;
-            --ts-highlight-token-title:    #f7ca88;
-            --ts-highlight-token-string:   #a1b56c;
-            --ts-highlight-token-builtin:  #86c1b9;
-            --ts-highlight-token-function: #7cafc2;
-            --ts-highlight-token-keyword:  #ba8baf;
-            --ts-highlight-token-meta:     #a16946;
+            --ts-highlight-token-comment:  var(--ts-skin-code-comment, #b8b8b8);
+            --ts-highlight-token-tag:      var(--ts-skin-code-tag, #585858);
+            --ts-highlight-token-operator: var(--ts-skin-code-operator, #383838);
+            --ts-highlight-token-variable: var(--ts-skin-code-variable, #ab4642);
+            --ts-highlight-token-number:   var(--ts-skin-code-number, #dc9656);
+            --ts-highlight-token-title:    var(--ts-skin-code-title, #f7ca88);
+            --ts-highlight-token-string:   var(--ts-skin-code-string, #a1b56c);
+            --ts-highlight-token-builtin:  var(--ts-skin-code-builtin, #86c1b9);
+            --ts-highlight-token-function: var(--ts-skin-code-function, #7cafc2);
+            --ts-highlight-token-keyword:  var(--ts-skin-code-keyword, #ba8baf);
+            --ts-highlight-token-meta:     var(--ts-skin-code-meta, #a16946);
         }
  
         /* Dark mode — system preference */
         @media (prefers-color-scheme: dark) {
             :root {
-                --ts-highlight-bg:              #181818;
-                --ts-highlight-color:           #d8d8d8;
-                --ts-highlight-header-bg:       var(--dark-100, #16181b);
-                --ts-highlight-selection-bg:    #383838;
+                --ts-highlight-bg:              var(--ts-skin-code-bg, #181818);
+                --ts-highlight-color:           var(--ts-skin-code-text, #d8d8d8);
+                --ts-highlight-header-bg:       var(--ts-skin-code-bg, var(--dark-100, #16181b));
+                --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, #383838);
                 --ts-highlight-selection-color: #d8d8d8;
                 --ts-highlight-marked-bg:       rgba(229,192,123,.12);
                 --ts-highlight-marked-border-color: #e5c07b;
-                --ts-highlight-token-comment:   #585858;
-                --ts-highlight-token-tag:       #b8b8b8;
-                --ts-highlight-token-operator:  #d8d8d8;
+                --ts-highlight-token-comment:   var(--ts-skin-code-comment, #585858);
+                --ts-highlight-token-tag:       var(--ts-skin-code-tag, #b8b8b8);
+                --ts-highlight-token-operator:  var(--ts-skin-code-operator, #d8d8d8);
             }
         }
  
         /* Dark mode — explicit Bootstrap / Themestrap theme attribute */
         html.dark,
         [data-bs-theme="dark"] {
-            --ts-highlight-bg:              #181818;
-            --ts-highlight-color:           #d8d8d8;
-            --ts-highlight-header-bg:       var(--dark-100, #16181b);
-            --ts-highlight-selection-bg:    #383838;
+            --ts-highlight-bg:              var(--ts-skin-code-bg, #181818);
+            --ts-highlight-color:           var(--ts-skin-code-text, #d8d8d8);
+            --ts-highlight-header-bg:       var(--ts-skin-code-bg, var(--dark-100, #16181b));
+            --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, #383838);
             --ts-highlight-selection-color: #d8d8d8;
             --ts-highlight-marked-bg:       rgba(229,192,123,.12);
             --ts-highlight-marked-border-color: #e5c07b;
-            --ts-highlight-token-comment:   #585858;
-            --ts-highlight-token-tag:       #b8b8b8;
-            --ts-highlight-token-operator:  #d8d8d8;
+            --ts-highlight-token-comment:   var(--ts-skin-code-comment, #585858);
+            --ts-highlight-token-tag:       var(--ts-skin-code-tag, #b8b8b8);
+            --ts-highlight-token-operator:  var(--ts-skin-code-operator, #d8d8d8);
         }
  
         /* Explicit light override — restores :root defaults even inside a
            dark ancestor (e.g. a light card inside a dark page shell). */
         [data-bs-theme="light"] {
-            --ts-highlight-bg:              var(--light-100, #f2f2f2);
-            --ts-highlight-color:           var(--dark--300, #383f45);
-            --ts-highlight-header-bg:       var(--dark--300, #383f45);
-            --ts-highlight-selection-bg:    var(--light-inverse, #777);
+            --ts-highlight-bg:              var(--ts-skin-code-bg, var(--light-100, #f2f2f2));
+            --ts-highlight-color:           var(--ts-skin-code-text, var(--dark--300, #383f45));
+            --ts-highlight-header-bg:       var(--ts-skin-code-bg, var(--dark--300, #383f45));
+            --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, var(--light-inverse, #777));
             --ts-highlight-selection-color: var(--dark-inverse, #fff);
             --ts-highlight-marked-bg:       rgba(229,192,123,.3);
             --ts-highlight-marked-border-color: #cfa85e;
-            --ts-highlight-token-comment:   #b8b8b8;
-            --ts-highlight-token-tag:       #585858;
-            --ts-highlight-token-operator:  #383838;
+            --ts-highlight-token-comment:   var(--ts-skin-code-comment, #b8b8b8);
+            --ts-highlight-token-tag:       var(--ts-skin-code-tag, #585858);
+            --ts-highlight-token-operator:  var(--ts-skin-code-operator, #383838);
         }
  
         /* === Code Block === */
@@ -455,13 +455,13 @@
             color: var(--primary--300, #00aaff);
         }
         .hljs-ts-json.number_ {
-            color: #0288d1;
+            color: var(--ts-skin-code-number, #0288d1);
         }
         .hljs-ts-json.literal_ {
             color: blue;
         }
         .hljs-ts-json.punctuation_ {
-            color: #607d8b;
+            color: var(--ts-skin-code-operator, #607d8b);
         }
  
         /* Line Numbers */
@@ -524,14 +524,14 @@
         }
  
         .hljs-copy-btn {
-            box-shadow: inset 0px 1px 0px 0px #ffffff;
+            box-shadow: var(--ts-skin-shadow, inset 0px 1px 0px 0px #ffffff);
             background: linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
-            background-color: #ffffff;
+            background-color: var(--ts-skin-code-bg, #ffffff);
             border-radius: 8px;
-            border: 1px solid #dcdcdc;
+            border: 1px solid var(--ts-skin-border, #dcdcdc);
             display: inline-block;
             cursor: pointer;
-            color: #666666;
+            color: var(--ts-skin-code-text, #666666);
             padding: 3px 10px;
             text-decoration: none;
             text-shadow: 0px 1px 0px #ffffff;
@@ -544,7 +544,7 @@
  
         .hljs-copy-btn:hover {
             background: linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
-            background-color: #f6f6f6;
+            background-color: var(--ts-skin-code-bg, #f6f6f6);
             opacity: var(--ts-highlight-copy-hover-opacity);
         }
     `;

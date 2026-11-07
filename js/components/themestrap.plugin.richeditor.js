@@ -50,7 +50,7 @@
  *   --ts-re-accent-contrast
  *
  * Init.js wiring:
- *   if ($.isFunction($.fn['themestrapPluginRichEditor']) && $('[data-plugin-richeditor]').length) {
+ *   if (typeof $.fn['themestrapPluginRichEditor'] === 'function' && $('[data-plugin-richeditor]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-richeditor]:not(.manual)', 'themestrapPluginRichEditor');
  *   }
  */
@@ -69,23 +69,23 @@
     // Theme tokens. Private --re-* properties resolve the public --ts-re-* overrides
     // against a per-theme fallback, so consumers can override on any ancestor.
     const LIGHT_TOKENS = `
-        --re-bg:              var(--ts-re-bg, #ffffff);
-        --re-border:          var(--ts-re-border, rgba(0,0,0,.14));
-        --re-toolbar-bg:      var(--ts-re-toolbar-bg, rgba(0,0,0,.035));
-        --re-text:            var(--ts-re-text, #1f2937);
-        --re-placeholder:     var(--ts-re-placeholder, rgba(31,41,55,.42));
-        --re-link:            var(--ts-re-link, #0b8a83);
-        --re-accent:          var(--ts-re-border-focus, #00a89f);
+        --re-bg:              var(--ts-re-bg, var(--ts-skin-surface, #ffffff));
+        --re-border:          var(--ts-re-border, var(--ts-skin-border, rgba(0,0,0,.14)));
+        --re-toolbar-bg:      var(--ts-re-toolbar-bg, var(--ts-skin-surface-2, rgba(0,0,0,.035)));
+        --re-text:            var(--ts-re-text, var(--ts-skin-text, #1f2937));
+        --re-placeholder:     var(--ts-re-placeholder, var(--ts-skin-text-dim, rgba(31,41,55,.42)));
+        --re-link:            var(--ts-re-link, var(--ts-skin-accent, #0b8a83));
+        --re-accent:          var(--ts-re-border-focus, var(--ts-skin-accent, #00a89f));
     `;
 
     const DARK_TOKENS = `
-        --re-bg:              var(--ts-re-bg, rgba(255,255,255,.02));
-        --re-border:          var(--ts-re-border, rgba(255,255,255,.10));
-        --re-toolbar-bg:      var(--ts-re-toolbar-bg, rgba(0,0,0,.20));
-        --re-text:            var(--ts-re-text, #cdd8e6);
-        --re-placeholder:     var(--ts-re-placeholder, rgba(205,216,230,.35));
-        --re-link:            var(--ts-re-link, #00c7be);
-        --re-accent:          var(--ts-re-border-focus, #00c7be);
+        --re-bg:              var(--ts-re-bg, var(--ts-skin-surface-2, rgba(255,255,255,.02)));
+        --re-border:          var(--ts-re-border, var(--ts-skin-border, rgba(255,255,255,.10)));
+        --re-toolbar-bg:      var(--ts-re-toolbar-bg, var(--ts-skin-surface, rgba(0,0,0,.20)));
+        --re-text:            var(--ts-re-text, var(--ts-skin-text, #cdd8e6));
+        --re-placeholder:     var(--ts-re-placeholder, var(--ts-skin-text-dim, rgba(205,216,230,.35)));
+        --re-link:            var(--ts-re-link, var(--ts-skin-accent, #00c7be));
+        --re-accent:          var(--ts-re-border-focus, var(--ts-skin-accent, #00c7be));
     `;
 
     const INJECTED_CSS = `
@@ -103,7 +103,7 @@
             flex-direction: column;
             background: var(--re-bg);
             border: 1px solid var(--re-border);
-            border-radius: var(--ts-re-radius, 6px);
+            border-radius: var(--ts-re-radius, var(--ts-skin-radius, 6px));
             overflow: hidden;
             transition: border-color .15s, box-shadow .15s;
         }
@@ -209,10 +209,10 @@
             outline: none;
             transition: border-color .15s;
         }
-        .ts-re-link-input:focus            { border-color: var(--ts-re-border-focus, #00a89f); }
-        .ts-re-link-input[aria-invalid="true"] { border-color: #dc2626; }
+        .ts-re-link-input:focus            { border-color: var(--ts-re-border-focus, var(--ts-skin-accent, #00a89f)); }
+        .ts-re-link-input[aria-invalid="true"] { border-color: var(--ts-skin-danger, #dc2626); }
         .ts-re-link-error {
-            color: #dc2626;
+            color: var(--ts-skin-danger, #dc2626);
             font-size: 12px;
             margin: 6px 0 0;
         }
@@ -241,8 +241,8 @@
         .ts-re-dlg-cancel,
         .ts-re-dlg-remove  { background: color-mix(in srgb, currentColor 10%, transparent); color: inherit; }
         .ts-re-dlg-confirm {
-            background: var(--ts-re-border-focus, #00a89f);
-            color: var(--ts-re-accent-contrast, #04211f);
+            background: var(--ts-re-border-focus, var(--ts-skin-accent, #00a89f));
+            color: var(--ts-re-accent-contrast, var(--ts-skin-on-accent, #04211f));
             font-weight: 600;
         }
         .ts-re-dlg-cancel:hover,

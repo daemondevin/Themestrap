@@ -70,7 +70,7 @@ A nav with one plain link and one trigger-and-panel item:
 ### Auto-init wiring (`themestrap.init.js`)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginNavmenu']) && $('[data-plugin-navmenu]').length) {
+if (typeof $.fn['themestrapPluginNavmenu'] === 'function' && $('[data-plugin-navmenu]').length) {
     $(() => {
         $('[data-plugin-navmenu]:not(.manual)').each(function () {
             const $this = $(this);

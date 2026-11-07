@@ -89,7 +89,7 @@
  * Init.js wiring
  *
  *   // Sidebar/Panel (forceInit:true → dynIntObsInit inits immediately)
- *   if ($.isFunction($.fn['themestrapPluginNavigation']) &&
+ *   if (typeof $.fn['themestrapPluginNavigation'] === 'function' &&
  *       $('[data-plugin-navigation]').length) {
  *       themestrap.fn.dynIntObsInit(
  *           '[data-plugin-navigation]:not(.manual)',
@@ -124,61 +124,61 @@
     --ts-nav-indent-step:        1rem;
 
     /* Colours */
-    --ts-nav-bg:                 var(--light, #ffffff);
-    --ts-nav-border-color:       var(--light--200, #ececec);
-    --ts-nav-header-bg:          var(--light--100, #ffffff);
-    --ts-nav-footer-bg:          var(--light--300, #ffffff);
+    --ts-nav-bg:                 var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-nav-border-color:       var(--ts-skin-border, var(--light--200, #ececec));
+    --ts-nav-header-bg:          var(--ts-skin-surface-2, var(--light--100, #ffffff));
+    --ts-nav-footer-bg:          var(--ts-skin-surface-2, var(--light--300, #ffffff));
 
-    --ts-nav-text:               var(--default, #777);
-    --ts-nav-text-muted:         var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
-    --ts-nav-icon-color:         var(--grey, #969696);
+    --ts-nav-text:               var(--ts-skin-text, var(--default, #777));
+    --ts-nav-text-muted:         var(--ts-skin-text-dim, var(--dark-rgba-20, rgba(33, 37, 41, 0.2)));
+    --ts-nav-icon-color:         var(--ts-skin-text-dim, var(--grey, #969696));
 
-    --ts-nav-accent:             var(--primary, #0088CC);
-    --ts-nav-focus-ring:         var(--ts-nav-accent);
+    --ts-nav-accent:             var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-nav-focus-ring:         var(--ts-skin-ring, var(--ts-nav-accent));
 
-    --ts-nav-item-hover-bg:      var(--light-rgba-10, #rgba(255, 255, 255, 0.1));
+    --ts-nav-item-hover-bg:      var(--ts-skin-elevated, var(--light-rgba-10, #rgba(255, 255, 255, 0.1)));
     --ts-nav-item-active-bg:     transparent;
-    --ts-nav-item-active-text:   var(--ts-nav-accent);
-    --ts-nav-item-active-border: var(--ts-nav-accent);
+    --ts-nav-item-active-text:   var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-item-active-border: var(--ts-skin-accent, var(--ts-nav-accent));
 
-    --ts-nav-section-title-color:#8a93a0;
-    --ts-nav-badge-bg:           var(--light-300, #e6e6e6);
-    --ts-nav-badge-color:        var(--dark-300, #383f45);
-    --ts-nav-badge-active-bg:    var(--grey-500, #dbdbdb);
-    --ts-nav-badge-active-color: var(--ts-nav-accent);
-    --ts-nav-toggle-color:       var(--grey-1000, #757575);
-    --ts-nav-toggle-hover-bg:    var(--light-100, #f2f2f2);
+    --ts-nav-section-title-color:var(--ts-skin-text-strong, #8a93a0);
+    --ts-nav-badge-bg:           var(--ts-skin-surface, var(--light-300, #e6e6e6));
+    --ts-nav-badge-color:        var(--ts-skin-text, var(--dark-300, #383f45));
+    --ts-nav-badge-active-bg:    var(--ts-skin-accent-soft, var(--grey-500, #dbdbdb));
+    --ts-nav-badge-active-color: var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-toggle-color:       var(--ts-skin-text, var(--grey-1000, #757575));
+    --ts-nav-toggle-hover-bg:    var(--ts-skin-elevated, var(--light-100, #f2f2f2));
 
-    --ts-nav-content-bg:         var(--light, #ffffff);
-    --ts-nav-content-border:     var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-    --ts-nav-content-shadow:     0 4px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)), 0 1px 4px var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
-    --ts-nav-muted-text:         var(--dark-rgba-50, rgba(33, 37, 41, 0.5));
+    --ts-nav-content-bg:         var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-nav-content-border:     var(--ts-skin-border, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+    --ts-nav-content-shadow:     var(--ts-skin-shadow, 0 4px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)), 0 1px 4px var(--dark-rgba-60, rgba(33, 37, 41, 0.6)));
+    --ts-nav-muted-text:         var(--ts-skin-text-dim, var(--dark-rgba-50, rgba(33, 37, 41, 0.5)));
 }
 
 /* Dark variant — via option class or html.dark */
 :root.dark {
-    --ts-nav-bg:                 var(--dark, #212529);
-    --ts-nav-border-color:       var(--dark--200, #101214);
-    --ts-nav-header-bg:          var(--dark--100, #2c3237);
-    --ts-nav-footer-bg:          var(--dark, #212529);
-    --ts-nav-text:               var(--light, #ffffff);
-    --ts-nav-text-muted:         var(--light-rgba-20, rgba(255, 255, 255, 0.2));
-    --ts-nav-icon-color:         var(--grey-700, #c1c1c1);
-    --ts-nav-accent:             var(--primary, #0088CC);
-    --ts-nav-item-hover-bg:      var(--dark-200, #101214);
-    --ts-nav-item-active-text:   var(--ts-nav-accent);
-    --ts-nav-item-active-border: var(--ts-nav-accent);
-    --ts-nav-section-title-color:var(--dark--300, #383f45);
-    --ts-nav-badge-bg:           var(--dark--100, #2c3237);
-    --ts-nav-badge-color:        var(--light, #ffffff);
-    --ts-nav-badge-active-bg:    var(--primary-100, #0077b3);
-    --ts-nav-badge-active-color: var(--primary--200, #00a1f2);
-    --ts-nav-toggle-color:       var(--grey-200, #eaeaea);
-    --ts-nav-toggle-hover-bg:    var(--dark-100, #16181b);
-    --ts-nav-content-bg:         var(--dark, #212529);
-    --ts-nav-content-border:     var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
-    --ts-nav-content-shadow:     0 4px 24px var(--dark-rgba-40, rgba(33, 37, 41, 0.4));
-    --ts-nav-muted-text:         var(--light-rgba-50, rgba(255, 255, 255, 0.5));
+    --ts-nav-bg:                 var(--ts-skin-surface, var(--dark, #212529));
+    --ts-nav-border-color:       var(--ts-skin-border, var(--dark--200, #101214));
+    --ts-nav-header-bg:          var(--ts-skin-surface-2, var(--dark--100, #2c3237));
+    --ts-nav-footer-bg:          var(--ts-skin-surface-2, var(--dark, #212529));
+    --ts-nav-text:               var(--ts-skin-text, var(--light, #ffffff));
+    --ts-nav-text-muted:         var(--ts-skin-text-dim, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+    --ts-nav-icon-color:         var(--ts-skin-text-dim, var(--grey-700, #c1c1c1));
+    --ts-nav-accent:             var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-nav-item-hover-bg:      var(--ts-skin-elevated, var(--dark-200, #101214));
+    --ts-nav-item-active-text:   var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-item-active-border: var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-section-title-color:var(--ts-skin-text-strong, var(--dark--300, #383f45));
+    --ts-nav-badge-bg:           var(--ts-skin-surface, var(--dark--100, #2c3237));
+    --ts-nav-badge-color:        var(--ts-skin-text, var(--light, #ffffff));
+    --ts-nav-badge-active-bg:    var(--ts-skin-accent-soft, var(--primary-100, #0077b3));
+    --ts-nav-badge-active-color: var(--ts-skin-accent, var(--primary--200, #00a1f2));
+    --ts-nav-toggle-color:       var(--ts-skin-text, var(--grey-200, #eaeaea));
+    --ts-nav-toggle-hover-bg:    var(--ts-skin-elevated, var(--dark-100, #16181b));
+    --ts-nav-content-bg:         var(--ts-skin-surface, var(--dark, #212529));
+    --ts-nav-content-border:     var(--ts-skin-border, var(--dark-rgba-80, rgba(33, 37, 41, 0.8)));
+    --ts-nav-content-shadow:     var(--ts-skin-shadow, 0 4px 24px var(--dark-rgba-40, rgba(33, 37, 41, 0.4)));
+    --ts-nav-muted-text:         var(--ts-skin-text-dim, var(--light-rgba-50, rgba(255, 255, 255, 0.5)));
 }
 
 /* Compact density */
@@ -649,8 +649,8 @@
     left: calc(var(--ts-nav-width-collapsed) - .5rem);
     top: 50%;
     transform: translateY(-50%);
-    background-color: #1f2937;
-    color: #f9fafb;
+    background-color: var(--ts-skin-inverse, #1f2937);
+    color: var(--ts-skin-on-inverse, #f9fafb);
     padding: .3125rem .625rem;
     border-radius: .375rem;
     font-size: .8125rem;
@@ -658,7 +658,7 @@
     white-space: nowrap;
     pointer-events: none;
     z-index: 200;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+    box-shadow: var(--ts-skin-shadow, 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1));
 }
 
 /* Separator */

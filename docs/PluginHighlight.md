@@ -32,7 +32,7 @@ The `<code>` child is recommended but optional — the plugin falls back to the 
 **Auto-init via `themestrap.init.js`:**
 
 ```js
-if ($.isFunction($.fn['themestrapPluginHighlight']) && $('[data-plugin-highlight]').length) {
+if (typeof $.fn['themestrapPluginHighlight'] === 'function' && $('[data-plugin-highlight]').length) {
     themestrap.fn.intObsInit('[data-plugin-highlight]:not(.manual)', 'themestrapPluginHighlight');
 }
 ```

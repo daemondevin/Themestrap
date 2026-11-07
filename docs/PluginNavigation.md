@@ -136,7 +136,7 @@ The plugin injects its own `<style id="ts-nav-styles">` on first use — no sepa
 
 ```js
 // Navigation (hybrid)
-if ($.isFunction($.fn['themestrapPluginNavigation']) &&
+if (typeof $.fn['themestrapPluginNavigation'] === 'function' &&
     $('[data-plugin-navigation]').length) {
     themestrap.fn.dynIntObsInit(
         '[data-plugin-navigation]:not(.manual)',

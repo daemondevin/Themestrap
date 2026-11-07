@@ -86,7 +86,7 @@
 
                     $el.text(self._format(current));
 
-                    if ($.isFunction(opts.onUpdate)) {
+                    if (typeof opts.onUpdate === 'function') {
                         opts.onUpdate.call($el[0], current);
                     }
                 }
@@ -97,7 +97,7 @@
                     self._running = false;
                     $el.text(self._format(to));
 
-                    if ($.isFunction(opts.onComplete)) {
+                    if (typeof opts.onComplete === 'function') {
                         opts.onComplete.call($el[0], to);
                     }
 
@@ -111,7 +111,7 @@
         _format(value) {
             const opts = this.options;
 
-            if ($.isFunction(opts.formatter)) {
+            if (typeof opts.formatter === 'function') {
                 return opts.formatter(value, opts);
             }
 

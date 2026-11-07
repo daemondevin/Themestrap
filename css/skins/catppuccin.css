@@ -1,0 +1,294 @@
+/* Themestrap skin: Catppuccin
+ * Base16 Catppuccin Latte and Mocha, by the Catppuccin community.
+ *
+ * Load one skin in place of default.css:
+ *   <link rel="stylesheet" href="css/skins/catppuccin.css">
+ *
+ * The first half sets the original palette that themestrap.css reads (--primary, --dark, ...).
+ * The second half sets the --ts-skin-* tokens every Themestrap plugin reads, once for
+ * light mode and once for dark mode, using the same three dark-mode tiers as the plugins.
+ * See docs/ThemestrapSkins.md for what each token is for.
+ */
+
+/* General */
+:root {
+	--border-radius: 10px;
+	--border-radius2x: 14px;
+	--default: #6c6c81;
+}
+/* Skin Colors */
+:root {
+	--primary: #8839ef;
+	--primary-100: #7a21ed;
+	--primary-200: #7316ec;
+	--primary-300: #6d12e3;
+	--primary--100: #9651f1;
+	--primary--200: #9d5cf2;
+	--primary--300: #a468f3;
+	--primary-rgba-0: rgba(136, 57, 239, 0);
+	--primary-rgba-10: rgba(136, 57, 239, 0.1);
+	--primary-rgba-20: rgba(136, 57, 239, 0.2);
+	--primary-rgba-30: rgba(136, 57, 239, 0.3);
+	--primary-rgba-40: rgba(136, 57, 239, 0.4);
+	--primary-rgba-50: rgba(136, 57, 239, 0.5);
+	--primary-rgba-60: rgba(136, 57, 239, 0.6);
+	--primary-rgba-70: rgba(136, 57, 239, 0.7);
+	--primary-rgba-80: rgba(136, 57, 239, 0.8);
+	--primary-rgba-90: rgba(136, 57, 239, 0.9);
+	--secondary: #d20f39;
+	--secondary-100: #ba0d33;
+	--secondary-200: #ae0c2f;
+	--secondary-300: #a20c2c;
+	--secondary--100: #ea113f;
+	--secondary--200: #ef1947;
+	--secondary--300: #ef2550;
+	--secondary-rgba-0: rgba(210, 15, 57, 0);
+	--secondary-rgba-10: rgba(210, 15, 57, 0.1);
+	--secondary-rgba-20: rgba(210, 15, 57, 0.2);
+	--secondary-rgba-30: rgba(210, 15, 57, 0.3);
+	--secondary-rgba-40: rgba(210, 15, 57, 0.4);
+	--secondary-rgba-50: rgba(210, 15, 57, 0.5);
+	--secondary-rgba-60: rgba(210, 15, 57, 0.6);
+	--secondary-rgba-70: rgba(210, 15, 57, 0.7);
+	--secondary-rgba-80: rgba(210, 15, 57, 0.8);
+	--secondary-rgba-90: rgba(210, 15, 57, 0.9);
+	--tertiary: #1e66f5;
+	--tertiary-100: #0b57ef;
+	--tertiary-200: #0a53e3;
+	--tertiary-300: #0a4ed6;
+	--tertiary--100: #3677f6;
+	--tertiary--200: #437ff7;
+	--tertiary--300: #4f87f7;
+	--tertiary-rgba-0: rgba(30, 102, 245, 0);
+	--tertiary-rgba-10: rgba(30, 102, 245, 0.1);
+	--tertiary-rgba-20: rgba(30, 102, 245, 0.2);
+	--tertiary-rgba-30: rgba(30, 102, 245, 0.3);
+	--tertiary-rgba-40: rgba(30, 102, 245, 0.4);
+	--tertiary-rgba-50: rgba(30, 102, 245, 0.5);
+	--tertiary-rgba-60: rgba(30, 102, 245, 0.6);
+	--tertiary-rgba-70: rgba(30, 102, 245, 0.7);
+	--tertiary-rgba-80: rgba(30, 102, 245, 0.8);
+	--tertiary-rgba-90: rgba(30, 102, 245, 0.9);
+	--quaternary: #333446;
+	--quaternary-100: #282937;
+	--quaternary-200: #232430;
+	--quaternary-300: #1e1e28;
+	--quaternary--100: #3e3f55;
+	--quaternary--200: #43445c;
+	--quaternary--300: #484a64;
+	--quaternary-rgba-0: rgba(51, 52, 70, 0);
+	--quaternary-rgba-10: rgba(51, 52, 70, 0.1);
+	--quaternary-rgba-20: rgba(51, 52, 70, 0.2);
+	--quaternary-rgba-30: rgba(51, 52, 70, 0.3);
+	--quaternary-rgba-40: rgba(51, 52, 70, 0.4);
+	--quaternary-rgba-50: rgba(51, 52, 70, 0.5);
+	--quaternary-rgba-60: rgba(51, 52, 70, 0.6);
+	--quaternary-rgba-70: rgba(51, 52, 70, 0.7);
+	--quaternary-rgba-80: rgba(51, 52, 70, 0.8);
+	--quaternary-rgba-90: rgba(51, 52, 70, 0.9);
+	--dark: #262637;
+	--dark-100: #1c1c28;
+	--dark-200: #161620;
+	--dark-300: #111119;
+	--dark--100: #303046;
+	--dark--200: #36364e;
+	--dark--300: #3b3b55;
+	--dark-rgba-0: rgba(38, 38, 55, 0);
+	--dark-rgba-10: rgba(38, 38, 55, 0.1);
+	--dark-rgba-20: rgba(38, 38, 55, 0.2);
+	--dark-rgba-30: rgba(38, 38, 55, 0.3);
+	--dark-rgba-40: rgba(38, 38, 55, 0.4);
+	--dark-rgba-50: rgba(38, 38, 55, 0.5);
+	--dark-rgba-60: rgba(38, 38, 55, 0.6);
+	--dark-rgba-70: rgba(38, 38, 55, 0.7);
+	--dark-rgba-80: rgba(38, 38, 55, 0.8);
+	--dark-rgba-90: rgba(38, 38, 55, 0.9);
+	--light: #f5f6f8;
+	--light-100: #e6e8ed;
+	--light-200: #dfe2e8;
+	--light-300: #d7dbe3;
+	--light--100: #ffffff;
+	--light--200: #ffffff;
+	--light--300: #ffffff;
+	--light-rgba-0: rgba(245, 246, 248, 0);
+	--light-rgba-10: rgba(245, 246, 248, 0.1);
+	--light-rgba-20: rgba(245, 246, 248, 0.2);
+	--light-rgba-30: rgba(245, 246, 248, 0.3);
+	--light-rgba-40: rgba(245, 246, 248, 0.4);
+	--light-rgba-50: rgba(245, 246, 248, 0.5);
+	--light-rgba-60: rgba(245, 246, 248, 0.6);
+	--light-rgba-70: rgba(245, 246, 248, 0.7);
+	--light-rgba-80: rgba(245, 246, 248, 0.8);
+	--light-rgba-90: rgba(245, 246, 248, 0.9);
+}
+/* Skin Colors - Inverse */
+:root {
+	--primary-inverse: #ffffff;
+	--secondary-inverse: #ffffff;
+	--tertiary-inverse: #ffffff;
+	--quaternary-inverse: #ffffff;
+	--dark-inverse: #ffffff;
+	--light-inverse: #6c6c81;
+}
+/* Grey Colors */
+:root {
+	--grey: #aeaebb;
+	--grey-100: #eaecf0;
+	--grey-200: #e5e6ec;
+	--grey-300: #e1e2e8;
+	--grey-400: #dddee5;
+	--grey-500: #d9dae1;
+	--grey-600: #d1d2da;
+	--grey-700: #c9cad3;
+	--grey-800: #b8b9c4;
+	--grey-900: #a7a8b5;
+	--grey-1000: #9697a6;
+}
+
+/* Central tokens: light mode (and explicit data-bs-theme="light") */
+:root,
+[data-bs-theme="light"] {
+    --ts-skin-bg:            #eff1f5;
+    --ts-skin-surface:       #f5f6f8;
+    --ts-skin-surface-2:     #e8eaef;
+    --ts-skin-elevated:      #e3e5eb;
+    --ts-skin-overlay:       rgba(15, 15, 23, 0.5);
+    --ts-skin-border:        #d3d5dd;
+    --ts-skin-border-strong: #bec0cb;
+    --ts-skin-text:          #4c4f69;
+    --ts-skin-text-strong:   #4c4f69;
+    --ts-skin-text-dim:      #6c6c81;
+    --ts-skin-text-faint:    #a1a3b2;
+    --ts-skin-accent:        #8839ef;
+    --ts-skin-accent-hover:  #7316ec;
+    --ts-skin-accent-soft:   rgba(136, 57, 239, 0.12);
+    --ts-skin-on-accent:     #ffffff;
+    --ts-skin-ring:          rgba(136, 57, 239, 0.45);
+    --ts-skin-success:       #40a02b;
+    --ts-skin-success-soft:  rgba(64, 160, 43, 0.12);
+    --ts-skin-warning:       #f05901;
+    --ts-skin-warning-soft:  rgba(240, 89, 1, 0.12);
+    --ts-skin-danger:        #d20f39;
+    --ts-skin-danger-soft:   rgba(210, 15, 57, 0.12);
+    --ts-skin-info:          #1e66f5;
+    --ts-skin-info-soft:     rgba(30, 102, 245, 0.12);
+    --ts-skin-inverse:       #1e1e2e;
+    --ts-skin-on-inverse:    #ffffff;
+    --ts-skin-code-bg:       #1e1e2e;
+    --ts-skin-code-text:     #cdd6f4;
+    --ts-skin-code-comment:  #54566e;
+    --ts-skin-code-keyword:  #cba6f7;
+    --ts-skin-code-string:   #a6e3a1;
+    --ts-skin-code-number:   #fab387;
+    --ts-skin-code-function: #89b4fa;
+    --ts-skin-code-title:    #f9e2af;
+    --ts-skin-code-variable: #f38ba8;
+    --ts-skin-code-builtin:  #94e2d5;
+    --ts-skin-code-tag:      #676a84;
+    --ts-skin-code-operator: #cdd6f4;
+    --ts-skin-code-meta:     #f2cdcd;
+    --ts-skin-shadow:        0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px -8px rgba(0, 0, 0, 0.18);
+    --ts-skin-shadow-lg:     0 24px 56px -12px rgba(0, 0, 0, 0.28), 0 4px 12px -4px rgba(0, 0, 0, 0.12);
+    --ts-skin-radius-sm:     6px;
+    --ts-skin-radius:        10px;
+    --ts-skin-radius-lg:     14px;
+}
+
+/* Central tokens: dark mode, system preference */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-bs-theme="light"]) {
+        --ts-skin-bg:            #1e1e2e;
+        --ts-skin-surface:       #262637;
+        --ts-skin-surface-2:     #2b2c3d;
+        --ts-skin-elevated:      #313244;
+        --ts-skin-overlay:       rgba(15, 15, 23, 0.7);
+        --ts-skin-border:        #3c3d50;
+        --ts-skin-border-strong: #4f5265;
+        --ts-skin-text:          #cdd6f4;
+        --ts-skin-text-strong:   #f5e0dc;
+        --ts-skin-text-dim:      #9ca2bd;
+        --ts-skin-text-faint:    #72768d;
+        --ts-skin-accent:        #cba6f7;
+        --ts-skin-accent-hover:  #e0c9fa;
+        --ts-skin-accent-soft:   rgba(203, 166, 247, 0.18);
+        --ts-skin-on-accent:     #0d0d15;
+        --ts-skin-ring:          rgba(203, 166, 247, 0.45);
+        --ts-skin-success:       #a6e3a1;
+        --ts-skin-success-soft:  rgba(166, 227, 161, 0.16);
+        --ts-skin-warning:       #f9e2af;
+        --ts-skin-warning-soft:  rgba(249, 226, 175, 0.16);
+        --ts-skin-danger:        #f38ba8;
+        --ts-skin-danger-soft:   rgba(243, 139, 168, 0.16);
+        --ts-skin-info:          #94e2d5;
+        --ts-skin-info-soft:     rgba(148, 226, 213, 0.16);
+        --ts-skin-inverse:       #f5e0dc;
+        --ts-skin-on-inverse:    #1e1e2e;
+        --ts-skin-code-bg:       #1e1e2e;
+        --ts-skin-code-text:     #cdd6f4;
+        --ts-skin-code-comment:  #54566e;
+        --ts-skin-code-keyword:  #cba6f7;
+        --ts-skin-code-string:   #a6e3a1;
+        --ts-skin-code-number:   #fab387;
+        --ts-skin-code-function: #89b4fa;
+        --ts-skin-code-title:    #f9e2af;
+        --ts-skin-code-variable: #f38ba8;
+        --ts-skin-code-builtin:  #94e2d5;
+        --ts-skin-code-tag:      #676a84;
+        --ts-skin-code-operator: #cdd6f4;
+        --ts-skin-code-meta:     #f2cdcd;
+        --ts-skin-shadow:        0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -10px rgba(0, 0, 0, 0.7);
+        --ts-skin-shadow-lg:     0 28px 60px -12px rgba(0, 0, 0, 0.75), 0 4px 14px -4px rgba(0, 0, 0, 0.5);
+        --ts-skin-radius-sm:     6px;
+        --ts-skin-radius:        10px;
+        --ts-skin-radius-lg:     14px;
+    }
+}
+
+/* Central tokens: dark mode, explicit (PluginDarkMode sets both) */
+html.dark,
+[data-bs-theme="dark"] {
+    --ts-skin-bg:            #1e1e2e;
+    --ts-skin-surface:       #262637;
+    --ts-skin-surface-2:     #2b2c3d;
+    --ts-skin-elevated:      #313244;
+    --ts-skin-overlay:       rgba(15, 15, 23, 0.7);
+    --ts-skin-border:        #3c3d50;
+    --ts-skin-border-strong: #4f5265;
+    --ts-skin-text:          #cdd6f4;
+    --ts-skin-text-strong:   #f5e0dc;
+    --ts-skin-text-dim:      #9ca2bd;
+    --ts-skin-text-faint:    #72768d;
+    --ts-skin-accent:        #cba6f7;
+    --ts-skin-accent-hover:  #e0c9fa;
+    --ts-skin-accent-soft:   rgba(203, 166, 247, 0.18);
+    --ts-skin-on-accent:     #0d0d15;
+    --ts-skin-ring:          rgba(203, 166, 247, 0.45);
+    --ts-skin-success:       #a6e3a1;
+    --ts-skin-success-soft:  rgba(166, 227, 161, 0.16);
+    --ts-skin-warning:       #f9e2af;
+    --ts-skin-warning-soft:  rgba(249, 226, 175, 0.16);
+    --ts-skin-danger:        #f38ba8;
+    --ts-skin-danger-soft:   rgba(243, 139, 168, 0.16);
+    --ts-skin-info:          #94e2d5;
+    --ts-skin-info-soft:     rgba(148, 226, 213, 0.16);
+    --ts-skin-inverse:       #f5e0dc;
+    --ts-skin-on-inverse:    #1e1e2e;
+    --ts-skin-code-bg:       #1e1e2e;
+    --ts-skin-code-text:     #cdd6f4;
+    --ts-skin-code-comment:  #54566e;
+    --ts-skin-code-keyword:  #cba6f7;
+    --ts-skin-code-string:   #a6e3a1;
+    --ts-skin-code-number:   #fab387;
+    --ts-skin-code-function: #89b4fa;
+    --ts-skin-code-title:    #f9e2af;
+    --ts-skin-code-variable: #f38ba8;
+    --ts-skin-code-builtin:  #94e2d5;
+    --ts-skin-code-tag:      #676a84;
+    --ts-skin-code-operator: #cdd6f4;
+    --ts-skin-code-meta:     #f2cdcd;
+    --ts-skin-shadow:        0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -10px rgba(0, 0, 0, 0.7);
+    --ts-skin-shadow-lg:     0 28px 60px -12px rgba(0, 0, 0, 0.75), 0 4px 14px -4px rgba(0, 0, 0, 0.5);
+    --ts-skin-radius-sm:     6px;
+    --ts-skin-radius:        10px;
+    --ts-skin-radius-lg:     14px;
+}

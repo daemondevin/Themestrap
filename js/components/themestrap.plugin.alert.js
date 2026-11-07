@@ -80,63 +80,63 @@
 }
 
 .alert-ts-info {
-    --alert-ts-bg           : #eff6ff;
-    --alert-ts-border       : #3b82f6;
-    --alert-ts-icon         : #3b82f6;
-    --alert-ts-title        : #1e40af;
-    --alert-ts-text         : #1d4ed8;
-    --alert-ts-action       : #1d4ed8;
-    --alert-ts-action-hover : #1e40af;
-    --alert-ts-close        : #93c5fd;
-    --alert-ts-close-hover  : #1d4ed8;
+    --alert-ts-bg           : var(--ts-skin-info-soft, #eff6ff);
+    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
+    --alert-ts-icon         : var(--ts-skin-info, #3b82f6);
+    --alert-ts-title        : var(--ts-skin-text-strong, #1e40af);
+    --alert-ts-text         : var(--ts-skin-text, #1d4ed8);
+    --alert-ts-action       : var(--ts-skin-info, #1d4ed8);
+    --alert-ts-action-hover : var(--ts-skin-info, #1e40af);
+    --alert-ts-close        : var(--ts-skin-info, #93c5fd);
+    --alert-ts-close-hover  : var(--ts-skin-text, #1d4ed8);
 }
 
 .alert-ts-success {
-    --alert-ts-bg           : #f0fdf4;
-    --alert-ts-border       : #22c55e;
-    --alert-ts-icon         : #22c55e;
-    --alert-ts-title        : #14532d;
-    --alert-ts-text         : #15803d;
-    --alert-ts-action       : #15803d;
-    --alert-ts-action-hover : #14532d;
-    --alert-ts-close        : #86efac;
-    --alert-ts-close-hover  : #15803d;
+    --alert-ts-bg           : var(--ts-skin-success-soft, #f0fdf4);
+    --alert-ts-border       : var(--ts-skin-success, #22c55e);
+    --alert-ts-icon         : var(--ts-skin-success, #22c55e);
+    --alert-ts-title        : var(--ts-skin-text-strong, #14532d);
+    --alert-ts-text         : var(--ts-skin-text, #15803d);
+    --alert-ts-action       : var(--ts-skin-success, #15803d);
+    --alert-ts-action-hover : var(--ts-skin-success, #14532d);
+    --alert-ts-close        : var(--ts-skin-success, #86efac);
+    --alert-ts-close-hover  : var(--ts-skin-text, #15803d);
 }
 
 .alert-ts-warning {
-    --alert-ts-bg           : #fffbeb;
-    --alert-ts-border       : #f59e0b;
-    --alert-ts-icon         : #f59e0b;
-    --alert-ts-title        : #78350f;
-    --alert-ts-text         : #92400e;
-    --alert-ts-action       : #92400e;
-    --alert-ts-action-hover : #78350f;
-    --alert-ts-close        : #fcd34d;
-    --alert-ts-close-hover  : #92400e;
+    --alert-ts-bg           : var(--ts-skin-warning-soft, #fffbeb);
+    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-icon         : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-title        : var(--ts-skin-text-strong, #78350f);
+    --alert-ts-text         : var(--ts-skin-text, #92400e);
+    --alert-ts-action       : var(--ts-skin-warning, #92400e);
+    --alert-ts-action-hover : var(--ts-skin-warning, #78350f);
+    --alert-ts-close        : var(--ts-skin-warning, #fcd34d);
+    --alert-ts-close-hover  : var(--ts-skin-text, #92400e);
 }
 
 .alert-ts-danger {
-    --alert-ts-bg           : #fef2f2;
-    --alert-ts-border       : #ef4444;
-    --alert-ts-icon         : #ef4444;
-    --alert-ts-title        : #7f1d1d;
-    --alert-ts-text         : #991b1b;
-    --alert-ts-action       : #991b1b;
-    --alert-ts-action-hover : #7f1d1d;
-    --alert-ts-close        : #fca5a5;
-    --alert-ts-close-hover  : #991b1b;
+    --alert-ts-bg           : var(--ts-skin-danger-soft, #fef2f2);
+    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
+    --alert-ts-icon         : var(--ts-skin-danger, #ef4444);
+    --alert-ts-title        : var(--ts-skin-text-strong, #7f1d1d);
+    --alert-ts-text         : var(--ts-skin-text, #991b1b);
+    --alert-ts-action       : var(--ts-skin-danger, #991b1b);
+    --alert-ts-action-hover : var(--ts-skin-danger, #7f1d1d);
+    --alert-ts-close        : var(--ts-skin-danger, #fca5a5);
+    --alert-ts-close-hover  : var(--ts-skin-text, #991b1b);
 }
 
 .alert-ts-neutral {
-    --alert-ts-bg           : #f9fafb;
-    --alert-ts-border       : #6b7280;
-    --alert-ts-icon         : #6b7280;
-    --alert-ts-title        : #111827;
-    --alert-ts-text         : #374151;
-    --alert-ts-action       : #374151;
-    --alert-ts-action-hover : #111827;
-    --alert-ts-close        : #d1d5db;
-    --alert-ts-close-hover  : #374151;
+    --alert-ts-bg           : var(--ts-skin-surface, #f9fafb);
+    --alert-ts-border       : var(--ts-skin-border, #6b7280);
+    --alert-ts-icon         : var(--ts-skin-text-dim, #6b7280);
+    --alert-ts-title        : var(--ts-skin-text-strong, #111827);
+    --alert-ts-text         : var(--ts-skin-text, #374151);
+    --alert-ts-action       : var(--ts-skin-text-strong, #374151);
+    --alert-ts-action-hover : var(--ts-skin-text-strong, #111827);
+    --alert-ts-close        : var(--ts-skin-text-dim, #d1d5db);
+    --alert-ts-close-hover  : var(--ts-skin-text, #374151);
 }
 
 
@@ -249,14 +249,14 @@
 .alert-ts-action-primary {
     background-color : var(--alert-ts-action);
     border-color     : var(--alert-ts-action);
-    color            : #fff;
+    color            : var(--ts-skin-on-accent, #fff);
 }
 
 .alert-ts-action-primary:hover,
 .alert-ts-action-primary:focus-visible {
     background-color : var(--alert-ts-action-hover);
     border-color     : var(--alert-ts-action-hover);
-    color            : #fff;
+    color            : var(--ts-skin-on-accent, #fff);
 }
 
 /* Secondary action — ghost / outlined */
@@ -269,7 +269,7 @@
 .alert-ts-action-secondary:hover,
 .alert-ts-action-secondary:focus-visible {
     background-color : var(--alert-ts-action);
-    color            : #fff;
+    color            : var(--ts-skin-on-accent, #fff);
 }
 
 /* Link-style action — no border, just tinted text */
@@ -361,8 +361,8 @@
 
 .alert-toast-stack > .alert-ts {
     pointer-events : auto;
-    box-shadow     : 0 4px 6px -1px rgba(0,0,0,.08),
-                     0 2px 4px -2px rgba(0,0,0,.06);
+    box-shadow     : var(--ts-skin-shadow, 0 4px 6px -1px rgba(0,0,0,.08),
+                     0 2px 4px -2px rgba(0,0,0,.06));
 }
 
 /* Slide-in entrance for toasts */
@@ -383,67 +383,67 @@
 
 /* Dark-mode palette */
 html.dark .alert-ts-info {
-    --alert-ts-bg           : #172554;
-    --alert-ts-border       : #3b82f6;
-    --alert-ts-icon         : #60a5fa;
-    --alert-ts-title        : #bfdbfe;
-    --alert-ts-text         : #93c5fd;
-    --alert-ts-action       : #93c5fd;
-    --alert-ts-action-hover : #bfdbfe;
-    --alert-ts-close        : #3b82f6;
-    --alert-ts-close-hover  : #bfdbfe;
+    --alert-ts-bg           : var(--ts-skin-info-soft, #172554);
+    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
+    --alert-ts-icon         : var(--ts-skin-info, #60a5fa);
+    --alert-ts-title        : var(--ts-skin-text-strong, #bfdbfe);
+    --alert-ts-text         : var(--ts-skin-text, #93c5fd);
+    --alert-ts-action       : var(--ts-skin-info, #93c5fd);
+    --alert-ts-action-hover : var(--ts-skin-info, #bfdbfe);
+    --alert-ts-close        : var(--ts-skin-info, #3b82f6);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bfdbfe);
 }
 
 html.dark .alert-ts-success {
-    --alert-ts-bg           : #052e16;
-    --alert-ts-border       : #22c55e;
-    --alert-ts-icon         : #4ade80;
-    --alert-ts-title        : #bbf7d0;
-    --alert-ts-text         : #86efac;
-    --alert-ts-action       : #86efac;
-    --alert-ts-action-hover : #bbf7d0;
-    --alert-ts-close        : #22c55e;
-    --alert-ts-close-hover  : #bbf7d0;
+    --alert-ts-bg           : var(--ts-skin-success-soft, #052e16);
+    --alert-ts-border       : var(--ts-skin-success, #22c55e);
+    --alert-ts-icon         : var(--ts-skin-success, #4ade80);
+    --alert-ts-title        : var(--ts-skin-text-strong, #bbf7d0);
+    --alert-ts-text         : var(--ts-skin-on-accent, #86efac);
+    --alert-ts-action       : var(--ts-skin-success, #86efac);
+    --alert-ts-action-hover : var(--ts-skin-success, #bbf7d0);
+    --alert-ts-close        : var(--ts-skin-success, #22c55e);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bbf7d0);
 }
 
 html.dark .alert-ts-warning {
-    --alert-ts-bg           : #27170a;
-    --alert-ts-border       : #f59e0b;
-    --alert-ts-icon         : #fbbf24;
-    --alert-ts-title        : #fde68a;
-    --alert-ts-text         : #fcd34d;
-    --alert-ts-action       : #fcd34d;
-    --alert-ts-action-hover : #fde68a;
-    --alert-ts-close        : #f59e0b;
-    --alert-ts-close-hover  : #fde68a;
+    --alert-ts-bg           : var(--ts-skin-warning-soft, #27170a);
+    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-icon         : var(--ts-skin-warning, #fbbf24);
+    --alert-ts-title        : var(--ts-skin-text-strong, #fde68a);
+    --alert-ts-text         : var(--ts-skin-on-accent, #fcd34d);
+    --alert-ts-action       : var(--ts-skin-warning, #fcd34d);
+    --alert-ts-action-hover : var(--ts-skin-warning, #fde68a);
+    --alert-ts-close        : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fde68a);
 }
 
 html.dark .alert-ts-danger {
-    --alert-ts-bg           : #2d0a0a;
-    --alert-ts-border       : #ef4444;
-    --alert-ts-icon         : #f87171;
-    --alert-ts-title        : #fecaca;
-    --alert-ts-text         : #fca5a5;
-    --alert-ts-action       : #fca5a5;
-    --alert-ts-action-hover : #fecaca;
-    --alert-ts-close        : #ef4444;
-    --alert-ts-close-hover  : #fecaca;
+    --alert-ts-bg           : var(--ts-skin-danger-soft, #2d0a0a);
+    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
+    --alert-ts-icon         : var(--ts-skin-danger, #f87171);
+    --alert-ts-title        : var(--ts-skin-text-strong, #fecaca);
+    --alert-ts-text         : var(--ts-skin-text, #fca5a5);
+    --alert-ts-action       : var(--ts-skin-danger, #fca5a5);
+    --alert-ts-action-hover : var(--ts-skin-danger, #fecaca);
+    --alert-ts-close        : var(--ts-skin-danger, #ef4444);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fecaca);
 }
 
 html.dark .alert-ts-neutral {
-    --alert-ts-bg           : #111827;
-    --alert-ts-border       : #6b7280;
-    --alert-ts-icon         : #9ca3af;
-    --alert-ts-title        : #f9fafb;
-    --alert-ts-text         : #d1d5db;
-    --alert-ts-action       : #d1d5db;
-    --alert-ts-action-hover : #f9fafb;
-    --alert-ts-close        : #6b7280;
-    --alert-ts-close-hover  : #f9fafb;
+    --alert-ts-bg           : var(--ts-skin-surface, #111827);
+    --alert-ts-border       : var(--ts-skin-border, #6b7280);
+    --alert-ts-icon         : var(--ts-skin-text-dim, #9ca3af);
+    --alert-ts-title        : var(--ts-skin-text-strong, #f9fafb);
+    --alert-ts-text         : var(--ts-skin-text, #d1d5db);
+    --alert-ts-action       : var(--ts-skin-text-strong, #d1d5db);
+    --alert-ts-action-hover : var(--ts-skin-text-strong, #f9fafb);
+    --alert-ts-close        : var(--ts-skin-text-dim, #6b7280);
+    --alert-ts-close-hover  : var(--ts-skin-text, #f9fafb);
 }
 
 .alert.alert-ts {
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    box-shadow: inset 0 0 0 1px var(--ts-skin-border, rgba(255,255,255,.06));
 }
 
 /* Reduced-motion overrides */
@@ -683,7 +683,7 @@ html.dark .alert-ts-neutral {
             self.$el.on('click.pluginalert', '.alert-ts-action', function() {
                 const key = $(this).data('action');
                 self.$el.trigger('action.alert', [key, self]);
-                if ($.isFunction(o.onAction)) {
+                if (typeof o.onAction === 'function') {
                     o.onAction.call(self, key);
                 }
             });
@@ -790,7 +790,7 @@ html.dark .alert-ts-neutral {
             const self = this;
             self.$el.trigger('closed.bs.alert');
 
-            if ($.isFunction(self.options.onDismiss)) {
+            if (typeof self.options.onDismiss === 'function') {
                 self.options.onDismiss.call(self);
             }
 
@@ -928,7 +928,7 @@ html.dark .alert-ts-neutral {
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     instance[opts]();
                 } else if (opts !== 'dismiss' && opts !== 'destroy') {
                     console.warn(`[PluginAlert] Unknown command: "${opts}"`);

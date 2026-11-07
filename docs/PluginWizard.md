@@ -102,7 +102,7 @@ $('#signup-wizard').themestrapPluginWizard();
 Because the wizard must be live before user interaction, use DOMReady-immediate initialization; not `intObsInit`:
 
 ```js
-if ($.isFunction($.fn['themestrapPluginWizard']) && $('[data-plugin-wizard]').length) {
+if (typeof $.fn['themestrapPluginWizard'] === 'function' && $('[data-plugin-wizard]').length) {
     $(() => {
         $('[data-plugin-wizard]:not(.manual)').each(function () {
             const $this = $(this);

@@ -1051,31 +1051,31 @@
     --tsc-easing:              cubic-bezier(0.4, 0, 0.2, 1);
     --tsc-nav-size:            46px;
     --tsc-nav-offset:          -23px;
-    --tsc-nav-bg:              rgba(0,0,0,.5);
-    --tsc-nav-bg-hover:        rgba(0,0,0,.78);
-    --tsc-nav-color:           #fff;
+    --tsc-nav-bg:              var(--ts-skin-surface, rgba(0,0,0,.5));
+    --tsc-nav-bg-hover:        var(--ts-skin-elevated, rgba(0,0,0,.78));
+    --tsc-nav-color:           var(--ts-skin-text, #fff);
     --tsc-nav-radius:          50%;
     --tsc-nav-icon:            20px;
     --tsc-nav-border:          none;
-    --tsc-nav-shadow:          0 2px 8px rgba(0,0,0,.25);
+    --tsc-nav-shadow:          var(--ts-skin-shadow, 0 2px 8px rgba(0,0,0,.25));
     --tsc-dot-size:            8px;
     --tsc-dot-gap:             8px;
-    --tsc-dot-color:           rgba(0,0,0,.22);
-    --tsc-dot-active-color:    var(--primary, #0d6efd);
+    --tsc-dot-color:           var(--ts-skin-border-strong, rgba(0,0,0,.22));
+    --tsc-dot-active-color:    var(--ts-skin-accent, var(--primary, #0d6efd));
     --tsc-dot-line-w:          22px;
     --tsc-dot-line-h:          3px;
     --tsc-dot-num-size:        28px;
     --tsc-progress-h:          3px;
-    --tsc-progress-bg:         rgba(0,0,0,.1);
-    --tsc-progress-color:      var(--primary, #0d6efd);
-    --tsc-counter-color:       var(--grey-600, #6c757d);
+    --tsc-progress-bg:         var(--ts-skin-surface-2, rgba(0,0,0,.1));
+    --tsc-progress-color:      var(--ts-skin-accent, var(--primary, #0d6efd));
+    --tsc-counter-color:       var(--ts-skin-text-dim, var(--grey-600, #6c757d));
     --tsc-thumb-size:          72px;
     --tsc-thumb-gap:           6px;
-    --tsc-thumb-radius:        6px;
+    --tsc-thumb-radius:        var(--ts-skin-radius, 6px);
     --tsc-thumb-opacity:       .5;
     --tsc-thumb-opacity-hover: 1;
     --tsc-thumb-border:        2px solid transparent;
-    --tsc-thumb-border-active: 2px solid var(--primary, #0d6efd);
+    --tsc-thumb-border-active: 2px solid var(--primary, var(--ts-skin-accent, #0d6efd));
     --tsc-gap:                 0px;
 
     position: relative;
@@ -1269,7 +1269,7 @@
 .tsc-dots-number .tsc-dot.tsc-dot-active {
     background: var(--tsc-dot-active-color);
     border-color: var(--tsc-dot-active-color);
-    color: #fff;
+    color: var(--ts-skin-on-accent, #fff);
 }
 
 /* Counter */
@@ -1401,24 +1401,24 @@
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
     .tsc-carousel {
-        --tsc-dot-color:        rgba(255,255,255,.28);
-        --tsc-dot-active-color: var(--primary, #6ea8fe);
-        --tsc-progress-bg:      rgba(255,255,255,.12);
-        --tsc-counter-color:    rgba(255,255,255,.5);
+        --tsc-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
+        --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
+        --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
+        --tsc-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
     }
 }
 html.dark .tsc-carousel,
 [data-bs-theme="dark"] .tsc-carousel {
-    --tsc-dot-color:        rgba(255,255,255,.28);
-    --tsc-dot-active-color: var(--primary, #6ea8fe);
-    --tsc-progress-bg:      rgba(255,255,255,.12);
-    --tsc-counter-color:    rgba(255,255,255,.5);
+    --tsc-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
+    --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
+    --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
+    --tsc-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
 }
 [data-bs-theme="light"] .tsc-carousel {
-    --tsc-dot-color:        rgba(0,0,0,.22);
-    --tsc-dot-active-color: var(--primary, #0d6efd);
-    --tsc-progress-bg:      rgba(0,0,0,.1);
-    --tsc-counter-color:    var(--grey-600, #6c757d);
+    --tsc-dot-color:        var(--ts-skin-border-strong, rgba(0,0,0,.22));
+    --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #0d6efd));
+    --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.1));
+    --tsc-counter-color:    var(--ts-skin-text-dim, var(--grey-600, #6c757d));
 }
 `;
 

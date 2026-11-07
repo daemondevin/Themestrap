@@ -102,16 +102,16 @@
  */
 
 :root {
-    --ts-drw-bg          : #ffffff;
-    --ts-drw-overlay     : rgba(0, 0, 0, 0.5);
-    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
-    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-radius      : 1rem;
-    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
-    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
-    --ts-drw-text-muted  : #6b7280;
+    --ts-drw-bg          : var(--ts-skin-surface, #ffffff);
+    --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.5));
+    --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06));
+    --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-radius      : var(--ts-skin-radius-lg, 1rem);
+    --ts-drw-handle      : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.18));
+    --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(0, 0, 0, 0.30));
+    --ts-drw-text-muted  : var(--ts-skin-text-dim, #6b7280);
     --ts-drw-max-h       : 85svh;
     --ts-drw-side-w      : min(380px, 85vw);
     --ts-drw-pad         : 1.5rem;
@@ -161,7 +161,7 @@
     scrollbar-width     : thin;
 
     &::-webkit-scrollbar       { width: 4px; }
-    &::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.18); border-radius: 2px; }
+    &::-webkit-scrollbar-thumb { background: var(--ts-skin-border-strong, rgba(0, 0, 0, 0.18)); border-radius: 2px; }
 }
 
 /* Bottom drawer */
@@ -303,52 +303,52 @@ body.ts-scroll-lock {
 /* Dark mode — tier 1: system preference */
 @media (prefers-color-scheme: dark) {
     :root {
-        --ts-drw-bg          : #1e2939;
-        --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
-        --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
-        --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
-        --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
-        --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
-        --ts-drw-handle      : rgba(255, 255, 255, 0.22);
-        --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
-        --ts-drw-text-muted  : #9ca3af;
+        --ts-drw-bg          : var(--ts-skin-surface, #1e2939);
+        --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.70));
+        --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.45));
+        --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.45));
+        --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.45));
+        --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.45));
+        --ts-drw-handle      : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.22));
+        --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(255, 255, 255, 0.38));
+        --ts-drw-text-muted  : var(--ts-skin-text-dim, #9ca3af);
     }
 
     [data-drawer-panel]::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.15);
+        background: var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
     }
 }
 
 /* Dark mode — tier 2: explicit class/attribute */
 html.dark,
 [data-bs-theme="dark"] {
-    --ts-drw-bg          : #1e2939;
-    --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
-    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
-    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
-    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
-    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
-    --ts-drw-handle      : rgba(255, 255, 255, 0.22);
-    --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
-    --ts-drw-text-muted  : #9ca3af;
+    --ts-drw-bg          : var(--ts-skin-surface, #1e2939);
+    --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.70));
+    --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.45));
+    --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.45));
+    --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.45));
+    --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.45));
+    --ts-drw-handle      : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.22));
+    --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(255, 255, 255, 0.38));
+    --ts-drw-text-muted  : var(--ts-skin-text-dim, #9ca3af);
 }
 
 html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 [data-bs-theme="dark"] [data-drawer-panel]::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
 }
 
 /* Dark mode — tier 3: explicit light override */
 [data-bs-theme="light"] {
-    --ts-drw-bg          : #ffffff;
-    --ts-drw-overlay     : rgba(0, 0, 0, 0.50);
-    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
-    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
-    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
-    --ts-drw-text-muted  : #6b7280;
+    --ts-drw-bg          : var(--ts-skin-surface, #ffffff);
+    --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.50));
+    --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06));
+    --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-handle      : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.18));
+    --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(0, 0, 0, 0.30));
+    --ts-drw-text-muted  : var(--ts-skin-text-dim, #6b7280);
 }
 
 /* Reduced motion */

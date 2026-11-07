@@ -38,7 +38,7 @@
 		}
 
         build() {
-			if (!($.isFunction($.fn.revolution))) {
+			if (!(typeof $.fn.revolution === 'function')) {
 				return this;
 			}
 

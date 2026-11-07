@@ -52,7 +52,7 @@
  *
  * Init.js wiring
  *
- *   if ($.isFunction($.fn['themestrapPluginTooltip']) && $('[data-plugin-tooltip]').length) {
+ *   if (typeof $.fn['themestrapPluginTooltip'] === 'function' && $('[data-plugin-tooltip]').length) {
  *       $(() => {
  *           $('[data-plugin-tooltip]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -73,8 +73,8 @@
     const CSS_TEXT = `/* Themestrap — PluginTooltip */
 /* Base */
 .ts-tooltip-el {
-    --ts-tt-bg    : rgba(0, 0, 0, 0.94);
-    --ts-tt-color : var(--grey-500, #dbdbdb);
+    --ts-tt-bg    : var(--ts-skin-inverse, rgba(0, 0, 0, 0.94));
+    --ts-tt-color : var(--ts-skin-on-inverse, var(--grey-500, #dbdbdb));
 
     position      : fixed;
     z-index       : 9999;
@@ -119,10 +119,10 @@
     --ts-tt-color : var(--dark-300, #0a0c0d);
     box-shadow    : 0 4px 14px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)), 0 0 0 1px var(--dark-rgba-70, rgba(33, 37, 41, 0.7));
 }
-.ts-tooltip-el.ts-tt-success    { --ts-tt-bg: rgba( 22, 163,  74, 0.95); --ts-tt-color: var(--light, #ffffff); }
-.ts-tooltip-el.ts-tt-warning    { --ts-tt-bg: rgba(234, 179,   8, 0.95); --ts-tt-color: var(--dark-200, #101214); }
-.ts-tooltip-el.ts-tt-danger     { --ts-tt-bg: rgba(220,  38,  38, 0.95); --ts-tt-color: var(--light, #ffffff); }
-.ts-tooltip-el.ts-tt-info       { --ts-tt-bg: rgba( 59, 130, 246, 0.95); --ts-tt-color: var(--light, #ffffff); }
+.ts-tooltip-el.ts-tt-success    { --ts-tt-bg: var(--ts-skin-success, rgba( 22, 163,  74, 0.95)); --ts-tt-color: var(--ts-skin-on-accent, var(--light, #ffffff)); }
+.ts-tooltip-el.ts-tt-warning    { --ts-tt-bg: var(--ts-skin-warning, rgba(234, 179,   8, 0.95)); --ts-tt-color: var(--dark-200, #101214); }
+.ts-tooltip-el.ts-tt-danger     { --ts-tt-bg: var(--ts-skin-danger, rgba(220,  38,  38, 0.95)); --ts-tt-color: var(--ts-skin-on-accent, var(--light, #ffffff)); }
+.ts-tooltip-el.ts-tt-info       { --ts-tt-bg: var(--ts-skin-info, rgba( 59, 130, 246, 0.95)); --ts-tt-color: var(--ts-skin-on-accent, var(--light, #ffffff)); }
 
 /* Arrow */
 /* The arrow points from the tooltip toward the trigger.
@@ -442,7 +442,7 @@
             $(document).on(`touchend.tooltip-outside.${self._uid}`, self._touchOutsideHandler);
 
             self.$el.trigger('tooltip:show', [self]);
-            if ($.isFunction(self.options.onShow)) {
+            if (typeof self.options.onShow === 'function') {
                 self.options.onShow.call(self);
             }
 
@@ -462,7 +462,7 @@
             $(document).off(`touchend.tooltip-outside.${self._uid}`);
 
             self.$el.trigger('tooltip:hide', [self]);
-            if ($.isFunction(self.options.onHide)) {
+            if (typeof self.options.onHide === 'function') {
                 self.options.onHide.call(self);
             }
 
@@ -585,7 +585,7 @@
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     instance[opts]();
                 } else if (instance) {
                     console.warn(`[PluginTooltip] Unknown command: "${opts}"`);

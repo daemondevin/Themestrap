@@ -181,7 +181,7 @@ Instead of a per-block init script, wire auto-init once in `themestrap.init.js` 
 
 ```javascript
 // themestrap.init.js — PluginAccordion auto-init
-if ($.isFunction($.fn['themestrapPluginAccordion'])
+if (typeof $.fn['themestrapPluginAccordion'] === 'function'
     && $('[data-plugin-accordion]').length) {
     themestrap.fn.intObsInit(
         '[data-plugin-accordion]:not(.manual)',

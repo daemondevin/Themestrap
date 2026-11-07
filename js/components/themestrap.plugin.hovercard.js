@@ -56,7 +56,7 @@
  *
  * Init.js wiring
  *
- *   if ($.isFunction($.fn['themestrapPluginHoverCard']) && $('[data-plugin-hovercard]').length) {
+ *   if (typeof $.fn['themestrapPluginHoverCard'] === 'function' && $('[data-plugin-hovercard]').length) {
  *       $(() => {
  *           $('[data-plugin-hovercard]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -86,15 +86,15 @@
     z-index: 9994;
     min-width: 240px;
     max-width: 340px;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--ts-hc-surface, var(--ts-skin-surface, #fff));
+    border: 1px solid var(--ts-hc-border, var(--ts-skin-border, rgba(0, 0, 0, 0.08)));
     border-radius: 0.625rem;
     box-shadow:
-        0 4px  6px -1px rgba(0, 0, 0, 0.07),
-        0 10px 15px -3px rgba(0, 0, 0, 0.10);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0, 0, 0, 0.07),
+        0 10px 15px -3px rgba(0, 0, 0, 0.10));
     padding: 1rem;
     line-height: 1.5;
-    color: #1a1a2e;
+    color: var(--ts-hc-text, var(--ts-skin-text, #1a1a2e));
     display: none;
     pointer-events: none;
 }
@@ -140,27 +140,27 @@
     display: block;
 }
 
-[data-hovercard-content].ts-hc-side-top::after    { top:  100%;                border-top-color: #fff; }
-[data-hovercard-content].ts-hc-side-top::before   { top:  calc(100% + 1px);   border-top-color: rgba(0,0,0,0.08); }
-[data-hovercard-content].ts-hc-side-bottom::after  { bottom: 100%;             border-bottom-color: #fff; }
-[data-hovercard-content].ts-hc-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: rgba(0,0,0,0.08); }
-[data-hovercard-content].ts-hc-side-left::after   { left:  100%;               border-left-color: #fff; }
-[data-hovercard-content].ts-hc-side-left::before  { left:  calc(100% + 1px);   border-left-color: rgba(0,0,0,0.08); }
-[data-hovercard-content].ts-hc-side-right::after  { right: 100%;               border-right-color: #fff; }
-[data-hovercard-content].ts-hc-side-right::before { right: calc(100% + 1px);   border-right-color: rgba(0,0,0,0.08); }
+[data-hovercard-content].ts-hc-side-top::after    { top:  100%;                border-top-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-top::before   { top:  calc(100% + 1px);   border-top-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
+[data-hovercard-content].ts-hc-side-bottom::after  { bottom: 100%;             border-bottom-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
+[data-hovercard-content].ts-hc-side-left::after   { left:  100%;               border-left-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-left::before  { left:  calc(100% + 1px);   border-left-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
+[data-hovercard-content].ts-hc-side-right::after  { right: 100%;               border-right-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-right::before { right: calc(100% + 1px);   border-right-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Convenience layout helpers */
 .hc-avatar       { margin-bottom: 0.625rem; }
 .hc-avatar img   { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; display: block; }
 
 .hc-name         { font-size: 0.9375rem; font-weight: 700; line-height: 1.25; color: inherit; }
-.hc-handle       { font-size: 0.8125rem; color: #6b7280; margin-bottom: 0.375rem; }
-.hc-bio          { font-size: 0.8125rem; color: #374151; margin: 0 0 0.625rem; }
+.hc-handle       { font-size: 0.8125rem; color: var(--ts-hc-text-dim, var(--ts-skin-text-dim, #6b7280)); margin-bottom: 0.375rem; }
+.hc-bio          { font-size: 0.8125rem; color: var(--ts-hc-text, var(--ts-skin-text, #374151)); margin: 0 0 0.625rem; }
 
 .hc-meta         { display: flex; gap: 1rem; font-size: 0.8125rem; font-weight: 600; color: inherit; }
-.hc-meta-label   { font-weight: 400; color: #6b7280; }
+.hc-meta-label   { font-weight: 400; color: var(--ts-hc-text-dim, var(--ts-skin-text-dim, #6b7280)); }
 
-.hc-divider      { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 0.625rem 0; }
+.hc-divider      { border: none; border-top: 1px solid var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.06))); margin: 0.625rem 0; }
 
 /* Dark mode */
 html.dark [data-hovercard-content] {
@@ -168,8 +168,8 @@ html.dark [data-hovercard-content] {
     color: var(--default, #777);
     border-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5));
     box-shadow:
-        0 4px  6px -1px rgba(0,0,0,0.3),
-        0 10px 15px -3px rgba(0,0,0,0.4);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0,0,0,0.3),
+        0 10px 15px -3px rgba(0,0,0,0.4));
 }
 
 html.dark [data-hovercard-content].ts-hc-side-top::after    { border-top-color: var(--dark-300, #0a0c0d); }
@@ -182,8 +182,8 @@ html.dark [data-hovercard-content].ts-hc-side-right::after  { border-right-color
 html.dark [data-hovercard-content].ts-hc-side-right::before { border-right-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
 
 html.dark .hc-handle,
-html.dark .hc-meta-label { color: var(--color-grey-300, #9ca3af); }
-html.dark .hc-bio        { color: var(--color-grey-200, #c0c8d4); }
+html.dark .hc-meta-label { color: var(--ts-skin-border-strong, var(--color-grey-300, #9ca3af)); }
+html.dark .hc-bio        { color: var(--ts-skin-border, var(--color-grey-200, #c0c8d4)); }
 html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -650,7 +650,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     instance[opts]();
                 }
                 return instance;

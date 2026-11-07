@@ -251,7 +251,7 @@ Add the following block to `themestrap.init.js`:
 
 ```js
 // Context Menu
-if ($.isFunction($.fn['themestrapPluginContextMenu']) && $('[data-plugin-context-menu]').length) {
+if (typeof $.fn['themestrapPluginContextMenu'] === 'function' && $('[data-plugin-context-menu]').length) {
     themestrap.fn.intObsInit('[data-plugin-context-menu]:not(.manual)', 'themestrapPluginContextMenu');
 }
 ```

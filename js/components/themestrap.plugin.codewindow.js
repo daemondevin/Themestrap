@@ -50,7 +50,7 @@
  *   cw.destroy();            // restore original markup
  *
  *   // Code Window
- *   if ($.isFunction($.fn['themestrapPluginCodeWindow']) && $('[data-plugin-code-window]').length) {
+ *   if (typeof $.fn['themestrapPluginCodeWindow'] === 'function' && $('[data-plugin-code-window]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-code-window]:not(.manual)', 'themestrapPluginCodeWindow');
  *   }
  */
@@ -64,17 +64,17 @@
 
     const CSS_TEXT = `/* Themestrap — PluginCodeWindow */
 .ts-code-window {
-    --ts-cw-radius:        4px;
-    --ts-cw-bg:            #212529;
-    --ts-cw-chrome-bg:     #16181b;
-    --ts-cw-border:        rgba(255,255,255,0.08);
-    --ts-cw-tab-fg:        rgba(245,241,234,0.50);
-    --ts-cw-tab-fg-active: #f5f1ea;
-    --ts-cw-accent:        var(--primary);
+    --ts-cw-radius:        var(--ts-skin-radius-sm, 4px);
+    --ts-cw-bg:            var(--ts-skin-code-bg, #212529);
+    --ts-cw-chrome-bg:     var(--ts-skin-code-bg, #16181b);
+    --ts-cw-border:        var(--ts-skin-border, rgba(255,255,255,0.08));
+    --ts-cw-tab-fg:        var(--ts-skin-code-comment, rgba(245,241,234,0.50));
+    --ts-cw-tab-fg-active: var(--ts-skin-code-text, #f5f1ea);
+    --ts-cw-accent:        var(--ts-skin-accent, var(--primary));
     --ts-cw-glow-1:        rgba(42,184,200,0.30);
     --ts-cw-glow-2:        rgba(232,103,42,0.28);
-    --ts-cw-shadow:        0 30px 60px -20px rgba(0,0,0,0.55),
-                           0 12px 24px -12px rgba(0,0,0,0.45);
+    --ts-cw-shadow:        var(--ts-skin-shadow, 0 30px 60px -20px rgba(0,0,0,0.55),
+                           0 12px 24px -12px rgba(0,0,0,0.45));
 
     position: relative;
     border-radius: var(--ts-cw-radius);
@@ -88,8 +88,8 @@
 
 /* Light theme tuning (page default). Dark theme keeps the dark editor look. */
 html:not(.dark) .ts-code-window {
-    --ts-cw-shadow: 0 24px 50px -22px rgba(10,25,41,0.35),
-                    0 8px 18px -10px rgba(10,25,41,0.20);
+    --ts-cw-shadow: var(--ts-skin-shadow, 0 24px 50px -22px rgba(10,25,41,0.35),
+                    0 8px 18px -10px rgba(10,25,41,0.20));
 }
 
 /* Ambient gradient glow */
@@ -212,7 +212,7 @@ html:not(.dark) .ts-code-window {
     border: 0;
     background: transparent;
     color: var(--ts-cw-tab-fg);
-    font-family: var(--mono, ui-monospace, 'JetBrains Mono', monospace);
+    font-family: var(--ts-skin-font-mono, var(--mono, ui-monospace, 'JetBrains Mono', monospace));
     font-size: 12.5px;
     line-height: 1;
     padding: 0 14px;
@@ -285,8 +285,8 @@ html:not(.dark) .ts-code-window {
     font-weight: 600;
     line-height: 1;
 
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.75);
+    background: var(--ts-skin-code-bg, rgba(255,255,255,0.08));
+    color: var(--ts-skin-code-text, rgba(255,255,255,0.75));
 
     text-transform: uppercase;
     letter-spacing: .04em;
@@ -467,7 +467,7 @@ html:not(.dark) .ts-code-window {
             const self = this;
             if (!this.options.highlight) return this;
 
-            if (!$.isFunction($.fn.themestrapPluginHighlight)) {
+            if (typeof $.fn.themestrapPluginHighlight !== 'function') {
                 // Highlight plugin not on the page — panes still render as plain
                 // (but styled) code. Nothing else to do.
                 return this;

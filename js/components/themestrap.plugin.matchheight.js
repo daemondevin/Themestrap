@@ -37,7 +37,7 @@
 		}
 
         build() {
-			if (!($.isFunction($.fn.matchHeight))) {
+			if (!(typeof $.fn.matchHeight === 'function')) {
 				return this;
 			}
 

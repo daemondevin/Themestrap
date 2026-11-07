@@ -231,7 +231,7 @@ themestrap.PluginDialog.alert({ title: 'Saved', message: 'Your changes are live.
 
 <script>
 // Dialog
-if ($.isFunction($.fn['themestrapPluginDialog']) && $('[data-plugin-dialog]').length) {
+if (typeof $.fn['themestrapPluginDialog'] === 'function' && $('[data-plugin-dialog]').length) {
     $(() => {
         $('[data-plugin-dialog]:not(.manual)').each(function () {
             const $this = $(this);

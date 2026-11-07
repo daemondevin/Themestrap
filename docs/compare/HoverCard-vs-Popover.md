@@ -784,7 +784,7 @@ Both plugins support:
 html.dark
 ```
 
-and use Themestrap/Porto custom properties for dark-mode colors.
+and use Themestrap custom properties for dark-mode colors.
 
 ### HoverCard
 

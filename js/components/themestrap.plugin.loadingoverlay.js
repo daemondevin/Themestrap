@@ -21,7 +21,7 @@ body.ts-scroll-lock {
 
 /* Overlay shell */
 .ts-lo-overlay {
-    --ts-lo-color:    #e8672a;
+    --ts-lo-color:    var(--ts-skin-accent, #e8672a);
     --ts-lo-z:        9000;
     --ts-lo-size:     48px;
     --ts-lo-duration: 800ms;
@@ -83,7 +83,7 @@ html.dark .ts-lo-overlay,
 .ts-lo-progress-track {
     width: 160px;
     height: 4px;
-    background: rgba(128, 128, 128, 0.25);
+    background: var(--ts-skin-surface-2, rgba(128, 128, 128, 0.25));
     border-radius: 2px;
     overflow: hidden;
 }

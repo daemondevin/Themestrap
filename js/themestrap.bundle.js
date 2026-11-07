@@ -1,4 +1,94 @@
 // Accordion
+/**
+ * Themestrap Accordion Plugin
+ *
+ * A true multi-item accordion: a group of disclosure rows where (by default)
+ * only one panel is open at a time. This is the *group* counterpart to
+ * PluginCollapsible (which manages a single, standalone panel). Use Accordion
+ * for FAQs, settings groups, nested docs nav, "show more" stacks — anywhere a
+ * set of headers reveal/hide their own bodies and you want exclusive-open,
+ * keyboard navigation, and a clean height transition out of the box.
+ *
+ * Out of the box it uses the Venom palette (Base16 Black Metal / Venom-inspired):
+ * near-black surfaces, hairline borders, cream headings, and a single deep
+ * blood-red accent. Tokens resolve from the active skin's --ts-skin-* custom
+ * properties (css/skins/*.css) when present, and fall back to those Venom
+ * literals otherwise, so the component looks right standalone and follows the
+ * site's skin when one is loaded.
+ *
+ * All CSS is contained in this file and injected ONCE per page, lazily, on the
+ * first build() — loading the script never adds styles to pages that don't use
+ * the plugin.
+ *
+ * Part of the Themestrap component library for MODX 3.
+ *
+ * MARKUP
+ *   <div data-plugin-accordion data-plugin-options='{"exclusive": true, "openIndex": 0}'>
+ *
+ *     <div data-accordion-item>
+ *       <button type="button" data-accordion-trigger>What is Themestrap?</button>
+ *       <div data-accordion-panel>
+ *         <p>A jQuery + Bootstrap component library for MODX 3.</p>
+ *       </div>
+ *     </div>
+ *
+ *     <div data-accordion-item>
+ *       <button type="button" data-accordion-trigger>How are panels animated?</button>
+ *       <div data-accordion-panel>
+ *         <p>Each panel animates 0 &harr; measured height, then hands off to CSS.</p>
+ *       </div>
+ *     </div>
+ *
+ *   </div>
+ *
+ *   Per item the plugin looks for:
+ *     [data-accordion-trigger]  the header/toggle. Falls back to the first
+ *                               <button>/<a>/[data-accordion-header] in the item.
+ *     [data-accordion-panel]    the collapsible body. Falls back to
+ *                               [data-accordion-content], else the trigger's
+ *                               next sibling element.
+ *   A chevron <span data-accordion-icon> is injected into the trigger if none
+ *   is present, and is rotated on open (CSS-drawn caret — no icon font needed).
+ *
+ * OPTIONS (data-plugin-options or the jQuery method argument)
+ *   exclusive   {bool}            One panel open at a time.                 default true
+ *   collapsible {bool}            In exclusive mode, allow the open panel to
+ *                                 be closed (so all can be shut).           default true
+ *   openIndex   {number|number[]  Which item(s) start open. A 0-based index,
+ *               |'all'|'none'}    an array of indices, 'all', or 'none'.    default 0
+ *   duration    {string|number}   Height transition: any CSS <time> string
+ *                                 ('320ms', '0.32s') or a ms number.        default '320ms'
+ *   easing      {string}          CSS easing for the transition.            default cubic-bezier(.16,1,.3,1)
+ *   iconRotate  {number}          Chevron rotation when open, in degrees.   default 180
+ *   flush       {bool}            Edge-to-edge style (no card border/radius).default false
+ *   disabled    {bool}            Render the whole accordion inert.         default false
+ *
+ * EVENTS (all namespaced .ts.accordion; index is 0-based, $item is the row)
+ *   ready.ts.accordion    (e, instance)
+ *   open.ts.accordion     (e, index, $item)   fired when an open animation starts
+ *   opened.ts.accordion   (e, index, $item)   fired after it finishes
+ *   close.ts.accordion    (e, index, $item)
+ *   closed.ts.accordion   (e, index, $item)
+ *   change.ts.accordion   (e, index, isOpen, $item)
+ *
+ * PROGRAMMATIC API
+ *   const acc = $('#faq').data('__accordion');
+ *   acc.open(2);          // open item 2
+ *   acc.close(0);         // close item 0
+ *   acc.toggle(1);        // toggle item 1
+ *   acc.openAll();        // (no-op in exclusive mode beyond the first)
+ *   acc.closeAll();
+ *   acc.openedIndexes();  // -> [0, 2]
+ *   acc.refresh();        // re-scan items after dynamic DOM changes
+ *   acc.setDisabled(true);
+ *   acc.destroy();        // restore original markup
+ *
+ *   // init.js wiring
+ *   if (typeof $.fn['themestrapPluginAccordion'] === 'function' && $('[data-plugin-accordion]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-accordion]:not(.manual)', 'themestrapPluginAccordion');
+ *   }
+ */
+// Accordion
 (((themestrap = {}, $) => {
 
     const instanceName = '__accordion';
@@ -8,22 +98,22 @@
     const STYLE_ID = 'ts-accordion-styles';
 
     const CSS_TEXT = `
-/* Themestrap — PluginAccordion (Venom palette) */
+/* Themestrap — PluginAccordion (Venom palette by default) */
 .ts-accordion {
-    /* Palette tokens: prefer global --ts-venom-* if defined, else fall back. */
-    --ts-acc-bg:        var(--ts-venom-surface,      #121212);
-    --ts-acc-bg-hover:  var(--ts-venom-elevated,     #1c1c1c);
-    --ts-acc-bg-open:   var(--ts-venom-surface-2,    #181818);
-    --ts-acc-border:    var(--ts-venom-border,       #333333);
-    --ts-acc-hairline:  var(--ts-venom-muted,        #444444);
-    --ts-acc-text:      var(--ts-venom-text,         #c1c1c1);
-    --ts-acc-heading:   var(--ts-venom-text-strong,  #f8f7f2);
-    --ts-acc-muted:     var(--ts-venom-text-dim,     #999999);
-    --ts-acc-accent:    var(--ts-venom-accent,       #79241f);
-    --ts-acc-accent-2:  var(--ts-venom-accent-hover, #a3312a);
-    --ts-acc-ring:      var(--ts-venom-ring,         rgba(163, 49, 42, .55));
+    /* Palette tokens: prefer the active skin's --ts-skin-* tokens if defined, else fall back. */
+    --ts-acc-bg:        var(--ts-skin-surface,      #121212);
+    --ts-acc-bg-hover:  var(--ts-skin-elevated,     #1c1c1c);
+    --ts-acc-bg-open:   var(--ts-skin-surface-2,    #181818);
+    --ts-acc-border:    var(--ts-skin-border,       #333333);
+    --ts-acc-hairline:  var(--ts-skin-border-strong,        #444444);
+    --ts-acc-text:      var(--ts-skin-text,         #c1c1c1);
+    --ts-acc-heading:   var(--ts-skin-text-strong,  #f8f7f2);
+    --ts-acc-muted:     var(--ts-skin-text-dim,     #999999);
+    --ts-acc-accent:    var(--ts-skin-accent,       #79241f);
+    --ts-acc-accent-2:  var(--ts-skin-accent-hover, #a3312a);
+    --ts-acc-ring:      var(--ts-skin-ring,         rgba(163, 49, 42, .55));
 
-    --ts-acc-radius:    10px;
+    --ts-acc-radius:    var(--ts-skin-radius-lg, 10px);
     --ts-acc-duration:  320ms;
     --ts-acc-easing:    cubic-bezier(.16, 1, .3, 1);
     --ts-acc-icon-rot:  180deg;
@@ -586,6 +676,7 @@
 })).apply(this, [window.themestrap, jQuery]);
 
 // Account
+// Account
 (((themestrap = {}, $) => {
     let initialized = false;
 
@@ -670,6 +761,7 @@
 })).apply(this, [window.themestrap, jQuery]);
 
 // Alert
+// Alert
 (((themestrap = {}, $) => {
     const instanceName = '__pluginAlert';
 
@@ -751,63 +843,63 @@
 }
 
 .alert-ts-info {
-    --alert-ts-bg           : #eff6ff;
-    --alert-ts-border       : #3b82f6;
-    --alert-ts-icon         : #3b82f6;
-    --alert-ts-title        : #1e40af;
-    --alert-ts-text         : #1d4ed8;
-    --alert-ts-action       : #1d4ed8;
-    --alert-ts-action-hover : #1e40af;
-    --alert-ts-close        : #93c5fd;
-    --alert-ts-close-hover  : #1d4ed8;
+    --alert-ts-bg           : var(--ts-skin-info-soft, #eff6ff);
+    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
+    --alert-ts-icon         : var(--ts-skin-info, #3b82f6);
+    --alert-ts-title        : var(--ts-skin-text-strong, #1e40af);
+    --alert-ts-text         : var(--ts-skin-text, #1d4ed8);
+    --alert-ts-action       : var(--ts-skin-info, #1d4ed8);
+    --alert-ts-action-hover : var(--ts-skin-info, #1e40af);
+    --alert-ts-close        : var(--ts-skin-info, #93c5fd);
+    --alert-ts-close-hover  : var(--ts-skin-text, #1d4ed8);
 }
 
 .alert-ts-success {
-    --alert-ts-bg           : #f0fdf4;
-    --alert-ts-border       : #22c55e;
-    --alert-ts-icon         : #22c55e;
-    --alert-ts-title        : #14532d;
-    --alert-ts-text         : #15803d;
-    --alert-ts-action       : #15803d;
-    --alert-ts-action-hover : #14532d;
-    --alert-ts-close        : #86efac;
-    --alert-ts-close-hover  : #15803d;
+    --alert-ts-bg           : var(--ts-skin-success-soft, #f0fdf4);
+    --alert-ts-border       : var(--ts-skin-success, #22c55e);
+    --alert-ts-icon         : var(--ts-skin-success, #22c55e);
+    --alert-ts-title        : var(--ts-skin-text-strong, #14532d);
+    --alert-ts-text         : var(--ts-skin-text, #15803d);
+    --alert-ts-action       : var(--ts-skin-success, #15803d);
+    --alert-ts-action-hover : var(--ts-skin-success, #14532d);
+    --alert-ts-close        : var(--ts-skin-success, #86efac);
+    --alert-ts-close-hover  : var(--ts-skin-text, #15803d);
 }
 
 .alert-ts-warning {
-    --alert-ts-bg           : #fffbeb;
-    --alert-ts-border       : #f59e0b;
-    --alert-ts-icon         : #f59e0b;
-    --alert-ts-title        : #78350f;
-    --alert-ts-text         : #92400e;
-    --alert-ts-action       : #92400e;
-    --alert-ts-action-hover : #78350f;
-    --alert-ts-close        : #fcd34d;
-    --alert-ts-close-hover  : #92400e;
+    --alert-ts-bg           : var(--ts-skin-warning-soft, #fffbeb);
+    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-icon         : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-title        : var(--ts-skin-text-strong, #78350f);
+    --alert-ts-text         : var(--ts-skin-text, #92400e);
+    --alert-ts-action       : var(--ts-skin-warning, #92400e);
+    --alert-ts-action-hover : var(--ts-skin-warning, #78350f);
+    --alert-ts-close        : var(--ts-skin-warning, #fcd34d);
+    --alert-ts-close-hover  : var(--ts-skin-text, #92400e);
 }
 
 .alert-ts-danger {
-    --alert-ts-bg           : #fef2f2;
-    --alert-ts-border       : #ef4444;
-    --alert-ts-icon         : #ef4444;
-    --alert-ts-title        : #7f1d1d;
-    --alert-ts-text         : #991b1b;
-    --alert-ts-action       : #991b1b;
-    --alert-ts-action-hover : #7f1d1d;
-    --alert-ts-close        : #fca5a5;
-    --alert-ts-close-hover  : #991b1b;
+    --alert-ts-bg           : var(--ts-skin-danger-soft, #fef2f2);
+    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
+    --alert-ts-icon         : var(--ts-skin-danger, #ef4444);
+    --alert-ts-title        : var(--ts-skin-text-strong, #7f1d1d);
+    --alert-ts-text         : var(--ts-skin-text, #991b1b);
+    --alert-ts-action       : var(--ts-skin-danger, #991b1b);
+    --alert-ts-action-hover : var(--ts-skin-danger, #7f1d1d);
+    --alert-ts-close        : var(--ts-skin-danger, #fca5a5);
+    --alert-ts-close-hover  : var(--ts-skin-text, #991b1b);
 }
 
 .alert-ts-neutral {
-    --alert-ts-bg           : #f9fafb;
-    --alert-ts-border       : #6b7280;
-    --alert-ts-icon         : #6b7280;
-    --alert-ts-title        : #111827;
-    --alert-ts-text         : #374151;
-    --alert-ts-action       : #374151;
-    --alert-ts-action-hover : #111827;
-    --alert-ts-close        : #d1d5db;
-    --alert-ts-close-hover  : #374151;
+    --alert-ts-bg           : var(--ts-skin-surface, #f9fafb);
+    --alert-ts-border       : var(--ts-skin-border, #6b7280);
+    --alert-ts-icon         : var(--ts-skin-text-dim, #6b7280);
+    --alert-ts-title        : var(--ts-skin-text-strong, #111827);
+    --alert-ts-text         : var(--ts-skin-text, #374151);
+    --alert-ts-action       : var(--ts-skin-text-strong, #374151);
+    --alert-ts-action-hover : var(--ts-skin-text-strong, #111827);
+    --alert-ts-close        : var(--ts-skin-text-dim, #d1d5db);
+    --alert-ts-close-hover  : var(--ts-skin-text, #374151);
 }
 
 
@@ -920,14 +1012,14 @@
 .alert-ts-action-primary {
     background-color : var(--alert-ts-action);
     border-color     : var(--alert-ts-action);
-    color            : #fff;
+    color            : var(--ts-skin-on-accent, #fff);
 }
 
 .alert-ts-action-primary:hover,
 .alert-ts-action-primary:focus-visible {
     background-color : var(--alert-ts-action-hover);
     border-color     : var(--alert-ts-action-hover);
-    color            : #fff;
+    color            : var(--ts-skin-on-accent, #fff);
 }
 
 /* Secondary action — ghost / outlined */
@@ -940,7 +1032,7 @@
 .alert-ts-action-secondary:hover,
 .alert-ts-action-secondary:focus-visible {
     background-color : var(--alert-ts-action);
-    color            : #fff;
+    color            : var(--ts-skin-on-accent, #fff);
 }
 
 /* Link-style action — no border, just tinted text */
@@ -1032,8 +1124,8 @@
 
 .alert-toast-stack > .alert-ts {
     pointer-events : auto;
-    box-shadow     : 0 4px 6px -1px rgba(0,0,0,.08),
-                     0 2px 4px -2px rgba(0,0,0,.06);
+    box-shadow     : var(--ts-skin-shadow, 0 4px 6px -1px rgba(0,0,0,.08),
+                     0 2px 4px -2px rgba(0,0,0,.06));
 }
 
 /* Slide-in entrance for toasts */
@@ -1054,67 +1146,67 @@
 
 /* Dark-mode palette */
 html.dark .alert-ts-info {
-    --alert-ts-bg           : #172554;
-    --alert-ts-border       : #3b82f6;
-    --alert-ts-icon         : #60a5fa;
-    --alert-ts-title        : #bfdbfe;
-    --alert-ts-text         : #93c5fd;
-    --alert-ts-action       : #93c5fd;
-    --alert-ts-action-hover : #bfdbfe;
-    --alert-ts-close        : #3b82f6;
-    --alert-ts-close-hover  : #bfdbfe;
+    --alert-ts-bg           : var(--ts-skin-info-soft, #172554);
+    --alert-ts-border       : var(--ts-skin-info, #3b82f6);
+    --alert-ts-icon         : var(--ts-skin-info, #60a5fa);
+    --alert-ts-title        : var(--ts-skin-text-strong, #bfdbfe);
+    --alert-ts-text         : var(--ts-skin-text, #93c5fd);
+    --alert-ts-action       : var(--ts-skin-info, #93c5fd);
+    --alert-ts-action-hover : var(--ts-skin-info, #bfdbfe);
+    --alert-ts-close        : var(--ts-skin-info, #3b82f6);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bfdbfe);
 }
 
 html.dark .alert-ts-success {
-    --alert-ts-bg           : #052e16;
-    --alert-ts-border       : #22c55e;
-    --alert-ts-icon         : #4ade80;
-    --alert-ts-title        : #bbf7d0;
-    --alert-ts-text         : #86efac;
-    --alert-ts-action       : #86efac;
-    --alert-ts-action-hover : #bbf7d0;
-    --alert-ts-close        : #22c55e;
-    --alert-ts-close-hover  : #bbf7d0;
+    --alert-ts-bg           : var(--ts-skin-success-soft, #052e16);
+    --alert-ts-border       : var(--ts-skin-success, #22c55e);
+    --alert-ts-icon         : var(--ts-skin-success, #4ade80);
+    --alert-ts-title        : var(--ts-skin-text-strong, #bbf7d0);
+    --alert-ts-text         : var(--ts-skin-on-accent, #86efac);
+    --alert-ts-action       : var(--ts-skin-success, #86efac);
+    --alert-ts-action-hover : var(--ts-skin-success, #bbf7d0);
+    --alert-ts-close        : var(--ts-skin-success, #22c55e);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #bbf7d0);
 }
 
 html.dark .alert-ts-warning {
-    --alert-ts-bg           : #27170a;
-    --alert-ts-border       : #f59e0b;
-    --alert-ts-icon         : #fbbf24;
-    --alert-ts-title        : #fde68a;
-    --alert-ts-text         : #fcd34d;
-    --alert-ts-action       : #fcd34d;
-    --alert-ts-action-hover : #fde68a;
-    --alert-ts-close        : #f59e0b;
-    --alert-ts-close-hover  : #fde68a;
+    --alert-ts-bg           : var(--ts-skin-warning-soft, #27170a);
+    --alert-ts-border       : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-icon         : var(--ts-skin-warning, #fbbf24);
+    --alert-ts-title        : var(--ts-skin-text-strong, #fde68a);
+    --alert-ts-text         : var(--ts-skin-on-accent, #fcd34d);
+    --alert-ts-action       : var(--ts-skin-warning, #fcd34d);
+    --alert-ts-action-hover : var(--ts-skin-warning, #fde68a);
+    --alert-ts-close        : var(--ts-skin-warning, #f59e0b);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fde68a);
 }
 
 html.dark .alert-ts-danger {
-    --alert-ts-bg           : #2d0a0a;
-    --alert-ts-border       : #ef4444;
-    --alert-ts-icon         : #f87171;
-    --alert-ts-title        : #fecaca;
-    --alert-ts-text         : #fca5a5;
-    --alert-ts-action       : #fca5a5;
-    --alert-ts-action-hover : #fecaca;
-    --alert-ts-close        : #ef4444;
-    --alert-ts-close-hover  : #fecaca;
+    --alert-ts-bg           : var(--ts-skin-danger-soft, #2d0a0a);
+    --alert-ts-border       : var(--ts-skin-danger, #ef4444);
+    --alert-ts-icon         : var(--ts-skin-danger, #f87171);
+    --alert-ts-title        : var(--ts-skin-text-strong, #fecaca);
+    --alert-ts-text         : var(--ts-skin-text, #fca5a5);
+    --alert-ts-action       : var(--ts-skin-danger, #fca5a5);
+    --alert-ts-action-hover : var(--ts-skin-danger, #fecaca);
+    --alert-ts-close        : var(--ts-skin-danger, #ef4444);
+    --alert-ts-close-hover  : var(--ts-skin-on-accent, #fecaca);
 }
 
 html.dark .alert-ts-neutral {
-    --alert-ts-bg           : #111827;
-    --alert-ts-border       : #6b7280;
-    --alert-ts-icon         : #9ca3af;
-    --alert-ts-title        : #f9fafb;
-    --alert-ts-text         : #d1d5db;
-    --alert-ts-action       : #d1d5db;
-    --alert-ts-action-hover : #f9fafb;
-    --alert-ts-close        : #6b7280;
-    --alert-ts-close-hover  : #f9fafb;
+    --alert-ts-bg           : var(--ts-skin-surface, #111827);
+    --alert-ts-border       : var(--ts-skin-border, #6b7280);
+    --alert-ts-icon         : var(--ts-skin-text-dim, #9ca3af);
+    --alert-ts-title        : var(--ts-skin-text-strong, #f9fafb);
+    --alert-ts-text         : var(--ts-skin-text, #d1d5db);
+    --alert-ts-action       : var(--ts-skin-text-strong, #d1d5db);
+    --alert-ts-action-hover : var(--ts-skin-text-strong, #f9fafb);
+    --alert-ts-close        : var(--ts-skin-text-dim, #6b7280);
+    --alert-ts-close-hover  : var(--ts-skin-text, #f9fafb);
 }
 
 .alert.alert-ts {
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    box-shadow: inset 0 0 0 1px var(--ts-skin-border, rgba(255,255,255,.06));
 }
 
 /* Reduced-motion overrides */
@@ -1354,7 +1446,7 @@ html.dark .alert-ts-neutral {
             self.$el.on('click.pluginalert', '.alert-ts-action', function() {
                 const key = $(this).data('action');
                 self.$el.trigger('action.alert', [key, self]);
-                if ($.isFunction(o.onAction)) {
+                if (typeof o.onAction === 'function') {
                     o.onAction.call(self, key);
                 }
             });
@@ -1461,7 +1553,7 @@ html.dark .alert-ts-neutral {
             const self = this;
             self.$el.trigger('closed.bs.alert');
 
-            if ($.isFunction(self.options.onDismiss)) {
+            if (typeof self.options.onDismiss === 'function') {
                 self.options.onDismiss.call(self);
             }
 
@@ -1599,7 +1691,7 @@ html.dark .alert-ts-neutral {
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     instance[opts]();
                 } else if (opts !== 'dismiss' && opts !== 'destroy') {
                     console.warn(`[PluginAlert] Unknown command: "${opts}"`);
@@ -1616,167 +1708,6 @@ html.dark .alert-ts-neutral {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Animate
-(((themestrap = {}, $) => {
-    const instanceName = '__animate';
-
-    class PluginAnimate {
-        constructor($el, opts) {
-            return this.initialize($el, opts);
-        }
-
-        initialize($el, opts) {
-			if ($el.data(instanceName)) {
-				return this;
-			}
-
-			this.$el = $el;
-
-			this
-				.setData()
-				.setOptions(opts)
-				.build();
-
-			return this;
-		}
-
-        setData() {
-			this.$el.data(instanceName, this);
-
-			return this;
-		}
-
-        setOptions(opts) {
-			this.options = $.extend(true, {}, PluginAnimate.defaults, opts, {
-				wrapper: this.$el
-			});
-
-			return this;
-		}
-
-        build() {
-			const self = this;
-
-			// Flag Class Only
-			// - Useful for simple animations like hightlight
-			// - Less process and memory
-			if( self.options.flagClassOnly ) {
-				const delay = self.options.wrapper.attr('data-appear-animation-delay') ? self.options.wrapper.attr('data-appear-animation-delay') : self.options.delay;
-				
-				self.options.wrapper.css({
-					'animation-delay': delay + 'ms',
-					'transition-delay': delay + 'ms'
-				});
-				self.options.wrapper.addClass( self.options.wrapper.attr('data-appear-animation') );
-
-				return this;
-			}
-
-			if ($('body').hasClass('loading-overlay-showing')) {
-				$(window).on('loading.overlay.ready', () => {
-					self.animate();
-				});
-			} else {
-				self.animate();
-			}
-
-			return this;
-		}
-
-        animate() {
-            const self = this;
-            const $el = this.options.wrapper;
-            let delay = 0;
-            let duration = this.options.duration;
-            const elTopDistance = $el.offset().top;
-            const windowTopDistance = $(window).scrollTop();
-
-            // If has appear animation elements inside a SVG. 
-            // Intersection Observer API do not check elements inside SVG's, so we need initialize trough top parent SVG
-            if ($el.data('appear-animation-svg')) {
-				$el.find('[data-appear-animation]').each(function(){
-                    const $this = $(this);
-                    let opts;
-
-                    const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
-                    if (pluginOptions)
-						opts = pluginOptions;
-
-                    $this.themestrapPluginAnimate(opts);
-                });
-
-				return this;
-			}
-
-            // No animation at the first load of page. This is good for performance
-            if (self.options.firstLoadNoAnim) {
-				$el.removeClass('appear-animation');
-
-				// Inside Carousel
-				if ($el.closest('.owl-carousel').get(0)) {
-					setTimeout(() => {
-						$el.closest('.owl-carousel').on('change.owl.carousel', () => {
-							self.options.firstLoadNoAnim = false;
-							$el.removeData('__animate');
-							$el.themestrapPluginAnimate(self.options);
-						});
-					}, 500);
-				}
-
-				return this;
-			}
-
-            $el.addClass('appear-animation animated');
-
-            if (!$('html').hasClass('no-csstransitions') && $(window).width() > self.options.minWindowWidth && elTopDistance >= windowTopDistance || self.options.forceAnimation == true) {
-				delay = ($el.attr('data-appear-animation-delay') ? $el.attr('data-appear-animation-delay') : self.options.delay);
-				duration = ($el.attr('data-appear-animation-duration') ? $el.attr('data-appear-animation-duration') : self.options.duration);
-
-				if (duration != '750ms') {
-					$el.css('animation-duration', duration);
-				}
-
-				$el.css('animation-delay', delay + 'ms');
-				$el.addClass($el.attr('data-appear-animation') + ' appear-animation-visible');
-				
-				$el.trigger('animation:show');
-
-			} else {
-				$el.addClass('appear-animation-visible');
-			}
-
-            return this;
-        }
-    }
-
-    PluginAnimate.defaults = {
-		accX: 0,
-		accY: -80,
-		delay: 100,
-		duration: '750ms',
-		minWindowWidth: 0,
-		forceAnimation: false,
-		flagClassOnly: false
-	};
-
-    $.extend(themestrap, {
-		PluginAnimate
-	});
-
-    $.fn.themestrapPluginAnimate = function(opts) {
-		return this.map(function() {
-			const $this = $(this);
-
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginAnimate($this, opts);
-			}
-
-		});
-	};
-})).apply(this, [window.themestrap, jQuery]);
-
-//Animated Content
 (((themestrap = {}, $) => {
     const instanceName = '__animatedContent';
 
@@ -1905,7 +1836,7 @@ html.dark .alert-ts-neutral {
 					delay = delay + self.options.animationSpeed;
 				});
 
-                if ($.isFunction($.fn['themestrapPluginAnimate']) && $('.animated-words-item[data-appear-animation]').length) {
+                if (typeof $.fn['themestrapPluginAnimate'] === 'function' && $('.animated-words-item[data-appear-animation]').length) {
 					themestrap.fn.dynIntObsInit( '.animated-words-item[data-appear-animation]', 'themestrapPluginAnimate', themestrap.PluginAnimate.defaults );
 				}
 
@@ -1989,134 +1920,183 @@ html.dark .alert-ts-neutral {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Auth
+/**
+ * Themestrap Auth
+ *
+ * Progressive-enhancement layer for authentication forms, independent of any backend.
+ * It adds inline validation, password show/hide, a strength meter, a Caps Lock hint, busy
+ * and lockout states, inline or toast feedback, and optional AJAX submission. The network
+ * layer is a pluggable adapter, so the same form can talk to MODX, a PHP session, Laravel,
+ * Django, a JWT REST API, Firebase, an OAuth provider, or anything else.
+ *
+ * Without JavaScript the form still submits natively, so the page keeps working.
+ *
+ * Markup (unchanged from earlier versions):
+ *
+ *   <form data-plugin-auth
+ *         data-auth-action="login"
+ *         data-plugin-options='{"adapter": "json", "redirect": "/dashboard"}'
+ *         method="post" action="/login">
+ *
+ *     <div data-auth-message></div>                       <!-- optional inline status area -->
+ *
+ *     <div data-auth-field="username">
+ *       <label for="u">Username</label>
+ *       <input id="u" name="username" required data-auth-error>
+ *       <div data-auth-feedback></div>
+ *     </div>
+ *
+ *     <div data-auth-field="password">
+ *       <label for="p">Password</label>
+ *       <input id="p" name="password" type="password" required minlength="8"
+ *              data-auth-strength data-auth-error>
+ *       <button type="button" data-auth-toggle-password>Show</button>
+ *       <div data-auth-strength-meter></div>
+ *       <span data-auth-capslock class="d-none">Caps Lock is on</span>
+ *       <div data-auth-feedback></div>
+ *     </div>
+ *
+ *     <button type="submit" data-auth-submit>
+ *       <span data-auth-submit-label>Sign in</span>
+ *       <span data-auth-spinner class="d-none"></span>
+ *     </button>
+ *   </form>
+ *
+ * Optional extras:
+ *   data-auth-step="credentials|otp|..."   a section shown for one step of a multi-step flow
+ *   data-auth-provider="github"            a button that starts an OAuth or social sign-in
+ *   data-auth-match="#password"            field must equal another field
+ *   data-auth-validate="name"              run options.validators[name]
+ *   data-auth-redirect, data-auth-success-msg, data-auth-error-msg   per-form overrides
+ *
+ * Adapters (options.adapter):
+ *   'form'  (default)  native browser submit
+ *   'json'             fetch, response understood in many common shapes
+ *   'modx'             alias of 'json' with form-encoded bodies (Login and FormIt style)
+ *   'rest'             alias of 'json' with JSON bodies
+ *   object             { submit(ctx) => Promise<result> } for any other system
+ *   function           shorthand for { submit: fn }
+ *   ajax: true is shorthand for adapter 'json'.
+ *
+ * A result is { ok, message, errors, redirect, token, challenge, retryAfter, data }.
+ *
+ * Public API (via stored instance):
+ *   const auth = $('#form').data('__pluginAuth');
+ *   auth.validate();             // true | false
+ *   auth.submit();               // validate and send, same as pressing the button
+ *   auth.setBusy(true|false);
+ *   auth.setMessage(text, 'error' | 'success' | 'info');
+ *   auth.clearMessage();
+ *   auth.setErrors({ field: 'message' });
+ *   auth.showStep('otp');        // reveal a [data-auth-step] section
+ *   auth.getToken(); auth.setToken(t); auth.clearToken();
+ *   auth.reset();
+ *   auth.destroy();
+ *
+ *   themestrap.PluginAuth.registerAdapter(name, adapter);
+ *   themestrap.PluginAuth.getToken(key, store);
+ *   themestrap.PluginAuth.authHeaders(tokenOptions);   // { Authorization: 'Bearer …' } for your own calls
+ *
+ * Events. Earlier jQuery events are kept, and every event is also a native CustomEvent
+ * (bubbling, dispatched on the form) named ts.auth.*:
+ *   auth:validate  / ts.auth.validate    (instance, isValid)
+ *   auth:submit    / ts.auth.submit      (instance, data)
+ *   auth:success   / ts.auth.success     (instance, result)
+ *   auth:error     / ts.auth.error       (instance, result)
+ *   auth:challenge / ts.auth.challenge   (instance, step)
+ *   auth:token     / ts.auth.token       (instance, token)
+ *   ts.auth.redirect                     cancelable, detail.url
+ *
+ * CSS custom properties (all optional): --ts-au-invalid, --ts-au-valid, --ts-au-muted,
+ * --ts-au-warn-bg, --ts-au-warn-text, --ts-au-info-bg, --ts-au-info-text
+ *
+ * Init.js wiring (DOM ready, auth forms must work without scrolling):
+ *   if (typeof $.fn['themestrapPluginAuth'] === 'function' && $('[data-plugin-auth]').length) {
+ *       $(() => {
+ *           $('[data-plugin-auth]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginAuth(opts);
+ *           });
+ *       });
+ *   }
+ */
+// Auth
 (((themestrap = {}, $) => {
     const instanceName = '__pluginAuth';
-    
-    // Injected stylesheet — runs once per page, keyed to the plugin stylesheet ID
-    const STYLE_ID = 'ts-auth-styles';
-    // CSS_TEXT is injected lazily by injectStyles() on first build (see below),
-    // so loading this script never adds CSS to pages that don't use the plugin.
+    const STYLE_ID     = 'ts-auth-styles';
+    const EVENT_NS     = 'auth';
+
+    let instanceCount = 0;
+
+    const LIGHT_TOKENS = `
+        --au-invalid:   var(--ts-au-invalid, var(--ts-skin-danger, #dc3545));
+        --au-valid:     var(--ts-au-valid, var(--ts-skin-success, #198754));
+        --au-muted:     var(--ts-au-muted, var(--ts-skin-text-dim, #6c757d));
+        --au-track:     var(--ts-au-track, var(--ts-skin-surface-2, #e9ecef));
+        --au-warn-bg:   var(--ts-au-warn-bg, var(--ts-skin-warning-soft, #fff3cd));
+        --au-warn-text: var(--ts-au-warn-text, var(--ts-skin-warning, #664d03));
+        --au-info-bg:   var(--ts-au-info-bg, var(--ts-skin-info-soft, #e7f1ff));
+        --au-info-text: var(--ts-au-info-text, var(--ts-skin-info, #0a3c7d));
+    `;
+    const DARK_TOKENS = `
+        --au-invalid:   var(--ts-au-invalid, var(--ts-skin-danger, #f87171));
+        --au-valid:     var(--ts-au-valid, var(--ts-skin-success, #4ade80));
+        --au-muted:     var(--ts-au-muted, var(--ts-skin-text-dim, #9fb3c8));
+        --au-track:     var(--ts-au-track, var(--ts-skin-surface-2, rgba(255,255,255,.12)));
+        --au-warn-bg:   var(--ts-au-warn-bg, var(--ts-skin-warning-soft, rgba(251,191,36,.15)));
+        --au-warn-text: var(--ts-au-warn-text, var(--ts-skin-warning, #fbbf24));
+        --au-info-bg:   var(--ts-au-info-bg, var(--ts-skin-info-soft, rgba(96,165,250,.15)));
+        --au-info-text: var(--ts-au-info-text, var(--ts-skin-info, #93c5fd));
+    `;
+
+    // Rules use :where() where Bootstrap supplies the same thing, so the framework always wins
+    // and the form still looks right when Bootstrap is not on the page.
     const CSS_TEXT = `
-        /* Themestrap Auth Plugin — supplementary styles
-           Bootstrap 5 provides the bulk of validation styling (is-invalid / is-valid /
-           invalid-feedback); these rules add only what the framework is missing:
-           the segmented password-strength meter, the Caps Lock hint pill, and a few
-           ergonomic spacings on auth forms. */
-
-        .auth-form .form-control:focus {
-            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
+        .auth-form { ${LIGHT_TOKENS} }
+        @media (prefers-color-scheme: dark) {
+            .auth-form { ${DARK_TOKENS} }
         }
+        html.dark .auth-form,
+        [data-bs-theme="dark"] .auth-form { ${DARK_TOKENS} }
+        [data-bs-theme="light"] .auth-form { ${LIGHT_TOKENS} }
 
-        /* Password strength meter
-           Built lazily by PluginAuth — five <span class="auth-strength-bar"> +
-           one <span class="auth-strength-label">. Bar colors are applied via
-           Bootstrap utility classes (.bg-danger / .bg-warning / .bg-info / .bg-success). */
-        .auth-strength {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 6px;
-            height: 22px;
+        :where(.auth-form) .d-none { display: none !important; }
+        .auth-form [hidden] { display: none !important; }
+        .auth-form [data-auth-feedback]:empty { display: none; }
+        .auth-form [data-auth-feedback]:not(:empty) { display: block; margin-top: .25rem; font-size: .85rem; color: var(--au-invalid); }
+        :where(.auth-form) .is-invalid { border-color: var(--au-invalid); }
+        :where(.auth-form) .is-valid   { border-color: var(--au-valid); }
+        :where(.auth-form) .spinner-border {
+            display: inline-block; width: 1em; height: 1em; vertical-align: -.125em;
+            border: .15em solid currentColor; border-right-color: transparent; border-radius: 50%;
+            animation: ts-auth-spin .6s linear infinite;
         }
+        @keyframes ts-auth-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { :where(.auth-form) .spinner-border { animation-duration: 2s; } }
 
-        .auth-strength .auth-strength-bar {
-            flex: 1;
-            height: 4px;
-            border-radius: 2px;
-            background: #e9ecef;
-            transition: background-color .2s ease;
-        }
+        .auth-message { margin: 0 0 1rem; padding: .6rem .85rem; border-radius: 8px; font-size: .9rem; border: 1px solid transparent; }
+        .auth-message:empty { display: none; }
+        .auth-message--error   { background: color-mix(in srgb, var(--au-invalid) 12%, transparent); border-color: var(--au-invalid); }
+        .auth-message--success { background: color-mix(in srgb, var(--au-valid) 12%, transparent);   border-color: var(--au-valid); }
+        .auth-message--info    { background: var(--au-info-bg); color: var(--au-info-text); border-color: transparent; }
 
-        .auth-strength .auth-strength-label {
-            margin-left: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            color: #6c757d;
-            min-width: 64px;
-        }
+        .auth-strength { display: flex; align-items: center; gap: 4px; margin-top: 6px; height: 22px; }
+        .auth-strength .auth-strength-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--au-track); transition: background-color .2s ease; }
+        .auth-strength[data-score="0"] .auth-strength-bar--on,
+        .auth-strength[data-score="1"] .auth-strength-bar--on { background: var(--ts-skin-danger, #dc3545); }
+        .auth-strength[data-score="2"] .auth-strength-bar--on { background: var(--ts-skin-warning, #f0ad00); }
+        .auth-strength[data-score="3"] .auth-strength-bar--on { background: var(--ts-skin-info, #0dcaf0); }
+        .auth-strength[data-score="4"] .auth-strength-bar--on { background: var(--ts-skin-success, #198754); }
+        .auth-strength .auth-strength-label { margin-left: 8px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--au-muted); min-width: 64px; }
 
-        /* Caps Lock hint pill
-           Rendered inside [data-auth-field] for password fields. The plugin toggles
-           .d-none on [data-auth-capslock] based on keyup CapsLock state. */
-        .auth-capslock {
-            display: inline-block;
-            margin-top: 6px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #fff3cd;
-            color: #664d03;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .03em;
-        }
+        .auth-capslock { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 10px; background: var(--au-warn-bg); color: var(--au-warn-text); font-size: 11px; font-weight: 600; letter-spacing: .03em; }
+        .auth-capslock::before { content: "\\21EA "; margin-right: 4px; }
 
-        .auth-capslock::before {
-            content: "⇪ ";
-            margin-right: 4px;
-        }
+        .auth-profile-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--au-track); border-radius: 8px; margin-bottom: 1rem; }
+        @media (prefers-reduced-motion: reduce) { .auth-strength .auth-strength-bar { transition: none; } }
+    `;
 
-        /* Profile card */
-        .auth-profile-card {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 18px 20px;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            background: #fff;
-        }
-
-        .auth-profile-card .auth-profile-avatar {
-            flex: 0 0 64px;
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: #e9ecef center/cover no-repeat;
-            color: #6c757d;
-            font-size: 26px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-        }
-
-        .auth-profile-card .auth-profile-name {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .auth-profile-card .auth-profile-meta {
-            margin: 0;
-            font-size: 13px;
-            color: #6c757d;
-        }
-
-        .auth-profile-card .auth-profile-actions {
-            margin-left: auto;
-            display: flex;
-            gap: 8px;
-        }
-
-        /* Compact spinner-in-button alignment */
-        .auth-form [data-auth-submit] {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Optional: smooth disabled state */
-        .auth-form [data-auth-submit][disabled] {
-            cursor: progress;
-            opacity: .75;
-        }
-        `;
-
-    // Inject the stylesheet only when the plugin is actually used (called
-    // from build()), so loading the script never adds CSS to unused pages.
     function injectStyles() {
         if (document.getElementById(STYLE_ID)) return;
         const style = document.createElement('style');
@@ -2125,7 +2105,12 @@ html.dark .alert-ts-neutral {
         (document.head || document.documentElement).appendChild(style);
     }
 
-    // Password strength scoring (0-4, no zxcvbn dependency).
+    // Helpers
+
+    const STRENGTH_LABELS  = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+    const STRENGTH_CLASSES = ['bg-danger', 'bg-danger', 'bg-warning', 'bg-info', 'bg-success'];
+    const EMAIL_RX         = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     function scorePassword(pw) {
         if (!pw) return 0;
         let score = 0;
@@ -2137,9 +2122,186 @@ html.dark .alert-ts-neutral {
         return Math.min(score, 4);
     }
 
-    const STRENGTH_LABELS  = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
-    const STRENGTH_CLASSES = ['bg-danger', 'bg-danger', 'bg-warning', 'bg-info', 'bg-success'];
-    const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isObj  = (v) => v && typeof v === 'object' && !Array.isArray(v);
+    const truthy = (v) => v === true || v === 1 || v === '1' || String(v).toLowerCase() === 'true';
+
+    function getPath(obj, path) {
+        if (!obj || path == null) return undefined;
+        return String(path).split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+    }
+
+    function firstOf(obj, paths) {
+        for (let i = 0; i < paths.length; i++) {
+            const v = getPath(obj, paths[i]);
+            if (v !== undefined && v !== null && v !== '') return v;
+        }
+        return undefined;
+    }
+
+    function readCookie(name) {
+        const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'));
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    function storeFor(kind) {
+        try {
+            if (kind === 'local')   return window.localStorage;
+            if (kind === 'session') return window.sessionStorage;
+        } catch (e) { /* storage blocked */ }
+        return null;
+    }
+
+    const memoryTokens = {};
+
+    // Redirects stay on this site unless the page opts in, so a forged response cannot send users away.
+    function safeRedirect(url, allowExternal) {
+        if (!url) return '';
+        try {
+            const u = new URL(url, window.location.href);
+            if (!/^https?:$/.test(u.protocol)) return '';
+            if (!allowExternal && u.origin !== window.location.origin) return '';
+            return u.href;
+        } catch (e) {
+            return '';
+        }
+    }
+
+    // Turns any common server reply into { ok, message, errors, redirect, token, challenge, retryAfter, data }
+    function defaultNormalize(body, res, opts) {
+        const b   = isObj(body) ? body : {};
+        const map = opts.response || {};
+        const pick = (key, paths) => (map[key] !== undefined
+            ? (typeof map[key] === 'function' ? map[key](body, res) : getPath(b, map[key]))
+            : firstOf(b, paths));
+
+        let ok = !!res.ok;
+        ['success', 'ok', 'authenticated'].forEach((k) => {
+            if (k in b) ok = ok && truthy(b[k]);
+        });
+        if (typeof b.status === 'string' && /^(error|fail|failed|failure)$/i.test(b.status)) ok = false;
+        if (typeof b.error === 'string' && b.error) ok = false;
+        if (map.success !== undefined) {
+            const s = typeof map.success === 'function' ? map.success(body, res) : getPath(b, map.success);
+            ok = !!res.ok && truthy(s);
+        }
+
+        let message = pick('message', ['message', 'msg', 'detail', 'error_description', 'error', 'title']);
+        if (message && typeof message !== 'string') message = '';
+
+        // Field errors: { errors: { field: 'msg' | ['msg'] } }, [{ field, message }], or DRF style { field: ['msg'] }
+        let errors = pick('errors', ['errors', 'fieldErrors', 'field_errors']);
+        const out = {};
+        if (isObj(errors)) {
+            Object.keys(errors).forEach((k) => {
+                const v = errors[k];
+                out[k] = Array.isArray(v) ? String(v[0]) : (isObj(v) ? String(v.message || '') : String(v));
+            });
+        } else if (Array.isArray(errors)) {
+            errors.forEach((e) => {
+                const f = e && (e.field || e.name || e.path || e.param);
+                if (f) out[f] = String(e.message || e.msg || '');
+            });
+        } else if (!res.ok && !map.errors) {
+            Object.keys(b).forEach((k) => {
+                if (Array.isArray(b[k]) && b[k].length && typeof b[k][0] === 'string') out[k] = b[k][0];
+            });
+        }
+
+        let challenge = pick('challenge', ['challenge', 'next_step', 'nextStep', 'requires']);
+        if (!challenge && (truthy(b.mfa_required) || truthy(b.mfa) || truthy(b.requires_otp) || truthy(b.otp_required))) challenge = 'otp';
+        if (challenge && typeof challenge !== 'string') challenge = 'otp';
+
+        let retry = pick('retryAfter', ['retryAfter', 'retry_after']);
+        const header = res.headers && typeof res.headers.get === 'function' ? res.headers.get('Retry-After') : '';
+        if ((retry === undefined || retry === '') && header) retry = header;
+
+        const token = pick('token', ['token', 'access_token', 'accessToken', 'jwt', 'data.token', 'data.access_token']);
+        const redirect = pick('redirect', ['redirect', 'redirectUrl', 'redirect_url', 'redirect_to', 'next', 'location'])
+            || (res.headers && typeof res.headers.get === 'function' ? res.headers.get('Location') : '');
+
+        return {
+            ok, message: message || '', errors: out, redirect: redirect || '', token: token ? String(token) : '',
+            challenge: challenge || '', retryAfter: Math.max(0, parseInt(retry, 10) || 0), data: body
+        };
+    }
+
+    // Built in adapters
+
+    function jsonTransport(ctx) {
+        const o = ctx.options;
+        const headers = $.extend({ 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }, o.headers);
+        let body;
+
+        if (o.encoding === 'json') {
+            headers['Content-Type'] = 'application/json';
+            body = JSON.stringify(ctx.data);
+        } else {
+            const p = new URLSearchParams();
+            Object.keys(ctx.data).forEach((k) => {
+                const v = ctx.data[k];
+                (Array.isArray(v) ? v : [v]).forEach((x) => p.append(k, x == null ? '' : x));
+            });
+            body = p.toString();
+            headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+        }
+
+        if (ctx.csrf && ctx.csrf.value && ctx.csrf.header) headers[ctx.csrf.header] = ctx.csrf.value;
+        const bearer = ctx.instance._bearer();
+        if (bearer) headers[bearer.name] = bearer.value;
+
+        const method = ctx.method === 'GET' ? 'GET' : ctx.method;
+        let url = ctx.url;
+        const init = { method, headers, credentials: o.credentials };
+        if (method === 'GET') {
+            url += (url.indexOf('?') === -1 ? '?' : '&') + body;
+            delete headers['Content-Type'];
+        } else {
+            init.body = body;
+        }
+
+        const useFetch = typeof window.fetch === 'function';
+        const finish = (res, text) => {
+            let parsed = null;
+            let isJson = true;
+            if (text) {
+                try { parsed = JSON.parse(text); } catch (e) { isJson = false; }
+            }
+            if (!isJson && res.status !== 204) {
+                return { ok: false, message: o.unexpectedResponseMessage, errors: {}, redirect: '', token: '', challenge: '', retryAfter: 0, data: text };
+            }
+            const normalize = typeof o.normalize === 'function' ? o.normalize : defaultNormalize;
+            const result = normalize(parsed, res, o, ctx);
+            return result;
+        };
+
+        if (useFetch) {
+            let timer = null;
+            if (typeof AbortController === 'function' && o.timeout) {
+                const ac = new AbortController();
+                init.signal = ac.signal;
+                timer = setTimeout(() => ac.abort(), o.timeout);
+            }
+            return window.fetch(url, init)
+                .then((res) => res.text().then((text) => { clearTimeout(timer); return finish(res, text); }))
+                .catch((err) => { clearTimeout(timer); throw err; });
+        }
+
+        return new Promise((resolve, reject) => {
+            $.ajax({ url, method, headers, data: init.body, processData: false, contentType: headers['Content-Type'], dataType: 'text', timeout: o.timeout })
+                .done((text, st, xhr) => resolve(finish({ ok: true, status: xhr.status, headers: { get: (n) => xhr.getResponseHeader(n) } }, text)))
+                .fail((xhr) => {
+                    if (!xhr.status) return reject(new Error('network'));
+                    resolve(finish({ ok: false, status: xhr.status, headers: { get: (n) => xhr.getResponseHeader(n) } }, xhr.responseText));
+                });
+        });
+    }
+
+    const ADAPTERS = {
+        form: { native: true },
+        json: { submit: jsonTransport },
+        modx: { encoding: 'form', submit: jsonTransport },
+        rest: { encoding: 'json', submit: jsonTransport }
+    };
 
     class PluginAuth {
         constructor($el, opts) {
@@ -2172,16 +2334,35 @@ html.dark .alert-ts-neutral {
 
         setOptions(opts) {
             this.options = $.extend(true, {}, PluginAuth.defaults, opts, {
-                wrapper: this.$el,
+                wrapper: this.$el
             });
+            // Functions and adapter objects are kept as given, not cloned
+            if (opts) {
+                ['normalize', 'beforeSubmit', 'transform'].forEach((k) => { if (typeof opts[k] === 'function') this.options[k] = opts[k]; });
+                if (opts.adapter && typeof opts.adapter !== 'string') this.options.adapter = opts.adapter;
+                if (opts.validators) this.options.validators = opts.validators;
+                if (opts.providers)  this.options.providers  = opts.providers;
+                if (opts.response)   this.options.response   = opts.response;
+            }
+            this.adapter = this._resolveAdapter();
+            if (this.adapter.encoding && !(opts && opts.encoding)) this.options.encoding = this.adapter.encoding;
             return this;
         }
 
+        _resolveAdapter() {
+            let a = this.options.adapter;
+            if (a == null || a === '') a = this.options.ajax ? 'json' : 'form';
+            if (typeof a === 'function') return { submit: a };
+            if (isObj(a)) return a;
+            return ADAPTERS[a] || ADAPTERS.form;
+        }
+
         build() {
-            // Inject component CSS lazily - only when an instance is built.
-            injectStyles();
             const self = this;
             const $el  = self.$el;
+
+            instanceCount++;
+            injectStyles();
 
             self.$fields  = $el.find('[data-auth-field]');
             self.$inputs  = $el.find('[data-auth-error]');
@@ -2194,7 +2375,24 @@ html.dark .alert-ts-neutral {
             }
 
             $el.addClass('auth-form auth-form-' + self.action);
-            $el.attr('novalidate', 'novalidate');
+            if ($el.is('form')) $el.attr('novalidate', 'novalidate');
+
+            // Link each input to its feedback text so screen readers announce the error
+            self.$inputs.each(function () {
+                const $i = $(this);
+                const $fb = $i.closest('[data-auth-field]').find('[data-auth-feedback]').first();
+                if ($fb.length) {
+                    if (!$fb.attr('id')) $fb.attr('id', self._uid + '-fb-' + ($i.attr('name') || Math.random().toString(36).slice(2, 6)));
+                    $i.attr('aria-describedby', $fb.attr('id'));
+                }
+            });
+
+            // Hide every step except the first
+            const $steps = $el.find('[data-auth-step]');
+            if ($steps.length) {
+                self._step = $steps.first().data('auth-step');
+                $steps.each(function (i) { if (i > 0) this.setAttribute('hidden', ''); });
+            }
 
             return this;
         }
@@ -2204,26 +2402,30 @@ html.dark .alert-ts-neutral {
             const $el  = self.$el;
             const ns   = '.' + self._uid;
 
-            // Form submit
+            // A button or link marked as the logout action
+            if (!$el.is('form')) {
+                $el.on('click' + ns, (e) => {
+                    if (self.action !== 'logout') return;
+                    e.preventDefault();
+                    self.submit();
+                });
+            }
+
             $el.on('submit' + ns, function (e) {
+                if (self._nativeSubmit) { self._nativeSubmit = false; return; }
+
                 if (!self.validate()) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
-                    self._toastError(self.options.errorMessage ||
-                        $el.data('auth-error-msg') ||
-                        'Please correct the highlighted fields.');
+                    self._message(self.options.errorMessage || $el.data('auth-error-msg') || 'Please correct the highlighted fields.', 'error');
                     return false;
                 }
 
-                $el.trigger('auth:submit', [self, self._collect()]);
-
-                if (self.options.ajax) {
-                    e.preventDefault();
-                    self._submitAjax();
-                    return false;
-                }
-
-                self.setBusy(true);
+                e.preventDefault();
+                const original = e.originalEvent || e;
+                self._submitter = original && original.submitter ? original.submitter : null;
+                self._dispatchSubmit();
+                return false;
             });
 
             // Live validation on blur / change
@@ -2234,55 +2436,78 @@ html.dark .alert-ts-neutral {
             // Re-validate on input once a field has been marked invalid
             self.$inputs.on('input' + ns, function () {
                 const $i = $(this);
-                if ($i.hasClass('is-invalid')) {
+                if ($i.hasClass(self.options.classes.invalid)) {
                     self._validateField($i);
                 }
             });
 
-            // Password strength meter — live update
+            // Password strength meter
             $el.find('[data-auth-strength]').on('input' + ns, function () {
                 self._updateStrength($(this));
             });
 
-            // Password toggle (Show / Hide)
+            // Password toggle
             $el.on('click' + ns, '[data-auth-toggle-password]', function (e) {
                 e.preventDefault();
                 self._togglePassword($(this));
             });
 
-            // Caps Lock warning on password inputs
+            // Social and OAuth buttons
+            $el.on('click' + ns, '[data-auth-provider]', function (e) {
+                e.preventDefault();
+                self.provider($(this).data('auth-provider'));
+            });
+
+            // Caps Lock warning
             $el.find('input[type="password"]').on('keyup' + ns, function (e) {
                 const caps = e.originalEvent && typeof e.originalEvent.getModifierState === 'function'
                     ? e.originalEvent.getModifierState('CapsLock')
                     : false;
-                const $field = $(this).closest('[data-auth-field]');
-                $field.find('[data-auth-capslock]').toggleClass('d-none', !caps);
+                $(this).closest('[data-auth-field]').find('[data-auth-capslock]').toggleClass(self.options.classes.hidden, !caps);
             });
 
             return this;
         }
 
-        // Public API 
+        // Public API
+
         validate() {
             const self = this;
             let valid = true;
+            let first = null;
 
             self.$inputs.each(function () {
+                if (!self._active($(this))) return;
                 if (!self._validateField($(this))) {
                     valid = false;
+                    if (!first) first = this;
                 }
             });
 
-            self.$el.trigger('auth:validate', [self, valid]);
+            if (first && typeof first.focus === 'function') first.focus();
+            self._emit('validate', [self, valid], { instance: self, valid });
             return valid;
+        }
+
+        // Validates and sends, exactly like pressing the submit button
+        submit() {
+            if (!this.validate()) {
+                this._message(this.options.errorMessage || 'Please correct the highlighted fields.', 'error');
+                return this;
+            }
+            this._submitter = null;
+            this._dispatchSubmit();
+            return this;
         }
 
         reset() {
             const self = this;
             self.$inputs
-                .removeClass('is-invalid is-valid')
+                .removeClass(self.options.classes.invalid + ' ' + self.options.classes.valid)
+                .removeAttr('aria-invalid')
                 .closest('[data-auth-field]')
                 .find('[data-auth-feedback]').text('');
+            self.clearMessage();
             return self;
         }
 
@@ -2293,18 +2518,129 @@ html.dark .alert-ts-neutral {
             if (!self.$submit.length) return self;
 
             self.$submit.prop('disabled', self.busy);
+            self.$submit.attr('aria-busy', self.busy ? 'true' : 'false');
 
             if (self.$spinner.length) {
-                self.$spinner.toggleClass('d-none', !self.busy);
+                self.$spinner.toggleClass(self.options.classes.hidden, !self.busy);
             }
-
             if (self.$label.length) {
-                self.$label.text(self.busy
-                    ? (self.options.busyLabel || 'Working...')
-                    : self.originalLabel
-                );
+                self.$label.text(self.busy ? (self.options.busyLabel || 'Working...') : self.originalLabel);
+            }
+            return self;
+        }
+
+        setMessage(text, type) {
+            this._message(text, type || 'info', true);
+            return this;
+        }
+
+        clearMessage() {
+            const $m = this._messageEl(false);
+            if ($m && $m.length) $m.text('').removeClass('auth-message--error auth-message--success auth-message--info').removeAttr('role');
+            return this;
+        }
+
+        setErrors(map) {
+            const self = this;
+            Object.keys(map || {}).forEach((name) => {
+                const $i = self.$el.find('[name="' + name + '"]').first();
+                if (!$i.length) return;
+                const $fb = $i.closest('[data-auth-field]').find('[data-auth-feedback]').first();
+                $i.removeClass(self.options.classes.valid).addClass(self.options.classes.invalid).attr('aria-invalid', 'true');
+                if ($fb.length) $fb.text(map[name]);
+            });
+            return self;
+        }
+
+        // Reveals one [data-auth-step] section and hides the others
+        showStep(name) {
+            const self = this;
+            const $steps = self.$el.find('[data-auth-step]');
+            // An unknown name changes nothing, so a server asking for a step the page lacks cannot hide the form
+            if (!$steps.filter(function () { return $(this).data('auth-step') === name; }).length) return self;
+            $steps.each(function () {
+                if ($(this).data('auth-step') === name) this.removeAttribute('hidden');
+                else this.setAttribute('hidden', '');
+            });
+            self._step = name;
+            const $first = $steps.filter(function () { return $(this).data('auth-step') === name; }).find('input, select, textarea').not('[type=hidden]').first();
+            if ($first.length) $first.trigger('focus');
+            return self;
+        }
+
+        getStep() { return this._step || ''; }
+
+        // Tokens, for APIs that answer a sign in with a token instead of a cookie
+        getToken() { return PluginAuth.getToken(this.options.token.key, this.options.token.store); }
+
+        setToken(token) {
+            const t = this.options.token;
+            const kind = t.store;
+            if (!kind) return this;
+            if (kind === 'memory') {
+                memoryTokens[t.key] = token;
+            } else {
+                const s = storeFor(kind);
+                if (s) { try { s.setItem(t.key, token); } catch (e) { /* quota or blocked */ } }
+            }
+            this._emit('token', [this, token], { instance: this, token });
+            return this;
+        }
+
+        clearToken() {
+            const t = this.options.token;
+            delete memoryTokens[t.key];
+            ['local', 'session'].forEach((k) => { const s = storeFor(k); if (s) { try { s.removeItem(t.key); } catch (e) { /* blocked */ } } });
+            return this;
+        }
+
+        _bearer() {
+            const t = this.options.token;
+            if (!t || !t.store || !t.header) return null;
+            const v = this.getToken();
+            return v ? { name: t.header, value: (t.scheme ? t.scheme + ' ' : '') + v } : null;
+        }
+
+        // Starts an OAuth or social sign in configured under options.providers
+        provider(name) {
+            const self = this;
+            const p = self.options.providers[name];
+            if (!p || !p.url) return self;
+
+            if (p.mode !== 'popup') {
+                window.location.href = p.url;
+                return self;
             }
 
+            const w = p.width || 480, h = p.height || 640;
+            const left = Math.max(0, (window.screenX || 0) + ((window.outerWidth || w) - w) / 2);
+            const top  = Math.max(0, (window.screenY || 0) + ((window.outerHeight || h) - h) / 2);
+            const win = window.open(p.url, 'ts-auth-' + name, 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
+            if (!win) {
+                self._message(self.options.popupBlockedMessage, 'error');
+                return self;
+            }
+            self.setBusy(true);
+
+            const origin = p.origin || window.location.origin;
+            const onMessage = (e) => {
+                if (e.origin !== origin) return;
+                const d = e.data || {};
+                if (d.type !== 'ts-auth') return;
+                window.removeEventListener('message', onMessage);
+                clearInterval(poll);
+                self.setBusy(false);
+                const result = { ok: !!d.ok, message: d.message || '', errors: {}, redirect: d.redirect || '', token: d.token || '', challenge: '', retryAfter: 0, data: d };
+                self._handleResult(result);
+            };
+            const poll = setInterval(() => {
+                if (win.closed) {
+                    clearInterval(poll);
+                    window.removeEventListener('message', onMessage);
+                    self.setBusy(false);
+                }
+            }, 500);
+            window.addEventListener('message', onMessage);
             return self;
         }
 
@@ -2312,6 +2648,7 @@ html.dark .alert-ts-neutral {
             const self = this;
             const ns   = '.' + self._uid;
 
+            clearInterval(self._lockTimer);
             self.$el.off(ns);
             self.$inputs.off(ns);
             self.$el.find('[data-auth-strength]').off(ns);
@@ -2319,12 +2656,66 @@ html.dark .alert-ts-neutral {
             self.$el.removeClass('auth-form auth-form-' + self.action);
             self.$el.removeData(instanceName);
 
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
             return self;
         }
 
         // Internals
+
+        _active($input) {
+            return !$input.closest('[data-auth-step][hidden]').length;
+        }
+
+        _emit(name, jqArgs, detail) {
+            this.$el.trigger('auth:' + name, jqArgs);
+            const el = this.$el[0];
+            if (el && typeof el.dispatchEvent === 'function') {
+                el.dispatchEvent(new CustomEvent('ts.' + EVENT_NS + '.' + name, { detail: detail || {}, bubbles: true }));
+            }
+        }
+
+        _messageEl(create) {
+            const self = this;
+            let $m = self.$el.find(self.options.messageTarget).first();
+            if (!$m.length && create) {
+                $m = $('<div class="auth-message" data-auth-message></div>').prependTo(self.$el);
+            }
+            return $m;
+        }
+
+        _hasToasts() {
+            return !!(themestrap && themestrap.PluginToast && typeof themestrap.PluginToast.show === 'function');
+        }
+
+        _message(text, type, force) {
+            if (!text) return;
+            const self = this;
+            const inline = force || !self._hasToasts() || self.$el.find(self.options.messageTarget).length;
+
+            if (inline) {
+                const $m = self._messageEl(true);
+                $m.removeClass('auth-message--error auth-message--success auth-message--info')
+                    .addClass('auth-message auth-message--' + type)
+                    .attr('role', type === 'error' ? 'alert' : 'status')
+                    .text(text);
+            }
+            if (!force && self.options.toasts && self._hasToasts()) {
+                themestrap.PluginToast.show({
+                    title: type === 'success' ? self.options.toastSuccessTitle : (type === 'info' ? '' : self.options.toastErrorTitle),
+                    body:  text,
+                    type:  type === 'success' ? 'success' : (type === 'info' ? 'info' : 'danger')
+                });
+            }
+        }
+
         _validateField($input) {
             const self     = this;
+            const o        = self.options;
             const $field   = $input.closest('[data-auth-field]');
             const $fb      = $field.find('[data-auth-feedback]').first();
             const val      = ($input.val() || '').toString();
@@ -2334,72 +2725,68 @@ html.dark .alert-ts-neutral {
             let error = '';
 
             if (required && !val.trim()) {
-                error = self.options.messages.required;
+                error = o.messages.required;
             }
             else if (val && type === 'email' && !EMAIL_RX.test(val)) {
-                error = self.options.messages.email;
+                error = o.messages.email;
             }
             else if (val && $input.attr('minlength')) {
                 const min = parseInt($input.attr('minlength'), 10);
-                if (val.length < min) {
-                    error = self.options.messages.minlength.replace('%s', min);
-                }
+                if (val.length < min) error = o.messages.minlength.replace('%s', min);
             }
             else if (val && $input.attr('pattern')) {
                 try {
-                    if (!new RegExp('^(?:' + $input.attr('pattern') + ')$').test(val)) {
-                        error = self.options.messages.pattern;
-                    }
-                } catch (e) { /* malformed pattern — skip */ }
+                    if (!new RegExp('^(?:' + $input.attr('pattern') + ')$').test(val)) error = o.messages.pattern;
+                } catch (e) { /* malformed pattern, skip */ }
             }
-            else if (val && $input.data('auth-match')) {
-                const target = $input.data('auth-match');
-                const $other = self.$el.find(target);
-                if ($other.length && val !== ($other.val() || '').toString()) {
-                    error = self.options.messages.match;
+            if (!error && val && $input.data('auth-match')) {
+                const $other = self.$el.find($input.data('auth-match'));
+                if ($other.length && val !== ($other.val() || '').toString()) error = o.messages.match;
+            }
+            if (!error && val && $input.data('auth-validate')) {
+                const fn = o.validators && o.validators[$input.data('auth-validate')];
+                if (typeof fn === 'function') {
+                    const r = fn(val, $input, self);
+                    if (typeof r === 'string' && r) error = r;
+                    else if (r === false) error = o.messages.pattern;
                 }
             }
 
+            const c = o.classes;
             if (error) {
-                $input.removeClass('is-valid').addClass('is-invalid');
+                $input.removeClass(c.valid).addClass(c.invalid).attr('aria-invalid', 'true');
                 if ($fb.length) $fb.text(error);
                 return false;
             }
 
-            $input.removeClass('is-invalid');
-            if (val.trim()) $input.addClass('is-valid');
+            $input.removeClass(c.invalid).removeAttr('aria-invalid');
+            if (val.trim()) $input.addClass(c.valid);
             if ($fb.length) $fb.text('');
             return true;
         }
 
         _updateStrength($input) {
-            const val   = ($input.val() || '').toString();
-            const score = scorePassword(val);
+            const val    = ($input.val() || '').toString();
+            const score  = scorePassword(val);
             const $field = $input.closest('[data-auth-field]');
             const $meter = $field.find('[data-auth-strength-meter]').first();
 
             if (!$meter.length) return;
 
-            // Lazy-construct the 5 bar segments
             if (!$meter.children().length) {
-                const bars = [0, 1, 2, 3, 4]
-                    .map(() => '<span class="auth-strength-bar"></span>')
-                    .join('');
-                $meter
-                    .addClass('auth-strength')
-                    .html(bars + '<span class="auth-strength-label"></span>');
+                const bars = [0, 1, 2, 3, 4].map(() => '<span class="auth-strength-bar"></span>').join('');
+                $meter.addClass('auth-strength').html(bars + '<span class="auth-strength-label"></span>');
             }
 
-            const $bars  = $meter.children('.auth-strength-bar');
-            const $label = $meter.children('.auth-strength-label');
-
-            $bars.each(function (i) {
+            $meter.attr('data-score', val.length ? score : '');
+            $meter.children('.auth-strength-bar').each(function (i) {
+                const on = i <= score && val.length > 0;
                 $(this)
                     .removeClass('bg-danger bg-warning bg-info bg-success')
-                    .toggleClass(STRENGTH_CLASSES[score], i <= score && val.length > 0);
+                    .toggleClass(STRENGTH_CLASSES[score], on)
+                    .toggleClass('auth-strength-bar--on', on);
             });
-
-            $label.text(val.length ? STRENGTH_LABELS[score] : '');
+            $meter.children('.auth-strength-label').text(val.length ? STRENGTH_LABELS[score] : '');
         }
 
         _togglePassword($btn) {
@@ -2413,129 +2800,299 @@ html.dark .alert-ts-neutral {
 
             const isHidden = $pw.attr('type') === 'password';
             $pw.attr('type', isHidden ? 'text' : 'password');
-            $btn.text(isHidden
-                ? (this.options.hidePasswordLabel || 'Hide')
-                : (this.options.showPasswordLabel || 'Show')
-            );
+            $btn.text(isHidden ? (this.options.hidePasswordLabel || 'Hide') : (this.options.showPasswordLabel || 'Show'));
             $btn.attr('aria-pressed', isHidden ? 'true' : 'false');
         }
 
         _collect() {
+            const self = this;
             const data = {};
-            this.$el.find('input, select, textarea').each(function () {
+            self.$el.find('input, select, textarea').each(function () {
                 const $i = $(this);
                 const name = $i.attr('name');
                 if (!name) return;
                 const type = ($i.attr('type') || '').toLowerCase();
                 if ((type === 'checkbox' || type === 'radio') && !$i.prop('checked')) return;
+                if (type === 'file') return;
                 data[name] = $i.val();
             });
+            // The pressed button counts, as it does in a native submit
+            const s = self._submitter;
+            if (s && s.name && !(s.name in data)) data[s.name] = s.value;
             return data;
         }
 
-        _submitAjax() {
+        _csrf() {
+            const c = this.options.csrf;
+            if (c === false) return null;
+            const cfg = isObj(c) ? c : {};
+            let value = typeof cfg.token === 'function' ? cfg.token() : cfg.token;
+            let header = cfg.header || '';
+
+            if (!value) {
+                const fieldSel = cfg.field
+                    ? 'input[name="' + cfg.field + '"]'
+                    : 'input[name="_csrf"], input[name="csrf_token"], input[name="csrfmiddlewaretoken"], input[name="authenticity_token"], input[name="_token"], input[name="__RequestVerificationToken"]';
+                const $f = this.$el.find(fieldSel).first();
+                if ($f.length) value = $f.val();
+            }
+            if (!value) {
+                const $m = $('meta[name="csrf-token"], meta[name="csrf"], meta[name="_csrf"]').first();
+                if ($m.length) value = $m.attr('content');
+            }
+            if (!value) {
+                const cookie = readCookie(cfg.cookie || 'XSRF-TOKEN');
+                if (cookie) { value = cookie; header = header || 'X-XSRF-TOKEN'; }
+            }
+            if (!value) return null;
+            return { value, header: header || 'X-CSRF-Token' };
+        }
+
+        _endpoint() {
+            const o = this.options;
+            const $el = this.$el;
+            return o.endpoints[this.action] || o.url || ($el.is('form') ? $el.attr('action') : '') || $el.data('auth-url') || window.location.href;
+        }
+
+        _method() {
+            const o = this.options;
+            return (o.method || (this.$el.is('form') ? this.$el.attr('method') : '') || 'POST').toUpperCase();
+        }
+
+        // Runs beforeSubmit, then either lets the browser post the form or sends through the adapter
+        _dispatchSubmit() {
             const self = this;
-            const $el  = self.$el;
-            const url  = $el.attr('action') || window.location.href;
+            const o    = self.options;
+            let data   = self._collect();
 
-            self.setBusy(true);
+            self._emit('submit', [self, data], { instance: self, data });
+            self.clearMessage();
 
-            $.ajax({
-                url:      url,
-                method:   ($el.attr('method') || 'POST').toUpperCase(),
-                data:     $el.serialize(),
-                dataType: 'json',
-                headers:  { 'X-Requested-With': 'XMLHttpRequest' },
-            })
-            .done(function (resp) {
-                const ok = resp && (resp.success === true || resp.success === 'true');
-
-                if (ok) {
-                    self._toastSuccess(resp.message || $el.data('auth-success-msg') || self.options.successMessage);
-                    $el.trigger('auth:success', [self, resp]);
-
-                    const redirect = resp.redirect || $el.data('auth-redirect') || self.options.redirect;
-                    if (redirect) {
-                        setTimeout(() => { window.location.href = redirect; }, 600);
-                    } else {
-                        self.setBusy(false);
-                    }
+            const go = (final) => {
+                if (final === false) return;
+                data = final || data;
+                if (!self.adapter || self.adapter.native || typeof self.adapter.submit !== 'function') {
+                    self._nativePost();
                     return;
                 }
+                self._send(data);
+            };
 
-                // Server reported failure — paint field errors if provided
-                if (resp && resp.errors && typeof resp.errors === 'object') {
-                    Object.keys(resp.errors).forEach(name => {
-                        const $i = $el.find('[name="' + name + '"]').first();
-                        if (!$i.length) return;
-                        $i.removeClass('is-valid').addClass('is-invalid');
-                        const $fb = $i.closest('[data-auth-field]').find('[data-auth-feedback]').first();
-                        if ($fb.length) $fb.text(resp.errors[name]);
-                    });
+            if (typeof o.beforeSubmit === 'function') {
+                self.setBusy(true);
+                Promise.resolve()
+                    .then(() => o.beforeSubmit.call(self, data, { action: self.action, instance: self }))
+                    .then((r) => { if (r === false) self.setBusy(false); go(r); })
+                    .catch(() => { self.setBusy(false); self._message(o.networkErrorMessage, 'error'); });
+                return;
+            }
+            go();
+        }
+
+        _nativePost() {
+            const self = this;
+            const form = self.$el[0];
+            if (!self.$el.is('form')) return;
+            self.setBusy(true);
+            self._nativeSubmit = true;
+            const s = self._submitter;
+            if (typeof form.requestSubmit === 'function') {
+                try { form.requestSubmit(s || undefined); return; } catch (e) { /* fall through */ }
+            }
+            // Older browsers: carry the pressed button's name and value across
+            if (s && s.name) {
+                const h = document.createElement('input');
+                h.type = 'hidden'; h.name = s.name; h.value = s.value;
+                form.appendChild(h);
+            }
+            self._nativeSubmit = false;
+            form.submit();
+        }
+
+        _send(data) {
+            const self = this;
+            const o    = self.options;
+            const payload = typeof o.transform === 'function' ? (o.transform(data, { action: self.action }) || data) : data;
+            const ctx = {
+                action: self.action, data: payload, url: self._endpoint(), method: self._method(),
+                form: self.$el.is('form') ? self.$el[0] : null, options: o, instance: self,
+                csrf: self._csrf(), submitter: self._submitter
+            };
+
+            self.setBusy(true);
+            Promise.resolve()
+                .then(() => self.adapter.submit(ctx))
+                .then((result) => {
+                    const r = $.extend({ ok: false, message: '', errors: {}, redirect: '', token: '', challenge: '', retryAfter: 0 }, result);
+                    self._handleResult(r);
+                })
+                .catch((err) => {
+                    const detail = { network: true, error: err };
+                    self._message(o.networkErrorMessage, 'error');
+                    self._emit('error', [self, detail], { instance: self, result: detail });
+                    self.setBusy(false);
+                });
+        }
+
+        _handleResult(r) {
+            const self = this;
+            const o    = self.options;
+            const $el  = self.$el;
+
+            if (r.challenge) {
+                self.setBusy(false);
+                self.showStep(r.challenge);
+                if (r.message) self._message(r.message, 'info');
+                self._emit('challenge', [self, r.challenge], { instance: self, step: r.challenge, result: r });
+                return;
+            }
+
+            if (r.ok) {
+                if (r.token) { self.setToken(r.token); }
+                const msg = r.message || $el.data('auth-success-msg') || o.successMessage;
+                if (msg) self._message(msg, 'success');
+                self._emit('success', [self, r], { instance: self, result: r });
+
+                if (self.action === 'logout') self.clearToken();
+
+                const target = safeRedirect(r.redirect || $el.data('auth-redirect') || o.redirect, o.allowExternalRedirect);
+                if (target) {
+                    const ev = new CustomEvent('ts.' + EVENT_NS + '.redirect', { detail: { url: target, instance: self }, bubbles: true, cancelable: true });
+                    const proceed = $el[0].dispatchEvent(ev);
+                    if (proceed) setTimeout(() => { window.location.href = target; }, o.redirectDelay);
+                    else self.setBusy(false);
+                } else {
+                    self.setBusy(false);
                 }
+                return;
+            }
 
-                self._toastError((resp && resp.message) || self.options.errorMessage);
-                $el.trigger('auth:error', [self, resp]);
-                self.setBusy(false);
-            })
-            .fail(function (xhr) {
-                const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message)
-                    || self.options.networkErrorMessage;
-                self._toastError(msg);
-                $el.trigger('auth:error', [self, { network: true, status: xhr.status }]);
-                self.setBusy(false);
-            });
+            // Failure: paint field errors, then the message
+            if (r.errors && Object.keys(r.errors).length) self.setErrors(r.errors);
+            self._message(r.message || $el.data('auth-error-msg') || o.errorMessage, 'error');
+            self._emit('error', [self, r], { instance: self, result: r });
+            self.setBusy(false);
+            if (r.retryAfter > 0) self._lockFor(r.retryAfter);
         }
 
-        _toastSuccess(body) {
-            if (!this.options.toasts || !body) return;
-            if (themestrap && themestrap.PluginToast) {
-                themestrap.PluginToast.show({
-                    title: this.options.toastSuccessTitle,
-                    body:  body,
-                    type:  'success',
-                });
-            }
-        }
-
-        _toastError(body) {
-            if (!this.options.toasts || !body) return;
-            if (themestrap && themestrap.PluginToast) {
-                themestrap.PluginToast.show({
-                    title: this.options.toastErrorTitle,
-                    body:  body,
-                    type:  'danger',
-                });
-            }
+        // Disables the submit button with a countdown, for rate limits and lockouts
+        _lockFor(seconds) {
+            const self = this;
+            if (!self.$submit.length) return;
+            clearInterval(self._lockTimer);
+            let left = seconds;
+            const fmt = (n) => Math.floor(n / 60) + ':' + ('0' + (n % 60)).slice(-2);
+            const paint = () => {
+                self.$submit.prop('disabled', true);
+                if (self.$label.length) self.$label.text(self.options.lockedLabel.replace('%s', fmt(left)));
+            };
+            paint();
+            self._lockTimer = setInterval(() => {
+                left--;
+                if (left <= 0) {
+                    clearInterval(self._lockTimer);
+                    self.$submit.prop('disabled', false);
+                    if (self.$label.length) self.$label.text(self.originalLabel);
+                    self.clearMessage();
+                } else {
+                    paint();
+                }
+            }, 1000);
         }
     }
 
     PluginAuth.defaults = {
-        // Submission
-        ajax:                false,    // when true, posts via XHR and expects JSON
-        redirect:            '',       // URL to redirect to after AJAX success
+        // Transport
+        ajax:                false,           // shorthand for adapter: 'json'
+        adapter:             null,            // 'form' | 'json' | 'modx' | 'rest' | { submit(ctx) } | function(ctx)
+        url:                 '',              // overrides the form action
+        endpoints:           {},              // { login: '/api/login', register: '/api/register', ... }
+        method:              '',              // overrides the form method
+        encoding:            'form',          // 'form' or 'json' request bodies
+        headers:             {},              // extra request headers
+        credentials:         'same-origin',   // fetch credentials mode
+        timeout:             20000,           // ms before a request is aborted, 0 to disable
+        csrf:                'auto',          // 'auto' | false | { header, field, token, cookie }
+
+        // Understanding replies
+        response:            {},              // { success, message, errors, redirect, token, challenge, retryAfter } as path or function
+        normalize:           null,            // function(body, res, options, ctx) returning a result, replaces the default
+
+        // Flow
+        beforeSubmit:        null,            // function(data, ctx) returning data, false to cancel, or a Promise of either
+        transform:           null,            // function(data, ctx) returning the data to send
+        redirect:            '',              // where to go after success
+        redirectDelay:       600,             // ms
+        allowExternalRedirect: false,         // allow redirects to other sites
+
+        // Tokens for APIs that sign in with a token instead of a cookie
+        token: {
+            store:  false,                    // false | 'memory' | 'session' | 'local'
+            key:    'ts_auth_token',
+            header: 'Authorization',
+            scheme: 'Bearer'
+        },
+
+        // OAuth and social providers: { github: { url, mode: 'redirect' | 'popup', origin, width, height } }
+        providers:           {},
 
         // Feedback
-        toasts:              true,     // emit PluginToast on success / error
+        toasts:              true,            // PluginToast on success and error, when that plugin is loaded
+        messageTarget:       '[data-auth-message]',
         toastSuccessTitle:   'Success',
         toastErrorTitle:     'Sorry',
         successMessage:      '',
         errorMessage:        'Please check the form for errors.',
         networkErrorMessage: 'Could not reach the server. Please try again.',
+        unexpectedResponseMessage: 'The server sent a reply this form could not understand.',
+        popupBlockedMessage: 'The sign in window was blocked. Please allow pop-ups and try again.',
 
         // UI labels
         busyLabel:           'Working...',
+        lockedLabel:         'Try again in %s',
         showPasswordLabel:   'Show',
         hidePasswordLabel:   'Hide',
 
-        // Validation messages
+        // Class names, for frameworks other than Bootstrap
+        classes: { invalid: 'is-invalid', valid: 'is-valid', hidden: 'd-none' },
+
+        // Validation
+        validators:          {},              // { name: function(value, $input, instance) returning '' or an error }
         messages: {
             required:  'This field is required.',
             email:     'Please enter a valid email address.',
             minlength: 'Must be at least %s characters.',
             pattern:   'Invalid format.',
-            match:     'Values do not match.',
-        },
+            match:     'Values do not match.'
+        }
+    };
+
+    PluginAuth.adapters = ADAPTERS;
+
+    // Add or replace a named adapter: themestrap.PluginAuth.registerAdapter('firebase', { submit(ctx) {} })
+    PluginAuth.registerAdapter = function (name, adapter) {
+        ADAPTERS[name] = typeof adapter === 'function' ? { submit: adapter } : adapter;
+        return PluginAuth;
+    };
+
+    PluginAuth.getToken = function (key, store) {
+        key = key || PluginAuth.defaults.token.key;
+        if (store === 'memory') return memoryTokens[key] || '';
+        const kinds = store ? [store] : ['session', 'local'];
+        for (let i = 0; i < kinds.length; i++) {
+            const s = storeFor(kinds[i]);
+            if (s) { try { const v = s.getItem(key); if (v) return v; } catch (e) { /* blocked */ } }
+        }
+        return memoryTokens[key] || '';
+    };
+
+    // Headers for your own API calls once signed in: fetch(url, { headers: PluginAuth.authHeaders() })
+    PluginAuth.authHeaders = function (tokenOptions) {
+        const t = $.extend({}, PluginAuth.defaults.token, tokenOptions);
+        const v = PluginAuth.getToken(t.key, t.store || undefined);
+        const h = {};
+        if (v) h[t.header] = (t.scheme ? t.scheme + ' ' : '') + v;
+        return h;
     };
 
     $.extend(themestrap, { PluginAuth });
@@ -2552,6 +3109,7 @@ html.dark .alert-ts-neutral {
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Before/After
 // Before/After
 (((themestrap = {}, $) => {
     const instanceName = '__beforeafter';
@@ -2758,6 +3316,9 @@ html.dark .alert-ts-neutral {
             const $imgAfter  = $imgs.eq(1).clone();
 
             const doInit = () => {
+                // destroy() may have run while the image was still loading
+                if (self._destroyed || self.$handle) return;
+
                 const nw = $imgs[0].naturalWidth  || 800;
                 const nh = $imgs[0].naturalHeight || 600;
 
@@ -2789,13 +3350,21 @@ html.dark .alert-ts-neutral {
                 self.isVertical = isVertical;
 
                 self._setPosition(pct);
+
+                // events() was called before the slider existed; bind now
+                if (self._eventsPending) {
+                    self._eventsPending = false;
+                    self.events();
+                }
             };
 
             const img = $imgs[0];
             if (img.complete && img.naturalWidth) {
                 doInit();
             } else {
-                $imgs[0].addEventListener('load', doInit, { once: true });
+                // A broken image still gets a working slider (with the 4:3 fallback ratio)
+                $imgs[0].addEventListener('load',  doInit, { once: true });
+                $imgs[0].addEventListener('error', doInit, { once: true });
             }
 
             return this;
@@ -2850,6 +3419,13 @@ html.dark .alert-ts-neutral {
             const $wrap = self.options.wrapper;
             const ns = self.eventNamespace;
             let dragging = false;
+
+            // The slider is built once the first image has loaded. Until then
+            // there is nothing to bind to, so build() calls back in here later.
+            if (!self.$handle) {
+                self._eventsPending = true;
+                return this;
+            }
 
             $wrap.on(`mousedown${ns} touchstart${ns}`, (e) => {
                 if (self.options.move_with_handle_only) return;
@@ -2909,6 +3485,8 @@ html.dark .alert-ts-neutral {
 
         destroy() {
             const ns = this.eventNamespace;
+            this._destroyed = true;
+            this._eventsPending = false;
             $(document).off(ns);
             this.options.wrapper
                 .removeClass('ts-ba-wrap ts-ba-vertical')
@@ -2950,6 +3528,7 @@ html.dark .alert-ts-neutral {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Calendar
+// Calendar
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCalendar';
     const STYLE_ID     = 'ts-calendar-styles';
@@ -2959,11 +3538,11 @@ html.dark .alert-ts-neutral {
 .ts-calendar {
     display: inline-flex;
     flex-direction: column;
-    font-family: var(--font-ui, system-ui, sans-serif);
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 13px;
-    color: var(--text-normal, #c0c0c0);
-    background: var(--bg-raised, #252627);
-    border: 1px solid var(--border-soft, rgba(255,255,255,0.12));
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
+    background: var(--ts-skin-surface, var(--bg-raised, #252627));
+    border: 1px solid var(--ts-skin-border, var(--border-soft, rgba(255,255,255,0.12)));
     border-radius: 8px;
     padding: 14px 12px;
     user-select: none;
@@ -2982,7 +3561,7 @@ html.dark .alert-ts-neutral {
     text-align: center;
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-bright, #f0f0f0);
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
     letter-spacing: 0.03em;
 }
 
@@ -2994,22 +3573,22 @@ html.dark .alert-ts-neutral {
     width: 26px;
     height: 26px;
     padding: 0 0 1px;
-    border: 1px solid var(--border-soft, rgba(255,255,255,0.12));
+    border: 1px solid var(--ts-skin-border, var(--border-soft, rgba(255,255,255,0.12)));
     border-radius: 5px;
     background: transparent;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
     font-size: 18px;
     line-height: 1;
     cursor: pointer;
     transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 .ts-cal-nav:hover {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
-    border-color: var(--border-mid, rgba(255,255,255,0.20));
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
+    border-color: var(--ts-skin-border-strong, var(--border-mid, rgba(255,255,255,0.20)));
 }
 .ts-cal-nav:focus-visible {
-    outline: 2px solid var(--accent-cyan, #5ecfdb);
+    outline: 2px solid var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     outline-offset: 2px;
 }
 
@@ -3027,7 +3606,7 @@ html.dark .alert-ts-neutral {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
 }
 
 .ts-cal-cell {
@@ -3035,7 +3614,7 @@ html.dark .alert-ts-neutral {
     text-align: center;
 }
 .ts-cal-cell--in-range {
-    background: rgba(94,207,219,0.10);
+    background: var(--ts-cal-accent-soft, var(--ts-skin-accent-soft, rgba(94,207,219,0.10)));
 }
 .ts-cal-cell--range-start {
     background: linear-gradient(to right, transparent 50%, rgba(94,207,219,0.10) 50%);
@@ -3056,31 +3635,31 @@ html.dark .alert-ts-neutral {
     border: none;
     border-radius: 6px;
     background: transparent;
-    color: var(--text-normal, #c0c0c0);
-    font-family: var(--font-ui, system-ui, sans-serif);
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 12.5px;
     cursor: pointer;
     transition: background 0.1s, color 0.1s;
 }
 .ts-cal-day:hover:not([disabled]) {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
 }
 .ts-cal-day:focus-visible {
-    outline: 2px solid var(--accent-cyan, #5ecfdb);
+    outline: 2px solid var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     outline-offset: 1px;
     z-index: 1;
 }
 
 .ts-cal-day--outside {
-    color: var(--text-dim, rgba(255,255,255,0.18));
+    color: var(--ts-skin-text-faint, var(--text-dim, rgba(255,255,255,0.18)));
 }
 .ts-cal-day--outside:hover:not([disabled]) {
-    color: var(--text-muted, rgba(255,255,255,0.40));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.40)));
 }
 
 .ts-cal-day--today {
-    color: var(--accent-cyan, #5ecfdb);
+    color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     font-weight: 600;
 }
 .ts-cal-day--today::after {
@@ -3092,46 +3671,46 @@ html.dark .alert-ts-neutral {
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: var(--accent-cyan, #5ecfdb);
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 
 .ts-cal-day--disabled {
-    color: var(--text-dim, rgba(255,255,255,0.18));
+    color: var(--ts-skin-text-faint, var(--text-dim, rgba(255,255,255,0.18)));
     cursor: not-allowed;
     opacity: 0.45;
     pointer-events: none;
 }
 
 .ts-cal-day--selected {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     font-weight: 600;
 }
 .ts-cal-day--selected:hover {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     opacity: 0.9;
 }
 .ts-cal-day--selected.ts-cal-day--today::after {
-    background: #0d0e0f;
+    background: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
 }
 
 .ts-cal-day--range-start,
 .ts-cal-day--range-end {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     font-weight: 600;
     border-radius: 6px;
 }
 .ts-cal-day--range-start:hover,
 .ts-cal-day--range-end:hover {
-    background: var(--accent-cyan, #5ecfdb);
-    color: #0d0e0f;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
     opacity: 0.9;
 }
 .ts-cal-day--range-start.ts-cal-day--today::after,
 .ts-cal-day--range-end.ts-cal-day--today::after {
-    background: #0d0e0f;
+    background: var(--ts-cal-on-accent, var(--ts-skin-on-accent, #0d0e0f));
 }
 
 .ts-cal-footer {
@@ -3139,22 +3718,22 @@ html.dark .alert-ts-neutral {
     justify-content: center;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid var(--border-dim, rgba(255,255,255,0.06));
+    border-top: 1px solid var(--ts-skin-border, var(--border-dim, rgba(255,255,255,0.06)));
 }
 .ts-cal-today-btn {
     padding: 4px 14px;
-    border: 1px solid var(--border-soft, rgba(255,255,255,0.12));
+    border: 1px solid var(--ts-skin-border, var(--border-soft, rgba(255,255,255,0.12)));
     border-radius: 4px;
     background: transparent;
-    color: var(--text-muted, rgba(255,255,255,0.35));
-    font-family: var(--font-ui, system-ui, sans-serif);
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 11.5px;
     cursor: pointer;
     transition: background 0.12s, color 0.12s;
 }
 .ts-cal-today-btn:hover {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
 }
     `;
 
@@ -3729,36 +4308,27 @@ html.dark .alert-ts-neutral {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Carousel
+// Carousel
 (((themestrap = {}, $) => {
     const instanceName = '__carousel';
-    const STYLE_ID = 'ts-carousel-styles';
+    const STYLE_ID    = 'ts-carousel-styles';
+
+    const SVG_PREV = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+    const SVG_NEXT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+    const SVG_UP   = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+    const SVG_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
 
     class PluginCarousel {
+
         constructor($el, opts) {
             return this.initialize($el, opts);
         }
 
         initialize($el, opts) {
-            if ($el.data(instanceName)) {
-                return this;
-            }
-
-            this.$el = $el;
+            if ($el.data(instanceName)) { return this; }
+            this.$el        = $el;
             this.initialHTML = $el.html();
-            this._uid = ++PluginCarousel._uidCounter;
-
-            // Defer init until icon plugin has rendered its icons to prevent flicker
-            if ($el.find('[data-icon]').get(0)) {
-                const self = this;
-                $(window).on('icon.rendered', function() {
-                    if ($el.data(instanceName)) return;
-                    setTimeout(() => {
-                        self.setData().setOptions(opts).build().events();
-                    }, 1000);
-                });
-                return this;
-            }
-
+            this._uid       = ++PluginCarousel._uidCounter;
             this.setData().setOptions(opts).build().events();
             return this;
         }
@@ -3777,537 +4347,874 @@ html.dark .alert-ts-neutral {
         }
 
         build() {
-            // Lazy CSS injection — only once, ref-counted for destroy
             if (!document.getElementById(STYLE_ID)) {
                 const style = document.createElement('style');
-                style.id = STYLE_ID;
+                style.id          = STYLE_ID;
                 style.textContent = PluginCarousel.css;
                 document.head.appendChild(style);
             }
 
-            const self = this;
-            const $el = this.options.wrapper;
+            const $el  = this.$el;
             const opts = this.options;
 
-            // RTL: inherit from html[dir] when not explicitly set
             if ($('html').attr('dir') === 'rtl') opts.rtl = true;
 
-            // Collect and count original items before mutating the DOM
-            const $originalItems = $el.children();
-            const itemCount = $originalItems.length;
-            if (itemCount === 0) return this;
+            // Non-slide transitions only support a single visible item
+            if (opts.transition !== 'slide') opts.items = 1;
 
-            this.itemCount = itemCount;
+            const $originals = $el.children();
+            const count      = $originals.length;
+            if (count === 0) return this;
+
+            // State
+            this.slideCount   = count;
             this.currentIndex = 0;
+            this.realIndex    = 0;
             this.clonedBefore = 0;
-            this.clonedAfter = 0;
-            this.autoplayTimer = null;
+            this.clonedAfter  = 0;
+            this.autoplayTimer  = null;
+            this.isPlaying      = false;
+            this._hovering      = false;
+            this._focused       = false;
+            this._docHidden     = false;
+            this._transitioning = false;
+            this.isDragging     = false;
 
-            // Single-item shortcut: ignore responsive breakpoints
-            if (opts.items === 1) opts.responsive = {};
+            // Build the DOM skeleton
+            this.$trackOuter = $('<div class="tsc-track-outer"></div>');
+            this.$track      = $('<div class="tsc-track" role="presentation"></div>');
+            this.$trackOuter.append(this.$track);
 
-            // Items beyond default 4: ensure a 1199px breakpoint entry
-            if (opts.items > 4) {
-                opts.responsive = $.extend(true, {}, opts.responsive, {
-                    1199: { items: opts.items }
-                });
+            this.$nav      = this._buildNav();
+            this.$dots     = this._buildDots(count);
+            this.$counter  = opts.counter     ? this._buildCounter(count) : null;
+            this.$progress = opts.progressBar ? this._buildProgress()     : null;
+            this.$thumbs   = (opts.thumbs || opts.thumbsEl) ? this._buildThumbs($originals, count) : null;
+            this.$progressBar = null; // set inside _buildProgress
+
+            // Re-wire progressBar ref after build
+            if (this.$progress) {
+                this.$progressBar = this.$progress.find('.tsc-progress-bar');
             }
 
-            // Resolve visible item count for the current viewport width
-            this.getItemsCount = () => {
-                const resp = opts.responsive;
-                if (!resp || Object.keys(resp).length === 0) return Math.max(opts.items || 1, 1);
-                const w = window.innerWidth;
-                const bps = Object.keys(resp).map(Number).sort((a, b) => a - b);
-                let count = Math.max(opts.items || 1, 1);
-                for (const bp of bps) {
-                    if (w >= bp && resp[bp].items !== undefined) count = resp[bp].items;
-                }
-                return Math.max(count, 1);
-            };
+            // Populate track with items (plus loop clones)
+            this._populateTrack($originals, count);
 
-            // Build stage structure
-            const $stageOuter = $('<div class="owl-stage-outer"></div>');
-            const $stage = $('<div class="owl-stage"></div>');
-            $stageOuter.append($stage);
+            // Assemble into element
+            $el.empty();
+            if (opts.progressBar && opts.progressPosition === 'top') $el.append(this.$progress);
+            $el.append(this.$trackOuter, this.$nav, this.$dots);
+            if (this.$counter)  $el.append(this.$counter);
+            if (opts.progressBar && opts.progressPosition !== 'top') $el.append(this.$progress);
 
-            // Wrap every original child in an .owl-item; keep a reference array for cloning
-            const $realItems = [];
-            $originalItems.each(function() {
-                const $item = $('<div class="owl-item"></div>').append($(this).clone(true, true));
-                $stage.append($item);
-                $realItems.push($item[0]);
+            // Stage padding (peekaboo / reveal-adjacent)
+            const sp = opts.stagePadding || 0;
+            if (sp > 0) {
+                this.$trackOuter.css(opts.vertical
+                    ? { paddingTop: sp + 'px', paddingBottom: sp + 'px' }
+                    : { paddingLeft: sp + 'px', paddingRight: sp + 'px' }
+                );
+                this.$trackOuter.css('overflow', 'visible');
+                $el.css('overflow', 'hidden');
+            }
+
+            // Propagate speed + easing to CSS so transitions can pick them up
+            $el[0].style.setProperty('--tsc-speed', opts.speed + 'ms');
+            $el[0].style.setProperty('--tsc-easing', opts.easing);
+            if (opts.gap) $el[0].style.setProperty('--tsc-gap', opts.gap + 'px');
+
+            // ARIA on root
+            $el.attr({
+                role:                 'region',
+                'aria-roledescription': 'carousel',
+                'aria-label':           opts.ariaLabel || 'Carousel'
             });
 
-            // Clone items for seamless looping
-            if (opts.loop && itemCount > 1) {
-                // Clone count: enough to cover one full page-worth of visible items
-                const cloneCount = Math.min(Math.max(this.getItemsCount(), 2), itemCount);
+            // Root classes
+            $el.addClass(`tsc-carousel tsc-trans-${opts.transition}`);
+            if (opts.vertical)           $el.addClass('tsc-vertical');
+            if (opts.rtl)                $el.addClass('tsc-rtl');
+            if (opts.dotType === 'line') $el.addClass('tsc-dots-line');
+            if (opts.dotType === 'number') $el.addClass('tsc-dots-number');
+            if (!opts.loop)              $el.addClass('tsc-no-loop');
 
-                // Prepend clones of the tail of the real items (enables backward loop)
-                for (let i = cloneCount - 1; i >= 0; i--) {
-                    const idx = ((itemCount - cloneCount + i) % itemCount + itemCount) % itemCount;
-                    $($realItems[idx]).clone(true, true).addClass('cloned').prependTo($stage);
-                    this.clonedBefore++;
-                }
-
-                // Append clones of the head of the real items (enables forward loop)
-                for (let i = 0; i < cloneCount; i++) {
-                    $($realItems[i % itemCount]).clone(true, true).addClass('cloned').appendTo($stage);
-                    this.clonedAfter++;
-                }
-
-                // Start positioned at the first real item
-                this.currentIndex = this.clonedBefore;
+            // Initial layout
+            if (opts.transition === 'slide') {
+                this._layout(false);
+            } else {
+                this._layoutStack();
             }
 
-            // Build navigation
-            const $nav = $('<div class="owl-nav"></div>');
-            const $prev = $('<button type="button" role="button" class="owl-prev"></button>');
-            const $next = $('<button type="button" role="button" class="owl-next"></button>');
-            opts.rtl ? $nav.append($next).append($prev) : $nav.append($prev).append($next);
+            this._updateActive();
+            this._updateDots();
+            this._updateNavState();
+            if (this.$counter) this._updateCounter();
+            if (this.$thumbs)  this._updateThumbs();
+            if (opts.lazyLoad) this._lazyLoad(0);
 
-            // Build dots
-            const $dots = $('<div class="owl-dots"></div>');
-            for (let i = 0; i < itemCount; i++) {
-                $dots.append($('<button type="button" role="button" class="owl-dot"><span></span></button>'));
+            $el.addClass('tsc-loaded');
+
+            // Attach thumbnail strip
+            this._attachThumbs();
+
+            // Start autoplay
+            if (opts.autoplay) {
+                this.isPlaying = true;
+                this.$track.attr('aria-live', 'off');
+                this._applyPlayState();
+            } else {
+                this.$track.attr('aria-live', 'polite');
             }
-
-            // Replace carousel content with generated structure
-            $el.empty().append($stageOuter).append($nav).append($dots);
-
-            // Honour explicit nav/dots suppression
-            if (opts.nav === false) $nav.addClass('disabled');
-            if (opts.dots === false) $dots.addClass('disabled');
-
-            // SVG arrow icons injected per-button for nav-svg-arrows-1
-            if ($el.hasClass('nav-svg-arrows-1')) {
-                const svg = '<svg version="1.1" viewBox="0 0 15.698 8.706" width="17" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><polygon stroke="#212121" stroke-width="0.1" fill="#212121" points="11.354,0 10.646,0.706 13.786,3.853 0,3.853 0,4.853 13.786,4.853 10.646,8 11.354,8.706 15.698,4.353"/></svg>';
-                $prev.append(svg);
-                $next.append(svg);
-            }
-
-            // Store DOM refs
-            this.$stage = $stage;
-            this.$stageOuter = $stageOuter;
-            this.$nav = $nav;
-            this.$prev = $prev;
-            this.$next = $next;
-            this.$dots = $dots;
-
-            $el.addClass('owl-themestrap owl-drag');
-
-            // Initial layout — no transition
-            this._layout(false);
-
-            // Mark as fully loaded
-            $el.addClass('owl-loaded').removeClass('owl-loading');
-            $el.css('height', 'auto');
-
-            if ($el.prev().hasClass('owl-carousel-loader')) $el.prev().remove();
-
-            if ($el.closest('.owl-carousel-wrapper').get(0)) {
-                setTimeout(() => $el.closest('.owl-carousel-wrapper').css({ height: '' }), 500);
-            }
-
-            if ($el.hasClass('nav-outside')) self._handleNavOutside();
-
-            self.navigationOffsets();
-            self.carouselNavigate();
-
-            if (opts.autoHeight) self._applyAutoHeight();
-            if (opts.autoplay) self._startAutoplay();
-            if ($el.attr('data-sync')) self._setupSync();
-            if ($el.hasClass('carousel-center-active-item')) self._updateCenterActive();
-
-            if ($el.find('[data-plugin-video-background]').get(0)) $(window).trigger('resize');
 
             return this;
         }
 
-        // Measure stage, size all items, and position at currentIndex without animation
-        _layout(animate) {
-            const opts = this.options;
-            const visCount = this.getItemsCount();
-            const $allItems = this.$stage.children();
-            const stageW = this.$stageOuter[0].offsetWidth;
-            const itemW = stageW / visCount;
-
-            $allItems.css({
-                width: itemW + 'px',
-                float: opts.rtl ? 'right' : 'left'
-            });
-
-            this.$stage.css({ width: ($allItems.length * itemW) + 'px' });
-            this._moveTo(this.currentIndex, animate !== false);
-        }
-
-        // Apply a CSS transform to the stage for the given slide index
-        _moveTo(index, animate) {
-            const opts = this.options;
-            const visCount = this.getItemsCount();
-            const itemW = this.$stageOuter[0].offsetWidth / visCount;
-
-            this.$stage.css({
-                transition: animate ? `transform ${opts.smartSpeed}ms ease` : 'none',
-                transform: `translate3d(${-(index * itemW)}px, 0, 0)`
-            });
-        }
-
-        // Public: navigate to a real item by 0-based index
-        to(index) {
-            const realIdx = ((index % this.itemCount) + this.itemCount) % this.itemCount;
-            this._slide(this.clonedBefore + realIdx, true);
-        }
-
-        // Public proxy methods
-        next() { this._next(); return this; }
-        prev() { this._prev(); return this; }
-
-        _next() { this._slide(this.currentIndex + 1, true); }
-        _prev() { this._slide(this.currentIndex - 1, true); }
-
-        // Core slide: fires events, moves the stage, handles loop-jump after transition
-        _slide(targetIndex, animate) {
+        _populateTrack($originals, count) {
             const self = this;
             const opts = this.options;
-            const clonedBefore = this.clonedBefore;
-            const itemCount = this.itemCount;
-            const realIdx = ((targetIndex - clonedBefore) % itemCount + itemCount) % itemCount;
+            const isSlideTrans = opts.transition === 'slide';
+            const $realItems   = [];
+
+            $originals.each(function(i) {
+                const $item = $('<div class="tsc-item"></div>').attr({
+                    role:                  'group',
+                    'aria-roledescription': 'slide',
+                    'aria-label':           `${i + 1} of ${count}`,
+                    'aria-hidden':          'true',
+                    tabindex:              '-1',
+                    'data-tsc-real':       i
+                }).append($(this).clone(true, true));
+
+                self.$track.append($item);
+                $realItems.push($item[0]);
+            });
+
+            // Clone items for seamless looping (slide mode only)
+            if (isSlideTrans && opts.loop && count > 1) {
+                const visCount    = self._getItemsCount();
+                const cloneCount  = Math.min(Math.max(visCount, 2), count);
+
+                // Prepend tail clones so backward navigation wraps smoothly
+                for (let i = cloneCount - 1; i >= 0; i--) {
+                    const idx = ((count - cloneCount + i) % count + count) % count;
+                    $($realItems[idx]).clone(true, true)
+                        .addClass('tsc-clone')
+                        .attr('aria-hidden', 'true')
+                        .prependTo(self.$track);
+                    self.clonedBefore++;
+                }
+
+                // Append head clones so forward navigation wraps smoothly
+                for (let i = 0; i < cloneCount; i++) {
+                    $($realItems[i % count]).clone(true, true)
+                        .addClass('tsc-clone')
+                        .attr('aria-hidden', 'true')
+                        .appendTo(self.$track);
+                    self.clonedAfter++;
+                }
+
+                self.currentIndex = self.clonedBefore;
+            }
+        }
+
+        _buildNav() {
+            const opts = this.options;
+            const vert = opts.vertical;
+            const $nav = $('<div class="tsc-nav" aria-hidden="true"></div>');
+
+            const prevIcon = Array.isArray(opts.navText) && opts.navText[0]
+                ? opts.navText[0] : (vert ? SVG_UP   : SVG_PREV);
+            const nextIcon = Array.isArray(opts.navText) && opts.navText[1]
+                ? opts.navText[1] : (vert ? SVG_DOWN : SVG_NEXT);
+
+            this.$prev = $(`<button type="button" class="tsc-btn tsc-prev">${prevIcon}</button>`)
+                .attr('aria-label', vert ? 'Previous slide (up)' : 'Previous slide');
+            this.$next = $(`<button type="button" class="tsc-btn tsc-next">${nextIcon}</button>`)
+                .attr('aria-label', vert ? 'Next slide (down)' : 'Next slide');
+
+            opts.rtl
+                ? $nav.append(this.$next, this.$prev)
+                : $nav.append(this.$prev, this.$next);
+
+            if (!opts.nav) $nav.addClass('tsc-hidden');
+            return $nav;
+        }
+
+        _buildDots(count) {
+            const opts  = this.options;
+            const $dots = $('<div class="tsc-dots" role="tablist" aria-label="Slide navigation"></div>');
+
+            for (let i = 0; i < count; i++) {
+                const $dot = $('<button type="button" class="tsc-dot" role="tab"></button>').attr({
+                    'aria-label':    `Go to slide ${i + 1}`,
+                    'aria-selected': 'false',
+                    tabindex:        '-1'
+                });
+
+                if (opts.dotType === 'number') {
+                    $dot.append(`<span class="tsc-dot-label">${i + 1}</span>`);
+                } else {
+                    $dot.append('<span class="tsc-dot-pip"></span>');
+                }
+
+                $dots.append($dot);
+            }
+
+            if (!opts.dots) $dots.addClass('tsc-hidden');
+            return $dots;
+        }
+
+        _buildCounter(count) {
+            const total = String(count).padStart(2, '0');
+            const $c    = $('<div class="tsc-counter" aria-live="polite" aria-atomic="true"></div>');
+            this.$cN     = $('<span class="tsc-counter-n">01</span>');
+            this.$cTotal = $(`<span class="tsc-counter-total">${total}</span>`);
+            $c.append(this.$cN, '<span class="tsc-counter-sep"> / </span>', this.$cTotal);
+            return $c;
+        }
+
+        _buildProgress() {
+            const $p = $('<div class="tsc-progress" role="presentation" aria-hidden="true"></div>');
+            $p.append('<div class="tsc-progress-bar"></div>');
+            return $p;
+        }
+
+        _buildThumbs($originals, count) {
+            const self  = this;
+            const $wrap = $('<div class="tsc-thumbs" role="tablist" aria-label="Slide thumbnails"></div>');
+
+            $originals.each(function(i) {
+                const $src = $(this);
+                const img  = $src.attr('data-thumb') || $src.find('img').first().attr('src') || '';
+                const $th  = $('<button type="button" class="tsc-thumb" role="tab"></button>').attr({
+                    'aria-label':    `Go to slide ${i + 1}`,
+                    'aria-selected': 'false',
+                    tabindex:        '-1'
+                });
+
+                if (img) {
+                    $th.append(`<img src="${img}" alt="" loading="lazy" aria-hidden="true">`);
+                } else {
+                    $th.append(`<span class="tsc-thumb-idx">${i + 1}</span>`);
+                }
+
+                $wrap.append($th);
+            });
+
+            return $wrap;
+        }
+
+        _attachThumbs() {
+            const opts = this.options;
+            if (!this.$thumbs) return;
+
+            if (opts.thumbsEl) {
+                const $ext = $(opts.thumbsEl).empty();
+                this.$thumbs.children().each(function() {
+                    $ext.append($(this).clone(true, true));
+                });
+                // Point $thumbs at the external container so _updateThumbs targets it
+                this.$thumbs = $ext;
+            } else {
+                this.$el.after(this.$thumbs);
+            }
+        }
+
+        _getItemsCount() {
+            const opts = this.options;
+            if (opts.transition !== 'slide') return 1;
+            const resp = opts.responsive;
+            if (!resp || !Object.keys(resp).length) return Math.max(opts.items || 1, 1);
+            const w   = window.innerWidth;
+            const bps = Object.keys(resp).map(Number).sort((a, b) => a - b);
+            let n     = Math.max(opts.items || 1, 1);
+            for (const bp of bps) {
+                if (w >= bp && resp[bp].items !== undefined) n = resp[bp].items;
+            }
+            return Math.max(n, 1);
+        }
+
+        _layout(animate) {
+            const opts     = this.options;
+            const $all     = this.$track.children();
+            const n        = $all.length;
+            const gap      = opts.gap || 0;
+            const visCount = this._getItemsCount();
+
+            if (opts.vertical) {
+                const wrapH = this.$trackOuter[0].clientHeight
+                    || this.$el[0].clientHeight
+                    || 400;
+                const itemH = (wrapH - gap * (visCount - 1)) / visCount;
+                this.$track.css({
+                    flexDirection: 'column',
+                    width:         '100%',
+                    gap:           gap + 'px',
+                    height:        (n * (itemH + gap) - gap) + 'px'
+                });
+                $all.css({ width: '100%', height: itemH + 'px', flexShrink: 0 });
+            } else {
+                const stageW = this.$trackOuter[0].clientWidth;
+                const itemW  = (stageW - gap * (visCount - 1)) / visCount;
+                const totalW = n * (itemW + gap) - gap;
+                this.$track.css({
+                    flexDirection: 'row',
+                    gap:           gap + 'px',
+                    width:         totalW + 'px',
+                    height:        ''
+                });
+                $all.css({ width: itemW + 'px', height: '', flexShrink: 0 });
+            }
+
+            this._moveTo(this.currentIndex, animate !== false);
+            if (opts.autoHeight) this._applyAutoHeight();
+        }
+
+        _layoutStack() {
+            const self = this;
+            const $all = this.$track.children('.tsc-item');
+
+            this.$track.css({ position: 'relative', width: '100%' });
+            $all.css({ position: 'absolute', top: 0, left: 0, right: 0, width: '100%' });
+
+            // Attempt to auto-size the track outer if no height is set yet
+            requestAnimationFrame(() => {
+                if (self.$trackOuter[0].offsetHeight > 0) return;
+                let max = 0;
+                $all.each(function() { max = Math.max(max, this.scrollHeight); });
+                if (max > 0) self.$trackOuter.css('min-height', max + 'px');
+            });
+        }
+
+        _moveTo(index, animate) {
+            const opts  = this.options;
+            const gap   = opts.gap || 0;
+            const speed = animate !== false ? opts.speed : 0;
+            const ease  = opts.easing;
+            let tf;
+
+            if (opts.vertical) {
+                const itemH = this.$track.children().first().outerHeight() || 0;
+                tf = `translate3d(0, ${-(index * (itemH + gap))}px, 0)`;
+            } else {
+                const visCount = this._getItemsCount();
+                const stageW   = this.$trackOuter[0].clientWidth;
+                const itemW    = (stageW - gap * (visCount - 1)) / visCount;
+                const offset   = index * (itemW + gap);
+                tf = opts.rtl
+                    ? `translate3d(${offset}px, 0, 0)`
+                    : `translate3d(${-offset}px, 0, 0)`;
+            }
+
+            this.$track.css({
+                transition: speed > 0 ? `transform ${speed}ms ${ease}` : 'none',
+                transform:  tf
+            });
+        }
+
+        _navigate(dir) {
+            const opts  = this.options;
+            const count = this.slideCount;
+            const group = Math.max(opts.group || 1, 1);
+
+            if (this._transitioning) return;
+
+            if (opts.progressBar) this._resetProgress();
+
+            if (opts.transition !== 'slide') {
+                let target = this.realIndex + dir * group;
+                if (opts.loop) {
+                    target = ((target % count) + count) % count;
+                } else {
+                    target = Math.max(0, Math.min(target, count - 1));
+                    if (target === this.realIndex) return;
+                }
+                this._slideFade(target, true);
+            } else {
+                let target = this.currentIndex + dir * group;
+                if (!opts.loop) {
+                    const visCount = this._getItemsCount();
+                    const minIdx   = this.clonedBefore;
+                    const maxIdx   = this.clonedBefore + count - visCount;
+                    target = Math.max(minIdx, Math.min(target, maxIdx));
+                    if (target === this.currentIndex) return;
+                }
+                this._slide(target, true);
+            }
+
+            if (opts.autoplay && this.isPlaying && opts.progressBar) {
+                this._startProgress();
+            }
+        }
+
+        _slide(targetIndex, animate) {
+            const self    = this;
+            const opts    = this.options;
+            const cb      = this.clonedBefore;
+            const count   = this.slideCount;
+            const realIdx = ((targetIndex - cb) % count + count) % count;
+
+            this._transitioning = true;
 
             this.$el[0].dispatchEvent(new CustomEvent('ts.carousel.change', {
-                detail: { property: { name: 'position', value: realIdx } },
+                detail: { index: realIdx, total: count },
                 bubbles: true
             }));
 
             this._moveTo(targetIndex, animate);
             this.currentIndex = targetIndex;
+            this.realIndex    = realIdx;
 
-            const afterSlide = () => {
-                // Silent jump when we've slid into the clone region
+            this._updateActive();
+            this._updateDots();
+            this._updateNavState();
+            if (this.$counter) this._updateCounter();
+            if (this.$thumbs)  this._updateThumbs();
+            if (opts.lazyLoad) this._lazyLoad(realIdx);
+            if (opts.pauseMedia) this._pauseMedia();
+
+            const delay = animate ? opts.speed + 50 : 0;
+
+            setTimeout(() => {
+                // Silent loop jump when inside the clone region
                 if (opts.loop) {
-                    if (self.currentIndex >= clonedBefore + itemCount) {
-                        self.currentIndex = clonedBefore;
+                    if (self.currentIndex >= cb + count) {
+                        self.currentIndex -= count;
                         self._moveTo(self.currentIndex, false);
-                    } else if (self.currentIndex < clonedBefore) {
-                        self.currentIndex = clonedBefore + itemCount - 1;
+                    } else if (self.currentIndex < cb) {
+                        self.currentIndex += count;
                         self._moveTo(self.currentIndex, false);
                     }
                 }
 
-                self._updateActive();
-                self._updateDots();
-                if (self.$el.hasClass('carousel-center-active-item')) self._updateCenterActive();
+                self._transitioning = false;
 
-                const finalIdx = ((self.currentIndex - clonedBefore) % itemCount + itemCount) % itemCount;
                 self.$el[0].dispatchEvent(new CustomEvent('ts.carousel.changed', {
-                    detail: { item: { index: finalIdx, count: itemCount } },
+                    detail: { index: self.realIndex, total: count },
                     bubbles: true
                 }));
-            };
-
-            animate ? setTimeout(afterSlide, opts.smartSpeed + 50) : afterSlide();
+            }, delay);
         }
 
-        // Mark visCount items starting at currentIndex as .active
+        _slideFade(targetIdx, animate) {
+            const self  = this;
+            const opts  = this.options;
+            const count = this.slideCount;
+            const $items = this.$track.children('.tsc-item');
+
+            if (targetIdx === this.realIndex) return;
+
+            this._transitioning = true;
+
+            this.$el[0].dispatchEvent(new CustomEvent('ts.carousel.change', {
+                detail: { index: targetIdx, total: count },
+                bubbles: true
+            }));
+
+            const $cur = $items.eq(this.realIndex);
+            const $nxt = $items.eq(targetIdx);
+            const tr   = opts.transition;
+
+            if (!animate || opts.speed === 0) {
+                $cur.removeClass('tsc-active');
+                $nxt.addClass('tsc-active');
+                this.realIndex    = targetIdx;
+                this.currentIndex = targetIdx;
+                this._updateDots();
+                this._updateNavState();
+                if (this.$counter) this._updateCounter();
+                if (this.$thumbs)  this._updateThumbs();
+                this._transitioning = false;
+                this.$el[0].dispatchEvent(new CustomEvent('ts.carousel.changed', {
+                    detail: { index: targetIdx, total: count },
+                    bubbles: true
+                }));
+                return;
+            }
+
+            // Apply leave animation to the outgoing slide
+            $cur.addClass(`tsc-${tr}-leave`);
+            // For zoom: add enter animation class to incoming slide before active is set
+            if (tr === 'zoom') $nxt.addClass('tsc-zoom-enter');
+
+            // Update state and active classes
+            this.realIndex    = targetIdx;
+            this.currentIndex = targetIdx;
+            this._updateActive();
+            this._updateNavState();
+            if (opts.lazyLoad) this._lazyLoad(targetIdx);
+            if (opts.pauseMedia) this._pauseMedia();
+
+            setTimeout(() => {
+                $cur.removeClass(`tsc-${tr}-leave`);
+                $nxt.removeClass('tsc-zoom-enter');
+                self._updateDots();
+                if (self.$counter) self._updateCounter();
+                if (self.$thumbs)  self._updateThumbs();
+                self._transitioning = false;
+                self.$el[0].dispatchEvent(new CustomEvent('ts.carousel.changed', {
+                    detail: { index: targetIdx, total: count },
+                    bubbles: true
+                }));
+            }, opts.speed + 20);
+        }
+
         _updateActive() {
-            const visCount = this.getItemsCount();
-            const $allItems = this.$stage.children();
-            $allItems.removeClass('active');
+            const opts     = this.options;
+            const visCount = this._getItemsCount();
+
+            if (opts.transition !== 'slide') {
+                const $real = this.$track.children('.tsc-item');
+                $real.removeClass('tsc-active').attr({ 'aria-hidden': 'true', tabindex: '-1' });
+                $real.eq(this.realIndex)
+                    .addClass('tsc-active')
+                    .attr({ 'aria-hidden': 'false', tabindex: '0' });
+                return;
+            }
+
+            const $all = this.$track.children();
+            $all.removeClass('tsc-active').attr({ 'aria-hidden': 'true', tabindex: '-1' });
             for (let i = 0; i < visCount; i++) {
-                $allItems.eq(this.currentIndex + i).addClass('active');
+                $all.eq(this.currentIndex + i)
+                    .addClass('tsc-active')
+                    .attr({ 'aria-hidden': 'false', tabindex: '0' });
             }
         }
 
-        // Sync dot state to real item index
         _updateDots() {
-            const realIdx = ((this.currentIndex - this.clonedBefore) % this.itemCount + this.itemCount) % this.itemCount;
-            this.$dots.children().removeClass('active').eq(realIdx).addClass('active');
+            const $dots = this.$dots.children('.tsc-dot');
+            $dots.removeClass('tsc-dot-active').attr({ 'aria-selected': 'false', tabindex: '-1' });
+            $dots.eq(this.realIndex)
+                .addClass('tsc-dot-active')
+                .attr({ 'aria-selected': 'true', tabindex: '0' });
         }
 
-        // Add .current to the middle visible item for carousel-center-active-item
-        _updateCenterActive() {
-            const $actives = this.$stage.children('.active');
-            const midIdx = Math.floor(($actives.length - 1) / 2);
-            this.$stage.children().removeClass('current');
-            $actives.eq(midIdx).addClass('current');
-        }
+        _updateNavState() {
+            if (this.options.loop) {
+                this.$prev.prop('disabled', false).removeClass('tsc-btn-disabled');
+                this.$next.prop('disabled', false).removeClass('tsc-btn-disabled');
+                return;
+            }
 
-        _applyAutoHeight() {
-            const self = this;
-            const measure = () => {
-                const heights = [];
-                self.$stage.children('.active').each(function() {
-                    heights.push($(this).outerHeight());
-                });
-                if (heights.length) self.$stageOuter.height(Math.max(...heights));
-            };
-            const ns = `.carousel-${this._uid}`;
-            $(window).on(`load${ns} resize${ns}`, measure);
-            measure();
-        }
+            const cb       = this.clonedBefore;
+            const count    = this.slideCount;
+            const visCount = this._getItemsCount();
 
-        _startAutoplay() {
-            this._stopAutoplay();
-            this.autoplayTimer = setInterval(() => this._next(), this.options.autoplayTimeout);
-        }
-
-        _stopAutoplay() {
-            if (this.autoplayTimer) {
-                clearInterval(this.autoplayTimer);
-                this.autoplayTimer = null;
+            if (this.options.transition !== 'slide') {
+                this.$prev.prop('disabled', this.realIndex === 0)
+                    .toggleClass('tsc-btn-disabled', this.realIndex === 0);
+                this.$next.prop('disabled', this.realIndex === count - 1)
+                    .toggleClass('tsc-btn-disabled', this.realIndex === count - 1);
+            } else {
+                const atStart = this.currentIndex <= cb;
+                const atEnd   = this.currentIndex >= cb + count - visCount;
+                this.$prev.prop('disabled', atStart).toggleClass('tsc-btn-disabled', atStart);
+                this.$next.prop('disabled', atEnd).toggleClass('tsc-btn-disabled', atEnd);
             }
         }
 
-        _setupSync() {
-            const syncSel = this.$el.attr('data-sync');
-            this.$el[0].addEventListener('ts.carousel.changed', (e) => {
-                const syncInst = $(syncSel).data(instanceName);
-                if (syncInst) syncInst.to(e.detail.item.index);
+        _updateCounter() {
+            if (!this.$cN) return;
+            this.$cN.text(String(this.realIndex + 1).padStart(2, '0'));
+        }
+
+        _updateThumbs() {
+            if (!this.$thumbs) return;
+            this.$thumbs.children('.tsc-thumb')
+                .removeClass('tsc-thumb-active')
+                .attr({ 'aria-selected': 'false', tabindex: '-1' });
+            this.$thumbs.children('.tsc-thumb').eq(this.realIndex)
+                .addClass('tsc-thumb-active')
+                .attr({ 'aria-selected': 'true', tabindex: '0' });
+        }
+
+        _lazyLoad(realIdx) {
+            const count  = this.slideCount;
+            const $real  = this.$track.children('.tsc-item:not(.tsc-clone)');
+            const load   = [realIdx, (realIdx + 1) % count, (realIdx - 1 + count) % count];
+            load.forEach(i => {
+                $real.eq(i).find('[data-lazy-src]').each(function() {
+                    const $img = $(this);
+                    $img.attr('src', $img.attr('data-lazy-src')).removeAttr('data-lazy-src');
+                });
             });
         }
 
-        _handleNavOutside() {
-            const self = this;
-            const $el = this.$el;
-            const opts = this.options;
-            const ns = `.carousel-${this._uid}`;
+        _pauseMedia() {
+            this.$track.children('.tsc-item:not(.tsc-active)')
+                .find('video, audio')
+                .each(function() { this.pause(); });
 
-            const update = () => {
-                if ($(window).width() < 992) {
-                    opts.stagePadding = 40;
-                    $el.addClass('stage-margin');
-                } else {
-                    opts.stagePadding = 0;
-                    $el.removeClass('stage-margin');
-                }
-                self.$stageOuter.css('padding', opts.stagePadding ? `0 ${opts.stagePadding}px` : '');
-                self._layout(false);
-                self.navigationOffsets();
-            };
-
-            $(window).on(`load${ns} resize${ns}`, update);
-            update();
+            this.$track.children('.tsc-item.tsc-active')
+                .find('[data-autoplay]')
+                .each(function() { if (this.play) this.play().catch(() => {}); });
         }
 
-        // Pointer/touch drag on the stage
+        _applyAutoHeight() {
+            let max = 0;
+            this.$track.children('.tsc-active').each(function() {
+                max = Math.max(max, $(this).outerHeight());
+            });
+            if (max > 0) this.$trackOuter.css('height', max + 'px');
+        }
+
+        _applyPlayState() {
+            const opts      = this.options;
+            const shouldRun = this.isPlaying && !this._hovering && !this._focused && !this._docHidden;
+
+            if (shouldRun && !this.autoplayTimer) {
+                this.autoplayTimer = setInterval(() => this._navigate(1), opts.autoplaySpeed);
+                this.$track.attr('aria-live', 'off');
+                if (opts.progressBar) this._startProgress();
+            } else if (!shouldRun && this.autoplayTimer) {
+                clearInterval(this.autoplayTimer);
+                this.autoplayTimer = null;
+                this.$track.attr('aria-live', 'polite');
+                if (opts.progressBar) this._stopProgress();
+            }
+        }
+
+        _startProgress() {
+            if (!this.$progressBar || !this.$progressBar.length) return;
+            const dur = this.options.autoplaySpeed;
+            this.$progressBar.css({ transition: 'none', width: '0%' });
+            void this.$progressBar[0].offsetWidth; // force reflow
+            this.$progressBar.css({ transition: `width ${dur}ms linear`, width: '100%' });
+        }
+
+        _stopProgress() {
+            if (!this.$progressBar || !this.$progressBar.length) return;
+            const cur = this.$progressBar[0].offsetWidth;
+            const par = this.$progressBar.parent()[0].offsetWidth;
+            const pct = par > 0 ? (cur / par * 100) : 0;
+            this.$progressBar.css({ transition: 'none', width: pct.toFixed(1) + '%' });
+        }
+
+        _resetProgress() {
+            if (!this.$progressBar || !this.$progressBar.length) return;
+            this.$progressBar.css({ transition: 'none', width: '0%' });
+        }
+
         _setupDrag() {
-            const self = this;
-            const opts = this.options;
-            const stage = this.$stage[0];
+            const self    = this;
+            const opts    = this.options;
+            const trackEl = this.$track[0];
 
-            let startX = 0, startY = 0, dragging = false, delta = 0, startTranslate = 0;
+            // Dragging only meaningful in slide transition mode
+            if (opts.transition !== 'slide') return;
 
-            const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
-            const getY = (e) => e.touches ? e.touches[0].clientY : e.clientY;
+            let startX   = 0, startY = 0, delta = 0;
+            let dragging = false, startTranslate = 0, startTime = 0;
+            let dirLocked = null;
 
-            const onStart = (e) => {
-                startX = getX(e);
-                startY = getY(e);
-                dragging = true;
-                delta = 0;
-                const mat = new DOMMatrix(getComputedStyle(stage).transform);
-                startTranslate = mat.m41;
-                self.$stage.css('transition', 'none');
-                self._stopAutoplay();
+            const getX = e => e.touches ? e.touches[0].clientX : e.clientX;
+            const getY = e => e.touches ? e.touches[0].clientY : e.clientY;
+
+            const getTranslate = () => {
+                const m = new DOMMatrix(getComputedStyle(trackEl).transform);
+                return opts.vertical ? m.m42 : m.m41;
             };
 
-            const onMove = (e) => {
+            const onStart = e => {
+                if (self._transitioning) return;
+                startX         = getX(e);
+                startY         = getY(e);
+                delta          = 0;
+                dirLocked      = null;
+                startTranslate = getTranslate();
+                startTime      = Date.now();
+                dragging       = true;
+                self.$track.css('transition', 'none');
+                // Suspend autoplay while dragging
+                if (self.autoplayTimer) {
+                    clearInterval(self.autoplayTimer);
+                    self.autoplayTimer = null;
+                    if (opts.progressBar) self._stopProgress();
+                }
+            };
+
+            const onMove = e => {
                 if (!dragging) return;
                 const dx = getX(e) - startX;
                 const dy = getY(e) - startY;
-                // Cancel drag if motion is primarily vertical before a horizontal threshold
-                if (!delta && Math.abs(dy) > Math.abs(dx)) { dragging = false; return; }
+
+                // Lock direction on first meaningful movement
+                if (!dirLocked) {
+                    if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return;
+                    dirLocked = Math.abs(dx) >= Math.abs(dy) ? 'h' : 'v';
+                    if (!opts.vertical && dirLocked === 'v') { dragging = false; return; }
+                    if ( opts.vertical && dirLocked === 'h') { dragging = false; return; }
+                }
+
                 e.preventDefault();
-                delta = dx;
-                self.$stage.css('transform', `translate3d(${startTranslate + dx}px, 0, 0)`);
+                delta = opts.vertical ? dy : dx;
+                self.isDragging = true;
+
+                const tf = opts.vertical
+                    ? `translate3d(0, ${startTranslate + dy}px, 0)`
+                    : `translate3d(${startTranslate + dx}px, 0, 0)`;
+                self.$track.css('transform', tf);
             };
 
             const onEnd = () => {
                 if (!dragging) return;
-                dragging = false;
-                const visCount = self.getItemsCount();
-                const itemW = self.$stageOuter[0].offsetWidth / visCount;
-                const threshold = itemW * 0.2;
-                if (delta < -threshold) {
-                    self._next();
-                } else if (delta > threshold) {
-                    self._prev();
+                dragging        = false;
+                self.isDragging = false;
+
+                const elapsed  = Math.max(Date.now() - startTime, 1);
+                const velocity = Math.abs(delta) / elapsed;
+                const visCount = self._getItemsCount();
+                const itemSize = opts.vertical
+                    ? (self.$track.children().first().outerHeight() || 100)
+                    : (self.$trackOuter[0].clientWidth / visCount);
+
+                const threshold = itemSize * 0.2;
+                const fastSwipe = velocity > 0.3;
+
+                if ((Math.abs(delta) > threshold || fastSwipe) && delta < 0) {
+                    self._navigate(1);
+                } else if ((Math.abs(delta) > threshold || fastSwipe) && delta > 0) {
+                    self._navigate(-1);
                 } else {
+                    // Snap back to current position
                     self._moveTo(self.currentIndex, true);
                 }
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+
+                // Restore autoplay after drag
+                if (self.isPlaying && !self._hovering && !self._focused && !self._docHidden) {
+                    self._applyPlayState();
+                }
             };
 
             if (opts.mouseDrag !== false) {
-                stage.addEventListener('mousedown', onStart);
-                this._mouseMoveHandler = onMove;
-                this._mouseUpHandler = onEnd;
+                trackEl.addEventListener('mousedown', onStart);
+                this._onDocMove = onMove;
+                this._onDocUp   = onEnd;
                 document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onEnd);
+                document.addEventListener('mouseup',   onEnd);
+                trackEl.style.cursor = 'grab';
             }
 
             if (opts.touchDrag !== false) {
-                stage.addEventListener('touchstart', onStart, { passive: true });
-                stage.addEventListener('touchmove', onMove, { passive: false });
-                stage.addEventListener('touchend', onEnd);
+                trackEl.addEventListener('touchstart', onStart, { passive: true });
+                trackEl.addEventListener('touchmove',  onMove,  { passive: false });
+                trackEl.addEventListener('touchend',   onEnd);
             }
-        }
-
-        navigationOffsets() {
-            const opts = this.options;
-            const $el = this.options.wrapper;
-            const $navEl = $el.find('.owl-nav');
-            const $dotsEl = $el.find('.owl-dots');
-            const navHasTransform = $navEl.css('transform') !== 'none';
-            const dotsHasTransform = $dotsEl.css('transform') !== 'none';
-
-            if (opts.navHorizontalOffset && !opts.navVerticalOffset) {
-                navHasTransform
-                    ? $navEl.css({ left: opts.navHorizontalOffset })
-                    : $navEl.css({ transform: `translate3d(${opts.navHorizontalOffset}, 0, 0)` });
-            }
-
-            if (opts.navVerticalOffset && !opts.navHorizontalOffset) {
-                navHasTransform
-                    ? $navEl.css({ top: `calc(50% - ${opts.navVerticalOffset})` })
-                    : $navEl.css({ transform: `translate3d(0, ${opts.navVerticalOffset}, 0)` });
-            }
-
-            if (opts.navVerticalOffset && opts.navHorizontalOffset) {
-                navHasTransform
-                    ? $navEl.css({ top: `calc(50% - ${opts.navVerticalOffset})`, left: opts.navHorizontalOffset })
-                    : $navEl.css({ transform: `translate3d(${opts.navHorizontalOffset}, ${opts.navVerticalOffset}, 0)` });
-            }
-
-            if (opts.dotsHorizontalOffset && !opts.dotsVerticalOffset) {
-                $dotsEl.css({ transform: `translate3d(${opts.dotsHorizontalOffset}, 0, 0)` });
-            }
-
-            if (opts.dotsVerticalOffset && !opts.dotsHorizontalOffset) {
-                dotsHasTransform
-                    ? $dotsEl.css({ top: `calc(50% - ${opts.dotsVerticalOffset})` })
-                    : $dotsEl.css({ transform: `translate3d(0, ${opts.dotsVerticalOffset}, 0)` });
-            }
-
-            if (opts.dotsVerticalOffset && opts.dotsHorizontalOffset) {
-                $dotsEl.css({ transform: `translate3d(${opts.dotsHorizontalOffset}, ${opts.dotsVerticalOffset}, 0)` });
-            }
-
-            return this;
-        }
-
-        carouselNavigate() {
-            const self = this;
-            const $el = this.options.wrapper;
-            const id = $el.attr('id');
-            if (!id || !$('[data-carousel-navigate]').get(0)) return this;
-
-            const navSel = `[data-carousel-navigate-id="#${id}"]`;
-
-            $(navSel).each(function() {
-                const $this = $(this);
-                const toIdx = parseInt($this.data('carousel-navigate-to'), 10) - 1;
-                $this.on('click.carousel', () => self.to(toIdx));
-            });
-
-            $el[0].addEventListener('ts.carousel.change', () => $(navSel).removeClass('active'));
-            $el[0].addEventListener('ts.carousel.changed', (e) => {
-                $(`${navSel}[data-carousel-navigate-to="${e.detail.item.index + 1}"]`).addClass('active');
-            });
-
-            return this;
         }
 
         events() {
             const self = this;
-            const $el = this.$el;
+            const $el  = this.$el;
             const opts = this.options;
-            const ns = `.carousel-${this._uid}`;
+            const ns   = `.tsc-${this._uid}`;
 
-            this.$prev.on(`click${ns}`, (e) => {
+            // Prev / next buttons
+            this.$prev.on(`click${ns}`, e => {
                 e.preventDefault();
-                self._stopAutoplay();
-                self._prev();
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
+                self._navigate(-1);
+            });
+            this.$next.on(`click${ns}`, e => {
+                e.preventDefault();
+                self._navigate(1);
             });
 
-            this.$next.on(`click${ns}`, (e) => {
-                e.preventDefault();
-                self._stopAutoplay();
-                self._next();
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
-            });
-
-            this.$dots.on(`click${ns}`, '.owl-dot', function() {
-                self._stopAutoplay();
+            // Dot clicks
+            this.$dots.on(`click${ns}`, '.tsc-dot', function() {
                 self.to($(this).index());
-                if (opts.autoplay) setTimeout(() => self._startAutoplay(), opts.autoplayTimeout);
             });
 
+            // Thumbnail clicks (both inline and external containers use the same $thumbs ref)
+            if (this.$thumbs) {
+                this.$thumbs.on(`click${ns}`, '.tsc-thumb', function() {
+                    self.to($(this).index());
+                });
+            }
+
+            // Keyboard navigation
+            if (opts.keyboard) {
+                $el.attr('tabindex', '0');
+                $el.on(`keydown${ns}`, e => {
+                    const k     = e.key;
+                    const vert  = opts.vertical;
+                    const prev  = vert ? 'ArrowUp'   : 'ArrowLeft';
+                    const next  = vert ? 'ArrowDown'  : 'ArrowRight';
+                    if (k === prev)   { e.preventDefault(); self._navigate(-1); }
+                    if (k === next)   { e.preventDefault(); self._navigate(1);  }
+                    if (k === 'Home') { e.preventDefault(); self.to(0); }
+                    if (k === 'End')  { e.preventDefault(); self.to(self.slideCount - 1); }
+                });
+            }
+
+            // Hover pause
+            if (opts.autoplay && opts.pauseOnHover) {
+                $el.on(`mouseenter${ns}`, () => { self._hovering = true;  self._applyPlayState(); });
+                $el.on(`mouseleave${ns}`, () => { self._hovering = false; self._applyPlayState(); });
+            }
+
+            // Focus pause (helps keyboard users)
+            if (opts.autoplay && opts.pauseOnFocus) {
+                $el.on(`focusin${ns}`,  () => { self._focused = true;  self._applyPlayState(); });
+                $el.on(`focusout${ns}`, () => { self._focused = false; self._applyPlayState(); });
+            }
+
+            // Page Visibility API pause
+            if (opts.autoplay && opts.pauseOnVisibility) {
+                this._onVisChange = () => {
+                    self._docHidden = document.hidden;
+                    self._applyPlayState();
+                };
+                document.addEventListener('visibilitychange', this._onVisChange);
+            }
+
+            // Drag / swipe
             this._setupDrag();
 
-            if (opts.keyboard) {
-                $(document).on(`keydown${ns}`, (e) => {
-                    if (e.key === 'ArrowLeft') self._prev();
-                    if (e.key === 'ArrowRight') self._next();
-                });
-            }
-
-            if (opts.autoplayHoverPause && opts.autoplay) {
-                $el.on(`mouseenter${ns}`, () => self._stopAutoplay());
-                $el.on(`mouseleave${ns}`, () => self._startAutoplay());
-            }
-
-            // Responsive relayout via ResizeObserver; fallback to debounced window resize
+            // Responsive relayout via ResizeObserver
             if (window.ResizeObserver) {
                 this._resizeObs = new ResizeObserver(() => {
-                    self._layout(false);
-                    self._updateActive();
-                    self._updateDots();
+                    if (opts.transition === 'slide') {
+                        self._layout(false);
+                        self._updateActive();
+                        self._updateNavState();
+                    }
                 });
-                this._resizeObs.observe(this.$stageOuter[0]);
+                this._resizeObs.observe(this.$trackOuter[0]);
             } else {
                 let resizeTimer;
                 $(window).on(`resize${ns}`, () => {
                     clearTimeout(resizeTimer);
                     resizeTimer = setTimeout(() => {
-                        self._layout(false);
-                        self._updateActive();
-                        self._updateDots();
+                        if (opts.transition === 'slide') {
+                            self._layout(false);
+                            self._updateActive();
+                            self._updateNavState();
+                        }
                     }, 150);
                 });
             }
 
-            // AnimateIn/AnimateOut support for appear-animation plugins inside the carousel
+            // PluginAnimate integration: re-trigger appear animations on active slides
             if (opts.animateIn || opts.animateOut) {
-                $el[0].addEventListener('ts.carousel.change', () => {
-                    $el.find('[data-appear-animation], [data-plugin-animated-letters]').addClass('d-none');
-                    $el.find('[data-plugin-animated-letters]').trigger('animated.letters.destroy');
-                    $el.find('.owl-item:not(.active) [data-carousel-onchange-show]').removeClass('d-none');
-                });
-
                 $el[0].addEventListener('ts.carousel.changed', () => {
-                    setTimeout(() => {
-                        $el.find('[data-appear-animation]').each(function() {
-                            const $this = $(this);
-                            const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+                    $el.find('.tsc-item.tsc-active [data-appear-animation]').each(function() {
+                        const $this      = $(this);
+                        const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+                        if (typeof $.fn.themestrapPluginAnimate === 'function') {
                             $this.themestrapPluginAnimate(pluginOpts);
-                        });
-                        $el.find('.owl-item.active [data-appear-animation], .owl-item.active [data-plugin-animated-letters]').removeClass('d-none');
-                        $el.find('.owl-item.active [data-plugin-animated-letters]').trigger('animated.letters.initialize');
-                        $el.find('.owl-item.cloned.active [data-plugin-video-background]').trigger('video.background.initialize');
-                    }, 10);
+                        }
+                    });
                 });
             }
 
-            // Re-run icon plugin on cloned items when they become active
+            // Re-run PluginIcon on cloned items when they activate
             if ($el.find('[data-icon]').length) {
-                $el[0].addEventListener('ts.carousel.change', () => {
-                    $el.find('.owl-item.cloned [data-icon]').each(function() {
-                        const $this = $(this);
+                $el[0].addEventListener('ts.carousel.changed', () => {
+                    $el.find('.tsc-clone.tsc-active [data-icon]').each(function() {
+                        const $this      = $(this);
                         const pluginOpts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
-                        if (typeof $.fn.themestrapPluginIcon === 'function') $this.themestrapPluginIcon(pluginOpts);
+                        if (typeof $.fn.themestrapPluginIcon === 'function') {
+                            $this.themestrapPluginIcon(pluginOpts);
+                        }
                     });
                 });
             }
@@ -4315,25 +5222,67 @@ html.dark .alert-ts-neutral {
             return this;
         }
 
+        // Public: navigate to a specific 0-based real slide index
+        to(index) {
+            const opts    = this.options;
+            const count   = this.slideCount;
+            const realIdx = ((index % count) + count) % count;
+
+            if (opts.transition !== 'slide') {
+                this._slideFade(realIdx, true);
+            } else {
+                this._slide(this.clonedBefore + realIdx, true);
+            }
+
+            if (opts.progressBar) this._resetProgress();
+            if (opts.autoplay && this.isPlaying) this._startProgress();
+            return this;
+        }
+
+        next()  { this._navigate(1);  return this; }
+        prev()  { this._navigate(-1); return this; }
+
+        play() {
+            this.isPlaying = true;
+            this.$track.attr('aria-live', 'off');
+            this._applyPlayState();
+            return this;
+        }
+
+        pause() {
+            this.isPlaying = false;
+            this.$track.attr('aria-live', 'polite');
+            this._applyPlayState();
+            return this;
+        }
+
         destroy() {
-            const ns = `.carousel-${this._uid}`;
+            const ns = `.tsc-${this._uid}`;
 
-            this._stopAutoplay();
-
-            if (this._resizeObs) this._resizeObs.disconnect();
-            if (this._mouseMoveHandler) document.removeEventListener('mousemove', this._mouseMoveHandler);
-            if (this._mouseUpHandler) document.removeEventListener('mouseup', this._mouseUpHandler);
+            if (this.autoplayTimer) clearInterval(this.autoplayTimer);
+            if (this._resizeObs)   this._resizeObs.disconnect();
+            if (this._onVisChange) document.removeEventListener('visibilitychange', this._onVisChange);
+            if (this._onDocMove)   document.removeEventListener('mousemove', this._onDocMove);
+            if (this._onDocUp)     document.removeEventListener('mouseup',   this._onDocUp);
 
             $(window).off(ns);
-            $(document).off(ns);
             this.$el.off(ns);
-            $('[data-carousel-navigate]').off('.carousel');
+            if (this.$thumbs) this.$thumbs.off(ns);
+
+            // Remove inline thumbnail strip from DOM
+            if (this.$thumbs && !this.options.thumbsEl) {
+                this.$thumbs.remove();
+            }
 
             this.$el.html(this.initialHTML);
-            this.$el.removeClass('owl-themestrap owl-loaded owl-loading owl-carousel-init owl-drag');
-            this.$el.removeData(instanceName);
+            this.$el
+                .removeClass('tsc-carousel tsc-loaded tsc-vertical tsc-rtl tsc-no-loop tsc-dots-line tsc-dots-number')
+                .removeAttr('role aria-roledescription aria-label tabindex style')
+                .css({ overflow: '' })
+                .removeData(instanceName);
 
             PluginCarousel.instances = Math.max(0, PluginCarousel.instances - 1);
+
             if (PluginCarousel.instances === 0) {
                 const styleEl = document.getElementById(STYLE_ID);
                 if (styleEl) styleEl.remove();
@@ -4343,778 +5292,444 @@ html.dark .alert-ts-neutral {
         }
     }
 
-    PluginCarousel.instances = 0;
+    PluginCarousel.instances   = 0;
     PluginCarousel._uidCounter = 0;
 
     PluginCarousel.defaults = {
-        items: 4,
-        loop: true,
-        responsive: {
-            0:    { items: 1 },
-            479:  { items: 1 },
-            768:  { items: 2 },
-            979:  { items: 3 },
-            1199: { items: 4 }
-        },
-        nav: true,
-        navText: [],
-        dots: true,
-        smartSpeed: 250,
-        autoplay: false,
-        autoplayTimeout: 5000,
-        autoplayHoverPause: false,
-        mouseDrag: true,
+        // Core
+        items:      1,
+        loop:       true,
+        transition: 'slide',   // 'slide' | 'fade' | 'zoom'
+        speed:      500,
+        easing:     'cubic-bezier(0.4, 0, 0.2, 1)',
+        group:      1,         // slides to advance per interaction
+
+        // Responsive breakpoints (slide mode only)
+        responsive: {},
+
+        // Autoplay
+        autoplay:           false,
+        autoplaySpeed:      5000,
+        pauseOnHover:       true,
+        pauseOnFocus:       true,
+        pauseOnVisibility:  true,
+
+        // Navigation
+        nav:              true,
+        navText:          [],
+        dots:             true,
+        dotType:          'default',  // 'default' | 'line' | 'number'
+        counter:          false,
+        progressBar:      false,
+        progressPosition: 'bottom',   // 'top' | 'bottom'
+
+        // Thumbnails
+        thumbs:   false,
+        thumbsEl: null,   // CSS selector for an external thumbnail container
+
+        // Interaction
         touchDrag: true,
+        mouseDrag: true,
+        keyboard:  true,
+
+        // Layout
+        rtl:          false,
+        vertical:     false,
         stagePadding: 0,
-        autoHeight: false,
-        rtl: false,
-        animateIn: null,
+        gap:          0,
+        autoHeight:   false,
+
+        // Media
+        lazyLoad:   true,
+        pauseMedia: false,
+
+        // PluginAnimate compatibility
+        animateIn:  null,
         animateOut: null,
-        keyboard: false,
-        refresh: false
+
+        // ARIA
+        ariaLabel: 'Carousel',
+
+        // Init system
+        forceInit: false,
+        accY:      0
     };
 
     PluginCarousel.css = `
-/* Carousel */
-.owl-carousel {
+.tsc-carousel {
+    --tsc-speed:               500ms;
+    --tsc-easing:              cubic-bezier(0.4, 0, 0.2, 1);
+    --tsc-nav-size:            46px;
+    --tsc-nav-offset:          -23px;
+    --tsc-nav-bg:              var(--ts-skin-surface, rgba(0,0,0,.5));
+    --tsc-nav-bg-hover:        var(--ts-skin-elevated, rgba(0,0,0,.78));
+    --tsc-nav-color:           var(--ts-skin-text, #fff);
+    --tsc-nav-radius:          50%;
+    --tsc-nav-icon:            20px;
+    --tsc-nav-border:          none;
+    --tsc-nav-shadow:          var(--ts-skin-shadow, 0 2px 8px rgba(0,0,0,.25));
+    --tsc-dot-size:            8px;
+    --tsc-dot-gap:             8px;
+    --tsc-dot-color:           var(--ts-skin-border-strong, rgba(0,0,0,.22));
+    --tsc-dot-active-color:    var(--ts-skin-accent, var(--primary, #0d6efd));
+    --tsc-dot-line-w:          22px;
+    --tsc-dot-line-h:          3px;
+    --tsc-dot-num-size:        28px;
+    --tsc-progress-h:          3px;
+    --tsc-progress-bg:         var(--ts-skin-surface-2, rgba(0,0,0,.1));
+    --tsc-progress-color:      var(--ts-skin-accent, var(--primary, #0d6efd));
+    --tsc-counter-color:       var(--ts-skin-text-dim, var(--grey-600, #6c757d));
+    --tsc-thumb-size:          72px;
+    --tsc-thumb-gap:           6px;
+    --tsc-thumb-radius:        var(--ts-skin-radius, 6px);
+    --tsc-thumb-opacity:       .5;
+    --tsc-thumb-opacity-hover: 1;
+    --tsc-thumb-border:        2px solid transparent;
+    --tsc-thumb-border-active: 2px solid var(--primary, var(--ts-skin-accent, #0d6efd));
+    --tsc-gap:                 0px;
+
     position: relative;
     z-index: 1;
-    -webkit-tap-highlight-color: transparent;
+    opacity: 0;
     touch-action: pan-y;
-}
-.owl-carousel .owl-stage {
-    position: relative;
-    will-change: transform;
-}
-.owl-carousel .owl-stage::after {
-    content: "";
-    display: block;
-    clear: both;
-}
-.owl-carousel .owl-stage-outer {
-    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
     overflow: hidden;
 }
-.owl-carousel .owl-item {
+.tsc-carousel.tsc-loaded {
+    opacity: 1;
+    transition: opacity .25s ease;
+}
+.tsc-carousel.tsc-vertical {
+    touch-action: pan-x;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+.tsc-carousel.tsc-vertical .tsc-track-outer {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+}
+.tsc-carousel.tsc-vertical .tsc-item {
+    overflow: hidden;
+}
+
+.tsc-track-outer {
     position: relative;
-    float: left;
-    min-height: 1px;
+    overflow: hidden;
+    width: 100%;
+}
+.tsc-track {
+    display: flex;
+    will-change: transform;
     backface-visibility: hidden;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
+}
+.tsc-item {
+    flex-shrink: 0;
+    position: relative;
     box-sizing: border-box;
+    -webkit-touch-callout: none;
+    outline: none;
 }
-.owl-carousel .owl-nav .owl-prev,
-.owl-carousel .owl-nav .owl-next,
-.owl-carousel .owl-dots .owl-dot {
+.tsc-item img {
+    max-width: 100%;
+    height: auto;
+    pointer-events: none;
+}
+.tsc-item:focus-visible {
+    outline: 2px solid var(--primary, #0d6efd);
+    outline-offset: -2px;
+}
+.tsc-carousel.tsc-no-loop .tsc-clone {
+    display: none;
+}
+
+/* Navigation */
+.tsc-nav {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+.tsc-btn {
+    pointer-events: all;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tsc-nav-size);
+    height: var(--tsc-nav-size);
+    border-radius: var(--tsc-nav-radius);
+    background: var(--tsc-nav-bg);
+    border: var(--tsc-nav-border);
+    color: var(--tsc-nav-color);
+    box-shadow: var(--tsc-nav-shadow);
     cursor: pointer;
-    user-select: none;
+    padding: 0;
+    line-height: 1;
+    transition: background .2s ease, box-shadow .2s ease, opacity .2s ease;
+    outline: none;
 }
-.owl-carousel .owl-nav button.owl-prev,
-.owl-carousel .owl-nav button.owl-next,
-.owl-carousel .owl-dots button.owl-dot {
+.tsc-btn:hover {
+    background: var(--tsc-nav-bg-hover);
+}
+.tsc-btn:focus-visible {
+    outline: 2px solid var(--tsc-nav-color);
+    outline-offset: 2px;
+}
+.tsc-btn.tsc-btn-disabled {
+    opacity: .3;
+    pointer-events: none;
+}
+.tsc-btn svg {
+    width: var(--tsc-nav-icon);
+    height: var(--tsc-nav-icon);
+    pointer-events: none;
+    display: block;
+}
+.tsc-prev { left:  var(--tsc-nav-offset); }
+.tsc-next { right: var(--tsc-nav-offset); }
+
+.tsc-carousel.tsc-rtl .tsc-prev { left: auto; right: var(--tsc-nav-offset); }
+.tsc-carousel.tsc-rtl .tsc-next { right: auto; left: var(--tsc-nav-offset); }
+
+.tsc-carousel.tsc-vertical .tsc-nav {
+    /* Constrain the absolute overlay to the trackOuter, not the whole carousel */
+    bottom: auto;
+    height: 100%;
+}
+.tsc-carousel.tsc-vertical .tsc-btn {
+    left: 50%;
+    right: auto;
+    top: auto;
+    transform: translateX(-50%);
+}
+/* Buttons sit just inside the track edges rather than outside */
+.tsc-carousel.tsc-vertical .tsc-prev { top: 10px; }
+.tsc-carousel.tsc-vertical .tsc-next { bottom: 10px; }
+
+/* Dots */
+.tsc-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--tsc-dot-gap);
+    padding: 14px 0 4px;
+}
+.tsc-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
-    padding: 0 !important;
-    font: inherit;
+    padding: 4px;
     cursor: pointer;
     outline: none;
 }
-.owl-carousel .owl-nav.disabled,
-.owl-carousel .owl-dots.disabled {
-    display: none;
+.tsc-dot:focus-visible {
+    outline: 2px solid var(--primary, #0d6efd);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
-.owl-carousel .owl-dots .owl-dot span {
+.tsc-dot-pip {
     display: block;
-    background: #d6d6d6;
-    border-radius: 30px;
-    transition: background 200ms ease;
-}
-.owl-carousel.owl-rtl .owl-item { float: right; }
-.owl-carousel.owl-drag .owl-item { touch-action: none; user-select: none; }
-
-/* Carousel — Themestrap skin */
-.owl-carousel {
-    display: block;
-    margin-bottom: 20px;
-    opacity: 0;
-}
-.owl-carousel.owl-loaded {
-    opacity: 1;
-}
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) > div,
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) span {
-    display: none;
-}
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) > div:first-child,
-.owl-carousel:not(.owl-loaded):not(.owl-carousel-light) span:first-child {
-    display: block;
-}
-.owl-carousel .owl-item img {
-    transform-style: unset;
-}
-.owl-carousel .owl-item img[data-icon] {
-    display: inline;
-}
-.owl-carousel .thumbnail {
-    margin-right: 1px;
-}
-.owl-carousel .item-video {
-    height: 300px;
-}
-.owl-carousel .owl-nav {
-    top: 50%;
-    position: absolute;
-    width: 100%;
-    margin-top: 0;
-    transform: translate3d(0, -50%, 0);
-}
-.owl-carousel .owl-nav button.owl-prev,
-.owl-carousel .owl-nav button.owl-next {
-    display: inline-block;
-    position: absolute;
-    top: 50%;
-    width: 30px;
-    height: 30px;
-    outline: 0;
-    margin: 0;
-    transform: translate3d(0, -50%, 0);
-}
-.owl-carousel .owl-nav button.owl-prev {
-    left: 0;
-}
-.owl-carousel .owl-nav button.owl-prev:before {
-    font-family: 'Font Awesome 7 Free';
-    font-weight: 900;
-    font-size: 11.2px;
-    font-size: 0.7rem;
-    content: "\f053";
-    position: relative;
-    left: -1px;
-    top: -1px;
-}
-.owl-carousel .owl-nav button.owl-next {
-    right: 0;
-}
-.owl-carousel .owl-nav button.owl-next:before {
-    font-family: 'Font Awesome 7 Free';
-    font-weight: 900;
-    font-size: 11.2px;
-    font-size: 0.7rem;
-    content: "\f054";
-    position: relative;
-    left: 1px;
-    top: -1px;
-}
-.owl-carousel.stage-margin .owl-stage-outer {
-    margin-left: 40px !important;
-    margin-right: 40px !important;
-}
-.owl-carousel.stage-margin .owl-stage-outer .owl-stage {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-.owl-carousel.stage-margin.stage-margin-sm .owl-stage-outer {
-    margin-left: 50px !important;
-    margin-right: 50px !important;
-}
-.owl-carousel.stage-margin.stage-margin-md .owl-stage-outer {
-    margin-left: 75px !important;
-    margin-right: 75px !important;
-}
-.owl-carousel.stage-margin.stage-margin-lg .owl-stage-outer {
-    margin-left: 100px !important;
-    margin-right: 100px !important;
-}
-.owl-carousel.top-border {
-    border-top: 1px solid #eaeaea;
-    padding-top: 18px;
-}
-.owl-carousel.nav-remove-prev .owl-nav .owl-prev { display: none; }
-.owl-carousel.nav-remove-next .owl-nav .owl-next { display: none; }
-.owl-carousel.nav-full-height .owl-stage-outer { z-index: 1; }
-.owl-carousel.nav-full-height .owl-nav { height: 100%; }
-.owl-carousel.nav-full-height .owl-nav .owl-next,
-.owl-carousel.nav-full-height .owl-nav .owl-prev { height: 100% !important; }
-.owl-carousel.show-nav-hover .owl-nav {
-    opacity: 0;
-    transition: all 0.2s ease-in-out;
-}
-.owl-carousel.show-nav-hover .owl-nav button.owl-prev {
-    left: 0;
-    transition: all 0.2s ease-in-out;
-}
-.owl-carousel.show-nav-hover .owl-nav button.owl-next {
-    right: 0;
-    transition: all 0.2s ease-in-out;
-}
-.owl-carousel.show-nav-hover:hover .owl-nav { opacity: 1; }
-.owl-carousel.show-nav-hover:hover .owl-nav button.owl-prev { left: -40px; }
-.owl-carousel.show-nav-hover:hover .owl-nav button.owl-next { right: -40px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2:hover .owl-nav button.owl-prev { left: -15px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2:hover .owl-nav button.owl-next { right: -15px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .owl-nav button.owl-prev { left: -20px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-2.nav-md:hover .owl-nav button.owl-next { right: -20px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-3:hover .owl-nav button.owl-prev { left: 10px; }
-.owl-carousel.show-nav-hover.show-nav-hover-pos-3:hover .owl-nav button.owl-next { right: 10px; }
-.owl-carousel.show-nav-title .owl-nav {
-    top: 0;
-    right: 0;
-    margin-top: -25px;
-    width: auto;
-}
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"],
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:active {
-    font-size: 18px;
-    background: transparent !important;
-    width: 18px;
-}
-.owl-carousel.show-nav-title .owl-nav button.owl-prev { left: -40px; }
-.owl-carousel.show-nav-title .owl-nav button.owl-prev:before,
-.owl-carousel.show-nav-title .owl-nav button.owl-prev:after,
-.owl-carousel.show-nav-title .owl-nav button.owl-next:before,
-.owl-carousel.show-nav-title .owl-nav button.owl-next:after { font-size: inherit; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides .owl-nav { width: 100%; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides button.owl-prev { left: 0; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides button.owl-next { right: 0; }
-.owl-carousel.show-nav-title.show-nav-title-both-sides-style-2 .owl-nav { margin-top: 15px; }
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"] {
-    padding: 3px 7px;
+    width: var(--tsc-dot-size);
+    height: var(--tsc-dot-size);
     border-radius: 50%;
-    background: transparent;
-    border: 1px solid #999;
-    color: #999;
+    background: var(--tsc-dot-color);
+    transition: background .25s ease, transform .25s ease, width .25s ease;
 }
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"].hover {
-    background: transparent;
-    border: 1px solid #a1a1a1;
-    color: #a1a1a1;
+.tsc-dot.tsc-dot-active .tsc-dot-pip,
+.tsc-dot:hover .tsc-dot-pip {
+    background: var(--tsc-dot-active-color);
 }
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"]:active,
-.owl-carousel.rounded-nav .owl-nav button[class*="owl-"].active {
-    background: transparent;
-    border: 1px solid #666;
-    color: #666;
+.tsc-dot.tsc-dot-active .tsc-dot-pip {
+    transform: scale(1.4);
 }
-.owl-carousel.nav-bottom .owl-stage-outer { margin-bottom: 10px; }
-.owl-carousel.nav-bottom .owl-nav {
-    position: static;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    transform: none;
+
+/* Dot type: line */
+.tsc-dots-line .tsc-dot-pip {
+    width: var(--tsc-dot-line-w);
+    height: var(--tsc-dot-line-h);
+    border-radius: 2px;
+    transform: none !important;
 }
-.owl-carousel.nav-bottom .owl-nav button.owl-prev,
-.owl-carousel.nav-bottom .owl-nav button.owl-next {
-    position: static;
-    transform: none;
+.tsc-dots-line .tsc-dot.tsc-dot-active .tsc-dot-pip {
+    width: calc(var(--tsc-dot-line-w) * 2);
 }
-.owl-carousel.nav-bottom .owl-nav button.owl-prev { margin-right: 5px; }
-.owl-carousel.nav-bottom .owl-nav button.owl-next { margin-left: 5px; }
-.owl-carousel.nav-bottom.nav-bottom-align-left .owl-nav { text-align: left; }
-.owl-carousel.nav-bottom.nav-bottom-align-right .owl-nav { text-align: right; }
-.owl-carousel.nav-bottom-inside .owl-nav {
-    position: relative;
-    margin: -68.8px 0 0 0;
-    margin: -4.3rem 0 0 0;
-    padding: 0;
-    width: auto;
-}
-.owl-carousel.nav-bottom-inside .owl-nav button.owl-prev,
-.owl-carousel.nav-bottom-inside .owl-nav button.owl-next { position: static; }
-.owl-carousel.nav-inside .owl-nav button.owl-prev { left: 15px; }
-.owl-carousel.nav-inside .owl-nav button.owl-next { right: 15px; left: auto; }
-.owl-carousel.nav-inside.nav-inside-edge .owl-nav button.owl-prev { left: 0; }
-.owl-carousel.nav-inside.nav-inside-edge .owl-nav button.owl-next { right: 0; left: auto; }
-.owl-carousel.nav-inside.nav-inside-plus .owl-nav button.owl-prev { left: 30px; }
-.owl-carousel.nav-inside.nav-inside-plus .owl-nav button.owl-next { right: 30px; left: auto; }
-.owl-carousel.nav-inside.nav-bottom .owl-nav {
-    position: absolute;
-    top: auto;
-    bottom: 40px;
-    width: 100%;
-}
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-prev,
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-next { position: relative; }
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-prev { left: 0; }
-.owl-carousel.nav-inside.nav-bottom .owl-nav button.owl-next { right: 0; }
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav { top: auto; bottom: 60px; }
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev,
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next {
-    transform: none;
-    width: 60px !important;
-    height: 60px !important;
-}
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev:before,
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next:before {
-    font-size: 12.8px;
-    font-size: 0.8rem;
-    left: 0;
-    top: 0;
-}
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev { left: -60px; top: -61px; }
-.owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next { left: -60px; }
-@media (max-width: 991px) {
-    .owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-prev { left: 0; }
-    .owl-carousel.nav-inside.nav-inside-half-section .owl-nav button.owl-next { left: 0; }
-}
-.owl-carousel.nav-outside .owl-nav button.owl-prev { left: 0; }
-.owl-carousel.nav-outside .owl-nav button.owl-next { right: 0; }
-@media (min-width: 992px) {
-    .owl-carousel.nav-outside .owl-nav button.owl-prev { left: -50px; }
-    .owl-carousel.nav-outside .owl-nav button.owl-next { right: -50px; }
-}
-.owl-carousel.nav-position-1 .owl-nav button.owl-prev { left: 20px; }
-.owl-carousel.nav-position-1 .owl-nav button.owl-next { right: 20px; }
-.owl-carousel.nav-icon-1 .owl-nav .owl-next:before { content: "\f061"; }
-.owl-carousel.nav-icon-1 .owl-nav .owl-prev:before { content: "\f060"; }
-.owl-carousel.nav-size-md .owl-nav .owl-next,
-.owl-carousel.nav-size-md .owl-nav .owl-prev { width: 40px; height: 40px; }
-.owl-carousel.nav-size-md .owl-nav .owl-next:before,
-.owl-carousel.nav-size-md .owl-nav .owl-prev:before { top: 0; font-size: 12px; font-size: 0.75rem; }
-.owl-carousel.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev {
-    width: 20px;
-    background: transparent !important;
-    color: #000;
-}
-.owl-carousel.nav-style-1 .owl-nav .owl-next:hover,
-.owl-carousel.nav-style-1 .owl-nav .owl-next:active,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:hover,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:active { color: var(--grey-500); }
-.owl-carousel.nav-style-1 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-1 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev:after { font-size: inherit; }
-.owl-carousel.nav-style-2 .owl-nav .owl-next,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev { background: transparent !important; }
-.owl-carousel.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:before {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 50%;
-    left: 1px;
-    width: 1.3em;
-    height: 1.3em;
-    border-top: 2px solid var(--grey-500);
-    border-left: 2px solid var(--grey-500);
-    font-size: inherit;
-    transform: translate3d(0, -50%, 0) rotate(-45deg);
-}
-.owl-carousel.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:after {
-    content: '';
-    display: block;
-    border-top: 3px solid var(--grey-500);
-    width: 2.5em;
-    position: absolute;
-    top: 50%;
-    font-size: inherit;
-    transform: translate3d(0, -50%, 0);
-}
-.owl-carousel.nav-style-2 .owl-nav .owl-next {
-    transform: rotate(180deg) !important;
-    transform-origin: 15px 8px;
-}
-.owl-carousel.nav-style-2.nav-bottom.nav-inside .owl-nav .owl-next { transform-origin: 15px; }
-.owl-carousel.nav-style-3 .owl-nav { top: 25%; }
-.owl-carousel.nav-style-3 .owl-nav .owl-next,
-.owl-carousel.nav-style-3 .owl-nav .owl-prev {
-    width: 30px;
-    background: transparent !important;
-    color: var(--grey-500);
-}
-.owl-carousel.nav-style-3 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-3 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-3 .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-3 .owl-nav .owl-prev:after { font-size: 1.5em; }
-.owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 75px; }
-@media (max-width: 991px) { .owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 40px; } }
-@media (max-width: 767px) { .owl-carousel.nav-style-4 .owl-nav .owl-prev { left: 13px; } }
-.owl-carousel.nav-style-4 .owl-nav .owl-next { right: 75px; }
-@media (max-width: 991px) { .owl-carousel.nav-style-4 .owl-nav .owl-next { right: 40px; } }
-@media (max-width: 767px) { .owl-carousel.nav-style-4 .owl-nav .owl-next { right: 13px; } }
-.owl-carousel.nav-style-4 .owl-nav .owl-prev,
-.owl-carousel.nav-style-4 .owl-nav .owl-next {
-    background: var(--light);
-    font-size: 11.2px;
-    font-size: 0.7rem;
-    width: 40px;
-    height: 40px;
-    color: #000;
-    border-radius: 100%;
-    box-shadow: 0px 0px 40px -10px rgba(0, 0, 0, 0.3);
-}
-.owl-carousel.nav-style-4 .owl-nav .owl-prev:hover,
-.owl-carousel.nav-style-4 .owl-nav .owl-next:hover { color: var(--light); }
-.owl-carousel.nav-style-4.nav-style-4-pos-2 .owl-nav .owl-prev { left: 0px; }
-.owl-carousel.nav-style-4.nav-style-4-pos-2 .owl-nav .owl-next { right: 0px; }
-.owl-carousel.nav-style-diamond .owl-nav .owl-prev,
-.owl-carousel.nav-style-diamond .owl-nav .owl-next {
-    transform: rotate(45deg);
-    transform-origin: 100% 0%;
-}
-.owl-carousel.nav-style-diamond .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-diamond .owl-nav .owl-next:before {
-    display: block;
-    transform: rotate(-45deg);
-    transform-origin: 60% 50%;
-}
-.owl-carousel.nav-style-diamond .owl-nav .owl-next:before { transform-origin: 50%; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next { width: 35px; height: 35px; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev:before,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next:before { content: none; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg { width: 2em; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg polygon { fill: #FFF; stroke: #FFF; }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg { transform: rotate(180deg); }
-.owl-carousel.nav-arrows-1 .owl-nav .owl-prev,
-.owl-carousel.nav-arrows-1 .owl-nav .owl-next {
-    width: 35px;
-    height: 35px;
-    font-size: 19.2px;
-    font-size: 1.2rem;
-    background: transparent;
-}
-.owl-carousel.nav-arrows-1 .owl-nav .owl-next:before { content: '\f061'; font-size: inherit; }
-.owl-carousel.nav-arrows-1 .owl-nav .owl-prev:before { content: '\f060'; font-size: inherit; }
-.owl-carousel.nav-arrows-2 .owl-nav .owl-prev,
-.owl-carousel.nav-arrows-2 .owl-nav .owl-next {
-    width: 35px;
-    height: 35px;
-    font-size: 19.2px;
-    font-size: 1.2rem;
-    background: transparent;
-}
-.owl-carousel.nav-arrows-2 .owl-nav .owl-next:before { content: '\f101'; font-size: inherit; }
-.owl-carousel.nav-arrows-2 .owl-nav .owl-prev:before { content: '\f100'; font-size: inherit; }
-.owl-carousel.nav-arrows-thin .owl-nav .owl-prev:before,
-.owl-carousel.nav-arrows-thin .owl-nav .owl-next:before {
-    font-family: simple-line-icons;
-    speak: none;
-    font-style: normal;
-    font-weight: 700;
-    font-variant: normal;
-    text-transform: none;
+
+/* Dot type: number */
+.tsc-dots-number .tsc-dot {
+    width: var(--tsc-dot-num-size);
+    height: var(--tsc-dot-num-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--tsc-dot-color);
+    color: var(--tsc-dot-color);
+    font-size: .7rem;
+    font-weight: 600;
     line-height: 1;
-    -webkit-font-smoothing: antialiased;
+    padding: 0;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
 }
-.owl-carousel.nav-arrows-thin .owl-nav .owl-next:before { content: "\e606"; font-size: inherit; }
-.owl-carousel.nav-arrows-thin .owl-nav .owl-prev:before { content: "\e605"; font-size: inherit; }
-.owl-carousel.nav-center-images-only .owl-nav { top: 37%; }
-.owl-carousel.nav-center-outside .owl-nav {
-    width: calc(100% + 90px);
-    left: 49.9%;
-    transform: translate3d(-50%, 0, 0);
+.tsc-dots-number .tsc-dot.tsc-dot-active {
+    background: var(--tsc-dot-active-color);
+    border-color: var(--tsc-dot-active-color);
+    color: var(--ts-skin-on-accent, #fff);
 }
-.owl-carousel.full-width .owl-nav button[class*="owl-"],
-.owl-carousel.full-width .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.big-nav .owl-nav button[class*="owl-"],
-.owl-carousel.big-nav .owl-nav button[class*="owl-"]:hover { height: auto; padding: 20px 0 !important; }
-.owl-carousel.full-width .owl-nav button.owl-prev,
-.owl-carousel.big-nav .owl-nav button.owl-prev { border-radius: 0 4px 4px 0; }
-.owl-carousel.full-width .owl-nav button.owl-next,
-.owl-carousel.big-nav .owl-nav button.owl-next { border-radius: 4px 0 0 4px; }
-.owl-carousel.nav-squared .owl-nav button[class*="owl-"] { border-radius: 0; }
-.owl-carousel.nav-rounded .owl-nav button[class*="owl-"] { border-radius: 50%; }
-.owl-carousel.nav-sm .owl-nav button.owl-prev,
-.owl-carousel.nav-sm .owl-nav button.owl-next { width: 30px !important; height: 30px !important; }
-.owl-carousel.nav-md .owl-nav button.owl-prev,
-.owl-carousel.nav-md .owl-nav button.owl-next { width: 40px; height: 40px; }
-.owl-carousel.nav-lg .owl-nav button.owl-prev,
-.owl-carousel.nav-lg .owl-nav button.owl-next { width: 45px; height: 60px; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev,
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next { width: 55px; height: 55px; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev:before,
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next:before { font-size: 14.4px; font-size: 0.9rem; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-prev:before { top: -1px; left: -1px; }
-.owl-carousel.nav-lg.rounded-nav .owl-nav button.owl-next:before { top: -1px; left: 1px; }
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-next { font-size: 10px; }
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-sm .owl-nav button.owl-next:before { font-size: inherit; }
-.owl-carousel.nav-font-size-md .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-md .owl-nav button.owl-next { font-size: 14px; }
-.owl-carousel.nav-font-size-md .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-md .owl-nav button.owl-next:before { font-size: inherit; }
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-next { font-size: 19px; }
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-lg .owl-nav button.owl-next:before { font-size: inherit; left: 2px; }
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-prev,
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-next { font-size: 25px; }
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-prev:before,
-.owl-carousel.nav-font-size-xl .owl-nav button.owl-next:before { font-size: inherit; left: 2px; }
-.owl-carousel.nav-transparent .owl-nav button[class*="owl-"] {
-    background-color: transparent !important;
-    color: var(--dark) !important;
+
+/* Counter */
+.tsc-counter {
+    text-align: center;
+    padding: 8px 0 4px;
+    font-size: .82rem;
+    color: var(--tsc-counter-color);
+    letter-spacing: .06em;
+    line-height: 1;
 }
-.owl-carousel.nav-transparent .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.nav-transparent .owl-nav button[class*="owl-"]:active {
-    background-color: transparent !important;
-    border-color: transparent !important;
-}
-.owl-carousel.nav-borders .owl-nav button[class*="owl-"] { border-color: var(--dark-rgba-10) !important; }
-.owl-carousel.nav-borders .owl-nav button[class*="owl-"]:hover { border-color: var(--dark-rgba-10) !important; }
-.owl-carousel.nav-borders .owl-nav button[class*="owl-"]:active { border-color: var(--dark-rgba-30) !important; }
-.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"] { border-color: var(--light-rgba-20) !important; }
-.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"]:hover { border-color: var(--light-rgba-20) !important; }
-.owl-carousel.nav-borders-light .owl-nav button[class*="owl-"]:active { border-color: var(--light-rgba-30) !important; }
-.owl-carousel.nav-arrow-light .owl-nav .owl-next:before,
-.owl-carousel.nav-arrow-light .owl-nav .owl-next:after,
-.owl-carousel.nav-arrow-light .owl-nav .owl-prev:before,
-.owl-carousel.nav-arrow-light .owl-nav .owl-prev:after { color: var(--light) !important; }
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"] {
-    background-color: var(--grey-100) !important;
-    border-color: var(--grey-100) !important;
-    color: var(--dark) !important;
-}
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"]:hover {
-    background-color: var(--light) !important;
-    border-color: var(--light) !important;
-}
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"]:active {
-    background-color: var(--grey-200) !important;
-    border-color: var(--grey-200) !important;
-}
-.owl-carousel.nav-light:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav button[class*="owl-"] {
-    width: 35px;
-    height: 45px;
-    background-color: var(--dark-rgba-10) !important;
-    border-color: transparent !important;
-}
-.owl-carousel.nav-light.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-light.nav-style-1 .owl-nav .owl-prev { color: var(--light) !important; }
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-prev:before,
-.owl-carousel.nav-light.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--light) !important; }
-.owl-carousel.nav-light.nav-style-3 .owl-nav .owl-next,
-.owl-carousel.nav-light.nav-style-3 .owl-nav .owl-prev { color: var(--light) !important; }
-.owl-carousel.nav-light.nav-svg-arrows-1 .owl-nav .owl-next svg polygon,
-.owl-carousel.nav-light.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon { fill: #FFF !important; stroke: #FFF !important; }
-.owl-carousel.nav-light.nav-arrows-1 .owl-nav .owl-next,
-.owl-carousel.nav-light.nav-arrows-1 .owl-nav .owl-prev { color: var(--light) !important; }
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev {
-    background-color: var(--dark--100) !important;
-    border-color: var(--dark--100) var(--dark--100) var(--dark--100) !important;
-    color: var(--light) !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next:hover,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev:hover {
-    background-color: var(--dark--100) !important;
-    border-color: var(--dark--100) !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-next:active,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1) .owl-nav .owl-prev:active {
-    background-color: var(--dark) !important;
-    border-color: var(--dark) !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-next,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-prev {
-    width: 35px;
-    height: 45px;
-    background-color: rgba(var(--dark--100), 0.4) !important;
-    border-color: transparent !important;
-}
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-next:hover,
-.owl-carousel.nav-dark:not(.nav-style-1):not(.nav-style-2):not(.nav-style-3):not(.show-nav-title):not(.nav-arrows-1).nav-with-transparency .owl-nav .owl-prev:hover {
-    background-color: rgba(var(--dark--100), 1) !important;
-}
-.owl-carousel.nav-dark.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-dark.nav-style-1 .owl-nav .owl-prev { color: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-prev:before,
-.owl-carousel.nav-dark.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-style-3 .owl-nav .owl-next,
-.owl-carousel.nav-dark.nav-style-3 .owl-nav .owl-prev { color: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-svg-arrows-1 .owl-nav .owl-next svg polygon,
-.owl-carousel.nav-dark.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon { fill: var(--dark) !important; stroke: var(--dark) !important; }
-.owl-carousel.nav-dark.nav-arrows-1 .owl-nav .owl-next,
-.owl-carousel.nav-dark.nav-arrows-1 .owl-nav .owl-prev { color: var(--dark) !important; }
-.owl-carousel .owl-dots .owl-dot { outline: 0; }
-.owl-carousel .owl-dots .owl-dot span { width: 8px; height: 8px; margin: 5px 4px; }
-.owl-carousel.dots-inside .owl-dots { position: absolute; bottom: 2px; right: 10px; margin-top: 0; }
-.owl-carousel.dots-title .owl-dots { position: absolute; margin-top: 0 !important; top: -51px; left: 155px; }
-.owl-carousel.dots-title .owl-dots .owl-dot span { width: 8px; height: 8px; margin: 5px 4px; }
-.owl-carousel.dots-title.dots-title-pos-2 .owl-dots { left: 235px; }
-.owl-carousel.dots-light .owl-dots .owl-dot span { background: rgba(255, 255, 255, 0.6); }
-.owl-carousel.dots-light .owl-dots .owl-dot.active span,
-.owl-carousel.dots-light .owl-dots .owl-dot:hover span { background: #FFF !important; }
-.owl-carousel.dots-dark .owl-dots .owl-dot span { background: rgba(33, 33, 33, 0.6); }
-.owl-carousel.dots-dark .owl-dots .owl-dot.active span,
-.owl-carousel.dots-dark .owl-dots .owl-dot:hover span { background: #212121 !important; }
-.owl-carousel.dots-morphing .owl-dots .owl-dot span { width: 20px; height: 6px; transition: ease width 300ms; }
-.owl-carousel.dots-morphing .owl-dots .owl-dot.active span,
-.owl-carousel.dots-morphing .owl-dots .owl-dot:hover span { width: 40px; }
-.owl-carousel.dots-modern .owl-dots { display: flex; align-items: center; justify-content: center; }
-.owl-carousel.dots-modern .owl-dots .owl-dot { display: flex; align-items: center; justify-content: center; margin: 0 2px; }
-.owl-carousel.dots-modern .owl-dots .owl-dot span { width: 4px; height: 4px; transition: ease all 300ms 300ms; }
-.owl-carousel.dots-modern .owl-dots .owl-dot.active span { transition: ease all 300ms; transform: scale(2); }
-.owl-carousel.dots-modern.dots-modern-lg .owl-dots .owl-dot { margin: 0 3px; }
-.owl-carousel.dots-modern.dots-modern-lg .owl-dots .owl-dot span { width: 6px; height: 6px; }
-.owl-carousel.dots-orientation-portrait .owl-dots { display: flex; flex-direction: column; margin-left: 15px !important; margin-right: 15px !important; }
-.owl-carousel.dots-align-left .owl-dots { text-align: left; justify-content: flex-start; }
-.owl-carousel.dots-align-right .owl-dots { text-align: left; }
-.owl-carousel.dots-horizontal-center .owl-dots { left: 0; right: 0; width: 100%; }
-.owl-carousel.dots-vertical-center .owl-dots { top: 50%; bottom: auto; margin: 0; transform: translate3d(0, -50%, 0); }
-@media (max-width: 575px) {
-    .owl-carousel.show-dots-xs .owl-dots { opacity: 1 !important; visibility: visible !important; }
-}
-@media (min-width: 576px) and (max-width: 767px) {
-    .owl-carousel.show-dots-sm .owl-dots { opacity: 1 !important; visibility: visible !important; }
-}
-@media (min-width: 768px) and (max-width: 991px) {
-    .owl-carousel.show-dots-md .owl-dots { opacity: 1 !important; visibility: visible !important; }
-}
-.owl-carousel.show-dots-hover .owl-dots { opacity: 0; visibility: hidden; transition: ease opacity 300ms; }
-.owl-carousel.show-dots-hover:hover .owl-dots { opacity: 1; visibility: visible; }
-.owl-carousel.carousel-shadow-1 { position: relative; }
-.owl-carousel.carousel-shadow-1:before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 65%;
-    height: 0px;
-    box-shadow: 0 0 110px 180px rgba(0, 0, 0, 0.04);
-    transform: translate3d(-50%, -50%, 0);
-    z-index: 0;
-}
-.owl-carousel.carousel-shadow-1.carousel-shadow-1-bold:before { box-shadow: 0 0 110px 230px rgba(0, 0, 0, 0.04); }
-.owl-carousel .img-thumbnail.img-thumbnail-hover-icon { display: block; }
-.owl-carousel.carousel-right-side-nav { width: calc(100% - 55px); }
-.owl-carousel.carousel-right-side-nav .owl-nav .owl-next { width: 55px; transform: translate3d(100%, -50%, 0); }
-.owl-carousel.carousel-bottom-inside-shadow .owl-stage-outer:after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 35%;
+.tsc-counter-n { font-weight: 700; }
+.tsc-counter-sep,
+.tsc-counter-total { opacity: .55; }
+
+/* Progress bar */
+.tsc-progress {
     width: 100%;
-    background-image: linear-gradient(360deg, var(--grey-500) 0%, transparent 100%);
+    height: var(--tsc-progress-h);
+    background: var(--tsc-progress-bg);
+    overflow: hidden;
+    flex-shrink: 0;
 }
-.owl-carousel [class*="opacity-"]:not([class*="opacity-hover"]) { transition: ease opacity 300ms; }
-.owl-carousel [class*="opacity-"]:not([class*="opacity-hover"]):hover { opacity: 1 !important; }
-@media (min-width: 576px) {
-    .owl-carousel.carousel-sync-style-1 {
-        position: absolute;
-        top: 50%;
-        left: -30px;
-        max-width: 355px;
-        transform: translate3d(0, -50%, 0);
-    }
+.tsc-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--tsc-progress-color);
 }
-.owl-carousel-spaced { margin-left: -5px; }
-.owl-carousel-spaced .owl-item > div { margin: 5px; }
-.owl-carousel.testimonials img { display: inline-block; height: 70px; width: 70px; }
-@media (max-width: 575px) { .owl-carousel-spaced { margin-left: 0; } }
-.carousel-half-full-width-wrapper > .owl-carousel { width: 100%; }
-@media (min-width: 576px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 540px) / 2)); } }
-@media (min-width: 768px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 720px) / 2)); } }
-@media (min-width: 992px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 960px) / 2)); } }
-@media (min-width: 1200px) { .carousel-half-full-width-wrapper > .owl-carousel { width: calc(100vw - ((100vw - 1140px) / 2)); } }
-.carousel-half-full-width-wrapper > .owl-carousel .owl-stage-outer { margin-bottom: 20px; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left { direction: rtl; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav { display: flex; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav .owl-prev { order: 2; }
-.carousel-half-full-width-wrapper.carousel-half-full-width-left > .owl-carousel .owl-nav .owl-next { order: 1; }
-.carousel-areas {
-    background: #f2f2f2;
-    background: linear-gradient(to bottom, #f2f2f2 0%, rgba(33, 37, 41, 0.5) 100%);
-    margin-bottom: -10px;
-    padding: 8px 8px 0 8px;
-    border-radius: 6px 6px 0 0;
-    box-shadow: 0px 0px 50px 20px rgba(0, 0, 0, 0.07);
+
+/* Thumbnail strip */
+.tsc-thumbs {
+    display: flex;
+    gap: var(--tsc-thumb-gap);
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 8px 0 0;
 }
-.carousel-areas .owl-carousel { box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2); }
-.carousel-areas .owl-carousel .owl-nav button.owl-prev { left: -55px; }
-.carousel-areas .owl-carousel .owl-nav button.owl-next { right: -55px; }
-.carousel-areas .owl-carousel:first-child img { border-radius: 6px 6px 0 0; }
-@media (max-width: 991px) { .carousel-areas .owl-carousel .owl-nav { display: none; } }
-.owl-carousel.carousel-center-active-item .owl-item { opacity: 0.2; transition: ease opacity 300ms; }
-.owl-carousel.carousel-center-active-item .owl-item.current { opacity: 1 !important; }
-.owl-carousel.carousel-center-active-item.carousel-center-active-item-style-2 .owl-item { opacity: 0.7; }
-.owl-carousel.carousel-center-active-item-2 .owl-stage-outer { overflow: visible; }
-.owl-carousel.carousel-center-active-item-2 .owl-item > div {
-    width: 66.6666%;
-    margin-left: auto;
-    padding: 48px;
-    padding: 3rem;
-    background: var(--light);
-    border-radius: 7px;
-    box-shadow: 0px 0px 70px -40px rgba(0, 0, 0, 0.2);
+.tsc-thumb {
+    flex: 0 0 var(--tsc-thumb-size);
+    width: var(--tsc-thumb-size);
+    height: var(--tsc-thumb-size);
+    border-radius: var(--tsc-thumb-radius);
+    border: var(--tsc-thumb-border);
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
+    opacity: var(--tsc-thumb-opacity);
+    background: var(--grey-200, #e9ecef);
+    transition: opacity .2s ease, border-color .2s ease;
+    outline: none;
 }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active > div { margin-right: auto; }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active > div * { color: var(--light) !important; }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active + .owl-item > div { margin-right: auto; margin-left: 0; }
-.owl-carousel.carousel-center-active-item-3 .owl-stage-outer { overflow: visible; }
-.owl-carousel.carousel-center-active-item-3 .owl-item > div { width: 100%; margin-left: auto; transition: ease opacity 300ms; }
-.owl-carousel.carousel-center-active-item-3 .owl-item.active > div { margin-right: auto; }
-.owl-carousel.carousel-center-active-item-3 .owl-item.active + .owl-item > div { margin-right: auto; margin-left: 0; }
-.owl-carousel-light.owl-carousel-light-init-fadeIn { transition: ease opacity 300ms; }
-.owl-carousel-light .owl-stage-outer,
-.owl-carousel-light .owl-stage { height: 100%; }
-.owl-carousel-light .owl-item {
-    display: none;
-    visibility: hidden;
-    opacity: 0;
-    position: absolute !important;
+.tsc-thumb:hover { opacity: var(--tsc-thumb-opacity-hover); }
+.tsc-thumb:focus-visible {
+    outline: 2px solid var(--primary, #0d6efd);
+    outline-offset: 2px;
+}
+.tsc-thumb.tsc-thumb-active {
+    opacity: var(--tsc-thumb-opacity-hover);
+    border: var(--tsc-thumb-border-active);
+}
+.tsc-thumb img {
     width: 100%;
     height: 100%;
-    top: 0;
-    transition: ease opacity 300ms;
+    object-fit: cover;
+    pointer-events: none;
 }
-.owl-carousel-light .owl-item.active { display: block; visibility: visible; opacity: 1; }
-.owl-carousel-light .owl-dots .owl-dot span { margin: 5px 2px; }
-.horizontal-scroller { padding: 32px 0; padding: 2rem 0; height: 100vh; position: relative; }
-.horizontal-scroller-scroll { position: relative; overflow: hidden; padding: 32px; padding: 2rem; }
-.horizontal-scroller-images { height: 100%; display: flex; align-items: center; }
-.horizontal-scroller-item { height: 100%; display: flex; justify-content: center; flex: 0 0 auto; padding: 0 32px; padding: 0 2rem; }
-.horizontal-scroller-image { object-fit: fill; margin: 0 auto; max-height: 80vh; padding-top: 10vh; }
+.tsc-thumb-idx {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    color: var(--grey-600, #6c757d);
+}
 
-/* Carousel — skin (primary colour bindings) */
-.owl-carousel .owl-dots .owl-dot.active span,
-.owl-carousel .owl-dots .owl-dot:hover span { background-color: var(--primary-100); }
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"],
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"]:hover,
-.owl-carousel.show-nav-title .owl-nav button[class*="owl-"].hover { color: var(--primary); }
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"] {
-    background-color: var(--primary);
-    border-color: var(--primary) var(--primary) var(--primary-300);
-    color: var(--primary-inverse);
+/* Fade transition */
+.tsc-trans-fade .tsc-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity var(--tsc-speed) var(--tsc-easing);
 }
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"]:hover,
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"].hover {
-    background-color: var(--primary--100);
-    border-color: var(--primary--300) var(--primary--300) var(--primary);
+.tsc-trans-fade .tsc-item.tsc-active {
+    opacity: 1;
+    z-index: 1;
 }
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"]:active,
-.owl-carousel:not(.nav-arrows-1):not(.show-nav-title) .owl-nav button[class*="owl-"].active {
-    background-color: var(--primary-300);
-    background-image: none;
-    border-color: var(--primary-300) var(--primary-300) var(--primary-300);
+.tsc-trans-fade .tsc-item.tsc-fade-leave {
+    opacity: 0;
+    z-index: 2;
+    transition: opacity var(--tsc-speed) var(--tsc-easing);
 }
-.owl-carousel.nav-with-transparency:not(.nav-style-1):not(.show-nav-title):not(.nav-arrows-1) .owl-nav button[class*="owl-"] { background-color: var(--primary-rgba-35); }
-.owl-carousel.nav-style-1 .owl-nav .owl-next,
-.owl-carousel.nav-style-1 .owl-nav .owl-prev { color: var(--primary) !important; }
-.owl-carousel.nav-style-2 .owl-nav .owl-next:before,
-.owl-carousel.nav-style-2 .owl-nav .owl-next:after,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:before,
-.owl-carousel.nav-style-2 .owl-nav .owl-prev:after { border-color: var(--primary); }
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-prev svg polygon,
-.owl-carousel.nav-svg-arrows-1 .owl-nav .owl-next svg polygon { fill: var(--primary); stroke: var(--primary); }
-.owl-carousel.nav-arrows-1 .owl-nav .owl-prev,
-.owl-carousel.nav-arrows-1 .owl-nav .owl-next { color: var(--primary); }
-.owl-carousel.carousel-center-active-item-2 .owl-item.active > div { background: var(--primary); }
-.owl-carousel.carousel-bottom-inside-shadow .owl-stage-outer:after { background-image: linear-gradient(360deg, var(--primary) 0%, transparent 100%); }
+
+/* Zoom transition */
+.tsc-trans-zoom .tsc-item {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    opacity: 0;
+    z-index: 0;
+    transform: scale(1);
+    transition: opacity var(--tsc-speed) var(--tsc-easing),
+                transform var(--tsc-speed) var(--tsc-easing);
+}
+.tsc-trans-zoom .tsc-item.tsc-active {
+    opacity: 1;
+    z-index: 1;
+    transform: scale(1);
+}
+.tsc-trans-zoom .tsc-item.tsc-zoom-leave {
+    opacity: 0;
+    z-index: 2;
+    transform: scale(.96);
+}
+.tsc-trans-zoom .tsc-item.tsc-zoom-enter {
+    animation: tsc-zoom-enter-kf var(--tsc-speed) var(--tsc-easing) both;
+    z-index: 1;
+}
+@keyframes tsc-zoom-enter-kf {
+    from { opacity: 0; transform: scale(1.04); }
+    to   { opacity: 1; transform: scale(1);    }
+}
+
+/* Utility */
+.tsc-hidden { display: none !important; }
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .tsc-carousel {
+        --tsc-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
+        --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
+        --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
+        --tsc-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
+    }
+}
+html.dark .tsc-carousel,
+[data-bs-theme="dark"] .tsc-carousel {
+    --tsc-dot-color:        var(--ts-skin-border-strong, rgba(255,255,255,.28));
+    --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #6ea8fe));
+    --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.12));
+    --tsc-counter-color:    var(--ts-skin-text-dim, rgba(255,255,255,.5));
+}
+[data-bs-theme="light"] .tsc-carousel {
+    --tsc-dot-color:        var(--ts-skin-border-strong, rgba(0,0,0,.22));
+    --tsc-dot-active-color: var(--ts-skin-accent, var(--primary, #0d6efd));
+    --tsc-progress-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.1));
+    --tsc-counter-color:    var(--ts-skin-text-dim, var(--grey-600, #6c757d));
+}
 `;
 
     $.extend(themestrap, { PluginCarousel });
@@ -5122,10 +5737,16 @@ html.dark .alert-ts-neutral {
     $.fn.themestrapPluginCarousel = function(opts) {
         return this.map(function() {
             const $this = $(this);
-            if ($this.data(instanceName)) {
-                return $this.data(instanceName);
+            const inst  = $this.data(instanceName);
+
+            if (inst) {
+                if (typeof opts === 'string' && typeof inst[opts] === 'function') {
+                    inst[opts]();
+                }
+                return inst;
             }
-            return new PluginCarousel($this, opts);
+
+            return new PluginCarousel($this, typeof opts === 'object' ? opts : {});
         });
     };
 })).apply(this, [window.themestrap, jQuery]);
@@ -6913,6 +7534,7 @@ html.dark .tscp-carousel,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Chart Circular
+// Chart Circular
 (((themestrap = {}, $) => {
     const instanceName = '__chartCircular';
 
@@ -7143,6 +7765,64 @@ html.dark .tscp-carousel,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Code Rail
+/**
+ * Themestrap Code Rail Plugin
+ *
+ * The signature two-column API-reference layout: prose sections on the left,
+ * a sticky code column on the right whose visible panel stays in sync with the
+ * section you are currently reading. Scroll the prose and the matching code
+ * example cross-fades into the sticky frame.
+ *
+ * On narrow viewports the two columns can't co-exist, so each code panel is
+ * relocated inline directly beneath the prose section it documents and the
+ * scroll-sync is disabled. Resize back up and the sticky rail is restored.
+ *
+ * This plugin owns ONLY the layout + the scroll-sync. The code panels inside
+ * it are ordinary [data-plugin-code-window] / [data-plugin-highlight] blocks
+ * and are decorated by their own plugins as usual.
+ *
+ * Part of the Themestrap component library for MODX 3.
+ *
+ * MARKUP
+ *   <div data-plugin-code-rail data-plugin-options='{"top": 96}'>
+ *
+ *     <div data-code-rail-main>
+ *       <section data-code-rail-section="create" id="create"> …prose… </section>
+ *       <section data-code-rail-section="list"   id="list">   …prose… </section>
+ *     </div>
+ *
+ *     <div data-code-rail-aside>
+ *       <div data-code-rail-panel="create"> …code window… </div>
+ *       <div data-code-rail-panel="list">   …code window… </div>
+ *     </div>
+ *
+ *   </div>
+ *
+ * Each [data-code-rail-section] is paired with the [data-code-rail-panel]
+ * whose value matches its data-code-rail-section value. Sections with no
+ * matching panel simply keep the previous panel on screen.
+ *
+ * OPTIONS (data-plugin-options)
+ *   top        {number}  Sticky offset from the top, in px.            default 96
+ *   breakpoint {number}  Min viewport px for the two-column rail.      default 1024
+ *   rootMargin {string}  Override the IntersectionObserver band.       default '' (auto)
+ *   fade       {bool}    Cross-fade panels on change.                  default true
+ *
+ * EVENTS
+ *   coderail:ready   (e, instance)            fired once after build
+ *   coderail:change  (e, instance, id, $pane) fired on every synced switch
+ *
+ * PROGRAMMATIC API
+ *   const cr = $('#api').data('__codeRail');
+ *   cr.activate('list');   // force a panel
+ *   cr.refresh();          // re-evaluate layout mode
+ *   cr.destroy();          // restore original markup
+ *
+ *   // Code Rail (init.js wiring)
+ *   if (typeof $.fn['themestrapPluginCodeRail'] === 'function' && $('[data-plugin-code-rail]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-code-rail]:not(.manual)', 'themestrapPluginCodeRail');
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__codeRail';
 
@@ -7469,6 +8149,63 @@ html.dark .tscp-carousel,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Code Window
+/**
+ * Themestrap Code Window Plugin
+ *
+ * Decorates a group of <pre> code blocks with a mac or windows editor window:
+ * a chrome bar (mac or windows buttons + a filename tab strip), a body that shows
+ * one pane at a time, and an optional ambient gradient glow behind the frame.
+ * Syntax highlighting, line numbers and the copy button are delegated to
+ * PluginHighlight — this plugin only owns the window shell and tab switching.
+ *
+ * Part of the Themestrap component library for MODX 3.
+ *
+ * MARKUP
+ *   <div data-plugin-code-window
+ *        data-plugin-options='{"glow": true, "activeTab": 0}'>
+ *
+ *     <pre data-code-window-tab="cache-advance.config.js"
+ *          data-plugin-highlight="javascript"
+ *          data-plugin-highlight-lines="2,3-5"><code>export default {
+ *     strategy: 'predictive',
+ *   }</code></pre>
+ *
+ *     <pre data-code-window-tab="package.json"
+ *          data-plugin-highlight="json"><code>{ "name": "cache-advance" }</code></pre>
+ *
+ *   </div>
+ *
+ * Each direct-child <pre> becomes one tab. The tab label is read from
+ * data-code-window-tab (falls back to "untitled"). All standard PluginHighlight
+ * data-* attributes (data-plugin-highlight, -lines, -hljs-config) stay on the
+ * <pre> and are honored.
+ *
+ * OPTIONS (data-plugin-options)
+ *   activeTab   {number}  Zero-based index of the pane shown first.   default 0
+ *   chrome      {string}  Render either a Mac or Windows topbar.      default 'win'
+ *   tabs        {bool}    Render the filename tab strip.              default true
+ *   glow        {bool}    Ambient gradient glow behind the window.    default true
+ *   lineNumbers {bool}    Forwarded to PluginHighlight.               default true
+ *   showCopy    {bool}    Forwarded to PluginHighlight (copy button). default true
+ *   highlight   {bool}    Run PluginHighlight on each pane.           default true
+ *   accent      {string}  CSS color for the active-tab indicator.    default '' (theme)
+ *
+ * EVENTS
+ *   codewindow:ready  (e, instance)                 fired once after build
+ *   codewindow:tab    (e, instance, index, $pane)   fired on every tab change
+ *
+ * PROGRAMMATIC API 
+ *   const cw = $('#hero-code').data('__codeWindow');
+ *   cw.activate(1);          // switch to the second pane
+ *   cw.next(); cw.prev();    // cycle panes
+ *   cw.destroy();            // restore original markup
+ *
+ *   // Code Window
+ *   if (typeof $.fn['themestrapPluginCodeWindow'] === 'function' && $('[data-plugin-code-window]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-code-window]:not(.manual)', 'themestrapPluginCodeWindow');
+ *   }
+ */
+// Code Window
 (((themestrap = {}, $) => {
     const instanceName = '__codeWindow';
 
@@ -7478,17 +8215,17 @@ html.dark .tscp-carousel,
 
     const CSS_TEXT = `/* Themestrap — PluginCodeWindow */
 .ts-code-window {
-    --ts-cw-radius:        4px;
-    --ts-cw-bg:            #212529;
-    --ts-cw-chrome-bg:     #16181b;
-    --ts-cw-border:        rgba(255,255,255,0.08);
-    --ts-cw-tab-fg:        rgba(245,241,234,0.50);
-    --ts-cw-tab-fg-active: #f5f1ea;
-    --ts-cw-accent:        var(--primary);
+    --ts-cw-radius:        var(--ts-skin-radius-sm, 4px);
+    --ts-cw-bg:            var(--ts-skin-code-bg, #212529);
+    --ts-cw-chrome-bg:     var(--ts-skin-code-bg, #16181b);
+    --ts-cw-border:        var(--ts-skin-border, rgba(255,255,255,0.08));
+    --ts-cw-tab-fg:        var(--ts-skin-code-comment, rgba(245,241,234,0.50));
+    --ts-cw-tab-fg-active: var(--ts-skin-code-text, #f5f1ea);
+    --ts-cw-accent:        var(--ts-skin-accent, var(--primary));
     --ts-cw-glow-1:        rgba(42,184,200,0.30);
     --ts-cw-glow-2:        rgba(232,103,42,0.28);
-    --ts-cw-shadow:        0 30px 60px -20px rgba(0,0,0,0.55),
-                           0 12px 24px -12px rgba(0,0,0,0.45);
+    --ts-cw-shadow:        var(--ts-skin-shadow, 0 30px 60px -20px rgba(0,0,0,0.55),
+                           0 12px 24px -12px rgba(0,0,0,0.45));
 
     position: relative;
     border-radius: var(--ts-cw-radius);
@@ -7502,8 +8239,8 @@ html.dark .tscp-carousel,
 
 /* Light theme tuning (page default). Dark theme keeps the dark editor look. */
 html:not(.dark) .ts-code-window {
-    --ts-cw-shadow: 0 24px 50px -22px rgba(10,25,41,0.35),
-                    0 8px 18px -10px rgba(10,25,41,0.20);
+    --ts-cw-shadow: var(--ts-skin-shadow, 0 24px 50px -22px rgba(10,25,41,0.35),
+                    0 8px 18px -10px rgba(10,25,41,0.20));
 }
 
 /* Ambient gradient glow */
@@ -7626,7 +8363,7 @@ html:not(.dark) .ts-code-window {
     border: 0;
     background: transparent;
     color: var(--ts-cw-tab-fg);
-    font-family: var(--mono, ui-monospace, 'JetBrains Mono', monospace);
+    font-family: var(--ts-skin-font-mono, var(--mono, ui-monospace, 'JetBrains Mono', monospace));
     font-size: 12.5px;
     line-height: 1;
     padding: 0 14px;
@@ -7699,8 +8436,8 @@ html:not(.dark) .ts-code-window {
     font-weight: 600;
     line-height: 1;
 
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.75);
+    background: var(--ts-skin-code-bg, rgba(255,255,255,0.08));
+    color: var(--ts-skin-code-text, rgba(255,255,255,0.75));
 
     text-transform: uppercase;
     letter-spacing: .04em;
@@ -7881,7 +8618,7 @@ html:not(.dark) .ts-code-window {
             const self = this;
             if (!this.options.highlight) return this;
 
-            if (!$.isFunction($.fn.themestrapPluginHighlight)) {
+            if (typeof $.fn.themestrapPluginHighlight !== 'function') {
                 // Highlight plugin not on the page — panes still render as plain
                 // (but styled) code. Nothing else to do.
                 return this;
@@ -8002,6 +8739,7 @@ html:not(.dark) .ts-code-window {
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Collapsible
 // Collapsible
 (((themestrap = {}, $) => {
 
@@ -8410,6 +9148,117 @@ html:not(.dark) .ts-code-window {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Command Menu
+/**
+ * Themestrap Command Menu Plugin
+ * Accessible, keyboard-driven command palette
+ * Part of the Themestrap component library.
+ *
+ * Features:
+ *   • Global keyboard shortcut (default: Cmd/Ctrl+K) to summon the palette anywhere.
+ *   • Live fuzzy-ish substring filtering as the user types — searches the visible
+ *     label, the optional description, AND any space-delimited keywords supplied
+ *     via [data-command-keywords].
+ *   • Keyboard navigation — ArrowUp / ArrowDown / Home / End / PgUp / PgDn,
+ *     Enter to execute, Escape to close. The active item is auto-scrolled into view.
+ *   • Item activation modes — navigate to [data-command-href], dispatch a
+ *     [data-command-action] event, or invoke a JS callback registered against an
+ *     [data-command-action] key.
+ *   • Group headings — items inside a [data-command-group] share a sticky heading
+ *     pulled from [data-command-heading]. Empty groups auto-hide as the user
+ *     filters.
+ *   • Empty state — a [data-command-empty] element is shown when no items match.
+ *   • Recent commands — optionally pinned at the top of the list and persisted to
+ *     localStorage (one history list per instance ID).
+ *   • Full ARIA combobox + listbox pattern with aria-activedescendant.
+ *
+ * Markup anatomy:
+ *
+ *   <!-- Trigger (anywhere in the DOM) -->
+ *   <button data-command-open="main-cmd">
+ *     <kbd>⌘</kbd><kbd>K</kbd>
+ *   </button>
+ *
+ *   <!-- Command Menu root -->
+ *   <div data-plugin-command-menu id="main-cmd"
+ *        data-plugin-options='{"shortcut": "mod+k", "recent": true}'>
+ *
+ *     <!-- Backdrop -->
+ *     <div data-command-backdrop></div>
+ *
+ *     <!-- Panel -->
+ *     <div data-command-panel>
+ *
+ *       <!-- Search input -->
+ *       <div data-command-search>
+ *         <i class="fas fa-search"></i>
+ *         <input data-command-input type="text" placeholder="Type a command..." />
+ *       </div>
+ *
+ *       <!-- List of groups and items -->
+ *       <div data-command-list>
+ *
+ *         <!-- Empty state -->
+ *         <div data-command-empty>No results found.</div>
+ *
+ *         <!-- Optional recents group (auto-managed when recent: true) -->
+ *         <div data-command-group data-command-heading="Recent"
+ *              data-command-recent></div>
+ *
+ *         <!-- Static groups -->
+ *         <div data-command-group data-command-heading="Navigation">
+ *           <button data-command-item
+ *                   data-command-keywords="dashboard overview"
+ *                   data-command-href="/dashboard">
+ *             <i class="fas fa-home" data-command-icon></i>
+ *             <span data-command-label>Dashboard</span>
+ *             <span data-command-description>Go to the dashboard</span>
+ *             <kbd data-command-shortcut>G D</kbd>
+ *           </button>
+ *
+ *           <button data-command-item
+ *                   data-command-action="new-project">
+ *             <i class="fas fa-plus" data-command-icon></i>
+ *             <span data-command-label>New project…</span>
+ *             <kbd data-command-shortcut>⌘ N</kbd>
+ *           </button>
+ *         </div>
+ *       </div>
+ *
+ *       <!-- Optional footer -->
+ *       <div data-command-footer>
+ *         <kbd>↑</kbd><kbd>↓</kbd> to navigate
+ *         <kbd>↵</kbd> to select
+ *         <kbd>esc</kbd> to close
+ *       </div>
+ *     </div>
+ *   </div>
+ *
+ * Public API (via stored instance):
+ *   const cmd = $('#main-cmd').data('__pluginCommandMenu');
+ *   cmd.open();
+ *   cmd.close();
+ *   cmd.toggle();
+ *   cmd.setQuery('proj');
+ *   cmd.registerAction('new-project', () => { ... });
+ *
+ * Events fired on the command menu root element:
+ *   command:open    — after the open transition begins                 (instance)
+ *   command:close   — after the close transition completes             (instance)
+ *   command:filter  — every time the query changes after filtering     (instance, query, matchCount)
+ *   command:select  — when an item is activated (before navigation)    (instance, $item, payload)
+ *
+ * Init.js wiring (DOMReady-immediate — must be ready before any trigger fires):
+ *   if (typeof $.fn['themestrapPluginCommandMenu'] === 'function' && $('[data-plugin-command-menu]').length) {
+ *       $(() => {
+ *           $('[data-plugin-command-menu]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginCommandMenu(opts);
+ *           });
+ *       });
+ *   }
+ */
+ // Command Menu
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCommandMenu';
     
@@ -8428,24 +9277,24 @@ html:not(.dark) .ts-code-window {
              *  .command-menu element, or via theme skins (dark mode, brand colors).
              */
             :root {
-                --command-bg:              var(--light, #fff);
-                --command-fg:              var(--default, #777);
-                --command-muted:           var(--light-rgba-60, rgba(255, 255, 255, 0.6));
-                --command-border:          var(--light-rgba-80, rgba(255, 255, 255, 0.8));
-                --command-border-strong:   var(--light-rgba-20, rgba(255, 255, 255, 0.2));
-                --command-hover:           var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-                --command-active-bg:       var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-                --command-active-fg:       var(--dark, #0a0c0d);
-                --command-accent:          var(--primary, #0088CC);
-                --command-backdrop:        var(--dark-rgba-90, rgba(33, 37, 41, 0.9));
-                --command-radius:          var(--border-radius, 4px);
-                --command-radius-item:     var(--border-radius2x, 8px);
-                --command-shadow:          0 24px 56px -12px rgba(0, 0, 0, 0.32),
-                                           0 4px 12px -4px rgba(0, 0, 0, 0.16);
+                --command-bg:              var(--ts-skin-surface, var(--light, #fff));
+                --command-fg:              var(--ts-skin-text, var(--default, #777));
+                --command-muted:           var(--ts-skin-text-dim, var(--light-rgba-60, rgba(255, 255, 255, 0.6)));
+                --command-border:          var(--ts-skin-border, var(--light-rgba-80, rgba(255, 255, 255, 0.8)));
+                --command-border-strong:   var(--ts-skin-border-strong, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+                --command-hover:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --command-active-bg:       var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+                --command-active-fg:       var(--ts-skin-text-strong, var(--dark, #0a0c0d));
+                --command-accent:          var(--ts-skin-accent, var(--primary, #0088CC));
+                --command-backdrop:        var(--ts-skin-overlay, var(--dark-rgba-90, rgba(33, 37, 41, 0.9)));
+                --command-radius:          var(--ts-skin-radius-sm, var(--border-radius, 4px));
+                --command-radius-item:     var(--ts-skin-radius, var(--border-radius2x, 8px));
+                --command-shadow:          var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.32),
+                                           0 4px 12px -4px rgba(0, 0, 0, 0.16));
                 --command-panel-width:     min(96vw, 640px);
                 --command-list-max-h:      min(60vh, 480px);
                 --command-z:               1080;
-                --command-font:            inherit;
+                --command-font:            var(--ts-skin-font, inherit);
             }
 
             /* Dark variant */
@@ -8459,8 +9308,8 @@ html:not(.dark) .ts-code-window {
                 --command-active-bg:      var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
                 --command-active-fg:      var(--light, #fff);
                 --command-backdrop:       var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
-                --command-shadow:         0 24px 56px -12px rgba(0, 0, 0, 0.6),
-                                          0 4px 12px -4px rgba(0, 0, 0, 0.4);
+                --command-shadow:         var(--ts-skin-shadow, 0 24px 56px -12px rgba(0, 0, 0, 0.6),
+                                          0 4px 12px -4px rgba(0, 0, 0, 0.4));
             }
 
             body.ts-scroll-lock {
@@ -8705,13 +9554,19 @@ html:not(.dark) .ts-code-window {
 
             .command-menu [data-command-item]:has([data-command-description]) {
                 align-items: center;
+                /* Let the description take its own line under the label instead of
+                   squeezing the label to zero width on the same row */
+                flex-wrap: wrap;
+                row-gap: 0;
             }
 
             /* Wrap label + description in an inline column when both are present */
             .command-menu [data-command-item] [data-command-label] + [data-command-description] {
-                /* If author puts description after label without a wrapper, force it onto its own line */
-                width: 100%;
-                flex: 1 0 100%;
+                /* If author puts description after label without a wrapper, force it onto its own line,
+                   after any shortcut or badge (order), indented to line up with the label */
+                order: 1;
+                width: calc(100% - 30px);
+                flex: 1 0 calc(100% - 30px);
                 margin-top: 2px;
                 margin-left: 30px;   /* align with label, accounting for icon column */
             }
@@ -8749,7 +9604,7 @@ html:not(.dark) .ts-code-window {
                 padding: 2px 8px;
                 border-radius: 999px;
                 background: var(--command-accent);
-                color: #fff;
+                color: var(--ts-skin-on-accent, #fff);
                 font-size: 10.5px;
                 font-weight: 600;
                 letter-spacing: 0.02em;
@@ -8816,9 +9671,9 @@ html:not(.dark) .ts-code-window {
                 align-items: center;
                 gap: 10px;
                 padding: 6px 10px 6px 12px;
-                background: var(--command-bg, #fff);
-                color: var(--command-muted, #64748b);
-                border: 1px solid var(--command-border, rgba(15, 23, 42, 0.12));
+                background: var(--command-bg, var(--ts-skin-surface, #fff));
+                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
+                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
                 border-radius: 8px;
                 font-size: 13px;
                 line-height: 1.4;
@@ -8828,8 +9683,8 @@ html:not(.dark) .ts-code-window {
             }
 
             .command-trigger:hover {
-                border-color: var(--command-border-strong, rgba(15, 23, 42, 0.2));
-                background: var(--command-hover, rgba(15, 23, 42, 0.04));
+                border-color: var(--command-border-strong, var(--ts-skin-border-strong, rgba(15, 23, 42, 0.2)));
+                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.04)));
             }
 
             .command-trigger .command-trigger-label {
@@ -8844,9 +9699,9 @@ html:not(.dark) .ts-code-window {
             }
 
             .command-trigger .command-trigger-shortcut kbd {
-                background: var(--command-hover, rgba(15, 23, 42, 0.06));
-                border: 1px solid var(--command-border, rgba(15, 23, 42, 0.12));
-                color: var(--command-muted, #64748b);
+                background: var(--command-hover, var(--ts-skin-elevated, rgba(15, 23, 42, 0.06)));
+                border: 1px solid var(--command-border, var(--ts-skin-border, rgba(15, 23, 42, 0.12)));
+                color: var(--command-muted, var(--ts-skin-text-dim, #64748b));
                 border-radius: 4px;
                 padding: 1px 5px;
                 font-size: 10.5px;
@@ -9809,6 +10664,7 @@ html:not(.dark) .ts-code-window {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Context Menu
+// Context Menu
 (((themestrap = {}, $) => {
     const instanceName = '__pluginContextMenu';
     const STYLE_ID     = 'ts-contextmenu-styles';
@@ -9822,11 +10678,11 @@ html:not(.dark) .ts-code-window {
     min-width: 180px;
     max-width: 280px;
     padding: 4px;
-    background: #ffffff;
-    border: 1px solid rgba(0,0,0,.08);
+    background: var(--ts-ctx-surface, var(--ts-skin-surface, #ffffff));
+    border: 1px solid var(--ts-ctx-border, var(--ts-skin-border, rgba(0,0,0,.08)));
     border-radius: 8px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1),
-                0 0 0 1px rgba(0,0,0,.04);
+    box-shadow: var(--ts-skin-shadow, 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1),
+                0 0 0 1px rgba(0,0,0,.04));
     font-family: inherit;
     font-size: .875rem;
     line-height: 1.4;
@@ -9846,9 +10702,9 @@ html:not(.dark) .ts-code-window {
 /* Dark mode */
 html.dark .ts-ctx-menu,
 .ts-ctx-menu.ts-ctx-dark {
-    background: #1c1c1e;
-    border-color: rgba(255,255,255,.08);
-    color: #f5f5f5;
+    background: var(--ts-ctx-surface, var(--ts-skin-surface, #1c1c1e));
+    border-color: var(--ts-ctx-border, var(--ts-skin-border, rgba(255,255,255,.08)));
+    color: var(--ts-ctx-text, var(--ts-skin-text, #f5f5f5));
 }
 
 /* Items */
@@ -9872,24 +10728,24 @@ html.dark .ts-ctx-menu,
 }
 .ts-ctx-item:hover,
 .ts-ctx-item:focus {
-    background: rgba(0,0,0,.06);
+    background: var(--ts-ctx-elevated, var(--ts-skin-elevated, rgba(0,0,0,.06)));
 }
 html.dark .ts-ctx-item:hover,
 html.dark .ts-ctx-item:focus,
 .ts-ctx-dark .ts-ctx-item:hover,
 .ts-ctx-dark .ts-ctx-item:focus {
-    background: rgba(255,255,255,.08);
+    background: var(--ts-ctx-elevated, var(--ts-skin-elevated, rgba(255,255,255,.08)));
 }
 .ts-ctx-item.ts-ctx-destructive {
-    color: #dc2626;
+    color: var(--ts-ctx-danger, var(--ts-skin-danger, #dc2626));
 }
 html.dark .ts-ctx-item.ts-ctx-destructive,
 .ts-ctx-dark .ts-ctx-item.ts-ctx-destructive {
-    color: #f87171;
+    color: var(--ts-ctx-danger, var(--ts-skin-danger, #f87171));
 }
 .ts-ctx-item.ts-ctx-destructive:hover,
 .ts-ctx-item.ts-ctx-destructive:focus {
-    background: rgba(220,38,38,.08);
+    background: var(--ts-ctx-danger-soft, var(--ts-skin-danger-soft, rgba(220,38,38,.08)));
 }
 .ts-ctx-item.ts-ctx-disabled {
     opacity: .45;
@@ -9922,11 +10778,11 @@ html.dark .ts-ctx-item.ts-ctx-destructive,
 .ts-ctx-separator {
     height: 1px;
     margin: 4px 0;
-    background: rgba(0,0,0,.07);
+    background: var(--ts-ctx-border, var(--ts-skin-border, rgba(0,0,0,.07)));
 }
 html.dark .ts-ctx-separator,
 .ts-ctx-dark .ts-ctx-separator {
-    background: rgba(255,255,255,.08);
+    background: var(--ts-ctx-border, var(--ts-skin-border, rgba(255,255,255,.08)));
 }
 
 /* Label (non-interactive group label) */
@@ -10391,6 +11247,7 @@ html.dark .ts-ctx-separator,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Countdown
+// Countdown
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCountdown';
     const STYLE_ID = 'themestrap-countdown-styles';
@@ -10726,6 +11583,7 @@ html.dark .ts-ctx-separator,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Counter
+// Counter
 (((themestrap = {}, $) => {
     const instanceName = '__pluginCounter';
     const STYLE_ID = 'themestrap-counter-styles';
@@ -10813,7 +11671,7 @@ html.dark .ts-ctx-separator,
 
                     $el.text(self._format(current));
 
-                    if ($.isFunction(opts.onUpdate)) {
+                    if (typeof opts.onUpdate === 'function') {
                         opts.onUpdate.call($el[0], current);
                     }
                 }
@@ -10824,7 +11682,7 @@ html.dark .ts-ctx-separator,
                     self._running = false;
                     $el.text(self._format(to));
 
-                    if ($.isFunction(opts.onComplete)) {
+                    if (typeof opts.onComplete === 'function') {
                         opts.onComplete.call($el[0], to);
                     }
 
@@ -10838,7 +11696,7 @@ html.dark .ts-ctx-separator,
         _format(value) {
             const opts = this.options;
 
-            if ($.isFunction(opts.formatter)) {
+            if (typeof opts.formatter === 'function') {
                 return opts.formatter(value, opts);
             }
 
@@ -10975,20 +11833,26 @@ html.dark .ts-ctx-separator,
 })).apply(this, [window.themestrap, jQuery]);
 
 // CursorEffect
+
+// CursorEffect
 (((themestrap = {}, $) => {
-    const instanceName = '__cursorEffect';
+	const instanceName = '__cursorEffect';
 
-    class PluginCursorEffect {
-        constructor($el, opts) {
-            return this.initialize($el, opts);
-        }
+	// Each instance gets its own event namespace so destroy() only removes its own handlers.
+	let seq = 0;
 
-        initialize($el, opts) {
+	class PluginCursorEffect {
+		constructor($el, opts) {
+			return this.initialize($el, opts);
+		}
+
+		initialize($el, opts) {
 			if ($el.data(instanceName)) {
-				return this;
+				return $el.data(instanceName);
 			}
 
 			this.$el = $el;
+			this._ns = '.cursorEffect' + (++seq);
 
 			this
 				.setData()
@@ -10999,13 +11863,13 @@ html.dark .ts-ctx-separator,
 			return this;
 		}
 
-        setData() {
+		setData() {
 			this.$el.data(instanceName, this);
 
 			return this;
 		}
 
-        setOptions(opts) {
+		setOptions(opts) {
 			this.options = $.extend(true, {}, PluginCursorEffect.defaults, opts, {
 				wrapper: this.$el
 			});
@@ -11013,103 +11877,188 @@ html.dark .ts-ctx-separator,
 			return this;
 		}
 
-        build() {
+		build() {
 			const self = this;
 
-			// Global Variables for cursor position
 			self.clientX = -100;
 			self.clientY = -100;
+			self.isStuck = false;
+			self.isVisible = true;
 
-			// Hide Mouse Cursor
-			if( self.options.hideMouseCursor ) {
+			// Hide native mouse cursor.
+			if (self.options.hideMouseCursor) {
 				self.$el.addClass('hide-mouse-cursor');
 			}
 
-			// Creates the cursor wrapper node
-			const cursorOuter = document.createElement('DIV');
-				cursorOuter.className = 'cursor-outer';
+			// Creates the cursor outer node.
+			self.cursorOuter = document.createElement('div');
+			self.cursorOuter.className = 'cursor-outer';
 
-			// Creates the cursor inner node
-			const cursorInner = document.createElement('DIV');
-				cursorInner.className = 'cursor-inner';
+			// Creates the cursor inner node.
+			self.cursorInner = document.createElement('div');
+			self.cursorInner.className = 'cursor-inner';
 
-			// Custom Cursor Outer Color
-			if( self.options.cursorOuterColor ) {
-				cursorOuter.style = 'border-color: ' + self.options.cursorOuterColor + ';';
+			// Custom cursor outer color.
+			if (self.options.cursorOuterColor) {
+				self.cursorOuter.style.borderColor = self.options.cursorOuterColor;
 			}
 
-			// Custom Cursor Inner Color
-			if( self.options.cursorInnerColor ) {
-				cursorInner.style = 'background-color: ' + self.options.cursorInnerColor + ';';
+			// Custom cursor inner color.
+			if (self.options.cursorInnerColor) {
+				self.cursorInner.style.backgroundColor = self.options.cursorInnerColor;
 			}
 
-			// Size
-			if( self.options.size ) {
-				switch ( self.options.size ) {
-					case 'small':
-						self.$el.addClass( 'cursor-effect-size-small' );
-						break;
-					
-					case 'big':
-						self.$el.addClass( 'cursor-effect-size-big' );
-						break;
-				}
+			// Size.
+			self.applySize();
+
+			// Style.
+			if (self.options.style) {
+				self.$el.addClass(self.options.style);
 			}
 
-			// Style
-			if( self.options.style ) {
-				self.$el.addClass( self.options.style );
-			}
+			// Add cursor nodes to the document.
+			document.body.prepend(self.cursorOuter);
+			document.body.prepend(self.cursorInner);
 
-			// Prepend cursor wrapper node to the body
-			document.body.prepend( cursorOuter );
-
-			// Prepend cursor inner node to the body
-			document.body.prepend( cursorInner );
-
-			// Loop for render
+			// Render loop.
 			const render = () => {
-				cursorOuter.style.transform = 'translate('+ self.clientX +'px, '+ self.clientY +'px)';
-				cursorInner.style.transform = 'translate('+ self.clientX +'px, '+ self.clientY +'px)';
+				if (!self.cursorOuter || !self.cursorInner) {
+					return;
+				}
+
+				self.cursorOuter.style.transform =
+					'translate(' + self.clientX + 'px, ' + self.clientY + 'px)';
+
+				self.cursorInner.style.transform =
+					'translate(' + self.clientX + 'px, ' + self.clientY + 'px)';
 
 				self.loopInside = requestAnimationFrame(render);
 			};
+
 			self.loop = requestAnimationFrame(render);
 
 			return this;
 		}
 
-        events() {
-			const self = this, $cursorOuter = $('.cursor-outer'), $cursorInner = $('.cursor-inner');
+		applySize() {
+			const self = this;
 
-			const initialCursorOuterBox    = $cursorOuter[0].getBoundingClientRect(), initialCursorOuterRadius = $cursorOuter.css('border-radius');
+			self.$el.removeClass(
+				'cursor-effect-size-small cursor-effect-size-big'
+			);
 
-			// Update Cursor Position
-			document.addEventListener('mousemove', ({clientX, clientY}) => {
-				if( !self.isStuck ) {
+			switch (self.options.size) {
+				case 'small':
+					self.$el.addClass('cursor-effect-size-small');
+					break;
+
+				case 'big':
+					self.$el.addClass('cursor-effect-size-big');
+					break;
+			}
+
+			return this;
+		}
+
+		setSize(size) {
+			const allowedSizes = ['small', 'default', 'big'];
+
+			if (allowedSizes.indexOf(size) === -1) {
+				size = 'default';
+			}
+
+			this.options.size = size;
+			this.applySize();
+
+			return this;
+		}
+
+		show() {
+			const self = this;
+
+			if (self.cursorOuter) {
+				$(self.cursorOuter).removeClass('opacity-0');
+			}
+
+			if (self.cursorInner) {
+				$(self.cursorInner).removeClass('opacity-0');
+			}
+
+			self.isVisible = true;
+
+			return this;
+		}
+
+		hide() {
+			const self = this;
+
+			if (self.cursorOuter) {
+				$(self.cursorOuter).addClass('opacity-0');
+			}
+
+			if (self.cursorInner) {
+				$(self.cursorInner).addClass('opacity-0');
+			}
+
+			self.isVisible = false;
+
+			return this;
+		}
+
+		events() {
+			const self = this;
+			const $cursorOuter = $(self.cursorOuter);
+			const $cursorInner = $(self.cursorInner);
+
+			const initialCursorOuterBox =
+				self.cursorOuter.getBoundingClientRect();
+
+			const initialCursorOuterRadius =
+				$cursorOuter.css('border-radius');
+
+			// Update cursor position.
+			self._mousemoveHandler = ({ clientX, clientY }) => {
+				if (!self.isStuck) {
 					self.clientX = clientX - 20;
 					self.clientY = clientY - 20;
 				}
 
-				$cursorOuter.removeClass('opacity-0');
-			});
+				if (self.isVisible) {
+					$cursorOuter.removeClass('opacity-0');
+				}
+			};
 
-			self.isStuck = false;
-			$('[data-cursor-effect-hover]').on('mouseenter', function(e){
+			document.addEventListener(
+				'mousemove',
+				self._mousemoveHandler
+			);
 
-				// Identify Event With Hover Class
+			// Hover effects.
+			self._hoverSelector = '[data-cursor-effect-hover]';
+
+			self._mouseenterHandler = function () {
+				const $this = $(this);
+
 				$cursorOuter.addClass('cursor-outer-hover');
 				$cursorInner.addClass('cursor-inner-hover');
 
-				// Hover Color
-				const hoverColor = $(this).data('cursor-effect-hover-color');
-				$cursorOuter.addClass( 'cursor-color-' + hoverColor );
-				$cursorInner.addClass( 'cursor-color-' + hoverColor );
+				const hoverColor =
+					$this.data('cursor-effect-hover-color');
 
-				// Effect Types
-				switch ( $(this).data('cursor-effect-hover') ) {
-					case 'fit':
-						const thisBox = $(this)[0].getBoundingClientRect();
+				if (hoverColor) {
+					$cursorOuter.addClass(
+						'cursor-color-' + hoverColor
+					);
+
+					$cursorInner.addClass(
+						'cursor-color-' + hoverColor
+					);
+				}
+
+				switch ($this.data('cursor-effect-hover')) {
+					case 'fit': {
+						const thisBox =
+							$this[0].getBoundingClientRect();
 
 						self.clientX = thisBox.x;
 						self.clientY = thisBox.y;
@@ -11117,33 +12066,41 @@ html.dark .ts-ctx-separator,
 						$cursorOuter.css({
 							width: thisBox.width,
 							height: thisBox.height,
-							'border-radius': $(this).css('border-radius')
+							'border-radius': $this.css('border-radius')
 						}).addClass('cursor-outer-fit');
 
 						$cursorInner.addClass('opacity-0');
 
 						self.isStuck = true;
 						break;
+					}
 
 					case 'plus':
 						$cursorInner.addClass('cursor-inner-plus');
 						break;
 				}
-			});
+			};
 
-			$('[data-cursor-effect-hover]').on('mouseleave', function(){
-				
-				// Identify Event With Hover Class
+			self._mouseleaveHandler = function () {
+				const $this = $(this);
+
 				$cursorOuter.removeClass('cursor-outer-hover');
 				$cursorInner.removeClass('cursor-inner-hover');
 
-				// Remove Color Class
-				const hoverColor = $(this).data('cursor-effect-hover-color');
-				$cursorOuter.removeClass( 'cursor-color-' + hoverColor );
-				$cursorInner.removeClass( 'cursor-color-' + hoverColor );
+				const hoverColor =
+					$this.data('cursor-effect-hover-color');
 
-				// Effect Types
-				switch ( $(this).data('cursor-effect-hover') ) {
+				if (hoverColor) {
+					$cursorOuter.removeClass(
+						'cursor-color-' + hoverColor
+					);
+
+					$cursorInner.removeClass(
+						'cursor-color-' + hoverColor
+					);
+				}
+
+				switch ($this.data('cursor-effect-hover')) {
 					case 'fit':
 						$cursorOuter.css({
 							width: initialCursorOuterBox.width,
@@ -11157,58 +12114,183 @@ html.dark .ts-ctx-separator,
 						break;
 
 					case 'plus':
-						$cursorInner.removeClass('cursor-inner-plus');
+						$cursorInner.removeClass(
+							'cursor-inner-plus'
+						);
 						break;
 				}
-			});
+			};
 
-			$(window).on('scroll', () => {
-				if( $cursorOuter.hasClass('cursor-outer-fit') ) {
-					$cursorOuter.addClass('opacity-0').removeClass('cursor-outer-fit');
+			$(document)
+				.on(
+					'mouseenter' + self._ns,
+					self._hoverSelector,
+					self._mouseenterHandler
+				)
+				.on(
+					'mouseleave' + self._ns,
+					self._hoverSelector,
+					self._mouseleaveHandler
+				);
+
+			// If the cursor is stuck to an element, release it on scroll.
+			self._scrollHandler = () => {
+				if ($cursorOuter.hasClass('cursor-outer-fit')) {
+					$cursorOuter
+						.addClass('opacity-0')
+						.removeClass('cursor-outer-fit');
+
+					$cursorInner.removeClass('opacity-0');
+
+					self.isStuck = false;
 				}
-			});
+			};
+
+			$(window).on(
+				'scroll' + self._ns,
+				self._scrollHandler
+			);
 
 			return this;
 		}
 
-        destroy() {
+		destroy() {
 			const self = this;
 
-			self.$el.removeClass('hide-mouse-cursor cursor-effect-size-small cursor-effect-size-big cursor-effect-style-square');		
+			// Stop animation loop.
+			if (self.loop) {
+				cancelAnimationFrame(self.loop);
+			}
 
-			cancelAnimationFrame( self.loop );
-			cancelAnimationFrame( self.loopInside );
+			if (self.loopInside) {
+				cancelAnimationFrame(self.loopInside);
+			}
 
-			document.querySelector('.cursor-outer').remove();
-			document.querySelector('.cursor-inner').remove();
+			// Remove document events.
+			if (self._mousemoveHandler) {
+				document.removeEventListener(
+					'mousemove',
+					self._mousemoveHandler
+				);
+			}
 
-			self.$el.removeData( instanceName, self );
+			$(document).off(self._ns);
+			$(window).off(self._ns);
+
+			// Restore host element.
+			self.$el.removeClass(
+				'hide-mouse-cursor ' +
+				'cursor-effect-size-small ' +
+				'cursor-effect-size-big ' +
+				'cursor-effect-style-square'
+			);
+
+			// Remove cursor elements.
+			if (self.cursorOuter) {
+				self.cursorOuter.remove();
+			}
+
+			if (self.cursorInner) {
+				self.cursorInner.remove();
+			}
+
+			// Remove stored instance.
+			self.$el.removeData(instanceName);
+
+			self.cursorOuter = null;
+			self.cursorInner = null;
+
+			return this;
 		}
-    }
-
-    PluginCursorEffect.defaults = {
-
 	}
 
-    $.extend(themestrap, {
+	PluginCursorEffect.defaults = {
+		size: 'default',
+		hideMouseCursor: false,
+		cursorOuterColor: null,
+		cursorInnerColor: null,
+		style: null
+	};
+
+	$.extend(themestrap, {
 		PluginCursorEffect
 	});
 
-    $.fn.themestrapPluginCursorEffect = function(opts) {
-		return this.map(function() {
+	$.fn.themestrapPluginCursorEffect = function(opts) {
+		return this.map(function () {
 			const $this = $(this);
 
 			if ($this.data(instanceName)) {
 				return $this.data(instanceName);
-			} else {
-				return new PluginCursorEffect($this, opts);
 			}
 
+			return new PluginCursorEffect($this, opts);
 		});
-	}
+	};
+
 })).apply(this, [window.themestrap, jQuery]);
 
 // Dark Mode
+/**
+ * Themestrap Dark Mode Toggle
+ *
+ * Toggles light / dark theme on the document by adding or removing the
+ * `dark` class on the <html> element. Also sets a `data-theme` attribute 
+ * and `data-bs-theme` attribute so Bootstrap 5.3 native components pick 
+ * up the theme too.
+ *
+ * Resolution order on first paint:
+ *   1. localStorage[options.storageKey]            // explicit user choice
+ *   2. window.matchMedia('(prefers-color-scheme: dark)')
+ *   3. light
+ *
+ * The plugin runs its theme-apply step the moment the script executes
+ * (before DOMReady) so the correct class is on <html> as early as
+ * possible, minimizing flash-of-unstyled-content.
+ *
+ * Persistence:
+ *   - Manual clicks save to localStorage.
+ *   - Optionally also writes a cookie (off by default) so the server can
+ *     read the theme at render time. Enable by setting
+ *     `PluginDarkMode.defaults.cookieEnabled = true` before the first
+ *     instance is created. See the cookie* options below for tuning.
+ *   - Until a manual click has occurred, the page follows OS-level
+ *     `prefers-color-scheme` changes in real time.
+ *   - `storage` events propagate theme changes between tabs.
+ *
+ * Markup (auto-init via [data-plugin-darkmode]):
+ *   <button data-plugin-darkmode></button>
+ *
+ *   The plugin injects an SVG sun (light mode) or moon (dark mode) so the
+ *   icon reflects the *current* theme.
+ *
+ * Programmatic API:
+ *   themestrap.PluginDarkMode.getTheme()       // 'light' | 'dark'
+ *   themestrap.PluginDarkMode.setTheme('dark') // persist + apply
+ *   themestrap.PluginDarkMode.toggle()         // flip current theme
+ *   themestrap.PluginDarkMode.reset()          // clear override, follow OS
+ *   themestrap.PluginDarkMode.apply()          // re-run resolution order
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginDarkMode'] === 'function' && $('[data-plugin-darkmode]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-darkmode]:not(.manual)', 'themestrapPluginDarkMode');
+ *   }
+ *
+ * Optional FOUC-proof head snippet (place BEFORE any CSS in <head>):
+ *   <script>
+ *     (function(){
+ *       try {
+ *         var s = localStorage.getItem('themestrap-theme'),
+ *             d = matchMedia('(prefers-color-scheme: dark)').matches,
+ *             t = s || (d ? 'dark' : 'light'),
+ *             h = document.documentElement;
+ *         if (t === 'dark') h.classList.add('dark');
+ *         h.setAttribute('data-theme', t);
+ *         h.setAttribute('data-bs-theme', t);
+ *       } catch(e) {}
+ *     })();
+ *   </script>
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__darkMode';
 
@@ -11539,7 +12621,7 @@ html.dark .ts-ctx-separator,
         // (e.g. when MODX needs to know the theme at render time). When
         // enabled, every setTheme/toggle/reset call also writes (or clears)
         // the cookie alongside localStorage.
-        cookieEnabled:    true,
+        cookieEnabled:    false,
         cookieName:       'themestrap-theme',
         cookieMaxAge:     31536000,    // 1 year, in seconds
         cookiePath:       '/',
@@ -11577,6 +12659,69 @@ html.dark .ts-ctx-separator,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Dialog
+/**
+ * Themestrap Dialog Plugin
+ * Accessible, focus-trapped dialogs with backdrop, scroll-lock, and transition support.
+ * Part of the Themestrap component library for MODX 3
+ *
+ * Markup anatomy:
+ *
+ *   <!-- Trigger (anywhere in the DOM) -->
+ *   <button data-dialog-open="payment-dialog">Open</button>
+ *
+ *   <!-- Dialog root -->
+ *   <div data-plugin-dialog id="payment-dialog"
+ *        data-plugin-options='{"animationIn": "fadeInDown", "closeOnBackdrop": true}'>
+ *
+ *     <!-- Backdrop: click-to-close overlay -->
+ *     <div data-dialog-backdrop></div>
+ *
+ *     <!-- Panel: the visible card -->
+ *     <div data-dialog-panel>
+ *
+ *       <!-- Title & description wired to ARIA automatically -->
+ *       <h2 data-dialog-title>Confirm Payment</h2>
+ *       <p data-dialog-description>Review the details below before confirming.</p>
+ *
+ *       <!-- Any content here -->
+ *
+ *       <!-- Dedicated close trigger(s) inside the panel -->
+ *       <button data-dialog-close>Cancel</button>
+ *       <button data-dialog-close>Confirm</button>
+ *     </div>
+ *   </div>
+ *
+ * Public API (via stored instance):
+ *   const dlg = $('#payment-dialog').data('__pluginDialog');
+ *   dlg.open();
+ *   dlg.close();
+ *   dlg.toggle();
+ *
+ * Prompts (replace window.confirm and window.alert, no markup needed):
+ *   themestrap.PluginDialog.confirm({ title: 'Delete this post?', message: 'This cannot be undone.',
+ *                                     confirmLabel: 'Delete', cancelLabel: 'Keep it', danger: true })
+ *       .then(function (yes) { if (yes) { ... } });
+ *   themestrap.PluginDialog.alert({ title: 'Saved', message: 'Your changes are live.' })
+ *       .then(function () { ... });
+ *   Both return a Promise. confirm resolves true or false (Escape, backdrop and Cancel resolve false).
+ *   A plain string is shorthand for { message }. Text is inserted as text, never as HTML.
+ *   danger: true focuses Cancel instead of the confirm button and styles the confirm button as destructive.
+ *
+ * Events fired on the dialog root element:
+ *   dialog:open   — after open animation starts   (receives instance as arg)
+ *   dialog:close  — after close animation ends     (receives instance as arg)
+ *
+ * Init.js wiring (DOMReady-immediate — dialogs must be ready before any trigger fires):
+ *   if (typeof $.fn['themestrapPluginDialog'] === 'function' && $('[data-plugin-dialog]').length) {
+ *       $(() => {
+ *           $('[data-plugin-dialog]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginDialog(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginDialog';
 
@@ -11597,6 +12742,11 @@ html.dark .ts-ctx-separator,
     
     // Injected stylesheet — keyed to STYLE_ID so it runs only once per page
     const STYLE_ID = 'ts-dialog-styles';
+
+    // Open and close animations listen under their own namespace so a finished or
+    // abandoned animation can always be unbound (see _stopAnimation)
+    const ANIM_NS  = '.tsDialogAnim';
+    const ANIM_END = `animationend${ANIM_NS} webkitAnimationEnd${ANIM_NS}`;
     // CSS_TEXT is injected lazily by injectStyles() on first build (see below),
     // so loading this script never adds CSS to pages that don't use the plugin.
     const CSS_TEXT = `/**
@@ -11614,7 +12764,23 @@ html.dark .ts-ctx-separator,
  * .dialog-root.dialog-hidden      ← closed (display:none equivalent via CSS)
  * .dialog-root.dialog-is-open     ← open
  * body.dialog-scroll-lock         ← scroll disabled while a dialog is open
+ *
+ * Design tokens (override on :root or any ancestor):
+ * --ts-dlg-bg          panel background
+ * --ts-dlg-color       panel text color (unset = inherits the page color)
+ * --ts-dlg-text-muted  description text
+ * --ts-dlg-shadow      panel shadow
+ * --ts-dlg-backdrop    overlay color
+ * --ts-dlg-scrollbar   WebKit scrollbar thumb
  */
+:root {
+    --ts-dlg-bg         : var(--ts-skin-surface, #ffffff);
+    --ts-dlg-text-muted : var(--ts-skin-text-dim, #6b7280);
+    --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12));
+    --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.6));
+    --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.2));
+}
+
 .dialog-root {
     position: fixed;
     inset: 0;                  /* top/right/bottom/left: 0 */
@@ -11637,7 +12803,7 @@ html.dark .ts-ctx-separator,
     position: absolute;
     inset: 0;
     z-index: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--ts-dlg-backdrop);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
 
@@ -11655,11 +12821,10 @@ html.dark .ts-ctx-separator,
 [data-dialog-panel] {
     position: relative;         /* sit above backdrop */
     z-index: 1;
-    background: #fff;
+    background: var(--ts-dlg-bg);
+    color: var(--ts-dlg-color);
     border-radius: 0.75rem;
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.25),
-        0 4px  12px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--ts-dlg-shadow);
     padding: 2rem;
     width: 100%;
     max-width: 32rem;           /* ~512px — override with data-plugin-options if needed */
@@ -11669,7 +12834,7 @@ html.dark .ts-ctx-separator,
     /* Scrollbar styling (WebKit) */
     scrollbar-width: thin;
     &::-webkit-scrollbar       { width: 4px; }
-    &::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 2px; }
+    &::-webkit-scrollbar-thumb { background: var(--ts-dlg-scrollbar); border-radius: 2px; }
 }
 
 [data-dialog-title] {
@@ -11683,7 +12848,7 @@ html.dark .ts-ctx-separator,
 
 [data-dialog-description] {
     font-size: 0.9375rem;
-    color: #6b7280;
+    color: var(--ts-dlg-text-muted);
     margin-bottom: 1.5rem;
     line-height: 1.5;
 }
@@ -11800,18 +12965,49 @@ body.ts-scroll-lock {
     margin-bottom: 0.75rem;
 }
 
+/* Dark mode, tier 1: system preference */
 @media (prefers-color-scheme: dark) {
-    [data-dialog-panel] {
-        background: #1e2939;
-        color: #f3f4f6;
-        box-shadow:
-            0 20px 60px rgba(0, 0, 0, 0.55),
-            0 4px  12px rgba(0, 0, 0, 0.3);
+    :root {
+        --ts-dlg-bg         : var(--ts-skin-surface, #1e2939);
+        --ts-dlg-color      : var(--ts-skin-text, #f3f4f6);
+        --ts-dlg-text-muted : var(--ts-skin-text-dim, #9ca3af);
+        --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3));
+        --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.7));
+        --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
     }
+}
 
-    [data-dialog-description] {
-        color: #9ca3af;
-    }
+/* Dark mode, tier 2: explicit class or attribute (PluginDarkMode sets both on <html>) */
+html.dark,
+[data-bs-theme="dark"] {
+    --ts-dlg-bg         : var(--ts-skin-surface, #1e2939);
+    --ts-dlg-color      : var(--ts-skin-text, #f3f4f6);
+    --ts-dlg-text-muted : var(--ts-skin-text-dim, #9ca3af);
+    --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.3));
+    --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.7));
+    --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
+}
+
+/* Dark mode, tier 3: explicit light override on a system that prefers dark */
+[data-bs-theme="light"] {
+    --ts-dlg-bg         : var(--ts-skin-surface, #ffffff);
+    --ts-dlg-color      : initial;
+    --ts-dlg-text-muted : var(--ts-skin-text-dim, #6b7280);
+    --ts-dlg-shadow     : var(--ts-skin-shadow, 0 20px 60px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.12));
+    --ts-dlg-backdrop   : var(--ts-skin-overlay, rgba(0, 0, 0, 0.6));
+    --ts-dlg-scrollbar  : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.2));
+}
+
+/* Prompts built by PluginDialog.confirm() and PluginDialog.alert() */
+.ts-dlg-prompt [data-dialog-panel] { max-width: 26rem; padding: 1.5rem; }
+.ts-dlg-prompt [data-dialog-description] { margin-bottom: 0; white-space: pre-line; }
+.ts-dlg-prompt [data-dialog-description]:empty { display: none; }
+.ts-dlg-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
 }
 `;
 
@@ -11965,6 +13161,13 @@ body.ts-scroll-lock {
             const $el  = self.$el;
             const opts = self.options;
 
+            if (self._closing) {
+                // Opened again while the close animation was still running: cancel the close
+                // and keep the dialog up
+                self._closing = false;
+                self._stopAnimation();
+                return this;
+            }
             if (self.isOpen) return this;
             self.isOpen = true;
 
@@ -11985,17 +13188,9 @@ body.ts-scroll-lock {
                 .attr('aria-hidden', 'false');
 
             // Panel-level entrance animation
-            const $animTarget = self.$panel.length ? self.$panel : $el;
+            self._stopAnimation();
             if (opts.animationIn) {
-                $animTarget
-                    .addClass(`dialog-anim-enter ${opts.animationIn}`)
-                    .one('animationend webkitAnimationEnd', function () {
-                        $animTarget.removeClass(`dialog-anim-enter ${opts.animationIn}`);
-                    });
-
-                setTimeout(() => {
-                    $animTarget.removeClass(`dialog-anim-enter ${opts.animationIn}`);
-                }, opts.animationDuration + 50);
+                self._animate(`dialog-anim-enter ${opts.animationIn}`, () => self._stopAnimation());
             }
 
             // Focus management
@@ -12020,29 +13215,51 @@ body.ts-scroll-lock {
             const $el  = self.$el;
             const opts = self.options;
 
-            if (!self.isOpen) return this;
+            if (!self.isOpen || self._closing) return this;
+            self._closing = true;
 
             $el.off('keydown.dialog.trap');
-
-            const $animTarget = self.$panel.length ? self.$panel : $el;
+            self._stopAnimation();
 
             if (opts.animationOut) {
-                $animTarget
-                    .addClass(`dialog-anim-leave ${opts.animationOut}`)
-                    .one('animationend webkitAnimationEnd', function () {
-                        $animTarget.removeClass(`dialog-anim-leave ${opts.animationOut}`);
-                        self._finishClose();
-                    });
-
-                setTimeout(() => {
-                    $animTarget.removeClass(`dialog-anim-leave ${opts.animationOut}`);
-                    self._finishClose();
-                }, opts.animationDuration + 50);
+                self._animate(`dialog-anim-leave ${opts.animationOut}`, () => self._finishClose());
             } else {
                 self._finishClose();
             }
 
             return this;
+        }
+
+        // Runs a CSS animation on the panel and calls done once, when it ends or after
+        // animationDuration as a fallback. Only the panel's own animation counts, not ones
+        // bubbling up from content inside it.
+        _animate(classes, done) {
+            const $target = this.$panel.length ? this.$panel : this.$el;
+            let finished = false;
+            const finish = () => {
+                if (finished) return;
+                finished = true;
+                done();
+            };
+            this._animClasses = classes;
+            $target.addClass(classes).on(ANIM_END, function (e) {
+                if (e.target === this) finish();
+            });
+            this._animTimer = setTimeout(finish, this.options.animationDuration + 50);
+        }
+
+        // Removes the running animation's classes, listener and fallback timer. Without this a
+        // close whose fallback timer won would leave its listener behind, and the next open
+        // animation's animationend would close the dialog again straight away.
+        _stopAnimation() {
+            clearTimeout(this._animTimer);
+            this._animTimer = null;
+            const $target = this.$panel.length ? this.$panel : this.$el;
+            $target.off(ANIM_NS);
+            if (this._animClasses) {
+                $target.removeClass(this._animClasses);
+                this._animClasses = null;
+            }
         }
 
         toggle() {
@@ -12056,6 +13273,8 @@ body.ts-scroll-lock {
 
             if (!self.isOpen) return;
             self.isOpen = false;
+            self._closing = false;
+            self._stopAnimation();
 
             $el
                 .addClass('dialog-hidden')
@@ -12077,6 +13296,12 @@ body.ts-scroll-lock {
         }
 
         _focusFirst() {
+            // An element marked data-dialog-autofocus wins, so prompts can pick a safe default button
+            const $pref = this.$el.find('[data-dialog-autofocus]').first();
+            if ($pref.length) {
+                $pref.trigger('focus');
+                return;
+            }
             const focusable = this._focusable();
             if (focusable.length) {
                 focusable.first().trigger('focus');
@@ -12114,7 +13339,11 @@ body.ts-scroll-lock {
             const self = this;
             const $el  = self.$el;
 
-            if (self.isOpen) self.close();
+            // Close at once, an animated close would finish on a destroyed instance
+            if (self.isOpen) {
+                self._stopAnimation();
+                self._finishClose();
+            }
 
             $(document).off(`click.dialog.${self._uid}`);
             $(document).off(`keydown.dialog.${self._uid}`);
@@ -12128,6 +13357,68 @@ body.ts-scroll-lock {
             return this;
         }
     }
+
+    const PROMPT_DEFAULTS = {
+        title:           '',
+        message:         '',
+        confirmLabel:    'OK',
+        cancelLabel:     'Cancel',
+        danger:          false,       // destructive action: Cancel is focused first
+        closeOnBackdrop: true,
+        closeOnEscape:   true,
+        classes: {
+            confirm: 'btn btn-primary',
+            danger:  'btn btn-danger',
+            cancel:  'btn btn-light',
+            actions: ''
+        }
+    };
+
+    // Builds a throwaway dialog, resolves when it closes, then removes every trace of it
+    function prompt(kind, input) {
+        const o = $.extend(true, {}, PROMPT_DEFAULTS, typeof input === 'string' ? { message: input } : input);
+        if (!o.title) o.title = kind === 'alert' ? 'Notice' : 'Are you sure?';
+
+        return new Promise((resolve) => {
+            let result = false;
+
+            const $root  = $('<div data-plugin-dialog class="manual ts-dlg-prompt" role="alertdialog"></div>');
+            const $panel = $('<div data-dialog-panel></div>').appendTo($root);
+            $('<h2 data-dialog-title></h2>').text(o.title).appendTo($panel);
+            $('<p data-dialog-description></p>').text(o.message).appendTo($panel);
+
+            const $actions = $('<div class="ts-dlg-actions"></div>').addClass(o.classes.actions).appendTo($panel);
+            let $cancel = $();
+            if (kind === 'confirm') {
+                $cancel = $('<button type="button" data-dialog-close></button>')
+                    .addClass(o.classes.cancel).text(o.cancelLabel).appendTo($actions);
+            }
+            const $ok = $('<button type="button" data-dialog-ok></button>')
+                .addClass(o.danger ? o.classes.danger : o.classes.confirm).text(o.confirmLabel).appendTo($actions);
+
+            // Safe default focus: Cancel for destructive prompts, otherwise the confirm button
+            ($cancel.length && o.danger ? $cancel : $ok).attr('data-dialog-autofocus', '');
+
+            $root.appendTo(document.body);
+            $root.themestrapPluginDialog({
+                closeOnBackdrop: o.closeOnBackdrop,
+                closeOnEscape:   o.closeOnEscape
+            });
+            const dlg = $root.data(instanceName);
+
+            $ok.on('click', () => { result = true; dlg.close(); });
+            $root.on('dialog:close', () => {
+                dlg.destroy();
+                $root.remove();
+                resolve(kind === 'alert' ? true : result);
+            });
+
+            dlg.open();
+        });
+    }
+
+    PluginDialog.confirm = (opts) => prompt('confirm', opts);
+    PluginDialog.alert   = (opts) => prompt('alert', opts);
 
     PluginDialog.defaults = {
         closeOnBackdrop  : true,    // close when [data-dialog-backdrop] is clicked
@@ -12156,6 +13447,60 @@ body.ts-scroll-lock {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Drawer
+/**
+ * Themestrap Drawer Plugin
+ * Accessible panel that slides in from any edge — bottom (default), top, left, or right.
+ * Supports backdrop, drag-to-dismiss via a grab handle, scroll-lock, and focus trapping.
+ * Part of the Themestrap component library for MODX 3.
+ *
+ * Markup anatomy:
+ *
+ *   <!-- Trigger (anywhere in the DOM) -->
+ *   <button data-drawer-open="my-drawer">Open</button>
+ *
+ *   <!-- Drawer root -->
+ *   <div data-plugin-drawer id="my-drawer"
+ *        data-plugin-options='{"direction": "bottom"}'>
+ *
+ *     <!-- Backdrop (auto-injected if omitted) -->
+ *     <div data-drawer-backdrop></div>
+ *
+ *     <!-- Panel -->
+ *     <div data-drawer-panel>
+ *
+ *       <!-- [data-drawer-handle] is auto-injected for bottom/top drawers.
+ *            Add it manually inside [data-drawer-panel] to control its position. -->
+ *
+ *       <h2 data-drawer-title>Drawer Title</h2>
+ *       <p  data-drawer-description>Optional description.</p>
+ *
+ *       <!-- Content -->
+ *
+ *       <button data-drawer-close>Close</button>
+ *     </div>
+ *   </div>
+ *
+ * Public API (via stored instance):
+ *   const drw = $('#my-drawer').data('__pluginDrawer');
+ *   drw.open();
+ *   drw.close();
+ *   drw.toggle();
+ *
+ * Events fired on the drawer root element:
+ *   drawer:open  — after the open transition starts  (receives instance as arg)
+ *   drawer:close — after the close transition ends   (receives instance as arg)
+ *
+ * Init.js wiring (DOMReady-immediate — drawers must be ready before any trigger fires):
+ *   if (typeof $.fn['themestrapPluginDrawer'] === 'function' && $('[data-plugin-drawer]').length) {
+ *       $(() => {
+ *           $('[data-plugin-drawer]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginDrawer(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginDrawer';
 
@@ -12206,23 +13551,22 @@ body.ts-scroll-lock {
  */
 
 :root {
-    --ts-drw-bg          : #ffffff;
-    --ts-drw-overlay     : rgba(0, 0, 0, 0.5);
-    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
-    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-radius      : 1rem;
-    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
-    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
-    --ts-drw-text-muted  : #6b7280;
+    --ts-drw-bg          : var(--ts-skin-surface, #ffffff);
+    --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.5));
+    --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06));
+    --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-radius      : var(--ts-skin-radius-lg, 1rem);
+    --ts-drw-handle      : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.18));
+    --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(0, 0, 0, 0.30));
+    --ts-drw-text-muted  : var(--ts-skin-text-dim, #6b7280);
     --ts-drw-max-h       : 85svh;
     --ts-drw-side-w      : min(380px, 85vw);
     --ts-drw-pad         : 1.5rem;
     --ts-drw-dur         : 320ms;
     --ts-drw-ease        : cubic-bezier(0.32, 0.72, 0, 1);
 }
-
 
 /* Root container */
 .drawer-root {
@@ -12237,7 +13581,6 @@ body.ts-scroll-lock {
         visibility     : hidden;
     }
 }
-
 
 /* Backdrop */
 [data-drawer-backdrop] {
@@ -12255,7 +13598,6 @@ body.ts-scroll-lock {
     }
 }
 
-
 /* Panel — shared base */
 [data-drawer-panel] {
     position            : absolute;
@@ -12268,9 +13610,8 @@ body.ts-scroll-lock {
     scrollbar-width     : thin;
 
     &::-webkit-scrollbar       { width: 4px; }
-    &::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.18); border-radius: 2px; }
+    &::-webkit-scrollbar-thumb { background: var(--ts-skin-border-strong, rgba(0, 0, 0, 0.18)); border-radius: 2px; }
 }
-
 
 /* Bottom drawer */
 .drawer-bottom [data-drawer-panel] {
@@ -12285,7 +13626,6 @@ body.ts-scroll-lock {
 }
 .drawer-bottom.drawer-open [data-drawer-panel] { transform: translateY(0); }
 
-
 /* Top drawer */
 .drawer-top [data-drawer-panel] {
     top           : 0;
@@ -12298,7 +13638,6 @@ body.ts-scroll-lock {
     transform     : translateY(-100%);
 }
 .drawer-top.drawer-open [data-drawer-panel] { transform: translateY(0); }
-
 
 /* Left drawer */
 .drawer-left [data-drawer-panel] {
@@ -12317,7 +13656,6 @@ body.ts-scroll-lock {
 }
 .drawer-left.drawer-open [data-drawer-panel] { transform: translateX(0); }
 
-
 /* Right drawer */
 .drawer-right [data-drawer-panel] {
     top           : 0;
@@ -12334,7 +13672,6 @@ body.ts-scroll-lock {
     transform     : translateX(100%);
 }
 .drawer-right.drawer-open [data-drawer-panel] { transform: translateX(0); }
-
 
 /* Drag handle — renders as a sticky full-width bar with a centred pill */
 [data-drawer-handle] {
@@ -12389,7 +13726,6 @@ body.ts-scroll-lock {
     display : none;
 }
 
-
 /* Typography helpers */
 [data-drawer-title] {
     font-size    : 1.25rem;
@@ -12407,65 +13743,62 @@ body.ts-scroll-lock {
     line-height  : 1.5;
 }
 
-
 /* Scroll-lock utility — shared with PluginDialog; redundant definition is harmless */
 body.ts-scroll-lock {
     overflow      : hidden;
     padding-right : var(--ts-scrollbar-width, 0px);
 }
 
-
 /* Dark mode — tier 1: system preference */
 @media (prefers-color-scheme: dark) {
     :root {
-        --ts-drw-bg          : #1e2939;
-        --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
-        --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
-        --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
-        --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
-        --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
-        --ts-drw-handle      : rgba(255, 255, 255, 0.22);
-        --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
-        --ts-drw-text-muted  : #9ca3af;
+        --ts-drw-bg          : var(--ts-skin-surface, #1e2939);
+        --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.70));
+        --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.45));
+        --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.45));
+        --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.45));
+        --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.45));
+        --ts-drw-handle      : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.22));
+        --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(255, 255, 255, 0.38));
+        --ts-drw-text-muted  : var(--ts-skin-text-dim, #9ca3af);
     }
 
     [data-drawer-panel]::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.15);
+        background: var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
     }
 }
 
 /* Dark mode — tier 2: explicit class/attribute */
 html.dark,
 [data-bs-theme="dark"] {
-    --ts-drw-bg          : #1e2939;
-    --ts-drw-overlay     : rgba(0, 0, 0, 0.70);
-    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.45);
-    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.45);
-    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.45);
-    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.45);
-    --ts-drw-handle      : rgba(255, 255, 255, 0.22);
-    --ts-drw-handle-hover: rgba(255, 255, 255, 0.38);
-    --ts-drw-text-muted  : #9ca3af;
+    --ts-drw-bg          : var(--ts-skin-surface, #1e2939);
+    --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.70));
+    --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.45));
+    --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.45));
+    --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.45));
+    --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.45));
+    --ts-drw-handle      : var(--ts-skin-border-strong, rgba(255, 255, 255, 0.22));
+    --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(255, 255, 255, 0.38));
+    --ts-drw-text-muted  : var(--ts-skin-text-dim, #9ca3af);
 }
 
 html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 [data-bs-theme="dark"] [data-drawer-panel]::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--ts-skin-border-strong, rgba(255, 255, 255, 0.15));
 }
 
 /* Dark mode — tier 3: explicit light override */
 [data-bs-theme="light"] {
-    --ts-drw-bg          : #ffffff;
-    --ts-drw-overlay     : rgba(0, 0, 0, 0.50);
-    --ts-drw-shadow-b    : 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06);
-    --ts-drw-shadow-t    : 0  4px 32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-l    : 4px  0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-shadow-r    : -4px 0  32px rgba(0, 0, 0, 0.12);
-    --ts-drw-handle      : rgba(0, 0, 0, 0.18);
-    --ts-drw-handle-hover: rgba(0, 0, 0, 0.30);
-    --ts-drw-text-muted  : #6b7280;
+    --ts-drw-bg          : var(--ts-skin-surface, #ffffff);
+    --ts-drw-overlay     : var(--ts-skin-overlay, rgba(0, 0, 0, 0.50));
+    --ts-drw-shadow-b    : var(--ts-skin-shadow, 0 -4px 32px rgba(0, 0, 0, 0.12), 0 -1px 4px rgba(0, 0, 0, 0.06));
+    --ts-drw-shadow-t    : var(--ts-skin-shadow, 0  4px 32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-l    : var(--ts-skin-shadow, 4px  0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-shadow-r    : var(--ts-skin-shadow, -4px 0  32px rgba(0, 0, 0, 0.12));
+    --ts-drw-handle      : var(--ts-skin-border-strong, rgba(0, 0, 0, 0.18));
+    --ts-drw-handle-hover: var(--ts-skin-text-dim, rgba(0, 0, 0, 0.30));
+    --ts-drw-text-muted  : var(--ts-skin-text-dim, #6b7280);
 }
-
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -12499,6 +13832,7 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             this.$handle        = null;
             this.$previousFocus = null;
             this.isOpen         = false;
+            this._closing       = false;      // close transition running; open() can still reverse it
             this._uid           = uid('drawer');
             this._drag          = null;
             this._closeTimer    = null;
@@ -12533,7 +13867,8 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             const dir  = opts.direction;
 
             // ARIA role and modal flag
-            if (!$el.attr('role')) $el.attr('role', 'dialog');
+            self._addedRole = !$el.attr('role');
+            if (self._addedRole) $el.attr('role', 'dialog');
             $el.attr('aria-modal', 'true');
 
             // Auto-wire title → aria-labelledby
@@ -12558,6 +13893,7 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
                 if (!self.$backdrop.length) {
                     self.$backdrop = $('<div data-drawer-backdrop></div>');
                     $el.prepend(self.$backdrop);
+                    self._injectedBackdrop = true;
                 }
             }
 
@@ -12568,6 +13904,7 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             if (opts.showHandle && (dir === 'bottom' || dir === 'top')) {
                 self.$handle = $el.find('[data-drawer-handle]');
                 if (!self.$handle.length) {
+                    self._injectedHandle = true;
                     self.$handle = $('<div data-drawer-handle role="presentation"></div>');
                     if (dir === 'bottom') {
                         self.$panel.prepend(self.$handle);
@@ -12651,7 +13988,7 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             const handleEl = self.$handle[0];
             const isVert   = dir === 'bottom' || dir === 'top';
 
-            handleEl.addEventListener('pointerdown', function (e) {
+            const onDown = function (e) {
                 if (!self.isOpen) return;
 
                 // Capture so pointermove/up keep firing even outside the handle
@@ -12669,9 +14006,9 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 
                 // Disable CSS transition while dragging for a 1:1 feel
                 $panel.css('transition', 'none');
-            });
+            };
 
-            handleEl.addEventListener('pointermove', function (e) {
+            const onMove = function (e) {
                 if (!self._drag) return;
 
                 const d   = self._drag;
@@ -12682,8 +14019,8 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
                 let raw = isVert ? (e.clientY - d.startY) : (e.clientX - d.startX);
 
                 // Clamp: only allow movement toward the dismiss edge
-                if (dir === 'bottom' && raw < 0) raw = 0;
-                if (dir === 'top'    && raw > 0) raw = 0;
+                if ((dir === 'bottom' || dir === 'right') && raw < 0) raw = 0;
+                if ((dir === 'top'    || dir === 'left')  && raw > 0) raw = 0;
 
                 d.delta = raw;
 
@@ -12702,9 +14039,9 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
                     ? `translateY(${raw}px)`
                     : `translateX(${raw}px)`
                 );
-            });
+            };
 
-            handleEl.addEventListener('pointerup', function () {
+            const onUp = function () {
                 if (!self._drag) return;
 
                 const d        = self._drag;
@@ -12724,33 +14061,35 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
                     // Continue animating from the current drag position to fully off-screen.
                     // The panel already has an inline transform from the drag — the transition
                     // will now run from there to the destination.
-                    const sign = (dir === 'bottom') ? 1 : -1;
+                    const sign = (dir === 'bottom' || dir === 'right') ? 1 : -1;
                     const dest = isVert
                         ? `translateY(${sign * size}px)`
                         : `translateX(${sign * size}px)`;
 
                     $panel.css('transform', dest);
 
-                    // Fade the backdrop out in sync by removing drawer-open
-                    $el.removeClass('drawer-open');
-
-                    // Schedule DOM cleanup after the transition finishes
-                    clearTimeout(self._closeTimer);
-                    self._closeTimer = setTimeout(() => {
-                        self._finishClose();
-                    }, opts.transitionDuration + 50);
+                    // The regular close path fades the backdrop, drops the focus
+                    // trap and schedules the cleanup
+                    self.close();
 
                 } else {
                     // Snap the panel back to the fully-open position
                     $panel.css('transform', '');
                 }
-            });
+            };
 
-            handleEl.addEventListener('pointercancel', function () {
+            const onCancel = function () {
                 if (!self._drag) return;
                 self._drag = null;
                 $panel.css({ transition: '', transform: '' });
-            });
+            };
+
+            handleEl.addEventListener('pointerdown',   onDown);
+            handleEl.addEventListener('pointermove',   onMove);
+            handleEl.addEventListener('pointerup',     onUp);
+            handleEl.addEventListener('pointercancel', onCancel);
+
+            self._dragListeners = { el: handleEl, onDown, onMove, onUp, onCancel };
         }
 
         open() {
@@ -12759,15 +14098,21 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             const opts = self.options;
 
             if (self.isOpen) return this;
-            self.isOpen = true;
 
-            // Cancel any pending close-cleanup from a prior close() call
+            // Opening again while the close transition runs: cancel the pending
+            // cleanup and slide back in. Focus restore keeps its original target.
+            const reopening = self._closing;
+            self._closing = false;
+            self.isOpen   = true;
+
             clearTimeout(self._closeTimer);
 
             // Clear any leftover inline transform from a drag-dismiss
             self.$panel.css('transform', '');
 
-            self.$previousFocus = $(document.activeElement);
+            if (!reopening) {
+                self.$previousFocus = $(document.activeElement);
+            }
 
             if (opts.scrollLock) {
                 $('body').addClass('ts-scroll-lock');
@@ -12790,7 +14135,7 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             setTimeout(() => self._focusFirst(), 50);
 
             // Focus trap
-            $el.on('keydown.drawer.trap', (e) => {
+            $el.off('keydown.drawer.trap').on('keydown.drawer.trap', (e) => {
                 if (e.key === 'Tab' || e.keyCode === 9) {
                     self._trapFocus(e);
                 }
@@ -12808,6 +14153,8 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             const opts = self.options;
 
             if (!self.isOpen) return this;
+            self.isOpen   = false;
+            self._closing = true;
 
             $el.off('keydown.drawer.trap');
 
@@ -12833,9 +14180,9 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             const $el  = self.$el;
             const opts = self.options;
 
-            // Guard: open() may have been called during the close transition
-            if (!self.isOpen) return;
-            self.isOpen = false;
+            // Guard: open() may have reversed the close during the transition
+            if (!self._closing) return;
+            self._closing = false;
 
             // Clear any inline transform set by a drag-dismiss
             self.$panel.css('transform', '');
@@ -12899,18 +14246,35 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 
             clearTimeout(self._closeTimer);
 
-            if (self.isOpen) {
-                self.isOpen = false;
-                $('body').removeClass('ts-scroll-lock');
+            if (self.isOpen || self._closing) {
+                self.isOpen   = false;
+                self._closing = false;
+                if (self.options.scrollLock) $('body').removeClass('ts-scroll-lock');
             }
+
+            if (self._dragListeners) {
+                const d = self._dragListeners;
+                d.el.removeEventListener('pointerdown',   d.onDown);
+                d.el.removeEventListener('pointermove',   d.onMove);
+                d.el.removeEventListener('pointerup',     d.onUp);
+                d.el.removeEventListener('pointercancel', d.onCancel);
+                self._dragListeners = null;
+            }
+            self._drag = null;
+
+            if (self._injectedHandle && self.$handle)     self.$handle.remove();
+            if (self._injectedBackdrop && self.$backdrop) self.$backdrop.remove();
+            if (self.$panel) self.$panel.css({ transform: '', transition: '' });
 
             $(document).off(`click.drawer.${self._uid}`);
             $(document).off(`keydown.drawer.${self._uid}`);
             $el.off('.drawer');
 
+            if (self._addedRole) $el.removeAttr('role');
+
             $el
                 .removeData(instanceName)
-                .removeAttr('role aria-modal aria-hidden aria-labelledby aria-describedby tabindex')
+                .removeAttr('aria-modal aria-hidden aria-labelledby aria-describedby tabindex')
                 .removeClass('drawer-root drawer-hidden drawer-is-open drawer-open drawer-bottom drawer-top drawer-left drawer-right');
 
             return this;
@@ -12947,8 +14311,15 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Float Element
+// Float Element
 (((themestrap = {}, $) => {
     const instanceName = '__floatElement';
+
+    let _instanceCounter = 0;
+
+    function lerp(a, b, t) {
+        return a + (b - a) * Math.max(0, Math.min(1, t));
+    }
 
     class PluginFloatElement {
         constructor($el, opts) {
@@ -12956,155 +14327,323 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
         }
 
         initialize($el, opts) {
-			if ($el.data(instanceName)) {
-				return this;
-			}
+            if ($el.data(instanceName)) {
+                return this;
+            }
 
-			this.$el = $el;
+            this.$el         = $el;
+            this._uid        = ++_instanceCounter;
+            this._inView     = false;
+            this._paused     = false;
+            this._ticking    = false;
+            this._rafId      = null;
+            this._active     = false;
+            this._lastScrollY = window.scrollY || 0;
 
-			this
-				.setData()
-				.setOptions(opts)
-				.build();
-
-			return this;
-		}
-
-        setData() {
-			this.$el.data(instanceName, this);
-
-			return this;
-		}
-
-        setOptions(opts) {
-			this.options = $.extend(true, {}, PluginFloatElement.defaults, opts, {
-				wrapper: this.$el
-			});
-
-			return this;
-		}
-
-        build() {
-            const self = this;
-            const $el = this.options.wrapper;
-            const $window = $(window);
-            let minus;
-
-            // If has floating elements inside a SVG. 
-            // Intersection Observer API do not check elements inside SVG's, so we need initialize trough top parent SVG
-            if( $el.data('plugin-float-element-svg') ) {
-				$el.find('[data-plugin-float-element]').each(function(){
-                    const $this = $(this);
-                    let opts;
-
-                    const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
-                    if (pluginOptions)
-						opts = pluginOptions;
-
-                    $this.themestrapPluginFloatElement(opts);
-                });
-
-				return this;
-			}
-
-            if( self.options.style ) {
-				$el.attr('style', self.options.style);
-			}
-
-            if( $window.width() > self.options.minWindowWidth ) {
-
-				// Set Start Position
-				if( self.options.startPos == 'none' ) {
-					minus = '';
-				} else if( self.options.startPos == 'top' ) {
-					$el.css({
-						top: 0
-					});
-					minus = '';
-				} else {
-					$el.css({
-						bottom: 0
-					});
-					minus = '-';
-				}
-
-				// Set Transition
-				if( self.options.transition ) {
-					$el.css({
-						transition: 'ease-out transform '+ self.options.transitionDuration +'ms ' + self.options.transitionDelay + 'ms'
-					});
-				}
-
-				// First Load
-				self.movement(minus);	
-
-				// Scroll
-				$window.on('scroll', () => {
-					self.movement(minus);				   
-				});
-
-			}
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
 
             return this;
         }
 
-        movement(minus) {
-			const self = this, $el = this.options.wrapper, $window = $(window), scrollTop = $window.scrollTop(), elementOffset = $el.offset().top, currentElementOffset = (elementOffset - scrollTop), factor = ( self.options.isInsideSVG ) ? 2 : 100;
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
 
-		   	const scrollPercent = factor * currentElementOffset / ($window.height());
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginFloatElement.defaults, opts, {
+                wrapper: this.$el
+            });
+            return this;
+        }
 
-		   	if( $el.visible( true ) ) {
+        build() {
+            const self = this;
+            const opts = self.options;
+            const $el  = opts.wrapper;
 
-		   		if( !self.options.horizontal ) {
+            /* SVG child delegation — IO cannot observe inside SVGs so the parent element
+               gets data-plugin-float-element-svg and delegates to each child */
+            if ($el.data('plugin-float-element-svg')) {
+                $el.find('[data-plugin-float-element]').each(function () {
+                    const $child     = $(this);
+                    const childOpts  = themestrap.fn.getOptions($child.data('plugin-options'));
+                    $child.themestrapPluginFloatElement(childOpts || undefined);
+                });
+                return this;
+            }
 
-		   			$el.css({
-			   			transform: 'translate3d(0, '+ minus + scrollPercent / self.options.speed +'%, 0)'
-			   		});
+            /* Respect prefers-reduced-motion */
+            if (opts.respectReducedMotion &&
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return this;
+            }
 
-		   		} else {
+            /* Skip on narrow viewports */
+            if ($(window).width() <= opts.minWindowWidth) {
+                return this;
+            }
 
-		   			$el.css({
-			   			transform: 'translate3d('+ minus + scrollPercent / self.options.speed +'%, 0, 0)'
-			   		});
+            /* Legacy arbitrary style override */
+            if (opts.style) {
+                $el.attr('style', opts.style);
+            }
 
-		   		}
-		   		
-		   	}
+            /* CSS positioning for absolutely-placed decorative elements */
+            if (opts.startPos === 'top') {
+                $el.css({ top: '0px' });
+            } else if (opts.startPos === 'bottom') {
+                $el.css({ bottom: '0px' });
+            }
 
-		}
+            /* will-change hint for GPU compositing */
+            $el.css('will-change', 'transform');
+
+            /* Optional CSS transition to smooth between scroll ticks */
+            if (opts.transition) {
+                const dur   = opts.transitionDuration + 'ms';
+                const delay = opts.transitionDelay   + 'ms';
+                let   tx    = 'transform ' + dur + ' ease-out ' + delay;
+                if (opts.opacity !== false) {
+                    tx += ', opacity ' + dur + ' ease-out ' + delay;
+                }
+                $el.css('transition', tx);
+            }
+
+            /* IntersectionObserver — sets _inView without polling */
+            if ('IntersectionObserver' in window) {
+                self._observer = new IntersectionObserver(entries => {
+                    self._inView = entries[0].isIntersecting;
+                }, { rootMargin: '20% 0px 20% 0px' });
+                self._observer.observe($el[0]);
+            } else {
+                self._inView = true;
+            }
+
+            self._active = true;
+
+            /* Seed position on build so there is no pop on first scroll */
+            self._move();
+
+            return this;
+        }
+
+        events() {
+            const self = this;
+
+            if (!self._active) return this;
+
+            $(window).on('scroll.floatelement.' + self._uid, () => {
+                if (self._paused || self._ticking) return;
+                self._ticking = true;
+                self._rafId = requestAnimationFrame(() => {
+                    self._move();
+                    self._ticking = false;
+                });
+            });
+
+            return this;
+        }
+
+        /* Compute all transforms and apply them */
+        _move() {
+            const self = this;
+            const opts = self.options;
+            const $el  = opts.wrapper;
+
+            if (!self._inView) return;
+
+            /* Scroll-direction gate */
+            const currentScrollY = window.scrollY || $(window).scrollTop();
+            const scrollingDown  = currentScrollY >= self._lastScrollY;
+            self._lastScrollY    = currentScrollY;
+
+            if (opts.scrollDirection === 'down' && !scrollingDown) return;
+            if (opts.scrollDirection === 'up'   &&  scrollingDown) return;
+
+            /* scrollPercent — 100 at the element's natural top,
+               falling as the user scrolls the element into view.
+               The SVG factor keeps animated SVG children in a tighter range. */
+            const factor      = opts.isInsideSVG ? 2 : 100;
+            const $win        = $(window);
+            const elTop       = $el.offset().top;
+            const winTop      = $win.scrollTop();
+            const scrollPct   = factor * (elTop - winTop) / $win.height();
+
+            /* Normalized 0–1 for interpolated transforms */
+            const t           = Math.max(0, Math.min(1, scrollPct / 100));
+
+            /* Direction: startPos:'bottom' historically inverted the sign;
+               invertDirection flips whatever the base direction is */
+            const baseDir     = opts.startPos === 'bottom' ? -1 : 1;
+            const dir         = opts.invertDirection ? -baseDir : baseDir;
+
+            /* Primary translation */
+            let translateVal  = dir * scrollPct / opts.speed;
+            if (opts.clamp !== false) {
+                const cap    = Math.abs(opts.clamp);
+                translateVal = Math.max(-cap, Math.min(cap, translateVal));
+            }
+
+            /* Build transform string */
+            const transforms = [];
+            const result     = {};
+
+            if (!opts.horizontal) {
+                transforms.push('translate3d(0, ' + translateVal + '%, 0)');
+                result.translateY = translateVal;
+            } else {
+                transforms.push('translate3d(' + translateVal + '%, 0, 0)');
+                result.translateX = translateVal;
+            }
+
+            if (Array.isArray(opts.scale)) {
+                const scaleVal = lerp(opts.scale[0], opts.scale[1], t);
+                transforms.push('scale(' + scaleVal + ')');
+                result.scale = scaleVal;
+            }
+
+            if (Array.isArray(opts.rotate)) {
+                const rotateVal = lerp(opts.rotate[0], opts.rotate[1], t);
+                transforms.push('rotate(' + rotateVal + 'deg)');
+                result.rotate = rotateVal;
+            }
+
+            if (Array.isArray(opts.skew)) {
+                const skewVal = lerp(opts.skew[0], opts.skew[1], t);
+                transforms.push('skewX(' + skewVal + 'deg)');
+                result.skew = skewVal;
+            }
+
+            $el.css('transform', transforms.join(' '));
+
+            /* Opacity */
+            if (Array.isArray(opts.opacity)) {
+                const opacityVal = lerp(opts.opacity[0], opts.opacity[1], t);
+                $el.css('opacity', opacityVal);
+                result.opacity = opacityVal;
+            }
+
+            if (typeof opts.onMove === 'function') {
+                opts.onMove.call($el[0], scrollPct, result);
+            }
+        }
+
+        /* Public API */
+
+        pause() {
+            this._paused = true;
+            return this;
+        }
+
+        resume() {
+            this._paused = false;
+            this._move();
+            return this;
+        }
+
+        recalculate() {
+            this._move();
+            return this;
+        }
+
+        destroy() {
+            const self = this;
+            const $el  = self.options.wrapper;
+
+            $(window).off('scroll.floatelement.' + self._uid);
+
+            if (self._rafId !== null) {
+                cancelAnimationFrame(self._rafId);
+                self._rafId = null;
+            }
+
+            if (self._observer) {
+                self._observer.disconnect();
+                self._observer = null;
+            }
+
+            $el.css({
+                transform:    '',
+                transition:   '',
+                opacity:      '',
+                'will-change': '',
+                top:          '',
+                bottom:       '',
+            });
+
+            $el.removeData(instanceName);
+
+            return this;
+        }
     }
 
     PluginFloatElement.defaults = {
-		startPos: 'top',
-		speed: 3,
-		horizontal: false,
-		isInsideSVG: false,
-		transition: false,
-		transitionDelay: 0,
-		transitionDuration: 500,
-		minWindowWidth: 991
-	};
+        /* Movement */
+        speed:                3,        // divisor — larger value = subtler movement
+        horizontal:           false,    // true → translate on X axis instead of Y
+        invertDirection:      false,    // flip the translation direction
+        startPos:             'top',    // 'top' | 'bottom' | 'none' — sets initial CSS position on the element
 
-    // expose to scope
+        /* Viewport gate */
+        minWindowWidth:       991,      // plugin is inactive below this viewport width (px)
+
+        /* Additional transforms — each accepts false or a [from, to] tuple,
+           interpolated 0–1 across the normalised scroll position */
+        opacity:              false,    // e.g. [1, 0]  — fade out as element scrolls up
+        scale:                false,    // e.g. [1, 1.2]
+        rotate:               false,    // e.g. [0, 30] (degrees)
+        skew:                 false,    // e.g. [0, 8]  (degrees, applied as skewX)
+
+        /* Clamping */
+        clamp:                false,    // max absolute translation in %; false = unlimited
+
+        /* Smoothing */
+        transition:           false,    // add a CSS transition to ease between ticks
+        transitionDuration:   500,      // ms
+        transitionDelay:      0,        // ms
+
+        /* Scroll direction filter */
+        scrollDirection:      'both',   // 'both' | 'down' | 'up'
+
+        /* Accessibility */
+        respectReducedMotion: true,     // honour prefers-reduced-motion
+
+        /* SVG child delegation */
+        isInsideSVG:          false,
+        style:                null,     // arbitrary inline style applied before plugin runs
+
+        /* Callback */
+        onMove:               null,     // (scrollPct: number, transforms: object) => void
+    };
+
     $.extend(themestrap, {
-		PluginFloatElement
-	});
+        PluginFloatElement
+    });
 
-    // jquery plugin
     $.fn.themestrapPluginFloatElement = function(opts) {
-		return this.map(function() {
-			const $this = $(this);
+        return this.map(function() {
+            const $this = $(this);
+            const inst  = $this.data(instanceName);
 
-			if ($this.data(instanceName)) {
-				return $this.data(instanceName);
-			} else {
-				return new PluginFloatElement($this, opts);
-			}
+            /* String command — e.g. $el.themestrapPluginFloatElement('pause') */
+            if (typeof opts === 'string') {
+                if (inst && typeof inst[opts] === 'function') {
+                    inst[opts]();
+                }
+                return $this;
+            }
 
-		});
-	}
+            return inst ? inst : new PluginFloatElement($this, opts);
+        });
+    };
 })).apply(this, [window.themestrap, jQuery]);
 
+// GDPR
 // GDPR
 (((themestrap = {}, $) => {
 
@@ -13470,6 +15009,122 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Syntax Highlight
+/**
+ * Themestrap Syntax Highlight Plugin
+ * Wraps highlight.js core with lazy ESM loading, language aliases, promise
+ * coalescing, line numbers, pre-highlighted lines, line selection and copy.
+ *
+ * Part of the Themestrap component library for MODX 3
+ *
+ * ATTRIBUTE API  (all attributes must live on the <pre> element)
+ *   data-plugin-highlight="modx"
+ *   data-plugin-highlight="javascript"
+ *     Canonical highlight.js language ID (or alias — see LANG_ALIASES below).
+ *     Omit or leave blank for plaintext (no coloring, line numbers still apply).
+ *
+ *   data-plugin-highlight-lines="1,3,5-8"
+ *     Comma-separated line numbers and/or inclusive ranges pre-marked with the
+ *     .hljs-ln-highlight-line / .hljs-ln-highlight-num classes (amber by default).
+ *     Applied after hljs runs — purely presentational, no effect on copy content.
+ *
+ *   data-plugin-highlight-hljs-config='{"tabReplace":"  "}'
+ *     JSON object forwarded to hljs.configure() before highlighting runs.
+ *     Any valid hljs configure key is accepted.
+ *
+ *   data-plugin-options='{"showCopy":true,"lineNumbers":true,"copyTimeout":800}'
+ *     Standard Themestrap options object. Accepts all PluginHighlight.defaults keys.
+ *     Individual data-plugin-highlight-* attrs take precedence over options in this bag.
+ *
+ *   id="my-block"
+ *     Line anchors use this as a prefix: my-block-L1, my-block-L2 …
+ *     A sequential id is auto-generated when absent: codeblock-1-L1, codeblock-1-L2 …
+ *
+ * ELEMENT NORMALIZATION
+ * The plugin always operates on a <pre> element. If the jQuery selector targets
+ * a <code> child or a wrapper <div>, the plugin locates the nearest <pre>,
+ * relocates any highlight data-* attrs, and uses the <pre> from that point on.
+ *
+ * RESILIENCE
+ * highlight.js core and per-language grammars are fetched from a CDN via dynamic
+ * import(). Those requests can fail (502 Bad Gateway, network drops, CSP blocks,
+ * timeouts). The plugin is designed to degrade gracefully rather than throw:
+ *   - Each import is wrapped in a per-attempt timeout and retried with backoff.
+ *   - A failed import is evicted from the in-flight cache so it is never "poisoned"
+ *     (a single transient 502 will not permanently disable highlighting).
+ *   - If core never loads, blocks still render as ESCAPED plaintext with line
+ *     numbers and copy intact — no raw-HTML injection, no thrown errors.
+ *   - After a hard core failure the loader backs off for a cooldown window to
+ *     avoid hammering a down CDN, then transparently retries later.
+ *
+ * CSS CUSTOM PROPERTIES
+ * All visual properties are exposed as --ts-highlight-* CSS custom properties,
+ * defined on :root. Override globally or scope to any ancestor element.
+ *
+ *   Code block
+ *     --ts-highlight-bg              Background of the <code> block.
+ *     --ts-highlight-color           Base text color inside the block.
+ *     --ts-highlight-border-radius   Border radius on bare <pre> elements.
+ *     --ts-highlight-padding         Padding inside <pre code.hljs>.
+ *
+ *   Header strip
+ *     --ts-highlight-header-bg       Background of .code-highlight-header.
+ *
+ *   Text selection
+ *     --ts-highlight-selection-bg    ::selection background inside a block.
+ *     --ts-highlight-selection-color ::selection text color inside a block.
+ *
+ *   Line-number gutter
+ *     --ts-highlight-ln-opacity      Opacity of line-number labels.
+ *     --ts-highlight-ln-gap          Right-margin / padding of the gutter.
+ *     --ts-highlight-ln-border-color Color of the gutter's right border.
+ *
+ *   Pre-marked / highlighted lines (data-plugin-highlight-lines)
+ *     --ts-highlight-marked-bg           Background tint on a marked code line.
+ *     --ts-highlight-marked-border-width Width of the left accent bar.
+ *     --ts-highlight-marked-border-color Color of the left accent bar.
+ *     --ts-highlight-marked-num-color    Number label color on a marked line.
+ *     --ts-highlight-marked-num-bg       Number label background on a marked line.
+ *
+ *   Copy button
+ *     --ts-highlight-copy-opacity        Resting opacity of the Copy button.
+ *     --ts-highlight-copy-hover-opacity  Hover opacity of the Copy button.
+ *     --ts-highlight-copy-top            Top offset of the Copy button.
+ *     --ts-highlight-copy-right          Right offset of the Copy button.
+ *     --ts-highlight-copy-success        Color used on "Copied!" confirmation.
+ *
+ *   Syntax token colours
+ *   (comment and tag swap in dark mode; the rest are mode-independent)
+ *     --ts-highlight-token-comment
+ *     --ts-highlight-token-tag
+ *     --ts-highlight-token-operator
+ *     --ts-highlight-token-variable
+ *     --ts-highlight-token-number
+ *     --ts-highlight-token-title
+ *     --ts-highlight-token-string
+ *     --ts-highlight-token-builtin
+ *     --ts-highlight-token-function
+ *     --ts-highlight-token-keyword
+ *     --ts-highlight-token-meta
+ *
+ * USAGE
+ *   <pre id="ex1"
+ *        data-plugin-highlight="javascript"
+ *        data-plugin-highlight-lines="3,7-9"
+ *        data-plugin-options='{"lineNumbers":true,"showCopy":true}'><code>
+ *       const greet = name => `Hello, ${name}!`;
+ *   </code></pre>
+ *
+ *   <script>
+ *     $('#ex1').themestrapPluginHighlight();
+ *   </script>
+ *
+ * Auto-init via themestrap.init.js (requires data-plugin-highlight on the <pre>):
+ *
+ *   if (typeof $.fn['themestrapPluginHighlight'] === 'function' && $('[data-plugin-highlight]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-highlight]:not(.manual)', 'themestrapPluginHighlight');
+ *   }
+ */
+// Syntax Highlight
 (((themestrap = {}, $) => {
     const instanceName = '__highlight';
  
@@ -13506,16 +15161,16 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
         /* Custom Property Definitions */
         :root {
             /* Code block */
-            --ts-highlight-bg:             var(--light-100, #f2f2f2);
-            --ts-highlight-color:          var(--dark--300, #383f45);
-            --ts-highlight-border-radius:  0.5em;
+            --ts-highlight-bg:             var(--ts-skin-code-bg, var(--light-100, #f2f2f2));
+            --ts-highlight-color:          var(--ts-skin-code-text, var(--dark--300, #383f45));
+            --ts-highlight-border-radius:  var(--ts-skin-radius, 0.5em);
             --ts-highlight-padding:        1em;
  
             /* Header strip (.code-highlight-header / .topfix) */
-            --ts-highlight-header-bg:      var(--dark--300, #383f45);
+            --ts-highlight-header-bg:      var(--ts-skin-code-bg, var(--dark--300, #383f45));
  
             /* Text selection inside a block */
-            --ts-highlight-selection-bg:    var(--light-inverse, #777);
+            --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, var(--light-inverse, #777));
             --ts-highlight-selection-color: var(--dark-inverse, #fff);
  
             /* Line-number gutter */
@@ -13535,68 +15190,68 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             --ts-highlight-copy-hover-opacity:  0.75;
             --ts-highlight-copy-top:            12px;
             --ts-highlight-copy-right:          10px;
-            --ts-highlight-copy-success:        #4caf50;
+            --ts-highlight-copy-success:        var(--ts-skin-success, #4caf50);
  
             /* Syntax token colours — light-mode defaults.
                Only comment, tag, and operator differ in dark mode;
                the remaining eight are identical across both themes. */
-            --ts-highlight-token-comment:  #b8b8b8;
-            --ts-highlight-token-tag:      #585858;
-            --ts-highlight-token-operator: #383838;
-            --ts-highlight-token-variable: #ab4642;
-            --ts-highlight-token-number:   #dc9656;
-            --ts-highlight-token-title:    #f7ca88;
-            --ts-highlight-token-string:   #a1b56c;
-            --ts-highlight-token-builtin:  #86c1b9;
-            --ts-highlight-token-function: #7cafc2;
-            --ts-highlight-token-keyword:  #ba8baf;
-            --ts-highlight-token-meta:     #a16946;
+            --ts-highlight-token-comment:  var(--ts-skin-code-comment, #b8b8b8);
+            --ts-highlight-token-tag:      var(--ts-skin-code-tag, #585858);
+            --ts-highlight-token-operator: var(--ts-skin-code-operator, #383838);
+            --ts-highlight-token-variable: var(--ts-skin-code-variable, #ab4642);
+            --ts-highlight-token-number:   var(--ts-skin-code-number, #dc9656);
+            --ts-highlight-token-title:    var(--ts-skin-code-title, #f7ca88);
+            --ts-highlight-token-string:   var(--ts-skin-code-string, #a1b56c);
+            --ts-highlight-token-builtin:  var(--ts-skin-code-builtin, #86c1b9);
+            --ts-highlight-token-function: var(--ts-skin-code-function, #7cafc2);
+            --ts-highlight-token-keyword:  var(--ts-skin-code-keyword, #ba8baf);
+            --ts-highlight-token-meta:     var(--ts-skin-code-meta, #a16946);
         }
  
         /* Dark mode — system preference */
         @media (prefers-color-scheme: dark) {
             :root {
-                --ts-highlight-bg:              #181818;
-                --ts-highlight-color:           #d8d8d8;
-                --ts-highlight-header-bg:       var(--dark-100, #16181b);
-                --ts-highlight-selection-bg:    #383838;
+                --ts-highlight-bg:              var(--ts-skin-code-bg, #181818);
+                --ts-highlight-color:           var(--ts-skin-code-text, #d8d8d8);
+                --ts-highlight-header-bg:       var(--ts-skin-code-bg, var(--dark-100, #16181b));
+                --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, #383838);
                 --ts-highlight-selection-color: #d8d8d8;
                 --ts-highlight-marked-bg:       rgba(229,192,123,.12);
                 --ts-highlight-marked-border-color: #e5c07b;
-                --ts-highlight-token-comment:   #585858;
-                --ts-highlight-token-tag:       #b8b8b8;
-                --ts-highlight-token-operator:  #d8d8d8;
+                --ts-highlight-token-comment:   var(--ts-skin-code-comment, #585858);
+                --ts-highlight-token-tag:       var(--ts-skin-code-tag, #b8b8b8);
+                --ts-highlight-token-operator:  var(--ts-skin-code-operator, #d8d8d8);
             }
         }
  
         /* Dark mode — explicit Bootstrap / Themestrap theme attribute */
         html.dark,
         [data-bs-theme="dark"] {
-            --ts-highlight-bg:              #181818;
-            --ts-highlight-color:           #d8d8d8;
-            --ts-highlight-header-bg:       var(--dark-100, #16181b);
-            --ts-highlight-selection-bg:    #383838;
+            --ts-highlight-bg:              var(--ts-skin-code-bg, #181818);
+            --ts-highlight-color:           var(--ts-skin-code-text, #d8d8d8);
+            --ts-highlight-header-bg:       var(--ts-skin-code-bg, var(--dark-100, #16181b));
+            --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, #383838);
             --ts-highlight-selection-color: #d8d8d8;
             --ts-highlight-marked-bg:       rgba(229,192,123,.12);
             --ts-highlight-marked-border-color: #e5c07b;
-            --ts-highlight-token-comment:   #585858;
-            --ts-highlight-token-tag:       #b8b8b8;
-            --ts-highlight-token-operator:  #d8d8d8;
+            --ts-highlight-token-comment:   var(--ts-skin-code-comment, #585858);
+            --ts-highlight-token-tag:       var(--ts-skin-code-tag, #b8b8b8);
+            --ts-highlight-token-operator:  var(--ts-skin-code-operator, #d8d8d8);
         }
  
         /* Explicit light override — restores :root defaults even inside a
            dark ancestor (e.g. a light card inside a dark page shell). */
         [data-bs-theme="light"] {
-            --ts-highlight-bg:              var(--light-100, #f2f2f2);
-            --ts-highlight-color:           var(--dark--300, #383f45);
-            --ts-highlight-header-bg:       var(--dark--300, #383f45);
-            --ts-highlight-selection-bg:    var(--light-inverse, #777);
+            --ts-highlight-bg:              var(--ts-skin-code-bg, var(--light-100, #f2f2f2));
+            --ts-highlight-color:           var(--ts-skin-code-text, var(--dark--300, #383f45));
+            --ts-highlight-header-bg:       var(--ts-skin-code-bg, var(--dark--300, #383f45));
+            --ts-highlight-selection-bg:    var(--ts-skin-accent-soft, var(--light-inverse, #777));
             --ts-highlight-selection-color: var(--dark-inverse, #fff);
             --ts-highlight-marked-bg:       rgba(229,192,123,.3);
             --ts-highlight-marked-border-color: #cfa85e;
-            --ts-highlight-token-comment:   #b8b8b8;
-            --ts-highlight-token-tag:       #585858;
-            --ts-highlight-token-operator:  #383838;
+            --ts-highlight-token-comment:   var(--ts-skin-code-comment, #b8b8b8);
+            --ts-highlight-token-tag:       var(--ts-skin-code-tag, #585858);
+            --ts-highlight-token-operator:  var(--ts-skin-code-operator, #383838);
         }
  
         /* === Code Block === */
@@ -13811,13 +15466,13 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
             color: var(--primary--300, #00aaff);
         }
         .hljs-ts-json.number_ {
-            color: #0288d1;
+            color: var(--ts-skin-code-number, #0288d1);
         }
         .hljs-ts-json.literal_ {
             color: blue;
         }
         .hljs-ts-json.punctuation_ {
-            color: #607d8b;
+            color: var(--ts-skin-code-operator, #607d8b);
         }
  
         /* Line Numbers */
@@ -13880,14 +15535,14 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
         }
  
         .hljs-copy-btn {
-            box-shadow: inset 0px 1px 0px 0px #ffffff;
+            box-shadow: var(--ts-skin-shadow, inset 0px 1px 0px 0px #ffffff);
             background: linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
-            background-color: #ffffff;
+            background-color: var(--ts-skin-code-bg, #ffffff);
             border-radius: 8px;
-            border: 1px solid #dcdcdc;
+            border: 1px solid var(--ts-skin-border, #dcdcdc);
             display: inline-block;
             cursor: pointer;
-            color: #666666;
+            color: var(--ts-skin-code-text, #666666);
             padding: 3px 10px;
             text-decoration: none;
             text-shadow: 0px 1px 0px #ffffff;
@@ -13900,7 +15555,7 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
  
         .hljs-copy-btn:hover {
             background: linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
-            background-color: #f6f6f6;
+            background-color: var(--ts-skin-code-bg, #f6f6f6);
             opacity: var(--ts-highlight-copy-hover-opacity);
         }
     `;
@@ -14576,6 +16231,74 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Hover Card
+/**
+ * Themestrap HoverCard Plugin
+ * Hover-triggered preview cards with delay, side-aware animations,
+ * auto-flip, portaling, optional arrow, and keyboard accessibility.
+ *
+ * Part of the Themestrap component library.
+ *
+ * Markup anatomy
+ *
+ *   <!-- Wrapper (the plugin root) -->
+ *   <div data-plugin-hovercard
+ *        data-plugin-options='{"side": "bottom", "delay": [200, 300]}'>
+ *
+ *     <!-- Trigger: any inline element -->
+ *     <a data-hovercard-trigger href="#">@daemon_devin</a>
+ *
+ *     <!-- Content panel: shown on hover -->
+ *     <div data-hovercard-content>
+ *       <div class="hc-avatar">
+ *         <img src="avatar.jpg" alt="daemon_devin">
+ *       </div>
+ *       <div class="hc-name">daemon.devin</div>
+ *       <div class="hc-handle">@daemon_devin</div>
+ *       <p class="hc-bio">Building Themestrap — a zero-build jQuery plugin ecosystem.</p>
+ *       <div class="hc-meta">
+ *         <span>128 <span class="hc-meta-label">Following</span></span>
+ *         <span>4.2k <span class="hc-meta-label">Followers</span></span>
+ *       </div>
+ *     </div>
+ *   </div>
+ *
+ * Options (data-plugin-options JSON or JS object)
+ *
+ *   side              "bottom"              where the card appears: top|bottom|left|right
+ *   align             "start"               alignment along the side axis: start|center|end
+ *   offset            12                    gap between trigger and card (px)
+ *   arrow             false                 show a pointing CSS arrow
+ *   portaling         false                 append content to <body> to escape overflow:hidden
+ *   delay             [200, 300]            [openDelayMs, closeDelayMs]; single number for both
+ *   animationDuration 180                   ms — fallback if animationend never fires
+ *   ariaLabel         "Hover card"          aria-label on the content panel
+ *   onShow            null                  callback(instance)
+ *   onHide            null                  callback(instance)
+ *
+ * Public API
+ *
+ *   const hc = $('#my-hovercard').data('__pluginHoverCard');
+ *   hc.show();
+ *   hc.hide();
+ *   hc.update();  // reposition without toggling visibility
+ *
+ * Events dispatched on [data-plugin-hovercard]  (native CustomEvent, bubbles)
+ *
+ *   ts.hovercard.show   — after card becomes visible   (detail: instance)
+ *   ts.hovercard.hide   — after card is hidden         (detail: instance)
+ *
+ * Init.js wiring
+ *
+ *   if (typeof $.fn['themestrapPluginHoverCard'] === 'function' && $('[data-plugin-hovercard]').length) {
+ *       $(() => {
+ *           $('[data-plugin-hovercard]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginHoverCard(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginHoverCard';
 
@@ -14596,15 +16319,15 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
     z-index: 9994;
     min-width: 240px;
     max-width: 340px;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--ts-hc-surface, var(--ts-skin-surface, #fff));
+    border: 1px solid var(--ts-hc-border, var(--ts-skin-border, rgba(0, 0, 0, 0.08)));
     border-radius: 0.625rem;
     box-shadow:
-        0 4px  6px -1px rgba(0, 0, 0, 0.07),
-        0 10px 15px -3px rgba(0, 0, 0, 0.10);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0, 0, 0, 0.07),
+        0 10px 15px -3px rgba(0, 0, 0, 0.10));
     padding: 1rem;
     line-height: 1.5;
-    color: #1a1a2e;
+    color: var(--ts-hc-text, var(--ts-skin-text, #1a1a2e));
     display: none;
     pointer-events: none;
 }
@@ -14650,51 +16373,51 @@ html.dark [data-drawer-panel]::-webkit-scrollbar-thumb,
     display: block;
 }
 
-[data-hovercard-content].ts-hc-side-top::after    { top:  100%;                border-top-color: #fff; }
-[data-hovercard-content].ts-hc-side-top::before   { top:  calc(100% + 1px);   border-top-color: rgba(0,0,0,0.08); }
-[data-hovercard-content].ts-hc-side-bottom::after  { bottom: 100%;             border-bottom-color: #fff; }
-[data-hovercard-content].ts-hc-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: rgba(0,0,0,0.08); }
-[data-hovercard-content].ts-hc-side-left::after   { left:  100%;               border-left-color: #fff; }
-[data-hovercard-content].ts-hc-side-left::before  { left:  calc(100% + 1px);   border-left-color: rgba(0,0,0,0.08); }
-[data-hovercard-content].ts-hc-side-right::after  { right: 100%;               border-right-color: #fff; }
-[data-hovercard-content].ts-hc-side-right::before { right: calc(100% + 1px);   border-right-color: rgba(0,0,0,0.08); }
+[data-hovercard-content].ts-hc-side-top::after    { top:  100%;                border-top-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-top::before   { top:  calc(100% + 1px);   border-top-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
+[data-hovercard-content].ts-hc-side-bottom::after  { bottom: 100%;             border-bottom-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
+[data-hovercard-content].ts-hc-side-left::after   { left:  100%;               border-left-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-left::before  { left:  calc(100% + 1px);   border-left-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
+[data-hovercard-content].ts-hc-side-right::after  { right: 100%;               border-right-color: var(--ts-hc-surface, var(--ts-skin-surface, #fff)); }
+[data-hovercard-content].ts-hc-side-right::before { right: calc(100% + 1px);   border-right-color: var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Convenience layout helpers */
 .hc-avatar       { margin-bottom: 0.625rem; }
 .hc-avatar img   { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; display: block; }
 
 .hc-name         { font-size: 0.9375rem; font-weight: 700; line-height: 1.25; color: inherit; }
-.hc-handle       { font-size: 0.8125rem; color: #6b7280; margin-bottom: 0.375rem; }
-.hc-bio          { font-size: 0.8125rem; color: #374151; margin: 0 0 0.625rem; }
+.hc-handle       { font-size: 0.8125rem; color: var(--ts-hc-text-dim, var(--ts-skin-text-dim, #6b7280)); margin-bottom: 0.375rem; }
+.hc-bio          { font-size: 0.8125rem; color: var(--ts-hc-text, var(--ts-skin-text, #374151)); margin: 0 0 0.625rem; }
 
 .hc-meta         { display: flex; gap: 1rem; font-size: 0.8125rem; font-weight: 600; color: inherit; }
-.hc-meta-label   { font-weight: 400; color: #6b7280; }
+.hc-meta-label   { font-weight: 400; color: var(--ts-hc-text-dim, var(--ts-skin-text-dim, #6b7280)); }
 
-.hc-divider      { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 0.625rem 0; }
+.hc-divider      { border: none; border-top: 1px solid var(--ts-hc-border, var(--ts-skin-border, rgba(0,0,0,0.06))); margin: 0.625rem 0; }
 
 /* Dark mode */
 html.dark [data-hovercard-content] {
-    background: var(--dark-300);
-    color: var(--default);
-    border-color: var(--dark-rgba-50);
+    background: var(--dark-300, #0a0c0d);
+    color: var(--default, #777);
+    border-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5));
     box-shadow:
-        0 4px  6px -1px rgba(0,0,0,0.3),
-        0 10px 15px -3px rgba(0,0,0,0.4);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0,0,0,0.3),
+        0 10px 15px -3px rgba(0,0,0,0.4));
 }
 
-html.dark [data-hovercard-content].ts-hc-side-top::after    { border-top-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-top::before   { border-top-color: var(--dark-rgba-50); }
-html.dark [data-hovercard-content].ts-hc-side-bottom::after  { border-bottom-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-bottom::before { border-bottom-color: var(--dark-rgba-50); }
-html.dark [data-hovercard-content].ts-hc-side-left::after   { border-left-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-left::before  { border-left-color: var(--dark-rgba-50); }
-html.dark [data-hovercard-content].ts-hc-side-right::after  { border-right-color: var(--dark-300); }
-html.dark [data-hovercard-content].ts-hc-side-right::before { border-right-color: var(--dark-rgba-50); }
+html.dark [data-hovercard-content].ts-hc-side-top::after    { border-top-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-top::before   { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
+html.dark [data-hovercard-content].ts-hc-side-bottom::after  { border-bottom-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-bottom::before { border-bottom-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
+html.dark [data-hovercard-content].ts-hc-side-left::after   { border-left-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-left::before  { border-left-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
+html.dark [data-hovercard-content].ts-hc-side-right::after  { border-right-color: var(--dark-300, #0a0c0d); }
+html.dark [data-hovercard-content].ts-hc-side-right::before { border-right-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
 
 html.dark .hc-handle,
-html.dark .hc-meta-label { color: var(--color-grey-300, #9ca3af); }
-html.dark .hc-bio        { color: var(--color-grey-200, #c0c8d4); }
-html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
+html.dark .hc-meta-label { color: var(--ts-skin-border-strong, var(--color-grey-300, #9ca3af)); }
+html.dark .hc-bio        { color: var(--ts-skin-border, var(--color-grey-200, #c0c8d4)); }
+html.dark .hc-divider    { border-top-color: var(--dark-rgba-50, rgba(33, 37, 41, 0.5)); }
 
 @media (prefers-reduced-motion: reduce) {
     [data-hovercard-content] { animation: none !important; }
@@ -15160,7 +16883,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     instance[opts]();
                 }
                 return instance;
@@ -15176,6 +16899,30 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Hover Effect
+/**
+ * Themestrap — PluginHoverEffect
+ *
+ * Dependency-free hover effects:
+ *   - magnetic
+ *   - 3d
+ *   - magnetic-3d
+ *
+ * Features:
+ *   - Vanilla JS effect engine
+ *   - jQuery plugin wrapper for Themestrap compatibility
+ *   - requestAnimationFrame animation
+ *   - Configurable X/Y magnetic strength
+ *   - Configurable 3D rotation
+ *   - Configurable perspective
+ *   - Configurable scale
+ *   - Optional glare
+ *   - Preserves the element's original transform
+ *   - Pointer and touch support
+ *   - Automatic cleanup via destroy()
+ *   - Prevents duplicate initialization
+ *   - Works with dynamically sized elements
+ */
 // Hover Effect
 (((themestrap = {}, $) => {
 
@@ -15929,6 +17676,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
 })).apply(this, [window.themestrap, jQuery]);
 
 // Icon
+// Icon
 (((themestrap = {}, $) => {
     const instanceName = '__icon';
 
@@ -16170,6 +17918,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
 })).apply(this, [window.themestrap, jQuery]);
 
 // In Viewport Style
+// In Viewport Style
 (((themestrap = {}, $) => {
     const instanceName = '__inviewportstyle';
 
@@ -16267,6 +18016,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
 	}
 })).apply(this, [window.themestrap, jQuery]);
 
+// Lightbox
 // Lightbox
 (((themestrap = {}, $) => {
     const instanceName = '__pluginLightbox';
@@ -16702,7 +18452,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
             self._open = true;
 
             // Callback
-            if ($.isFunction(o.onOpen)) o.onOpen.call(self, self._items[self._current], self._current);
+            if (typeof o.onOpen === 'function') o.onOpen.call(self, self._items[self._current], self._current);
 
             return this;
         }
@@ -16728,7 +18478,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
                 $('body').css('overflow', '');
             }, 300);
 
-            if ($.isFunction(o.onClose)) o.onClose.call(self);
+            if (typeof o.onClose === 'function') o.onClose.call(self);
 
             return this;
         }
@@ -16810,7 +18560,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
 
             function onLoaded() {
                 $wrap.removeClass('ts-lb-loading');
-                if ($.isFunction(o.onItemLoad)) o.onItemLoad.call(self, item, idx);
+                if (typeof o.onItemLoad === 'function') o.onItemLoad.call(self, item, idx);
             }
 
             if (type === 'image') {
@@ -16858,6 +18608,7 @@ html.dark .hc-divider    { border-top-color: var(--dark-rgba-50); }
 })).apply(this, [window.themestrap, jQuery]);
 
 // Loading Overlay
+// Loading Overlay
 (((themestrap = {}, $) => {
 
     const instanceName = '__pluginLoadingOverlay';
@@ -16880,7 +18631,7 @@ body.ts-scroll-lock {
 
 /* Overlay shell */
 .ts-lo-overlay {
-    --ts-lo-color:    #e8672a;
+    --ts-lo-color:    var(--ts-skin-accent, #e8672a);
     --ts-lo-z:        9000;
     --ts-lo-size:     48px;
     --ts-lo-duration: 800ms;
@@ -16942,7 +18693,7 @@ html.dark .ts-lo-overlay,
 .ts-lo-progress-track {
     width: 160px;
     height: 4px;
-    background: rgba(128, 128, 128, 0.25);
+    background: var(--ts-skin-surface-2, rgba(128, 128, 128, 0.25));
     border-radius: 2px;
     overflow: hidden;
 }
@@ -17496,6 +19247,48 @@ html.dark .ts-lo-overlay,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Lockscreen
+/**
+ * Themestrap Lockscreen Plugin
+ * Full-viewport PIN/OTP lockscreen overlay. Wraps PluginOtp to provide a
+ * polished idle-lock experience: blurred/dimmed page backdrop, clock display,
+ * optional avatar, configurable PIN verification, attempt limiting, and an
+ * idle timer that auto-locks after a period of inactivity.
+ *
+ * Markup anatomy:
+ *
+ *   <!-- Minimal — plugin builds all inner markup -->
+ *   <div data-plugin-lockscreen
+ *        id="page-lock"
+ *        data-plugin-options='{"pin": "1234", "name": "Alex", "idleTimeout": 300}'></div>
+ *
+ * Public API (via stored instance):
+ *   const ls = $('#page-lock').data('__pluginLockscreen');
+ *   ls.lock();                // activate the lockscreen immediately
+ *   ls.unlock();              // programmatic unlock (no PIN check)
+ *   ls.setPin('6789');        // change the expected PIN at runtime
+ *   ls.isLocked();            // returns true | false
+ *   ls.resetAttempts();       // clear the failed-attempt counter
+ *   ls.destroy();             // teardown
+ *
+ * Events dispatched on the wrapper element:
+ *   ts.lockscreen.locked     — fired when the screen locks
+ *   ts.lockscreen.unlocked   — { enteredPin } fired on successful unlock
+ *   ts.lockscreen.failed     — { enteredPin, attempts } fired on wrong PIN
+ *   ts.lockscreen.blocked    — { attempts } fired when maxAttempts is reached
+ *
+ * Requires PluginOtp (themestrap.plugin.otp.js) to be loaded first.
+ *
+ * Init.js wiring (DOMReady-immediate):
+ *   if (typeof $.fn['themestrapPluginLockscreen'] === 'function' && $('[data-plugin-lockscreen]').length) {
+ *       $(() => {
+ *           $('[data-plugin-lockscreen]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginLockscreen(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginLockscreen';
     const STYLE_ID     = 'ts-lockscreen-styles';
@@ -17553,7 +19346,7 @@ html.dark .ts-lo-overlay,
             letter-spacing: -.03em;
             color: var(--ts-lock-clock-color, #ffffff);
             line-height: 1;
-            font-family: var(--ts-lock-clock-font, system-ui, sans-serif);
+            font-family: var(--ts-lock-clock-font, var(--ts-skin-font, system-ui, sans-serif));
             margin-bottom: 4px;
         }
 
@@ -17569,14 +19362,14 @@ html.dark .ts-lo-overlay,
             width: 72px;
             height: 72px;
             border-radius: 50%;
-            background: var(--ts-lock-avatar-bg, rgba(42,184,200,.18)) center/cover no-repeat;
+            background: var(--ts-lock-avatar-bg, var(--ts-skin-accent-soft, rgba(42,184,200,.18))) center/cover no-repeat;
             border: 2px solid var(--ts-lock-avatar-border, rgba(255,255,255,.12));
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
             font-weight: 700;
-            color: var(--ts-lock-avatar-color, #2ab8c8);
+            color: var(--ts-lock-avatar-color, var(--ts-skin-accent, #2ab8c8));
             text-transform: uppercase;
             letter-spacing: .02em;
             margin-bottom: 12px;
@@ -17635,12 +19428,12 @@ html.dark .ts-lo-overlay,
         .ts-lock__btn:active { transform: scale(.97); }
 
         .ts-lock__btn--primary {
-            background: var(--ts-lock-btn-bg, #2ab8c8);
-            color: #fff;
+            background: var(--ts-lock-btn-bg, var(--ts-skin-accent, #2ab8c8));
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, #fff));
         }
 
         .ts-lock__btn--primary:hover {
-            background: var(--ts-lock-btn-hover, #25a5b4);
+            background: var(--ts-lock-btn-hover, var(--ts-skin-accent-hover, #25a5b4));
         }
 
         .ts-lock__btn--primary:disabled {
@@ -17650,22 +19443,22 @@ html.dark .ts-lo-overlay,
 
         .ts-lock__btn--ghost {
             background: rgba(255,255,255,.08);
-            color: rgba(255,255,255,.65);
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, rgba(255,255,255,.65)));
         }
 
         .ts-lock__btn--ghost:hover {
             background: rgba(255,255,255,.14);
-            color: #fff;
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, #fff));
         }
 
         .ts-lock__blocked {
             margin-top: 16px;
             padding: 10px 18px;
-            background: rgba(232,103,42,.14);
-            border: 1px solid rgba(232,103,42,.3);
+            background: var(--ts-ls-accent-soft, var(--ts-skin-accent-soft, rgba(232,103,42,.14)));
+            border: 1px solid var(--ts-ls-accent, var(--ts-skin-accent, rgba(232,103,42,.3)));
             border-radius: 8px;
             font-size: 13px;
-            color: #e8a07a;
+            color: var(--ts-ls-accent, var(--ts-skin-accent, #e8a07a));
             line-height: 1.5;
             display: none;
         }
@@ -17690,7 +19483,7 @@ html.dark .ts-lo-overlay,
         }
 
         .ts-lock__dot--used {
-            background: #e8672a;
+            background: var(--ts-ls-accent, var(--ts-skin-accent, #e8672a));
         }
 
         /* Idle indicator pill — appears in top-right when idleTimeout is set */
@@ -17703,7 +19496,7 @@ html.dark .ts-lo-overlay,
             border-radius: 20px;
             background: rgba(255,255,255,.08);
             border: 1px solid rgba(255,255,255,.12);
-            color: rgba(255,255,255,.45);
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, rgba(255,255,255,.45)));
             font-size: 11px;
             font-weight: 600;
             letter-spacing: .04em;
@@ -18176,6 +19969,92 @@ html.dark .ts-lo-overlay,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Markdown
+/**
+ * Themestrap GFM Markdown Plugin
+ * Parses GitHub Flavored Markdown into HTML, entirely client-side, with no
+ * external parser dependency.  A lightweight GFM-compatible tokenizer/renderer
+ * is bundled inside the IIFE so the plugin is self-contained.
+ *
+ * Part of the Themestrap component library.
+ *
+ * ATTRIBUTE API  (all attributes on the host element)
+ *
+ *   data-plugin-markdown
+ *     Presence triggers auto-init. Value is ignored.
+ *
+ *   data-plugin-markdown-src="url/to/file.md"
+ *     Fetch Markdown from a URL via XHR and render into the host element.
+ *     When absent the plugin renders the element's existing text content.
+ *
+ *   data-plugin-options='{"sanitize":true,"breaks":true,"taskLists":true}'
+ *     Standard Themestrap options bag; merges with PluginMarkdown.defaults.
+ * 
+ * SYNTAX HIGHLIGHTING  (PluginHighlight integration)
+ *
+ *   When options.highlight is true (default) and PluginHighlight is loaded on
+ *   the page, every fenced code block rendered by the plugin is automatically
+ *   passed to $.fn.themestrapPluginHighlight().  The language is read from the
+ *   class="language-*" attribute that the GFM renderer emits — no extra markup
+ *   is needed.
+ *
+ *   If PluginHighlight is not loaded the option is silently ignored and code
+ *   blocks retain their plain <pre><code> markup.
+ *
+ *   Options forwarded to PluginHighlight can be set via options.highlightOptions:
+ *
+ *     $('#readme').themestrapPluginMarkdown({
+ *         highlight: true,
+ *         highlightOptions: { lineNumbers: true, showCopy: true }
+ *     });
+ *
+ *   Per-block overrides via data-plugin-options on the rendered <pre> are NOT
+ *   supported (the <pre> is generated by the GFM renderer, not authored by the
+ *   user).  Use highlightOptions for page-wide defaults.
+ *
+ *   Highlight instances are tracked in this._highlightInstances and are
+ *   destroyed alongside the Markdown instance when destroy() is called.
+ *
+ * SUPPORTED GFM FEATURES
+ *
+ *   Block:  ATX headings (h1–h6), setext headings, fenced code blocks (```),
+ *           indented code blocks, block quotes, ordered / unordered lists,
+ *           task-list checkboxes (- [x] / - [ ]), horizontal rules, tables
+ *           (GFM pipe-table syntax with alignment), paragraphs, blank-line
+ *           separators, HTML pass-through blocks.
+ *
+ *   Inline: Bold (**…** / __…__), italic (*…* / _…_), bold+italic,
+ *           inline code (`…`), strikethrough (~~…~~), links ([text](url)),
+ *           reference links ([text][ref] + [ref]: url), images (![alt](url)),
+ *           auto-links (<url>), line breaks (trailing two spaces or \).
+ *
+ * PUBLIC API
+ *
+ *   instance.render(markdown)   — re-render from a Markdown string
+ *   instance.setSource(url)     — fetch a new URL and re-render
+ *   instance.getHtml()          — return the last rendered HTML string
+ *   instance.destroy()          — restore original content, unbind events
+ *
+ * USAGE
+ *
+ *   <!-- Render from inline text content -->
+ *   <div data-plugin-markdown># Hello World</div>
+ *
+ *   <!-- Fetch and render from a URL -->
+ *   <div data-plugin-markdown data-plugin-markdown-src="/docs/readme.md"></div>
+ *
+ *   <!-- Manual init with options -->
+ *   <div id="md-target"># Hello</div>
+ *   <script>
+ *     $('#md-target').themestrapPluginMarkdown({ breaks: true, sanitize: true });
+ *   </script>
+ *
+ * Auto-init wiring for themestrap.init.js:
+ *
+ *   if (typeof $.fn['themestrapPluginMarkdown'] === 'function' && $('[data-plugin-markdown]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-markdown]:not(.manual)', 'themestrapPluginMarkdown');
+ *   }
+ */
+// Markdown
 (((themestrap = {}, $) => {
 
     const instanceName = '__pluginMarkdown';
@@ -18185,15 +20064,15 @@ html.dark .ts-lo-overlay,
     const CSS_TEXT = `
 /* Themestrap — PluginMarkdown */
 .ts-markdown {
-    --ts-md-font:         inherit;
-    --ts-md-code-font:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-    --ts-md-code-bg:      rgba(0,0,0,.06);
-    --ts-md-border:       rgba(0,0,0,.15);
-    --ts-md-quote-border: #0a1929;
-    --ts-md-link:         #2ab8c8;
-    --ts-md-link-hover:   #e8672a;
-    --ts-md-table-stripe: rgba(0,0,0,.03);
-    --ts-md-hr:           rgba(0,0,0,.15);
+    --ts-md-font:         var(--ts-skin-font, inherit);
+    --ts-md-code-font:    var(--ts-skin-font-mono, 'JetBrains Mono', 'Fira Code', 'Courier New', monospace);
+    --ts-md-code-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.06));
+    --ts-md-border:       var(--ts-skin-border, rgba(0,0,0,.15));
+    --ts-md-quote-border: var(--ts-skin-border, #0a1929);
+    --ts-md-link:         var(--ts-skin-accent, #2ab8c8);
+    --ts-md-link-hover:   var(--ts-skin-accent-hover, #e8672a);
+    --ts-md-table-stripe: var(--ts-skin-surface-2, rgba(0,0,0,.03));
+    --ts-md-hr:           var(--ts-skin-border, rgba(0,0,0,.15));
     --ts-md-heading-mt:   1.5em;
     line-height: 1.7;
     font-family: var(--ts-md-font);
@@ -18213,7 +20092,7 @@ html.dark .ts-lo-overlay,
 .ts-markdown h3 { font-size: 1.25em; }
 .ts-markdown h4 { font-size: 1.1em;  }
 .ts-markdown h5 { font-size: 1em;    }
-.ts-markdown h6 { font-size: .875em; color: #666;  }
+.ts-markdown h6 { font-size: .875em; color: var(--ts-skin-text-dim, #666);  }
 
 /* Paragraphs & text */
 .ts-markdown p { margin: 0 0 1em; }
@@ -18252,8 +20131,8 @@ html.dark .ts-lo-overlay,
     margin: 0 0 1em;
     padding: .5em 1em;
     border-left: 4px solid var(--ts-md-quote-border);
-    color: #555;
-    background: rgba(0,0,0,.03);
+    color: var(--ts-skin-text-dim, #555);
+    background: var(--ts-skin-surface-2, rgba(0,0,0,.03));
     border-radius: 0 4px 4px 0;
 }
 .ts-markdown blockquote > p:last-child { margin-bottom: 0; }
@@ -18286,7 +20165,7 @@ html.dark .ts-lo-overlay,
     padding: .5em .8em;
     text-align: left;
 }
-.ts-markdown th { background: rgba(0,0,0,.06); font-weight: 700; }
+.ts-markdown th { background: var(--ts-skin-surface-2, rgba(0,0,0,.06)); font-weight: 700; }
 .ts-markdown tbody tr:nth-child(even) td { background: var(--ts-md-table-stripe); }
 
 /* Horizontal rule */
@@ -18301,7 +20180,7 @@ html.dark .ts-lo-overlay,
 
 /* Loading / error states */
 .ts-markdown-loading { opacity: .5; font-style: italic; }
-.ts-markdown-error   { color: #c0392b; font-style: italic; font-size: .9em; }
+.ts-markdown-error   { color: var(--ts-skin-danger, #c0392b); font-style: italic; font-size: .9em; }
 `;
 
     function injectStyles() {
@@ -18326,12 +20205,21 @@ html.dark .ts-lo-overlay,
                 .replace(/'/g, '&#39;');
         }
 
+        // Refuses javascript:, vbscript: and non-image data: URLs. Control characters and spaces are
+        // removed first because browsers ignore them inside a scheme ("java\tscript:").
+        function safeUrl(url) {
+            const probe = String(url).replace(/[\u0000-\u0020\u007f-\u009f]+/g, '').toLowerCase();
+            if (/^(javascript|vbscript|livescript):/.test(probe)) return '#';
+            if (/^data:/.test(probe) && !/^data:image\/(png|jpe?g|gif|webp);/.test(probe)) return '#';
+            return url;
+        }
+
         function renderInline(text, opts, refs) {
             let out = text;
 
             // Auto-links  <url>
             out = out.replace(/<(https?:\/\/[^\s>]+)>/g, (_, url) =>
-                `<a href="${escHtml(url)}">${escHtml(url)}</a>`
+                `<a href="${escHtml(safeUrl(url))}">${escHtml(url)}</a>`
             );
 
             // Inline code  `code`  (protect from further inline processing)
@@ -18346,14 +20234,14 @@ html.dark .ts-lo-overlay,
             out = out.replace(/!\[([^\]]*)\]\(([^)]*)\)/g, (_, alt, rest) => {
                 const [url, ...titleParts] = rest.trim().split(/\s+/);
                 const title = titleParts.join(' ').replace(/^["']|["']$/g, '');
-                return `<img src="${escHtml(url)}" alt="${escHtml(alt)}"${title ? ` title="${escHtml(title)}"` : ''}>`;
+                return `<img src="${escHtml(safeUrl(url))}" alt="${escHtml(alt)}"${title ? ` title="${escHtml(title)}"` : ''}>`;
             });
 
             // Links  [text](url "title")
             out = out.replace(/\[([^\]]+)\]\(([^)]*)\)/g, (_, label, rest) => {
                 const [url, ...titleParts] = rest.trim().split(/\s+/);
                 const title = titleParts.join(' ').replace(/^["']|["']$/g, '');
-                return `<a href="${escHtml(url)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
+                return `<a href="${escHtml(safeUrl(url))}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
             });
 
             // Reference links  [text][ref]  or  [text][]
@@ -18361,7 +20249,7 @@ html.dark .ts-lo-overlay,
                 const key = (ref || label).toLowerCase();
                 if (refs[key]) {
                     const { href, title } = refs[key];
-                    return `<a href="${escHtml(href)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
+                    return `<a href="${escHtml(safeUrl(href))}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(label, opts, refs)}</a>`;
                 }
                 return escHtml(`[${label}][${ref}]`);
             });
@@ -18371,7 +20259,7 @@ html.dark .ts-lo-overlay,
                 const key = ref.toLowerCase();
                 if (refs[key]) {
                     const { href, title } = refs[key];
-                    return `<a href="${escHtml(href)}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(ref, opts, refs)}</a>`;
+                    return `<a href="${escHtml(safeUrl(href))}"${title ? ` title="${escHtml(title)}"` : ''}>${renderInline(ref, opts, refs)}</a>`;
                 }
                 return match; // leave unchanged — might be task-list bracket
             });
@@ -18697,11 +20585,19 @@ html.dark .ts-lo-overlay,
         }
 
         // Minimal strip: removes <script> and on* attributes.
+        // Defence in depth for raw HTML pass-through: drops active elements and event handlers,
+        // and neutralizes script-bearing URL attributes.
         function sanitize(html) {
             return html
-                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                .replace(/\s+on\w+="[^"]*"/gi, '')
-                .replace(/\s+on\w+='[^']*'/gi, '');
+                .replace(/<(script|iframe|object|embed|style|link|meta|base|frame|frameset|applet)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '')
+                .replace(/<\/?(script|iframe|object|embed|style|link|meta|base|frame|frameset|applet)\b[^>]*>/gi, '')
+                .replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '')
+                .replace(/\s+on\w+\s*=\s*'[^']*'/gi, '')
+                .replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
+                .replace(/\s(href|src|action|formaction|xlink:href)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/gi, (m, attr, whole, a, b, c) => {
+                    const v = a !== undefined ? a : (b !== undefined ? b : c);
+                    return safeUrl(v.replace(/&#(x?[0-9a-f]+);?/gi, (x, n) => String.fromCharCode(n[0].toLowerCase() === 'x' ? parseInt(n.slice(1), 16) : parseInt(n, 10)))) === '#' ? ` ${attr}="#"` : m;
+                });
         }
 
         function parse(src, opts) {
@@ -18850,7 +20746,7 @@ html.dark .ts-lo-overlay,
          */
         _highlightBlocks() {
             if (!this.options.highlight) return this;
-            if (!$.isFunction($.fn.themestrapPluginHighlight)) return this;
+            if (typeof $.fn.themestrapPluginHighlight !== 'function') return this;
  
             // Tear down any highlight instances from the previous render pass
             // before creating new ones (re-render scenario).
@@ -19004,6 +20900,7 @@ html.dark .ts-lo-overlay,
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Masonry
 // Masonry
 (((themestrap = {}, $) => {
     const instanceName = '__masonry';
@@ -19313,6 +21210,7 @@ html.dark .ts-lo-overlay,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Match Height
+// Match Height
 (((themestrap = {}, $) => {
     const instanceName = '__matchHeight';
 
@@ -19351,7 +21249,7 @@ html.dark .ts-lo-overlay,
 		}
 
         build() {
-			if (!($.isFunction($.fn.matchHeight))) {
+			if (!(typeof $.fn.matchHeight === 'function')) {
 				return this;
 			}
 
@@ -19391,6 +21289,110 @@ html.dark .ts-lo-overlay,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Menubar
+/**
+ * Themestrap Menubar Plugin
+ *
+ * An accessible menubar with checkbox items, radio groups, nested 
+ * submenus, and full keyboard navigation.
+ *
+ * Part of the Themestrap component library.
+ *
+ * Markup anatomy:
+ *
+ *   <div data-plugin-menubar data-plugin-options='{"loop": true}'>
+ *
+ *     <div data-menubar-menu>
+ *       <button data-menubar-trigger>File</button>
+ *       <div data-menubar-content>
+ *
+ *         <!-- Plain item -->
+ *         <button data-menubar-item data-menubar-shortcut="⌘N">
+ *           <span data-menubar-item-icon><!-- icon --></span>
+ *           <span data-menubar-item-label>New Window</span>
+ *         </button>
+ *
+ *         <!-- Separator -->
+ *         <hr data-menubar-separator>
+ *
+ *         <!-- Group label -->
+ *         <div data-menubar-label>Options</div>
+ *
+ *         <!-- Checkbox item -->
+ *         <button data-menubar-item data-menubar-type="checkbox" data-menubar-checked="true">
+ *           <span data-menubar-indicator></span>
+ *           <span data-menubar-item-label>Show Status Bar</span>
+ *         </button>
+ *
+ *         <!-- Radio group -->
+ *         <div data-menubar-radio-group>
+ *           <button data-menubar-item data-menubar-type="radio"
+ *                   data-menubar-value="top" data-menubar-checked="true">
+ *             <span data-menubar-indicator></span>
+ *             <span data-menubar-item-label>Top</span>
+ *           </button>
+ *           <button data-menubar-item data-menubar-type="radio" data-menubar-value="bottom">
+ *             <span data-menubar-indicator></span>
+ *             <span data-menubar-item-label>Bottom</span>
+ *           </button>
+ *         </div>
+ *
+ *         <!-- Submenu -->
+ *         <div data-menubar-sub>
+ *           <button data-menubar-item data-menubar-sub-trigger>
+ *             <span data-menubar-item-label>Share</span>
+ *           </button>
+ *           <div data-menubar-sub-content>
+ *             <button data-menubar-item>Copy Link</button>
+ *             <button data-menubar-item>Email…</button>
+ *           </div>
+ *         </div>
+ *
+ *         <!-- Disabled item -->
+ *         <button data-menubar-item data-menubar-disabled="true">Save As…</button>
+ *
+ *       </div>
+ *     </div>
+ *
+ *   </div>
+ *
+ * Options:
+ *
+ *   subDelay          200     ms delay before opening a sub-menu on hover
+ *   subCloseDelay     120     ms hover-out delay before closing a sub-menu
+ *   animationDuration 150     open/close animation duration (ms)
+ *   closeOnOutside    true    outside click closes the open menu
+ *   closeOnEscape     true    Escape closes the open menu
+ *   loop              true    keyboard navigation wraps at ends
+ *   onOpen            null    callback(menuIndex, instance) on open
+ *   onClose           null    callback(menuIndex, instance) on close
+ *   onSelect          null    callback($item, payload, instance) on activation
+ *
+ * Public API:
+ *
+ *   const mb = $('[data-plugin-menubar]').data('__pluginMenubar');
+ *   mb.openMenu(index);    // open a top-level menu by 0-based index
+ *   mb.closeMenu();        // close the currently open menu
+ *   mb.getActiveMenu();    // returns open menu index or -1
+ *
+ * Events fired on [data-plugin-menubar]:
+ *
+ *   menubar:open    — detail: { index, instance }
+ *   menubar:close   — detail: { index, instance }
+ *   menubar:select  — detail: { $item, payload, instance }
+ *                     payload: { type, label, value, checked }
+ *
+ * Init.js wiring:
+ *
+ *   if (typeof $.fn['themestrapPluginMenubar'] === 'function' && $('[data-plugin-menubar]').length) {
+ *       $(() => {
+ *           $('[data-plugin-menubar]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginMenubar(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginMenubar';
 
@@ -19401,19 +21403,19 @@ html.dark .ts-lo-overlay,
     const CSS_TEXT = `
 /* Themestrap Menubar */
 [data-plugin-menubar] {
-    --ts-mb-fg:               #0f172a;
-    --ts-mb-muted:            #64748b;
-    --ts-mb-hover-bg:         rgba(0,0,0,.06);
-    --ts-mb-active-bg:        rgba(0,0,0,.09);
-    --ts-mb-focus-ring:       #e8672a;
-    --ts-mb-content-bg:       #ffffff;
-    --ts-mb-content-border:   rgba(0,0,0,.08);
-    --ts-mb-content-shadow:   0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
-    --ts-mb-item-hover-bg:    rgba(0,0,0,.05);
-    --ts-mb-separator:        rgba(0,0,0,.08);
-    --ts-mb-indicator-color:  #0f172a;
-    --ts-mb-radius:           5px;
-    --ts-mb-content-radius:   8px;
+    --ts-mb-fg:               var(--ts-skin-text, #0f172a);
+    --ts-mb-muted:            var(--ts-skin-text-dim, #64748b);
+    --ts-mb-hover-bg:         var(--ts-skin-elevated, rgba(0,0,0,.06));
+    --ts-mb-active-bg:        var(--ts-skin-elevated, rgba(0,0,0,.09));
+    --ts-mb-focus-ring:       var(--ts-skin-ring, #e8672a);
+    --ts-mb-content-bg:       var(--ts-skin-surface, #ffffff);
+    --ts-mb-content-border:   var(--ts-skin-border, rgba(0,0,0,.08));
+    --ts-mb-content-shadow:   var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
+    --ts-mb-item-hover-bg:    var(--ts-skin-elevated, rgba(0,0,0,.05));
+    --ts-mb-separator:        var(--ts-skin-border, rgba(0,0,0,.08));
+    --ts-mb-indicator-color:  var(--ts-skin-text, #0f172a);
+    --ts-mb-radius:           var(--ts-skin-radius, 5px);
+    --ts-mb-content-radius:   var(--ts-skin-radius, 8px);
     --ts-mb-font-size:        .875rem;
     --ts-mb-z:                1050;
 
@@ -19637,16 +21639,16 @@ html.dark .ts-lo-overlay,
 
 html.dark [data-plugin-menubar],
 [data-plugin-menubar].ts-mb-dark {
-    --ts-mb-fg:              #f1f5f9;
-    --ts-mb-muted:           #94a3b8;
-    --ts-mb-hover-bg:        rgba(255,255,255,.07);
-    --ts-mb-active-bg:       rgba(255,255,255,.11);
-    --ts-mb-content-bg:      #1e293b;
-    --ts-mb-content-border:  rgba(255,255,255,.10);
-    --ts-mb-content-shadow:  0 4px 24px rgba(0,0,0,.45), 0 1px 4px rgba(0,0,0,.2);
-    --ts-mb-item-hover-bg:   rgba(255,255,255,.07);
-    --ts-mb-separator:       rgba(255,255,255,.09);
-    --ts-mb-indicator-color: #f1f5f9;
+    --ts-mb-fg:              var(--ts-skin-text, #f1f5f9);
+    --ts-mb-muted:           var(--ts-skin-text-dim, #94a3b8);
+    --ts-mb-hover-bg:        var(--ts-skin-elevated, rgba(255,255,255,.07));
+    --ts-mb-active-bg:       var(--ts-skin-elevated, rgba(255,255,255,.11));
+    --ts-mb-content-bg:      var(--ts-skin-surface, #1e293b);
+    --ts-mb-content-border:  var(--ts-skin-border, rgba(255,255,255,.10));
+    --ts-mb-content-shadow:  var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.45), 0 1px 4px rgba(0,0,0,.2));
+    --ts-mb-item-hover-bg:   var(--ts-skin-elevated, rgba(255,255,255,.07));
+    --ts-mb-separator:       var(--ts-skin-border, rgba(255,255,255,.09));
+    --ts-mb-indicator-color: var(--ts-skin-text, #f1f5f9);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -20298,6 +22300,7 @@ html.dark [data-plugin-menubar],
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Nav
 // Nav
 (((themestrap = {}, $) => {
     let initialized = false;
@@ -21088,6 +23091,27 @@ html.dark [data-plugin-menubar],
 })).apply(this, [window.themestrap, jQuery]);
 
 // Navbar
+/**
+ * Navbar
+ * This navigation connects a series of related pages. It sits below a
+ * primary nav, exposes a logo/title, a set of links (some with dropdown menus),
+ * and an optional call-to-action. The current page is flagged with an accent
+ * top border.
+ *
+ * HTML anchor: [data-plugin-navbar]
+ *
+ * Quick-start:
+ *   <nav class="ts-navbar" data-plugin-navbar
+ *        data-plugin-options='{"palette": "light", "sticky": true}'
+ *        aria-label="Secondary">
+ *     ...
+ *   </nav>
+ *
+ * Init.js wiring (add to themestrap.init.js):
+ *   if (typeof $.fn['themestrapPluginNavbar'] === 'function' && $('[data-plugin-navbar]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-navbar]:not(.manual)', 'themestrapPluginNavbar');
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__navbar';
     
@@ -21098,28 +23122,28 @@ html.dark [data-plugin-menubar],
         style.textContent = `
 :root {
     /* Semantic surface tokens — LIGHT palette defaults */
-    --ts-navbar-bg:                 var(--light, #ffffff);
-    --ts-navbar-border:             var(--light--200, #ececec);
-    --ts-navbar-logo-color:         var(--primary, #0088CC);
-    --ts-navbar-link-color:         var(--primary, #0088CC);
-    --ts-navbar-link-hover:         var(--primary-100, #0077b3);
-    --ts-navbar-link-current:       var(--primary-300, #006699);
-    --ts-navbar-accent:             var(--secondary, #e36159);   
-    --ts-navbar-accent-hover:       var(--secondary-100, #df4c43);
-    --ts-navbar-hover-bg:           var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-    --ts-navbar-menu-bg:            var(--light, #ffffff);
-    --ts-navbar-menu-border:        var(--light--200, #ececec);
-    --ts-navbar-menu-link:          var(--primary, #0088CC);
-    --ts-navbar-menu-link-hover:    var(--primary-100, #0077b3);
-    --ts-navbar-menu-heading:       var(--default, #777);
-    --ts-navbar-toggle-color:       var(--primary, #0088CC);
-    --ts-navbar-shadow:             0 1px 2px var(--dark-rgba-60, rgba(33, 37, 41, 0.6)),
-                                    0 8px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1));;
+    --ts-navbar-bg:                 var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-navbar-border:             var(--ts-skin-border, var(--light--200, #ececec));
+    --ts-navbar-logo-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-hover:         var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-link-current:       var(--ts-skin-accent, var(--primary-300, #006699));
+    --ts-navbar-accent:             var(--ts-skin-accent, var(--secondary, #e36159));   
+    --ts-navbar-accent-hover:       var(--ts-skin-accent-hover, var(--secondary-100, #df4c43));
+    --ts-navbar-hover-bg:           var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+    --ts-navbar-menu-bg:            var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-navbar-menu-border:        var(--ts-skin-border, var(--light--200, #ececec));
+    --ts-navbar-menu-link:          var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-menu-link-hover:    var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-menu-heading:       var(--ts-skin-text-strong, var(--default, #777));
+    --ts-navbar-toggle-color:       var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-shadow:             var(--ts-skin-shadow, 0 1px 2px var(--dark-rgba-60, rgba(33, 37, 41, 0.6)),
+                                    0 8px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)));;
 
     /* Sizing & motion */
     --ts-navbar-height:        56px;
     --ts-navbar-accent-size:   3px;
-    --ts-navbar-radius:        8px;
+    --ts-navbar-radius:        var(--ts-skin-radius, 8px);
     --ts-navbar-transition:    150ms ease;
     --ts-navbar-sticky-top:    0px;
     --ts-navbar-z:             1020;
@@ -21127,21 +23151,21 @@ html.dark [data-plugin-menubar],
 
 html.dark .ts-navbar,
 .ts-navbar[data-ts-navbar-palette="dark"] {
-    --ts-navbar-bg:                 var(--dark, #212529);
-    --ts-navbar-border:             var(--dark--200, #101214);
-    --ts-navbar-logo-color:         var(--primary, #0088CC);
-    --ts-navbar-link-color:         var(--primary, #0088CC);
-    --ts-navbar-link-hover:         var(--primary-100, #0077b3);
-    --ts-navbar-link-current:       var(--primary-300, #006699);
-    --ts-navbar-hover-bg:           var(--dark-rgba-10, rgba(33, 37, 41, 0.1));
-    --ts-navbar-menu-bg:            var(--dark, #212529);
-    --ts-navbar-menu-border:        var(--dark--200, #101214);
-    --ts-navbar-menu-link:          var(--primary, #0088CC);
-    --ts-navbar-menu-link-hover:    var(--primary-100, #0077b3);
-    --ts-navbar-menu-heading:       var(--default, #777);
-    --ts-navbar-toggle-color:       var(--primary, #0088CC);
-    --ts-navbar-shadow:             0 1px 2px rgba(0,0,0,.3),
-                                    0 8px 24px rgba(0,0,0,.35);
+    --ts-navbar-bg:                 var(--ts-skin-surface, var(--dark, #212529));
+    --ts-navbar-border:             var(--ts-skin-border, var(--dark--200, #101214));
+    --ts-navbar-logo-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-color:         var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-link-hover:         var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-link-current:       var(--ts-skin-accent, var(--primary-300, #006699));
+    --ts-navbar-hover-bg:           var(--ts-skin-elevated, var(--dark-rgba-10, rgba(33, 37, 41, 0.1)));
+    --ts-navbar-menu-bg:            var(--ts-skin-surface, var(--dark, #212529));
+    --ts-navbar-menu-border:        var(--ts-skin-border, var(--dark--200, #101214));
+    --ts-navbar-menu-link:          var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-menu-link-hover:    var(--ts-skin-accent-hover, var(--primary-100, #0077b3));
+    --ts-navbar-menu-heading:       var(--ts-skin-text-strong, var(--default, #777));
+    --ts-navbar-toggle-color:       var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-navbar-shadow:             var(--ts-skin-shadow, 0 1px 2px rgba(0,0,0,.3),
+                                    0 8px 24px rgba(0,0,0,.35));
 }
 
 .ts-navbar {
@@ -21431,12 +23455,12 @@ html.dark .ts-navbar,
 .ts-navbar__btn--primary {
     background: var(--ts-navbar-accent);
     border-color: var(--ts-navbar-accent);
-    color: #fff;
+    color: var(--ts-skin-on-accent, #fff);
 }
 .ts-navbar__btn--primary:hover {
     background: var(--ts-navbar-accent-hover);
     border-color: var(--ts-navbar-accent-hover);
-    color: #fff;
+    color: var(--ts-skin-on-accent, #fff);
 }
 .ts-navbar__btn--ghost {
     background: transparent;
@@ -22005,6 +24029,107 @@ html.dark .ts-navbar,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Navigation
+/**
+ * Themestrap PluginNavigation
+ * 
+ * 
+ *
+ * Modes
+ *   'sidebar'   Collapsible icon-rail sidebar with header/footer zones,
+ *               group titles, badge counts, animated sub-drawers, and
+ *               responsive auto-collapse.
+ *   'panel'     Fixed-width vertical nav panel with depth-indented children,
+ *               metadata column, section headings, and accordion mode.
+ *   'megamenu'  Horizontal or vertical mega-menu bar with hover|click open,
+ *               animated content panels, viewport portal, and keyboard nav.
+ *
+ * Data attributes
+ *
+ *   SIDEBAR/PANEL mode
+ *   data-nav-header                  Header region (sidebar)
+ *   data-nav-logo                    Logo wrapper inside header
+ *   data-nav-title                   Title element inside header
+ *   data-nav-toggle                  Collapse toggle button
+ *   data-nav-actions                 Panel actions / title bar
+ *   data-nav-actions-title           Title inside actions bar
+ *   data-nav-body                    Scrollable nav body
+ *   data-nav-footer                  Footer region (sidebar)
+ *   data-nav-section                 Group / section wrapper
+ *   data-nav-section-title="Label"   Section heading text
+ *   data-nav-list                    <ul> list container
+ *   data-nav-item                    Nav item wrapper
+ *   data-nav-link                    Interactive link/button row
+ *   data-nav-active                  Pre-mark an item active
+ *   data-nav-has-children            Declare parent without a child list
+ *   data-nav-disabled                Disable an item
+ *   data-nav-icon                    Icon slot inside a link row
+ *   data-nav-label                   Text label slot inside a link row
+ *   data-nav-badge                   Badge count slot
+ *   data-nav-metadata                Right-aligned metadata (panel)
+ *   data-nav-child-items             Nested child list (becomes a drawer)
+ *   data-nav-separator               Horizontal divider
+ *
+ *   MEGAMENU mode
+ *   data-nav-item                    Top-level menu item
+ *   data-nav-link                    Plain link (no panel)
+ *   data-nav-trigger                 Disclosure button that opens a panel
+ *   data-nav-content                 Content panel (any HTML)
+ *   data-nav-viewport                External portal container
+ *   data-nav-list-item               Rich link row inside a content panel
+ *   data-nav-list-item-icon          Icon box inside a rich link
+ *   data-nav-list-item-title         Title line inside a rich link
+ *   data-nav-list-item-desc          Description paragraph
+ *
+ * Public API
+ *
+ *   UNIVERSAL
+ *   inst.setActive($item)            Mark $item as the active leaf; walks
+ *                                    ancestors to open drawers + mark branch
+ *   inst.setSubActive($sub)          Same, for a nested child item
+ *   inst.getActive()                 sidebar/panel → {item, subItem}
+ *                                    megamenu → active panel index | -1
+ *   inst.refresh()                   destroy + re-init
+ *   inst.destroy()
+ *
+ *   SIDEBAR
+ *   inst.collapse()                  Collapse to icon-only rail
+ *   inst.expand()                    Restore full width
+ *   inst.toggle()                    Flip collapsed state
+ *   inst.setCollapsed(bool)
+ *
+ *   SIDEBAR + PANEL (drawers)
+ *   inst.openGroup($item)
+ *   inst.closeGroup($item)
+ *   inst.toggleGroup($item)
+ *   inst.expandAll()
+ *   inst.collapseAll()
+ *
+ *   MEGAMENU
+ *   inst.open(index)                 Open panel at 0-based index
+ *   inst.close()                     Close the active panel
+ *   inst.togglePanel(index)
+ *   inst.getActivePanel()            Active panel index | -1
+ *
+ * Events (fired on the root element)
+ *   sidebar.toggle.ts.navigation     { collapsed }
+ *   drawer.toggle.ts.navigation      { $item, open }
+ *   item.ts.navigation               { $item, $link, href }
+ *   panel.open.ts.navigation         { index, $item }
+ *   panel.close.ts.navigation        { index, $item }
+ *
+ * Init.js wiring
+ *
+ *   // Sidebar/Panel (forceInit:true → dynIntObsInit inits immediately)
+ *   if (typeof $.fn['themestrapPluginNavigation'] === 'function' &&
+ *       $('[data-plugin-navigation]').length) {
+ *       themestrap.fn.dynIntObsInit(
+ *           '[data-plugin-navigation]:not(.manual)',
+ *           'themestrapPluginNavigation',
+ *           themestrap.PluginNavigation.defaults
+ *       );
+ *   }
+ */
+// Navigation
 (((themestrap = {}, $) => {
 
     const instanceName = '__pluginNavigation';
@@ -22030,61 +24155,61 @@ html.dark .ts-navbar,
     --ts-nav-indent-step:        1rem;
 
     /* Colours */
-    --ts-nav-bg:                 var(--light, #ffffff);
-    --ts-nav-border-color:       var(--light--200, #ececec);
-    --ts-nav-header-bg:          var(--light--100, #ffffff);
-    --ts-nav-footer-bg:          var(--light--300, #ffffff);
+    --ts-nav-bg:                 var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-nav-border-color:       var(--ts-skin-border, var(--light--200, #ececec));
+    --ts-nav-header-bg:          var(--ts-skin-surface-2, var(--light--100, #ffffff));
+    --ts-nav-footer-bg:          var(--ts-skin-surface-2, var(--light--300, #ffffff));
 
-    --ts-nav-text:               var(--default, #777);
-    --ts-nav-text-muted:         var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
-    --ts-nav-icon-color:         var(--grey, #969696);
+    --ts-nav-text:               var(--ts-skin-text, var(--default, #777));
+    --ts-nav-text-muted:         var(--ts-skin-text-dim, var(--dark-rgba-20, rgba(33, 37, 41, 0.2)));
+    --ts-nav-icon-color:         var(--ts-skin-text-dim, var(--grey, #969696));
 
-    --ts-nav-accent:             var(--primary, #0088CC);
-    --ts-nav-focus-ring:         var(--ts-nav-accent);
+    --ts-nav-accent:             var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-nav-focus-ring:         var(--ts-skin-ring, var(--ts-nav-accent));
 
-    --ts-nav-item-hover-bg:      var(--light-rgba-10, #rgba(255, 255, 255, 0.1));
+    --ts-nav-item-hover-bg:      var(--ts-skin-elevated, var(--light-rgba-10, #rgba(255, 255, 255, 0.1)));
     --ts-nav-item-active-bg:     transparent;
-    --ts-nav-item-active-text:   var(--ts-nav-accent);
-    --ts-nav-item-active-border: var(--ts-nav-accent);
+    --ts-nav-item-active-text:   var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-item-active-border: var(--ts-skin-accent, var(--ts-nav-accent));
 
-    --ts-nav-section-title-color:#8a93a0;
-    --ts-nav-badge-bg:           var(--light-300, #e6e6e6);
-    --ts-nav-badge-color:        var(--dark-300, #383f45);
-    --ts-nav-badge-active-bg:    var(--grey-500, #dbdbdb);
-    --ts-nav-badge-active-color: var(--ts-nav-accent);
-    --ts-nav-toggle-color:       var(--grey-1000, #757575);
-    --ts-nav-toggle-hover-bg:    var(--light-100, #f2f2f2);
+    --ts-nav-section-title-color:var(--ts-skin-text-strong, #8a93a0);
+    --ts-nav-badge-bg:           var(--ts-skin-surface, var(--light-300, #e6e6e6));
+    --ts-nav-badge-color:        var(--ts-skin-text, var(--dark-300, #383f45));
+    --ts-nav-badge-active-bg:    var(--ts-skin-accent-soft, var(--grey-500, #dbdbdb));
+    --ts-nav-badge-active-color: var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-toggle-color:       var(--ts-skin-text, var(--grey-1000, #757575));
+    --ts-nav-toggle-hover-bg:    var(--ts-skin-elevated, var(--light-100, #f2f2f2));
 
-    --ts-nav-content-bg:         var(--light, #ffffff);
-    --ts-nav-content-border:     var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-    --ts-nav-content-shadow:     0 4px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)), 0 1px 4px var(--dark-rgba-60, rgba(33, 37, 41, 0.6));
-    --ts-nav-muted-text:         var(--dark-rgba-50, rgba(33, 37, 41, 0.5));
+    --ts-nav-content-bg:         var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-nav-content-border:     var(--ts-skin-border, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+    --ts-nav-content-shadow:     var(--ts-skin-shadow, 0 4px 24px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)), 0 1px 4px var(--dark-rgba-60, rgba(33, 37, 41, 0.6)));
+    --ts-nav-muted-text:         var(--ts-skin-text-dim, var(--dark-rgba-50, rgba(33, 37, 41, 0.5)));
 }
 
 /* Dark variant — via option class or html.dark */
 :root.dark {
-    --ts-nav-bg:                 var(--dark, #212529);
-    --ts-nav-border-color:       var(--dark--200, #101214);
-    --ts-nav-header-bg:          var(--dark--100, #2c3237);
-    --ts-nav-footer-bg:          var(--dark, #212529);
-    --ts-nav-text:               var(--light, #ffffff);
-    --ts-nav-text-muted:         var(--light-rgba-20, rgba(255, 255, 255, 0.2));
-    --ts-nav-icon-color:         var(--grey-700, #c1c1c1);
-    --ts-nav-accent:             var(--primary, #0088CC);
-    --ts-nav-item-hover-bg:      var(--dark-200, #101214);
-    --ts-nav-item-active-text:   var(--ts-nav-accent);
-    --ts-nav-item-active-border: var(--ts-nav-accent);
-    --ts-nav-section-title-color:var(--dark--300, #383f45);
-    --ts-nav-badge-bg:           var(--dark--100, #2c3237);
-    --ts-nav-badge-color:        var(--light, #ffffff);
-    --ts-nav-badge-active-bg:    var(--primary-100, #0077b3);
-    --ts-nav-badge-active-color: var(--primary--200, #00a1f2);
-    --ts-nav-toggle-color:       var(--grey-200, #eaeaea);
-    --ts-nav-toggle-hover-bg:    var(--dark-100, #16181b);
-    --ts-nav-content-bg:         var(--dark, #212529);
-    --ts-nav-content-border:     var(--dark-rgba-80, rgba(33, 37, 41, 0.8));
-    --ts-nav-content-shadow:     0 4px 24px var(--dark-rgba-40, rgba(33, 37, 41, 0.4));
-    --ts-nav-muted-text:         var(--light-rgba-50, rgba(255, 255, 255, 0.5));
+    --ts-nav-bg:                 var(--ts-skin-surface, var(--dark, #212529));
+    --ts-nav-border-color:       var(--ts-skin-border, var(--dark--200, #101214));
+    --ts-nav-header-bg:          var(--ts-skin-surface-2, var(--dark--100, #2c3237));
+    --ts-nav-footer-bg:          var(--ts-skin-surface-2, var(--dark, #212529));
+    --ts-nav-text:               var(--ts-skin-text, var(--light, #ffffff));
+    --ts-nav-text-muted:         var(--ts-skin-text-dim, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+    --ts-nav-icon-color:         var(--ts-skin-text-dim, var(--grey-700, #c1c1c1));
+    --ts-nav-accent:             var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-nav-item-hover-bg:      var(--ts-skin-elevated, var(--dark-200, #101214));
+    --ts-nav-item-active-text:   var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-item-active-border: var(--ts-skin-accent, var(--ts-nav-accent));
+    --ts-nav-section-title-color:var(--ts-skin-text-strong, var(--dark--300, #383f45));
+    --ts-nav-badge-bg:           var(--ts-skin-surface, var(--dark--100, #2c3237));
+    --ts-nav-badge-color:        var(--ts-skin-text, var(--light, #ffffff));
+    --ts-nav-badge-active-bg:    var(--ts-skin-accent-soft, var(--primary-100, #0077b3));
+    --ts-nav-badge-active-color: var(--ts-skin-accent, var(--primary--200, #00a1f2));
+    --ts-nav-toggle-color:       var(--ts-skin-text, var(--grey-200, #eaeaea));
+    --ts-nav-toggle-hover-bg:    var(--ts-skin-elevated, var(--dark-100, #16181b));
+    --ts-nav-content-bg:         var(--ts-skin-surface, var(--dark, #212529));
+    --ts-nav-content-border:     var(--ts-skin-border, var(--dark-rgba-80, rgba(33, 37, 41, 0.8)));
+    --ts-nav-content-shadow:     var(--ts-skin-shadow, 0 4px 24px var(--dark-rgba-40, rgba(33, 37, 41, 0.4)));
+    --ts-nav-muted-text:         var(--ts-skin-text-dim, var(--light-rgba-50, rgba(255, 255, 255, 0.5)));
 }
 
 /* Compact density */
@@ -22555,8 +24680,8 @@ html.dark .ts-navbar,
     left: calc(var(--ts-nav-width-collapsed) - .5rem);
     top: 50%;
     transform: translateY(-50%);
-    background-color: #1f2937;
-    color: #f9fafb;
+    background-color: var(--ts-skin-inverse, #1f2937);
+    color: var(--ts-skin-on-inverse, #f9fafb);
     padding: .3125rem .625rem;
     border-radius: .375rem;
     font-size: .8125rem;
@@ -22564,7 +24689,7 @@ html.dark .ts-navbar,
     white-space: nowrap;
     pointer-events: none;
     z-index: 200;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+    box-shadow: var(--ts-skin-shadow, 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1));
 }
 
 /* Separator */
@@ -23927,6 +26052,92 @@ html.dark .ts-navbar,
 })).apply(this, [window.themestrap, jQuery]);
 
 // Navmenu
+/**
+ * Themestrap Navigation Menu Plugin
+ * Accessible, animated mega-menu / navigation menu.
+ *
+ * Part of the Themestrap component library for MODX 3
+ *
+ * Markup anatomy
+ *
+ *   <nav data-plugin-navmenu
+ *        data-plugin-options='{"orientation":"horizontal","delay":200}'>
+ *
+ *     <!-- Each top-level item -->
+ *     <div data-navmenu-item>
+ *
+ *       <!-- Plain link (no sub-menu) -->
+ *       <a href="/about" data-navmenu-link>About</a>
+ *
+ *     </div>
+ *
+ *     <div data-navmenu-item>
+ *
+ *       <!-- Trigger button (opens the content panel) -->
+ *       <button data-navmenu-trigger aria-expanded="false">Products</button>
+ *
+ *       <!-- Content panel — can hold any HTML; grid layouts work great -->
+ *       <div data-navmenu-content>
+ *         <ul>
+ *           <li><a href="/products/alpha" data-navmenu-list-item>
+ *             <span data-navmenu-list-item-icon>★</span>
+ *             <div>
+ *               <div data-navmenu-list-item-title>Alpha</div>
+ *               <p data-navmenu-list-item-desc>Alpha product description.</p>
+ *             </div>
+ *           </a></li>
+ *         </ul>
+ *       </div>
+ *
+ *     </div>
+ *   </nav>
+ *
+ *   <!-- Optional: viewport element for animated panel transitions -->
+ *   <div data-navmenu-viewport></div>
+ *
+ * Options
+ *
+ *   orientation       "horizontal"|"vertical"    layout axis                   "horizontal"
+ *   openOn            "hover"|"click"            what opens panels             "hover"
+ *   delay             200                        hover open delay (ms)         200
+ *   closeDelay        150                        hover close delay (ms)        150
+ *   animationIn       "ts-navmenu-in"            CSS class added on open       "ts-navmenu-in"
+ *   animationOut      "ts-navmenu-out"           CSS class added on close      "ts-navmenu-out"
+ *   animationDuration 200                        fallback timeout (ms)         200
+ *   useViewport       false                      portal panels into the        false
+ *                                                [data-navmenu-viewport] el
+ *   closeOnEscape     true                       Esc key closes open panel     true
+ *   closeOnOutside    true                       click outside closes          true
+ *   onOpen            null                       callback(item, instance)      null
+ *   onClose           null                       callback(item, instance)      null
+ *
+ * Public API 
+ *
+ *   const nav = $('[data-plugin-navmenu]').data('__pluginNavmenu');
+ *   nav.open(index);          // open item by index (0-based)
+ *   nav.close();              // close the active item
+ *   nav.toggle(index);        // toggle item by index
+ *   nav.getActive();          // returns index of open item, or -1
+ *
+ * Events
+ *
+ *   navmenu-opened   fired on [data-plugin-navmenu] after a panel opens
+ *   navmenu-closed   fired on [data-plugin-navmenu] after a panel closes
+ *
+ *   Both events carry { detail: { index, $item, instance } }
+ *
+ * Init.js wiring 
+ *
+ *   if (typeof $.fn['themestrapPluginNavmenu'] === 'function' && $('[data-plugin-navmenu]').length) {
+ *       $(() => {
+ *           $('[data-plugin-navmenu]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginNavmenu(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginNavmenu';
 
@@ -24035,10 +26246,10 @@ html.dark .ts-navbar,
     top: calc(100% + .5rem);
     left: 0;
     min-width: 220px;
-    background: var(--ts-nav-content-bg, #fff);
-    border: 1px solid var(--ts-nav-content-border, rgba(0,0,0,.08));
+    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #fff));
+    border: 1px solid var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08)));
     border-radius: .5rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
+    box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
     padding: .5rem;
     z-index: 1050;
     display: none;
@@ -24068,10 +26279,10 @@ html.dark .ts-navbar,
     left: 0;
     min-width: 220px;
     overflow: hidden;
-    background: var(--ts-nav-content-bg, #fff);
-    border: 1px solid var(--ts-nav-content-border, rgba(0,0,0,.08));
+    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #fff));
+    border: 1px solid var(--ts-nav-content-border, var(--ts-skin-border, rgba(0,0,0,.08)));
     border-radius: .5rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06);
+    box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.06));
     z-index: 1050;
     display: none;
     transition: width .2s ease, height .2s ease, left .2s ease;
@@ -24158,20 +26369,20 @@ html.dark .ts-navbar,
 [data-navmenu-list-item-desc] {
     font-size: .8125rem;
     line-height: 1.4;
-    color: var(--ts-nav-muted, rgba(0,0,0,.55));
+    color: var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(0,0,0,.55)));
     margin: 0;
 }
 
 /* Dark-mode overrides */
 html.dark [data-navmenu-content],
 html.dark [data-navmenu-viewport] {
-    background: var(--ts-nav-content-bg, #1c1c1e);
-    border-color: var(--ts-nav-content-border, rgba(255,255,255,.1));
-    box-shadow: 0 4px 24px rgba(0,0,0,.4);
+    background: var(--ts-nav-content-bg, var(--ts-skin-surface, #1c1c1e));
+    border-color: var(--ts-nav-content-border, var(--ts-skin-border, rgba(255,255,255,.1)));
+    box-shadow: var(--ts-skin-shadow, 0 4px 24px rgba(0,0,0,.4));
 }
 
 html.dark [data-navmenu-list-item-desc] {
-    color: var(--ts-nav-muted, rgba(255,255,255,.55));
+    color: var(--ts-nav-muted, var(--ts-skin-text-dim, rgba(255,255,255,.55)));
 }
 `;
 
@@ -24578,6 +26789,7 @@ html.dark [data-navmenu-list-item-desc] {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Newsletter
+// Newsletter
 (((themestrap = {}, $) => {
     let initialized = false;
 
@@ -24611,7 +26823,7 @@ html.dark [data-navmenu-list-item-desc] {
 			},
 
 			build() {
-				if (!($.isFunction($.fn.validate))) {
+				if (typeof $.fn.validate !== 'function') {
 					return this;
 				}
 
@@ -24677,6 +26889,44 @@ html.dark [data-navmenu-list-item-desc] {
 })).apply(this, [window.themestrap, jQuery]);
 
 // One-time Password
+/**
+ * Themestrap OTP Plugin
+ * Digit-segmented one-time password / PIN input with auto-advance,
+ * backspace navigation, paste handling, and ARIA wiring.
+ *
+ * Markup anatomy:
+ *
+ *   <div data-plugin-otp
+ *        data-plugin-options='{"length": 6, "type": "numeric", "autoSubmit": true}'></div>
+ *
+ * Public API (via stored instance):
+ *   const otp = $('#myOtp').data('__pluginOtp');
+ *   otp.getValue();          // returns the current string, e.g. "483920"
+ *   otp.setValue('123456'); // fills all boxes, moves focus, fires events
+ *   otp.clear();            // empties all boxes, fires ts.otp.clear
+ *   otp.focus();            // focuses the first empty box (or first box)
+ *   otp.setError('Bad code'); // adds error state + message, shakes
+ *   otp.setValid();         // adds valid state, clears error
+ *   otp.disable(true|false);// disables / re-enables all inputs
+ *   otp.destroy();          // teardown, empties element
+ *
+ * Events dispatched on the wrapper element:
+ *   ts.otp.change    — { value, complete }  on every keystroke
+ *   ts.otp.complete  — { value }            when all boxes are filled
+ *   ts.otp.submit    — { value }            when autoSubmit: true fires
+ *   ts.otp.clear     — {}                   when clear() is called
+ *
+ * Init.js wiring (DOMReady-immediate):
+ *   if (typeof $.fn['themestrapPluginOtp'] === 'function' && $('[data-plugin-otp]').length) {
+ *       $(() => {
+ *           $('[data-plugin-otp]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginOtp(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginOtp';
     const STYLE_ID     = 'ts-otp-styles';
@@ -24694,7 +26944,7 @@ html.dark [data-navmenu-list-item-desc] {
             width: 100%;
             font-size: 13px;
             font-weight: 600;
-            color: var(--ts-otp-label-color, rgba(255,255,255,.7));
+            color: var(--ts-otp-label-color, var(--ts-skin-text-dim, rgba(255,255,255,.7)));
             margin-bottom: 4px;
             letter-spacing: .03em;
             display: block;
@@ -24706,11 +26956,11 @@ html.dark [data-navmenu-list-item-desc] {
             text-align: center;
             font-size: var(--ts-otp-font-size, 22px);
             font-weight: 700;
-            font-family: var(--bs-font-monospace, monospace);
-            border: 2px solid var(--ts-otp-border, rgba(255,255,255,.15));
-            border-radius: var(--ts-otp-radius, 10px);
-            background: var(--ts-otp-bg, rgba(255,255,255,.06));
-            color: var(--ts-otp-color, #f3f4f6);
+            font-family: var(--ts-skin-font-mono, var(--bs-font-monospace, monospace));
+            border: 2px solid var(--ts-otp-border, var(--ts-skin-border, rgba(255,255,255,.15)));
+            border-radius: var(--ts-otp-radius, var(--ts-skin-radius-lg, 10px));
+            background: var(--ts-otp-bg, var(--ts-skin-surface-2, rgba(255,255,255,.06)));
+            color: var(--ts-otp-color, var(--ts-skin-text, #f3f4f6));
             outline: none;
             transition: border-color .15s, box-shadow .15s, background .15s;
             caret-color: transparent;
@@ -24725,9 +26975,9 @@ html.dark [data-navmenu-list-item-desc] {
         }
 
         .ts-otp__input:focus {
-            border-color: var(--ts-otp-focus-border, #2ab8c8);
-            box-shadow: 0 0 0 3px var(--ts-otp-focus-ring, rgba(42,184,200,.2));
-            background: var(--ts-otp-bg-focus, rgba(42,184,200,.06));
+            border-color: var(--ts-otp-focus-border, var(--ts-skin-accent, #2ab8c8));
+            box-shadow: 0 0 0 3px var(--ts-otp-focus-ring, var(--ts-skin-ring, rgba(42,184,200,.2)));
+            background: var(--ts-otp-bg-focus, var(--ts-skin-accent-soft, rgba(42,184,200,.06)));
         }
 
         .ts-otp__input:disabled {
@@ -24736,21 +26986,21 @@ html.dark [data-navmenu-list-item-desc] {
         }
 
         .ts-otp--error .ts-otp__input {
-            border-color: var(--ts-otp-error-color, #e8672a) !important;
+            border-color: var(--ts-otp-error-color, var(--ts-skin-danger, #e8672a)) !important;
         }
 
         .ts-otp--error .ts-otp__input:focus {
-            box-shadow: 0 0 0 3px rgba(232,103,42,.2);
+            box-shadow: 0 0 0 3px var(--ts-skin-danger, rgba(232,103,42,.2));
         }
 
         .ts-otp--valid .ts-otp__input {
-            border-color: var(--ts-otp-valid-color, #2ab8c8);
+            border-color: var(--ts-otp-valid-color, var(--ts-skin-success, #2ab8c8));
         }
 
         .ts-otp__separator {
             font-size: 22px;
             font-weight: 700;
-            color: var(--ts-otp-sep-color, rgba(255,255,255,.3));
+            color: var(--ts-otp-sep-color, var(--ts-skin-border, rgba(255,255,255,.3)));
             line-height: 1;
             user-select: none;
         }
@@ -24758,7 +27008,7 @@ html.dark [data-navmenu-list-item-desc] {
         .ts-otp__hint {
             width: 100%;
             font-size: 12px;
-            color: var(--ts-otp-hint-color, rgba(255,255,255,.38));
+            color: var(--ts-otp-hint-color, var(--ts-skin-text-dim, rgba(255,255,255,.38)));
             margin: 5px 0 0 0;
             line-height: 1.4;
         }
@@ -24767,7 +27017,7 @@ html.dark [data-navmenu-list-item-desc] {
             width: 100%;
             font-size: 12.5px;
             font-weight: 500;
-            color: var(--ts-otp-error-color, #e8672a);
+            color: var(--ts-otp-error-color, var(--ts-skin-danger, #e8672a));
             margin: 5px 0 0 0;
             min-height: 18px;
             line-height: 1.4;
@@ -24777,23 +27027,23 @@ html.dark [data-navmenu-list-item-desc] {
         .ts-otp--sm .ts-otp__input {
             --ts-otp-size: 40px;
             --ts-otp-font-size: 16px;
-            --ts-otp-radius: 7px;
+            --ts-otp-radius: var(--ts-skin-radius, 7px);
         }
 
         .ts-otp--lg .ts-otp__input {
             --ts-otp-size: 68px;
             --ts-otp-font-size: 30px;
-            --ts-otp-radius: 14px;
+            --ts-otp-radius: var(--ts-skin-radius-lg, 14px);
         }
 
         /* Light theme override */
         .ts-otp--light .ts-otp__input {
-            --ts-otp-bg:           rgba(0,0,0,.04);
-            --ts-otp-bg-focus:     rgba(42,184,200,.05);
-            --ts-otp-border:       rgba(0,0,0,.18);
-            --ts-otp-color:        #1a1f2e;
-            --ts-otp-label-color:  rgba(0,0,0,.65);
-            --ts-otp-hint-color:   rgba(0,0,0,.38);
+            --ts-otp-bg:           var(--ts-skin-surface-2, rgba(0,0,0,.04));
+            --ts-otp-bg-focus:     var(--ts-skin-accent-soft, rgba(42,184,200,.05));
+            --ts-otp-border:       var(--ts-skin-border, rgba(0,0,0,.18));
+            --ts-otp-color:        var(--ts-skin-text, #1a1f2e);
+            --ts-otp-label-color:  var(--ts-skin-text-dim, rgba(0,0,0,.65));
+            --ts-otp-hint-color:   var(--ts-skin-text-dim, rgba(0,0,0,.38));
         }
 
         /* Shake keyframe — triggered by setError() */
@@ -25157,6 +27407,14 @@ html.dark [data-navmenu-list-item-desc] {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Panel Nav
+/**
+ * Themestrap Panel Navigation
+ *
+ * A vertical link list with a caret-right active indicator, expandable
+ * drawer-toggle parent sections, optional left icons + right metadata,
+ * section headings, and separators.
+ */
+// Panel Nav
 (((themestrap = {}, $) => {
 
     const instanceName = '__pluginPanelNav';
@@ -25179,24 +27437,24 @@ html.dark [data-navmenu-list-item-desc] {
     --ts-pn-font-size:          0.875rem;
 
     /* Colours — override via CSS or data-plugin-options */
-    --ts-pn-bg:                 #ffffff;
-    --ts-pn-border-color:       #e6e9ee;
+    --ts-pn-bg:                 var(--ts-skin-surface, #ffffff);
+    --ts-pn-border-color:       var(--ts-skin-border, #e6e9ee);
 
-    --ts-pn-text:               #1c1f23;
-    --ts-pn-text-muted:         #6b7785;
-    --ts-pn-icon-color:         #6b7785;
+    --ts-pn-text:               var(--ts-skin-text, #1c1f23);
+    --ts-pn-text-muted:         var(--ts-skin-text-dim, #6b7785);
+    --ts-pn-icon-color:         var(--ts-skin-text-dim, #6b7785);
 
-    --ts-pn-accent:             var(--color-primary, #2470de);
-    --ts-pn-item-hover-bg:      #f4f6f8;
+    --ts-pn-accent:             var(--ts-skin-accent, var(--color-primary, #2470de));
+    --ts-pn-item-hover-bg:      var(--ts-skin-elevated, #f4f6f8);
     --ts-pn-item-active-bg:     transparent;
-    --ts-pn-item-active-text:   var(--ts-pn-accent);
-    --ts-pn-item-active-icon:   var(--ts-pn-accent);
-    --ts-pn-active-bar:         var(--ts-pn-accent);
+    --ts-pn-item-active-text:   var(--ts-skin-accent, var(--ts-pn-accent));
+    --ts-pn-item-active-icon:   var(--ts-skin-accent, var(--ts-pn-accent));
+    --ts-pn-active-bar:         var(--ts-skin-accent, var(--ts-pn-accent));
 
-    --ts-pn-section-title:      #8a93a0;
-    --ts-pn-metadata-color:     #8a93a0;
+    --ts-pn-section-title:      var(--ts-skin-text-strong, #8a93a0);
+    --ts-pn-metadata-color:     var(--ts-skin-text-dim, #8a93a0);
 
-    --ts-pn-focus-ring:         var(--ts-pn-accent);
+    --ts-pn-focus-ring:         var(--ts-skin-ring, var(--ts-pn-accent));
 
     box-sizing: border-box;
     width: var(--ts-pn-width);
@@ -25214,21 +27472,21 @@ html.dark [data-navmenu-list-item-desc] {
 
 /* Dark variant */
 .ts-panel-nav--dark {
-    --ts-pn-bg:                 #10151c;
-    --ts-pn-border-color:       #232c38;
+    --ts-pn-bg:                 var(--ts-skin-surface, #10151c);
+    --ts-pn-border-color:       var(--ts-skin-border, #232c38);
 
-    --ts-pn-text:               #e7ecf2;
-    --ts-pn-text-muted:         #8794a3;
-    --ts-pn-icon-color:         #8794a3;
+    --ts-pn-text:               var(--ts-skin-text, #e7ecf2);
+    --ts-pn-text-muted:         var(--ts-skin-text-dim, #8794a3);
+    --ts-pn-icon-color:         var(--ts-skin-text-dim, #8794a3);
 
-    --ts-pn-accent:             #6fa8ff;
-    --ts-pn-item-hover-bg:      #1a212b;
-    --ts-pn-item-active-text:   #9cc4ff;
-    --ts-pn-item-active-icon:   #9cc4ff;
-    --ts-pn-active-bar:         #6fa8ff;
+    --ts-pn-accent:             var(--ts-skin-accent, #6fa8ff);
+    --ts-pn-item-hover-bg:      var(--ts-skin-elevated, #1a212b);
+    --ts-pn-item-active-text:   var(--ts-skin-accent, #9cc4ff);
+    --ts-pn-item-active-icon:   var(--ts-skin-accent, #9cc4ff);
+    --ts-pn-active-bar:         var(--ts-skin-accent, #6fa8ff);
 
-    --ts-pn-section-title:      #6b7785;
-    --ts-pn-metadata-color:     #6b7785;
+    --ts-pn-section-title:      var(--ts-skin-text-strong, #6b7785);
+    --ts-pn-metadata-color:     var(--ts-skin-text-dim, #6b7785);
 }
 
 /* Full-height variant (when used as a left rail) */
@@ -26209,6 +28467,7 @@ html.dark [data-navmenu-list-item-desc] {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Parallax
+// Parallax
 (((themestrap = {}, $) => {
 
     const instanceName = '__parallax';
@@ -26563,6 +28822,79 @@ html.dark [data-navmenu-list-item-desc] {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Popover
+/**
+ * Themestrap Popover Plugin
+ * Accessible, anchor-positioned popovers.
+ *
+ * Part of the Themestrap component library for MODX 3
+ *
+ * Markup anatomy
+ *
+ *   <!-- Wrapper (the plugin root — positions anchor + popover together) -->
+ *   <div data-plugin-popover
+ *        data-plugin-options='{"side": "bottom", "align": "start"}'>
+ *
+ *     <!-- Trigger: the button / link that opens the popover -->
+ *     <button data-popover-trigger>Open</button>
+ *
+ *     <!-- Content panel: shown/hidden by the plugin -->
+ *     <div data-popover-content>
+ *       <h4 data-popover-title>Popover heading</h4>
+ *       <p>Your popover content goes here.</p>
+ *     </div>
+ *   </div>
+ *
+ * Alternatively: trigger and content in separate DOM positions
+ *
+ *   <button data-popover-trigger="settings-pop">Settings</button>
+ *
+ *   <div data-plugin-popover id="settings-pop"
+ *        data-plugin-options='{"side":"right"}'>
+ *     <div data-popover-content>…</div>
+ *   </div>
+ *
+ * Options (data-plugin-options JSON or JS object)
+ *
+ *   side              "top"|"bottom"|"left"|"right"   where the popover appears
+ *   align             "start"|"center"|"end"          alignment along the side axis
+ *   offset            8                               gap between trigger and popover (px)
+ *   arrow             true                            show a pointing arrow
+ *   portaling         false                           append content to <body> to escape
+ *                                                     overflow:hidden / stacking contexts
+ *   closeOnEscape     true                            Escape key closes
+ *   closeOnOutside    true                            click outside closes
+ *   animationIn       "ts-pop-in"                     CSS animation class on open
+ *   animationOut      "ts-pop-out"                    CSS animation class on close
+ *   animationDuration 200                             ms fallback if animationend stalls
+ *   modal             false                           trap focus inside content
+ *   onOpen            null                            callback(instance)
+ *   onClose           null                            callback(instance)
+ *
+ * Public API
+ *
+ *   const pop = $('#my-popover').data('__pluginPopover');
+ *   pop.open();
+ *   pop.close();
+ *   pop.toggle();
+ *   pop.update();   // reposition without closing
+ *
+ * Events fired on [data-plugin-popover]
+ *
+ *   popover:open   — after open animation begins   (detail: instance)
+ *   popover:close  — after close animation ends    (detail: instance)
+ *
+ * Init.js wiring
+ *
+ *   if (typeof $.fn['themestrapPluginPopover'] === 'function' && $('[data-plugin-popover]').length) {
+ *       $(() => {
+ *           $('[data-plugin-popover]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginPopover(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginPopover';
 
@@ -26596,15 +28928,15 @@ html.dark [data-navmenu-list-item-desc] {
     z-index: 9995;
     min-width: 14rem;
     max-width: 22rem;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--ts-pop-surface, var(--ts-skin-surface, #fff));
+    border: 1px solid var(--ts-pop-border, var(--ts-skin-border, rgba(0, 0, 0, 0.08)));
     border-radius: 0.5rem;
     box-shadow:
-        0 4px  6px -1px rgba(0, 0, 0, 0.07),
-        0 10px 15px -3px rgba(0, 0, 0, 0.10);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0, 0, 0, 0.07),
+        0 10px 15px -3px rgba(0, 0, 0, 0.10));
     padding: 1rem;
     line-height: 1.5;
-    color: #1a1a2e;
+    color: var(--ts-pop-text, var(--ts-skin-text, #1a1a2e));
 
     /* Hidden by default */
     display: none;
@@ -26642,20 +28974,20 @@ html.dark [data-navmenu-list-item-desc] {
 }
 
 /* Bottom arrow (popover is above trigger) */
-[data-popover-content].ts-pop-side-top::after  { top: 100%; border-top-color: #fff; }
-[data-popover-content].ts-pop-side-top::before { top: calc(100% + 1px); border-top-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-top::after  { top: 100%; border-top-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-top::before { top: calc(100% + 1px); border-top-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Top arrow (popover is below trigger) */
-[data-popover-content].ts-pop-side-bottom::after  { bottom: 100%; border-bottom-color: #fff; }
-[data-popover-content].ts-pop-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-bottom::after  { bottom: 100%; border-bottom-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-bottom::before { bottom: calc(100% + 1px); border-bottom-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Right arrow (popover is left of trigger) */
-[data-popover-content].ts-pop-side-left::after  { left: 100%; border-left-color: #fff; }
-[data-popover-content].ts-pop-side-left::before { left: calc(100% + 1px); border-left-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-left::after  { left: 100%; border-left-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-left::before { left: calc(100% + 1px); border-left-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Left arrow (popover is right of trigger) */
-[data-popover-content].ts-pop-side-right::after  { right: 100%; border-right-color: #fff; }
-[data-popover-content].ts-pop-side-right::before { right: calc(100% + 1px); border-right-color: rgba(0,0,0,0.08); }
+[data-popover-content].ts-pop-side-right::after  { right: 100%; border-right-color: var(--ts-pop-surface, var(--ts-skin-surface, #fff)); }
+[data-popover-content].ts-pop-side-right::before { right: calc(100% + 1px); border-right-color: var(--ts-pop-border, var(--ts-skin-border, rgba(0,0,0,0.08))); }
 
 /* Animations */
 @keyframes tsPopIn {
@@ -26710,14 +29042,14 @@ html.dark [data-navmenu-list-item-desc] {
 [data-popover-content].ts-pop-side-right.ts-pop-in  { animation-name: tsPopInRight; }
 [data-popover-content].ts-pop-side-right.ts-pop-out { animation-name: tsPopOutRight; }
 
-/* Dark mode — uses Porto/Themestrap CSS custom properties set by html.dark */
+/* Dark mode — uses Themestrap CSS custom properties set by html.dark */
 html.dark [data-popover-content] {
     background: var(--dark-300);
     color: var(--default);
     border-color: var(--dark-rgba-50);
     box-shadow:
-        0 4px  6px -1px rgba(0, 0, 0, 0.3),
-        0 10px 15px -3px rgba(0, 0, 0, 0.4);
+        var(--ts-skin-shadow, 0 4px  6px -1px rgba(0, 0, 0, 0.3),
+        0 10px 15px -3px rgba(0, 0, 0, 0.4));
 }
 
 html.dark [data-popover-content].ts-pop-side-top::after    { border-top-color: var(--dark-300); }
@@ -27266,415 +29598,84 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 })).apply(this, [window.themestrap, jQuery]);
 
 // Pricing Toggle
-(((themestrap = {}, $) => {
-    const instanceName = '__pricingToggle';
-
-    // CSS injected once per page
-    const STYLE_ID = 'themestrap-pricingtoggle-styles';
-
-    const CSS = `
-        [data-plugin-pricingtoggle] {
-            display: inline-flex;
-            align-items: center;
-            gap: .75rem;
-            user-select: none;
-        }
-
-        /* Track */
-        [data-pt-track] {
-            position: relative;
-            display: inline-block;
-            width: var(--pt-track-width, 44px);
-            height: var(--pt-track-height, 24px);
-            border-radius: 9999px;
-            background: var(--pt-track-bg, #3b82f6);
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            transition: background var(--pt-duration, 250ms) ease;
-            flex-shrink: 0;
-        }
-        [data-pt-track]:focus-visible {
-            outline: 2px solid var(--pt-track-bg, #3b82f6);
-            outline-offset: 3px;
-        }
-
-        /* Thumb */
-        [data-pt-thumb] {
-            position: absolute;
-            top: var(--pt-thumb-inset, 3px);
-            left: var(--pt-thumb-inset, 3px);
-            width: var(--pt-thumb-size, 18px);
-            height: var(--pt-thumb-size, 18px);
-            border-radius: 50%;
-            background: var(--pt-thumb-bg, #fff);
-            box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
-            transition: left var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1),
-                        background var(--pt-duration, 250ms) ease;
-            pointer-events: none;
-        }
-
-        /* Secondary (active / "on") state: slide thumb to the right */
-        [data-pt-track][aria-pressed="true"] [data-pt-thumb] {
-            left: calc(
-                var(--pt-track-width, 44px)
-                - var(--pt-thumb-size, 18px)
-                - var(--pt-thumb-inset, 3px)
-            );
-        }
-
-        /* Labels */
-        [data-pt-label-primary],
-        [data-pt-label-secondary] {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            font-size: .875rem;
-            font-weight: 600;
-            color: var(--pt-label-muted, #64748b);
-            transition: color var(--pt-duration, 250ms) ease;
-            cursor: pointer;
-        }
-        [data-pt-label-primary].is-active,
-        [data-pt-label-secondary].is-active {
-            color: var(--pt-label-active, #0f172a);
-        }
-
-        /* Savings badge — hidden in primary state, shown in secondary */
-        [data-pt-savings-badge] {
-            display: inline-block;
-            background: var(--pt-badge-bg, rgba(34, 197, 94, .12));
-            color: var(--pt-badge-color, #16a34a);
-            font-size: .6875rem;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 9999px;
-            letter-spacing: .02em;
-            opacity: 0;
-            transform: scale(.8) translateY(2px);
-            transition: opacity var(--pt-duration, 250ms) ease,
-                        transform var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1);
-            pointer-events: none;
-        }
-        [data-pt-label-secondary].is-active [data-pt-savings-badge] {
-            opacity: 1;
-            transform: none;
-        }
-
-        /* Price targets: crossfade between values */
-        [data-pt-price] {
-            display: inline-block;
-            transition: opacity var(--pt-price-duration, 180ms) ease;
-        }
-        [data-pt-price].pt-fading {
-            opacity: 0;
-        }
-    `;
-
-    function injectStyles() {
-        if (document.getElementById(STYLE_ID)) return;
-        const $style = $('<style>').attr({ id: STYLE_ID, type: 'text/css' }).text(CSS);
-        $('head').append($style);
-    }
-
-    /**
-     * Update every [data-pt-price] element on the page whose scope matches
-     * this toggle instance. Scoping: if the price element has a
-     * [data-pt-group] attribute it must equal the toggle's group option.
-     */
-    function updatePrices(opts, state) {
-        const isPrimary = state === 'primary';
-        const group = opts.group || null;
-
-        $('[data-pt-price]').each(function () {
-            const $price = $(this);
-            const elGroup = $price.data('pt-group') || null;
-
-            // Scope: only update elements that belong to the same group,
-            // OR elements with no group when no group is configured.
-            if (group !== elGroup) return;
-
-            const primary   = $price.data('pt-primary')   ?? '';
-            const secondary = $price.data('pt-secondary') ?? '';
-            const next = isPrimary ? primary : secondary;
-
-            if (opts.animatePrices) {
-                $price.addClass('pt-fading');
-                setTimeout(() => {
-                    $price.text(next).removeClass('pt-fading');
-                }, opts.priceFadeDuration);
-            } else {
-                $price.text(next);
-            }
-        });
-    }
-
-    class PluginPricingToggle {
-
-        constructor($el, opts) {
-            return this.initialize($el, opts);
-        }
-
-        initialize($el, opts) {
-            if ($el.data(instanceName)) {
-                return $el.data(instanceName);
-            }
-
-            this.$el = $el;
-
-            this
-                .setData()
-                .setOptions(opts)
-                .build()
-                .events();
-
-            return this;
-        }
-
-        setData() {
-            this.$el.data(instanceName, this);
-            return this;
-        }
-
-        setOptions(opts) {
-            const attrOpts = themestrap.fn.getOptions(this.$el.data('plugin-options'));
-
-            this.options = $.extend(true, {}, PluginPricingToggle.defaults, opts, attrOpts, {
-                wrapper: this.$el,
-            });
-
-            // Resolve initial state from markup if not forced via options.
-            // If the track is already aria-pressed="true" we start secondary.
-            if (!this.options.initialState) {
-                const $track = this.$el.find('[data-pt-track]');
-                this.options.initialState =
-                    $track.attr('aria-pressed') === 'true' ? 'secondary' : 'primary';
-            }
-
-            this._state = this.options.initialState;
-            return this;
-        }
-
-        build() {
-            injectStyles();
-
-            const o = this.options;
-            const $el = this.$el;
-
-            // Cache sub-element references (supports zero or one of each).
-            this.$track         = $el.find('[data-pt-track]');
-            this.$thumb         = $el.find('[data-pt-thumb]');
-            this.$labelPrimary  = $el.find('[data-pt-label-primary]');
-            this.$labelSecondary= $el.find('[data-pt-label-secondary]');
-            this.$savingsBadge  = $el.find('[data-pt-savings-badge]');
-
-            // Ensure the track button has the right type & ARIA role.
-            if (this.$track.is('button') && !this.$track.attr('type')) {
-                this.$track.attr('type', 'button');
-            }
-            this.$track.attr('role', 'switch');
-
-            // Apply CSS custom properties from options so pure-CSS themes
-            // can pick them up without any extra JS.
-            $el.css({
-                '--pt-track-width':      o.trackWidth,
-                '--pt-track-height':     o.trackHeight,
-                '--pt-thumb-size':       o.thumbSize,
-                '--pt-thumb-inset':      o.thumbInset,
-                '--pt-track-bg':         o.trackColor,
-                '--pt-thumb-bg':         o.thumbColor,
-                '--pt-duration':         o.duration + 'ms',
-                '--pt-price-duration':   o.priceFadeDuration + 'ms',
-                '--pt-label-muted':      o.labelMutedColor,
-                '--pt-label-active':     o.labelActiveColor,
-                '--pt-badge-bg':         o.badgeBg,
-                '--pt-badge-color':      o.badgeColor,
-            });
-
-            // Apply initial visual state without emitting events.
-            this._applyState(this._state, { silent: true });
-
-            // Set initial price values.
-            updatePrices(o, this._state);
-
-            return this;
-        }
-
-        events() {
-            const self = this;
-
-            // Track click / keyboard.
-            self.$track.on('click.pricingtoggle', function () {
-                self.toggle();
-            });
-
-            // Label clicks also toggle.
-            self.$labelPrimary.on('click.pricingtoggle', function () {
-                if (self._state !== 'primary') self.setState('primary');
-            });
-            self.$labelSecondary.on('click.pricingtoggle', function () {
-                if (self._state !== 'secondary') self.setState('secondary');
-            });
-
-            // Keyboard: Space / Enter on non-button tracks.
-            if (!self.$track.is('button')) {
-                self.$track.on('keydown.pricingtoggle', function (e) {
-                    if (e.key === ' ' || e.key === 'Enter' || e.key === 'Spacebar') {
-                        e.preventDefault();
-                        self.toggle();
-                    }
-                });
-            }
-
-            return this;
-        }
-
-        /**
-         * Apply visual state to all sub-elements.
-         * @param {string}  state   'primary' | 'secondary'
-         * @param {object}  opts
-         * @param {boolean} opts.silent  suppress jQuery event emission
-         */
-        _applyState(state, { silent = false } = {}) {
-            const o  = this.options;
-            const isSecondary = state === 'secondary';
-
-            // ARIA
-            this.$track.attr('aria-pressed', isSecondary ? 'true' : 'false');
-
-            // Labels
-            this.$labelPrimary
-                .toggleClass('is-active', !isSecondary)
-                .toggleClass(o.activeClass, !isSecondary);
-            this.$labelSecondary
-                .toggleClass('is-active', isSecondary)
-                .toggleClass(o.activeClass, isSecondary);
-
-            // Host element class hook for external CSS.
-            this.$el.toggleClass(o.activeClass, isSecondary);
-
-            // Accessible labels on track button.
-            if (this.$track.length) {
-                this.$track.attr(
-                    'aria-label',
-                    isSecondary ? o.ariaLabelSecondary : o.ariaLabelPrimary,
-                );
-            }
-
-            if (!silent) {
-                updatePrices(o, state);
-                this._emit(state);
-                if (typeof o.onChange === 'function') {
-                    o.onChange.call(this, state, this);
-                }
-            }
-
-            return this;
-        }
-
-        /** Build and fire the three namespaced jQuery events. */
-        _emit(state) {
-            const detail = {
-                state,
-                isPrimary:   state === 'primary',
-                isSecondary: state === 'secondary',
-                instance: this,
-            };
-            this.$el.trigger('ts-pricingtoggle-changed',   [detail]);
-            this.$el.trigger('ts-pricingtoggle-' + state,  [detail]);
-        }
-
-        /**
-         * Set the toggle to a specific state.
-         * @param {'primary'|'secondary'} state
-         */
-        setState(state) {
-            if (state !== 'primary' && state !== 'secondary') return this;
-            if (state === this._state) return this;
-            this._state = state;
-            this._applyState(state);
-            return this;
-        }
-
-        /** Flip the current state. */
-        toggle() {
-            return this.setState(this._state === 'primary' ? 'secondary' : 'primary');
-        }
-
-        /** Return the current state string. */
-        getState() {
-            return this._state;
-        }
-
-        /** Tear down: remove handlers + instance data. */
-        destroy() {
-            this.$track.off('.pricingtoggle');
-            this.$labelPrimary.off('.pricingtoggle');
-            this.$labelSecondary.off('.pricingtoggle');
-            this.$el.off('.pricingtoggle').removeData(instanceName);
-            return this;
-        }
-    }
-
-    PluginPricingToggle.defaults = {
-        // Starting state. 'primary' = left/off, 'secondary' = right/on.
-        // If null the plugin reads aria-pressed from the [data-pt-track] element.
-        initialState: null,
-
-        // Class added to the wrapper and the active label. Useful for theming.
-        activeClass: 'is-secondary',
-
-        // Group key — scope [data-pt-price] updates to elements with a
-        // matching [data-pt-group] attribute. Null = unscoped (updates all
-        // price elements without a group attribute).
-        group: null,
-
-        // Price animation: crossfade price spans when switching state.
-        animatePrices:     true,
-        priceFadeDuration: 160,          // ms for the opacity fade
-
-        // Thumb slide duration (also used for label color transition).
-        duration: 250,                   // ms
-
-        // Track / thumb geometry expressed as CSS values.
-        trackWidth:  '44px',
-        trackHeight: '24px',
-        thumbSize:   '18px',
-        thumbInset:  '3px',
-
-        // Colors (applied as CSS custom properties).
-        trackColor:       '#3b82f6',
-        thumbColor:       '#ffffff',
-        labelMutedColor:  '#64748b',
-        labelActiveColor: '#0f172a',
-        badgeBg:          'rgba(34,197,94,.12)',
-        badgeColor:       '#16a34a',
-
-        // Accessible labels for the track button.
-        ariaLabelPrimary:   'Switch to annual billing',
-        ariaLabelSecondary: 'Switch to monthly billing',
-
-        // Optional callback fired on every state change.
-        // Signature: function(state, instance) {}
-        onChange: null,
-    };
-
-    $.extend(themestrap, { PluginPricingToggle });
-
-    $.fn.themestrapPluginPricingToggle = function (opts) {
-        return this.map(function () {
-            const $this = $(this);
-
-            if ($this.data(instanceName)) {
-                return $this.data(instanceName);
-            }
-
-            return new PluginPricingToggle($this, opts);
-        });
-    };
-
-})).apply(this, [window.themestrap, jQuery]);
-
+/**
+ * Themestrap Progress Bar Plugin
+ * Animated progress bars with scroll-triggered fill, color variants,
+ * striped/animated patterns, indeterminate state, and an optional live value label.
+ *
+ * Part of the Themestrap component library.
+ *
+ * Markup anatomy
+ *
+ *   <!-- Minimal: 75% filled, primary color -->
+ *   <div data-plugin-progress-bar data-plugin-options='{"value": 75}'></div>
+ *
+ *   <!-- Success color, striped -->
+ *   <div data-plugin-progress-bar
+ *        data-plugin-options='{"value": 60, "color": "success", "striped": true}'></div>
+ *
+ *   <!-- Animated stripes -->
+ *   <div data-plugin-progress-bar
+ *        data-plugin-options='{"value": 80, "color": "warning", "animated": true}'></div>
+ *
+ *   <!-- With value label -->
+ *   <div data-plugin-progress-bar
+ *        data-plugin-options='{"value": 45, "label": true}'></div>
+ *
+ *   <!-- Custom label format -->
+ *   <div data-plugin-progress-bar
+ *        data-plugin-options='{"value": 3, "label": true, "labelFormat": "{value} of 10"}'></div>
+ *
+ *   <!-- Indeterminate (loading) state -->
+ *   <div data-plugin-progress-bar
+ *        data-plugin-options='{"indeterminate": true, "color": "info"}'></div>
+ *
+ *   <!-- Large, square-cornered -->
+ *   <div data-plugin-progress-bar
+ *        data-plugin-options='{"value": 55, "size": "lg", "rounded": false}'></div>
+ *
+ *   <!-- Force init (no IntersectionObserver; fills immediately on DOMReady) -->
+ *   <div data-plugin-progress-bar
+ *        data-plugin-options='{"value": 90, "forceInit": true}'></div>
+ *
+ * Options (data-plugin-options JSON or JS object)
+ *
+ *   value         0           fill percentage: 0–100
+ *   color         'primary'   variant: primary|secondary|tertiary|quaternary|success|warning|danger|info|dark
+ *   striped       false       diagonal stripe pattern on the fill
+ *   animated      false       animates the stripe pattern (implies striped: true)
+ *   indeterminate false       endless back-and-forth animation; ignores value
+ *   label         false       show the value as text inside the fill bar
+ *   labelFormat   '{value}%'  token {value} is replaced with the rounded integer value
+ *   duration      1200        fill transition duration in ms
+ *   easing        'cubic-bezier(0.4, 0, 0.2, 1)'   CSS easing for the fill transition
+ *   size          ''          height variant: ''(default 8px)|xs(3px)|sm(5px)|md(8px)|lg(16px)
+ *   rounded       true        fully-rounded pill shape; false = square corners
+ *   forceInit     false       skip IntersectionObserver; init immediately (dynIntObsInit)
+ *   accY          0           IntersectionObserver rootMargin offset Y (dynIntObsInit)
+ *
+ * Public API (via instance: $el.data('__pluginProgressBar'))
+ *
+ *   instance.set(value)     — animate to a new 0–100 value
+ *   instance.get()          — return the current target value
+ *   instance.reset()        — animate back to 0
+ *   instance.destroy()      — full teardown; restores original markup
+ *
+ * Events fired on the host element (native CustomEvent, bubbles)
+ *
+ *   progressbar:complete    — fires when the fill reaches 100 %
+ *   progressbar:change      — fires on every set(); detail: { value, previous }
+ *
+ * Init.js wiring (dynIntObsInit — supports forceInit + accY)
+ *
+ *   if (typeof $.fn['themestrapPluginProgressBar'] === 'function' && $('[data-plugin-progress-bar]').length) {
+ *       themestrap.fn.dynIntObsInit(
+ *           '[data-plugin-progress-bar]:not(.manual)',
+ *           'themestrapPluginProgressBar',
+ *           themestrap.PluginProgressBar.defaults
+ *       );
+ *   }
+ */
 //Progress bar
 (((themestrap = {}, $) => {
     const instanceName = '__pluginProgressBar';
@@ -27737,10 +29738,10 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 .ts-progress-fill--secondary 	{ background: var(--secondary, #e36159); }
 .ts-progress-fill--tertiary 	{ background: var(--tertiary, #2BAAB1); }
 .ts-progress-fill--quaternary	{ background: var(--quaternary, #383f48); }
-.ts-progress-fill--success   	{ background: var(--success, #87bb53); }
-.ts-progress-fill--warning   	{ background: var(--warning, #f4bf75); }
-.ts-progress-fill--danger    	{ background: var(--danger, #ff6159); }
-.ts-progress-fill--info     	{ background: var(--info, #61a6d6); }
+.ts-progress-fill--success   	{ background: var(--ts-skin-success, var(--success, #87bb53)); }
+.ts-progress-fill--warning   	{ background: var(--ts-skin-warning, var(--warning, #f4bf75)); }
+.ts-progress-fill--danger    	{ background: var(--ts-skin-danger, var(--danger, #ff6159)); }
+.ts-progress-fill--info     	{ background: var(--ts-skin-info, var(--info, #61a6d6)); }
 .ts-progress-fill--dark      	{ background: var(--dark, #212529); }
 
 /* Striped pattern */
@@ -28090,7 +30091,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     return instance[opts](arg);
                 }
                 return instance;
@@ -28106,6 +30107,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Random Images
 // Random Images
 (((themestrap = {}, $) => {
 
@@ -29078,6 +31080,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 })).apply(this, [window.themestrap, jQuery]);
 
 // Rating
+// Rating
 (((themestrap = {}, $) => {
     const instanceName = '__rating';
 
@@ -29126,7 +31129,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
 
             if (str.startsWith('<svg')) {
                 if (this.options.currentColor) {
-                    // Inline SVG â€” sanitize hardcoded fill/stroke colors to currentColor,
+                    // Inline SVG: sanitize hardcoded fill/stroke colors to currentColor,
                     // leaving fill="none" and stroke="none" untouched.
                     const sanitized = str
                         .replace(/\bfill\s*=\s*"(?!none")[^"]*"/gi, 'fill="currentColor"')
@@ -29139,12 +31142,17 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
                 }
             }
 
-            if (/\bfa[-\w]/.test(str)) {
-                // Font Awesome class string e.g. "fa-solid fa-heart"
-                const size = (this.options.size && this.options.size !== 'md') ? ` fa-${this.options.size}` : '';
-                return `<i class="${str.replace(/"/g, '')}${size} icon"></i>`;
+            // Any other markup (an <img>, an emoji in a <span>) is wrapped as is
+            if (str.startsWith('<')) {
+                return `<span class="icon">${str}</span>`;
             }
 
+            // Otherwise it is a class string: Font Awesome, Bootstrap Icons, or your own.
+            // Only Font Awesome gets the fa-{size} modifier.
+            const classes = str.replace(/["<>]/g, '');
+            const isFa    = /(^|\s)fa[-\w]*/.test(classes);
+            const size    = (isFa && this.options.size && this.options.size !== 'md') ? ` fa-${this.options.size}` : '';
+            return `<i class="${classes}${size} icon" aria-hidden="true"></i>`;
         }
 
         build() {
@@ -29162,11 +31170,8 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
                 self.$icons = self.$el.find('.icon');
             }
 
-            if (o.interactive) {
-                self.$el.removeClass('disabled');
-            } else {
-                self.$el.addClass('disabled');
-            }
+            self.disabled = !o.interactive;
+            self.$el.toggleClass('disabled', self.disabled);
 
             self.setRating(o.initialRating, true);
 
@@ -29176,8 +31181,10 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
         events() {
             const self = this;
 
-            self.$el
+            // Handlers are bound once and stay bound; they ignore input while disabled.
+            self.$el.off('.rating')
                 .on('mouseenter.rating', '.icon', function() {
+                    if (self.disabled) return;
                     const $active = $(this);
                     $active.nextAll().removeClass('selected');
                     self.$el.addClass('selected');
@@ -29188,6 +31195,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
                     self.$icons.removeClass('selected');
                 })
                 .on('click.rating', '.icon', function() {
+                    if (self.disabled) return;
                     const o = self.options;
                     const current = self.getRating();
                     const rating = self.$icons.index($(this)) + 1;
@@ -29210,6 +31218,8 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
             const $partialIcon = rating <= 1 ? $activeIcon : $activeIcon.next();
             const filledPct = (rating % 1) * 100;
 
+            self._rating = Math.max(0, Number(rating) || 0);
+
             self.$el.removeClass('selected');
             self.$icons.removeClass('selected active partial');
 
@@ -29225,7 +31235,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
                 }
             }
 
-            if (!silent) {
+            if (!silent && typeof self.options.onRate === 'function') {
                 self.options.onRate.call(self.$el[0], rating);
             }
 
@@ -29233,7 +31243,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
         }
 
         getRating() {
-            return this.$icons.filter('.active').length;
+            return this._rating || 0;
         }
 
         clearRating() {
@@ -29241,17 +31251,15 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
         }
 
         enable() {
-            const self = this;
-            self.$el.removeClass('disabled');
-            if (!self.$el.data('eventsbound')) {
-                self.events();
-                self.$el.data('eventsbound', true);
-            }
+            this.disabled = false;
+            this.$el.removeClass('disabled');
             return this;
         }
 
         disable() {
-            this.$el.addClass('disabled').off('.rating');
+            this.disabled = true;
+            this.$el.removeClass('selected').addClass('disabled');
+            this.$icons.removeClass('selected');
             return this;
         }
 
@@ -29289,6 +31297,7 @@ html.dark [data-popover-content].ts-pop-side-right::before { border-right-color:
     };
 })).apply(this, [window.themestrap, jQuery]);
 
+// Read More
 // Read More
 (((themestrap = {}, $) => {
     const instanceName = '__readmore';
@@ -29591,6 +31600,7 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Revolution Slider
+// Revolution Slider
 (((themestrap = {}, $) => {
     const instanceName = '__revolution';
 
@@ -29630,7 +31640,7 @@ html.dark .ts-readmore-overlay {
 		}
 
         build() {
-			if (!($.isFunction($.fn.revolution))) {
+			if (!(typeof $.fn.revolution === 'function')) {
 				return this;
 			}
 
@@ -29964,11 +31974,11 @@ html.dark .ts-readmore-overlay {
 
                 const $scrollable = this.$element.find('.scrollable');
                 if ( $scrollable ) {
-                    if ( $.isFunction($.fn['themestrapPluginScrollable'])  ) {
+                    if ( typeof $.fn['themestrapPluginScrollable'] === 'function'  ) {
                         $scrollable.themestrapPluginScrollable();
                     }
 
-                    if ( $.isFunction($.fn['nanoScroller']) ) {
+                    if ( typeof $.fn['nanoScroller'] === 'function' ) {
                         $scrollable.nanoScroller();
                     }
                 }
@@ -30042,6 +32052,66 @@ html.dark .ts-readmore-overlay {
 		PluginScrollable.updateModals();
 	});
 })).apply(this, [window.themestrap, jQuery]);
+
+// Scrollbar
+/**
+ * Themestrap Plugin Scrollbar
+ *
+ * A self-contained custom scrollbar plugin — zero vendor JS dependencies.
+ *
+ * Usage — auto-init:
+ *   <div data-plugin-scrollbar style="height: 300px; overflow: hidden;">
+ *     ...content...
+ *   </div>
+ *
+ *   With options:
+ *   <div data-plugin-scrollbar
+ *        data-plugin-options='{"axis": "yx", "theme": "dark", "scrollInertia": 400}'>
+ *
+ * Usage — manual:
+ *   $('#sidebar').themestrapPluginScrollbar({ theme: 'rounded-dark' });
+ *
+ *   const sb = $('#sidebar').data('__scrollbar');
+ *   sb.scrollTo('bottom');
+ *   sb.update();
+ *   sb.setTheme('rounded-dark');
+ *   sb.destroy();
+ *
+ * Light and dark pages:
+ *   darkModeTheme names the theme to use while the page is dark. The scrollbar
+ *   then switches between theme and darkModeTheme by itself, following
+ *   PluginDarkMode (html.dark / data-bs-theme) and the system setting.
+ *     <div data-plugin-scrollbar
+ *          data-plugin-options='{"theme": "inset-3", "darkModeTheme": "inset-3-dark"}'>
+ *
+ *   sb.setTheme('minimal')                    — change the theme now
+ *   sb.setTheme('inset-3', 'inset-3-dark')    — change both themes
+ *   sb.setTheme(null, 'minimal-dark')         — change only the dark page theme
+ *   sb.setTheme(null, null)                   — stop following the page theme
+ *   sb.getTheme()                             — theme currently shown
+ *
+ *   Every change fires callbacks.onThemeChange and a bubbling native
+ *   'ts.scrollbar.theme' event (detail: { theme, previous, dark }). Listen with
+ *   addEventListener, jQuery .on() cannot bind dotted event names.
+ *
+ * scrollTo() target formats:
+ *   sb.scrollTo(300)            — pixel offset
+ *   sb.scrollTo('top')          — scroll to top / left
+ *   sb.scrollTo('bottom')       — scroll to bottom / right
+ *   sb.scrollTo('50%')          — 50 % of the scrollable range
+ *   sb.scrollTo('+=150')        — 150 px forward from current position
+ *   sb.scrollTo('-=150')        — 150 px back from current position
+ *   sb.scrollTo('#myAnchor')    — CSS selector within the content container
+ *   sb.scrollTo($('#myAnchor')) — jQuery element
+ *   sb.scrollTo([yVal, xVal])   — both axes at once (yx mode)
+ *
+ * Available themes:
+ *   light, dark, light-2, dark-2, thick, thick-dark, thin, thin-dark,
+ *   rounded, rounded-dark, rounded-dots, rounded-dots-dark,
+ *   3d, 3d-dark, 3d-thick, 3d-thick-dark,
+ *   minimal, minimal-dark,
+ *   inset, inset-dark, inset-2, inset-2-dark, inset-3, inset-3-dark
+ */
 
 // Scrollbar
 (((themestrap = {}, $) => {
@@ -30352,20 +32422,20 @@ html.dark .ts-readmore-overlay {
 /* 9. DEFAULT (LIGHT) THEME COLOURS */
 
 .ts-scrollbox-scrollTools .ts-scrollbox-draggerRail {
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--ts-sb-border-strong, var(--ts-skin-border-strong, rgba(0, 0, 0, 0.4)));
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger .ts-scrollbox-dragger-bar {
-    background-color: rgba(255, 255, 255, 0.75);
+    background-color: var(--ts-sb-border-strong, var(--ts-skin-border-strong, rgba(255, 255, 255, 0.75)));
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger:hover .ts-scrollbox-dragger-bar {
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: var(--ts-sb-text-faint, var(--ts-skin-text-faint, rgba(255, 255, 255, 0.85)));
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger.ts-scrollbox-dragger-onDrag .ts-scrollbox-dragger-bar,
 .ts-scrollbox-scrollTools .ts-scrollbox-dragger:active .ts-scrollbox-dragger-bar {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--ts-sb-text-faint, var(--ts-skin-text-faint, rgba(255, 255, 255, 0.9)));
 }
 
 /* Button hover / active opacity (arrow colour is set below) */
@@ -30404,28 +32474,28 @@ html.dark .ts-readmore-overlay {
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonUp::after {
     border-width: 0 5px 7px;
     border-style: solid;
-    border-color: transparent transparent rgba(255, 255, 255, 0.9);
+    border-color: transparent transparent var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9)));
     margin-top: -2px;
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonDown::after {
     border-width: 7px 5px 0;
     border-style: solid;
-    border-color: rgba(255, 255, 255, 0.9) transparent transparent;
+    border-color: var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9))) transparent transparent;
     margin-top: 2px;
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonLeft::after {
     border-width: 5px 7px 5px 0;
     border-style: solid;
-    border-color: transparent rgba(255, 255, 255, 0.9) transparent transparent;
+    border-color: transparent var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9))) transparent transparent;
     margin-left: -2px;
 }
 
 .ts-scrollbox-scrollTools .ts-scrollbox-buttonRight::after {
     border-width: 5px 0 5px 7px;
     border-style: solid;
-    border-color: transparent transparent transparent rgba(255, 255, 255, 0.9);
+    border-color: transparent transparent transparent var(--ts-sb-border, var(--ts-skin-border, rgba(255, 255, 255, 0.9)));
     margin-left: 2px;
 }
 
@@ -31169,6 +33239,51 @@ html.dark .ts-readmore-overlay {
 
     function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+    // Page theme
+    // Mirrors the Themestrap dark mode CSS tiers: html.dark or data-bs-theme="dark"
+    // wins, then data-bs-theme="light", then the system setting.
+    function pageIsDark() {
+        const html = document.documentElement;
+        const bsTheme = html.getAttribute('data-bs-theme');
+        if (html.classList.contains('dark') || bsTheme === 'dark') return true;
+        if (bsTheme === 'light') return false;
+        return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+
+    // Instances with a darkModeTheme share one MutationObserver and one media
+    // listener. Both are removed when the last of those instances is destroyed.
+    const themeFollowers = new Set();
+    let themeWatch = null;
+
+    function followPageTheme(inst) {
+        themeFollowers.add(inst);
+        if (themeWatch) return;
+
+        const refresh = () => themeFollowers.forEach((i) => i._applyTheme());
+        const mo = new MutationObserver(refresh);
+        mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-bs-theme'] });
+
+        const mql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+        if (mql) {
+            if (typeof mql.addEventListener === 'function') mql.addEventListener('change', refresh);
+            else if (typeof mql.addListener === 'function') mql.addListener(refresh);
+        }
+        themeWatch = { mo, mql, refresh };
+    }
+
+    function unfollowPageTheme(inst) {
+        themeFollowers.delete(inst);
+        if (themeFollowers.size || !themeWatch) return;
+
+        const { mo, mql, refresh } = themeWatch;
+        mo.disconnect();
+        if (mql) {
+            if (typeof mql.removeEventListener === 'function') mql.removeEventListener('change', refresh);
+            else if (typeof mql.removeListener === 'function') mql.removeListener(refresh);
+        }
+        themeWatch = null;
+    }
+
     class PluginScrollbar {
 
         constructor($el, opts) {
@@ -31239,12 +33354,15 @@ html.dark .ts-readmore-overlay {
             // 1 Root element gets Scrollbar + optional autoHide class
             self.$el.addClass('tsScrollbar' + (o.autoHideScrollbar ? ' ts-scrollbar--autoHide' : ''));
 
+            // Theme for the current page (theme, or darkModeTheme on a dark page)
+            const theme = self._appliedTheme = self._resolveTheme();
+
             // 2 Scroll box (the clipping viewport)
             const axisClass = o.axis === 'yx' ? 'ts-scrollbox-vertical-horizontal'
                             : o.axis === 'x'  ? 'ts-scrollbox-horizontal'
                             : 'ts-scrollbox-vertical';
 
-            self._$box = $(`<div class="tsScrollBox ts-scrollbar-${o.theme} ${axisClass} ts-scrollbox-inside"></div>`);
+            self._$box = $(`<div class="tsScrollBox ts-scrollbar-${theme} ${axisClass} ts-scrollbox-inside"></div>`);
 
             // 3 Content container (this is what actually moves when scrolling)
             self._$container = $('<div class="ts-scrollbox-container" style="position:relative;top:0;left:0;"></div>')
@@ -31276,7 +33394,7 @@ html.dark .ts-readmore-overlay {
                 const $draggerCont = $('<div class="ts-scrollbox-draggerContainer"></div>').append($dragger).append($rail);
 
                 // Theme class is placed on the tools element itself
-                const $tools = $(`<div class="ts-scrollbox-scrollTools ts-scrollbar-${o.theme} ${dirClass}"></div>`)
+                const $tools = $(`<div class="ts-scrollbox-scrollTools ts-scrollbar-${theme} ${dirClass}"></div>`)
                     .append($draggerCont);
 
                 let $btnA = null, $btnB = null;
@@ -31337,6 +33455,9 @@ html.dark .ts-readmore-overlay {
                 self._ro.observe(self._$box[0]);
                 self._ro.observe(self._$container[0]);
             }
+
+            // 9 Follow the page between light and dark
+            if (o.darkModeTheme) followPageTheme(self);
 
             return this;
         }
@@ -31938,17 +34059,40 @@ html.dark .ts-readmore-overlay {
         }
 
         // Callbacks 
-        _fireCallback(name) {
+        _fireCallback(name, extra) {
             const cb = this.options.callbacks[name];
             if (typeof cb !== 'function') return;
-            cb.call(this.$el[0], {
+            cb.call(this.$el[0], $.extend({
                 scrollY:    this._scrollY,
                 scrollX:    this._scrollX,
                 maxScrollY: this._maxScrollY,
                 maxScrollX: this._maxScrollX,
                 pctY: this._maxScrollY > 0 ? Math.round(100 * this._scrollY / this._maxScrollY) : 0,
                 pctX: this._maxScrollX > 0 ? Math.round(100 * this._scrollX / this._maxScrollX) : 0,
-            });
+            }, extra));
+        }
+
+        // Theme
+        _resolveTheme() {
+            const o = this.options;
+            return (o.darkModeTheme && pageIsDark()) ? o.darkModeTheme : o.theme;
+        }
+
+        // Swaps the ts-scrollbar-{theme} class on the scroll box and its tracks
+        _applyTheme() {
+            const previous = this._appliedTheme;
+            const theme = this._resolveTheme();
+            if (!this._$box || theme === previous) return this;
+
+            this._$box.add(this._$toolsV || []).add(this._$toolsH || [])
+                .removeClass('ts-scrollbar-' + previous)
+                .addClass('ts-scrollbar-' + theme);
+            this._appliedTheme = theme;
+
+            const detail = { theme, previous, dark: pageIsDark() };
+            this._fireCallback('onThemeChange', detail);
+            this.$el[0].dispatchEvent(new CustomEvent('ts.scrollbar.theme', { bubbles: true, detail }));
+            return this;
         }
 
         // scrollTo target resolution 
@@ -32076,6 +34220,36 @@ html.dark .ts-readmore-overlay {
         }
 
         /**
+         * Change the theme without rebuilding. Content, scroll position and
+         * event handlers are kept.
+         *
+         * @param {string|null}           theme          — theme for light pages (or every page
+         *                                                 when darkModeTheme is not set).
+         *                                                 null or '' leaves it unchanged.
+         * @param {string|null|undefined} [darkModeTheme] — theme for dark pages. Omit to leave
+         *                                                 it unchanged, null to stop following
+         *                                                 the page theme.
+         */
+        setTheme(theme, darkModeTheme) {
+            const o = this.options;
+            if (typeof theme === 'string' && theme) o.theme = theme;
+            if (darkModeTheme !== undefined) o.darkModeTheme = darkModeTheme || null;
+
+            if (o.darkModeTheme) followPageTheme(this);
+            else unfollowPageTheme(this);
+
+            return this._applyTheme();
+        }
+
+        /**
+         * The theme currently shown.
+         * @returns {string}
+         */
+        getTheme() {
+            return this._appliedTheme;
+        }
+
+        /**
          * Destroy the plugin and restore the element to its original HTML.
          */
         destroy() {
@@ -32086,17 +34260,14 @@ html.dark .ts-readmore-overlay {
             clearTimeout(self._hideTimer);
 
             if (self._ro) self._ro.disconnect();
+            unfollowPageTheme(self);
 
             $(document).off('.scrollbar-drag').off('.scrollbar-btn');
 
             self.$el
                 .off('.scrollbar')
                 .removeAttr('tabindex')
-                .removeClass((i, cls) =>
-                    cls.split(' ')
-                        .filter(c => c.startsWith('mC') || c === 'ts-scrollbar-disabled' || c === 'ts-scrollbar-no-scrollbar')
-                        .join(' ')
-                )
+                .removeClass('tsScrollbar ts-scrollbar--autoHide ts-scrollbar-disabled ts-scrollbar-no-scrollbar')
                 .html(self._initialHTML)
                 .removeData(instanceName);
 
@@ -32119,6 +34290,11 @@ html.dark .ts-readmore-overlay {
         // 3d, 3d-dark, 3d-thick, 3d-thick-dark, minimal, minimal-dark,
         // inset, inset-dark, inset-2, inset-2-dark, inset-3, inset-3-dark
         theme: 'light',
+
+        // Theme to use while the page is dark (PluginDarkMode's html.dark or
+        // data-bs-theme="dark", or the system setting when neither is set).
+        // null = always use theme.
+        darkModeTheme: null,
 
         // Easing animation duration in ms. 0 = instant jump.
         scrollInertia: 950,
@@ -32191,6 +34367,10 @@ html.dark .ts-readmore-overlay {
             // Called when the scroll position returns to (or passes) the start.
             onTotalScrollBack: null,
             onTotalScrollBackOffset: 0,
+
+            // Called when the theme shown changes, from setTheme() or a page
+            // theme switch. Data adds theme, previous and dark.
+            onThemeChange: null,
         },
     };
 
@@ -32217,6 +34397,24 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Scroller
+/**
+ * Scroller
+ *
+ * A native, dependency-free custom scrollbar. It wraps an element's content in a 
+ * hidden-native-scrollbar viewport and renders a themable custom track + draggable 
+ * thumb on top.
+ *
+ * Unlike `themestrap.plugin.scrollable.js` (which delegates to the external
+ * nanoScroller vendor library), this plugin implements all scrollbar geometry,
+ * dragging, track-paging and auto-hide behaviour itself — no third-party JS.
+ *
+ * Markup (auto-generated from the host element's existing children):
+ *   <div data-plugin-scroller>                ->  .ts-scroller
+ *     ...your content...                          .ts-scroller__content  (scroll viewport)
+ *                                                 .ts-scroller__bar      (track)
+ *                                                   .ts-scroller__thumb  (draggable thumb)
+ */
+// Scroller
 (((themestrap = {}, $) => {
 
     const instanceName = '__pluginScroller';
@@ -32234,10 +34432,10 @@ html.dark .ts-readmore-overlay {
 .ts-scroller {
     --ts-scroller-size:        8px;
     --ts-scroller-gutter:      2px;
-    --ts-scroller-radius:      8px;
+    --ts-scroller-radius:      var(--ts-skin-radius, 8px);
     --ts-scroller-track:       transparent;
-    --ts-scroller-thumb:       rgba(10, 25, 41, 0.28);
-    --ts-scroller-thumb-hover: rgba(10, 25, 41, 0.5);
+    --ts-scroller-thumb:       var(--ts-skin-border-strong, rgba(10, 25, 41, 0.28));
+    --ts-scroller-thumb-hover: var(--ts-skin-text-faint, rgba(10, 25, 41, 0.5));
     position: relative;
     overflow: hidden;
 }
@@ -33025,12 +35223,34 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Scroll Shadow
+/**
+ * Themestrap ScrollShadow
+ *
+ * Edge shadows that show there is more to see. Two scopes:
+ *
+ *   scope: 'element' (default)  masks the edges of a scrollable container, as before.
+ *   scope: 'page'               for content that scrolls with the page, such as a blog post.
+ *                               Draws a fixed fade at the viewport edge (and an optional hint pill)
+ *                               while the element is on screen and more of it lies beyond that edge,
+ *                               and removes it once the element's end is in view.
+ *
+ *   $('.post-body').themestrapPluginScrollShadow({
+ *       scope: 'page', edges: ['bottom'], size: '96px', hint: 'Keep reading'
+ *   });
+ *
+ * Page scope options: edges (['top', 'bottom']), fade (CSS colour of the page background, or set
+ * --ts-ss-fade on :root), hint (text for a pill that scrolls down when clicked).
+ * The element also receives .ts-ss--top / .ts-ss--bottom so CSS can react.
+ */
+// Scroll Shadow
 (((themestrap = {}, $) => {
 
     const instanceName = '__pluginScrollShadow';
 
     // Injected stylesheet — runs once per page, keyed to the plugin stylesheet ID
     const STYLE_ID = 'ts-scroll-shadow-styles';
+    let instanceCount = 0;
+    let seq = 0;
     // CSS_TEXT is injected lazily by injectStyles() on first build (see below),
     // so loading this script never adds CSS to pages that don't use the plugin.
     const CSS_TEXT = `
@@ -33234,6 +35454,39 @@ html.dark .ts-readmore-overlay {
     -webkit-mask-size: 100% 100%, 100% 100%;
     mask-size: 100% 100%, 100% 100%;
 }
+
+/* Page scope: fixed fades at the viewport edge */
+.ts-ss-page {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: var(--ts-ss-size, 40px);
+    pointer-events: none;
+    z-index: 40;
+    opacity: 0;
+    transition: opacity .25s ease;
+}
+.ts-ss-page.is-on { opacity: 1; }
+.ts-ss-page--bottom { bottom: 0; background: linear-gradient(to top,    var(--ts-ss-fade, Canvas) 15%, transparent); }
+.ts-ss-page--top    { top: 0;    background: linear-gradient(to bottom, var(--ts-ss-fade, Canvas) 15%, transparent); }
+.ts-ss-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    padding: 5px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--ts-ss-hint-bg, rgba(20, 20, 20, .78));
+    color: var(--ts-ss-hint-fg, #fff);
+    font: 600 12px/1.4 system-ui, sans-serif;
+    letter-spacing: .02em;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .25);
+}
+.ts-ss-page:not(.is-on) .ts-ss-hint { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .ts-ss-page { transition: none; } }
 `;
 
     // Inject the stylesheet only when the plugin is actually used (called
@@ -33277,6 +35530,8 @@ html.dark .ts-readmore-overlay {
             this.options = $.extend(true, {}, PluginScrollShadow.defaults, opts, {
                 wrapper: this.$el
             });
+            // Arrays are replaced, never merged index by index
+            if (opts && Array.isArray(opts.edges)) this.options.edges = opts.edges.slice();
             return this;
         }
 
@@ -33286,6 +35541,13 @@ html.dark .ts-readmore-overlay {
             const self    = this;
             const $el     = self.$el;
             const options = self.options;
+
+            instanceCount++;
+            self._uid = ++seq;
+
+            if (options.scope === 'page') {
+                return self._buildPage();
+            }
 
             // Apply base class + orientation attribute
             $el.addClass('ts-scroll-shadow');
@@ -33320,8 +35582,55 @@ html.dark .ts-readmore-overlay {
             return this;
         }
 
+        // Page scope: overlays on <body>, driven by window scroll and resize
+        _buildPage() {
+            const self = this;
+            const o    = self.options;
+            const edges = Array.isArray(o.edges) && o.edges.length ? o.edges : ['top', 'bottom'];
+
+            self._overlays = {};
+            edges.forEach((edge) => {
+                if (edge !== 'top' && edge !== 'bottom') return;
+                const el = document.createElement('div');
+                el.className = 'ts-ss-page ts-ss-page--' + edge;
+                el.setAttribute('aria-hidden', 'true');
+                el.style.setProperty('--ts-ss-size', o.size);
+                if (o.fade) el.style.setProperty('--ts-ss-fade', o.fade);
+                if (edge === 'bottom' && o.hint) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'ts-ss-hint';
+                    b.tabIndex = -1;
+                    b.textContent = o.hint;
+                    b.addEventListener('click', () => {
+                        const calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        window.scrollBy({ top: Math.round(window.innerHeight * 0.8), behavior: calm ? 'auto' : 'smooth' });
+                    });
+                    el.appendChild(b);
+                }
+                document.body.appendChild(el);
+                self._overlays[edge] = el;
+            });
+
+            self._raf = 0;
+            self._onPageScroll = () => {
+                if (self._raf) return;
+                self._raf = requestAnimationFrame(() => { self._raf = 0; self._updateShadows(); });
+            };
+            window.addEventListener('scroll', self._onPageScroll, { passive: true });
+            window.addEventListener('resize', self._onPageScroll, { passive: true });
+            if (typeof ResizeObserver !== 'undefined') {
+                self._resizeObserver = new ResizeObserver(self._onPageScroll);
+                self._resizeObserver.observe(self.$el[0]);
+            }
+            self._updateShadows();
+            return self;
+        }
+
         events() {
             const self = this;
+
+            if (self.options.scope === 'page') return this;
 
             self.$el.on('scroll.scrollshadow', () => {
                 self._updateShadows();
@@ -33345,6 +35654,19 @@ html.dark .ts-readmore-overlay {
             const el      = self.$el[0];
             const options = self.options;
             const offset  = options.offset;
+
+            if (options.scope === 'page') {
+                const r  = el.getBoundingClientRect();
+                const vh = window.innerHeight || document.documentElement.clientHeight;
+                const on = options.isEnabled;
+                // Only while the element is actually on screen: it has more above, or more below
+                const top    = on && r.top < -offset && r.bottom > 0;
+                const bottom = on && r.bottom > vh + offset && r.top < vh;
+                self.$el.toggleClass('ts-ss--top', top).toggleClass('ts-ss--bottom', bottom);
+                if (self._overlays.top)    self._overlays.top.classList.toggle('is-on', top);
+                if (self._overlays.bottom) self._overlays.bottom.classList.toggle('is-on', bottom);
+                return;
+            }
 
             if (!options.isEnabled) {
                 self.$el.removeClass('ts-ss--top ts-ss--bottom ts-ss--left ts-ss--right');
@@ -33389,6 +35711,15 @@ html.dark .ts-readmore-overlay {
         destroy() {
             const self = this;
 
+            if (self.options.scope === 'page') {
+                window.removeEventListener('scroll', self._onPageScroll);
+                window.removeEventListener('resize', self._onPageScroll);
+                if (self._raf) cancelAnimationFrame(self._raf);
+                Object.keys(self._overlays || {}).forEach((k) => self._overlays[k].remove());
+                self._overlays = {};
+                self.$el.removeClass('ts-ss--top ts-ss--bottom');
+            }
+
             self.$el.off('.scrollshadow');
 
             if (self._resizeObserver) {
@@ -33404,6 +35735,13 @@ html.dark .ts-readmore-overlay {
                     '--ts-ss-color': ''
                 })
                 .removeData(instanceName);
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
 
             return this;
         }
@@ -33444,7 +35782,22 @@ html.dark .ts-readmore-overlay {
          * Set to false to disable all shadow rendering while keeping the
          * plugin instance alive. Useful for toggling based on viewport size.
          */
-        isEnabled: true
+        isEnabled: true,
+
+        /**
+         * 'element' masks a scrollable container (default).
+         * 'page' draws fixed fades at the viewport edge for content that scrolls with the page.
+         */
+        scope: 'element',
+
+        /** Page scope: which viewport edges get a fade. */
+        edges: ['top', 'bottom'],
+
+        /** Page scope: colour of the page background the fade dissolves into. Defaults to --ts-ss-fade. */
+        fade: null,
+
+        /** Page scope: text of a "keep reading" pill on the bottom fade. Empty for none. */
+        hint: ''
     };
 
     $.extend(themestrap, { PluginScrollShadow });
@@ -33462,6 +35815,7 @@ html.dark .ts-readmore-overlay {
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Scroll Spy
 // Scroll Spy
 (((themestrap = {}, $) => {
     const instanceName = '__scrollSpy';
@@ -33660,6 +36014,7 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Scroll to Top
+// Scroll to Top
 (((themestrap = {}, $) => {
     $.extend(themestrap, {
 
@@ -33779,6 +36134,7 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Search
+// Search
 (((themestrap = {}, $) => {
     let initialized = false;
 
@@ -33812,7 +36168,7 @@ html.dark .ts-readmore-overlay {
 			},
 
 			build() {
-				if (!($.isFunction($.fn.validate))) {
+				if (typeof $.fn.validate !== 'function') {
 					return this;
 				}
 
@@ -33848,6 +36204,7 @@ html.dark .ts-readmore-overlay {
 	});
 })).apply(this, [window.themestrap, jQuery]);
 
+// Section Scroll
 // Section Scroll
 (((themestrap = {}, $) => {
     const instanceName = '__sectionScroll';
@@ -34467,6 +36824,7 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Select
+// Select
 (((themestrap = {}, $) => {
 
     const STYLE_ID   = 'ts-select-styles';
@@ -34480,65 +36838,65 @@ html.dark .ts-readmore-overlay {
     const CSS = `
         .ts-select {
             --ts-select-h:                2.25rem;
-            --ts-select-trigger-bg:       var(--bs-body-bg, #fff);
-            --ts-select-trigger-border:   var(--bs-border-color, #dee2e6);
-            --ts-select-trigger-radius:   0.375rem;
-            --ts-select-trigger-color:    var(--bs-body-color, #212529);
-            --ts-select-trigger-muted:    var(--bs-secondary-color, #6c757d);
-            --ts-select-trigger-dim-bg:   var(--bs-secondary-bg, #e9ecef);
-            --ts-select-focus-ring:       0 0 0 0.25rem rgba(13,110,253,.25);
-            --ts-select-focus-border:     #86b7fe;
-            --ts-select-content-bg:       var(--bs-body-bg, #fff);
-            --ts-select-content-border:   var(--bs-border-color, #dee2e6);
-            --ts-select-content-radius:   0.5rem;
-            --ts-select-content-shadow:   0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
+            --ts-select-trigger-bg:       var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-trigger-border:   var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-trigger-radius:   var(--ts-skin-radius, 0.375rem);
+            --ts-select-trigger-color:    var(--ts-skin-text, var(--bs-body-color, #212529));
+            --ts-select-trigger-muted:    var(--ts-skin-text-dim, var(--bs-secondary-color, #6c757d));
+            --ts-select-trigger-dim-bg:   var(--ts-skin-surface, var(--bs-secondary-bg, #e9ecef));
+            --ts-select-focus-ring:       0 0 0 0.25rem var(--ts-skin-ring, rgba(13,110,253,.25));
+            --ts-select-focus-border:     var(--ts-skin-accent, #86b7fe);
+            --ts-select-content-bg:       var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-content-border:   var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-content-radius:   var(--ts-skin-radius, 0.5rem);
+            --ts-select-content-shadow:   var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06));
             --ts-select-content-z:        1050;
             --ts-select-item-h:           2rem;
-            --ts-select-item-radius:      0.25rem;
-            --ts-select-item-color:       var(--bs-body-color, #212529);
-            --ts-select-item-hover-bg:    var(--bs-tertiary-bg, #f8f9fa);
-            --ts-select-separator-bg:     var(--bs-border-color, #dee2e6);
+            --ts-select-item-radius:      var(--ts-skin-radius-sm, 0.25rem);
+            --ts-select-item-color:       var(--ts-skin-text, var(--bs-body-color, #212529));
+            --ts-select-item-hover-bg:    var(--ts-skin-elevated, var(--bs-tertiary-bg, #f8f9fa));
+            --ts-select-separator-bg:     var(--ts-skin-border, var(--bs-border-color, #dee2e6));
             position: relative;
             display: block;
         }
 
         @media (prefers-color-scheme: dark) {
             .ts-select {
-                --ts-select-trigger-bg:      var(--bs-body-bg, #212529);
-                --ts-select-trigger-border:  var(--bs-border-color, #495057);
-                --ts-select-trigger-color:   var(--bs-body-color, #dee2e6);
-                --ts-select-trigger-muted:   var(--bs-secondary-color, #adb5bd);
-                --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #343a40);
-                --ts-select-content-bg:      var(--bs-body-bg, #1a1d20);
-                --ts-select-content-border:  var(--bs-border-color, #495057);
-                --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3);
-                --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #2b2f33);
+                --ts-select-trigger-bg:      var(--ts-skin-surface, var(--bs-body-bg, #212529));
+                --ts-select-trigger-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+                --ts-select-trigger-color:   var(--ts-skin-text, var(--bs-body-color, #dee2e6));
+                --ts-select-trigger-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color, #adb5bd));
+                --ts-select-trigger-dim-bg:  var(--ts-skin-surface, var(--bs-secondary-bg, #343a40));
+                --ts-select-content-bg:      var(--ts-skin-surface, var(--bs-body-bg, #1a1d20));
+                --ts-select-content-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+                --ts-select-content-shadow:  var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3));
+                --ts-select-item-hover-bg:   var(--ts-skin-elevated, var(--bs-tertiary-bg, #2b2f33));
             }
         }
 
         html.dark .ts-select,
         [data-bs-theme="dark"] .ts-select {
-            --ts-select-trigger-bg:      var(--bs-body-bg, #212529);
-            --ts-select-trigger-border:  var(--bs-border-color, #495057);
-            --ts-select-trigger-color:   var(--bs-body-color, #dee2e6);
-            --ts-select-trigger-muted:   var(--bs-secondary-color, #adb5bd);
-            --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #343a40);
-            --ts-select-content-bg:      var(--bs-body-bg, #1a1d20);
-            --ts-select-content-border:  var(--bs-border-color, #495057);
-            --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3);
-            --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #2b2f33);
+            --ts-select-trigger-bg:      var(--ts-skin-surface, var(--bs-body-bg, #212529));
+            --ts-select-trigger-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+            --ts-select-trigger-color:   var(--ts-skin-text, var(--bs-body-color, #dee2e6));
+            --ts-select-trigger-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color, #adb5bd));
+            --ts-select-trigger-dim-bg:  var(--ts-skin-surface, var(--bs-secondary-bg, #343a40));
+            --ts-select-content-bg:      var(--ts-skin-surface, var(--bs-body-bg, #1a1d20));
+            --ts-select-content-border:  var(--ts-skin-border, var(--bs-border-color, #495057));
+            --ts-select-content-shadow:  var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.4), 0 2px 4px -2px rgba(0,0,0,.3));
+            --ts-select-item-hover-bg:   var(--ts-skin-elevated, var(--bs-tertiary-bg, #2b2f33));
         }
 
         [data-bs-theme="light"] .ts-select {
-            --ts-select-trigger-bg:      var(--bs-body-bg, #fff);
-            --ts-select-trigger-border:  var(--bs-border-color, #dee2e6);
-            --ts-select-trigger-color:   var(--bs-body-color, #212529);
-            --ts-select-trigger-muted:   var(--bs-secondary-color, #6c757d);
-            --ts-select-trigger-dim-bg:  var(--bs-secondary-bg, #e9ecef);
-            --ts-select-content-bg:      var(--bs-body-bg, #fff);
-            --ts-select-content-border:  var(--bs-border-color, #dee2e6);
-            --ts-select-content-shadow:  0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06);
-            --ts-select-item-hover-bg:   var(--bs-tertiary-bg, #f8f9fa);
+            --ts-select-trigger-bg:      var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-trigger-border:  var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-trigger-color:   var(--ts-skin-text, var(--bs-body-color, #212529));
+            --ts-select-trigger-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color, #6c757d));
+            --ts-select-trigger-dim-bg:  var(--ts-skin-surface, var(--bs-secondary-bg, #e9ecef));
+            --ts-select-content-bg:      var(--ts-skin-surface, var(--bs-body-bg, #fff));
+            --ts-select-content-border:  var(--ts-skin-border, var(--bs-border-color, #dee2e6));
+            --ts-select-content-shadow:  var(--ts-skin-shadow, 0 4px 16px -2px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.06));
+            --ts-select-item-hover-bg:   var(--ts-skin-elevated, var(--bs-tertiary-bg, #f8f9fa));
         }
 
         /* hide the native select — stays in DOM for form submission */
@@ -35030,6 +37388,13 @@ html.dark .ts-readmore-overlay {
             self.$el.addClass('ts-select--open');
             self.$content.addClass('ts-select-content--open');
             self.$trigger.attr('aria-expanded', 'true');
+            // Long lists open at the selected item instead of at the top
+            const $sel = self.$viewport.find('.ts-select-item--selected').first();
+            if ($sel.length) {
+                const v = self.$viewport[0];
+                const delta = $sel[0].getBoundingClientRect().top - v.getBoundingClientRect().top;
+                v.scrollTop = Math.max(0, v.scrollTop + delta - (v.clientHeight - $sel[0].offsetHeight) / 2);
+            }
             self.$content[0].focus();
             self.$el[0].dispatchEvent(new CustomEvent('ts.select.open', {
                 bubbles: true,
@@ -35071,6 +37436,11 @@ html.dark .ts-readmore-overlay {
                 bubbles: true,
                 detail:  { value, text: item.text, previousValue: prev }
             }));
+            // The wrapped <select> behaves like a native one: forms, validators and listeners see input and change
+            if (value !== prev) {
+                self.$native[0].dispatchEvent(new Event('input',  { bubbles: true }));
+                self.$native[0].dispatchEvent(new Event('change', { bubbles: true }));
+            }
             return this;
         }
 
@@ -35144,6 +37514,7 @@ html.dark .ts-readmore-overlay {
 })).apply(this, [window.themestrap, jQuery]);
 
 // SideNav
+// SideNav
 (((themestrap = {}, $) => {
 
     const instanceName = '__pluginSideNav';
@@ -35161,59 +37532,59 @@ html.dark .ts-readmore-overlay {
     --ts-sidenav-easing:            cubic-bezier(0.4, 0, 0.2, 1);
 
     /* Colours — override via CSS or data-plugin-options */
-    --ts-sidenav-bg:                var(--light, #ffffff);
-    --ts-sidenav-border-color:      var(--light--200, #ececec);
-    --ts-sidenav-header-bg:         var(--light--100, #ffffff);
-    --ts-sidenav-footer-bg:         var(--light--300, #ffffff);
+    --ts-sidenav-bg:                var(--ts-skin-surface, var(--light, #ffffff));
+    --ts-sidenav-border-color:      var(--ts-skin-border, var(--light--200, #ececec));
+    --ts-sidenav-header-bg:         var(--ts-skin-surface-2, var(--light--100, #ffffff));
+    --ts-sidenav-footer-bg:         var(--ts-skin-surface-2, var(--light--300, #ffffff));
 
-    --ts-sidenav-text:              var(--default, #777);
-    --ts-sidenav-text-muted:        var(--dark-rgba-20, rgba(33, 37, 41, 0.2));
-    --ts-sidenav-icon-color:        var(--grey, #969696);
-    --ts-sidenav-icon-active-color: var(--primary, #0088CC);
+    --ts-sidenav-text:              var(--ts-skin-text, var(--default, #777));
+    --ts-sidenav-text-muted:        var(--ts-skin-text-dim, var(--dark-rgba-20, rgba(33, 37, 41, 0.2)));
+    --ts-sidenav-icon-color:        var(--ts-skin-text-dim, var(--grey, #969696));
+    --ts-sidenav-icon-active-color: var(--ts-skin-accent, var(--primary, #0088CC));
 
-    --ts-sidenav-item-hover-bg:     var(--light-rgba-10, rgba(255, 255, 255, 0.1));
-    --ts-sidenav-item-active-bg:    var(--light-rgba-20, rgba(255, 255, 255, 0.2));
-    --ts-sidenav-item-active-color: var(--primary, #0088CC);
-    --ts-sidenav-item-active-border:var(--primary, #0088CC);
+    --ts-sidenav-item-hover-bg:     var(--ts-skin-elevated, var(--light-rgba-10, rgba(255, 255, 255, 0.1)));
+    --ts-sidenav-item-active-bg:    var(--ts-skin-elevated, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+    --ts-sidenav-item-active-color: var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-sidenav-item-active-border:var(--ts-skin-accent, var(--primary, #0088CC));
 
-    --ts-sidenav-group-title-color: var(--grey-1000, #757575);
+    --ts-sidenav-group-title-color: var(--ts-skin-text-strong, var(--grey-1000, #757575));
     --ts-sidenav-sub-item-indent:   2.75rem;
 
-    --ts-sidenav-badge-bg:          var(--light-300, #e6e6e6);
-    --ts-sidenav-badge-color:       var(--dark-300, #383f45);
-    --ts-sidenav-badge-active-bg:   var(--grey-500, #dbdbdb);
-    --ts-sidenav-badge-active-color:var(--primary, #0088CC);
+    --ts-sidenav-badge-bg:          var(--ts-skin-surface, var(--light-300, #e6e6e6));
+    --ts-sidenav-badge-color:       var(--ts-skin-text, var(--dark-300, #383f45));
+    --ts-sidenav-badge-active-bg:   var(--ts-skin-accent-soft, var(--grey-500, #dbdbdb));
+    --ts-sidenav-badge-active-color:var(--ts-skin-accent, var(--primary, #0088CC));
 
-    --ts-sidenav-toggle-color:      var(--grey-1000, #757575);
-    --ts-sidenav-toggle-hover-bg:   var(--light-100, #f2f2f2);
+    --ts-sidenav-toggle-color:      var(--ts-skin-text, var(--grey-1000, #757575));
+    --ts-sidenav-toggle-hover-bg:   var(--ts-skin-elevated, var(--light-100, #f2f2f2));
 }
 
 /* Dark variant */
 html.dark .ts-sidenav {
-    --ts-sidenav-bg:                var(--dark, #212529);
-    --ts-sidenav-border-color:      var(--dark--200, #32383e);
-    --ts-sidenav-header-bg:         var(--dark--100, #2c3237);
-    --ts-sidenav-footer-bg:         var(--dark, #212529);
+    --ts-sidenav-bg:                var(--ts-skin-surface, var(--dark, #212529));
+    --ts-sidenav-border-color:      var(--ts-skin-border, var(--dark--200, #32383e));
+    --ts-sidenav-header-bg:         var(--ts-skin-surface-2, var(--dark--100, #2c3237));
+    --ts-sidenav-footer-bg:         var(--ts-skin-surface-2, var(--dark, #212529));
 
-    --ts-sidenav-text:              var(--light, #ffffff);
-    --ts-sidenav-text-muted:        var(--light-rgba-20, rgba(255, 255, 255, 0.2));
-    --ts-sidenav-icon-color:        var(--grey-700, #c1c1c1);
-    --ts-sidenav-icon-active-color: var(--grey-900, #8e8e8e);
+    --ts-sidenav-text:              var(--ts-skin-text, var(--light, #ffffff));
+    --ts-sidenav-text-muted:        var(--ts-skin-text-dim, var(--light-rgba-20, rgba(255, 255, 255, 0.2)));
+    --ts-sidenav-icon-color:        var(--ts-skin-text-dim, var(--grey-700, #c1c1c1));
+    --ts-sidenav-icon-active-color: var(--ts-skin-text-strong, var(--grey-900, #8e8e8e));
 
-    --ts-sidenav-item-hover-bg:     var(--dark-200, #101214);
-    --ts-sidenav-item-active-bg:    var(--dark-100, #16181b);
-    --ts-sidenav-item-active-color: var(--primary, #0088CC);
-    --ts-sidenav-item-active-border:var(--primary, #0088CC);
+    --ts-sidenav-item-hover-bg:     var(--ts-skin-elevated, var(--dark-200, #101214));
+    --ts-sidenav-item-active-bg:    var(--ts-skin-elevated, var(--dark-100, #16181b));
+    --ts-sidenav-item-active-color: var(--ts-skin-accent, var(--primary, #0088CC));
+    --ts-sidenav-item-active-border:var(--ts-skin-accent, var(--primary, #0088CC));
 
-    --ts-sidenav-group-title-color: var(--dark--300, #383f45);
+    --ts-sidenav-group-title-color: var(--ts-skin-text-strong, var(--dark--300, #383f45));
 
-    --ts-sidenav-badge-bg:          var(--dark--100, #2c3237);
-    --ts-sidenav-badge-color:       var(--light, #ffffff);
-    --ts-sidenav-badge-active-bg:   var(--primary-100, #0077b3);
-    --ts-sidenav-badge-active-color:var(--primary--200, #00a1f2);
+    --ts-sidenav-badge-bg:          var(--ts-skin-surface, var(--dark--100, #2c3237));
+    --ts-sidenav-badge-color:       var(--ts-skin-text, var(--light, #ffffff));
+    --ts-sidenav-badge-active-bg:   var(--ts-skin-accent-soft, var(--primary-100, #0077b3));
+    --ts-sidenav-badge-active-color:var(--ts-skin-accent, var(--primary--200, #00a1f2));
 
-    --ts-sidenav-toggle-color:      var(--grey-200, #eaeaea);
-    --ts-sidenav-toggle-hover-bg:   var(--dark-100, #16181b);
+    --ts-sidenav-toggle-color:      var(--ts-skin-text, var(--grey-200, #eaeaea));
+    --ts-sidenav-toggle-hover-bg:   var(--ts-skin-elevated, var(--dark-100, #16181b));
 }
 
 /* Root */
@@ -35687,8 +38058,8 @@ html.dark .ts-sidenav {
     left: calc(var(--ts-sidenav-width-collapsed) - 0.5rem);
     top: 50%;
     transform: translateY(-50%);
-    background-color: #1f2937;
-    color: #f9fafb;
+    background-color: var(--ts-skin-inverse, #1f2937);
+    color: var(--ts-skin-on-inverse, #f9fafb);
     padding: 0.3125rem 0.625rem;
     border-radius: 0.375rem;
     font-size: 0.8125rem;
@@ -35696,7 +38067,7 @@ html.dark .ts-sidenav {
     white-space: nowrap;
     pointer-events: none;
     z-index: 200;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+    box-shadow: var(--ts-skin-shadow, 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1));
 }
 
 /* Collapsed: centre the icon */
@@ -36619,6 +38990,7 @@ html.dark .ts-sidenav {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Sort
+// Sort
 (((themestrap = {}, $) => {
     const instanceName = '__sort';
 
@@ -36865,16 +39237,19 @@ html.dark .ts-sidenav {
                 cssFilter += '[data-page-rel=' + self.$destination.attr('data-current-page') + ']';
             }
 
-            if (self.options.filterFieldText !== '') {
-                cssFilter += '[data-sort-search*=' + self.options.filterFieldText.toLowerCase() + ']';
-            }
+            // Search text is matched in JS, not in a selector, so spaces, quotes and
+            // brackets are safe, and both sides are compared in lowercase
+            const search = String(self.options.filterFieldText || '').trim().toLowerCase();
 
             // Show/hide items natively
             const $allItems = self.$destination.find(self.options.itemSelector);
 
             $allItems.each(function () {
                 const $item = $(this);
-                const show = cssFilter === '' || $item.is(cssFilter);
+                const inFilter = cssFilter === '' || $item.is(cssFilter);
+                const inSearch = search === '' ||
+                    String($item.attr('data-sort-search') || '').toLowerCase().indexOf(search) !== -1;
+                const show = inFilter && inSearch;
 
                 if (show) {
                     $item.css(self.options.visibleStyle).show();
@@ -37036,6 +39411,7 @@ html.dark .ts-sidenav {
     };
 })).apply(this, [window.themestrap, jQuery]);
 
+// Splash Screen
 // Splash Screen
 (((themestrap = {}, $) => {
     const instanceName = '__splashScreen';
@@ -37530,6 +39906,7 @@ html.dark .ts-sidenav {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Sticky
+// Sticky
 (((themestrap = {}, $) => {
     const instanceName = '__sticky';
 
@@ -37569,7 +39946,7 @@ html.dark .ts-sidenav {
 		}
 
         build() {
-			if (!($.isFunction($.fn.pin))) {
+			if (!(typeof $.fn.pin === 'function')) {
 				return this;
 			}
 
@@ -37713,6 +40090,7 @@ html.dark .ts-sidenav {
 	}
 })).apply(this, [ window.themestrap, jQuery ]);
 
+// Sticky Header
 // Sticky Header
 (((themestrap = {}, $) => {
     let initialized = false;
@@ -38241,6 +40619,21 @@ html.dark .ts-sidenav {
 })).apply(this, [window.themestrap, jQuery]);
 
 // TagsInput
+/**
+ * Themestrap TagsInput
+ *
+ * Turns a text input into a field of removable tags. The source input keeps the tags as "a, b, c".
+ *
+ * Adding tags:
+ *   - Type a tag and press Enter, Tab, comma or semicolon.
+ *   - Paste a list: "a, b, c", one tag per line, a column copied from a spreadsheet. Every item becomes its
+ *     own tag. A single pasted word is just inserted as text, so you can still edit it before pressing Enter.
+ *   - Text that arrives any other way (drag and drop, a phone keyboard, dictation) is split the same way.
+ *
+ * Options: separators, splitOnSpace, maxTags, ignoreCase, normalize (see PluginTagsInput.defaults).
+ * Events:  ts.tagsinput.add, ts.tagsinput.remove, ts.tagsinput.paste (detail: { added, skipped, tags }).
+ */
+// TagsInput
 (((themestrap = {}, $) => {
     const instanceName = '__tagsinput';
     const STYLE_ID     = 'ts-tagsinput-styles';
@@ -38254,22 +40647,22 @@ html.dark .ts-sidenav {
             align-items: center;
             gap: 5px;
             padding: 6px 8px;
-            background: var(--ts-ti-bg, rgba(255,255,255,0.03));
-            border: 1px solid var(--ts-ti-border, rgba(255,255,255,0.10));
-            border-radius: var(--ts-ti-radius, 5px);
+            background: var(--ts-ti-bg, var(--ts-skin-surface-2, rgba(255,255,255,0.03)));
+            border: 1px solid var(--ts-ti-border, var(--ts-skin-border, rgba(255,255,255,0.10)));
+            border-radius: var(--ts-ti-radius, var(--ts-skin-radius, 5px));
             cursor: text;
             min-height: 40px;
             transition: border-color 0.15s;
         }
         .ts-tagsinput:hover {
-            border-color: var(--ts-ti-border-hover, rgba(255,255,255,0.20));
+            border-color: var(--ts-ti-border-hover, var(--ts-skin-border-strong, rgba(255,255,255,0.20)));
         }
         .ts-tagsinput.ts-ti-focused {
-            border-color: var(--ts-ti-border-focus, #00c7be);
+            border-color: var(--ts-ti-border-focus, var(--ts-skin-accent, #00c7be));
             outline: none;
         }
         .ts-tagsinput.ts-ti-invalid {
-            border-color: var(--ts-ti-border-invalid, #e74c3c);
+            border-color: var(--ts-ti-border-invalid, var(--ts-skin-danger, #e74c3c));
             animation: ts-ti-shake 0.35s ease;
         }
         @keyframes ts-ti-shake {
@@ -38296,10 +40689,10 @@ html.dark .ts-sidenav {
             align-items: center;
             gap: 5px;
             padding: 2px 8px 2px 10px;
-            background: var(--ts-ti-tag-bg, rgba(0,199,190,0.15));
-            color: var(--ts-ti-tag-text, #00c7be);
-            border: 1px solid var(--ts-ti-tag-border, rgba(0,199,190,0.30));
-            border-radius: var(--ts-ti-tag-radius, 20px);
+            background: var(--ts-ti-tag-bg, var(--ts-skin-accent-soft, rgba(0,199,190,0.15)));
+            color: var(--ts-ti-tag-text, var(--ts-skin-accent, #00c7be));
+            border: 1px solid var(--ts-ti-tag-border, var(--ts-skin-accent, rgba(0,199,190,0.30)));
+            border-radius: var(--ts-ti-tag-radius, var(--ts-skin-radius-lg, 20px));
             font-size: 12px;
             font-weight: 500;
             line-height: 1.4;
@@ -38328,7 +40721,7 @@ html.dark .ts-sidenav {
         }
         .ts-tag-remove:hover {
             opacity: 1;
-            background: rgba(0,199,190,0.20);
+            background: var(--ts-skin-danger-soft, rgba(0,199,190,0.20));
         }
         .ts-tagsinput-field {
             flex: 1;
@@ -38342,7 +40735,7 @@ html.dark .ts-sidenav {
             font-family: inherit;
         }
         .ts-tagsinput-field::placeholder {
-            color: var(--ts-ti-placeholder, rgba(205,216,230,0.40));
+            color: var(--ts-ti-placeholder, var(--ts-skin-text-dim, rgba(205,216,230,0.40)));
         }
     `;
 
@@ -38652,6 +41045,67 @@ html.dark .ts-sidenav {
 (((themestrap = {}, $) => {
     const instanceName = '__toast';
 
+    // Toast stylesheet, injected once on the first toast. Bootstrap's .toast does the layout;
+    // these rules route its colors through --ts-toast-* tokens, which read the active skin's
+    // --ts-skin-* tokens and otherwise fall back to Bootstrap's own values (the previous look).
+    const STYLE_ID = 'ts-toast-styles';
+    const CSS_TEXT = `
+/* Themestrap: PluginToast */
+.ts-toast {
+    --ts-toast-bg:      var(--ts-skin-surface, rgba(var(--bs-body-bg-rgb), 0.85));
+    --ts-toast-text:    var(--ts-skin-text);    /* no fallback: inherits from the page, as Bootstrap does */
+    --ts-toast-muted:   var(--ts-skin-text-dim, var(--bs-secondary-color));
+    --ts-toast-border:  var(--ts-skin-border, var(--bs-border-color-translucent));
+    --ts-toast-radius:  var(--ts-skin-radius-lg, var(--bs-border-radius));
+    --ts-toast-shadow:  var(--ts-skin-shadow, var(--bs-box-shadow));
+    --ts-toast-icon:    var(--ts-skin-accent, #0088cc);
+    --ts-toast-icon-2:  var(--ts-skin-text-dim, #777);
+    --ts-toast-track:   var(--ts-skin-border, rgba(0, 0, 0, 0.08));
+    --ts-toast-success: var(--ts-skin-success, rgb(var(--bs-success-rgb)));
+    --ts-toast-danger:  var(--ts-skin-danger, rgb(var(--bs-danger-rgb)));
+    --ts-toast-warning: var(--ts-skin-warning, rgb(var(--bs-warning-rgb)));
+    --ts-toast-info:    var(--ts-skin-info, rgb(var(--bs-info-rgb)));
+    --ts-toast-dark:    var(--ts-skin-text-strong, rgb(var(--bs-dark-rgb)));
+    --ts-toast-light:   var(--ts-skin-text-dim, rgb(var(--bs-secondary-rgb)));
+
+    --bs-toast-bg:                 var(--ts-toast-bg);
+    --bs-toast-header-bg:          var(--ts-toast-bg);
+    --bs-toast-color:              var(--ts-toast-text);
+    --bs-toast-header-color:       var(--ts-toast-muted);
+    --bs-toast-header-border-color: var(--ts-toast-border);
+    --bs-toast-border-radius:      var(--ts-toast-radius);
+    --bs-toast-box-shadow:         var(--ts-toast-shadow);
+}
+.ts-toast--success .toast-header { color: var(--ts-toast-success); }
+.ts-toast--danger  .toast-header { color: var(--ts-toast-danger); }
+.ts-toast--warning .toast-header { color: var(--ts-toast-warning); }
+.ts-toast--info    .toast-header { color: var(--ts-toast-info); }
+.ts-toast--dark    .toast-header { color: var(--ts-toast-dark); }
+.ts-toast--light   .toast-header { color: var(--ts-toast-light); }
+.ts-toast-icon .ts-toast-i1 { stroke: var(--ts-toast-icon); }
+.ts-toast-icon .ts-toast-i2 { stroke: var(--ts-toast-icon-2); }
+.ts-toast-progress {
+    height: 3px;
+    background: var(--ts-toast-track);
+    border-radius: 0 0 var(--ts-toast-radius) var(--ts-toast-radius);
+    overflow: hidden;
+}
+.ts-toast-progress-bar {
+    height: 100%;
+    width: 100%;
+    background: currentColor;
+    opacity: .45;
+}
+`;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = CSS_TEXT;
+        (document.head || document.documentElement).appendChild(style);
+    }
+
     // Container registry
     // one container div per position, lazily created.
     const containers = {};
@@ -38659,7 +41113,7 @@ html.dark .ts-sidenav {
     function getContainer(position) {
         if (containers[position]) return containers[position];
 
-        const [y, x] = position.split('-');   // e.g. 'top-end' ? ['top', 'end']
+        const [y, x] = position.split('-');   // e.g. 'top-end' -> ['top', 'end']
 
         const yClass = {
             top:    'top-0',
@@ -38683,24 +41137,18 @@ html.dark .ts-sidenav {
 
     // Icon map
     const typeIcons = {
-        success: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" stroke="#0088cc"></path><path d="M9 12l2 2l4 -4" stroke="#777"></path></g></svg>`,
-        danger:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" stroke="#0088cc"></path><path d="M12 8v4" stroke="#777"></path><path d="M12 16h.01" stroke="#777"></path></g></svg>`,
-        warning: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M12 9v4" stroke="#777"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" stroke="#0088cc"></path><path d="M12 16h.01" stroke="#777"></path></g></svg>`,
-        info:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" stroke="#0088cc"></path><path d="M12 9h.01" stroke="#777"></path><path d="M11 12h1v4h1" stroke="#777"></path></g></svg>`,
-        dark:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"></path></g></svg>`,
-        light:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="#0088cc"><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" stroke="#0088cc"></path><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" stroke="#777"></path></g></svg>`,
+        success: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" class="ts-toast-i1"></path><path d="M9 12l2 2l4 -4" class="ts-toast-i2"></path></g></svg>`,
+        danger:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" class="ts-toast-i1"></path><path d="M12 8v4" class="ts-toast-i2"></path><path d="M12 16h.01" class="ts-toast-i2"></path></g></svg>`,
+        warning: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M12 9v4" class="ts-toast-i2"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" class="ts-toast-i1"></path><path d="M12 16h.01" class="ts-toast-i2"></path></g></svg>`,
+        info:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" class="ts-toast-i1"></path><path d="M12 9h.01" class="ts-toast-i2"></path><path d="M11 12h1v4h1" class="ts-toast-i2"></path></g></svg>`,
+        dark:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"></path></g></svg>`,
+        light:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g class="ts-toast-i1" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none"><path d="M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" class="ts-toast-i1"></path><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" class="ts-toast-i2"></path></g></svg>`,
     };
 
     // Header color map: Bootstrap contextual text + bg combos for the
     // icon/title row, keeping the body neutral white.
-    const typeHeaderClass = {
-        success: 'text-success',
-        danger:  'text-danger',
-        warning: 'text-warning',
-        info:    'text-info',
-        dark:    'text-dark',
-        light:   'text-secondary',
-    };
+    // Header color per type comes from the stylesheet (.ts-toast--{type}); see CSS_TEXT.
+    const TYPES = ['success', 'danger', 'warning', 'info', 'dark', 'light'];
 
     class PluginToast {
 
@@ -38754,20 +41202,22 @@ html.dark .ts-sidenav {
                 ? `<img src="${o.icon}" width="16" height="16" alt="" />`
                 : (typeIcons[o.type] ?? '');
 
-            const headerClass = typeHeaderClass[o.type] ?? '';
+            injectStyles();
+
+            const typeClass = TYPES.includes(o.type) ? `ts-toast--${o.type}` : '';
 
             const timestamp = o.timestamp
                 ? `<small class="text-body-secondary ms-auto">${o.timestamp}</small>`
                 : '';
 
             const progress = o.autohide && o.progress
-                ? `<div class="hljs-toast-progress"><div class="hljs-toast-progress-bar"></div></div>`
+                ? `<div class="toast-progress ts-toast-progress"><div class="toast-progress-bar ts-toast-progress-bar"></div></div>`
                 : '';
 
             const $toast = $(`
-                <div class="toast align-items-stretch border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="toast-header ${headerClass}">
-                        <span class="me-2 d-flex">${icon}</span>
+                <div class="toast ts-toast ${typeClass} align-items-stretch border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <span class="ts-toast-icon me-2 d-flex">${icon}</span>
                         <strong class="me-auto">${o.title}</strong>
                         ${timestamp}
                         ${o.dismissible ? '<button type="button" class="btn-close ms-2" data-bs-dismiss="toast" aria-label="Close"></button>' : ''}
@@ -38809,6 +41259,8 @@ html.dark .ts-sidenav {
             // Remove from DOM after Bootstrap fires hidden event.
             $toast[0].addEventListener('hidden.bs.toast', () => {
                 $toast.remove();
+                // Static show() mounts a hidden anchor; drop it with the toast.
+                if (self._ownsAnchor) self.$el.remove();
                 // Clean up empty container.
                 if ($container.children().length === 0) {
                     $container.remove();
@@ -38841,11 +41293,22 @@ html.dark .ts-sidenav {
             return this;
         }
 
+        // Same teardown name every other plugin uses: remove the toast now, without the hide animation.
+        destroy() {
+            this._bsToast?.dispose();
+            this.$toast?.remove();
+            if (this._ownsAnchor) this.$el.remove();
+            this.$el.removeData(instanceName);
+            return this;
+        }
+
         // Fire-and-forget: PluginToast.show({ title: '', body: '', type: 'success' })
         // No element needed, mounts to a detached anchor appended to body.
         static show(opts) {
             const $anchor = $('<div />').appendTo('body').hide();
-            return new PluginToast($anchor, opts);
+            const toast = new PluginToast($anchor, opts);
+            toast._ownsAnchor = true;
+            return toast;
         }
     }
 
@@ -38880,6 +41343,7 @@ html.dark .ts-sidenav {
 
 })).apply(this, [window.themestrap, jQuery]);
 
+// Toggle
 // Toggle
 (((themestrap = {}, $) => {
     const instanceName = '__toggle';
@@ -39034,6 +41498,7 @@ html.dark .ts-sidenav {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Toolbar
+// Toolbar
 (((themestrap = {}, $) => {
     const instanceName = '__pluginToolbar';
 
@@ -39041,35 +41506,35 @@ html.dark .ts-sidenav {
 
     const CSS_TEXT = `/* Themestrap — PluginToolbar */
 .ts-toolbar {
-    --ts-tb-bg:            #f4f6f8;
-    --ts-tb-border:        rgba(0,0,0,.1);
-    --ts-tb-shadow:        0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --ts-tb-bg:            var(--ts-skin-surface, #f4f6f8);
+    --ts-tb-border:        var(--ts-skin-border, rgba(0,0,0,.1));
+    --ts-tb-shadow:        var(--ts-skin-shadow, 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05));
     --ts-tb-pad:           4px;
     --ts-tb-gap:           2px;
-    --ts-tb-radius:        8px;
+    --ts-tb-radius:        var(--ts-skin-radius, 8px);
 
     --ts-tb-item-h:        34px;
     --ts-tb-item-px:       10px;
-    --ts-tb-item-radius:   5px;
-    --ts-tb-item-fg:       #374151;
-    --ts-tb-item-hover-bg: rgba(0,0,0,.06);
-    --ts-tb-item-hover-fg: #111827;
-    --ts-tb-item-active-bg: rgba(0,0,0,.09);
-    --ts-tb-item-font:     0.875rem;
+    --ts-tb-item-radius:   var(--ts-skin-radius, 5px);
+    --ts-tb-item-fg:       var(--ts-skin-text, #374151);
+    --ts-tb-item-hover-bg: var(--ts-skin-elevated, rgba(0,0,0,.06));
+    --ts-tb-item-hover-fg: var(--ts-skin-text-strong, #111827);
+    --ts-tb-item-active-bg: var(--ts-skin-elevated, rgba(0,0,0,.09));
+    --ts-tb-item-font:     var(--ts-skin-font, 0.875rem);
 
-    --ts-tb-on-bg:         #e8672a;
-    --ts-tb-on-fg:         #fff;
-    --ts-tb-on-hover-bg:   #d2541b;
+    --ts-tb-on-bg:         var(--ts-skin-accent, #e8672a);
+    --ts-tb-on-fg:         var(--ts-skin-on-accent, #fff);
+    --ts-tb-on-hover-bg:   var(--ts-skin-accent-hover, #d2541b);
 
-    --ts-tb-focus-ring:    #e8672a;
+    --ts-tb-focus-ring:    var(--ts-skin-ring, #e8672a);
     --ts-tb-focus-offset:  2px;
 
-    --ts-tb-sep-color:     rgba(0,0,0,.12);
+    --ts-tb-sep-color:     var(--ts-skin-border, rgba(0,0,0,.12));
     --ts-tb-sep-size:      1px;
     --ts-tb-sep-margin:    4px;
 
-    --ts-tb-group-bg:      rgba(0,0,0,.05);
-    --ts-tb-group-radius:  6px;
+    --ts-tb-group-bg:      var(--ts-skin-surface-2, rgba(0,0,0,.05));
+    --ts-tb-group-radius:  var(--ts-skin-radius, 6px);
     --ts-tb-group-gap:     1px;
 
     --ts-tb-disabled-opacity: .4;
@@ -39078,19 +41543,19 @@ html.dark .ts-sidenav {
 /* Dark theme — forced via class or auto via html.dark */
 .ts-toolbar--dark,
 html.dark .ts-toolbar:not(.ts-toolbar--light) {
-    --ts-tb-bg:            #0e2238;
-    --ts-tb-border:        rgba(255,255,255,.08);
-    --ts-tb-shadow:        0 2px 8px rgba(0,0,0,.45);
-    --ts-tb-item-fg:       rgba(255,255,255,.72);
-    --ts-tb-item-hover-bg: rgba(255,255,255,.08);
-    --ts-tb-item-hover-fg: #fff;
-    --ts-tb-item-active-bg: rgba(255,255,255,.12);
-    --ts-tb-on-bg:         #2ab8c8;
-    --ts-tb-on-fg:         #0a1929;
-    --ts-tb-on-hover-bg:   #1e9aaa;
-    --ts-tb-focus-ring:    #2ab8c8;
-    --ts-tb-sep-color:     rgba(255,255,255,.1);
-    --ts-tb-group-bg:      rgba(255,255,255,.06);
+    --ts-tb-bg:            var(--ts-skin-surface, #0e2238);
+    --ts-tb-border:        var(--ts-skin-border, rgba(255,255,255,.08));
+    --ts-tb-shadow:        var(--ts-skin-shadow, 0 2px 8px rgba(0,0,0,.45));
+    --ts-tb-item-fg:       var(--ts-skin-text, rgba(255,255,255,.72));
+    --ts-tb-item-hover-bg: var(--ts-skin-elevated, rgba(255,255,255,.08));
+    --ts-tb-item-hover-fg: var(--ts-skin-text-strong, #fff);
+    --ts-tb-item-active-bg: var(--ts-skin-elevated, rgba(255,255,255,.12));
+    --ts-tb-on-bg:         var(--ts-skin-accent, #2ab8c8);
+    --ts-tb-on-fg:         var(--ts-skin-text-strong, #0a1929);
+    --ts-tb-on-hover-bg:   var(--ts-skin-accent-hover, #1e9aaa);
+    --ts-tb-focus-ring:    var(--ts-skin-ring, #2ab8c8);
+    --ts-tb-sep-color:     var(--ts-skin-border, rgba(255,255,255,.1));
+    --ts-tb-group-bg:      var(--ts-skin-surface-2, rgba(255,255,255,.06));
 }
 
 /* Root */
@@ -39264,14 +41729,14 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 .ts-toolbar--sm {
     --ts-tb-item-h   : 28px;
     --ts-tb-item-px  : 8px;
-    --ts-tb-item-font: 0.8125rem;
+    --ts-tb-item-font: var(--ts-skin-font, 0.8125rem);
     --ts-tb-pad      : 3px;
 }
 
 .ts-toolbar--lg {
     --ts-tb-item-h   : 40px;
     --ts-tb-item-px  : 14px;
-    --ts-tb-item-font: 0.9375rem;
+    --ts-tb-item-font: var(--ts-skin-font, 0.9375rem);
     --ts-tb-pad      : 5px;
 }
 
@@ -39543,7 +42008,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 /* jQuery event for backward compatibility */
                 $el.trigger('toolbar:toggle', [value, pressed, $item, $group, self]);
 
-                if ($.isFunction(o.onToggle)) {
+                if (typeof o.onToggle === 'function') {
                     o.onToggle.call(self, value, pressed, $group[0]);
                 }
             });
@@ -39561,7 +42026,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
                 $el.trigger('toolbar:button', [value, $btn, self]);
 
-                if ($.isFunction(o.onButton)) {
+                if (typeof o.onButton === 'function') {
                     o.onButton.call(self, value, $btn[0]);
                 }
             });
@@ -39579,7 +42044,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
                 $el.trigger('toolbar:link', [value, $link, self]);
 
-                if ($.isFunction(o.onLink)) {
+                if (typeof o.onLink === 'function') {
                     o.onLink.call(self, value, $link[0]);
                 }
             });
@@ -39759,7 +42224,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     const args = Array.prototype.slice.call(arguments, 1);
                     instance[opts].apply(instance, args);
                 }
@@ -39775,6 +42240,70 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Tooltip
+/**
+ * Themestrap Tooltip Plugin
+ * JS-powered tooltips with CSS-variable theming, auto-flip, ARIA, and touch support.
+ *
+ * Part of the Themestrap component library for MODX 3
+ *
+ * Markup anatomy
+ *
+ *   <!-- Minimal: text from attribute value -->
+ *   <button data-plugin-tooltip="Save your work before continuing.">Save</button>
+ *
+ *   <!-- With options: variant, position, HTML content -->
+ *   <span data-plugin-tooltip="Pro tip"
+ *         data-plugin-options='{"type":"primary","location":"bottom","delay":[200,0]}'>
+ *     Hover me
+ *   </span>
+ *
+ *   <!-- HTML content via options (html:true required) -->
+ *   <a href="#"
+ *      data-plugin-tooltip=""
+ *      data-plugin-options='{"content":"<strong>Bold</strong> tip","html":true}'>
+ *     Link
+ *   </a>
+ *
+ * Options (data-plugin-options JSON or JS object)
+ *
+ *   content   ''           tooltip text; falls back to data-plugin-tooltip value
+ *   type      'default'    variant: default|primary|secondary|tertiary|quaternary|
+ *                                   dark|light|success|warning|danger|info
+ *   location  'top'        preferred side: top|bottom|left|right (auto-flips if no room)
+ *   offset    8            px gap between trigger edge and tooltip
+ *   arrow     true         show a pointing CSS arrow
+ *   html      false        render content as HTML (sanitise on your own server)
+ *   maxWidth  260          max-width in px
+ *   delay     [100, 0]     [showDelayMs, hideDelayMs]; number applies to both
+ *   onShow    null         callback(instance) — fires after show
+ *   onHide    null         callback(instance) — fires after hide
+ *
+ * Public API (via instance: $el.data('__pluginTooltip'))
+ *
+ *   instance.show()              — force show
+ *   instance.hide()              — force hide
+ *   instance.toggle()            — show/hide
+ *   instance.update()            — reposition without changing visibility
+ *   instance.setContent(text)    — update content live
+ *   instance.destroy()           — full teardown
+ *
+ * Events fired on the trigger element
+ *
+ *   tooltip:show   (jQuery event, [instance])
+ *   tooltip:hide   (jQuery event, [instance])
+ *
+ * Init.js wiring
+ *
+ *   if (typeof $.fn['themestrapPluginTooltip'] === 'function' && $('[data-plugin-tooltip]').length) {
+ *       $(() => {
+ *           $('[data-plugin-tooltip]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginTooltip(opts);
+ *           });
+ *       });
+ *   }
+ */
 (((themestrap = {}, $) => {
     const instanceName = '__pluginTooltip';
 
@@ -39786,8 +42315,8 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     const CSS_TEXT = `/* Themestrap — PluginTooltip */
 /* Base */
 .ts-tooltip-el {
-    --ts-tt-bg    : rgba(0, 0, 0, 0.94);
-    --ts-tt-color : var(--grey-500, #dbdbdb);
+    --ts-tt-bg    : var(--ts-skin-inverse, rgba(0, 0, 0, 0.94));
+    --ts-tt-color : var(--ts-skin-on-inverse, var(--grey-500, #dbdbdb));
 
     position      : fixed;
     z-index       : 9999;
@@ -39832,10 +42361,10 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     --ts-tt-color : var(--dark-300, #0a0c0d);
     box-shadow    : 0 4px 14px var(--dark-rgba-10, rgba(33, 37, 41, 0.1)), 0 0 0 1px var(--dark-rgba-70, rgba(33, 37, 41, 0.7));
 }
-.ts-tooltip-el.ts-tt-success    { --ts-tt-bg: rgba( 22, 163,  74, 0.95); --ts-tt-color: var(--light, #ffffff); }
-.ts-tooltip-el.ts-tt-warning    { --ts-tt-bg: rgba(234, 179,   8, 0.95); --ts-tt-color: var(--dark-200, #101214); }
-.ts-tooltip-el.ts-tt-danger     { --ts-tt-bg: rgba(220,  38,  38, 0.95); --ts-tt-color: var(--light, #ffffff); }
-.ts-tooltip-el.ts-tt-info       { --ts-tt-bg: rgba( 59, 130, 246, 0.95); --ts-tt-color: var(--light, #ffffff); }
+.ts-tooltip-el.ts-tt-success    { --ts-tt-bg: var(--ts-skin-success, rgba( 22, 163,  74, 0.95)); --ts-tt-color: var(--ts-skin-on-accent, var(--light, #ffffff)); }
+.ts-tooltip-el.ts-tt-warning    { --ts-tt-bg: var(--ts-skin-warning, rgba(234, 179,   8, 0.95)); --ts-tt-color: var(--dark-200, #101214); }
+.ts-tooltip-el.ts-tt-danger     { --ts-tt-bg: var(--ts-skin-danger, rgba(220,  38,  38, 0.95)); --ts-tt-color: var(--ts-skin-on-accent, var(--light, #ffffff)); }
+.ts-tooltip-el.ts-tt-info       { --ts-tt-bg: var(--ts-skin-info, rgba( 59, 130, 246, 0.95)); --ts-tt-color: var(--ts-skin-on-accent, var(--light, #ffffff)); }
 
 /* Arrow */
 /* The arrow points from the tooltip toward the trigger.
@@ -40155,7 +42684,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             $(document).on(`touchend.tooltip-outside.${self._uid}`, self._touchOutsideHandler);
 
             self.$el.trigger('tooltip:show', [self]);
-            if ($.isFunction(self.options.onShow)) {
+            if (typeof self.options.onShow === 'function') {
                 self.options.onShow.call(self);
             }
 
@@ -40175,7 +42704,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             $(document).off(`touchend.tooltip-outside.${self._uid}`);
 
             self.$el.trigger('tooltip:hide', [self]);
-            if ($.isFunction(self.options.onHide)) {
+            if (typeof self.options.onHide === 'function') {
                 self.options.onHide.call(self);
             }
 
@@ -40298,7 +42827,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     instance[opts]();
                 } else if (instance) {
                     console.warn(`[PluginTooltip] Unknown command: "${opts}"`);
@@ -40317,15 +42846,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Tree
+// Tree
 (((themestrap = {}, $) => {
     const instanceName = '__pluginTree';
     const STYLE_ID     = 'ts-tree-styles';
 
     const CSS = `
 .ts-tree {
-    font-family: var(--font-ui, system-ui, sans-serif);
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 13px;
-    color: var(--text-normal, #c0c0c0);
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
     user-select: none;
 }
 .ts-tree-search {
@@ -40334,11 +42864,11 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 }
 .ts-tree-search input {
     width: 100%;
-    background: var(--bg-deepest, #0d0e0f);
-    border: 1px solid var(--border-mid, rgba(255,255,255,0.20));
+    background: var(--ts-skin-surface-2, var(--bg-deepest, #0d0e0f));
+    border: 1px solid var(--ts-skin-border-strong, var(--border-mid, rgba(255,255,255,0.20)));
     border-radius: 4px;
-    color: var(--text-normal, #c0c0c0);
-    font-family: var(--font-mono, monospace);
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
+    font-family: var(--ts-skin-font-mono, var(--font-mono, monospace));
     font-size: 12px;
     padding: 4px 28px 4px 8px;
     outline: none;
@@ -40347,7 +42877,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     width: 100%;
 }
 .ts-tree-search input:focus {
-    border-color: var(--accent-cyan, #5ecfdb);
+    border-color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 .ts-tree-search-clear {
     position: absolute;
@@ -40355,13 +42885,13 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
     font-size: 11px;
     display: none;
     line-height: 1;
 }
 .ts-tree-search-clear.visible { display: block; }
-.ts-tree-search-clear:hover { color: var(--text-bright, #f0f0f0); }
+.ts-tree-search-clear:hover { color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0)); }
 .ts-tree-container,
 .ts-tree-children {
     list-style: none;
@@ -40383,15 +42913,15 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     outline: none;
 }
 .ts-tree-node-inner:hover {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
 }
 .ts-tree-node-inner:focus-visible {
-    box-shadow: 0 0 0 2px var(--accent-cyan, #5ecfdb);
+    box-shadow: 0 0 0 2px var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 .ts-tree-node.ts-tree-selected > .ts-tree-node-inner {
-    background: var(--bg-active, #3a3b3c);
-    color: var(--accent-cyan, #5ecfdb);
+    background: var(--ts-skin-accent-soft, var(--bg-active, #3a3b3c));
+    color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 .ts-tree-node.ts-tree-disabled > .ts-tree-node-inner {
     opacity: 0.38;
@@ -40405,13 +42935,13 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-dim, rgba(255,255,255,0.18));
+    color: var(--ts-skin-text-faint, var(--text-dim, rgba(255,255,255,0.18)));
     font-size: 9px;
     transition: transform 0.15s ease;
     border-radius: 2px;
 }
 .ts-tree-anchor::before { content: '▶'; display: block; }
-.ts-tree-anchor:hover { color: var(--text-muted, rgba(255,255,255,0.35)); }
+.ts-tree-anchor:hover { color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35))); }
 .ts-tree-node.ts-tree-open > .ts-tree-node-inner > .ts-tree-anchor {
     transform: rotate(90deg);
 }
@@ -40435,8 +42965,8 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     text-overflow: ellipsis;
 }
 .ts-tree-text mark {
-    background: rgba(94,207,219,0.22);
-    color: var(--accent-cyan, #5ecfdb);
+    background: var(--ts-tree-accent-soft, var(--ts-skin-accent-soft, rgba(94,207,219,0.22)));
+    color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     border-radius: 2px;
     padding: 0 1px;
     font-style: normal;
@@ -40444,7 +42974,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 .ts-tree-checkbox {
     width: 14px;
     height: 14px;
-    border: 1px solid var(--border-mid, rgba(255,255,255,0.20));
+    border: 1px solid var(--ts-skin-border-strong, var(--border-mid, rgba(255,255,255,0.20)));
     border-radius: 2px;
     flex-shrink: 0;
     display: flex;
@@ -40453,24 +42983,24 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     font-size: 9px;
     font-weight: 700;
     transition: background 0.15s, border-color 0.15s;
-    background: var(--bg-deepest, #0d0e0f);
+    background: var(--ts-skin-surface-2, var(--bg-deepest, #0d0e0f));
 }
 .ts-tree-checkbox.ts-tree-checked {
-    background: var(--accent-cyan, #5ecfdb);
-    border-color: var(--accent-cyan, #5ecfdb);
-    color: #000;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    border-color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-tree-on-accent, var(--ts-skin-on-accent, #000));
 }
 .ts-tree-checkbox.ts-tree-checked::before  { content: '✓'; }
 .ts-tree-checkbox.ts-tree-indeterminate {
-    background: rgba(94,207,219,0.35);
-    border-color: var(--accent-cyan, #5ecfdb);
-    color: #000;
+    background: var(--ts-tree-accent-soft, var(--ts-skin-accent-soft, rgba(94,207,219,0.35)));
+    border-color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-tree-text, var(--ts-skin-text, #000));
     font-size: 11px;
 }
 .ts-tree-checkbox.ts-tree-indeterminate::before { content: '−'; }
 .ts-tree-no-results {
     padding: 8px 6px;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
     font-size: 12px;
     font-style: italic;
     display: none;
@@ -41240,6 +43770,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Validation
+// Validation
 (((themestrap = {}, $) => {
     $.extend(themestrap, {
 
@@ -41295,7 +43826,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 			build() {
 				const self = this;
 
-				if (!($.isFunction($.validator))) {
+				if (!(typeof $.validator === 'function')) {
 					return this;
 				}
 
@@ -41323,6 +43854,71 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Vertical Navigation
+/**
+ * Vertical Navigation Plugin
+ *
+ * Supports collapsible sidebar (icon-only "mini" mode), expandable nav
+ * groups, active state tracking, icon support, and responsive behavior.
+ *
+ * Markup:
+ *   <nav data-plugin-vertical-nav data-plugin-options='{"collapsed": false}'>
+ *
+ *     <!-- Optional header / branding -->
+ *     <div class="ts-vn-header">
+ *       <span class="ts-vn-brand">App Name</span>
+ *     </div>
+ *
+ *     <!-- Direct link -->
+ *     <a href="/dashboard" class="ts-vn-link active">
+ *       <span class="ts-vn-icon"><i class="fas fa-home"></i></span>
+ *       <span class="ts-vn-text">Dashboard</span>
+ *     </a>
+ *
+ *     <!-- Expandable nav group -->
+ *     <div class="ts-vn-group">
+ *       <button class="ts-vn-group-trigger">
+ *         <span class="ts-vn-icon"><i class="fas fa-cog"></i></span>
+ *         <span class="ts-vn-text">Settings</span>
+ *       </button>
+ *       <div class="ts-vn-group-children">
+ *         <a href="/settings/profile"  class="ts-vn-link">Profile</a>
+ *         <a href="/settings/account"  class="ts-vn-link">Account</a>
+ *       </div>
+ *     </div>
+ *
+ *     <!-- Divider -->
+ *     <div class="ts-vn-divider"></div>
+ *
+ *   </nav>
+ *
+ * Options (data-plugin-options or JS):
+ *   collapsed      {Boolean}  false  — Start in icon-only mini mode
+ *   activeTracking {Boolean}  true   — Auto-set .active from current URL
+ *   hashTracking   {Boolean}  false  — Also match location.hash in addition to pathname
+ *   expandActive   {Boolean}  true   — Auto-expand group that contains the active link
+ *   toggleBtn      {Boolean}  true   — Render the collapse toggle button
+ *   toggleTarget   {String}   null   — Extra selector to add/remove .ts-vn-collapsed on collapse
+ *                                      (e.g. '#page-wrapper') — useful for pushing main content
+ *   animDuration   {Number}   260    — Group open/close animation duration in ms
+ *   tooltips       {Boolean}  true   — Show nav-text as Bootstrap tooltip when collapsed
+ *
+ * Public API:
+ *   const nav = $('#myNav').data('__verticalNav');
+ *   nav.collapse();         // collapse to mini mode
+ *   nav.expand();           // expand to full mode
+ *   nav.toggle();           // toggle collapse state
+ *   nav.openGroup($group);  // expand a .ts-vn-group element
+ *   nav.closeGroup($group); // collapse a .ts-vn-group element
+ *   nav.setActive(href);    // programmatically mark a link active
+ *   nav.destroy();          // teardown and restore original HTML
+ *
+ * themestrap.init.js wiring:
+ *   // Vertical Navigation
+ *   if (typeof $.fn['themestrapPluginVerticalNav'] === 'function' && $('[data-plugin-vertical-nav]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-vertical-nav]:not(.manual)', 'themestrapPluginVerticalNav');
+ *   }
+ */
+// Vertical Navigation
 (((themestrap = {}, $) => {
     const instanceName = '__verticalNav';
 
@@ -41338,23 +43934,23 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
  */
 /* Custom Properties */
 .ts-vertical-nav {
-    --ts-vn-bg:              var(--dark);
-    --ts-vn-border:          #393c41;
+    --ts-vn-bg:              var(--ts-skin-surface, var(--dark));
+    --ts-vn-border:          var(--ts-skin-border, #393c41);
 
     --ts-vn-width:           220px;
     --ts-vn-width-collapsed: 56px;
     --ts-vn-transition:      260ms cubic-bezier(.4, 0, .2, 1);
 
-    --ts-vn-link-color:        var(--default);
-    --ts-vn-link-hover-color:  var(--primary);
-    --ts-vn-link-hover-bg:     rgba(255, 255, 255, .08);
-    --ts-vn-link-active-color: var(--primary);
-    --ts-vn-link-active-bg:    rgba(255, 255, 255, .14);
-    --ts-vn-link-active-mark:  var(--primary);
+    --ts-vn-link-color:        var(--ts-skin-text, var(--default));
+    --ts-vn-link-hover-color:  var(--ts-skin-accent-hover, var(--primary));
+    --ts-vn-link-hover-bg:     var(--ts-skin-elevated, rgba(255, 255, 255, .08));
+    --ts-vn-link-active-color: var(--ts-skin-accent, var(--primary));
+    --ts-vn-link-active-bg:    var(--ts-skin-elevated, rgba(255, 255, 255, .14));
+    --ts-vn-link-active-mark:  var(--ts-skin-accent, var(--primary));
 
     --ts-vn-icon-size:   1.125rem;   /* 18 px */
-    --ts-vn-icon-color:  rgba(255, 255, 255, .60);
-    --ts-vn-icon-active: var(--primary);
+    --ts-vn-icon-color:  var(--ts-skin-text-dim, rgba(255, 255, 255, .60));
+    --ts-vn-icon-active: var(--ts-skin-accent, var(--primary));
 
     --ts-vn-header-height: 56px;
     --ts-vn-item-height:   36px;
@@ -41362,10 +43958,10 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
     --ts-vn-group-indent: 2.5rem;   /* children indented past icon column */
 
-    --ts-vn-divider-color: var(--grey-200);
+    --ts-vn-divider-color: var(--ts-skin-border, var(--grey-200));
 
-    --ts-vn-focus-ring: 0 0 0 2px #49afd9;
-    --ts-vn-radius:     4px;
+    --ts-vn-focus-ring: 0 0 0 2px var(--ts-skin-ring, #49afd9);
+    --ts-vn-radius:     var(--ts-skin-radius-sm, 4px);
 }
 /* Root nav element */
 .ts-vertical-nav {
@@ -41403,7 +43999,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 .ts-vn-brand {
     font-size:     .875rem;
     font-weight:   600;
-    color:         #fff;
+    color:         var(--ts-skin-text, #fff);
     opacity:       1;
     transition:    opacity var(--ts-vn-transition),
                    max-width var(--ts-vn-transition);
@@ -41491,7 +44087,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 }
 
 .ts-vn-body::-webkit-scrollbar       { width: 4px; }
-.ts-vn-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+.ts-vn-body::-webkit-scrollbar-thumb { background: var(--ts-skin-border-strong, rgba(255,255,255,.15)); border-radius: 4px; }
 /* Shared link / button row styles */
 .ts-vn-link,
 .ts-vn-group-trigger {
@@ -41646,7 +44242,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     font-weight:  600;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color:          rgba(255, 255, 255, .40);
+    color:          var(--ts-skin-text-dim, rgba(255, 255, 255, .40));
     white-space:    nowrap;
     overflow:       hidden;
     opacity:        1;
@@ -41680,12 +44276,12 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     --ts-vn-border:          var(--grey-200);
 
     --ts-vn-link-color:        var(--dark);
-    --ts-vn-link-hover-color:  #000;
-    --ts-vn-link-hover-bg:     rgba(0, 0, 0, .05);
-    --ts-vn-link-active-color: #000;
+    --ts-vn-link-hover-color:  var(--ts-skin-text-strong, #000);
+    --ts-vn-link-hover-bg:     var(--ts-skin-elevated, rgba(0, 0, 0, .05));
+    --ts-vn-link-active-color: var(--ts-skin-text-strong, #000);
     --ts-vn-link-active-bg:    var(--primary-rgba-10);
 
-    --ts-vn-icon-color:  #6a7e90;
+    --ts-vn-icon-color:  var(--ts-skin-text-dim, #6a7e90);
     --ts-vn-divider-color: var(--grey-200);
 }
 
@@ -42066,6 +44662,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Video Background
+// Video Background
 (((themestrap = {}, $) => {
     const instanceName = '__videobackground';
 
@@ -42104,7 +44701,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         build() {
 			const self = this;
 
-			if (!($.isFunction($.fn.vide)) || (!this.options.path)) {
+			if (!(typeof $.fn.vide === 'function') || (!this.options.path)) {
 				return this;
 			}
 
@@ -42243,6 +44840,112 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Wizard
+/**
+ * Themestrap Wizard Plugin
+ * Accessible multi-step form wizard / onboarding stepper
+ * Part of the Themestrap component library.
+ *
+ * Features:
+ *   • Step-by-step navigation with animated forward/back transitions.
+ *   • Optional per-step validation gate — any function, or HTML5
+ *     constraint validation (via options.validate: 'html5').
+ *   • Progress bar and step indicator sync (data-driven, no fixed markup).
+ *   • Keyboard navigation: Tab stays inside the active step; Alt+→ / Alt+←
+ *     move between steps when no validation is blocking.
+ *   • Jump-to-step via [data-wizard-goto="n"] anywhere in the document.
+ *   • Substep support — steps can contain nested [data-wizard-substep]
+ *     panels that must all be completed before the step counts as done.
+ *   • localStorage persistence — optionally re-opens the wizard at the
+ *     last-visited step.
+ *   • Full ARIA: role="tablist/tab/tabpanel" on the indicator strip;
+ *     aria-live region announces step title to screen readers.
+ *
+ * Markup anatomy:
+ *
+ *   <div data-plugin-wizard id="signup-wizard"
+ *        data-plugin-options='{"persist": true, "animationDuration": 300}'>
+ *
+ *     <!-- Optional: step indicator strip (rendered from [data-wizard-step] titles
+ *          if no [data-wizard-indicators] element exists). -->
+ *     <ol data-wizard-indicators role="tablist" aria-label="Form steps"></ol>
+ *
+ *     <!-- Optional: progress bar -->
+ *     <div data-wizard-progress>
+ *       <div data-wizard-progress-bar></div>
+ *     </div>
+ *
+ *     <!-- Optional: SR-only live region (auto-created if absent) -->
+ *     <div data-wizard-announce aria-live="polite" class="visually-hidden"></div>
+ *
+ *     <!-- Steps -->
+ *     <div data-wizard-steps>
+ *
+ *       <section data-wizard-step="1"
+ *                data-wizard-title="Account"
+ *                data-wizard-icon="fas fa-user">
+ *         <!-- any content; can include <input>s, [data-wizard-substep], etc. -->
+ *         <h3>Create your account</h3>
+ *         <input name="email" type="email" required />
+ *         <input name="password" type="password" required minlength="8" />
+ *       </section>
+ *
+ *       <section data-wizard-step="2"
+ *                data-wizard-title="Profile"
+ *                data-wizard-icon="fas fa-id-card">
+ *         <h3>Tell us about yourself</h3>
+ *         <input name="name" required />
+ *       </section>
+ *
+ *       <section data-wizard-step="3"
+ *                data-wizard-title="Done"
+ *                data-wizard-icon="fas fa-check">
+ *         <h3>All set!</h3>
+ *         <p>Your account is ready.</p>
+ *       </section>
+ *
+ *     </div>
+ *
+ *     <!-- Navigation bar -->
+ *     <div data-wizard-nav>
+ *       <button data-wizard-prev type="button">Back</button>
+ *       <button data-wizard-next type="button">Next</button>
+ *       <button data-wizard-submit type="submit">Finish</button>
+ *     </div>
+ *
+ *   </div>
+ *
+ * Public API (via stored instance):
+ *   const wiz = $('#signup-wizard').data('__pluginWizard');
+ *   wiz.next();                // advance (runs validation)
+ *   wiz.prev();                // go back (never validates)
+ *   wiz.goTo(n);               // jump to step n (1-indexed)
+ *   wiz.getStep();             // → current 1-indexed step number
+ *   wiz.getStepCount();        // → total number of steps
+ *   wiz.isFirst();             // → boolean
+ *   wiz.isLast();              // → boolean
+ *   wiz.markComplete(n);       // manually mark step n complete
+ *   wiz.reset();               // return to step 1, clear completions
+ *   wiz.destroy();             // remove listeners + instance data
+ *
+ * Events fired on the wizard root element:
+ *   wizard:beforechange   — before step changes; call e.preventDefault() to block
+ *   wizard:change         — after step has changed          (from, to, direction)
+ *   wizard:complete       — when the last step passes validation and submit fires
+ *   wizard:invalid        — when validation fails on a next() attempt          (step)
+ *   wizard:reset          — when reset() is called
+ *
+ * Init.js wiring (DOMReady-immediate):
+ *   if (typeof $.fn['themestrapPluginWizard'] === 'function' && $('[data-plugin-wizard]').length) {
+ *       $(() => {
+ *           $('[data-plugin-wizard]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginWizard(opts);
+ *           });
+ *       });
+ *   }
+ */
+// Wizard
 (((themestrap = {}, $) => {
     const instanceName = '__pluginWizard';
     const STYLE_ID     = 'ts-wizard-styles';
@@ -42251,16 +44954,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     const CSS_TEXT = `
         /* Themestrap Wizard */
         :root {
-            --wizard-accent:           var(--color-primary, #e8672a);
+            --wizard-accent:           var(--ts-skin-accent, var(--color-primary, #e8672a));
             --wizard-accent-subtle:    color-mix(in srgb, var(--wizard-accent) 12%, transparent);
-            --wizard-muted:            #94a3b8;
-            --wizard-fg:               #0f172a;
-            --wizard-bg:               #ffffff;
-            --wizard-border:           rgba(15, 23, 42, 0.10);
-            --wizard-border-strong:    rgba(15, 23, 42, 0.20);
+            --wizard-muted:            var(--ts-skin-text-dim, #94a3b8);
+            --wizard-fg:               var(--ts-skin-text, #0f172a);
+            --wizard-bg:               var(--ts-skin-surface, #ffffff);
+            --wizard-border:           var(--ts-skin-border, rgba(15, 23, 42, 0.10));
+            --wizard-border-strong:    var(--ts-skin-border-strong, rgba(15, 23, 42, 0.20));
             --wizard-step-size:        32px;
-            --wizard-step-font:        .8125rem;
-            --wizard-radius:           var(--border-radius, 6px);
+            --wizard-step-font:        var(--ts-skin-font, .8125rem);
+            --wizard-radius:           var(--ts-skin-radius, var(--border-radius, 6px));
             --wizard-duration:         300ms;
             --wizard-ease:             cubic-bezier(.16, 1, .3, 1);
         }
@@ -42339,14 +45042,14 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         [data-wizard-indicator].wiz-active [data-wizard-indicator-bubble] {
             background: var(--wizard-accent);
             border-color: var(--wizard-accent);
-            color: #fff;
+            color: var(--ts-skin-on-accent, #fff);
             box-shadow: 0 0 0 4px var(--wizard-accent-subtle);
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-bubble] {
             background: var(--wizard-accent);
             border-color: var(--wizard-accent);
-            color: #fff;
+            color: var(--ts-skin-on-accent, #fff);
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-bubble]::after {
@@ -42480,13 +45183,13 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
         /* Validation error styles on invalid inputs */
         [data-plugin-wizard] .wiz-invalid {
-            border-color: #dc2626 !important;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+            border-color: var(--ts-skin-danger, #dc2626) !important;
+            box-shadow: 0 0 0 3px var(--ts-skin-danger, rgba(220, 38, 38, 0.15)) !important;
         }
 
         [data-plugin-wizard] [data-wizard-error] {
             font-size: .8125rem;
-            color: #dc2626;
+            color: var(--ts-skin-danger, #dc2626);
             margin-top: 4px;
             display: none;
         }
@@ -43046,6 +45749,63 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Rich Editor
+/**
+ * Themestrap RichEditor
+ * 
+ * Lightweight contenteditable editor built on PluginToolbar (formatting controls)
+ * and PluginDialog.
+ *
+ * Markup:
+ *
+ *   <div data-plugin-richeditor
+ *        data-plugin-options='{"placeholder": "Write your message...", "minHeight": 220}'>
+ *       <p>Optional seed content.</p>
+ *   </div>
+ *
+ * Blog mode:
+ *
+ *   <div data-plugin-richeditor
+ *        data-plugin-options='{"toolbar": "blog", "markdownShortcuts": true, "statusBar": true}'></div>
+ *
+ *   "toolbar": "blog" adds headings, quote, inline code, code block, divider and image.
+ *   Typing Markdown shortcuts converts as you write: "## " heading, "- " list, "1. " numbered
+ *   list, "> " quote, "```" code block, "---" divider, plus **bold**, *italic* and `code`.
+ *   getMarkdown() / setMarkdown() let the editor read and write Markdown, so a post stays a
+ *   plain .md file. Images can be pasted, dropped or picked when imageUpload is provided.
+ *
+ * Public API (via stored instance):
+ *   const editor = $('#myEditor').data('__pluginRichEditor');
+ *   editor.getMarkdown();    // Markdown string converted from the current content
+ *   editor.setMarkdown(md);  // renders Markdown into the editor (PluginMarkdown or options.renderer)
+ *   editor.getWordCount();
+ *   editor.getContent();     // HTML string, '' when empty
+ *   editor.getText();        // plain text
+ *   editor.setContent(html); // replaces content (trusted HTML only, it is not sanitized)
+ *   editor.isEmpty();
+ *   editor.clear();
+ *   editor.focus();
+ *   editor.enable() / editor.disable();
+ *   editor.destroy();        // restores the current content into the host element
+ *
+ * Events dispatched on the host element (native CustomEvent, bubbles):
+ *   ts.richeditor.change   detail: { instance }
+ *   ts.richeditor.focus    detail: { instance }
+ *   ts.richeditor.blur     detail: { instance }
+ *   ts.richeditor.save     detail: { instance }  Ctrl/Cmd+S pressed
+ *   ts.richeditor.upload   detail: { instance, file, url }
+ *   ts.richeditor.error    detail: { instance, error }
+ *
+ * CSS custom properties (all optional):
+ *   --ts-re-bg, --ts-re-border, --ts-re-border-focus, --ts-re-radius, --ts-re-padding,
+ *   --ts-re-toolbar-bg, --ts-re-text, --ts-re-placeholder, --ts-re-link,
+ *   --ts-re-accent-contrast
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginRichEditor'] === 'function' && $('[data-plugin-richeditor]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-richeditor]:not(.manual)', 'themestrapPluginRichEditor');
+ *   }
+ */
+// Rich Editor
 (((themestrap = {}, $) => {
     const instanceName = '__pluginRichEditor';
     const STYLE_ID     = 'ts-richeditor-styles';
@@ -43060,23 +45820,23 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
     // Theme tokens. Private --re-* properties resolve the public --ts-re-* overrides
     // against a per-theme fallback, so consumers can override on any ancestor.
     const LIGHT_TOKENS = `
-        --re-bg:              var(--ts-re-bg, #ffffff);
-        --re-border:          var(--ts-re-border, rgba(0,0,0,.14));
-        --re-toolbar-bg:      var(--ts-re-toolbar-bg, rgba(0,0,0,.035));
-        --re-text:            var(--ts-re-text, #1f2937);
-        --re-placeholder:     var(--ts-re-placeholder, rgba(31,41,55,.42));
-        --re-link:            var(--ts-re-link, #0b8a83);
-        --re-accent:          var(--ts-re-border-focus, #00a89f);
+        --re-bg:              var(--ts-re-bg, var(--ts-skin-surface, #ffffff));
+        --re-border:          var(--ts-re-border, var(--ts-skin-border, rgba(0,0,0,.14)));
+        --re-toolbar-bg:      var(--ts-re-toolbar-bg, var(--ts-skin-surface-2, rgba(0,0,0,.035)));
+        --re-text:            var(--ts-re-text, var(--ts-skin-text, #1f2937));
+        --re-placeholder:     var(--ts-re-placeholder, var(--ts-skin-text-dim, rgba(31,41,55,.42)));
+        --re-link:            var(--ts-re-link, var(--ts-skin-accent, #0b8a83));
+        --re-accent:          var(--ts-re-border-focus, var(--ts-skin-accent, #00a89f));
     `;
 
     const DARK_TOKENS = `
-        --re-bg:              var(--ts-re-bg, rgba(255,255,255,.02));
-        --re-border:          var(--ts-re-border, rgba(255,255,255,.10));
-        --re-toolbar-bg:      var(--ts-re-toolbar-bg, rgba(0,0,0,.20));
-        --re-text:            var(--ts-re-text, #cdd8e6);
-        --re-placeholder:     var(--ts-re-placeholder, rgba(205,216,230,.35));
-        --re-link:            var(--ts-re-link, #00c7be);
-        --re-accent:          var(--ts-re-border-focus, #00c7be);
+        --re-bg:              var(--ts-re-bg, var(--ts-skin-surface-2, rgba(255,255,255,.02)));
+        --re-border:          var(--ts-re-border, var(--ts-skin-border, rgba(255,255,255,.10)));
+        --re-toolbar-bg:      var(--ts-re-toolbar-bg, var(--ts-skin-surface, rgba(0,0,0,.20)));
+        --re-text:            var(--ts-re-text, var(--ts-skin-text, #cdd8e6));
+        --re-placeholder:     var(--ts-re-placeholder, var(--ts-skin-text-dim, rgba(205,216,230,.35)));
+        --re-link:            var(--ts-re-link, var(--ts-skin-accent, #00c7be));
+        --re-accent:          var(--ts-re-border-focus, var(--ts-skin-accent, #00c7be));
     `;
 
     const INJECTED_CSS = `
@@ -43094,7 +45854,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             flex-direction: column;
             background: var(--re-bg);
             border: 1px solid var(--re-border);
-            border-radius: var(--ts-re-radius, 6px);
+            border-radius: var(--ts-re-radius, var(--ts-skin-radius, 6px));
             overflow: hidden;
             transition: border-color .15s, box-shadow .15s;
         }
@@ -43144,6 +45904,38 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         .ts-re-content p            { margin: 0 0 .6em; }
         .ts-re-content p:last-child { margin-bottom: 0; }
 
+        .ts-re-content h1,
+        .ts-re-content h2,
+        .ts-re-content h3          { line-height: 1.3; margin: 1.1em 0 .4em; }
+        .ts-re-content h1          { font-size: 1.6em; }
+        .ts-re-content h2          { font-size: 1.35em; }
+        .ts-re-content h3          { font-size: 1.15em; }
+        .ts-re-content h1:first-child,
+        .ts-re-content h2:first-child,
+        .ts-re-content h3:first-child { margin-top: 0; }
+        .ts-re-content blockquote  { margin: 0 0 .8em; padding-left: 1em; border-left: 3px solid var(--re-accent); color: var(--re-placeholder); }
+        .ts-re-content pre         { background: color-mix(in srgb, currentColor 8%, transparent); padding: 10px 12px; border-radius: 6px; overflow-x: auto; margin: 0 0 .8em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; white-space: pre-wrap; }
+        .ts-re-content code        { background: color-mix(in srgb, currentColor 10%, transparent); padding: .1em .35em; border-radius: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+        .ts-re-content pre code    { background: none; padding: 0; }
+        .ts-re-content hr          { border: 0; border-top: 1px solid var(--re-border); margin: 1.2em 0; }
+        .ts-re-content hr[data-more] { border-top: 1px dashed var(--re-accent); overflow: visible; height: 0; margin: 1.6em 0; }
+        .ts-re-content hr[data-more]::after { content: 'Summary ends here'; position: relative; top: -.75em; display: table; margin: 0 auto; padding: 0 .6em; background: var(--re-bg); color: var(--re-accent); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+        .ts-re-content img         { max-width: 100%; height: auto; border-radius: 4px; }
+        .ts-re-content table       { border-collapse: collapse; margin-bottom: .8em; }
+        .ts-re-content th,
+        .ts-re-content td          { border: 1px solid var(--re-border); padding: 4px 10px; }
+        .ts-re-status {
+            display: flex;
+            gap: 14px;
+            padding: 6px 14px;
+            border-top: 1px solid var(--re-border);
+            background: var(--re-toolbar-bg);
+            color: var(--re-placeholder);
+            font-size: 12px;
+        }
+        .ts-re-status .ts-re-msg   { margin-left: auto; }
+        .ts-richeditor.ts-re-dropping .ts-re-content { outline: 2px dashed var(--re-accent); outline-offset: -8px; }
+
         /* Link dialog. The dialog lives on <body>, so it is themed with currentColor
            and inherits its colors from PluginDialog's panel. */
         .ts-re-link-label {
@@ -43168,10 +45960,10 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             outline: none;
             transition: border-color .15s;
         }
-        .ts-re-link-input:focus            { border-color: var(--ts-re-border-focus, #00a89f); }
-        .ts-re-link-input[aria-invalid="true"] { border-color: #dc2626; }
+        .ts-re-link-input:focus            { border-color: var(--ts-re-border-focus, var(--ts-skin-accent, #00a89f)); }
+        .ts-re-link-input[aria-invalid="true"] { border-color: var(--ts-skin-danger, #dc2626); }
         .ts-re-link-error {
-            color: #dc2626;
+            color: var(--ts-skin-danger, #dc2626);
             font-size: 12px;
             margin: 6px 0 0;
         }
@@ -43200,8 +45992,8 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         .ts-re-dlg-cancel,
         .ts-re-dlg-remove  { background: color-mix(in srgb, currentColor 10%, transparent); color: inherit; }
         .ts-re-dlg-confirm {
-            background: var(--ts-re-border-focus, #00a89f);
-            color: var(--ts-re-accent-contrast, #04211f);
+            background: var(--ts-re-border-focus, var(--ts-skin-accent, #00a89f));
+            color: var(--ts-re-accent-contrast, var(--ts-skin-on-accent, #04211f));
             font-weight: 600;
         }
         .ts-re-dlg-cancel:hover,
@@ -43220,11 +46012,27 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         ol:          { cmd: 'insertOrderedList',   icon: 'fas fa-list-ol',       label: 'Numbered List' },
         link:        { cmd: 'link',                icon: 'fas fa-link',          label: 'Insert Link',      key: 'K' },
         clearFormat: { cmd: 'removeFormat',        icon: 'fas fa-eraser',        label: 'Clear Formatting' },
+        // Blog commands. 'inlineCode' is a custom toggle and the rest are one-shot actions.
+        inlineCode:  { cmd: 'inlineCode',          icon: 'fas fa-code',          label: 'Inline Code' },
+        h2:          { cmd: 'h2',                  icon: 'fas fa-heading',       label: 'Heading',          text: 'H2' },
+        h3:          { cmd: 'h3',                  icon: 'fas fa-heading',       label: 'Subheading',       text: 'H3' },
+        quote:       { cmd: 'quote',               icon: 'fas fa-quote-left',    label: 'Quote' },
+        codeBlock:   { cmd: 'codeBlock',           icon: 'fas fa-file-code',     label: 'Code Block' },
+        hr:          { cmd: 'insertHorizontalRule', icon: 'fas fa-minus',        label: 'Divider' },
+        image:       { cmd: 'image',               icon: 'fas fa-image',         label: 'Insert Image' },
     };
 
-    const INLINE_KEYS = ['bold', 'italic', 'underline', 'strike'];
+    const INLINE_KEYS = ['bold', 'italic', 'underline', 'strike', 'inlineCode'];
     const LIST_KEYS   = ['ul', 'ol'];
-    const ACTION_KEYS = ['link', 'clearFormat'];
+    const BLOCK_KEYS  = ['h2', 'h3', 'quote', 'codeBlock', 'hr'];
+    const ACTION_KEYS = ['link', 'image', 'clearFormat'];
+
+    // Named toolbar presets. options.toolbar may be one of these names or an array of keys.
+    const TOOLBARS = {
+        basic: ['bold', 'italic', 'underline', 'strike', '|', 'ul', 'ol', '|', 'link', 'clearFormat'],
+        blog:  ['bold', 'italic', 'strike', 'inlineCode', '|', 'h2', 'h3', 'quote', '|', 'ul', 'ol', '|',
+                'codeBlock', 'hr', '|', 'link', 'image', 'clearFormat']
+    };
 
     const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -43245,6 +46053,133 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         if (!/^[a-z][a-z0-9+.\-]*:/i.test(url)) url = `https://${url}`;
         const scheme = url.match(/^([a-z][a-z0-9+.\-]*):/i)[1].toLowerCase();
         return protocols.indexOf(scheme) !== -1 ? url : '';
+    };
+
+    // HTML to Markdown. Handles what the editor can produce plus common pasted markup.
+    const mdEscape = (t) => t
+        .replace(/\\/g, '\\\\')
+        .replace(/([*`\[\]])/g, '\\$1')
+        .replace(/(^|\s)_|_(?=\s|$)/g, (m) => m.replace('_', '\\_'));
+
+    const htmlToMarkdown = (root) => {
+        const inline = (node) => {
+            let out = '';
+            node.childNodes.forEach((n) => { out += inl(n); });
+            return out;
+        };
+        const wrapI = (mark, n) => {
+            const inner = inline(n);
+            const m = inner.match(/^(\s*)([\s\S]*?)(\s*)$/);
+            return m[2] ? `${m[1]}${mark}${m[2]}${mark}${m[3]}` : inner;
+        };
+        const inl = (n) => {
+            if (n.nodeType === 3) return mdEscape(n.nodeValue.replace(/\u00a0/g, ' ').replace(/\s*\n\s*/g, ' '));
+            if (n.nodeType !== 1) return '';
+            const tag = n.tagName.toLowerCase();
+            switch (tag) {
+                case 'strong': case 'b': return wrapI('**', n);
+                case 'em': case 'i':     return wrapI('*', n);
+                case 'del': case 's': case 'strike': return wrapI('~~', n);
+                case 'code': {
+                    const t = n.textContent;
+                    const fence = t.indexOf('`') !== -1 ? '``' : '`';
+                    return t ? `${fence}${t}${fence}` : '';
+                }
+                case 'br':  return '  \n';
+                case 'a': {
+                    const href = n.getAttribute('href') || '';
+                    const text = inline(n);
+                    return href ? `[${text}](${href})` : text;
+                }
+                case 'img': {
+                    const src = n.getAttribute('src') || '';
+                    return src ? `![${(n.getAttribute('alt') || '').replace(/[\[\]]/g, '')}](${src})` : '';
+                }
+                case 'input': return n.checked ? '[x] ' : '[ ] ';
+                default: return inline(n);
+            }
+        };
+        const blockEsc = (t) => t.replace(/^(\s*)(#{1,6}\s|>|[-+]\s|\d+[.)]\s|={3,}|-{3,})/, '$1\\$2');
+
+        const list = (el, depth) => {
+            const ordered = el.tagName.toLowerCase() === 'ol';
+            let i = parseInt(el.getAttribute('start') || '1', 10);
+            let out = '';
+            Array.prototype.forEach.call(el.children, (li) => {
+                if (li.tagName.toLowerCase() !== 'li') return;
+                const pad = '  '.repeat(depth);
+                const mark = ordered ? `${i++}. ` : '- ';
+                let text = '';
+                let nested = '';
+                li.childNodes.forEach((c) => {
+                    const t = c.nodeType === 1 ? c.tagName.toLowerCase() : '';
+                    if (t === 'ul' || t === 'ol') nested += list(c, depth + 1);
+                    else if (t === 'p' || t === 'div') text += (text ? ' ' : '') + inline(c).trim();
+                    else text += inl(c);
+                });
+                out += `${pad}${mark}${text.trim()}\n${nested}`;
+            });
+            return out;
+        };
+
+        const block = (n) => {
+            if (n.nodeType === 3) {
+                const t = n.nodeValue.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ');
+                return t.trim() ? blockEsc(mdEscape(t.trim())) + '\n\n' : '';
+            }
+            if (n.nodeType !== 1) return '';
+            const tag = n.tagName.toLowerCase();
+            const h = tag.match(/^h([1-6])$/);
+            if (h) return `${'#'.repeat(+h[1])} ${inline(n).trim()}\n\n`;
+            switch (tag) {
+                case 'p': case 'div': {
+                    const kids = Array.prototype.slice.call(n.children);
+                    // A div that wraps blocks is a container, not a paragraph
+                    if (kids.some((k) => /^(p|div|ul|ol|h[1-6]|pre|blockquote|table|hr)$/i.test(k.tagName))) return children(n);
+                    const t = inline(n).replace(/(  \n)+$/, '').trim();
+                    return t ? blockEsc(t) + '\n\n' : '';
+                }
+                case 'ul': case 'ol': return list(n, 0) + '\n';
+                case 'blockquote': {
+                    const inner = children(n).trim().split('\n').map((l) => (l ? `> ${l}` : '>')).join('\n');
+                    return inner + '\n\n';
+                }
+                case 'pre': {
+                    const code = n.querySelector('code');
+                    const lang = code ? ((code.className.match(/language-([\w+#.-]+)/) || [])[1] || '') : '';
+                    const text = (code || n).textContent.replace(/\n$/, '');
+                    const fence = text.indexOf('```') !== -1 ? '````' : '```';
+                    return `${fence}${lang}\n${text}\n${fence}\n\n`;
+                }
+                case 'hr': return n.hasAttribute('data-more') ? '<!--more-->\n\n' : '---\n\n';
+                case 'table': {
+                    const rows = Array.prototype.map.call(n.querySelectorAll('tr'), (tr) =>
+                        Array.prototype.map.call(tr.children, (c) => inline(c).trim().replace(/\|/g, '\\|').replace(/\n/g, ' ')));
+                    if (!rows.length) return '';
+                    const w = Math.max.apply(null, rows.map((r) => r.length));
+                    const fix = (r) => `| ${r.concat(Array(w - r.length).fill('')).join(' | ')} |`;
+                    return [fix(rows[0]), `| ${Array(w).fill('---').join(' | ')} |`].concat(rows.slice(1).map(fix)).join('\n') + '\n\n';
+                }
+                case 'img': return inl(n) + '\n\n';
+                case 'script': case 'style': return '';
+                default: return children(n);
+            }
+        };
+        const children = (el) => {
+            let out = '';
+            let run = '';
+            const flush = () => { if (run.trim()) out += blockEsc(run.trim()) + '\n\n'; run = ''; };
+            el.childNodes.forEach((c) => {
+                const t = c.nodeType === 1 ? c.tagName.toLowerCase() : '';
+                const isInline = c.nodeType === 3 || /^(a|b|strong|i|em|s|del|strike|u|code|span|br|img|sub|sup|mark|small|input)$/.test(t);
+                if (isInline) run += inl(c);
+                else { flush(); out += block(c); }
+            });
+            flush();
+            return out;
+        };
+
+        return children(root).replace(/\n{3,}/g, '\n\n').trim() + '\n';
     };
 
     class PluginRichEditor {
@@ -43287,8 +46222,12 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             // $.extend(true) merges arrays index by index, so a short user array would be
             // padded with default entries. Arrays are replaced wholesale instead.
             if (opts && Object.prototype.hasOwnProperty.call(opts, 'toolbar')) {
-                this.options.toolbar = opts.toolbar;
+                this.options.toolbar = typeof opts.toolbar === 'string' && TOOLBARS[opts.toolbar]
+                    ? TOOLBARS[opts.toolbar].slice()
+                    : opts.toolbar;
             }
+            if (opts && typeof opts.imageUpload === 'function') this.options.imageUpload = opts.imageUpload;
+            if (opts && typeof opts.renderer === 'function')    this.options.renderer = opts.renderer;
             if (opts && Array.isArray(opts.allowedProtocols)) {
                 this.options.allowedProtocols = opts.allowedProtocols.slice();
             }
@@ -43305,7 +46244,8 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
             // Dependencies are only required for the features that are switched on
             if ((self._enabled.size && !self._requires('themestrapPluginToolbar', 'PluginToolbar'))
-                || (self._enabled.has('link') && !self._requires('themestrapPluginDialog', 'PluginDialog'))) {
+                || ((self._enabled.has('link') || (self._enabled.has('image') && typeof opts.imageUpload !== 'function'))
+                    && !self._requires('themestrapPluginDialog', 'PluginDialog'))) {
                 self._failed = true;
                 $el.removeData(instanceName);
                 return this;
@@ -43342,7 +46282,13 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             $el.append(self.$editable);
             self._toggleEmpty();
 
-            if (self._enabled.has('link')) {
+            if (opts.statusBar) {
+                self.$status = $('<div class="ts-re-status"><span class="ts-re-words"></span><span class="ts-re-time"></span><span class="ts-re-msg" role="status"></span></div>');
+                $el.append(self.$status);
+                self._updateStatus();
+            }
+
+            if (self._enabled.has('link') || (self._enabled.has('image') && typeof opts.imageUpload !== 'function')) {
                 self._buildDialog();
             }
 
@@ -43391,22 +46337,24 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
             const inline  = INLINE_KEYS.filter((k) => enabled.has(k));
             const lists   = LIST_KEYS.filter((k) => enabled.has(k));
+            const blocks  = BLOCK_KEYS.filter((k) => enabled.has(k));
             const actions = ACTION_KEYS.filter((k) => enabled.has(k));
+
+            const buttons = (keys) => keys.map((k) => {
+                const d = CMDS[k];
+                return `
+                    <button type="button" class="ts-tb-icon"
+                            data-toolbar-button data-toolbar-value="${k}"
+                            title="${titleFor(d)}" aria-label="${d.label}">
+                        ${d.text ? `<span style="font-size:11px;font-weight:700">${d.text}</span>` : `<i class="${d.icon}" aria-hidden="true"></i>`}
+                    </button>`;
+            }).join('');
 
             const groups = [];
             if (inline.length) groups.push(self._toggleGroupHtml(inline, 'Inline formatting'));
+            if (blocks.length) groups.push(buttons(blocks));
             if (lists.length)  groups.push(self._toggleGroupHtml(lists, 'List formatting'));
-            if (actions.length) {
-                groups.push(actions.map((k) => {
-                    const d = CMDS[k];
-                    return `
-                        <button type="button" class="ts-tb-icon"
-                                data-toolbar-button data-toolbar-value="${k}"
-                                title="${titleFor(d)}" aria-label="${d.label}">
-                            <i class="${d.icon}" aria-hidden="true"></i>
-                        </button>`;
-                }).join(''));
-            }
+            if (actions.length) groups.push(buttons(actions));
 
             return $(`<div>${groups.join('<hr data-toolbar-separator>')}</div>`);
         }
@@ -43485,6 +46433,8 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 self.$toolbarEl[0].addEventListener('toolbar:button', (e) => {
                     if (e.detail.value === 'link') {
                         self._openLinkDialog();
+                    } else if (e.detail.value === 'image') {
+                        self._insertImage();
                     } else {
                         self._execCmd(e.detail.value);
                     }
@@ -43508,9 +46458,11 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 .on(`keyup.${EVENT_NS} mouseup.${EVENT_NS}`, () => {
                     self._syncState();
                 })
-                .on(`input.${EVENT_NS}`, () => {
+                .on(`input.${EVENT_NS}`, (e) => {
                     self._toggleEmpty();
                     self._syncState();
+                    self._updateStatus();
+                    if (self.options.markdownShortcuts) self._inlineShortcut(e.originalEvent);
                     self._dispatch('ts.richeditor.change');
                     if (typeof self.options.onChange === 'function') {
                         self.options.onChange.call(self, self.getContent());
@@ -43518,6 +46470,16 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 })
                 .on(`keydown.${EVENT_NS}`, (e) => {
                     const mod = e.ctrlKey || e.metaKey;
+                    if (mod && !e.altKey && !e.shiftKey && String(e.key).toLowerCase() === 's') {
+                        e.preventDefault();
+                        self._dispatch('ts.richeditor.save');
+                        return;
+                    }
+                    if (self.options.markdownShortcuts && !mod && !e.altKey && !e.isComposing
+                        && (e.key === ' ' || e.key === 'Enter') && self._blockShortcut(e)) {
+                        e.preventDefault();
+                        return;
+                    }
                     if (mod && !e.altKey && !e.shiftKey && String(e.key).toLowerCase() === 'k'
                         && self._enabled.has('link')) {
                         e.preventDefault();
@@ -43525,11 +46487,39 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                     }
                 })
                 .on(`paste.${EVENT_NS}`, (e) => {
-                    if (!self.options.pastePlainText) return;
                     const data = (e.originalEvent || e).clipboardData;
                     if (!data) return;
+                    const files = Array.prototype.filter.call(data.files || [], (f) => /^image\//.test(f.type));
+                    if (files.length && typeof self.options.imageUpload === 'function') {
+                        e.preventDefault();
+                        self._uploadFiles(files);
+                        return;
+                    }
+                    if (!self.options.pastePlainText) return;
                     e.preventDefault();
-                    document.execCommand('insertText', false, data.getData('text/plain'));
+                    const text = data.getData('text/plain');
+                    // A bare URL pasted over a selection becomes a link
+                    if (/^https?:\/\/\S+$/.test(text.trim()) && window.getSelection().toString()) {
+                        document.execCommand('createLink', false, text.trim());
+                        self._decorateLinks();
+                    } else {
+                        document.execCommand('insertText', false, text);
+                    }
+                })
+                .on(`dragover.${EVENT_NS} dragenter.${EVENT_NS}`, (e) => {
+                    const dt = e.originalEvent.dataTransfer;
+                    if (typeof self.options.imageUpload !== 'function' || !dt
+                        || !Array.prototype.some.call(dt.items || [], (i) => /^image\//.test(i.type))) return;
+                    e.preventDefault();
+                    self.options.wrapper.addClass('ts-re-dropping');
+                })
+                .on(`dragleave.${EVENT_NS} drop.${EVENT_NS}`, () => self.options.wrapper.removeClass('ts-re-dropping'))
+                .on(`drop.${EVENT_NS}`, (e) => {
+                    const dt = e.originalEvent.dataTransfer;
+                    const files = dt ? Array.prototype.filter.call(dt.files || [], (f) => /^image\//.test(f.type)) : [];
+                    if (!files.length || typeof self.options.imageUpload !== 'function') return;
+                    e.preventDefault();
+                    self._uploadFiles(files);
                 });
 
             // selectionchange only fires on the document, never on an element
@@ -43548,13 +46538,19 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
             $dlg.on(`dialog:open.${EVENT_NS}`, () => {
                 const editing = !!self._linkEl;
+                const image   = !!self._imageMode;
                 self._setLinkError('');
                 self.$linkInput.val(editing ? (self._linkEl.getAttribute('href') || '') : '');
                 self.$linkRemove.prop('hidden', !editing);
-                self.$linkTitle.text(editing ? 'Edit Link' : 'Insert Link');
+                self.$linkTitle.text(image ? 'Insert Image' : (editing ? 'Edit Link' : 'Insert Link'));
+                self.$dialog.find('[data-dialog-description]').text(image
+                    ? 'Paste the address of an image.'
+                    : 'Paste or type a URL. Select text first to wrap it in the link.');
                 self.$linkOk.text(editing ? 'Update' : 'Insert');
                 setTimeout(() => self.$linkInput.trigger('focus').trigger('select'), 60);
             });
+
+            $dlg.on(`dialog:close.${EVENT_NS}`, () => { self._imageMode = false; });
 
             $dlg.on(`keydown.${EVENT_NS}`, '.ts-re-link-input', (e) => {
                 if (e.key === 'Enter') {
@@ -43620,8 +46616,208 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
             this._restoreSelection();
             this.$editable.trigger('focus');
-            document.execCommand(def.cmd, false, null);
+            switch (def.cmd) {
+                case 'h2': case 'h3': this._toggleBlock(def.cmd); break;
+                case 'quote':         this._toggleBlock('blockquote'); break;
+                case 'codeBlock':     this._toggleBlock('pre'); break;
+                case 'inlineCode':    this._toggleInlineCode(); break;
+                default:              document.execCommand(def.cmd, false, null);
+            }
             this._syncState();
+            this._afterEdit();
+            return this;
+        }
+
+        // Applies a block tag, or returns to a paragraph when it is already applied
+        _toggleBlock(tag) {
+            let current = '';
+            try { current = String(document.queryCommandValue('formatBlock') || '').toLowerCase().replace(/[<>]/g, ''); } catch (err) { /* unsupported */ }
+            document.execCommand('formatBlock', false, current === tag ? 'p' : tag);
+            return this;
+        }
+
+        _toggleInlineCode() {
+            const sel = window.getSelection();
+            if (!sel || !sel.rangeCount) return this;
+            const range = sel.getRangeAt(0);
+            const node  = range.commonAncestorContainer;
+            const el    = node.nodeType === 3 ? node.parentElement : node;
+            const code  = el && el.closest ? el.closest('code') : null;
+
+            if (code && this.$editable[0].contains(code) && code.parentElement.tagName !== 'PRE') {
+                const text = document.createTextNode(code.textContent);
+                code.replaceWith(text);
+                const r = document.createRange();
+                r.selectNodeContents(text);
+                sel.removeAllRanges();
+                sel.addRange(r);
+            } else if (!range.collapsed) {
+                document.execCommand('insertHTML', false, `<code>${escapeHtml(range.toString())}</code>`);
+            }
+            return this;
+        }
+
+        // Fires change after programmatic edits, which do not always raise an input event
+        _afterEdit() {
+            this._toggleEmpty();
+            this._updateStatus();
+            this._dispatch('ts.richeditor.change');
+            if (typeof this.options.onChange === 'function') this.options.onChange.call(this, this.getContent());
+            return this;
+        }
+
+        // Markdown typing shortcuts
+
+        // Block shortcuts fire on Space ("## ") or Enter ("```", "---") at the start of a line
+        _blockShortcut(e) {
+            const sel = window.getSelection();
+            if (!sel || !sel.rangeCount || !sel.isCollapsed) return false;
+            const range = sel.getRangeAt(0);
+            let block = range.startContainer;
+            while (block && block !== this.$editable[0] && !(block.nodeType === 1 && /^(P|DIV)$/.test(block.tagName))) {
+                block = block.parentNode;
+            }
+            if (!block || block === this.$editable[0]) {
+                // Text typed directly in the editable root, with no wrapping paragraph yet
+                if (range.startContainer.nodeType !== 3 || range.startContainer.parentNode !== this.$editable[0]) return false;
+                block = null;
+            }
+            const text = block ? block.textContent : range.startContainer.nodeValue;
+            const upTo = block ? this._textBefore(block, range) : text.slice(0, range.startOffset);
+            const clear = () => {
+                if (block) { block.innerHTML = '<br>'; }
+                else { range.startContainer.nodeValue = text.slice(upTo.length); }
+                const r = document.createRange();
+                r.selectNodeContents(block || range.startContainer.parentNode);
+                r.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(r);
+            };
+
+            if (e.key === ' ') {
+                if (upTo !== text.slice(0, upTo.length) || text.trim() !== upTo.trim()) return false;
+                let m;
+                if ((m = upTo.match(/^(#{1,3})$/))) { clear(); document.execCommand('formatBlock', false, 'h' + m[1].length); }
+                else if (upTo === '>')                { clear(); document.execCommand('formatBlock', false, 'blockquote'); }
+                else if (/^[-*+]$/.test(upTo))        { clear(); document.execCommand('insertUnorderedList'); }
+                else if (/^\d+[.)]$/.test(upTo))      { clear(); document.execCommand('insertOrderedList'); }
+                else return false;
+                this._afterEdit();
+                return true;
+            }
+
+            if (e.key === 'Enter') {
+                if (/^`{3}[\w+#.-]*$/.test(upTo) && text.trim() === upTo) { clear(); document.execCommand('formatBlock', false, 'pre'); this._afterEdit(); return true; }
+                if (/^(-{3,}|\*{3,}|_{3,})$/.test(upTo) && text.trim() === upTo) {
+                    clear();
+                    document.execCommand('insertHorizontalRule');
+                    this._afterEdit();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        _textBefore(block, range) {
+            const r = document.createRange();
+            r.selectNodeContents(block);
+            r.setEnd(range.startContainer, range.startOffset);
+            return r.toString();
+        }
+
+        // **bold**, *italic*, ~~strike~~ and `code` convert when the closing mark is typed
+        _inlineShortcut(ev) {
+            if (!ev || ev.inputType !== 'insertText' || !/^[*_`~]$/.test(ev.data || '')) return;
+            const sel = window.getSelection();
+            if (!sel || !sel.rangeCount || !sel.isCollapsed) return;
+            const node = sel.anchorNode;
+            if (!node || node.nodeType !== 3 || node.parentElement.closest('pre, code')) return;
+
+            const before = node.nodeValue.slice(0, sel.anchorOffset);
+            const rules = [
+                [/\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/, 'bold', 2],
+                [/~~([^~\s](?:[^~]*[^~\s])?)~~$/, 'strikeThrough', 2],
+                [/(?:^|[^*\w])\*([^*\s](?:[^*]*[^*\s])?)\*$/, 'italic', 1],
+                [/(?:^|[^`])`([^`]+)`$/, 'code', 1]
+            ];
+            for (let i = 0; i < rules.length; i++) {
+                const m = before.match(rules[i][0]);
+                if (!m) continue;
+                const mark = rules[i][2];
+                const inner = m[1];
+                const end = sel.anchorOffset;
+                const start = end - inner.length - mark * 2;
+                const r = document.createRange();
+                r.setStart(node, start);
+                r.setEnd(node, end);
+                sel.removeAllRanges();
+                sel.addRange(r);
+                if (rules[i][1] === 'code') document.execCommand('insertHTML', false, `<code>${escapeHtml(inner)}</code>&#8203;`);
+                else {
+                    document.execCommand('insertText', false, inner);
+                    const back = document.createRange();
+                    const n = sel.anchorNode;
+                    back.setStart(n, sel.anchorOffset - inner.length);
+                    back.setEnd(n, sel.anchorOffset);
+                    sel.removeAllRanges();
+                    sel.addRange(back);
+                    document.execCommand(rules[i][1], false, null);
+                    sel.collapseToEnd();
+                    // Typing continues unformatted after the converted text
+                    try { if (document.queryCommandState(rules[i][1])) document.execCommand(rules[i][1], false, null); } catch (err) { /* unsupported */ }
+                }
+                return;
+            }
+        }
+
+        // Images
+
+        _insertImage() {
+            if (typeof this.options.imageUpload === 'function') {
+                const self  = this;
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.multiple = true;
+                input.addEventListener('change', () => self._uploadFiles(input.files));
+                this._saveSelection();
+                input.click();
+                return this;
+            }
+            // Without an upload handler the link dialog asks for an image address
+            this._imageMode = true;
+            return this._openLinkDialog();
+        }
+
+        _uploadFiles(fileList) {
+            const self = this;
+            this._restoreSelection();
+            Array.prototype.filter.call(fileList, (f) => /^image\//.test(f.type)).forEach((file) => {
+                const alt = (file.name || 'image').replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'image';
+                const id  = `ts-re-up-${++seq}`;
+                self.$editable.trigger('focus');
+                document.execCommand('insertHTML', false,
+                    `<p><img data-ts-uploading="${id}" alt="${escapeHtml(alt)}" style="opacity:.4" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></p>`);
+                self.setStatus('Uploading image\u2026');
+
+                Promise.resolve()
+                    .then(() => self.options.imageUpload(file))
+                    .then((url) => {
+                        const safe = normalizeUrl(url, ['http', 'https']);
+                        const img  = self.$editable.find(`img[data-ts-uploading="${id}"]`)[0];
+                        if (!safe) throw new Error('No image address returned');
+                        if (img) { img.src = safe; img.removeAttribute('data-ts-uploading'); img.removeAttribute('style'); }
+                        self.setStatus('Image added');
+                        self._dispatch('ts.richeditor.upload', { file, url: safe });
+                        self._afterEdit();
+                    })
+                    .catch((err) => {
+                        self.$editable.find(`img[data-ts-uploading="${id}"]`).closest('p').remove();
+                        self.setStatus('Upload failed');
+                        self._dispatch('ts.richeditor.error', { error: err });
+                        self._afterEdit();
+                    });
+            });
             return this;
         }
 
@@ -43639,6 +46835,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             const a    = el && typeof el.closest === 'function' ? el.closest('a') : null;
             this._linkEl = a && this.$editable[0].contains(a) ? a : null;
 
+            if (this._imageMode) this._linkEl = null;
             this._dialog.open();
             return this;
         }
@@ -43659,7 +46856,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 return this;
             }
 
-            const url = normalizeUrl(raw, self.options.allowedProtocols);
+            const url = normalizeUrl(raw, self._imageMode ? ['http', 'https'] : self.options.allowedProtocols);
             if (!url) {
                 self._setLinkError('Enter a valid URL (' + self.options.allowedProtocols.join(', ') + ').');
                 self.$linkInput.trigger('focus');
@@ -43668,6 +46865,14 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
             self._restoreSelection();
             self.$editable.trigger('focus');
+
+            if (self._imageMode) {
+                self._imageMode = false;
+                document.execCommand('insertHTML', false, `<img src="${escapeHtml(url)}" alt="">`);
+                self._dialog.close();
+                self._afterEdit();
+                return this;
+            }
 
             if (self._linkEl) {
                 // Editing: retarget the whole existing link
@@ -43683,6 +46888,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
             self._decorateLinks();
             self._dialog.close();
+            self._afterEdit();
             return this;
         }
 
@@ -43723,7 +46929,14 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
                 if (!def) return;
 
                 let active = false;
-                try { active = !!document.queryCommandState(def.cmd); } catch (err) { /* unsupported */ }
+                if (def.cmd === 'inlineCode') {
+                    const s = window.getSelection();
+                    const n = s && s.anchorNode;
+                    const el = n && (n.nodeType === 3 ? n.parentElement : n);
+                    active = !!(el && el.closest && el.closest('code') && !el.closest('pre'));
+                } else {
+                    try { active = !!document.queryCommandState(def.cmd); } catch (err) { /* unsupported */ }
+                }
                 this.setAttribute('aria-pressed', active ? 'true' : 'false');
                 this.classList.toggle('ts-toolbar__toggle-item--on', active);
             });
@@ -43758,9 +46971,52 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             return this.$editable.text();
         }
 
+        getWordCount() {
+            return (this.getText().match(/[\p{L}\p{N}']+/gu) || []).length;
+        }
+
+        // Converts the current content to Markdown
+        getMarkdown() {
+            return this.isEmpty() ? '' : htmlToMarkdown(this.$editable[0]);
+        }
+
+        // Renders Markdown into the editor. Uses options.renderer, else PluginMarkdown (sanitized).
+        setMarkdown(md) {
+            md = md || '';
+            let html = '';
+            if (typeof this.options.renderer === 'function') {
+                html = this.options.renderer(md);
+            } else if (typeof $.fn.themestrapPluginMarkdown === 'function') {
+                const $host = $('<div></div>');
+                $host.themestrapPluginMarkdown({ sanitize: true, highlight: false });
+                const inst  = $host.data('__pluginMarkdown');
+                inst.render(md);
+                html = inst.getHtml();
+                if (inst.destroy) inst.destroy();
+            } else {
+                html = `<p>${escapeHtml(md).replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p>`;
+            }
+            // Task list checkboxes are display-only in the editor and round-trip through Markdown
+            return this.setContent(html);
+        }
+
+        _updateStatus() {
+            if (!this.$status) return this;
+            const words = this.getWordCount();
+            this.$status.find('.ts-re-words').text(`${words} word${words === 1 ? '' : 's'}`);
+            this.$status.find('.ts-re-time').text(`${Math.max(words ? 1 : 0, Math.ceil(words / 220))} min read`);
+            return this;
+        }
+
+        setStatus(msg) {
+            if (this.$status) this.$status.find('.ts-re-msg').text(msg || '');
+            return this;
+        }
+
         setContent(html) {
             this.$editable.html(html || '');
             this._toggleEmpty();
+            this._updateStatus();
             return this;
         }
 
@@ -43808,6 +47064,7 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
             // The current content is handed back to the host so a re-init keeps the user's work
             const html = self.getContent();
             self.$editable.off(`.${EVENT_NS}`).remove();
+            if (self.$status) self.$status.remove();
             self.options.wrapper
                 .removeClass('ts-richeditor ts-re-focused ts-re-disabled')
                 .html(html)
@@ -43837,11 +47094,17 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         linkTarget:       '_blank',    // '' leaves links without a target attribute
         allowedProtocols: ['http', 'https', 'mailto', 'tel'],
         pastePlainText:   true,        // strips formatting from pasted content
+        markdownShortcuts: false,      // "## ", "- ", "> ", "```", "---", **bold**, *italic*, `code` convert as you type
+        statusBar:        false,       // word count and reading time under the editor
+        imageUpload:      null,        // function(file) returning a URL or a Promise of one; enables paste, drop and file picking
+        renderer:         null,        // function(markdown) returning HTML, replaces PluginMarkdown in setMarkdown()
         disabled:         false,
         onChange:         null,        // function(html) {}
         onFocus:          null,        // function() {}
         onBlur:           null         // function() {}
     };
+
+    PluginRichEditor.toolbars = TOOLBARS;
 
     $.extend(themestrap, { PluginRichEditor });
 
@@ -43860,6 +47123,52 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Number Input
+/**
+ * Themestrap NumberInput
+ *
+ * Replaces the browser's tiny spin arrows with a proper stepper: minus and plus buttons that match
+ * the other Themestrap inputs, hold-to-repeat, keyboard control, bounds, and an optional unit label.
+ * The original <input type="number"> stays in the page and keeps the value, so forms, validation and
+ * code that reads the input keep working.
+ *
+ * Markup:
+ *
+ *   <input type="number" name="per_page" value="8" min="1" max="50" step="1"
+ *          data-plugin-numberinput
+ *          data-plugin-options='{"unit": "posts"}'>
+ *
+ * Layouts: 'split' (default)  [ - | 8 posts | + ]
+ *          'stacked'          [ 8 posts | up/down ]
+ *
+ * Public API (via stored instance):
+ *   const ni = $('#per_page').data('__pluginNumberInput');
+ *   ni.getValue();            // number, or null when empty
+ *   ni.setValue(12, silent);  // clamps to min and max, silent skips the events
+ *   ni.increment(n);          // n steps up (default 1)
+ *   ni.decrement(n);
+ *   ni.setMin(1); ni.setMax(100); ni.setStep(5);
+ *   ni.enable(); ni.disable();
+ *   ni.destroy();
+ *
+ * Events (native CustomEvent, bubbling, dispatched on the input):
+ *   ts.numberinput.change   detail: { instance, value, previousValue, source }
+ *                           source is 'button', 'keyboard', 'wheel', 'typing' or 'api'
+ *   The input also fires ordinary 'input' and 'change' events, so existing listeners keep working.
+ *
+ * Keyboard (on the input):
+ *   Up / Down          one step           Shift + Up / Down, Page Up / Down   ten steps
+ *   Home / End         minimum / maximum  Enter                               apply the typed value
+ *
+ * CSS custom properties (all optional):
+ *   --ts-ni-h, --ts-ni-bg, --ts-ni-border, --ts-ni-border-focus, --ts-ni-radius, --ts-ni-text,
+ *   --ts-ni-muted, --ts-ni-btn-bg, --ts-ni-btn-hover, --ts-ni-focus-ring, --ts-ni-width
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginNumberInput'] === 'function' && $('[data-plugin-numberinput]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-numberinput]:not(.manual)', 'themestrapPluginNumberInput');
+ *   }
+ */
+// Number Input
 (((themestrap = {}, $) => {
     const instanceName = '__pluginNumberInput';
     const STYLE_ID     = 'ts-numberinput-styles';
@@ -43877,25 +47186,25 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
     const LIGHT = `
         --ni-h:            var(--ts-ni-h, 2.45rem);
-        --ni-bg:           var(--ts-ni-bg, #ffffff);
-        --ni-border:       var(--ts-ni-border, rgba(0,0,0,.18));
-        --ni-border-focus: var(--ts-ni-border-focus, #00a89f);
-        --ni-radius:       var(--ts-ni-radius, 7px);
-        --ni-text:         var(--ts-ni-text, #1f2937);
-        --ni-muted:        var(--ts-ni-muted, rgba(31,41,55,.55));
-        --ni-btn-bg:       var(--ts-ni-btn-bg, rgba(0,0,0,.035));
-        --ni-btn-hover:    var(--ts-ni-btn-hover, rgba(0,0,0,.09));
-        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px rgba(0,168,159,.20));
+        --ni-bg:           var(--ts-ni-bg, var(--ts-skin-surface, #ffffff));
+        --ni-border:       var(--ts-ni-border, var(--ts-skin-border, rgba(0,0,0,.18)));
+        --ni-border-focus: var(--ts-ni-border-focus, var(--ts-skin-accent, #00a89f));
+        --ni-radius:       var(--ts-ni-radius, var(--ts-skin-radius, 7px));
+        --ni-text:         var(--ts-ni-text, var(--ts-skin-text, #1f2937));
+        --ni-muted:        var(--ts-ni-muted, var(--ts-skin-text-dim, rgba(31,41,55,.55)));
+        --ni-btn-bg:       var(--ts-ni-btn-bg, var(--ts-skin-surface-2, rgba(0,0,0,.035)));
+        --ni-btn-hover:    var(--ts-ni-btn-hover, var(--ts-skin-elevated, rgba(0,0,0,.09)));
+        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,168,159,.20)));
     `;
     const DARK = `
-        --ni-bg:           var(--ts-ni-bg, rgba(255,255,255,.03));
-        --ni-border:       var(--ts-ni-border, rgba(255,255,255,.14));
-        --ni-border-focus: var(--ts-ni-border-focus, #00c7be);
-        --ni-text:         var(--ts-ni-text, #d5dfeb);
-        --ni-muted:        var(--ts-ni-muted, rgba(213,223,235,.55));
-        --ni-btn-bg:       var(--ts-ni-btn-bg, rgba(255,255,255,.05));
-        --ni-btn-hover:    var(--ts-ni-btn-hover, rgba(255,255,255,.12));
-        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px rgba(0,199,190,.22));
+        --ni-bg:           var(--ts-ni-bg, var(--ts-skin-surface-2, rgba(255,255,255,.03)));
+        --ni-border:       var(--ts-ni-border, var(--ts-skin-border, rgba(255,255,255,.14)));
+        --ni-border-focus: var(--ts-ni-border-focus, var(--ts-skin-accent, #00c7be));
+        --ni-text:         var(--ts-ni-text, var(--ts-skin-text, #d5dfeb));
+        --ni-muted:        var(--ts-ni-muted, var(--ts-skin-text-dim, rgba(213,223,235,.55)));
+        --ni-btn-bg:       var(--ts-ni-btn-bg, var(--ts-skin-surface-2, rgba(255,255,255,.05)));
+        --ni-btn-hover:    var(--ts-ni-btn-hover, var(--ts-skin-elevated, rgba(255,255,255,.12)));
+        --ni-ring:         var(--ts-ni-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,199,190,.22)));
     `;
 
     const CSS_TEXT = `
@@ -44335,6 +47644,51 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 })).apply(this, [window.themestrap, jQuery]);
 
 // Time Picker
+/**
+ * Themestrap TimePicker
+ *
+ * A time field with a popover of scrollable hour, minute and AM/PM columns, built to sit beside
+ * PluginCalendar. You can also type: "8:30pm", "830", "20.30" and "9" are all understood.
+ * The original input stays in the page (hidden) and always holds the value as 24 hour "HH:mm",
+ * whatever format is displayed, so forms and server code see one consistent format.
+ *
+ * Markup:
+ *
+ *   <input type="text" name="publish_time" value="08:30" data-plugin-timepicker
+ *          data-plugin-options='{"format": "12", "minuteStep": 5}'>
+ *
+ * Public API (via stored instance):
+ *   const tp = $('input[name=publish_time]').data('__pluginTimePicker');
+ *   tp.getValue();                 // "08:30", or "" when empty
+ *   tp.getTime();                  // { hour: 8, minute: 30 } or null
+ *   tp.setValue('20:15', silent);  // "HH:mm", "8:15pm", or { hour, minute }. silent skips the events
+ *   tp.setNow();                   // the current time
+ *   tp.open(); tp.close(); tp.toggle();
+ *   tp.enable(); tp.disable();
+ *   tp.destroy();
+ *
+ * Events (native CustomEvent, bubbling, dispatched on the original input):
+ *   ts.timepicker.change   detail: { instance, value, hour, minute, display, source }
+ *                          source is 'popover', 'typing', 'keyboard', 'now' or 'api'
+ *   ts.timepicker.open / ts.timepicker.close
+ *   The input also fires ordinary 'input' and 'change' events.
+ *
+ * Keyboard (in the field):  Up / Down change the minutes (Shift: the hours), Alt + Down or the clock
+ * button opens the popover, Enter applies the typed text, Escape closes.
+ * Keyboard (in the popover): Up / Down change the focused column, Left / Right move between columns,
+ * Home / End jump to the first or last value, Enter or Escape close.
+ *
+ * CSS custom properties (all optional):
+ *   --ts-tp-h, --ts-tp-bg, --ts-tp-border, --ts-tp-border-focus, --ts-tp-radius, --ts-tp-text,
+ *   --ts-tp-muted, --ts-tp-pop-bg, --ts-tp-hover, --ts-tp-accent, --ts-tp-accent-text,
+ *   --ts-tp-focus-ring, --ts-tp-shadow
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginTimePicker'] === 'function' && $('[data-plugin-timepicker]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-timepicker]:not(.manual)', 'themestrapPluginTimePicker');
+ *   }
+ */
+// Time Picker
 (((themestrap = {}, $) => {
     const instanceName = '__pluginTimePicker';
     const STYLE_ID     = 'ts-timepicker-styles';
@@ -44347,30 +47701,30 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
 
     const LIGHT = `
         --tp-h:            var(--ts-tp-h, 2.45rem);
-        --tp-bg:           var(--ts-tp-bg, #ffffff);
-        --tp-border:       var(--ts-tp-border, rgba(0,0,0,.18));
-        --tp-border-focus: var(--ts-tp-border-focus, #00a89f);
-        --tp-radius:       var(--ts-tp-radius, 7px);
-        --tp-text:         var(--ts-tp-text, #1f2937);
-        --tp-muted:        var(--ts-tp-muted, rgba(31,41,55,.55));
-        --tp-pop-bg:       var(--ts-tp-pop-bg, #ffffff);
-        --tp-hover:        var(--ts-tp-hover, rgba(0,0,0,.06));
-        --tp-accent:       var(--ts-tp-accent, #00a89f);
-        --tp-accent-text:  var(--ts-tp-accent-text, #04211f);
-        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px rgba(0,168,159,.20));
-        --tp-shadow:       var(--ts-tp-shadow, 0 12px 32px -6px rgba(0,0,0,.22), 0 4px 10px -4px rgba(0,0,0,.12));
+        --tp-bg:           var(--ts-tp-bg, var(--ts-skin-surface, #ffffff));
+        --tp-border:       var(--ts-tp-border, var(--ts-skin-border, rgba(0,0,0,.18)));
+        --tp-border-focus: var(--ts-tp-border-focus, var(--ts-skin-accent, #00a89f));
+        --tp-radius:       var(--ts-tp-radius, var(--ts-skin-radius, 7px));
+        --tp-text:         var(--ts-tp-text, var(--ts-skin-text, #1f2937));
+        --tp-muted:        var(--ts-tp-muted, var(--ts-skin-text-dim, rgba(31,41,55,.55)));
+        --tp-pop-bg:       var(--ts-tp-pop-bg, var(--ts-skin-surface, #ffffff));
+        --tp-hover:        var(--ts-tp-hover, var(--ts-skin-elevated, rgba(0,0,0,.06)));
+        --tp-accent:       var(--ts-tp-accent, var(--ts-skin-accent, #00a89f));
+        --tp-accent-text:  var(--ts-tp-accent-text, var(--ts-skin-on-accent, #04211f));
+        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,168,159,.20)));
+        --tp-shadow:       var(--ts-tp-shadow, var(--ts-skin-shadow, 0 12px 32px -6px rgba(0,0,0,.22), 0 4px 10px -4px rgba(0,0,0,.12)));
     `;
     const DARK = `
-        --tp-bg:           var(--ts-tp-bg, rgba(255,255,255,.03));
-        --tp-border:       var(--ts-tp-border, rgba(255,255,255,.14));
-        --tp-border-focus: var(--ts-tp-border-focus, #00c7be);
-        --tp-text:         var(--ts-tp-text, #d5dfeb);
-        --tp-muted:        var(--ts-tp-muted, rgba(213,223,235,.55));
-        --tp-pop-bg:       var(--ts-tp-pop-bg, #0e2238);
-        --tp-hover:        var(--ts-tp-hover, rgba(255,255,255,.08));
-        --tp-accent:       var(--ts-tp-accent, #00c7be);
-        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px rgba(0,199,190,.22));
-        --tp-shadow:       var(--ts-tp-shadow, 0 12px 32px -6px rgba(0,0,0,.6), 0 4px 10px -4px rgba(0,0,0,.4));
+        --tp-bg:           var(--ts-tp-bg, var(--ts-skin-surface-2, rgba(255,255,255,.03)));
+        --tp-border:       var(--ts-tp-border, var(--ts-skin-border, rgba(255,255,255,.14)));
+        --tp-border-focus: var(--ts-tp-border-focus, var(--ts-skin-accent, #00c7be));
+        --tp-text:         var(--ts-tp-text, var(--ts-skin-text, #d5dfeb));
+        --tp-muted:        var(--ts-tp-muted, var(--ts-skin-text-dim, rgba(213,223,235,.55)));
+        --tp-pop-bg:       var(--ts-tp-pop-bg, var(--ts-skin-surface, #0e2238));
+        --tp-hover:        var(--ts-tp-hover, var(--ts-skin-elevated, rgba(255,255,255,.08)));
+        --tp-accent:       var(--ts-tp-accent, var(--ts-skin-accent, #00c7be));
+        --tp-ring:         var(--ts-tp-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,199,190,.22)));
+        --tp-shadow:       var(--ts-tp-shadow, var(--ts-skin-shadow, 0 12px 32px -6px rgba(0,0,0,.6), 0 4px 10px -4px rgba(0,0,0,.4)));
     `;
 
     const CSS_TEXT = `
@@ -44928,4 +48282,5597 @@ html.dark .ts-toolbar:not(.ts-toolbar--light) {
         });
     };
 
+})).apply(this, [window.themestrap, jQuery]);
+
+// Animate
+(((themestrap = {}, $) => {
+    const instanceName = '__animate';
+
+    class PluginAnimate {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+			if ($el.data(instanceName)) {
+				return this;
+			}
+
+			this.$el = $el;
+
+			this
+				.setData()
+				.setOptions(opts)
+				.build();
+
+			return this;
+		}
+
+        setData() {
+			this.$el.data(instanceName, this);
+
+			return this;
+		}
+
+        setOptions(opts) {
+			this.options = $.extend(true, {}, PluginAnimate.defaults, opts, {
+				wrapper: this.$el
+			});
+
+			return this;
+		}
+
+        build() {
+			const self = this;
+
+			// Flag Class Only
+			// - Useful for simple animations like hightlight
+			// - Less process and memory
+			if( self.options.flagClassOnly ) {
+				const delay = self.options.wrapper.attr('data-appear-animation-delay') ? self.options.wrapper.attr('data-appear-animation-delay') : self.options.delay;
+				
+				self.options.wrapper.css({
+					'animation-delay': delay + 'ms',
+					'transition-delay': delay + 'ms'
+				});
+				self.options.wrapper.addClass( self.options.wrapper.attr('data-appear-animation') );
+
+				return this;
+			}
+
+			if ($('body').hasClass('loading-overlay-showing')) {
+				$(window).on('loading.overlay.ready', () => {
+					self.animate();
+				});
+			} else {
+				self.animate();
+			}
+
+			return this;
+		}
+
+        animate() {
+            const self = this;
+            const $el = this.options.wrapper;
+            let delay = 0;
+            let duration = this.options.duration;
+            const elTopDistance = $el.offset().top;
+            const windowTopDistance = $(window).scrollTop();
+
+            // If has appear animation elements inside a SVG. 
+            // Intersection Observer API do not check elements inside SVG's, so we need initialize trough top parent SVG
+            if ($el.data('appear-animation-svg')) {
+				$el.find('[data-appear-animation]').each(function(){
+                    const $this = $(this);
+                    let opts;
+
+                    const pluginOptions = themestrap.fn.getOptions($this.data('plugin-options'));
+                    if (pluginOptions)
+						opts = pluginOptions;
+
+                    $this.themestrapPluginAnimate(opts);
+                });
+
+				return this;
+			}
+
+            // No animation at the first load of page. This is good for performance
+            if (self.options.firstLoadNoAnim) {
+				$el.removeClass('appear-animation');
+
+				// Inside Carousel
+				if ($el.closest('.owl-carousel').get(0)) {
+					setTimeout(() => {
+						$el.closest('.owl-carousel').on('change.owl.carousel', () => {
+							self.options.firstLoadNoAnim = false;
+							$el.removeData('__animate');
+							$el.themestrapPluginAnimate(self.options);
+						});
+					}, 500);
+				}
+
+				return this;
+			}
+
+            $el.addClass('appear-animation animated');
+
+            if (!$('html').hasClass('no-csstransitions') && $(window).width() > self.options.minWindowWidth && elTopDistance >= windowTopDistance || self.options.forceAnimation == true) {
+				delay = ($el.attr('data-appear-animation-delay') ? $el.attr('data-appear-animation-delay') : self.options.delay);
+				duration = ($el.attr('data-appear-animation-duration') ? $el.attr('data-appear-animation-duration') : self.options.duration);
+
+				if (duration != '750ms') {
+					$el.css('animation-duration', duration);
+				}
+
+				$el.css('animation-delay', delay + 'ms');
+				$el.addClass($el.attr('data-appear-animation') + ' appear-animation-visible');
+				
+				$el.trigger('animation:show');
+
+			} else {
+				$el.addClass('appear-animation-visible');
+			}
+
+            return this;
+        }
+    }
+
+    PluginAnimate.defaults = {
+		accX: 0,
+		accY: -80,
+		delay: 100,
+		duration: '750ms',
+		minWindowWidth: 0,
+		forceAnimation: false,
+		flagClassOnly: false
+	};
+
+    $.extend(themestrap, {
+		PluginAnimate
+	});
+
+    $.fn.themestrapPluginAnimate = function(opts) {
+		return this.map(function() {
+			const $this = $(this);
+
+			if ($this.data(instanceName)) {
+				return $this.data(instanceName);
+			} else {
+				return new PluginAnimate($this, opts);
+			}
+
+		});
+	};
+})).apply(this, [window.themestrap, jQuery]);
+
+// Colorpicker
+// Color Picker
+(((themestrap = {}, $) => {
+
+    const instanceName  = '__pluginColorPicker';
+    const STYLE_ID      = 'themestrap-color-picker-styles';
+    let   instanceCount = 0;
+
+    // Color math utilities
+    const Color = {
+
+        hexToRgb(hex) {
+            hex = hex.replace(/^#/, '');
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            if (hex.length !== 6) return null;
+            const n = parseInt(hex, 16);
+            if (isNaN(n)) return null;
+            return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+        },
+
+        rgbToHex({ r, g, b }) {
+            return '#' + [r, g, b]
+                .map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0'))
+                .join('');
+        },
+
+        rgbToHsv({ r, g, b }) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+            let h = 0;
+            const s = max === 0 ? 0 : d / max;
+            const v = max;
+            if (max !== min) {
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return { h: h * 360, s: s * 100, v: v * 100 };
+        },
+
+        hsvToRgb({ h, s, v }) {
+            h /= 360; s /= 100; v /= 100;
+            let r = 0, g = 0, b = 0;
+            const i = Math.floor(h * 6), f = h * 6 - i;
+            const p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+            switch (i % 6) {
+                case 0: r = v; g = t; b = p; break;
+                case 1: r = q; g = v; b = p; break;
+                case 2: r = p; g = v; b = t; break;
+                case 3: r = p; g = q; b = v; break;
+                case 4: r = t; g = p; b = v; break;
+                case 5: r = v; g = p; b = q; break;
+            }
+            return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+        },
+
+        rgbToHsl({ r, g, b }) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h = 0, s = 0;
+            const l = (max + min) / 2;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+        },
+
+        hslToRgb({ h, s, l }) {
+            s /= 100; l /= 100;
+            const a = s * Math.min(l, 1 - l);
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            };
+            return { r: Math.round(f(0) * 255), g: Math.round(f(8) * 255), b: Math.round(f(4) * 255) };
+        },
+
+        parse(value) {
+            if (!value) return null;
+            value = String(value).trim();
+            if (/^#?[0-9a-f]{3,8}$/i.test(value)) {
+                const hex = value.startsWith('#') ? value : '#' + value;
+                const rgb = Color.hexToRgb(hex);
+                if (!rgb) return null;
+                return { ...Color.rgbToHsv(rgb), a: 1 };
+            }
+            const rm = value.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+            if (rm) {
+                const rgb = { r: +rm[1], g: +rm[2], b: +rm[3] };
+                return { ...Color.rgbToHsv(rgb), a: rm[4] !== undefined ? +rm[4] : 1 };
+            }
+            const hm = value.match(/hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%?\s*,\s*([\d.]+)%?(?:\s*,\s*([\d.]+))?\s*\)/i);
+            if (hm) {
+                const rgb = Color.hslToRgb({ h: +hm[1], s: +hm[2], l: +hm[3] });
+                return { ...Color.rgbToHsv(rgb), a: hm[4] !== undefined ? +hm[4] : 1 };
+            }
+            try {
+                const el = document.createElement('div');
+                el.style.color = value;
+                document.body.appendChild(el);
+                const computed = getComputedStyle(el).color;
+                document.body.removeChild(el);
+                const nm = computed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                if (nm) {
+                    const rgb = { r: +nm[1], g: +nm[2], b: +nm[3] };
+                    return { ...Color.rgbToHsv(rgb), a: nm[4] !== undefined ? +nm[4] : 1 };
+                }
+            } catch (e) {}
+            return null;
+        },
+
+        format(hsv, alpha, fmt) {
+            const rgb = Color.hsvToRgb(hsv);
+            switch (fmt) {
+                case 'rgb':  return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+                case 'rgba': return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+                case 'hsl':  { const hsl = Color.rgbToHsl(rgb); return `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`; }
+                case 'hsla': { const hsl = Color.rgbToHsl(rgb); return `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, ${alpha})`; }
+                default:     return Color.rgbToHex(rgb);
+            }
+        }
+    };
+
+    class PluginColorPicker {
+
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el    = $el;
+            this._id    = `ts-cp-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+            this.isOpen = false;
+            this._hsv   = { h: 0, s: 100, v: 100 };
+            this._alpha = 1;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            instanceCount++;
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginColorPicker.defaults, opts, {
+                wrapper: this.$el
+            });
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const o    = self.options;
+
+            if (!document.getElementById(STYLE_ID)) {
+                $('<style>').attr('id', STYLE_ID).text(PluginColorPicker._css()).appendTo('head');
+            }
+
+            const start  = self.$el.val() || self.$el.data('color') || o.defaultColor;
+            const parsed = Color.parse(start);
+            if (parsed) {
+                self._hsv   = { h: parsed.h, s: parsed.s, v: parsed.v };
+                self._alpha = parsed.a;
+            }
+
+            self.$el.wrap(`<div class="ts-cp-wrapper" id="${self._id}-wrapper"></div>`);
+            self.$wrapper = $(`#${self._id}-wrapper`);
+
+            self.$thumb = $(
+                `<button type="button" class="ts-cp-thumb"` +
+                ` aria-label="Open color picker" aria-haspopup="dialog"` +
+                ` aria-expanded="false" aria-controls="${self._id}-panel"></button>`
+            );
+            self.$wrapper.append(self.$thumb);
+
+            self.$panel = self._buildPanel();
+            $('body').append(self.$panel);
+
+            self._updateUI(false);
+
+            return this;
+        }
+
+        _buildPanel() {
+            const self = this;
+            const o    = self.options;
+            const pid  = `${self._id}-panel`;
+
+            const $panel = $(
+                `<div class="ts-cp-panel" id="${pid}"` +
+                ` role="dialog" aria-label="Color picker" aria-modal="true" tabindex="-1"></div>`
+            );
+
+            const $picker = $(`
+                <div class="ts-cp-picker">
+                    <div class="ts-cp-picker-sat"></div>
+                    <div class="ts-cp-picker-val"></div>
+                    <div class="ts-cp-picker-cursor" role="slider"
+                         aria-label="Color" tabindex="0"
+                         aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"></div>
+                </div>
+            `);
+
+            const $hueWrap = $(`
+                <div class="ts-cp-hue-wrap">
+                    <div class="ts-cp-hue-track" role="slider" aria-label="Hue"
+                         tabindex="0" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0">
+                        <div class="ts-cp-hue-thumb"></div>
+                    </div>
+                </div>
+            `);
+
+            let $alphaWrap = null;
+            if (o.alpha) {
+                $alphaWrap = $(`
+                    <div class="ts-cp-alpha-wrap">
+                        <div class="ts-cp-alpha-track" role="slider" aria-label="Opacity"
+                             tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1">
+                            <div class="ts-cp-alpha-thumb"></div>
+                        </div>
+                    </div>
+                `);
+            }
+
+            const $fields  = $('<div class="ts-cp-fields"></div>');
+            const $preview = $('<div class="ts-cp-preview"><div class="ts-cp-preview-bg"></div><div class="ts-cp-preview-color"></div></div>');
+            $fields.append($preview);
+
+            if (o.showInput) {
+                const $wrap = $(`
+                    <div class="ts-cp-input-wrap">
+                        <input class="ts-cp-field-input" type="text" spellcheck="false"
+                               aria-label="Color value" autocomplete="off">
+                    </div>
+                `);
+                const $sel = $('<select class="ts-cp-format-select" aria-label="Color format"></select>');
+                ['hex', 'rgb', 'rgba', 'hsl', 'hsla'].forEach(f => {
+                    $sel.append(`<option value="${f}"${f === o.format ? ' selected' : ''}>${f.toUpperCase()}</option>`);
+                });
+                $fields.append($wrap, $sel);
+                self.$fieldInput   = $wrap.find('.ts-cp-field-input');
+                self.$formatSelect = $sel;
+            }
+
+            $panel.append($picker, $hueWrap);
+            if ($alphaWrap) $panel.append($alphaWrap);
+            $panel.append($fields);
+
+            if (o.swatches && o.swatches.length) {
+                const $swatches = $('<div class="ts-cp-swatches" role="group" aria-label="Color presets"></div>');
+                o.swatches.forEach((color, i) => {
+                    $swatches.append(
+                        `<button type="button" class="ts-cp-swatch"` +
+                        ` style="background:${color}" data-color="${color}"` +
+                        ` aria-label="${color}" tabindex="${i === 0 ? 0 : -1}"></button>`
+                    );
+                });
+                $panel.append($swatches);
+            }
+
+            if (o.showEyeDropper && window.EyeDropper) {
+                const $edWrap = $(`
+                    <div class="ts-cp-eyedropper-wrap">
+                        <button type="button" class="ts-cp-eyedropper"
+                                aria-label="Pick color from screen" title="Eyedropper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/>
+                                <path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8Z"/>
+                            </svg>
+                            <span>Pick from screen</span>
+                        </button>
+                    </div>
+                `);
+                $panel.append($edWrap);
+                self.$eyedropper = $edWrap.find('.ts-cp-eyedropper');
+            }
+
+            self.$picker       = $picker;
+            self.$pickerCursor = $picker.find('.ts-cp-picker-cursor');
+            self.$hueTrack     = $hueWrap.find('.ts-cp-hue-track');
+            self.$hueThumb     = $hueWrap.find('.ts-cp-hue-thumb');
+            self.$previewColor = $preview.find('.ts-cp-preview-color');
+
+            if ($alphaWrap) {
+                self.$alphaTrack = $alphaWrap.find('.ts-cp-alpha-track');
+                self.$alphaThumb = $alphaWrap.find('.ts-cp-alpha-thumb');
+            }
+
+            return $panel;
+        }
+
+        events() {
+            const self = this;
+
+            self.$thumb.on('click.colorpicker', function(e) {
+                e.stopPropagation();
+                self.toggle();
+            });
+
+            self.$picker.on('mousedown.colorpicker touchstart.colorpicker', function(e) {
+                self._startDrag(e, self._pickerMove.bind(self));
+            });
+
+            self.$hueTrack.on('mousedown.colorpicker touchstart.colorpicker', function(e) {
+                self._startDrag(e, self._hueMove.bind(self));
+            });
+
+            if (self.options.alpha && self.$alphaTrack) {
+                self.$alphaTrack.on('mousedown.colorpicker touchstart.colorpicker', function(e) {
+                    self._startDrag(e, self._alphaMove.bind(self));
+                });
+            }
+
+            if (self.options.showInput) {
+                self.$fieldInput.on('keydown.colorpicker', function(e) {
+                    if (e.key === 'Enter') {
+                        const parsed = Color.parse($(this).val());
+                        if (parsed) {
+                            self._hsv   = { h: parsed.h, s: parsed.s, v: parsed.v };
+                            self._alpha = parsed.a;
+                            self._updateUI(true, true);
+                        }
+                    }
+                });
+                self.$fieldInput.on('blur.colorpicker', function() {
+                    const parsed = Color.parse($(this).val());
+                    if (parsed) {
+                        self._hsv   = { h: parsed.h, s: parsed.s, v: parsed.v };
+                        self._alpha = parsed.a;
+                        self._updateUI(true, true);
+                    }
+                });
+                self.$formatSelect.on('change.colorpicker', function() {
+                    self.options.format = $(this).val();
+                    self._updateUI(true);
+                });
+            }
+
+            self.$panel.on('click.colorpicker', '.ts-cp-swatch', function() {
+                const parsed = Color.parse($(this).data('color'));
+                if (parsed) {
+                    self._hsv   = { h: parsed.h, s: parsed.s, v: parsed.v };
+                    self._alpha = parsed.a;
+                    self._updateUI(true);
+                }
+                if (self.options.closeOnSelect) self.close();
+            });
+
+            self.$panel.on('keydown.colorpicker', '.ts-cp-swatch', function(e) {
+                const $all = self.$panel.find('.ts-cp-swatch');
+                const idx  = $all.index(this);
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const $next = $all.eq(idx + 1);
+                    if ($next.length) { $all.attr('tabindex', -1); $next.attr('tabindex', 0).trigger('focus'); }
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const $prev = $all.eq(idx - 1);
+                    if ($prev.length) { $all.attr('tabindex', -1); $prev.attr('tabindex', 0).trigger('focus'); }
+                }
+            });
+
+            self.$pickerCursor.on('keydown.colorpicker', function(e) {
+                const step = e.shiftKey ? 10 : 1;
+                let hit = true;
+                switch (e.key) {
+                    case 'ArrowRight': self._hsv.s = Math.min(100, self._hsv.s + step); break;
+                    case 'ArrowLeft':  self._hsv.s = Math.max(0,   self._hsv.s - step); break;
+                    case 'ArrowUp':    self._hsv.v = Math.min(100, self._hsv.v + step); break;
+                    case 'ArrowDown':  self._hsv.v = Math.max(0,   self._hsv.v - step); break;
+                    default: hit = false;
+                }
+                if (hit) { e.preventDefault(); self._updateUI(true); }
+            });
+
+            self.$hueTrack.on('keydown.colorpicker', function(e) {
+                const step = e.shiftKey ? 10 : 1;
+                let hit = true;
+                switch (e.key) {
+                    case 'ArrowRight': case 'ArrowUp':   self._hsv.h = Math.min(360, self._hsv.h + step); break;
+                    case 'ArrowLeft':  case 'ArrowDown': self._hsv.h = Math.max(0,   self._hsv.h - step); break;
+                    default: hit = false;
+                }
+                if (hit) { e.preventDefault(); self._updateUI(true); }
+            });
+
+            if (self.options.alpha && self.$alphaTrack) {
+                self.$alphaTrack.on('keydown.colorpicker', function(e) {
+                    const step = e.shiftKey ? 0.1 : 0.01;
+                    let hit = true;
+                    switch (e.key) {
+                        case 'ArrowRight': case 'ArrowUp':   self._alpha = +(Math.min(1, self._alpha + step)).toFixed(2); break;
+                        case 'ArrowLeft':  case 'ArrowDown': self._alpha = +(Math.max(0, self._alpha - step)).toFixed(2); break;
+                        default: hit = false;
+                    }
+                    if (hit) { e.preventDefault(); self._updateUI(true); }
+                });
+            }
+
+            if (self.$eyedropper) {
+                self.$eyedropper.on('click.colorpicker', async function() {
+                    try {
+                        const result = await (new EyeDropper()).open();
+                        const parsed = Color.parse(result.sRGBHex);
+                        if (parsed) {
+                            self._hsv   = { h: parsed.h, s: parsed.s, v: parsed.v };
+                            self._alpha = 1;
+                            self._updateUI(true);
+                        }
+                    } catch (err) {
+                        // User cancelled the dropper -- no-op
+                    }
+                });
+            }
+
+            $(document).on(`click.colorpicker.${self._id}`, function(e) {
+                if (
+                    self.isOpen &&
+                    !$(e.target).closest(self.$panel).length &&
+                    !$(e.target).closest(self.$wrapper).length
+                ) {
+                    self.close();
+                }
+            });
+
+            $(document).on(`keydown.colorpicker.${self._id}`, function(e) {
+                if (e.key === 'Escape' && self.isOpen) {
+                    self.close();
+                    self.$thumb.trigger('focus');
+                }
+            });
+
+            return this;
+        }
+
+        _startDrag(e, moveFn) {
+            e.preventDefault();
+            moveFn(e);
+            $(document).on('mousemove.ts-cp-drag touchmove.ts-cp-drag', moveFn);
+            $(document).one('mouseup.ts-cp-drag touchend.ts-cp-drag', function() {
+                $(document).off('.ts-cp-drag');
+            });
+        }
+
+        _pickerMove(e) {
+            const rect  = this.$picker[0].getBoundingClientRect();
+            const c     = this._client(e);
+            this._hsv.s = Math.max(0, Math.min(100, (c.x - rect.left)  / rect.width  * 100));
+            this._hsv.v = Math.max(0, Math.min(100, (1 - (c.y - rect.top) / rect.height) * 100));
+            this._updateUI(true);
+        }
+
+        _hueMove(e) {
+            const rect  = this.$hueTrack[0].getBoundingClientRect();
+            const c     = this._client(e);
+            this._hsv.h = Math.max(0, Math.min(360, (c.x - rect.left) / rect.width * 360));
+            this._updateUI(true);
+        }
+
+        _alphaMove(e) {
+            const rect    = this.$alphaTrack[0].getBoundingClientRect();
+            const c       = this._client(e);
+            this._alpha   = +(Math.max(0, Math.min(1, (c.x - rect.left) / rect.width))).toFixed(2);
+            this._updateUI(true);
+        }
+
+        _client(e) {
+            const ev  = e.originalEvent || e;
+            const src = ev.touches ? ev.touches[0] : ev;
+            return { x: src.clientX, y: src.clientY };
+        }
+
+        _updateUI(emit, skipField) {
+            const self        = this;
+            const { h, s, v } = self._hsv;
+            const a           = self._alpha;
+            const rgb         = Color.hsvToRgb({ h, s, v });
+            const hex         = Color.rgbToHex(rgb);
+
+            self.$picker.css('background-color', `hsl(${h}, 100%, 50%)`);
+
+            self.$pickerCursor.css({ left: `${s}%`, top: `${100 - v}%` });
+            self.$pickerCursor.attr('aria-valuenow', `Saturation ${Math.round(s)}, Brightness ${Math.round(v)}`);
+
+            self.$hueThumb.css({ left: `${(h / 360) * 100}%`, 'background-color': `hsl(${h}, 100%, 50%)` });
+            self.$hueTrack.attr('aria-valuenow', Math.round(h));
+
+            if (self.options.alpha && self.$alphaTrack) {
+                self.$alphaThumb.css({ left: `${a * 100}%`, 'background-color': hex });
+                self.$alphaTrack.css(
+                    'background',
+                    `linear-gradient(to right, rgba(${rgb.r},${rgb.g},${rgb.b},0), rgba(${rgb.r},${rgb.g},${rgb.b},1))`
+                );
+                self.$alphaTrack.attr('aria-valuenow', a);
+            }
+
+            const displayColor = self.options.alpha ? `rgba(${rgb.r},${rgb.g},${rgb.b},${a})` : hex;
+            self.$previewColor.css('background-color', displayColor);
+            self.$thumb[0].style.setProperty('--ts-cp-thumb-color', displayColor);
+
+            const formatted = Color.format({ h, s, v }, a, self.options.format);
+
+            if (!skipField && self.options.showInput && self.$fieldInput) {
+                self.$fieldInput.val(formatted);
+            }
+
+            self.$el.val(formatted);
+
+            if (emit) {
+                self.$el.trigger('change');
+                if (typeof self.options.onChange === 'function') {
+                    self.options.onChange(formatted, self);
+                }
+            }
+        }
+
+        _reposition() {
+            const self = this;
+            const rect = self.$wrapper[0].getBoundingClientRect();
+            const ph   = self.$panel.outerHeight();
+            const pw   = self.$panel.outerWidth();
+            const vpH  = window.innerHeight;
+            const vpW  = window.innerWidth;
+
+            const top  = rect.bottom + ph + 8 <= vpH ? rect.bottom + 8 : rect.top - ph - 8;
+            let   left = rect.left;
+
+            if (left + pw > vpW) left = Math.max(4, rect.right - pw);
+
+            self.$panel.css({ top: `${top}px`, left: `${left}px` });
+        }
+
+        open() {
+            if (this.isOpen) return this;
+            this.$panel.stop(true, true).fadeIn(150);
+            this.isOpen = true;
+            this.$thumb.attr('aria-expanded', 'true');
+            this._reposition();
+            this.$panel.trigger('focus');
+            if (typeof this.options.onOpen === 'function') this.options.onOpen(this);
+            return this;
+        }
+
+        close() {
+            if (!this.isOpen) return this;
+            this.$panel.stop(true, true).fadeOut(120);
+            this.isOpen = false;
+            this.$thumb.attr('aria-expanded', 'false');
+            if (typeof this.options.onClose === 'function') this.options.onClose(this);
+            return this;
+        }
+
+        toggle() {
+            return this.isOpen ? this.close() : this.open();
+        }
+
+        setColor(value) {
+            const parsed = Color.parse(value);
+            if (!parsed) return this;
+            this._hsv   = { h: parsed.h, s: parsed.s, v: parsed.v };
+            this._alpha = parsed.a;
+            this._updateUI(true);
+            return this;
+        }
+
+        getColor() {
+            return Color.format(this._hsv, this._alpha, this.options.format);
+        }
+
+        destroy() {
+            const self = this;
+            $(document).off(`.colorpicker.${self._id}`);
+            $(document).off('.ts-cp-drag');
+            self.$panel.remove();
+            self.$el.off('.colorpicker');
+            self.$el.unwrap();
+            self.$el.removeData(instanceName);
+            instanceCount--;
+            if (instanceCount <= 0) {
+                $(`#${STYLE_ID}`).remove();
+                instanceCount = 0;
+            }
+            return this;
+        }
+
+        static _css() {
+            return `
+:root {
+    --ts-cp-bg: var(--ts-skin-surface, #fff);
+    --ts-cp-border: var(--ts-skin-border, rgba(0,0,0,.1));
+    --ts-cp-shadow: var(--ts-skin-shadow, 0 8px 30px rgba(0,0,0,.12));
+    --ts-cp-radius: var(--ts-skin-radius-lg, 10px);
+    --ts-cp-panel-w: 264px;
+    --ts-cp-picker-h: 154px;
+    --ts-cp-track-h: 12px;
+    --ts-cp-track-radius: var(--ts-skin-radius, 6px);
+    --ts-cp-thumb-size: 32px;
+    --ts-cp-thumb-radius: var(--ts-skin-radius, 6px);
+    --ts-cp-thumb-border: var(--ts-skin-border, rgba(0,0,0,.18));
+    --ts-cp-swatch-size: 22px;
+    --ts-cp-swatch-radius: var(--ts-skin-radius-sm, 4px);
+    --ts-cp-z: 9999;
+    --ts-cp-focus: var(--ts-skin-accent, rgba(99,202,183,.7));
+    --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(0,0,0,.04));
+    --ts-cp-input-fg: var(--ts-skin-text, #1a2530);
+    --ts-cp-input-border: var(--ts-skin-border, rgba(0,0,0,.12));
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ts-cp-bg: var(--ts-skin-surface, #1e2938);
+        --ts-cp-border: var(--ts-skin-border, rgba(255,255,255,.1));
+        --ts-cp-shadow: var(--ts-skin-shadow, 0 12px 40px rgba(0,0,0,.45));
+        --ts-cp-thumb-border: var(--ts-skin-border, rgba(255,255,255,.18));
+        --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(255,255,255,.06));
+        --ts-cp-input-fg: var(--ts-skin-text, #e0e8f0);
+        --ts-cp-input-border: var(--ts-skin-border, rgba(255,255,255,.12));
+    }
+}
+html.dark,
+[data-bs-theme="dark"] {
+    --ts-cp-bg: var(--ts-skin-surface, #1e2938);
+    --ts-cp-border: var(--ts-skin-border, rgba(255,255,255,.1));
+    --ts-cp-shadow: var(--ts-skin-shadow, 0 12px 40px rgba(0,0,0,.45));
+    --ts-cp-thumb-border: var(--ts-skin-border, rgba(255,255,255,.18));
+    --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(255,255,255,.06));
+    --ts-cp-input-fg: var(--ts-skin-text, #e0e8f0);
+    --ts-cp-input-border: var(--ts-skin-border, rgba(255,255,255,.12));
+}
+[data-bs-theme="light"] {
+    --ts-cp-bg: var(--ts-skin-surface, #fff);
+    --ts-cp-border: var(--ts-skin-border, rgba(0,0,0,.1));
+    --ts-cp-shadow: var(--ts-skin-shadow, 0 8px 30px rgba(0,0,0,.12));
+    --ts-cp-thumb-border: var(--ts-skin-border, rgba(0,0,0,.18));
+    --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(0,0,0,.04));
+    --ts-cp-input-fg: var(--ts-skin-text, #1a2530);
+    --ts-cp-input-border: var(--ts-skin-border, rgba(0,0,0,.12));
+}
+.ts-cp-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    vertical-align: middle;
+}
+.ts-cp-thumb {
+    flex-shrink: 0;
+    width: var(--ts-cp-thumb-size);
+    height: var(--ts-cp-thumb-size);
+    border-radius: var(--ts-cp-thumb-radius);
+    border: 2px solid var(--ts-cp-thumb-border);
+    cursor: pointer;
+    padding: 0;
+    transition: transform .12s, border-color .15s;
+    background-color: #fff;
+    background-image:
+        linear-gradient(var(--ts-cp-thumb-color,#e74c3c), var(--ts-cp-thumb-color,#e74c3c)),
+        repeating-conic-gradient(#bbb 0% 25%, transparent 0% 50%);
+    background-size: 100% 100%, 8px 8px;
+}
+.ts-cp-thumb:hover { transform: scale(1.08); border-color: var(--ts-skin-accent, rgba(99,202,183,.6)); }
+.ts-cp-thumb:focus-visible { outline: 2px solid var(--ts-cp-focus); outline-offset: 2px; }
+.ts-cp-panel {
+    position: fixed;
+    z-index: var(--ts-cp-z);
+    width: var(--ts-cp-panel-w);
+    background: var(--ts-cp-bg);
+    border: 1px solid var(--ts-cp-border);
+    border-radius: var(--ts-cp-radius);
+    box-shadow: var(--ts-cp-shadow);
+    padding: 12px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.ts-cp-picker {
+    position: relative;
+    width: 100%;
+    height: var(--ts-cp-picker-h);
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: crosshair;
+    background-color: #f00;
+}
+.ts-cp-picker-sat,
+.ts-cp-picker-val {
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    pointer-events: none;
+}
+.ts-cp-picker-sat { background: linear-gradient(to right, #fff, transparent); }
+.ts-cp-picker-val { background: linear-gradient(to top, #000, transparent); }
+.ts-cp-picker-cursor {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.5);
+    cursor: grab;
+    outline: none;
+}
+.ts-cp-picker-cursor:active { cursor: grabbing; }
+.ts-cp-picker-cursor:focus-visible { box-shadow: 0 0 0 3px var(--ts-cp-focus), 0 1px 4px rgba(0,0,0,.5); }
+.ts-cp-hue-wrap,
+.ts-cp-alpha-wrap {
+    margin-bottom: 8px;
+    position: relative;
+}
+.ts-cp-hue-track,
+.ts-cp-alpha-track {
+    position: relative;
+    height: var(--ts-cp-track-h);
+    border-radius: var(--ts-cp-track-radius);
+    cursor: pointer;
+    outline: none;
+}
+.ts-cp-hue-track {
+    background: linear-gradient(to right,
+        #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+}
+.ts-cp-alpha-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--ts-cp-track-radius);
+    background-image: repeating-conic-gradient(#aaa 0% 25%, #fff 0% 50%);
+    background-size: 8px 8px;
+}
+.ts-cp-alpha-track {
+    position: relative;
+    z-index: 1;
+}
+.ts-cp-hue-track:focus-visible,
+.ts-cp-alpha-track:focus-visible { box-shadow: 0 0 0 2px var(--ts-cp-focus); }
+.ts-cp-hue-thumb,
+.ts-cp-alpha-thumb {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    pointer-events: none;
+}
+.ts-cp-fields {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    margin-bottom: 2px;
+}
+.ts-cp-preview {
+    flex-shrink: 0;
+    position: relative;
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    border: 1px solid var(--ts-cp-border);
+    overflow: hidden;
+}
+.ts-cp-preview-bg {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-conic-gradient(#aaa 0% 25%, #fff 0% 50%);
+    background-size: 8px 8px;
+}
+.ts-cp-preview-color { position: absolute; inset: 0; }
+.ts-cp-input-wrap { flex: 1; min-width: 0; }
+.ts-cp-field-input {
+    display: block;
+    width: 100%;
+    height: 28px;
+    padding: 4px 8px;
+    background: var(--ts-cp-input-bg);
+    border: 1px solid var(--ts-cp-input-border);
+    border-radius: 5px;
+    color: var(--ts-cp-input-fg);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color .15s;
+    box-sizing: border-box;
+}
+.ts-cp-field-input:focus { border-color: var(--ts-cp-focus); }
+.ts-cp-format-select {
+    flex-shrink: 0;
+    height: 28px;
+    padding: 0 4px;
+    background: var(--ts-cp-input-bg);
+    border: 1px solid var(--ts-cp-input-border);
+    border-radius: 5px;
+    color: var(--ts-cp-input-fg);
+    font-size: 11px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .15s;
+}
+.ts-cp-format-select:focus { border-color: var(--ts-cp-focus); }
+.ts-cp-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--ts-cp-border);
+}
+.ts-cp-swatch {
+    width: var(--ts-cp-swatch-size);
+    height: var(--ts-cp-swatch-size);
+    border-radius: var(--ts-cp-swatch-radius);
+    border: 1px solid rgba(0,0,0,.15);
+    cursor: pointer;
+    padding: 0;
+    transition: transform .12s, box-shadow .12s;
+}
+.ts-cp-swatch:hover { transform: scale(1.2); box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.ts-cp-swatch:focus-visible { outline: 2px solid var(--ts-cp-focus); outline-offset: 2px; }
+.ts-cp-eyedropper-wrap {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--ts-cp-border);
+    display: flex;
+    justify-content: flex-end;
+}
+.ts-cp-eyedropper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 10px;
+    background: var(--ts-cp-input-bg);
+    border: 1px solid var(--ts-cp-input-border);
+    border-radius: 5px;
+    color: var(--ts-cp-input-fg);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.ts-cp-eyedropper:hover { background: var(--ts-skin-accent-soft, rgba(99,202,183,.12)); border-color: var(--ts-skin-accent, rgba(99,202,183,.45)); }
+.ts-cp-eyedropper:focus-visible { outline: 2px solid var(--ts-cp-focus); outline-offset: 2px; }
+`;
+        }
+    }
+
+    PluginColorPicker.defaults = {
+        format:         'hex',
+        alpha:          false,
+        swatches:       [],
+        closeOnSelect:  false,
+        position:       'auto',
+        showEyeDropper: true,
+        showInput:      true,
+        defaultColor:   '#e74c3c',
+        onChange:       null,
+        onOpen:         null,
+        onClose:        null,
+    };
+
+    $.extend(themestrap, { PluginColorPicker });
+
+    $.fn.themestrapPluginColorPicker = function(opts, ...args) {
+        return this.map(function() {
+            const $this = $(this);
+            if (typeof opts === 'string') {
+                const inst = $this.data(instanceName);
+                if (inst && typeof inst[opts] === 'function') {
+                    return inst[opts](...args);
+                }
+                return $this;
+            }
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            }
+            return new PluginColorPicker($this, opts);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Dice
+/**
+ * Themestrap Dice
+ *
+ * A tray of dice drawn with pure CSS pips. Throw some or all of them with a tumbling
+ * animation, let the player pick dice by clicking or with the keyboard, and mark dice
+ * as held (set aside). Built for dice games such as Farkle, Yahtzee or Liar's Dice, and
+ * for anything that needs a die face on screen. No images, no vendor dependencies.
+ *
+ * Markup:
+ *
+ *   <div data-plugin-dice
+ *        data-plugin-options='{"count": 6, "selectable": true}'></div>
+ *
+ *   The tray is generated inside the host. Starting faces can be given with "values",
+ *   for example {"values": [1, 2, 3, 4, 5, 6]}. A null value draws an empty face.
+ *
+ * Public API (via stored instance):
+ *   const dice = $('#tray').data('__pluginDice');
+ *   dice.roll();                       // throw every die that is not held, random faces
+ *   dice.roll([0, 2], [6, 1]);         // throw dice 0 and 2, landing on 6 and 1
+ *   dice.roll().then(values => {});    // roll() returns a Promise of all values
+ *   dice.getValues();                  // [3, 6, 1, null, 5, 2]
+ *   dice.setValues([1, 1, 1]);         // set faces without animation
+ *   dice.setState([{ value: 5, held: true }, ...]);
+ *   dice.hold([0, 1]); dice.release([0]);
+ *   dice.select(2, true); dice.toggle(2); dice.clearSelection();
+ *   dice.setSelected([0, 4]);          // show exactly these as picked, no events, works when not selectable
+ *   dice.getSelected();                // [2, 4] indexes
+ *   dice.getSelectedValues();          // [1, 5]
+ *   dice.setSelectable(true); dice.enable(); dice.disable();
+ *   dice.isRolling();
+ *   dice.destroy();
+ *
+ * Events (native CustomEvent, bubbling, dispatched on the host):
+ *   ts.dice.select   detail: { instance, index, selected, selection, values }
+ *   ts.dice.roll     detail: { instance, indexes }             (throw starts)
+ *   ts.dice.rolled   detail: { instance, indexes, values }     (dice have landed)
+ *
+ * Keyboard (when selectable):
+ *   Left / Right, Up / Down   move between dice      Home / End   first / last die
+ *   Space / Enter             pick or drop the focused die
+ *
+ * CSS custom properties (all optional):
+ *   --ts-dice-size, --ts-dice-gap, --ts-dice-radius, --ts-dice-bg, --ts-dice-border,
+ *   --ts-dice-pip, --ts-dice-pip-one, --ts-dice-shadow, --ts-dice-selected,
+ *   --ts-dice-selected-bg, --ts-dice-held-bg, --ts-dice-held-opacity, --ts-dice-focus-ring
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginDice'] === 'function' && $('[data-plugin-dice]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-dice]:not(.manual)', 'themestrapPluginDice');
+ *   }
+ */
+// Dice
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginDice';
+    const STYLE_ID     = 'ts-dice-styles';
+    const EVT_SELECT   = 'ts.dice.select';
+    const EVT_ROLL     = 'ts.dice.roll';
+    const EVT_ROLLED   = 'ts.dice.rolled';
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    // Which of the nine pip cells (row by row, 1 to 9) are shown for each face
+    const FACES = {
+        1: [5],
+        2: [3, 7],
+        3: [3, 5, 7],
+        4: [1, 3, 7, 9],
+        5: [1, 3, 5, 7, 9],
+        6: [1, 3, 4, 6, 7, 9]
+    };
+
+    const LIGHT = `
+        --dc-bg:           var(--ts-dice-bg, var(--ts-skin-surface, #fffdf8));
+        --dc-border:       var(--ts-dice-border, var(--ts-skin-border, rgba(0,0,0,.16)));
+        --dc-pip:          var(--ts-dice-pip, var(--ts-skin-text-strong, #1b1f24));
+        --dc-pip-one:      var(--ts-dice-pip-one, var(--ts-skin-accent, #c62828));
+        --dc-shadow:       var(--ts-dice-shadow, var(--ts-skin-shadow, 0 2px 0 rgba(0,0,0,.12), 0 6px 14px rgba(0,0,0,.10)));
+        --dc-selected:     var(--ts-dice-selected, var(--ts-skin-accent, #21a366));
+        --dc-selected-bg:  var(--ts-dice-selected-bg, var(--ts-skin-accent-soft, #e3f7ec));
+        --dc-held-bg:      var(--ts-dice-held-bg, var(--ts-skin-surface-2, #d9dde3));
+        --dc-ring:         var(--ts-dice-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,168,159,.35)));
+    `;
+    const DARK = `
+        --dc-bg:           var(--ts-dice-bg, var(--ts-skin-surface, #f4f1ea));
+        --dc-border:       var(--ts-dice-border, var(--ts-skin-border, rgba(255,255,255,.22)));
+        --dc-pip:          var(--ts-dice-pip, var(--ts-skin-text-strong, #14181d));
+        --dc-pip-one:      var(--ts-dice-pip-one, var(--ts-skin-accent, #d32f2f));
+        --dc-shadow:       var(--ts-dice-shadow, var(--ts-skin-shadow, 0 2px 0 rgba(0,0,0,.45), 0 8px 18px rgba(0,0,0,.35)));
+        --dc-selected:     var(--ts-dice-selected, var(--ts-skin-accent, #2fd08a));
+        --dc-selected-bg:  var(--ts-dice-selected-bg, var(--ts-skin-accent-soft, #d4f5e4));
+        --dc-held-bg:      var(--ts-dice-held-bg, var(--ts-skin-surface-2, #7d8794));
+        --dc-ring:         var(--ts-dice-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(0,199,190,.45)));
+    `;
+
+    const pipRules = Object.keys(FACES).map((v) =>
+        FACES[v].map((cell) => `.ts-die[data-value="${v}"] .ts-pip:nth-child(${cell})`).join(',\n        ') +
+        ' { opacity: 1; transform: scale(1); }'
+    ).join('\n        ');
+
+    const CSS_TEXT = `
+        .ts-dice { ${LIGHT} }
+        @media (prefers-color-scheme: dark) { .ts-dice { ${DARK} } }
+        html.dark .ts-dice,
+        [data-bs-theme="dark"] .ts-dice { ${DARK} }
+        [data-bs-theme="light"] .ts-dice { ${LIGHT} }
+
+        .ts-dice {
+            --dc-size: var(--ts-dice-size, 3.25rem);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--ts-dice-gap, .75rem);
+        }
+        .ts-dice--sm { --dc-size: var(--ts-dice-size, 2.25rem); gap: var(--ts-dice-gap, .5rem); }
+        .ts-dice--lg { --dc-size: var(--ts-dice-size, 4.5rem); gap: var(--ts-dice-gap, 1rem); }
+        .ts-dice--center { justify-content: center; }
+
+        .ts-die {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            width: var(--dc-size);
+            height: var(--dc-size);
+            padding: calc(var(--dc-size) * .14);
+            margin: 0;
+            background: var(--dc-bg);
+            border: 1px solid var(--dc-border);
+            border-radius: var(--ts-dice-radius, calc(var(--dc-size) * .2));
+            box-shadow: var(--dc-shadow);
+            color: var(--dc-pip);
+            cursor: default;
+            transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, opacity .2s ease;
+            -webkit-tap-highlight-color: transparent;
+            font: inherit;
+            line-height: 1;
+            user-select: none;
+        }
+        .ts-die:focus { outline: none; }
+        .ts-die:focus-visible { box-shadow: var(--dc-shadow), var(--dc-ring); }
+
+        .ts-pip {
+            display: block;
+            align-self: center;
+            justify-self: center;
+            width: 72%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0;
+            transform: scale(.4);
+            transition: opacity .12s ease, transform .12s ease;
+        }
+        .ts-die[data-value="1"] .ts-pip { color: var(--dc-pip-one); width: 92%; }
+        .ts-dice--plain .ts-die[data-value="1"] .ts-pip { color: var(--dc-pip); width: 72%; }
+        ${pipRules}
+
+        .ts-die.is-empty { opacity: .45; }
+        .ts-die.is-selectable { cursor: pointer; }
+        .ts-die.is-selectable:hover { transform: translateY(-2px); }
+        .ts-die.is-selected {
+            background: var(--dc-selected-bg);
+            border-color: var(--dc-selected);
+            box-shadow: var(--dc-shadow), 0 0 0 3px var(--dc-selected);
+            transform: translateY(-3px);
+        }
+        .ts-die.is-held {
+            background: var(--dc-held-bg);
+            opacity: var(--ts-dice-held-opacity, .6);
+            transform: none;
+            cursor: default;
+        }
+        .ts-die.is-rolling { animation: ts-dice-tumble var(--dc-tumble, .28s) linear infinite; }
+        .ts-die.is-landed { animation: ts-dice-land .26s ease-out; }
+
+        @keyframes ts-dice-tumble {
+            0%   { transform: translate(0, 0) rotate(0deg); }
+            25%  { transform: translate(-3px, -4px) rotate(-14deg); }
+            50%  { transform: translate(2px, -6px) rotate(10deg); }
+            75%  { transform: translate(3px, -2px) rotate(-8deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        @keyframes ts-dice-land {
+            0%   { transform: scale(1.12); }
+            60%  { transform: scale(.96); }
+            100% { transform: scale(1); }
+        }
+
+        .ts-dice-sr {
+            position: absolute !important;
+            width: 1px; height: 1px;
+            margin: -1px; padding: 0; border: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ts-die, .ts-pip { transition: none; }
+            .ts-die.is-rolling, .ts-die.is-landed { animation: none; }
+            .ts-die.is-selectable:hover, .ts-die.is-selected { transform: none; }
+        }
+    `;
+
+    const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const randomFace = () => 1 + Math.floor(Math.random() * 6);
+    const validFace = (v) => Number.isInteger(v) && v >= 1 && v <= 6;
+    const toIndexes = (v) => (Array.isArray(v) ? v : [v]).map(Number).filter(Number.isInteger);
+
+    class PluginDice {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el      = $el;
+            this._uid     = ++seq;
+            this._ns      = `.tsdice${this._uid}`;
+            this._dice    = [];
+            this._rolling = null;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginDice.defaults, opts, {
+                wrapper: this.$el
+            });
+            const count = parseInt(this.options.count, 10);
+            this.options.count = Number.isInteger(count) && count > 0 ? Math.min(count, 50) : PluginDice.defaults.count;
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const o    = self.options;
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style       = document.createElement('style');
+                style.id          = STYLE_ID;
+                style.textContent = CSS_TEXT;
+                document.head.appendChild(style);
+            }
+
+            self._initialHTML = self.$el.html();
+            self.$el.empty().addClass('ts-dice').attr({ role: 'group', 'aria-label': o.labels.group });
+            if (o.size === 'sm' || o.size === 'lg') self.$el.addClass(`ts-dice--${o.size}`);
+            if (o.center) self.$el.addClass('ts-dice--center');
+            if (!o.redOne) self.$el.addClass('ts-dice--plain');
+
+            const values = Array.isArray(o.values) ? o.values : [];
+            const held   = Array.isArray(o.held) ? o.held : [];
+
+            for (let i = 0; i < o.count; i++) {
+                const $die = $('<button type="button" class="ts-die"></button>').attr('data-index', i);
+                for (let p = 0; p < 9; p++) $die.append('<span class="ts-pip" aria-hidden="true"></span>');
+                self.$el.append($die);
+                self._dice.push({
+                    $el: $die,
+                    value: validFace(values[i]) ? values[i] : null,
+                    held: Boolean(held[i]),
+                    selected: false
+                });
+            }
+
+            // A polite live region announces throws to screen readers
+            self.$live = $('<span class="ts-dice-sr" aria-live="polite"></span>').appendTo(self.$el);
+
+            self._dice.forEach((d, i) => self._paint(i));
+            self._syncFocus();
+            return this;
+        }
+
+        events() {
+            const self = this;
+
+            self.$el.on(`click${self._ns}`, '.ts-die', function (e) {
+                e.preventDefault();
+                self._focusIndex = Number(this.getAttribute('data-index'));
+                self.toggle(self._focusIndex);
+            });
+
+            self.$el.on(`keydown${self._ns}`, '.ts-die', function (e) {
+                if (!self.options.selectable) return;
+                const i    = Number(this.getAttribute('data-index'));
+                const last = self._dice.length - 1;
+                let next   = null;
+
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case 'ArrowDown':  next = i >= last ? 0 : i + 1; break;
+                    case 'ArrowLeft':
+                    case 'ArrowUp':    next = i <= 0 ? last : i - 1; break;
+                    case 'Home':       next = 0; break;
+                    case 'End':        next = last; break;
+                    default: return;
+                }
+                e.preventDefault();
+                self._focusIndex = next;
+                self._syncFocus();
+                self._dice[next].$el[0].focus();
+            });
+
+            return this;
+        }
+
+        // Faces and state
+
+        getValues() {
+            return this._dice.map((d) => d.value);
+        }
+
+        setValues(values) {
+            const list = Array.isArray(values) ? values : [];
+            this._dice.forEach((d, i) => {
+                if (i < list.length) {
+                    d.value = validFace(list[i]) ? list[i] : null;
+                    if (d.value === null) d.selected = false;
+                    this._paint(i);
+                }
+            });
+            return this;
+        }
+
+        getState() {
+            return this._dice.map((d) => ({ value: d.value, held: d.held, selected: d.selected }));
+        }
+
+        // Accepts [{ value, held }]. Dice whose face or held state changes lose their selection.
+        setState(state) {
+            const list = Array.isArray(state) ? state : [];
+            this._dice.forEach((d, i) => {
+                const s = list[i];
+                if (!s) return;
+                const value = validFace(s.value) ? s.value : null;
+                const held  = Boolean(s.held);
+                if (value !== d.value || held !== d.held) d.selected = false;
+                d.value = value;
+                d.held  = held;
+                this._paint(i);
+            });
+            this._syncFocus();
+            return this;
+        }
+
+        hold(indexes, held = true) {
+            toIndexes(indexes).forEach((i) => {
+                const d = this._dice[i];
+                if (!d) return;
+                d.held = Boolean(held);
+                if (d.held) d.selected = false;
+                this._paint(i);
+            });
+            this._syncFocus();
+            return this;
+        }
+
+        release(indexes) {
+            return this.hold(indexes, false);
+        }
+
+        // Selection
+
+        _canSelect(i) {
+            const d = this._dice[i];
+            return Boolean(d && this.options.selectable && !this._disabled && !this._rolling && !d.held && d.value !== null);
+        }
+
+        select(index, selected = true) {
+            const i = Number(index);
+            if (!this._canSelect(i)) return this;
+            const d = this._dice[i];
+            if (d.selected === Boolean(selected)) return this;
+            d.selected = Boolean(selected);
+            this._paint(i);
+            this._emit(EVT_SELECT, { index: i, selected: d.selected, selection: this.getSelected(), values: this.getSelectedValues() });
+            if (typeof this.options.onSelect === 'function') this.options.onSelect.call(this, i, d.selected, this.getSelected());
+            return this;
+        }
+
+        toggle(index) {
+            const d = this._dice[Number(index)];
+            return d ? this.select(index, !d.selected) : this;
+        }
+
+        getSelected() {
+            return this._dice.reduce((acc, d, i) => (d.selected ? acc.concat(i) : acc), []);
+        }
+
+        getSelectedValues() {
+            return this.getSelected().map((i) => this._dice[i].value);
+        }
+
+        clearSelection() {
+            this._dice.forEach((d, i) => {
+                if (d.selected) {
+                    d.selected = false;
+                    this._paint(i);
+                }
+            });
+            return this;
+        }
+
+        // Shows exactly these dice as picked. Unlike select() it fires no ts.dice.select event
+        // and works while the tray is not selectable, so a game can mirror a choice made
+        // elsewhere, such as another player's picks. Held dice and empty faces are skipped.
+        setSelected(indexes) {
+            const wanted = new Set(toIndexes(indexes));
+            this._dice.forEach((d, i) => {
+                const on = wanted.has(i) && !d.held && d.value !== null;
+                if (d.selected !== on) {
+                    d.selected = on;
+                    this._paint(i);
+                }
+            });
+            return this;
+        }
+
+        setSelectable(on) {
+            this.options.selectable = Boolean(on);
+            if (!this.options.selectable) this.clearSelection();
+            this._dice.forEach((d, i) => this._paint(i));
+            this._syncFocus();
+            return this;
+        }
+
+        enable() {
+            this._disabled = false;
+            this._dice.forEach((d, i) => this._paint(i));
+            this._syncFocus();
+            return this;
+        }
+
+        disable() {
+            this._disabled = true;
+            this._dice.forEach((d, i) => this._paint(i));
+            this._syncFocus();
+            return this;
+        }
+
+        // Rolling
+
+        isRolling() {
+            return Boolean(this._rolling);
+        }
+
+        // Throws the given dice (default: every die that is not held). Final faces come from
+        // values when given, otherwise they are random. Resolves with all values once landed.
+        roll(indexes, values) {
+            const self = this;
+            const o    = self.options;
+
+            let list = indexes == null
+                ? self._dice.reduce((acc, d, i) => (d.held ? acc : acc.concat(i)), [])
+                : toIndexes(indexes).filter((i) => self._dice[i]);
+            list = [...new Set(list)];
+
+            const finals = list.map((i, k) => {
+                const v = Array.isArray(values) ? values[k] : null;
+                return validFace(v) ? v : randomFace();
+            });
+
+            if (self._rolling) self._finishRoll(true);
+
+            list.forEach((i) => {
+                const d = self._dice[i];
+                d.selected = false;
+                d.$el.removeClass('is-landed').addClass('is-rolling').attr('aria-busy', 'true');
+                d.$el[0].style.setProperty('--dc-tumble', `${0.22 + Math.random() * 0.14}s`);
+            });
+            self._dice.forEach((d, i) => self._paint(i));
+
+            self._emit(EVT_ROLL, { indexes: list.slice() });
+            if (typeof o.onRoll === 'function') o.onRoll.call(self, list.slice());
+
+            const duration = reducedMotion() ? 0 : Math.max(0, Number(o.rollDuration) || 0);
+
+            return new Promise((resolve) => {
+                const spin = duration > 0
+                    ? setInterval(() => {
+                        list.forEach((i) => {
+                            self._dice[i].$el.attr('data-value', randomFace());
+                        });
+                    }, Math.max(30, Number(o.rollInterval) || 80))
+                    : null;
+
+                const done = () => {
+                    clearInterval(spin);
+                    list.forEach((i, k) => {
+                        const d = self._dice[i];
+                        d.value = finals[k];
+                        d.$el.removeClass('is-rolling').removeAttr('aria-busy');
+                        d.$el[0].style.removeProperty('--dc-tumble');
+                        if (duration > 0) d.$el.addClass('is-landed');
+                    });
+                    self._rolling = null;
+                    self._dice.forEach((d, i) => self._paint(i));
+                    self._syncFocus();
+                    self._announce(list);
+
+                    const all = self.getValues();
+                    self._emit(EVT_ROLLED, { indexes: list.slice(), values: all });
+                    if (typeof o.onRolled === 'function') o.onRolled.call(self, all, list.slice());
+                    resolve(all);
+                };
+
+                self._rolling = { timer: setTimeout(done, duration), done, spin };
+            });
+        }
+
+        // Ends a running throw at once (used when a new throw starts mid animation)
+        _finishRoll() {
+            if (!this._rolling) return;
+            clearTimeout(this._rolling.timer);
+            this._rolling.done();
+        }
+
+        // Rendering
+
+        _paint(i) {
+            const d   = this._dice[i];
+            const o   = this.options;
+            const $el = d.$el;
+            const selectable = this._canSelect(i);
+
+            $el.attr('data-value', d.value === null ? '' : d.value);
+            if (d.value === null && o.emptyFace === 'index') $el.attr('data-value', (i % 6) + 1);
+
+            $el.toggleClass('is-empty', d.value === null)
+               .toggleClass('is-held', d.held)
+               .toggleClass('is-selected', d.selected)
+               .toggleClass('is-selectable', selectable);
+
+            if (o.selectable) {
+                $el.attr('aria-pressed', d.selected ? 'true' : 'false');
+                $el.attr('aria-disabled', selectable ? 'false' : 'true');
+            } else {
+                $el.removeAttr('aria-pressed').attr('aria-disabled', 'true');
+            }
+
+            const parts = [o.labels.die.replace('{n}', i + 1) + ':', d.value === null ? o.labels.empty : String(d.value)];
+            if (d.held) parts.push(o.labels.held);
+            if (d.selected) parts.push(o.labels.selected);
+            $el.attr('aria-label', parts.join(' '));
+        }
+
+        // Only one die is in the tab order at a time (roving tabindex)
+        _syncFocus() {
+            const focusable = this._dice.map((d, i) => i).filter((i) => this._canSelect(i));
+            if (!focusable.includes(this._focusIndex)) this._focusIndex = focusable.length ? focusable[0] : null;
+            this._dice.forEach((d, i) => d.$el.attr('tabindex', i === this._focusIndex ? '0' : '-1'));
+        }
+
+        _announce(list) {
+            if (!this.$live) return;
+            const text = list.map((i) => this._dice[i].value).join(', ');
+            this.$live.text(text ? `${this.options.labels.rolled} ${text}` : '');
+        }
+
+        _emit(name, detail) {
+            this.$el[0].dispatchEvent(new CustomEvent(name, {
+                bubbles: true,
+                detail: Object.assign({ instance: this }, detail)
+            }));
+        }
+
+        destroy() {
+            const self = this;
+            if (self._rolling) {
+                clearTimeout(self._rolling.timer);
+                clearInterval(self._rolling.spin);
+                self._rolling = null;
+            }
+            self.$el.off(self._ns);
+            self.$el
+                .removeClass('ts-dice ts-dice--sm ts-dice--lg ts-dice--center ts-dice--plain')
+                .removeAttr('role aria-label')
+                .html(self._initialHTML)
+                .removeData(instanceName);
+            self._dice = [];
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+            return this;
+        }
+    }
+
+    PluginDice.defaults = {
+        count:        6,          // number of dice in the tray
+        values:       [],         // starting faces, null or missing for an empty face
+        held:         [],         // starting held flags
+        selectable:   false,      // dice can be picked by click or keyboard
+        size:         'md',       // 'sm' | 'md' | 'lg', or set --ts-dice-size
+        center:       false,      // center the dice in the tray
+        redOne:       true,       // draw the single pip of a one larger and in red
+        emptyFace:    'blank',    // 'blank' draws no pips, 'index' shows faces 1 to 6 in order
+        rollDuration: 900,        // ms a throw tumbles before landing (0 lands at once)
+        rollInterval: 80,         // ms between face changes while tumbling
+        labels: {
+            group:    'Dice',
+            die:      'Die {n}',
+            empty:    'not thrown',
+            held:     'set aside',
+            selected: 'selected',
+            rolled:   'Rolled'
+        },
+        onSelect:     null,       // function (index, selected, selection) {}
+        onRoll:       null,       // function (indexes) {}
+        onRolled:     null        // function (values, indexes) {}
+    };
+
+    $.extend(themestrap, { PluginDice });
+
+    // jQuery bridge. Accepts an options object or a method name with arguments:
+    //   $('#tray').themestrapPluginDice('roll', [0, 1]);
+    $.fn.themestrapPluginDice = function (opts) {
+        const args = Array.prototype.slice.call(arguments, 1);
+        return this.map(function () {
+            const $this = $(this);
+            const inst  = $this.data(instanceName);
+            if (inst) {
+                if (typeof opts === 'string' && typeof inst[opts] === 'function') {
+                    return inst[opts].apply(inst, args);
+                }
+                return inst;
+            }
+            return new PluginDice($this, typeof opts === 'object' ? opts : undefined);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Emoticon
+/**
+ * Themestrap Emoticon
+ *
+ * An emoji picker and emoticon converter for text inputs and textareas, built for chat boxes,
+ * comment forms and anything people type messages into. Typed emoticons such as :) or <3 and
+ * names such as :fire: turn into emoji as you type, and a picker button opens a searchable
+ * panel of emoji grouped by category, with the ones used most recently on top. Uses the
+ * device's own emoji font: no images, no vendor dependencies.
+ *
+ * Markup:
+ *
+ *   <div class="input-group">
+ *       <input type="text" class="form-control" data-plugin-emoticon
+ *              data-plugin-options='{"buttonClass": "btn btn-outline-secondary"}'>
+ *       <button class="btn btn-primary">Send</button>
+ *   </div>
+ *
+ *   The picker button is inserted right after the input (or before it, see buttonPosition),
+ *   which suits Bootstrap input groups. Point "trigger" at an existing button to use that
+ *   one instead, or set "button": false for conversion only.
+ *
+ * Public API (via stored instance):
+ *   const emo = $('#message').data('__pluginEmoticon');
+ *   emo.open(); emo.close(); emo.toggle(); emo.isOpen();
+ *   emo.insert('🎲');                  // at the caret, as if picked
+ *   emo.convertValue();                // converts the whole value now, returns the instance
+ *   emo.destroy();
+ *
+ * Static helpers (no instance needed):
+ *   themestrap.PluginEmoticon.convert('nice :) <3 :fire:');   // 'nice 🙂 ❤️ 🔥'
+ *   themestrap.PluginEmoticon.isEmojiOnly('🎉🎉');            // true, for big emoji in a chat
+ *   themestrap.PluginEmoticon.search('heart');                 // [{ char, name, keywords }, ...]
+ *   themestrap.PluginEmoticon.lookup(':tada:');                // '🎉'
+ *
+ * Events (native CustomEvent, bubbling, dispatched on the input):
+ *   ts.emoticon.open      detail: { instance }
+ *   ts.emoticon.close     detail: { instance }
+ *   ts.emoticon.pick      detail: { instance, emoji, name }
+ *   ts.emoticon.convert   detail: { instance, from, to }       (typed text turned into emoji)
+ *
+ * Keyboard:
+ *   In the input    Escape closes the panel. Backspace right after a conversion puts the typed
+ *                   text back.
+ *   In the panel    Arrow keys move between emoji, Home / End jump, Enter or Space picks,
+ *                   Escape closes and returns to the input, typing goes to the search box.
+ *
+ * CSS custom properties (all optional):
+ *   --ts-emoticon-width, --ts-emoticon-height, --ts-emoticon-size, --ts-emoticon-radius,
+ *   --ts-emoticon-bg, --ts-emoticon-border, --ts-emoticon-text, --ts-emoticon-muted,
+ *   --ts-emoticon-hover, --ts-emoticon-accent, --ts-emoticon-shadow, --ts-emoticon-focus-ring,
+ *   --ts-emoticon-z
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginEmoticon'] === 'function' && $('[data-plugin-emoticon]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-emoticon]:not(.manual)', 'themestrapPluginEmoticon');
+ *   }
+ */
+// Emoticon
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginEmoticon';
+    const STYLE_ID = 'ts-emoticon-styles';
+    const EVT_OPEN = 'ts.emoticon.open';
+    const EVT_CLOSE = 'ts.emoticon.close';
+    const EVT_PICK = 'ts.emoticon.pick';
+    const EVT_CONVERT = 'ts.emoticon.convert';
+
+    let instanceCount = 0;
+    let seq = 0;
+
+    // The emoji, one per line: the emoji, its name (also its :name: shortcode), then search words.
+    // Kept to Unicode Emoji 13.0 so phones a few years old still draw every one of them.
+    const CATEGORIES = [
+        { key: 'smileys', label: 'Smileys', icon: '🙂', list: `
+            😀 grinning smile happy
+            😃 smiley happy joy
+            😄 smile happy laugh
+            😁 grin beaming teeth
+            😆 laughing satisfied haha xd
+            😅 sweat_smile relief phew
+            🤣 rofl rolling laughing lol
+            😂 joy tears laughing lol
+            🙂 slight_smile smile
+            🙃 upside_down silly sarcasm
+            😉 wink
+            😊 blush happy shy
+            😇 innocent angel halo
+            🥰 smiling_hearts love adore
+            😍 heart_eyes love crush
+            🤩 star_struck wow amazing
+            😘 kiss love
+            😋 yum tasty delicious
+            😛 tongue playful
+            😜 winking_tongue crazy joke
+            🤪 zany crazy goofy wild
+            🤑 money_mouth rich cash
+            🤗 hug hugs
+            🤭 hand_over_mouth oops giggle
+            🤫 shush quiet secret
+            🤔 thinking hmm think
+            🤐 zipper_mouth secret quiet
+            🤨 raised_eyebrow suspicious skeptical
+            😐 neutral meh
+            😑 expressionless blank
+            😶 no_mouth silent speechless
+            😏 smirk sly
+            😒 unamused meh
+            🙄 eye_roll whatever
+            😬 grimace awkward yikes
+            😌 relieved calm
+            😔 pensive sad
+            😴 sleeping tired zzz
+            🥱 yawn bored tired
+            😷 mask sick
+            🤢 nauseated sick gross
+            🥵 hot sweating
+            🥶 cold freezing
+            🥴 woozy dizzy
+            🤯 mind_blown shocked exploding
+            🤠 cowboy yeehaw
+            🥳 partying celebrate birthday
+            😎 sunglasses cool
+            🤓 nerd geek
+            🧐 monocle inspect fancy
+            😕 confused
+            😟 worried
+            🙁 slight_frown sad
+            😮 open_mouth wow surprised
+            😲 astonished shocked
+            😳 flushed embarrassed
+            🥺 pleading puppy please
+            😨 fearful scared
+            😰 anxious nervous sweat
+            😢 cry sad tear
+            😭 sob crying sad
+            😱 scream scared horror
+            😖 confounded
+            😣 persevere struggle
+            😞 disappointed sad
+            😩 weary tired
+            😫 tired_face exhausted
+            😤 triumph huff steam
+            😠 angry mad
+            😡 rage furious
+            🤬 cursing swearing
+            😈 smiling_imp devil evil
+            💀 skull dead
+            🤡 clown
+            👻 ghost boo
+            👽 alien
+            🤖 robot
+        ` },
+        { key: 'gestures', label: 'Gestures', icon: '👍', list: `
+            👍 thumbsup yes ok like good
+            👎 thumbsdown no dislike bad
+            👏 clap applause bravo
+            🙌 raised_hands hooray celebrate
+            👐 open_hands
+            🤝 handshake deal agreed
+            🙏 pray please thanks hope
+            ✌️ v peace victory
+            🤞 crossed_fingers luck hope
+            🤟 love_you_gesture
+            🤘 metal rock horns
+            👌 ok_hand perfect
+            🤌 pinched_fingers
+            👈 point_left
+            👉 point_right
+            👆 point_up
+            👇 point_down
+            ☝️ index_up one wait
+            ✋ raised_hand stop high_five
+            👋 wave hello bye hi
+            🤙 call_me shaka
+            💪 muscle strong flex
+            🤷 shrug dunno whatever
+            🤦 facepalm ugh
+            🙋 raising_hand me pick
+            🙈 see_no_evil monkey
+            🙉 hear_no_evil monkey
+            🙊 speak_no_evil monkey
+            👀 eyes look watching
+            🧠 brain smart
+        ` },
+        { key: 'hearts', label: 'Hearts', icon: '❤️', list: `
+            ❤️ heart love red
+            🧡 orange_heart love
+            💛 yellow_heart love
+            💚 green_heart love
+            💙 blue_heart love
+            💜 purple_heart love
+            🖤 black_heart love
+            🤍 white_heart love
+            🤎 brown_heart love
+            💔 broken_heart heartbreak
+            💕 two_hearts love
+            💞 revolving_hearts love
+            💓 heartbeat love
+            💗 heartpulse love growing
+            💖 sparkling_heart love
+            💘 cupid love arrow
+            💝 gift_heart love
+            💋 kiss_mark lips
+        ` },
+        { key: 'games', label: 'Game night', icon: '🎲', list: `
+            🎲 dice game roll luck
+            🎯 bullseye target dart
+            🎰 slot_machine jackpot casino
+            🃏 joker card wild
+            ♠️ spades card
+            ♥️ hearts_suit card
+            🏆 trophy win winner champion
+            🥇 first_place gold medal winner
+            🥈 second_place silver medal
+            🥉 third_place bronze medal
+            🎉 tada party celebrate hooray
+            🎊 confetti_ball party celebrate
+            🎈 balloon party
+            🎁 gift present
+            👑 crown king queen winner
+            💯 hundred perfect score
+            💰 moneybag money rich points
+            💸 money_wings spend lost
+            💎 gem diamond
+            🍀 four_leaf_clover luck lucky
+            🔥 fire hot lit streak
+            💥 boom explosion bust
+            ⭐ star
+            🌟 glowing_star
+            ✨ sparkles magic
+            ⚡ zap lightning fast
+            🚀 rocket launch
+            💣 bomb
+            🧨 firecracker
+            🎮 video_game controller
+            🏁 checkered_flag finish race
+        ` },
+        { key: 'food', label: 'Food and drink', icon: '🍕', list: `
+            🍕 pizza
+            🍔 hamburger burger
+            🌭 hotdog
+            🍟 fries
+            🍿 popcorn movie
+            🌮 taco
+            🍩 doughnut donut
+            🍪 cookie
+            🎂 birthday_cake cake party
+            🍫 chocolate
+            🍺 beer drink
+            🍻 beers cheers drink
+            🥂 champagne toast cheers
+            🍷 wine drink
+            🍹 cocktail tropical drink
+            ☕ coffee tea hot
+            🥤 soda drink
+        ` },
+        { key: 'symbols', label: 'Symbols', icon: '✅', list: `
+            ✅ check yes done ok
+            ❌ x no wrong
+            ❗ exclamation important
+            ❓ question what
+            ‼️ bangbang wow
+            💤 zzz sleep
+            💬 speech chat talk
+            💭 thought think
+            ⏳ hourglass wait
+            ⏰ alarm_clock time hurry
+            🔔 bell ding
+            🎵 musical_note music
+            🚩 red_flag warning
+            ☠️ skull_crossbones danger
+        ` }
+    ];
+
+    // Emoticons people type, swapped as soon as a space or punctuation follows. Only swapped
+    // at the start of the text or after a space, so links (http://) and lists (b) stay as typed.
+    const SHORTCUTS = {
+        ':)': '🙂', ':-)': '🙂', ':]': '🙂', '(:': '🙂',
+        ':(': '🙁', ':-(': '🙁',
+        ':D': '😃', ':-D': '😃', 'XD': '😆', 'xD': '😆',
+        ';)': '😉', ';-)': '😉',
+        ':P': '😛', ':p': '😛', ':-P': '😛', ':-p': '😛', ';P': '😜', ';p': '😜',
+        ':O': '😮', ':o': '😮', ':-O': '😮', ':-o': '😮',
+        ":'(": '😢', ":'-(": '😢', 'T_T': '😭',
+        ':|': '😐', ':-|': '😐',
+        ':/': '😕', ':-/': '😕',
+        '<3': '❤️', '</3': '💔',
+        'B-)': '😎',
+        ':*': '😘', ':-*': '😘',
+        '>:(': '😠', '>:-(': '😠', '>:)': '😈',
+        'O:)': '😇', 'o:)': '😇', 'O:-)': '😇',
+        '^_^': '😊', '^^': '😊', '-_-': '😑', 'o_O': '😳', 'O_o': '😳', ':$': '😳'
+    };
+
+    // Parsed emoji, built once: { char, name, keywords, category }
+    const EMOJI = [];
+    const BY_NAME = Object.create(null);
+    CATEGORIES.forEach((cat) => {
+        cat.items = cat.list.trim().split('\n').map((line) => {
+            const parts = line.trim().split(/\s+/);
+            const item = { char: parts[0], name: parts[1], keywords: parts.slice(2), category: cat.key };
+            EMOJI.push(item);
+            BY_NAME[item.name] = item.char;
+            return item;
+        });
+        delete cat.list;
+    });
+    // A few extra names people reach for
+    Object.assign(BY_NAME, { '+1': '👍', '-1': '👎', 'thumbs_up': '👍', 'thumbs_down': '👎', 'party': '🥳', 'love': '😍', 'lol': '😂', 'poop': '💩', 'ok': '👌' });
+
+    const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const SPACE_BEFORE = '(^|[\\s(])';
+    const SPACE_AFTER = '(?=$|[\\s.,!?;:)])';
+
+    // Shortcuts as one pattern, longest first so >:( wins over :(
+    function shortcutPattern(map, flags) {
+        const keys = Object.keys(map).sort((a, b) => b.length - a.length).map(escapeRe);
+        return keys.length ? new RegExp(`${SPACE_BEFORE}(${keys.join('|')})${SPACE_AFTER}`, flags) : null;
+    }
+    const SHORTCODE_RE = /:([a-z0-9_+-]{1,32}):/gi;
+
+    // Emoji only: pictographs, flags, keycaps and the joiners and modifiers that build them
+    const EMOJI_ONLY_RE = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[#*0-9]️?⃣|[‍️\u{1F3FB}-\u{1F3FF}]|\s)+$/u;
+    const PICTOGRAPH_RE = /\p{Extended_Pictographic}|\p{Regional_Indicator}{2}|[#*0-9]️?⃣/gu;
+
+    const LIGHT = `
+        --em-bg:      var(--ts-emoticon-bg, var(--ts-skin-surface, #ffffff));
+        --em-border:  var(--ts-emoticon-border, var(--ts-skin-border, rgba(0,0,0,.14)));
+        --em-text:    var(--ts-emoticon-text, var(--ts-skin-text, #1b1f24));
+        --em-muted:   var(--ts-emoticon-muted, var(--ts-skin-text-dim, #6b7380));
+        --em-hover:   var(--ts-emoticon-hover, var(--ts-skin-elevated, rgba(0,0,0,.07)));
+        --em-accent:  var(--ts-emoticon-accent, var(--ts-skin-accent, #2185d0));
+        --em-shadow:  var(--ts-emoticon-shadow, var(--ts-skin-shadow, 0 10px 30px rgba(0,0,0,.18), 0 2px 6px rgba(0,0,0,.08)));
+        --em-ring:    var(--ts-emoticon-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(33,133,208,.35)));
+    `;
+    const DARK = `
+        --em-bg:      var(--ts-emoticon-bg, var(--ts-skin-surface, #1f242b));
+        --em-border:  var(--ts-emoticon-border, var(--ts-skin-border, rgba(255,255,255,.14)));
+        --em-text:    var(--ts-emoticon-text, var(--ts-skin-text, #e8eaed));
+        --em-muted:   var(--ts-emoticon-muted, var(--ts-skin-text-dim, #9aa3ad));
+        --em-hover:   var(--ts-emoticon-hover, var(--ts-skin-elevated, rgba(255,255,255,.10)));
+        --em-accent:  var(--ts-emoticon-accent, var(--ts-skin-accent, #5aa9e6));
+        --em-shadow:  var(--ts-emoticon-shadow, var(--ts-skin-shadow, 0 12px 32px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.35)));
+        --em-ring:    var(--ts-emoticon-focus-ring, 0 0 0 3px var(--ts-skin-ring, rgba(90,169,230,.45)));
+    `;
+
+    const EMOJI_FONT = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", sans-serif';
+
+    const CSS_TEXT = `
+        .ts-emoticon-panel, .ts-emoticon-toggle { ${LIGHT} }
+        @media (prefers-color-scheme: dark) { .ts-emoticon-panel, .ts-emoticon-toggle { ${DARK} } }
+        html.dark .ts-emoticon-panel, html.dark .ts-emoticon-toggle,
+        [data-bs-theme="dark"] .ts-emoticon-panel, [data-bs-theme="dark"] .ts-emoticon-toggle { ${DARK} }
+        [data-bs-theme="light"] .ts-emoticon-panel, [data-bs-theme="light"] .ts-emoticon-toggle { ${LIGHT} }
+
+        .ts-emoticon-toggle .ts-emoticon-toggle-icon {
+            font-family: ${EMOJI_FONT};
+            font-size: 1.15em;
+            line-height: 1;
+        }
+
+        .ts-emoticon-panel {
+            position: absolute;
+            z-index: var(--ts-emoticon-z, 1080);
+            display: flex;
+            flex-direction: column;
+            width: var(--ts-emoticon-width, 21rem);
+            max-width: calc(100vw - 1rem);
+            height: var(--ts-emoticon-height, 22rem);
+            max-height: calc(100vh - 2rem);
+            background: var(--em-bg);
+            color: var(--em-text);
+            border: 1px solid var(--em-border);
+            border-radius: var(--ts-emoticon-radius, var(--ts-skin-radius-lg, .75rem));
+            box-shadow: var(--em-shadow);
+            overflow: hidden;
+            font-size: .875rem;
+            transform-origin: var(--em-origin, bottom right);
+            animation: ts-emoticon-in .14s ease-out;
+        }
+        .ts-emoticon-panel[hidden] { display: none; }
+        @keyframes ts-emoticon-in {
+            from { opacity: 0; transform: scale(.96); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .ts-emoticon-search { padding: .5rem .5rem .25rem; }
+        .ts-emoticon-search input {
+            width: 100%;
+            padding: .35rem .6rem;
+            border: 1px solid var(--em-border);
+            border-radius: .5rem;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+        }
+        .ts-emoticon-search input:focus { outline: none; box-shadow: var(--em-ring); border-color: var(--em-accent); }
+
+        .ts-emoticon-tabs {
+            display: flex;
+            gap: .125rem;
+            padding: 0 .5rem;
+            border-bottom: 1px solid var(--em-border);
+        }
+        .ts-emoticon-tab {
+            flex: 1 1 0;
+            padding: .3rem 0 .35rem;
+            border: 0;
+            border-bottom: 2px solid transparent;
+            background: none;
+            font-family: ${EMOJI_FONT};
+            font-size: 1.15rem;
+            line-height: 1.2;
+            opacity: .6;
+            cursor: pointer;
+            transition: opacity .12s ease, border-color .12s ease;
+        }
+        .ts-emoticon-tab:hover { opacity: .9; }
+        .ts-emoticon-tab[aria-selected="true"] { opacity: 1; border-bottom-color: var(--em-accent); }
+        .ts-emoticon-tab:focus { outline: none; }
+        .ts-emoticon-tab:focus-visible { box-shadow: inset var(--em-ring); }
+
+        .ts-emoticon-body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: .25rem .5rem .5rem;
+        }
+        .ts-emoticon-heading {
+            position: sticky;
+            top: -.25rem;
+            margin: 0;
+            padding: .4rem .125rem .25rem;
+            background: var(--em-bg);
+            color: var(--em-muted);
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .02em;
+        }
+        .ts-emoticon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr));
+        }
+        .ts-emoticon-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+            padding: 0;
+            border: 0;
+            border-radius: .5rem;
+            background: none;
+            font-family: ${EMOJI_FONT};
+            font-size: var(--ts-emoticon-size, 1.5rem);
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color .1s ease, transform .1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ts-emoticon-item:hover { background: var(--em-hover); transform: scale(1.12); }
+        .ts-emoticon-item:focus { outline: none; }
+        .ts-emoticon-item:focus-visible { background: var(--em-hover); box-shadow: var(--em-ring); }
+        .ts-emoticon-empty { padding: 1.5rem .5rem; color: var(--em-muted); text-align: center; }
+
+        .ts-emoticon-preview {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            min-height: 2.25rem;
+            padding: .3rem .75rem;
+            border-top: 1px solid var(--em-border);
+            color: var(--em-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ts-emoticon-preview-char { font-family: ${EMOJI_FONT}; font-size: 1.35rem; line-height: 1; }
+        .ts-emoticon-preview-name { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; }
+        .ts-emoticon-preview.is-hint .ts-emoticon-preview-name { font-family: inherit; }
+
+        .ts-emoticon-sr {
+            position: absolute !important;
+            width: 1px; height: 1px;
+            margin: -1px; padding: 0; border: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .ts-emoticon-panel { animation: none; }
+            .ts-emoticon-item, .ts-emoticon-tab { transition: none; }
+            .ts-emoticon-item:hover { transform: none; }
+        }
+    `;
+
+    const coarsePointer = () => window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    const pretty = (name) => name.replace(/_/g, ' ');
+
+    function dispatch(el, type, detail) {
+        el.dispatchEvent(new CustomEvent(type, { bubbles: true, detail }));
+    }
+
+    function readRecent(key) {
+        try {
+            const list = JSON.parse(window.localStorage.getItem(key) || '[]');
+            return Array.isArray(list) ? list.filter((c) => typeof c === 'string') : [];
+        } catch (err) {
+            return [];
+        }
+    }
+
+    function writeRecent(key, list) {
+        try {
+            window.localStorage.setItem(key, JSON.stringify(list));
+        } catch (err) {
+            // Storage blocked, the recent row just lasts as long as the page
+        }
+    }
+
+    class PluginEmoticon {
+        constructor ($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el = $el;
+            this._uid = ++seq;
+            this._ns = `.tsemoticon${this._uid}`;
+            this._open = false;
+            this._lastSwap = null;
+            this._caret = null;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginEmoticon.defaults, opts, {
+                wrapper: this.$el
+            });
+            const o = this.options;
+            o.shortcutMap = $.extend({}, o.shortcuts ? SHORTCUTS : {}, o.extraShortcuts || {});
+            this._shortcutRe = shortcutPattern(o.shortcutMap, '');
+            this._shortcutEndRe = (() => {
+                const keys = Object.keys(o.shortcutMap).sort((a, b) => b.length - a.length).map(escapeRe);
+                return keys.length ? new RegExp(`${SPACE_BEFORE}(${keys.join('|')})$`) : null;
+            })();
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const o = self.options;
+            const input = self.$el[0];
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style = document.createElement('style');
+                style.id = STYLE_ID;
+                style.textContent = CSS_TEXT;
+                document.head.appendChild(style);
+            }
+
+            if (!input.id) input.id = `ts-emoticon-input-${self._uid}`;
+            const panelId = `ts-emoticon-panel-${self._uid}`;
+
+            // The button that opens the panel: one of ours, or the page's own
+            if (o.trigger) {
+                self.$button = $(o.trigger).first();
+                self._ownButton = false;
+            } else if (o.button) {
+                self.$button = $('<button type="button"></button>')
+                    .addClass(`ts-emoticon-toggle ${o.buttonClass || ''}`.trim())
+                    .append($('<span class="ts-emoticon-toggle-icon" aria-hidden="true"></span>').text(o.buttonIcon))
+                    .append($('<span class="ts-emoticon-sr"></span>').text(o.labels.button));
+                if (o.buttonPosition === 'before') self.$button.insertBefore(self.$el);
+                else self.$button.insertAfter(self.$el);
+                self._ownButton = true;
+            } else {
+                self.$button = $();
+            }
+            self.$button.attr({ 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-controls': panelId });
+
+            if (!self.$button.length) return this;
+
+            // The panel lives in the nearest drawer, modal or offcanvas (so focus traps and
+            // stacking keep working there), else in the body
+            self.$container = o.container ? $(o.container).first()
+                : self.$el.closest('[data-drawer-panel], .modal-dialog, .offcanvas, .ts-emoticon-container');
+            if (!self.$container.length) self.$container = $(document.body);
+            if (self.$container.css('position') === 'static') {
+                self._madeRelative = true;
+                self.$container.css('position', 'relative');
+            }
+
+            const $panel = $('<div class="ts-emoticon-panel" role="dialog" hidden></div>')
+                .attr({ id: panelId, 'aria-label': o.labels.panel });
+
+            if (o.search) {
+                $('<div class="ts-emoticon-search"></div>')
+                    .append($('<input type="search" autocomplete="off" spellcheck="false">')
+                        .attr({ placeholder: o.labels.search, 'aria-label': o.labels.search }))
+                    .appendTo($panel);
+            }
+
+            const $tabs = $('<div class="ts-emoticon-tabs" role="tablist"></div>').attr('aria-label', o.labels.categories);
+            self._categories().forEach((cat) => {
+                $('<button type="button" class="ts-emoticon-tab" role="tab" tabindex="-1"></button>')
+                    .attr({ 'data-category': cat.key, title: cat.label, 'aria-label': cat.label, 'aria-selected': 'false' })
+                    .text(cat.icon)
+                    .appendTo($tabs);
+            });
+            $panel.append($tabs);
+            $panel.append('<div class="ts-emoticon-body"></div>');
+            if (o.preview) {
+                $panel.append('<div class="ts-emoticon-preview" aria-hidden="true"><span class="ts-emoticon-preview-char"></span><span class="ts-emoticon-preview-name"></span></div>');
+            }
+            $panel.append('<span class="ts-emoticon-sr" aria-live="polite"></span>');
+
+            self.$panel = $panel.appendTo(self.$container);
+            self.$search = $panel.find('.ts-emoticon-search input');
+            self.$body = $panel.find('.ts-emoticon-body');
+            self.$live = $panel.find('[aria-live]');
+            self._renderAll();
+            return this;
+        }
+
+        events() {
+            const self = this;
+            const o = self.options;
+            const input = self.$el[0];
+
+            // Typed emoticons and :names:
+            self.$el.on(`input${self._ns}`, function (e) {
+                const type = e.originalEvent && e.originalEvent.inputType;
+                if (type && type !== 'insertText' && type !== 'insertCompositionText') {
+                    self._lastSwap = null;
+                    return;
+                }
+                self._convertAtCaret();
+            });
+
+            self.$el.on(`keydown${self._ns}`, function (e) {
+                if (e.key === 'Escape' && self._open) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    self.close();
+                    return;
+                }
+                // Backspace right after a swap brings the typed text back
+                const swap = self._lastSwap;
+                if (e.key === 'Backspace' && swap && input.value === swap.value && input.selectionStart === swap.caret && input.selectionEnd === swap.caret) {
+                    e.preventDefault();
+                    const before = input.value.slice(0, swap.start);
+                    const after = input.value.slice(swap.caret);
+                    input.value = before + swap.from + after;
+                    const caret = swap.start + swap.from.length;
+                    input.setSelectionRange(caret, caret);
+                    self._lastSwap = null;
+                    return;
+                }
+                if (e.key === 'Enter' && o.convertOnSubmit && !e.shiftKey) self.convertValue();
+                if (e.key === 'Delete' || e.key.startsWith('Arrow')) self._lastSwap = null;
+            });
+
+            // A message sent by button still gets its last emoticon swapped
+            const form = input.form;
+            if (form && o.convertOnSubmit) {
+                self._onSubmit = () => self.convertValue();
+                form.addEventListener('submit', self._onSubmit, true);
+            }
+
+            // Remember where the caret was, the panel takes focus away
+            self.$el.on(`blur${self._ns} keyup${self._ns} click${self._ns}`, function () {
+                if (typeof input.selectionStart === 'number') self._caret = [input.selectionStart, input.selectionEnd];
+            });
+
+            if (!self.$panel) return this;
+
+            self.$button.on(`click${self._ns}`, function (e) {
+                e.preventDefault();
+                self.toggle();
+            });
+
+            self.$panel.on(`click${self._ns}`, '.ts-emoticon-item', function (e) {
+                e.preventDefault();
+                self._pick(this);
+            });
+
+            self.$panel.on(`click${self._ns}`, '.ts-emoticon-tab', function (e) {
+                e.preventDefault();
+                self._showCategory(this.getAttribute('data-category'), true);
+            });
+
+            self.$panel.on(`mouseenter${self._ns} focusin${self._ns}`, '.ts-emoticon-item', function () {
+                self._preview(this);
+            });
+
+            self.$search.on(`input${self._ns}`, function () {
+                self._filter(this.value);
+            });
+
+            self.$panel.on(`keydown${self._ns}`, function (e) {
+                self._panelKey(e);
+            });
+
+            // Highlight the category scrolled into view
+            self.$body.on(`scroll${self._ns}`, function () {
+                if (self._scrollTimer) return;
+                self._scrollTimer = setTimeout(() => {
+                    self._scrollTimer = null;
+                    self._syncTabs();
+                }, 60);
+            });
+
+            // A click anywhere else closes the panel
+            $(document).on(`pointerdown${self._ns}`, function (e) {
+                if (!self._open) return;
+                if (self.$panel[0].contains(e.target) || self.$button[0].contains(e.target)) return;
+                self.close(false);
+            });
+
+            $(window).on(`resize${self._ns}`, function () {
+                if (self._open) self._place();
+            });
+
+            return this;
+        }
+
+        // Opening and closing
+
+        isOpen() {
+            return this._open;
+        }
+
+        open() {
+            const self = this;
+            if (!self.$panel || self._open) return this;
+            const input = self.$el[0];
+            if (typeof input.selectionStart === 'number' && document.activeElement === input) {
+                self._caret = [input.selectionStart, input.selectionEnd];
+            }
+            self._open = true;
+            if (self.$search.length) {
+                self.$search.val('');
+                self._filter('');
+            }
+            self._renderRecent();
+            self._preview(null);
+            self.$panel.prop('hidden', false);
+            self.$button.attr('aria-expanded', 'true');
+            self._place();
+            self.$body.scrollTop(0);
+            self._syncTabs();
+            // On phones the search box would bring up the keyboard and cover the panel
+            if (self.$search.length && !coarsePointer()) self.$search[0].focus();
+            else self._focusItem(0);
+            dispatch(self.$el[0], EVT_OPEN, { instance: self });
+            return this;
+        }
+
+        close(refocus = true) {
+            const self = this;
+            if (!self.$panel || !self._open) return this;
+            self._open = false;
+            self.$panel.prop('hidden', true);
+            self.$button.attr('aria-expanded', 'false');
+            if (refocus && !coarsePointer()) self._focusInput();
+            dispatch(self.$el[0], EVT_CLOSE, { instance: self });
+            return this;
+        }
+
+        toggle() {
+            return this._open ? this.close() : this.open();
+        }
+
+        // Inserting and converting
+
+        insert(emoji) {
+            const self = this;
+            const input = self.$el[0];
+            const value = input.value;
+            const max = input.maxLength > 0 ? input.maxLength : Infinity;
+            self._inserted = false;
+            if (value.length + emoji.length > max) {
+                if (self.$live) self.$live.text(self.options.labels.full);
+                return this;
+            }
+            self._inserted = true;
+            let [start, end] = self._caret || [value.length, value.length];
+            start = Math.min(start, value.length);
+            end = Math.min(Math.max(end, start), value.length);
+            input.value = value.slice(0, start) + emoji + value.slice(end);
+            const caret = start + emoji.length;
+            self._caret = [caret, caret];
+            self._lastSwap = null;
+            try {
+                input.setSelectionRange(caret, caret);
+            } catch (err) {
+                // Some input types have no selection, the emoji is in anyway
+            }
+            // Lets the page react as if it was typed (a typing note, a character count)
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            return this;
+        }
+
+        convertValue() {
+            const self = this;
+            const input = self.$el[0];
+            const from = input.value;
+            const to = PluginEmoticon.convert(from, { shortcuts: self.options.shortcutMap, shortcodes: self.options.shortcodes });
+            if (to !== from) {
+                input.value = to;
+                self._lastSwap = null;
+                dispatch(input, EVT_CONVERT, { instance: self, from, to });
+            }
+            return this;
+        }
+
+        destroy() {
+            const self = this;
+            const input = self.$el[0];
+            self.close(false);
+            clearTimeout(self._scrollTimer);
+            self.$el.off(self._ns);
+            $(document).off(self._ns);
+            $(window).off(self._ns);
+            if (self._onSubmit && input.form) input.form.removeEventListener('submit', self._onSubmit, true);
+            if (self.$panel) self.$panel.remove();
+            if (self._ownButton) self.$button.remove();
+            else self.$button.off(self._ns).removeAttr('aria-haspopup aria-expanded aria-controls');
+            if (self._madeRelative) self.$container.css('position', '');
+            self.$el.removeData(instanceName);
+            instanceCount = Math.max(0, instanceCount - 1);
+            if (!instanceCount) $(`#${STYLE_ID}`).remove();
+            return this;
+        }
+
+        // Inside
+
+        _categories() {
+            const o = this.options;
+            const only = Array.isArray(o.categories) && o.categories.length ? o.categories : null;
+            const cats = CATEGORIES.filter((c) => !only || only.includes(c.key)).map((c) => $.extend({}, c, { label: o.labels[c.key] || c.label }));
+            if (o.recent) cats.unshift({ key: 'recent', label: o.labels.recent, icon: '🕘', items: [] });
+            return cats;
+        }
+
+        _section(cat) {
+            const $section = $('<section class="ts-emoticon-section"></section>').attr('data-category', cat.key);
+            $('<h3 class="ts-emoticon-heading"></h3>').text(cat.label).appendTo($section);
+            const $grid = $('<div class="ts-emoticon-grid" role="group"></div>').attr('aria-label', cat.label).appendTo($section);
+            cat.items.forEach((item) => $grid.append(this._item(item)));
+            return $section;
+        }
+
+        _item(item) {
+            return $('<button type="button" class="ts-emoticon-item" tabindex="-1"></button>')
+                .attr({ 'data-emoji': item.char, 'data-name': item.name, 'aria-label': pretty(item.name) })
+                .text(item.char);
+        }
+
+        _renderAll() {
+            const self = this;
+            self.$body.empty();
+            self._categories().forEach((cat) => self.$body.append(self._section(cat)));
+            self._renderRecent();
+        }
+
+        _renderRecent() {
+            const self = this;
+            if (!self.options.recent || !self.$body) return;
+            const $section = self.$body.find('.ts-emoticon-section[data-category="recent"]');
+            const known = Object.create(null);
+            EMOJI.forEach((e) => { known[e.char] = e; });
+            const items = readRecent(self.options.recentKey)
+                .slice(0, self.options.recentMax)
+                .map((c) => known[c] || { char: c, name: 'emoji', keywords: [] });
+            const $grid = $section.find('.ts-emoticon-grid').empty();
+            items.forEach((item) => $grid.append(self._item(item)));
+            $section.prop('hidden', !items.length);
+            self.$panel.find('.ts-emoticon-tab[data-category="recent"]').prop('hidden', !items.length);
+        }
+
+        _filter(query) {
+            const self = this;
+            const q = String(query || '').trim().toLowerCase();
+            self.$body.find('.ts-emoticon-results').remove();
+            const $sections = self.$body.find('.ts-emoticon-section');
+            self.$panel.find('.ts-emoticon-tabs').prop('hidden', Boolean(q));
+            if (!q) {
+                $sections.prop('hidden', false);
+                self._renderRecent();
+                return;
+            }
+            $sections.prop('hidden', true);
+            const found = PluginEmoticon.search(q);
+            const $results = $('<section class="ts-emoticon-section ts-emoticon-results"></section>');
+            if (found.length) {
+                const $grid = $('<div class="ts-emoticon-grid" role="group"></div>').attr('aria-label', self.options.labels.results).appendTo($results);
+                found.forEach((item) => $grid.append(self._item(item)));
+            } else {
+                $('<div class="ts-emoticon-empty"></div>').text(self.options.labels.none).appendTo($results);
+            }
+            self.$body.prepend($results).scrollTop(0);
+            self.$live.text(found.length ? `${found.length} ${self.options.labels.found}` : self.options.labels.none);
+        }
+
+        _showCategory(key, focus) {
+            const self = this;
+            const $section = self.$body.find(`.ts-emoticon-section[data-category="${key}"]`);
+            if (!$section.length) return;
+            self.$body.scrollTop($section[0].offsetTop - self.$body[0].offsetTop);
+            self._syncTabs(key);
+            if (focus) {
+                const $first = $section.find('.ts-emoticon-item').first();
+                if ($first.length) self._focusItem(self._items().index($first));
+            }
+        }
+
+        _syncTabs(force) {
+            const self = this;
+            let current = force;
+            if (!current) {
+                const top = self.$body.scrollTop() + 8;
+                self.$body.find('.ts-emoticon-section[data-category]:not([hidden])').each(function () {
+                    if (this.offsetTop - self.$body[0].offsetTop <= top) current = this.getAttribute('data-category');
+                });
+            }
+            self.$panel.find('.ts-emoticon-tab').each(function () {
+                this.setAttribute('aria-selected', this.getAttribute('data-category') === current ? 'true' : 'false');
+            });
+        }
+
+        _items() {
+            return this.$body.find('.ts-emoticon-section:not([hidden]) .ts-emoticon-item');
+        }
+
+        _focusItem(index) {
+            const $items = this._items();
+            if (!$items.length) return;
+            const i = Math.max(0, Math.min(index, $items.length - 1));
+            $items.attr('tabindex', '-1');
+            const el = $items.eq(i).attr('tabindex', '0')[0];
+            el.focus({ preventScroll: false });
+            this._preview(el);
+        }
+
+        _focusInput() {
+            const input = this.$el[0];
+            input.focus();
+            if (this._caret) {
+                try {
+                    input.setSelectionRange(this._caret[0], this._caret[1]);
+                } catch (err) {
+                    // No selection on this input type
+                }
+            }
+        }
+
+        // The emoji under the pointer or focus, with its :name: to type it next time
+        _preview(el) {
+            if (!this.options.preview) return;
+            this.$panel.find('.ts-emoticon-preview').toggleClass('is-hint', !el);
+            this.$panel.find('.ts-emoticon-preview-char').text(el ? el.getAttribute('data-emoji') : '');
+            this.$panel.find('.ts-emoticon-preview-name').text(el ? `:${el.getAttribute('data-name')}:` : this.options.labels.hint);
+        }
+
+        // Emoji per row, from the layout
+        _columns() {
+            const $items = this._items();
+            if ($items.length < 2) return 1;
+            const top = $items[0].offsetTop;
+            let n = 0;
+            $items.each(function () {
+                if (this.offsetTop !== top) return false;
+                n++;
+                return true;
+            });
+            return Math.max(1, n);
+        }
+
+        _panelKey(e) {
+            const self = this;
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                self.close();
+                return;
+            }
+            const inSearch = e.target === self.$search[0];
+            const $items = self._items();
+            const index = $items.index(e.target);
+
+            if (inSearch) {
+                if (e.key === 'ArrowDown' || (e.key === 'Enter' && $items.length)) {
+                    e.preventDefault();
+                    if (e.key === 'Enter') self._pick($items[0]);
+                    else self._focusItem(0);
+                }
+                return;
+            }
+
+            if (index < 0) return;
+            const cols = self._columns();
+            let next = null;
+            switch (e.key) {
+                case 'ArrowRight': next = index + 1; break;
+                case 'ArrowLeft': next = index - 1; break;
+                case 'ArrowDown': next = index + cols; break;
+                case 'ArrowUp':
+                    if (index < cols && self.$search.length) {
+                        e.preventDefault();
+                        self.$search[0].focus();
+                        return;
+                    }
+                    next = index - cols;
+                    break;
+                case 'Home': next = 0; break;
+                case 'End': next = $items.length - 1; break;
+                case 'Enter':
+                case ' ':
+                    e.preventDefault();
+                    self._pick(e.target);
+                    return;
+                default:
+                    // Letters go to the search box
+                    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && self.$search.length) {
+                        self.$search[0].focus();
+                    }
+                    return;
+            }
+            e.preventDefault();
+            self._focusItem(Math.max(0, Math.min(next, $items.length - 1)));
+        }
+
+        _pick(el) {
+            const self = this;
+            const o = self.options;
+            const emoji = el.getAttribute('data-emoji');
+            const name = el.getAttribute('data-name');
+            self.insert(emoji);
+            if (!self._inserted) return;
+            if (o.recent) {
+                const list = readRecent(o.recentKey).filter((c) => c !== emoji);
+                list.unshift(emoji);
+                writeRecent(o.recentKey, list.slice(0, o.recentMax));
+            }
+            self.$live.text(`${pretty(name)} ${o.labels.added}`);
+            dispatch(self.$el[0], EVT_PICK, { instance: self, emoji, name });
+            if (o.closeOnPick) {
+                self.close();
+            } else {
+                self._renderRecent();
+                el.focus();
+            }
+        }
+
+        // Places the panel above or below the input, whichever has more room, lined up with
+        // the right edge of the button and kept inside the container
+        _place() {
+            const self = this;
+            const anchorEl = (self.$el.closest('.input-group')[0] || self.$el[0]);
+            const anchor = anchorEl.getBoundingClientRect();
+            const button = self.$button[0].getBoundingClientRect();
+            const box = self.$container[0].getBoundingClientRect();
+            const isBody = self.$container[0] === document.body;
+            const panel = self.$panel[0];
+            const width = panel.offsetWidth;
+            const height = panel.offsetHeight;
+            const gap = 6;
+            const viewH = window.innerHeight;
+
+            const roomAbove = anchor.top;
+            const roomBelow = viewH - anchor.bottom;
+            const placement = self.options.placement;
+            // Above by default, chat boxes sit at the bottom of the screen
+            const above = placement === 'top' ? true : placement === 'bottom' ? false
+                : roomAbove >= height + gap || roomAbove > roomBelow;
+
+            const container = self.$container[0];
+            const originX = isBody ? -window.scrollX : box.left + container.clientLeft - container.scrollLeft;
+            const originY = isBody ? -window.scrollY : box.top + container.clientTop - container.scrollTop;
+            const right = Math.max(button.right, anchor.left + Math.min(width, anchor.width));
+            let left = right - width;
+            const minLeft = (isBody ? 0 : box.left) + 8;
+            const maxLeft = (isBody ? window.innerWidth : box.right) - width - 8;
+            left = Math.max(minLeft, Math.min(left, maxLeft));
+            let top = above ? anchor.top - height - gap : anchor.bottom + gap;
+            top = Math.max(8, Math.min(top, viewH - height - 8));
+
+            panel.style.left = `${Math.round(left - originX)}px`;
+            panel.style.top = `${Math.round(top - originY)}px`;
+            panel.style.setProperty('--em-origin', `${above ? 'bottom' : 'top'} right`);
+        }
+
+        // Swaps an emoticon or :name: that ends just before the caret
+        _convertAtCaret() {
+            const self = this;
+            const o = self.options;
+            const input = self.$el[0];
+            const caret = input.selectionStart;
+            if (typeof caret !== 'number' || caret !== input.selectionEnd || caret < 2) return;
+            const value = input.value;
+            const last = value.charAt(caret - 1);
+            const head = value.slice(0, caret - 1);
+            let start = -1;
+            let from = '';
+            let to = '';
+
+            // An emoticon is swapped once a space or punctuation follows it
+            if (o.shortcuts !== false && self._shortcutEndRe && /[\s.,!?;)]/.test(last)) {
+                const m = head.match(self._shortcutEndRe);
+                if (m) {
+                    from = m[2];
+                    to = o.shortcutMap[from];
+                    start = head.length - from.length;
+                }
+            }
+            // A :name: is swapped when its closing colon is typed
+            if (!to && o.shortcodes && last === ':') {
+                const m = value.slice(0, caret).match(/:([a-z0-9_+-]{1,32}):$/i);
+                if (m && BY_NAME[m[1].toLowerCase()]) {
+                    from = m[0];
+                    to = BY_NAME[m[1].toLowerCase()];
+                    start = caret - from.length;
+                }
+            }
+            if (!to) return;
+
+            // The space or punctuation that set off an emoticon stays, a :name: has none
+            const tail = value.slice(start + from.length, caret);
+            input.value = value.slice(0, start) + to + tail + value.slice(caret);
+            const newCaret = start + to.length + tail.length;
+            input.setSelectionRange(newCaret, newCaret);
+            // Backspace now brings back what was typed, without the space
+            self._lastSwap = { start, caret: newCaret, from, value: input.value };
+            dispatch(input, EVT_CONVERT, { instance: self, from, to });
+        }
+    }
+
+    // Turns emoticons and :names: in a string into emoji
+    PluginEmoticon.convert = function (text, opts = {}) {
+        let out = String(text == null ? '' : text);
+        const map = opts.shortcuts === false ? null : (opts.shortcuts && typeof opts.shortcuts === 'object' ? opts.shortcuts : SHORTCUTS);
+        if (map) {
+            const re = shortcutPattern(map, 'g');
+            if (re) out = out.replace(re, (all, space, key) => space + map[key]);
+        }
+        if (opts.shortcodes !== false) {
+            out = out.replace(SHORTCODE_RE, (all, name) => BY_NAME[name.toLowerCase()] || all);
+        }
+        return out;
+    };
+
+    // True for text that is only emoji (at most max of them), handy for showing them big
+    PluginEmoticon.isEmojiOnly = function (text, max = 3) {
+        const value = String(text == null ? '' : text).trim();
+        if (!value || !EMOJI_ONLY_RE.test(value)) return false;
+        const count = (value.match(PICTOGRAPH_RE) || []).length;
+        return count > 0 && count <= max;
+    };
+
+    // Emoji whose name or search words start with the query
+    PluginEmoticon.search = function (query) {
+        const q = String(query || '').trim().toLowerCase().replace(/^:|:$/g, '');
+        if (!q) return [];
+        const starts = [];
+        const contains = [];
+        EMOJI.forEach((item) => {
+            const words = [item.name, ...item.name.split('_'), ...item.keywords];
+            if (words.some((w) => w.startsWith(q))) starts.push(item);
+            else if (item.name.includes(q)) contains.push(item);
+        });
+        return starts.concat(contains);
+    };
+
+    // The emoji for a :name: or name, or null
+    PluginEmoticon.lookup = function (name) {
+        const key = String(name || '').toLowerCase().replace(/^:|:$/g, '');
+        return BY_NAME[key] || null;
+    };
+
+    PluginEmoticon.emoji = EMOJI;
+    PluginEmoticon.shortcuts = SHORTCUTS;
+
+    PluginEmoticon.defaults = {
+        button: true,               // add a picker button next to the input
+        buttonPosition: 'after',    // 'after' or 'before' the input
+        buttonClass: 'btn btn-outline-secondary',
+        buttonIcon: '🙂',
+        trigger: null,              // selector of an existing button to open the picker instead
+        container: null,            // where the panel goes, default the nearest drawer, modal or offcanvas, else the body
+        placement: 'auto',          // 'auto', 'top' or 'bottom'
+        search: true,               // search box at the top of the panel
+        preview: true,              // name of the emoji under the pointer at the bottom
+        categories: null,           // keys to show, for example ['smileys', 'games'], default all
+        recent: true,               // a row of the emoji picked last
+        recentMax: 16,
+        recentKey: 'ts-emoticon-recent',
+        closeOnPick: false,         // keep the panel open to pick several
+        shortcuts: true,            // swap :) <3 and friends as you type
+        extraShortcuts: {},         // more emoticons, for example {"(y)": "👍"}
+        shortcodes: true,           // swap :name: as you type
+        convertOnSubmit: true,      // swap what is left when Enter is pressed or the form is sent
+        labels: {
+            button: 'Add an emoji',
+            panel: 'Emoji',
+            search: 'Search emoji',
+            categories: 'Emoji categories',
+            recent: 'Recently used',
+            results: 'Search results',
+            none: 'No emoji found',
+            found: 'emoji found',
+            added: 'added',
+            full: 'The message is full',
+            hint: 'Tip: type :name: to add one without the picker'
+        }
+    };
+
+    // Expose class to themestrap namespace
+    $.extend(themestrap, {
+        PluginEmoticon
+    });
+
+    // jQuery plugin method
+    $.fn.themestrapPluginEmoticon = function (opts) {
+        return this.map(function () {
+            const $this = $(this);
+
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            } else {
+                return new PluginEmoticon($this, opts);
+            }
+        });
+    };
+})).apply(this, [window.themestrap, jQuery]);
+
+// Markdowneditor
+/**
+ * Themestrap MarkdownEditor
+ *
+ * A distraction-free Markdown writing surface that enhances a plain <textarea>.
+ * The textarea stays the source of truth (so normal form posts keep working), and
+ * gains a PluginToolbar, smart list/quote continuation, image paste and drop upload,
+ * a live preview rendered by PluginMarkdown, and a focus-friendly fullscreen mode.
+ *
+ * Markup:
+ *
+ *   <textarea name="body" data-plugin-markdowneditor
+ *             data-plugin-options='{"view": "split", "minHeight": 420}'>
+ *   # Hello
+ *   </textarea>
+ *
+ * Public API (via stored instance):
+ *   const ed = $('#body').data('__pluginMarkdownEditor');
+ *   ed.getValue();                 // Markdown string
+ *   ed.setValue(md, silent);       // replace content, silent skips the change event
+ *   ed.getHtml();                  // rendered preview HTML
+ *   ed.insert(text);               // insert at the caret (replaces the selection)
+ *   ed.wrap(before, after, hint);  // toggle an inline wrapper around the selection
+ *   ed.command('bold');            // run any toolbar command by key
+ *   ed.setView('write|split|preview');
+ *   ed.fullscreen(true|false);
+ *   ed.setStatus('Saved');         // short message in the status bar
+ *   ed.focus(); ed.enable(); ed.disable(); ed.destroy();
+ *
+ * Events (native CustomEvent dispatched on the textarea, bubbles):
+ *   ts.markdowneditor.change   detail: { instance, value }
+ *   ts.markdowneditor.save     detail: { instance }      Ctrl/Cmd+S pressed
+ *   ts.markdowneditor.view     detail: { instance, view }
+ *   ts.markdowneditor.upload   detail: { instance, file, url }
+ *   ts.markdowneditor.error    detail: { instance, error }
+ *   ts.markdowneditor.focus / ts.markdowneditor.blur
+ *
+ * CSS custom properties (all optional):
+ *   --ts-me-bg, --ts-me-border, --ts-me-border-focus, --ts-me-radius, --ts-me-text,
+ *   --ts-me-muted, --ts-me-toolbar-bg, --ts-me-font, --ts-me-font-size,
+ *   --ts-me-line-height, --ts-me-padding, --ts-me-preview-bg, --ts-me-code-bg, --ts-me-link
+ *
+ * The renderer option may return HTML or a Promise of HTML, which lets the preview use the
+ * same server-side renderer as the published site.
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginMarkdownEditor'] === 'function' && $('[data-plugin-markdowneditor]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-markdowneditor]:not(.manual)', 'themestrapPluginMarkdownEditor');
+ *   }
+ */
+// Markdown Editor
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginMarkdownEditor';
+    const STYLE_ID     = 'ts-markdowneditor-styles';
+    const EVENT_NS     = 'markdowneditor';
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+    const MOD    = IS_MAC ? '\u2318' : 'Ctrl+';
+
+    const LIGHT_TOKENS = `
+        --me-bg:          var(--ts-me-bg, var(--ts-skin-surface, #ffffff));
+        --me-border:      var(--ts-me-border, var(--ts-skin-border, rgba(0,0,0,.14)));
+        --me-toolbar-bg:  var(--ts-me-toolbar-bg, var(--ts-skin-surface-2, rgba(0,0,0,.035)));
+        --me-text:        var(--ts-me-text, var(--ts-skin-text, #1f2937));
+        --me-muted:       var(--ts-me-muted, var(--ts-skin-text-dim, rgba(31,41,55,.55)));
+        --me-preview-bg:  var(--ts-me-preview-bg, var(--ts-skin-surface-2, rgba(0,0,0,.02)));
+        --me-code-bg:     var(--ts-me-code-bg, var(--ts-skin-surface-2, rgba(0,0,0,.06)));
+        --me-link:        var(--ts-me-link, var(--ts-skin-accent, #0b8a83));
+        --me-accent:      var(--ts-me-border-focus, var(--ts-skin-accent, #00a89f));
+    `;
+
+    const DARK_TOKENS = `
+        --me-bg:          var(--ts-me-bg, var(--ts-skin-surface-2, rgba(255,255,255,.02)));
+        --me-border:      var(--ts-me-border, var(--ts-skin-border, rgba(255,255,255,.10)));
+        --me-toolbar-bg:  var(--ts-me-toolbar-bg, var(--ts-skin-surface, rgba(0,0,0,.20)));
+        --me-text:        var(--ts-me-text, var(--ts-skin-text, #cdd8e6));
+        --me-muted:       var(--ts-me-muted, var(--ts-skin-text-dim, rgba(205,216,230,.55)));
+        --me-preview-bg:  var(--ts-me-preview-bg, var(--ts-skin-surface-2, rgba(255,255,255,.03)));
+        --me-code-bg:     var(--ts-me-code-bg, var(--ts-skin-surface-2, rgba(255,255,255,.08)));
+        --me-link:        var(--ts-me-link, var(--ts-skin-accent, #00c7be));
+        --me-accent:      var(--ts-me-border-focus, var(--ts-skin-accent, #00c7be));
+    `;
+
+    const INJECTED_CSS = `
+        .ts-mdeditor { ${LIGHT_TOKENS} }
+        @media (prefers-color-scheme: dark) {
+            .ts-mdeditor { ${DARK_TOKENS} }
+        }
+        html.dark .ts-mdeditor,
+        [data-bs-theme="dark"] .ts-mdeditor { ${DARK_TOKENS} }
+        [data-bs-theme="light"] .ts-mdeditor,
+        html [data-bs-theme="light"] .ts-mdeditor { ${LIGHT_TOKENS} }
+
+        .ts-mdeditor {
+            display: flex;
+            flex-direction: column;
+            background: var(--me-bg);
+            border: 1px solid var(--me-border);
+            border-radius: var(--ts-me-radius, var(--ts-skin-radius, 6px));
+            overflow: hidden;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .ts-mdeditor.ts-me-focused {
+            border-color: var(--me-accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--me-accent) 18%, transparent);
+        }
+        .ts-mdeditor.ts-me-disabled { opacity: .6; }
+        .ts-mdeditor.ts-me-disabled .ts-toolbar { pointer-events: none; }
+
+        .ts-mdeditor .ts-toolbar {
+            --ts-tb-bg:     var(--ts-skin-surface, var(--me-toolbar-bg));
+            --ts-tb-border: transparent;
+            --ts-tb-shadow: none;
+            --ts-tb-radius: 0;
+            width: 100%;
+            max-width: 100%;
+            flex-wrap: wrap;
+            border-radius: 0;
+            border-bottom: 1px solid var(--me-border);
+        }
+        .ts-mdeditor .ts-toolbar [data-toolbar-toggle-item][aria-pressed="true"] {
+            --ts-tb-on-bg: var(--ts-skin-accent, var(--me-accent));
+        }
+        .ts-me-spacer { flex: 1 1 auto; }
+
+        .ts-me-panes { display: flex; flex: 1; min-height: 0; }
+        .ts-me-write,
+        .ts-me-preview { flex: 1 1 0; min-width: 0; position: relative; }
+        .ts-me-view-write   .ts-me-preview { display: none; }
+        .ts-me-view-preview .ts-me-write   { display: none; }
+        .ts-me-view-split   .ts-me-write   { border-right: 1px solid var(--me-border); }
+        .ts-me-view-split .ts-me-panes,
+        .ts-me-view-preview .ts-me-panes { height: var(--ts-me-height, 420px); }
+        .ts-me-view-split .ts-me-write,
+        .ts-me-view-split .ts-me-preview,
+        .ts-me-view-preview .ts-me-preview { overflow-y: auto; }
+
+        .ts-me-input {
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: var(--ts-me-height, 420px);
+            margin: 0;
+            padding: var(--ts-me-padding, 16px 18px);
+            border: 0;
+            outline: 0;
+            resize: none;
+            background: transparent;
+            color: var(--me-text);
+            font-family: var(--ts-me-font, var(--ts-skin-font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace));
+            font-size: var(--ts-me-font-size, 15px);
+            line-height: var(--ts-me-line-height, 1.7);
+            tab-size: 4;
+            box-sizing: border-box;
+        }
+        .ts-me-input::placeholder { color: var(--me-muted); opacity: .8; }
+        .ts-me-view-write .ts-me-input { overflow: hidden; }
+        .ts-me-view-split .ts-me-input { min-height: 100%; }
+
+        .ts-me-preview {
+            padding: var(--ts-me-padding, 16px 18px);
+            background: var(--me-preview-bg);
+            color: var(--me-text);
+            font-size: 15px;
+            line-height: 1.7;
+            word-break: break-word;
+        }
+        .ts-me-preview-body > :first-child { margin-top: 0; }
+        .ts-me-preview-body > :last-child  { margin-bottom: 0; }
+        .ts-me-preview a { color: var(--me-link); }
+        .ts-me-preview img { max-width: 100%; height: auto; border-radius: 4px; }
+        .ts-me-preview blockquote { margin: 0 0 1em; padding-left: 1em; border-left: 3px solid var(--me-accent); color: var(--me-muted); }
+        .ts-me-preview pre { background: var(--me-code-bg); padding: 12px 14px; border-radius: 6px; overflow-x: auto; }
+        .ts-me-preview code { background: var(--me-code-bg); padding: .1em .35em; border-radius: 4px; font-size: .9em; }
+        .ts-me-preview pre code { background: none; padding: 0; }
+        .ts-me-preview table { border-collapse: collapse; margin-bottom: 1em; }
+        .ts-me-preview th, .ts-me-preview td { border: 1px solid var(--me-border); padding: 4px 10px; }
+        .ts-me-preview hr { border: 0; border-top: 1px solid var(--me-border); }
+        .ts-me-preview-empty { color: var(--me-muted); font-style: italic; }
+
+        .ts-me-status {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            padding: 6px 14px;
+            border-top: 1px solid var(--me-border);
+            background: var(--me-toolbar-bg);
+            color: var(--me-muted);
+            font-size: 12px;
+        }
+        .ts-me-msg { margin-left: auto; }
+        .ts-me-dropping .ts-me-write::after {
+            content: 'Drop image to upload';
+            position: absolute;
+            inset: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--me-accent);
+            border-radius: 8px;
+            background: color-mix(in srgb, var(--me-bg) 88%, transparent);
+            color: var(--me-accent);
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .ts-mdeditor.ts-me-fullscreen {
+            position: fixed;
+            inset: 0;
+            z-index: 1040;
+            border-radius: 0;
+            border: 0;
+            --ts-me-height: calc(100vh - 100px);
+        }
+        .ts-mdeditor.ts-me-fullscreen .ts-me-panes { height: auto; }
+        .ts-mdeditor.ts-me-fullscreen.ts-me-view-write .ts-me-write { overflow-y: auto; }
+        .ts-mdeditor.ts-me-fullscreen.ts-me-view-write .ts-me-input { overflow: auto; }
+        body.ts-me-lock { overflow: hidden; }
+    `;
+
+    // Toolbar commands. type: wrap | line | block | action
+    const CMDS = {
+        bold:      { icon: 'fas fa-bold',          label: 'Bold',          key: 'B' },
+        italic:    { icon: 'fas fa-italic',        label: 'Italic',        key: 'I' },
+        strike:    { icon: 'fas fa-strikethrough', label: 'Strikethrough' },
+        code:      { icon: 'fas fa-code',          label: 'Inline code' },
+        h2:        { icon: 'fas fa-heading',       label: 'Heading',       text: 'H2' },
+        h3:        { icon: 'fas fa-heading',       label: 'Subheading',    text: 'H3' },
+        quote:     { icon: 'fas fa-quote-left',    label: 'Quote' },
+        ul:        { icon: 'fas fa-list-ul',       label: 'Bullet list' },
+        ol:        { icon: 'fas fa-list-ol',       label: 'Numbered list' },
+        task:      { icon: 'fas fa-list-check',    label: 'Task list' },
+        link:      { icon: 'fas fa-link',          label: 'Link',          key: 'K' },
+        image:     { icon: 'fas fa-image',         label: 'Image' },
+        codeblock: { icon: 'fas fa-file-code',     label: 'Code block' },
+        hr:        { icon: 'fas fa-minus',         label: 'Divider' },
+        table:     { icon: 'fas fa-table',         label: 'Table' }
+    };
+
+    const VIEWS = {
+        write:   { icon: 'fas fa-pen',            label: 'Write' },
+        split:   { icon: 'fas fa-table-columns',  label: 'Write and preview' },
+        preview: { icon: 'fas fa-eye',            label: 'Preview' }
+    };
+
+    const titleFor = (d) => (d.key ? `${d.label} (${MOD}${d.key})` : d.label);
+    const toPx     = (v) => (typeof v === 'number' ? `${v}px` : v);
+
+    class PluginMarkdownEditor {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el     = $el;
+            this._uid    = ++seq;
+            this._ns     = `${EVENT_NS}${this._uid}`;
+            this._view   = 'write';
+            this._failed = false;
+            this._timer  = null;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginMarkdownEditor.defaults, opts, {
+                wrapper: this.$el
+            });
+            // Arrays are replaced wholesale, not merged index by index
+            if (opts && Array.isArray(opts.toolbar)) this.options.toolbar = opts.toolbar.slice();
+            if (opts && typeof opts.imageUpload === 'function') this.options.imageUpload = opts.imageUpload;
+            if (opts && typeof opts.renderer === 'function')    this.options.renderer = opts.renderer;
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const opts = self.options;
+
+            if (!self.$el.is('textarea')) {
+                console.error('PluginMarkdownEditor: the host element must be a <textarea>.');
+                self._failed = true;
+                self.$el.removeData(instanceName);
+                return this;
+            }
+            if (opts.toolbar !== false && typeof $.fn.themestrapPluginToolbar !== 'function') {
+                if (themestrap.fn && typeof themestrap.fn.showErrorMessage === 'function') {
+                    themestrap.fn.showErrorMessage('Failed to Load File',
+                        'Failed to load: PluginToolbar - Include the following file(s): (components/themestrap.plugin.toolbar.js)');
+                } else {
+                    console.error('PluginMarkdownEditor: PluginToolbar must be loaded first.');
+                }
+                self._failed = true;
+                self.$el.removeData(instanceName);
+                return this;
+            }
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style       = document.createElement('style');
+                style.id          = STYLE_ID;
+                style.textContent = INJECTED_CSS;
+                document.head.appendChild(style);
+            }
+
+            self.$ta    = self.$el;
+            self.$wrap  = $('<div class="ts-mdeditor"></div>');
+            self.$panes = $('<div class="ts-me-panes"></div>');
+            self.$write = $('<div class="ts-me-write"></div>');
+
+            // The textarea keeps its place in the DOM tree, inside the new wrapper
+            self.$wrap.insertBefore(self.$ta);
+            self.$ta.addClass('ts-me-input').attr({ spellcheck: 'true' });
+            if (opts.placeholder) self.$ta.attr('placeholder', opts.placeholder);
+            if (opts.ariaLabel && !self.$ta.attr('aria-label')) self.$ta.attr('aria-label', opts.ariaLabel);
+            self.$write.append(self.$ta);
+            self.$panes.append(self.$write);
+
+            if (opts.minHeight) self.$wrap[0].style.setProperty('--ts-me-height', toPx(opts.minHeight));
+
+            if (opts.preview) {
+                self.$preview = $('<div class="ts-me-preview" tabindex="-1"><div class="ts-me-preview-body"></div></div>');
+                self.$previewBody = self.$preview.find('.ts-me-preview-body');
+                self.$panes.append(self.$preview);
+                if (!opts.renderer && typeof $.fn.themestrapPluginMarkdown === 'function') {
+                    // A detached host: PluginMarkdown renders into it and the HTML is copied across
+                    self.$mdHost = $('<div></div>');
+                    self.$mdHost.themestrapPluginMarkdown({
+                        sanitize: opts.sanitize, breaks: opts.breaks, highlight: false
+                    });
+                    self._md = $(self.$mdHost[0]).data('__pluginMarkdown');
+                }
+            }
+
+            if (opts.toolbar !== false) {
+                self.$toolbarEl = self._buildToolbarEl();
+                self.$wrap.append(self.$toolbarEl);
+                self.$toolbarEl.themestrapPluginToolbar($.extend({}, opts.toolbarOptions));
+            }
+
+            self.$wrap.append(self.$panes);
+
+            if (opts.statusBar) {
+                self.$status = $('<div class="ts-me-status"><span class="ts-me-words"></span><span class="ts-me-time"></span><span class="ts-me-msg" role="status"></span></div>');
+                self.$wrap.append(self.$status);
+            }
+
+            self.setView(opts.view, true);
+            self._updateStatus();
+            self._autoGrow();
+            if (opts.disabled) self.disable();
+
+            return this;
+        }
+
+        _buildToolbarEl() {
+            const self = this;
+            const t    = self.options.toolbar;
+            const keys = (t === true || !Array.isArray(t)) ? PluginMarkdownEditor.defaults.toolbar : t;
+            const parts = [];
+            let group = [];
+
+            const flush = () => { if (group.length) { parts.push(group.join('')); group = []; } };
+
+            keys.forEach((k) => {
+                if (k === '|')      { flush(); return; }
+                if (k === 'views')  { flush(); parts.push(self._viewsHtml()); return; }
+                if (k === 'spacer') { flush(); parts.push('<span class="ts-me-spacer"></span>'); return; }
+                if (k === 'fullscreen') {
+                    flush();
+                    parts.push(`<button type="button" class="ts-tb-icon" data-toolbar-button data-toolbar-value="fullscreen"
+                        title="Fullscreen (Esc to leave)" aria-label="Fullscreen"><i class="fas fa-expand" aria-hidden="true"></i></button>`);
+                    return;
+                }
+                const d = CMDS[k];
+                if (!d) return;
+                group.push(`<button type="button" class="ts-tb-icon" data-toolbar-button data-toolbar-value="${k}"
+                    title="${titleFor(d)}" aria-label="${d.label}">
+                    ${d.text ? `<span class="ts-me-ico-text">${d.text}</span>` : `<i class="${d.icon}" aria-hidden="true"></i>`}
+                </button>`);
+            });
+            flush();
+
+            return $(`<div>${parts.join('<hr data-toolbar-separator>')}</div>`);
+        }
+
+        _viewsHtml() {
+            const items = Object.keys(VIEWS).map((k) => {
+                const d = VIEWS[k];
+                return `<button type="button" class="ts-tb-icon" data-toolbar-toggle-item data-toolbar-value="${k}"
+                    title="${d.label}" aria-label="${d.label}"><i class="${d.icon}" aria-hidden="true"></i></button>`;
+            }).join('');
+            return `<div data-toolbar-toggle-group data-toolbar-type="single" data-toolbar-group-label="Editor view">${items}</div>`;
+        }
+
+        events() {
+            const self = this;
+            if (self._failed) return this;
+
+            if (self.$toolbarEl) {
+                // Keep the caret and selection in the textarea while toolbar buttons are pressed
+                self.$toolbarEl.on(`mousedown.${EVENT_NS}`, (e) => e.preventDefault());
+                self.$toolbarEl[0].addEventListener('toolbar:button', (e) => {
+                    if (e.detail.value === 'fullscreen') self.fullscreen(!self._full);
+                    else self.command(e.detail.value);
+                });
+                self.$toolbarEl[0].addEventListener('toolbar:toggle', (e) => {
+                    if (VIEWS[e.detail.value]) self.setView(e.detail.value);
+                });
+            }
+
+            self.$ta
+                .on(`focus.${EVENT_NS}`, () => {
+                    self.$wrap.addClass('ts-me-focused');
+                    self._dispatch('ts.markdowneditor.focus');
+                })
+                .on(`blur.${EVENT_NS}`, () => {
+                    self.$wrap.removeClass('ts-me-focused');
+                    self._dispatch('ts.markdowneditor.blur');
+                })
+                .on(`input.${EVENT_NS}`, () => {
+                    self._autoGrow();
+                    self._updateStatus();
+                    self._queuePreview();
+                    self._dispatch('ts.markdowneditor.change', { value: self.getValue() });
+                    if (typeof self.options.onChange === 'function') self.options.onChange.call(self, self.getValue());
+                })
+                .on(`keydown.${EVENT_NS}`, (e) => self._onKeydown(e))
+                .on(`paste.${EVENT_NS}`, (e) => self._onPaste(e))
+                .on(`scroll.${EVENT_NS}`, () => self._syncScroll('write'));
+
+            if (self.$preview) {
+                self.$preview.on(`scroll.${EVENT_NS}`, () => self._syncScroll('preview'));
+            }
+
+            // Drag and drop images onto the writing surface
+            self.$write
+                .on(`dragover.${EVENT_NS} dragenter.${EVENT_NS}`, (e) => {
+                    if (!self._hasImageFiles(e.originalEvent.dataTransfer)) return;
+                    e.preventDefault();
+                    self.$wrap.addClass('ts-me-dropping');
+                })
+                .on(`dragleave.${EVENT_NS} drop.${EVENT_NS}`, (e) => {
+                    if (e.type === 'dragleave' && self.$write[0].contains(e.originalEvent.relatedTarget)) return;
+                    self.$wrap.removeClass('ts-me-dropping');
+                })
+                .on(`drop.${EVENT_NS}`, (e) => {
+                    const dt = e.originalEvent.dataTransfer;
+                    if (!self._hasImageFiles(dt)) return;
+                    e.preventDefault();
+                    self._uploadFiles(dt.files);
+                });
+
+            $(document).on(`keydown.${self._ns}`, (e) => {
+                if (e.key === 'Escape' && self._full) self.fullscreen(false);
+            });
+
+            return this;
+        }
+
+        // Selection and text helpers
+
+        _sel() {
+            const ta = this.$ta[0];
+            return { s: ta.selectionStart, e: ta.selectionEnd, v: ta.value };
+        }
+
+        // Replaces [start, end) with text through the browser edit stack when possible, so undo keeps working
+        _replace(start, end, text, selStart, selEnd) {
+            const ta = this.$ta[0];
+            ta.focus();
+            ta.setSelectionRange(start, end);
+            let ok = false;
+            try { ok = document.execCommand('insertText', false, text); } catch (err) { ok = false; }
+            if (!ok || ta.value.slice(start, start + text.length) !== text) {
+                ta.setRangeText(text, start, end, 'end');
+                ta.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            const a = selStart === undefined ? start + text.length : selStart;
+            const b = selEnd   === undefined ? a : selEnd;
+            ta.setSelectionRange(a, b);
+            return this;
+        }
+
+        _lineRange(s, e) {
+            const v = this.$ta[0].value;
+            const start = v.lastIndexOf('\n', s - 1) + 1;
+            let end = v.indexOf('\n', e);
+            if (end === -1) end = v.length;
+            // A selection that ends right after a newline should not pull in the next line
+            if (e > s && v[e - 1] === '\n') end = e - 1;
+            return { start, end };
+        }
+
+        // Public editing API
+
+        insert(text) {
+            const { s, e } = this._sel();
+            return this._replace(s, e, text);
+        }
+
+        wrap(before, after, hint) {
+            after = after === undefined ? before : after;
+            const { s, e, v } = this._sel();
+            const sel = v.slice(s, e);
+            const bl = before.length, al = after.length;
+
+            // Already wrapped outside the selection: unwrap
+            if (s >= bl && v.slice(s - bl, s) === before && v.slice(e, e + al) === after) {
+                return this._replace(s - bl, e + al, sel, s - bl, s - bl + sel.length);
+            }
+            // Selection includes the wrappers: unwrap
+            if (sel.length >= bl + al && sel.startsWith(before) && sel.endsWith(after)) {
+                const inner = sel.slice(bl, sel.length - al);
+                return this._replace(s, e, inner, s, s + inner.length);
+            }
+            const inner = sel || hint || '';
+            return this._replace(s, e, before + inner + after, s + bl, s + bl + inner.length);
+        }
+
+        // Applies a transform to every line in the selection
+        _lines(fn) {
+            const { s, e, v } = this._sel();
+            const { start, end } = this._lineRange(s, e);
+            const lines = v.slice(start, end).split('\n');
+            const out = fn(lines).join('\n');
+            return this._replace(start, end, out, start, start + out.length);
+        }
+
+        _toggleLinePrefix(re, makePrefix, stripOthers) {
+            return this._lines((lines) => {
+                const filled = lines.filter((l) => l.trim() !== '');
+                const all    = filled.length && filled.every((l) => re.test(l));
+                let n = 0;
+                return lines.map((l) => {
+                    if (l.trim() === '') return l;
+                    if (all) return l.replace(re, '');
+                    n++;
+                    const base = stripOthers ? l.replace(stripOthers, '') : l.replace(re, '');
+                    return makePrefix(n) + base;
+                });
+            });
+        }
+
+        command(name) {
+            const self = this;
+            const { s, e, v } = self._sel();
+            switch (name) {
+                case 'bold':      return self.wrap('**', '**', 'bold text');
+                case 'italic':    return self.wrap('*', '*', 'italic text');
+                case 'strike':    return self.wrap('~~', '~~', 'text');
+                case 'code':
+                    return v.slice(s, e).indexOf('\n') !== -1 ? self.command('codeblock') : self.wrap('`', '`', 'code');
+                case 'h2':
+                case 'h3': {
+                    const pre = name === 'h2' ? '## ' : '### ';
+                    return self._lines((lines) => lines.map((l) => {
+                        if (l.indexOf(pre) === 0) return l.slice(pre.length);
+                        return pre + l.replace(/^#{1,6}\s+/, '');
+                    }));
+                }
+                case 'quote': return self._toggleLinePrefix(/^>\s?/, () => '> ');
+                case 'ul':    return self._toggleLinePrefix(/^(\s*)[-*+]\s+(\[[ xX]\]\s+)?/, () => '- ', /^(\s*)([-*+]|\d+[.)])\s+(\[[ xX]\]\s+)?/);
+                case 'ol':    return self._toggleLinePrefix(/^(\s*)\d+[.)]\s+/, (n) => `${n}. `, /^(\s*)([-*+]|\d+[.)])\s+(\[[ xX]\]\s+)?/);
+                case 'task':  return self._toggleLinePrefix(/^(\s*)[-*+]\s+\[[ xX]\]\s+/, () => '- [ ] ', /^(\s*)([-*+]|\d+[.)])\s+(\[[ xX]\]\s+)?/);
+                case 'link': {
+                    const sel = v.slice(s, e);
+                    if (/^https?:\/\/\S+$/.test(sel)) {
+                        return self._replace(s, e, `[link](${sel})`, s + 1, s + 5);
+                    }
+                    const text = sel || 'link text';
+                    const url  = 'https://';
+                    const at   = s + text.length + 3;
+                    return self._replace(s, e, `[${text}](${url})`, at, at + url.length);
+                }
+                case 'image': {
+                    if (typeof self.options.imageUpload === 'function') return self._pickImage();
+                    const alt = v.slice(s, e) || 'alt text';
+                    const url = 'https://';
+                    const at  = s + alt.length + 4;
+                    return self._replace(s, e, `![${alt}](${url})`, at, at + url.length);
+                }
+                case 'codeblock': {
+                    const sel   = v.slice(s, e);
+                    const lead  = s > 0 && v[s - 1] !== '\n' ? '\n' : '';
+                    const block = `${lead}\`\`\`\n${sel}\n\`\`\`\n`;
+                    const a     = s + lead.length + 4;
+                    return self._replace(s, e, block, a, a + sel.length);
+                }
+                case 'hr': {
+                    const lead = s > 0 && v[s - 1] !== '\n' ? '\n\n' : (s > 0 ? '\n' : '');
+                    return self._replace(s, e, `${lead}---\n\n`);
+                }
+                case 'table': {
+                    const lead = s > 0 && v[s - 1] !== '\n' ? '\n\n' : (s > 0 ? '\n' : '');
+                    const tpl  = '| Column | Column |\n| --- | --- |\n| Cell | Cell |\n';
+                    return self._replace(s, e, lead + tpl, s + lead.length + 2, s + lead.length + 8);
+                }
+            }
+            return self;
+        }
+
+        // Keyboard
+
+        _onKeydown(e) {
+            const self = this;
+            const mod  = e.ctrlKey || e.metaKey;
+            const k    = String(e.key).toLowerCase();
+
+            if (mod && !e.altKey) {
+                if (!e.shiftKey && k === 'b') { e.preventDefault(); self.command('bold');   return; }
+                if (!e.shiftKey && k === 'i') { e.preventDefault(); self.command('italic'); return; }
+                if (!e.shiftKey && k === 'k') { e.preventDefault(); self.command('link');   return; }
+                if (!e.shiftKey && k === 's') {
+                    e.preventDefault();
+                    self._dispatch('ts.markdowneditor.save');
+                    return;
+                }
+            }
+
+            if (e.key === 'Enter' && !mod && !e.shiftKey && !e.altKey && !e.isComposing) {
+                if (self._continueBlock()) e.preventDefault();
+                return;
+            }
+
+            if (e.key === 'Tab' && !mod && !e.altKey) {
+                if (self._indent(e.shiftKey)) e.preventDefault();
+            }
+        }
+
+        // Continues lists and quotes on Enter. Returns true when it handled the key.
+        _continueBlock() {
+            const { s, e, v } = this._sel();
+            if (s !== e) return false;
+            const lineStart = v.lastIndexOf('\n', s - 1) + 1;
+            const lineEnd   = (v.indexOf('\n', s) === -1) ? v.length : v.indexOf('\n', s);
+            const line      = v.slice(lineStart, lineEnd);
+
+            const m = line.match(/^(\s*)(?:([-*+])|(\d+)([.)]))\s+(\[[ xX]\]\s+)?/) || line.match(/^(\s*)(>)\s?/);
+            if (!m) return false;
+            const marker = m[0];
+            // Caret must be after the marker, otherwise this is a plain line break
+            if (s - lineStart < marker.length) return false;
+
+            // An empty item ends the list or quote
+            if (line.slice(marker.length).trim() === '') {
+                this._replace(lineStart, lineEnd, '', lineStart, lineStart);
+                return true;
+            }
+
+            let next;
+            if (m[2] === '>')       next = `${m[1]}> `;
+            else if (m[3] !== undefined) next = `${m[1]}${parseInt(m[3], 10) + 1}${m[4]} `;
+            else                    next = `${m[1]}${m[2]} `;
+            if (m[5]) next += '[ ] ';
+
+            this._replace(s, s, `\n${next}`);
+            return true;
+        }
+
+        _indent(outdent) {
+            const { s, e, v } = this._sel();
+            const pad = ' '.repeat(this.options.tabSize);
+            const { start, end } = this._lineRange(s, e);
+            const block = v.slice(start, end);
+            const listy = /^(\s*)([-*+]|\d+[.)])\s/.test(block.split('\n')[0]);
+            // Only capture Tab inside lists or multi-line selections, so keyboard focus is never trapped
+            if (!listy && block.indexOf('\n') === -1) return false;
+
+            const out = block.split('\n').map((l) => {
+                if (!outdent) return l.trim() === '' ? l : pad + l;
+                return l.indexOf(pad) === 0 ? l.slice(pad.length) : l.replace(/^ {1,3}/, '');
+            }).join('\n');
+            const delta = out.length - block.length;
+            this._replace(start, end, out, s === start ? start : Math.max(start, s + (out.indexOf('\n') === -1 ? delta : 0)), e + delta);
+            return true;
+        }
+
+        // Paste: images upload, a URL pasted over a selection becomes a link
+        _onPaste(e) {
+            const self = this;
+            const cd   = (e.originalEvent || e).clipboardData;
+            if (!cd) return;
+
+            const files = Array.prototype.filter.call(cd.files || [], (f) => /^image\//.test(f.type));
+            if (files.length && typeof self.options.imageUpload === 'function') {
+                e.preventDefault();
+                self._uploadFiles(files);
+                return;
+            }
+
+            const text = (cd.getData('text/plain') || '').trim();
+            const { s, e: end, v } = self._sel();
+            if (s !== end && /^https?:\/\/\S+$/.test(text)) {
+                e.preventDefault();
+                const label = v.slice(s, end);
+                self._replace(s, end, `[${label}](${text})`);
+            }
+        }
+
+        // Images
+
+        _hasImageFiles(dt) {
+            return !!dt && typeof this.options.imageUpload === 'function'
+                && Array.prototype.some.call(dt.items || dt.files || [], (i) => /^image\//.test(i.type));
+        }
+
+        _pickImage() {
+            const self  = this;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            input.addEventListener('change', () => self._uploadFiles(input.files));
+            input.click();
+            return self;
+        }
+
+        _uploadFiles(fileList) {
+            const self = this;
+            Array.prototype.filter.call(fileList, (f) => /^image\//.test(f.type)).forEach((file) => {
+                const alt  = (file.name || 'image').replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'image';
+                const mark = `![Uploading ${alt}\u2026]()`;
+                const { s, e, v } = self._sel();
+                const lead = s > 0 && v[s - 1] !== '\n' ? '\n\n' : '';
+                self._replace(s, e, `${lead}${mark}\n`);
+                self.setStatus('Uploading image\u2026');
+
+                Promise.resolve()
+                    .then(() => self.options.imageUpload(file))
+                    .then((url) => {
+                        if (!url) throw new Error('No image address returned');
+                        self._swap(mark, `![${alt}](${url})`);
+                        self.setStatus('Image added');
+                        self._dispatch('ts.markdowneditor.upload', { file, url });
+                    })
+                    .catch((err) => {
+                        self._swap(`${mark}\n`, '');
+                        self._swap(mark, '');
+                        self.setStatus('Upload failed');
+                        self._dispatch('ts.markdowneditor.error', { error: err });
+                    });
+            });
+            return self;
+        }
+
+        // Replaces the first occurrence of a marker string without disturbing the caret much
+        _swap(find, repl) {
+            const ta  = this.$ta[0];
+            const i   = ta.value.indexOf(find);
+            if (i === -1) return this;
+            const hadFocus = document.activeElement === ta;
+            const s = ta.selectionStart, e = ta.selectionEnd;
+            const delta = repl.length - find.length;
+            ta.setSelectionRange(i, i + find.length);
+            let ok = false;
+            try { ok = document.execCommand('insertText', false, repl); } catch (err) { ok = false; }
+            if (!ok) {
+                ta.setRangeText(repl, i, i + find.length, 'end');
+                ta.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            const shift = (p) => (p > i ? p + delta : p);
+            ta.setSelectionRange(shift(s), shift(e));
+            if (!hadFocus) ta.blur();
+            return this;
+        }
+
+        // View, preview and layout
+
+        setView(view, silent) {
+            if (!VIEWS[view]) return this;
+            if (view !== 'write' && !this.$preview) view = 'write';
+            this._view = view;
+            this.$wrap
+                .removeClass('ts-me-view-write ts-me-view-split ts-me-view-preview')
+                .addClass(`ts-me-view-${view}`);
+
+            if (this.$toolbarEl) {
+                this.$toolbarEl.find('[data-toolbar-toggle-item]').each(function() {
+                    const on = this.getAttribute('data-toolbar-value') === view;
+                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                    this.classList.toggle('ts-toolbar__toggle-item--on', on);
+                });
+            }
+            if (view !== 'write') this._renderPreview();
+            this._autoGrow();
+            if (!silent) this._dispatch('ts.markdowneditor.view', { view });
+            return this;
+        }
+
+        getView() { return this._view; }
+
+        fullscreen(on) {
+            on = !!on;
+            if (on === !!this._full) return this;
+            this._full = on;
+            this.$wrap.toggleClass('ts-me-fullscreen', on);
+            $('body').toggleClass('ts-me-lock', on);
+            this._autoGrow();
+            if (on) this.$ta.trigger('focus');
+            return this;
+        }
+
+        _autoGrow() {
+            const ta = this.$ta[0];
+            if (!this.options.autoGrow) return this;
+            if (this._view !== 'write' || this._full) { ta.style.height = ''; return this; }
+            ta.style.height = 'auto';
+            ta.style.height = `${Math.max(ta.scrollHeight, 0)}px`;
+            return this;
+        }
+
+        _queuePreview() {
+            if (this._view === 'write' || !this.$preview) return this;
+            clearTimeout(this._timer);
+            this._timer = setTimeout(() => this._renderPreview(), this.options.previewDelay);
+            return this;
+        }
+
+        _renderPreview() {
+            if (!this.$preview) return this;
+            const md = this.getValue();
+            let html = '';
+            if (md.trim() === '') {
+                this.$previewBody.html('<p class="ts-me-preview-empty">Nothing to preview yet.</p>');
+                return this;
+            }
+            if (typeof this.options.renderer === 'function') {
+                const out = this.options.renderer(md);
+                if (out && typeof out.then === 'function') {
+                    // Asynchronous renderers (a server round trip): only the latest result is applied
+                    const token = this._rtoken = (this._rtoken || 0) + 1;
+                    out.then((h) => { if (token === this._rtoken) this.$previewBody.html(h); })
+                       .catch(() => { if (token === this._rtoken) this.$previewBody.html(this._fallbackHtml(md)); });
+                    return this;
+                }
+                html = out;
+            } else if (this._md) {
+                this._md.render(md);
+                html = this._md.getHtml();
+            } else {
+                html = this._fallbackHtml(md);
+            }
+            this.$previewBody.html(html);
+            return this;
+        }
+
+        _fallbackHtml(md) {
+            return $('<div></div>').text(md).html().replace(/\n/g, '<br>');
+        }
+
+        _syncScroll(from) {
+            if (!this.options.syncScroll || this._view !== 'split' || this._syncing) return this;
+            const a = from === 'write' ? this.$write[0] : this.$preview[0];
+            const b = from === 'write' ? this.$preview[0] : this.$write[0];
+            // In split view the write pane scrolls (not the textarea itself)
+            const src = from === 'write' ? this.$write[0] : a;
+            const max = src.scrollHeight - src.clientHeight;
+            if (max <= 0) return this;
+            this._syncing = true;
+            b.scrollTop = (src.scrollTop / max) * (b.scrollHeight - b.clientHeight);
+            requestAnimationFrame(() => { this._syncing = false; });
+            return this;
+        }
+
+        _updateStatus() {
+            if (!this.$status) return this;
+            const text  = this.getValue().replace(/```[\s\S]*?```/g, ' ').replace(/[#>*_`~\[\]()!|-]+/g, ' ');
+            const words = (text.match(/[\p{L}\p{N}']+/gu) || []).length;
+            this.$status.find('.ts-me-words').text(`${words} word${words === 1 ? '' : 's'}`);
+            this.$status.find('.ts-me-time').text(`${Math.max(words ? 1 : 0, Math.ceil(words / 220))} min read`);
+            return this;
+        }
+
+        setStatus(msg) {
+            if (this.$status) this.$status.find('.ts-me-msg').text(msg || '');
+            return this;
+        }
+
+        _dispatch(name, extra) {
+            this.$ta[0].dispatchEvent(new CustomEvent(name, {
+                detail: $.extend({ instance: this }, extra),
+                bubbles: true
+            }));
+            return this;
+        }
+
+        // Public API
+
+        getValue() { return this.$ta.val(); }
+
+        setValue(md, silent) {
+            this.$ta.val(md || '');
+            this._autoGrow();
+            this._updateStatus();
+            if (this._view !== 'write') this._renderPreview();
+            if (!silent) this._dispatch('ts.markdowneditor.change', { value: this.getValue() });
+            return this;
+        }
+
+        getHtml() {
+            if (typeof this.options.renderer === 'function') return this.options.renderer(this.getValue());
+            if (this._md) { this._md.render(this.getValue()); return this._md.getHtml(); }
+            return '';
+        }
+
+        focus() {
+            this.$ta.trigger('focus');
+            return this;
+        }
+
+        enable() {
+            this.$ta.prop('disabled', false);
+            this.$wrap.removeClass('ts-me-disabled');
+            return this;
+        }
+
+        disable() {
+            this.$ta.prop('disabled', true);
+            this.$wrap.removeClass('ts-me-focused').addClass('ts-me-disabled');
+            return this;
+        }
+
+        destroy() {
+            const self = this;
+            if (self._failed) return this;
+
+            clearTimeout(self._timer);
+            $(document).off(`keydown.${self._ns}`);
+            self.fullscreen(false);
+
+            if (self.$toolbarEl) {
+                const tb = self.$toolbarEl.data('__pluginToolbar');
+                if (tb && typeof tb.destroy === 'function') tb.destroy();
+                self.$toolbarEl.off(`.${EVENT_NS}`);
+            }
+            if (self._md && typeof self._md.destroy === 'function') self._md.destroy();
+
+            self.$ta.off(`.${EVENT_NS}`).removeClass('ts-me-input').css('height', '');
+            self.$write.off(`.${EVENT_NS}`);
+            self.$ta.insertBefore(self.$wrap);
+            self.$wrap.remove();
+            self.$el.removeData(instanceName);
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+
+            return this;
+        }
+    }
+
+    PluginMarkdownEditor.defaults = {
+        placeholder:   'Write in Markdown\u2026',
+        ariaLabel:     'Markdown editor',
+        view:          'write',          // 'write' | 'split' | 'preview'
+        minHeight:     420,              // number (px) or CSS length; height of split and preview panes
+        // Toolbar keys. '|' separates groups, 'views' adds the view switcher,
+        // 'spacer' pushes what follows to the right. Set to false for no toolbar.
+        toolbar:       ['bold', 'italic', 'strike', 'code', '|', 'h2', 'h3', 'quote', '|', 'ul', 'ol', 'task', '|',
+                        'link', 'image', 'codeblock', 'hr', 'table', 'spacer', 'views', 'fullscreen'],
+        toolbarOptions: { ariaLabel: 'Markdown formatting', size: 'sm', full: true },
+        preview:       true,             // false removes the preview pane and view switcher
+        renderer:      null,             // function(markdown) returning HTML or a Promise of HTML, replaces PluginMarkdown
+        sanitize:      true,             // forwarded to PluginMarkdown
+        breaks:        false,            // forwarded to PluginMarkdown
+        previewDelay:  150,              // ms debounce before the preview refreshes
+        syncScroll:    true,             // keep write and preview aligned in split view
+        autoGrow:      true,             // write view grows with the text like a document
+        tabSize:       2,                // spaces used to indent list items
+        statusBar:     true,             // word count and reading time
+        imageUpload:   null,             // function(file) {} returning a URL or a Promise of one
+        disabled:      false,
+        onChange:      null              // function(markdown) {}
+    };
+
+    $.extend(themestrap, { PluginMarkdownEditor });
+
+    $.fn.themestrapPluginMarkdownEditor = function(opts) {
+        return this.map(function() {
+            const $this = $(this);
+
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            } else {
+                return new PluginMarkdownEditor($this, opts);
+            }
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Particles
+/**
+ * Themestrap Particles
+ *
+ * A canvas particle background for heroes, sections and cards. Drifting dots that can
+ * twinkle, link up into a network, swell or shrink under the pointer, and scatter on
+ * click. Replaces particles.js with a single dependency-free plugin.
+ *
+ * The animation pauses when the element scrolls out of view or the tab is hidden,
+ * redraws sharply on high-DPI screens, resizes with its host, and shows a still field
+ * when the visitor asks for reduced motion.
+ *
+ * Markup:
+ *
+ *   <section class="hero">
+ *     <div data-plugin-particles
+ *          data-plugin-options='{"color": "#0088cc", "density": 160}'></div>
+ *     …content…
+ *   </section>
+ *
+ *   The host fills its nearest positioned ancestor (position: absolute, inset 0) unless
+ *   "fill" is false, and never takes pointer events, so content above it stays clickable.
+ *
+ * Public API (via stored instance):
+ *   const fx = $('#hero-particles').data('__pluginParticles');
+ *   fx.pause(); fx.play(); fx.isPlaying();
+ *   fx.burst(x, y, 6);           // add particles at a point inside the host
+ *   fx.refresh();                // rebuild the field (after changing options)
+ *   fx.setOptions({ color: ['#e8672a', '#2ab8c8'] }).refresh();
+ *   fx.destroy();
+ *
+ * Events (native CustomEvent, bubbling, dispatched on the host):
+ *   ts.particles.ready   detail: { instance, count }
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginParticles'] === 'function' && $('[data-plugin-particles]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-particles]:not(.manual)', 'themestrapPluginParticles');
+ *   }
+ */
+// Particles
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginParticles';
+    const STYLE_ID     = 'ts-particles-styles';
+    const EVT_READY    = 'ts.particles.ready';
+    const AREA         = 800 * 800;   // density counts particles per 800 by 800 px of host
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    const CSS_TEXT = `
+        .ts-particles {
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .ts-particles--fill {
+            position: absolute;
+            inset: 0;
+            z-index: var(--ts-particles-z, 0);
+        }
+        .ts-particles > canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .ts-particles-host { position: relative; }
+    `;
+
+    const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const rand  = (min, max) => min + Math.random() * (max - min);
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+    // Accepts #rgb, #rrggbb, rgb() or any CSS color the canvas understands
+    const parseColor = (color) => {
+        const ctx = document.createElement('canvas').getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillStyle = String(color);
+        const hex = ctx.fillStyle;
+        if (hex.charAt(0) === '#') {
+            const n = parseInt(hex.slice(1), 16);
+            return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+        }
+        const m = hex.match(/\d+(\.\d+)?/g) || [0, 0, 0];
+        return { r: +m[0], g: +m[1], b: +m[2] };
+    };
+
+    const DIRECTIONS = {
+        top:    [0, -1], 'top-right':    [0.7, -0.7], right:  [1, 0], 'bottom-right': [0.7, 0.7],
+        bottom: [0, 1],  'bottom-left':  [-0.7, 0.7], left:   [-1, 0], 'top-left':    [-0.7, -0.7]
+    };
+
+    class PluginParticles {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el       = $el;
+            this._uid      = ++seq;
+            this._ns       = `.tsparticles${this._uid}`;
+            this._parts    = [];
+            this._pointer  = { x: null, y: null };
+            this._raf      = null;
+            this._visible  = true;
+            this._paused   = false;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, this.options || PluginParticles.defaults, opts, {
+                wrapper: this.$el
+            });
+            const colors = Array.isArray(this.options.color) ? this.options.color : [this.options.color];
+            this._colors = colors.map(parseColor);
+            this._links  = parseColor(this.options.links.color || colors[0]);
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const o    = self.options;
+
+            instanceCount++;
+            if (!document.getElementById(STYLE_ID)) {
+                const style       = document.createElement('style');
+                style.id          = STYLE_ID;
+                style.textContent = CSS_TEXT;
+                document.head.appendChild(style);
+            }
+
+            self.$el.addClass('ts-particles').attr('aria-hidden', 'true');
+            if (o.fill) {
+                self.$el.addClass('ts-particles--fill');
+                const $parent = self.$el.parent();
+                if ($parent.length && $parent.css('position') === 'static') {
+                    $parent.addClass('ts-particles-host');
+                    self._hostClassAdded = true;
+                }
+            }
+
+            self.canvas = document.createElement('canvas');
+            self.ctx    = self.canvas.getContext('2d');
+            self.$el.append(self.canvas);
+
+            self._resize();
+            self._populate();
+            self._draw();
+            if (!reducedMotion()) self._loop();
+
+            self._emit(EVT_READY, { count: self._parts.length });
+            return this;
+        }
+
+        events() {
+            const self = this;
+            const o    = self.options;
+
+            if (typeof ResizeObserver === 'function') {
+                self._ro = new ResizeObserver(() => {
+                    self._resize();
+                    self._populate(true);
+                    self._draw();
+                });
+                self._ro.observe(self.$el[0]);
+            } else {
+                $(window).on(`resize${self._ns}`, () => { self._resize(); self._populate(true); self._draw(); });
+            }
+
+            if (typeof IntersectionObserver === 'function') {
+                self._io = new IntersectionObserver((entries) => {
+                    self._visible = entries[0].isIntersecting;
+                    self._syncLoop();
+                });
+                self._io.observe(self.$el[0]);
+            }
+
+            $(document).on(`visibilitychange${self._ns}`, () => self._syncLoop());
+
+            // The canvas ignores the pointer, so movement is read from the window and mapped in
+            if (o.hover.mode || o.click.mode) {
+                $(window).on(`pointermove${self._ns}`, (e) => {
+                    const r = self.canvas.getBoundingClientRect();
+                    const x = e.clientX - r.left;
+                    const y = e.clientY - r.top;
+                    const inside = x >= 0 && y >= 0 && x <= r.width && y <= r.height;
+                    self._pointer.x = inside ? x : null;
+                    self._pointer.y = inside ? y : null;
+                });
+                $(document).on(`pointerleave${self._ns}`, () => { self._pointer.x = self._pointer.y = null; });
+            }
+
+            if (o.click.mode) {
+                $(window).on(`pointerdown${self._ns}`, (e) => {
+                    const r = self.canvas.getBoundingClientRect();
+                    const x = e.clientX - r.left;
+                    const y = e.clientY - r.top;
+                    if (x < 0 || y < 0 || x > r.width || y > r.height) return;
+                    if (o.click.mode === 'push') self.burst(x, y, o.click.count);
+                    if (o.click.mode === 'repulse') self._shove(x, y);
+                });
+            }
+
+            return this;
+        }
+
+        // Field setup
+
+        _resize() {
+            const el   = this.$el[0];
+            const dpr  = Math.min(window.devicePixelRatio || 1, 2);
+            this._w    = Math.max(1, el.clientWidth);
+            this._h    = Math.max(1, el.clientHeight);
+            this._dpr  = dpr;
+            this.canvas.width  = Math.round(this._w * dpr);
+            this.canvas.height = Math.round(this._h * dpr);
+            this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        _target() {
+            const o = this.options;
+            if (Number.isFinite(o.count) && o.count > 0) return Math.round(o.count);
+            const n = Math.round((this._w * this._h / AREA) * o.density);
+            return clamp(n, 0, o.maxParticles);
+        }
+
+        // keep: keep existing particles that still fit the new size
+        _populate(keep) {
+            const target = this._target();
+            if (keep) {
+                this._parts = this._parts.filter((p) => p.x <= this._w + p.r && p.y <= this._h + p.r);
+            } else {
+                this._parts = [];
+            }
+            while (this._parts.length < target) this._parts.push(this._spawn());
+            if (this._parts.length > target) this._parts.length = target;
+        }
+
+        _spawn(x, y) {
+            const o     = this.options;
+            const r     = o.sizeRandom ? rand(o.size * 0.15, o.size) : o.size;
+            const alpha = o.opacityRandom ? rand(o.opacity * 0.15, o.opacity) : o.opacity;
+            const speed = o.speed * (o.speedRandom ? rand(0.2, 1) : 1);
+            let vx, vy;
+            const dir = DIRECTIONS[o.direction];
+            if (dir) {
+                vx = dir[0] * speed + (o.speedRandom ? rand(-0.2, 0.2) * speed : 0);
+                vy = dir[1] * speed + (o.speedRandom ? rand(-0.2, 0.2) * speed : 0);
+            } else {
+                const a = rand(0, Math.PI * 2);
+                vx = Math.cos(a) * speed;
+                vy = Math.sin(a) * speed;
+            }
+            return {
+                x: x != null ? x : rand(0, this._w),
+                y: y != null ? y : rand(0, this._h),
+                vx, vy,
+                r, baseR: r,
+                a: alpha, baseA: alpha,
+                twinkle: rand(0, Math.PI * 2),
+                color: this._colors[Math.floor(Math.random() * this._colors.length)],
+                pushX: 0, pushY: 0
+            };
+        }
+
+        // Animation
+
+        _loop() {
+            if (this._raf) return;
+            let last = performance.now();
+            const tick = (now) => {
+                const dt = Math.min(3, (now - last) / 16.667);
+                last = now;
+                this._step(dt);
+                this._draw();
+                this._raf = requestAnimationFrame(tick);
+            };
+            this._raf = requestAnimationFrame(tick);
+        }
+
+        _stop() {
+            if (this._raf) cancelAnimationFrame(this._raf);
+            this._raf = null;
+        }
+
+        _syncLoop() {
+            const run = this._visible && !this._paused && !document.hidden && !reducedMotion();
+            if (run) this._loop(); else this._stop();
+        }
+
+        _step(dt) {
+            const o  = this.options;
+            const w  = this._w;
+            const h  = this._h;
+            const px = this._pointer.x;
+            const py = this._pointer.y;
+            const hv = o.hover;
+
+            for (const p of this._parts) {
+                p.x += (p.vx + p.pushX) * dt;
+                p.y += (p.vy + p.pushY) * dt;
+                p.pushX *= 0.9;
+                p.pushY *= 0.9;
+
+                if (o.outMode === 'bounce') {
+                    if (p.x < p.r || p.x > w - p.r) { p.vx = -p.vx; p.x = clamp(p.x, p.r, w - p.r); }
+                    if (p.y < p.r || p.y > h - p.r) { p.vy = -p.vy; p.y = clamp(p.y, p.r, h - p.r); }
+                } else {
+                    if (p.x < -p.r) p.x = w + p.r; else if (p.x > w + p.r) p.x = -p.r;
+                    if (p.y < -p.r) p.y = h + p.r; else if (p.y > h + p.r) p.y = -p.r;
+                }
+
+                let alpha = p.baseA;
+                if (o.twinkle.enable) {
+                    p.twinkle += 0.05 * o.twinkle.speed * dt;
+                    const t = (Math.sin(p.twinkle) + 1) / 2;
+                    alpha = o.twinkle.min + (p.baseA - o.twinkle.min) * t;
+                }
+
+                let radius = p.baseR;
+                if (px !== null && hv.mode) {
+                    const dx   = p.x - px;
+                    const dy   = p.y - py;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < hv.distance) {
+                        const k = 1 - dist / hv.distance;
+                        if (hv.mode === 'bubble') {
+                            radius = p.baseR + (hv.size - p.baseR) * k;
+                            alpha  = alpha + (hv.opacity - alpha) * k;
+                        } else if (hv.mode === 'repulse' && dist > 0) {
+                            p.pushX += (dx / dist) * k * hv.strength * dt;
+                            p.pushY += (dy / dist) * k * hv.strength * dt;
+                        }
+                    }
+                }
+                p.r = Math.max(0, radius);
+                p.a = clamp(alpha, 0, 1);
+            }
+        }
+
+        _draw() {
+            const ctx = this.ctx;
+            const o   = this.options;
+            ctx.clearRect(0, 0, this._w, this._h);
+
+            if (o.links.enable) this._drawLinks();
+
+            for (const p of this._parts) {
+                if (p.r <= 0.05 || p.a <= 0.01) continue;
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(${p.color.r},${p.color.g},${p.color.b},${p.a})`;
+                if (o.shape === 'square') {
+                    ctx.rect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
+                } else {
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                }
+                ctx.fill();
+            }
+        }
+
+        _drawLinks() {
+            const ctx   = this.ctx;
+            const l     = this.options.links;
+            const parts = this._parts;
+            const max   = l.distance;
+            const c     = this._links;
+            ctx.lineWidth = l.width;
+
+            for (let i = 0; i < parts.length; i++) {
+                const a = parts[i];
+                for (let j = i + 1; j < parts.length; j++) {
+                    const b  = parts[j];
+                    const dx = a.x - b.x;
+                    if (dx > max || dx < -max) continue;
+                    const dy = a.y - b.y;
+                    if (dy > max || dy < -max) continue;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist >= max) continue;
+                    ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${l.opacity * (1 - dist / max)})`;
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(b.x, b.y);
+                    ctx.stroke();
+                }
+            }
+
+            // Grab mode draws lines from the pointer to nearby particles
+            const hv = this.options.hover;
+            if (hv.mode === 'grab' && this._pointer.x !== null) {
+                for (const p of parts) {
+                    const dx = p.x - this._pointer.x;
+                    const dy = p.y - this._pointer.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist >= hv.distance) continue;
+                    ctx.strokeStyle = `rgba(${c.r},${c.g},${c.b},${l.opacity * (1 - dist / hv.distance)})`;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(this._pointer.x, this._pointer.y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        _shove(x, y) {
+            const c = this.options.click;
+            for (const p of this._parts) {
+                const dx   = p.x - x;
+                const dy   = p.y - y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                if (dist > c.distance) continue;
+                const k = (1 - dist / c.distance) * c.strength;
+                p.pushX += (dx / dist) * k;
+                p.pushY += (dy / dist) * k;
+            }
+            if (reducedMotion()) { this._step(1); this._draw(); }
+        }
+
+        // Public API
+
+        // Adds particles at a point. The oldest particles make room once maxParticles is reached.
+        burst(x, y, count) {
+            const n = Math.max(0, Math.round(count == null ? this.options.click.count : count));
+            for (let i = 0; i < n; i++) this._parts.push(this._spawn(x, y));
+            const over = this._parts.length - this.options.maxParticles;
+            if (over > 0) this._parts.splice(0, over);
+            if (!this._raf) this._draw();
+            return this;
+        }
+
+        pause() {
+            this._paused = true;
+            this._syncLoop();
+            return this;
+        }
+
+        play() {
+            this._paused = false;
+            this._syncLoop();
+            return this;
+        }
+
+        isPlaying() {
+            return Boolean(this._raf);
+        }
+
+        refresh() {
+            this._resize();
+            this._populate();
+            this._draw();
+            this._syncLoop();
+            return this;
+        }
+
+        _emit(name, detail) {
+            this.$el[0].dispatchEvent(new CustomEvent(name, {
+                bubbles: true,
+                detail: Object.assign({ instance: this }, detail)
+            }));
+        }
+
+        destroy() {
+            const self = this;
+            self._stop();
+            if (self._ro) self._ro.disconnect();
+            if (self._io) self._io.disconnect();
+            $(window).off(self._ns);
+            $(document).off(self._ns);
+            $(self.canvas).remove();
+            if (self._hostClassAdded) self.$el.parent().removeClass('ts-particles-host');
+            self.$el.removeClass('ts-particles ts-particles--fill').removeAttr('aria-hidden').removeData(instanceName);
+            self._parts = [];
+
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const styleEl = document.getElementById(STYLE_ID);
+                if (styleEl) styleEl.remove();
+            }
+            return this;
+        }
+    }
+
+    PluginParticles.defaults = {
+        density:       80,          // particles per 800 by 800 px of host
+        count:         null,        // fixed number of particles, overrides density
+        maxParticles:  400,         // upper bound for density and for particles added by push or burst()
+        color:         '#0088cc',   // a CSS color or an array of colors picked at random
+        shape:         'circle',    // 'circle' or 'square'
+        size:          3,           // largest radius in px
+        sizeRandom:    true,        // radius between 15% and 100% of size
+        opacity:       0.8,         // largest opacity
+        opacityRandom: true,        // opacity between 15% and 100% of opacity
+        twinkle: {
+            enable:    true,        // fade each particle in and out
+            speed:     1,
+            min:       0
+        },
+        speed:         0.6,         // px per frame at 60 fps
+        speedRandom:   true,
+        direction:     'none',      // 'none' or top | top-right | right | bottom-right | bottom | bottom-left | left | top-left
+        outMode:       'out',       // 'out' wraps around the edges, 'bounce' bounces off them
+        links: {
+            enable:    false,       // join nearby particles with lines
+            distance:  130,
+            color:     null,        // defaults to the first particle color
+            opacity:   0.4,
+            width:     1
+        },
+        hover: {
+            mode:      'bubble',    // 'bubble', 'grab', 'repulse' or null
+            distance:  150,
+            size:      0,           // bubble: radius at the pointer
+            opacity:   0,           // bubble: opacity at the pointer
+            strength:  0.6          // repulse: push per frame
+        },
+        click: {
+            mode:      'repulse',   // 'repulse', 'push' or null
+            distance:  220,         // repulse reach in px
+            strength:  9,           // repulse push
+            count:     4            // push: particles added per click
+        },
+        fill:          true         // cover the nearest positioned ancestor
+    };
+
+    $.extend(themestrap, { PluginParticles });
+
+    // jQuery bridge. Accepts an options object or a method name with arguments:
+    //   $('#hero-particles').themestrapPluginParticles('pause');
+    $.fn.themestrapPluginParticles = function (opts) {
+        const args = Array.prototype.slice.call(arguments, 1);
+        return this.map(function () {
+            const $this = $(this);
+            const inst  = $this.data(instanceName);
+            if (inst) {
+                if (typeof opts === 'string' && typeof inst[opts] === 'function') {
+                    return inst[opts].apply(inst, args);
+                }
+                return inst;
+            }
+            return new PluginParticles($this, typeof opts === 'object' ? opts : undefined);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Pricingtoggle
+/**
+ * Themestrap Pricing Toggle
+ *
+ * Drives a billing-period switcher (e.g. Monthly ↔ Annual) that:
+ *   - Animates a pill/thumb inside a track between two positions.
+ *   - Broadcasts a namespaced jQuery event so any number of listeners on the
+ *     page can react (price spans, feature lists, badge visibility, etc.).
+ *   - Supports an optional savings badge shown only in the secondary state.
+ *   - Exposes a clean programmatic API and full ARIA semantics.
+ *   - Integrates with PluginCounter so animated price figures recount when the
+ *     period switches (opt-in via options.animatePrices).
+ *   - Fires CSS custom-property updates on the host element so pure-CSS
+ *     themes can react without any JavaScript of their own.
+ *
+ *  Markup 
+ *
+ *   <!-- Minimal: two labels + a track wrapper containing a thumb -->
+ *   <div data-plugin-pricingtoggle>
+ *     <span data-pt-label-primary>Monthly</span>
+ *     <button data-pt-track aria-pressed="false" type="button">
+ *       <span data-pt-thumb></span>
+ *     </button>
+ *     <span data-pt-label-secondary>
+ *       Annual
+ *       <span data-pt-savings-badge>−20%</span>
+ *     </span>
+ *   </div>
+ *
+ *   <!-- Price targets anywhere on the page (not required to be inside the
+ *        toggle wrapper). Each element declares both values via data attrs. -->
+ *   <span data-pt-price data-pt-primary="$29" data-pt-secondary="$23"></span>
+ *
+ *   <!-- Per-element options override defaults: -->
+ *   <div data-plugin-pricingtoggle
+ *        data-plugin-options='{"duration":200,"activeClass":"is-annual"}'>
+ *
+ *  Events 
+ *
+ *   The toggle element emits two namespaced events. Both carry the same
+ *   detail object:  { state, isPrimary, isSecondary, instance }
+ *
+ *   ts-pricingtoggle-changed   — fires on every state change (after DOM update)
+ *   ts-pricingtoggle-primary   — fires only when reverting to primary state
+ *   ts-pricingtoggle-secondary — fires only when entering secondary state
+ *
+ *   Usage:
+ *     $('[data-plugin-pricingtoggle]').on('ts-pricingtoggle-changed', (e, detail) => {
+ *       console.log(detail.state); // 'primary' | 'secondary'
+ *     });
+ *
+ * Programmatic API 
+ *
+ *   const pt = $('[data-plugin-pricingtoggle]').data('__pricingToggle');
+ *   pt.setState('secondary');   // set to a specific state
+ *   pt.toggle();                // flip current state
+ *   pt.getState();              // → 'primary' | 'secondary'
+ *   pt.destroy();               // remove all handlers + data
+ *
+ * Init.js wiring 
+ *
+ *   if (typeof $.fn['themestrapPluginPricingToggle'] === 'function' && $('[data-plugin-pricingtoggle]').length) {
+ *       $(() => {
+ *           $('[data-plugin-pricingtoggle]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts  = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginPricingToggle(opts);
+ *           });
+ *       });
+ *   }
+ */
+// Pricing Toggle
+(((themestrap = {}, $) => {
+    const instanceName = '__pricingToggle';
+
+    // CSS injected once per page
+    const STYLE_ID = 'themestrap-pricingtoggle-styles';
+
+    const CSS = `
+        [data-plugin-pricingtoggle] {
+            display: inline-flex;
+            align-items: center;
+            gap: .75rem;
+            user-select: none;
+        }
+
+        /* Track */
+        [data-pt-track] {
+            position: relative;
+            display: inline-block;
+            width: var(--pt-track-width, 44px);
+            height: var(--pt-track-height, 24px);
+            border-radius: 9999px;
+            background: var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: background var(--pt-duration, 250ms) ease;
+            flex-shrink: 0;
+        }
+        [data-pt-track]:focus-visible {
+            outline: 2px solid var(--pt-track-bg, var(--ts-skin-accent-soft, #3b82f6));
+            outline-offset: 3px;
+        }
+
+        /* Thumb */
+        [data-pt-thumb] {
+            position: absolute;
+            top: var(--pt-thumb-inset, 3px);
+            left: var(--pt-thumb-inset, 3px);
+            width: var(--pt-thumb-size, 18px);
+            height: var(--pt-thumb-size, 18px);
+            border-radius: 50%;
+            background: var(--pt-thumb-bg, var(--ts-skin-surface, #fff));
+            box-shadow: var(--ts-skin-shadow, 0 1px 4px rgba(0, 0, 0, .25));
+            transition: left var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1),
+                        background var(--pt-duration, 250ms) ease;
+            pointer-events: none;
+        }
+
+        /* Secondary (active / "on") state: slide thumb to the right */
+        [data-pt-track][aria-pressed="true"] [data-pt-thumb] {
+            left: calc(
+                var(--pt-track-width, 44px)
+                - var(--pt-thumb-size, 18px)
+                - var(--pt-thumb-inset, 3px)
+            );
+        }
+
+        /* Labels */
+        [data-pt-label-primary],
+        [data-pt-label-secondary] {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--pt-label-muted, var(--ts-skin-text-dim, #64748b));
+            transition: color var(--pt-duration, 250ms) ease;
+            cursor: pointer;
+        }
+        [data-pt-label-primary].is-active,
+        [data-pt-label-secondary].is-active {
+            color: var(--pt-label-active, var(--ts-skin-text-strong, #0f172a));
+        }
+
+        /* Savings badge — hidden in primary state, shown in secondary */
+        [data-pt-savings-badge] {
+            display: inline-block;
+            background: var(--pt-badge-bg, var(--ts-skin-success-soft, rgba(34, 197, 94, .12)));
+            color: var(--pt-badge-color, var(--ts-skin-success, #16a34a));
+            font-size: .6875rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            letter-spacing: .02em;
+            opacity: 0;
+            transform: scale(.8) translateY(2px);
+            transition: opacity var(--pt-duration, 250ms) ease,
+                        transform var(--pt-duration, 250ms) cubic-bezier(.16, 1, .3, 1);
+            pointer-events: none;
+        }
+        [data-pt-label-secondary].is-active [data-pt-savings-badge] {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Price targets: crossfade between values */
+        [data-pt-price] {
+            display: inline-block;
+            transition: opacity var(--pt-price-duration, 180ms) ease;
+        }
+        [data-pt-price].pt-fading {
+            opacity: 0;
+        }
+    `;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const $style = $('<style>').attr({ id: STYLE_ID, type: 'text/css' }).text(CSS);
+        $('head').append($style);
+    }
+
+    /**
+     * Update every [data-pt-price] element on the page whose scope matches
+     * this toggle instance. Scoping: if the price element has a
+     * [data-pt-group] attribute it must equal the toggle's group option.
+     */
+    function updatePrices(opts, state) {
+        const isPrimary = state === 'primary';
+        const group = opts.group || null;
+
+        $('[data-pt-price]').each(function () {
+            const $price = $(this);
+            const elGroup = $price.data('pt-group') || null;
+
+            // Scope: only update elements that belong to the same group,
+            // OR elements with no group when no group is configured.
+            if (group !== elGroup) return;
+
+            const primary   = $price.data('pt-primary')   ?? '';
+            const secondary = $price.data('pt-secondary') ?? '';
+            const next = isPrimary ? primary : secondary;
+
+            if (opts.animatePrices) {
+                $price.addClass('pt-fading');
+                setTimeout(() => {
+                    $price.text(next).removeClass('pt-fading');
+                }, opts.priceFadeDuration);
+            } else {
+                $price.text(next);
+            }
+        });
+    }
+
+    class PluginPricingToggle {
+
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return $el.data(instanceName);
+            }
+
+            this.$el = $el;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            const attrOpts = themestrap.fn.getOptions(this.$el.data('plugin-options'));
+
+            this.options = $.extend(true, {}, PluginPricingToggle.defaults, opts, attrOpts, {
+                wrapper: this.$el,
+            });
+
+            // Resolve initial state from markup if not forced via options.
+            // If the track is already aria-pressed="true" we start secondary.
+            if (!this.options.initialState) {
+                const $track = this.$el.find('[data-pt-track]');
+                this.options.initialState =
+                    $track.attr('aria-pressed') === 'true' ? 'secondary' : 'primary';
+            }
+
+            this._state = this.options.initialState;
+            return this;
+        }
+
+        build() {
+            injectStyles();
+
+            const o = this.options;
+            const $el = this.$el;
+
+            // Cache sub-element references (supports zero or one of each).
+            this.$track         = $el.find('[data-pt-track]');
+            this.$thumb         = $el.find('[data-pt-thumb]');
+            this.$labelPrimary  = $el.find('[data-pt-label-primary]');
+            this.$labelSecondary= $el.find('[data-pt-label-secondary]');
+            this.$savingsBadge  = $el.find('[data-pt-savings-badge]');
+
+            // Ensure the track button has the right type & ARIA role.
+            if (this.$track.is('button') && !this.$track.attr('type')) {
+                this.$track.attr('type', 'button');
+            }
+            this.$track.attr('role', 'switch');
+
+            // Apply CSS custom properties from options so pure-CSS themes
+            // can pick them up without any extra JS.
+            $el.css({
+                '--pt-track-width':      o.trackWidth,
+                '--pt-track-height':     o.trackHeight,
+                '--pt-thumb-size':       o.thumbSize,
+                '--pt-thumb-inset':      o.thumbInset,
+                '--pt-track-bg':         o.trackColor,
+                '--pt-thumb-bg':         o.thumbColor,
+                '--pt-duration':         o.duration + 'ms',
+                '--pt-price-duration':   o.priceFadeDuration + 'ms',
+                '--pt-label-muted':      o.labelMutedColor,
+                '--pt-label-active':     o.labelActiveColor,
+                '--pt-badge-bg':         o.badgeBg,
+                '--pt-badge-color':      o.badgeColor,
+            });
+
+            // Apply initial visual state without emitting events.
+            this._applyState(this._state, { silent: true });
+
+            // Set initial price values.
+            updatePrices(o, this._state);
+
+            return this;
+        }
+
+        events() {
+            const self = this;
+
+            // Track click / keyboard.
+            self.$track.on('click.pricingtoggle', function () {
+                self.toggle();
+            });
+
+            // Label clicks also toggle.
+            self.$labelPrimary.on('click.pricingtoggle', function () {
+                if (self._state !== 'primary') self.setState('primary');
+            });
+            self.$labelSecondary.on('click.pricingtoggle', function () {
+                if (self._state !== 'secondary') self.setState('secondary');
+            });
+
+            // Keyboard: Space / Enter on non-button tracks.
+            if (!self.$track.is('button')) {
+                self.$track.on('keydown.pricingtoggle', function (e) {
+                    if (e.key === ' ' || e.key === 'Enter' || e.key === 'Spacebar') {
+                        e.preventDefault();
+                        self.toggle();
+                    }
+                });
+            }
+
+            return this;
+        }
+
+        /**
+         * Apply visual state to all sub-elements.
+         * @param {string}  state   'primary' | 'secondary'
+         * @param {object}  opts
+         * @param {boolean} opts.silent  suppress jQuery event emission
+         */
+        _applyState(state, { silent = false } = {}) {
+            const o  = this.options;
+            const isSecondary = state === 'secondary';
+
+            // ARIA
+            this.$track.attr('aria-pressed', isSecondary ? 'true' : 'false');
+
+            // Labels
+            this.$labelPrimary
+                .toggleClass('is-active', !isSecondary)
+                .toggleClass(o.activeClass, !isSecondary);
+            this.$labelSecondary
+                .toggleClass('is-active', isSecondary)
+                .toggleClass(o.activeClass, isSecondary);
+
+            // Host element class hook for external CSS.
+            this.$el.toggleClass(o.activeClass, isSecondary);
+
+            // Accessible labels on track button.
+            if (this.$track.length) {
+                this.$track.attr(
+                    'aria-label',
+                    isSecondary ? o.ariaLabelSecondary : o.ariaLabelPrimary,
+                );
+            }
+
+            if (!silent) {
+                updatePrices(o, state);
+                this._emit(state);
+                if (typeof o.onChange === 'function') {
+                    o.onChange.call(this, state, this);
+                }
+            }
+
+            return this;
+        }
+
+        /** Build and fire the three namespaced jQuery events. */
+        _emit(state) {
+            const detail = {
+                state,
+                isPrimary:   state === 'primary',
+                isSecondary: state === 'secondary',
+                instance: this,
+            };
+            this.$el.trigger('ts-pricingtoggle-changed',   [detail]);
+            this.$el.trigger('ts-pricingtoggle-' + state,  [detail]);
+        }
+
+        /**
+         * Set the toggle to a specific state.
+         * @param {'primary'|'secondary'} state
+         */
+        setState(state) {
+            if (state !== 'primary' && state !== 'secondary') return this;
+            if (state === this._state) return this;
+            this._state = state;
+            this._applyState(state);
+            return this;
+        }
+
+        /** Flip the current state. */
+        toggle() {
+            return this.setState(this._state === 'primary' ? 'secondary' : 'primary');
+        }
+
+        /** Return the current state string. */
+        getState() {
+            return this._state;
+        }
+
+        /** Tear down: remove handlers + instance data. */
+        destroy() {
+            this.$track.off('.pricingtoggle');
+            this.$labelPrimary.off('.pricingtoggle');
+            this.$labelSecondary.off('.pricingtoggle');
+            this.$el.off('.pricingtoggle').removeData(instanceName);
+            return this;
+        }
+    }
+
+    PluginPricingToggle.defaults = {
+        // Starting state. 'primary' = left/off, 'secondary' = right/on.
+        // If null the plugin reads aria-pressed from the [data-pt-track] element.
+        initialState: null,
+
+        // Class added to the wrapper and the active label. Useful for theming.
+        activeClass: 'is-secondary',
+
+        // Group key — scope [data-pt-price] updates to elements with a
+        // matching [data-pt-group] attribute. Null = unscoped (updates all
+        // price elements without a group attribute).
+        group: null,
+
+        // Price animation: crossfade price spans when switching state.
+        animatePrices:     true,
+        priceFadeDuration: 160,          // ms for the opacity fade
+
+        // Thumb slide duration (also used for label color transition).
+        duration: 250,                   // ms
+
+        // Track / thumb geometry expressed as CSS values.
+        trackWidth:  '44px',
+        trackHeight: '24px',
+        thumbSize:   '18px',
+        thumbInset:  '3px',
+
+        // Colors (applied as CSS custom properties).
+        trackColor:       '#3b82f6',
+        thumbColor:       '#ffffff',
+        labelMutedColor:  '#64748b',
+        labelActiveColor: '#0f172a',
+        badgeBg:          'rgba(34,197,94,.12)',
+        badgeColor:       '#16a34a',
+
+        // Accessible labels for the track button.
+        ariaLabelPrimary:   'Switch to annual billing',
+        ariaLabelSecondary: 'Switch to monthly billing',
+
+        // Optional callback fired on every state change.
+        // Signature: function(state, instance) {}
+        onChange: null,
+    };
+
+    $.extend(themestrap, { PluginPricingToggle });
+
+    $.fn.themestrapPluginPricingToggle = function (opts) {
+        return this.map(function () {
+            const $this = $(this);
+
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            }
+
+            return new PluginPricingToggle($this, opts);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+// Transfer
+/**
+ * Themestrap Transfer Plugin
+ * Live progress for downloads, uploads, file copies and other long jobs:
+ * bytes done and total, smoothed speed, time left, job states, an
+ * indeterminate mode and an optional cancel button.
+ * Part of the Themestrap component library for MODX 3
+ *
+ * Markup anatomy:
+ *
+ *   <!-- Empty element: the plugin builds the inner markup -->
+ *   <div data-plugin-transfer id="dl-ubuntu"
+ *        data-plugin-options='{"label": "ubuntu-26.04-desktop-amd64.iso", "total": 6200000000, "cancelable": true}'>
+ *   </div>
+ *
+ *   Built structure (all parts hide themselves when empty):
+ *
+ *   .ts-transfer.is-idle|is-running|is-paused|is-done|is-failed|is-cancelled[.is-indeterminate]
+ *   ├── .ts-transfer-head
+ *   │   ├── .ts-transfer-label
+ *   │   ├── .ts-transfer-percent
+ *   │   └── button.ts-transfer-cancel          (cancelable: true)
+ *   ├── .ts-transfer-track[role=progressbar]
+ *   │   └── .ts-transfer-bar
+ *   └── .ts-transfer-meta
+ *       ├── .ts-transfer-bytes                  "2.1 GiB of 5.8 GiB"
+ *       ├── .ts-transfer-speed                  "38.2 MiB/s"
+ *       ├── .ts-transfer-eta                    "1m 37s left"
+ *       └── .ts-transfer-message                state text or setMessage()
+ *
+ * Options (data-plugin-options JSON or JS object):
+ *
+ *   label        ''          heading text (always set as text, never HTML)
+ *   message      ''          initial message line
+ *   total        null        total bytes; null or 0 means unknown
+ *   done         0           bytes already done (e.g. a resumed download)
+ *   units        'iec'       'iec' (KiB, MiB: 1024) or 'si' (kB, MB: 1000)
+ *   decimals     1           decimals for byte and speed values
+ *   showPercent  true
+ *   showBytes    true
+ *   showSpeed    true
+ *   showEta      true
+ *   cancelable   false       render a cancel button (fires transfer:cancel)
+ *   cancelText   'Cancel'
+ *   smoothing    0.3         speed EMA weight of the newest sample (0..1)
+ *   sampleMs     400         minimum time between speed samples
+ *   stateText    { idle: '', running: '', paused: 'Paused', done: 'Done',
+ *                  failed: 'Failed', cancelled: 'Cancelled' }
+ *   onProgress   null        function(info)  info = { done, total, percent, speed, eta }
+ *   onState      null        function(state, previous)
+ *   onCancel     null        function()      return false to keep the button enabled
+ *
+ * Public API (via stored instance):
+ *   const t = $('#dl-ubuntu').data('__pluginTransfer');
+ *   t.update(2100000000);                         // bytes done; speed and ETA derived
+ *   t.update(2100000000, 6200000000);             // done and total
+ *   t.update({ done, total, speed });             // speed (bytes/s) from the producer
+ *   t.setIndeterminate(true);                     // unknown progress (e.g. verifying)
+ *   t.setState('done', 'Checksum OK');            // idle|running|paused|done|failed|cancelled
+ *   t.setLabel('New label');
+ *   t.setMessage('Retrying in 4s');               // '' clears it
+ *   t.getInfo();                                  // { done, total, percent, speed, eta, state }
+ *   t.reset();                                    // back to idle, zero bytes
+ *   t.destroy();                                  // restore original markup
+ *
+ * Static helpers:
+ *   themestrap.PluginTransfer.formatBytes(1536, 'iec', 1)  // "1.5 KiB"
+ *   themestrap.PluginTransfer.formatDuration(97)          // "1m 37s"
+ *
+ * Events fired on the root element (jQuery):
+ *   transfer:progress  [instance, info]
+ *   transfer:state     [instance, state, previous]
+ *   transfer:complete  [instance]                  state became 'done'
+ *   transfer:cancel    [instance]                  cancel button clicked
+ *
+ * Theming (CSS custom properties). The defaults are declared with
+ * :where(.ts-transfer), so a plain .ts-transfer { ... } rule in your theme
+ * overrides them regardless of load order:
+ *   --ts-transfer-bar, --ts-transfer-track, --ts-transfer-done,
+ *   --ts-transfer-failed, --ts-transfer-paused, --ts-transfer-muted,
+ *   --ts-transfer-height, --ts-transfer-radius, --ts-transfer-gap,
+ *   --ts-transfer-font, --ts-transfer-mono
+ *
+ * Init.js wiring (DOMReady-immediate: producers call update() whether or not
+ * the element has scrolled into view, so it must not wait for an observer):
+ *   if (typeof $.fn['themestrapPluginTransfer'] === 'function' && $('[data-plugin-transfer]').length) {
+ *       $(() => {
+ *           $('[data-plugin-transfer]:not(.manual)').each(function () {
+ *               const $this = $(this);
+ *               const opts = themestrap.fn.getOptions($this.data('plugin-options')) || undefined;
+ *               $this.themestrapPluginTransfer(opts);
+ *           });
+ *       });
+ *   }
+ */
+// Transfer
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginTransfer';
+    const STATES = ['idle', 'running', 'paused', 'done', 'failed', 'cancelled'];
+
+    // Injected stylesheet, added once on first build so pages that only load
+    // the script get no extra CSS.
+    const STYLE_ID = 'ts-transfer-styles';
+    const CSS_TEXT = `
+/* Tokens sit in :where() (zero specificity) so any theme rule overrides them. */
+:where(.ts-transfer) {
+    --ts-transfer-bar: var(--ts-skin-accent, var(--bs-primary, #0088cc));
+    --ts-transfer-track: var(--ts-skin-surface-2, rgba(127, 127, 127, .2));
+    --ts-transfer-done: var(--ts-skin-success, var(--bs-success, #198754));
+    --ts-transfer-failed: var(--ts-skin-danger, var(--bs-danger, #dc3545));
+    --ts-transfer-paused: var(--ts-skin-warning, var(--bs-warning, #ffc107));
+    --ts-transfer-muted: var(--ts-skin-text-dim, var(--bs-secondary-color, #6c757d));
+    --ts-transfer-height: 4px;
+    --ts-transfer-radius: 999px;
+    --ts-transfer-gap: 6px;
+    --ts-transfer-font: var(--ts-skin-font, inherit);
+    --ts-transfer-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+.ts-transfer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ts-transfer-gap);
+    font-family: var(--ts-transfer-font);
+    min-width: 0;
+}
+.ts-transfer-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.ts-transfer-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+}
+.ts-transfer-percent {
+    font-family: var(--ts-transfer-mono);
+    font-size: .85em;
+    color: var(--ts-transfer-muted);
+    font-variant-numeric: tabular-nums;
+}
+.ts-transfer-cancel {
+    margin-left: auto;
+    font: inherit;
+    font-size: .85em;
+    line-height: 1.2;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: var(--ts-transfer-muted);
+    cursor: pointer;
+}
+.ts-transfer-cancel:hover:not(:disabled) { color: var(--ts-transfer-failed); }
+.ts-transfer-cancel:disabled { opacity: .5; cursor: default; }
+.ts-transfer-track {
+    position: relative;
+    height: var(--ts-transfer-height);
+    border-radius: var(--ts-transfer-radius);
+    background: var(--ts-transfer-track);
+    overflow: hidden;
+}
+.ts-transfer-bar {
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: var(--ts-transfer-bar);
+    transition: width .2s linear, background-color .2s ease;
+}
+.ts-transfer.is-indeterminate .ts-transfer-bar,
+.ts-transfer.is-unknown .ts-transfer-bar {
+    width: 30%;
+    animation: ts-transfer-slide 1.1s ease-in-out infinite;
+}
+@keyframes ts-transfer-slide {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(340%); }
+}
+.ts-transfer.is-done      .ts-transfer-bar { background: var(--ts-transfer-done); }
+.ts-transfer.is-failed    .ts-transfer-bar { background: var(--ts-transfer-failed); }
+.ts-transfer.is-paused    .ts-transfer-bar,
+.ts-transfer.is-cancelled .ts-transfer-bar { background: var(--ts-transfer-paused); }
+.ts-transfer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    font-family: var(--ts-transfer-mono);
+    font-size: .82em;
+    color: var(--ts-transfer-muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 0;
+}
+.ts-transfer.is-done   .ts-transfer-message { color: var(--ts-transfer-done); }
+.ts-transfer.is-failed .ts-transfer-message { color: var(--ts-transfer-failed); font-family: var(--ts-transfer-font); }
+.ts-transfer-message { overflow-wrap: anywhere; white-space: pre-line; }
+.ts-transfer-label:empty, .ts-transfer-percent:empty, .ts-transfer-bytes:empty,
+.ts-transfer-speed:empty, .ts-transfer-eta:empty, .ts-transfer-message:empty { display: none; }
+.ts-transfer-head:not(:has(> :not(:empty))) { display: none; }
+.ts-transfer-meta:not(:has(> :not(:empty))) { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    .ts-transfer-bar { transition: none; }
+    .ts-transfer.is-indeterminate .ts-transfer-bar,
+    .ts-transfer.is-unknown .ts-transfer-bar { animation: none; width: 100%; opacity: .5; }
+}
+`;
+
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = CSS_TEXT;
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    class PluginTransfer {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el = $el;
+            this.initialHTML = $el.html();
+            this.initialClass = $el.attr('class') || '';
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginTransfer.defaults, opts, {
+                wrapper: this.$el
+            });
+            return this;
+        }
+
+        build() {
+            const self = this;
+            const o = self.options;
+            injectStyles();
+
+            self.state = 'idle';
+            self.indeterminate = false;
+            self.total = o.total > 0 ? Number(o.total) : null;
+            self.done = Number(o.done) || 0;
+            self.speed = 0;
+            self._sample = null;
+            self._frame = null;
+
+            const $head = $('<div class="ts-transfer-head"></div>');
+            self.$label = $('<span class="ts-transfer-label"></span>').text(o.label || '');
+            self.$percent = $('<span class="ts-transfer-percent"></span>');
+            $head.append(self.$label, self.$percent);
+            if (o.cancelable) {
+                self.$cancel = $('<button type="button" class="ts-transfer-cancel"></button>').text(o.cancelText);
+                $head.append(self.$cancel);
+            }
+
+            self.$track = $('<div class="ts-transfer-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
+            self.$bar = $('<div class="ts-transfer-bar"></div>');
+            self.$track.append(self.$bar);
+            if (o.label) self.$track.attr('aria-label', o.label);
+
+            const $meta = $('<div class="ts-transfer-meta"></div>');
+            self.$bytes = $('<span class="ts-transfer-bytes"></span>');
+            self.$speed = $('<span class="ts-transfer-speed"></span>');
+            self.$eta = $('<span class="ts-transfer-eta"></span>');
+            self.$message = $('<span class="ts-transfer-message" aria-live="polite"></span>').text(o.message || '');
+            $meta.append(self.$bytes, self.$speed, self.$eta, self.$message);
+
+            self.$el
+                .addClass('ts-transfer is-idle')
+                .empty()
+                .append($head, self.$track, $meta);
+
+            self._render();
+            return this;
+        }
+
+        events() {
+            const self = this;
+            if (self.$cancel) {
+                self.$el.on('click.transfer', '.ts-transfer-cancel', (e) => {
+                    e.preventDefault();
+                    if (self.$cancel.prop('disabled')) return;
+                    const keep = typeof self.options.onCancel === 'function'
+                        && self.options.onCancel.call(self) === false;
+                    if (!keep) self.$cancel.prop('disabled', true);
+                    self.$el.trigger('transfer:cancel', [self]);
+                });
+            }
+            return this;
+        }
+
+        // Accepts update(done), update(done, total) or update({ done, total, speed }).
+        update(done, total) {
+            const self = this;
+            let explicitSpeed = null;
+
+            if (done !== null && typeof done === 'object') {
+                if (done.total !== undefined) total = done.total;
+                if (done.speed !== undefined) explicitSpeed = Number(done.speed);
+                done = done.done;
+            }
+            if (total !== undefined) {
+                self.total = total > 0 ? Number(total) : null;
+            }
+            done = Math.max(0, Number(done) || 0);
+
+            if (explicitSpeed !== null && isFinite(explicitSpeed)) {
+                self.speed = Math.max(0, explicitSpeed);
+                self._sample = { t: performance.now(), done };
+            } else {
+                self._sampleSpeed(done);
+            }
+            self.done = done;
+
+            if (self.state === 'idle' || self.state === 'paused') {
+                self.setState('running');
+            }
+            if (self.indeterminate && self.total) {
+                self.setIndeterminate(false);
+            }
+
+            self._schedule();
+            const info = self.getInfo();
+            if (typeof self.options.onProgress === 'function') self.options.onProgress.call(self, info);
+            self.$el.trigger('transfer:progress', [self, info]);
+            return this;
+        }
+
+        setIndeterminate(on) {
+            this.indeterminate = !!on;
+            this.$el.toggleClass('is-indeterminate', this.indeterminate);
+            this._schedule();
+            return this;
+        }
+
+        setState(state, message) {
+            const self = this;
+            if (!STATES.includes(state)) return this;
+            const previous = self.state;
+            self.state = state;
+            self.$el
+                .removeClass(STATES.map((s) => `is-${s}`).join(' '))
+                .addClass(`is-${state}`);
+
+            if (state !== 'running') {
+                self.speed = 0;
+                self._sample = null;
+            }
+            if (state === 'done') {
+                self.indeterminate = false;
+                self.$el.removeClass('is-indeterminate');
+                if (self.total) self.done = self.total;
+            }
+            if (self.$cancel) {
+                self.$cancel.prop('disabled', ['done', 'failed', 'cancelled'].includes(state));
+                self.$cancel.toggle(state !== 'done');
+            }
+
+            const text = message !== undefined ? message : (self.options.stateText[state] || '');
+            self.$message.text(text);
+            self._schedule();
+
+            if (previous !== state) {
+                if (typeof self.options.onState === 'function') self.options.onState.call(self, state, previous);
+                self.$el.trigger('transfer:state', [self, state, previous]);
+                if (state === 'done') self.$el.trigger('transfer:complete', [self]);
+            }
+            return this;
+        }
+
+        setLabel(text) {
+            this.$label.text(text || '');
+            this.$track.attr('aria-label', text || null);
+            return this;
+        }
+
+        setMessage(text) {
+            this.$message.text(text || '');
+            return this;
+        }
+
+        getInfo() {
+            const total = this.total;
+            const percent = total ? Math.min(100, (this.done / total) * 100) : null;
+            const eta = total && this.speed > 0 && this.state === 'running'
+                ? Math.max(0, (total - this.done) / this.speed)
+                : null;
+            return { done: this.done, total, percent, speed: this.speed, eta, state: this.state };
+        }
+
+        reset() {
+            const self = this;
+            self.done = 0;
+            self.total = self.options.total > 0 ? Number(self.options.total) : null;
+            self.speed = 0;
+            self._sample = null;
+            self.setIndeterminate(false);
+            if (self.$cancel) self.$cancel.prop('disabled', false).show();
+            self.setState('idle', self.options.message || '');
+            return this;
+        }
+
+        destroy() {
+            const self = this;
+            if (self._frame) cancelAnimationFrame(self._frame);
+            self.$el
+                .off('.transfer')
+                .removeData(instanceName)
+                .attr('class', self.initialClass)
+                .html(self.initialHTML);
+            return this;
+        }
+
+        // Exponential moving average over samples at least sampleMs apart.
+        _sampleSpeed(done) {
+            const self = this;
+            const now = performance.now();
+            const s = self._sample;
+            if (!s || done < s.done) {
+                self._sample = { t: now, done };
+                if (!s) self.speed = 0;
+                return;
+            }
+            const dt = now - s.t;
+            if (dt < self.options.sampleMs) return;
+            const instant = ((done - s.done) / dt) * 1000;
+            const a = Math.min(1, Math.max(0, Number(self.options.smoothing)));
+            self.speed = self.speed > 0 ? self.speed * (1 - a) + instant * a : instant;
+            self._sample = { t: now, done };
+        }
+
+        // Coalesce DOM writes to one per animation frame.
+        _schedule() {
+            const self = this;
+            if (self._frame) return;
+            const raf = window.requestAnimationFrame || ((fn) => setTimeout(fn, 16));
+            self._frame = raf(() => {
+                self._frame = null;
+                self._render();
+            });
+        }
+
+        _render() {
+            const self = this;
+            const o = self.options;
+            const info = self.getInfo();
+            const fmt = (n) => PluginTransfer.formatBytes(n, o.units, o.decimals);
+
+            // Running with no known total: animate like indeterminate mode.
+            self.$el.toggleClass('is-unknown', self.state === 'running' && !info.total);
+
+            if (self.indeterminate || info.percent === null) {
+                self.$bar.css('width', self.state === 'done' ? '100%' : '');
+                self.$track.removeAttr('aria-valuenow');
+                self.$percent.text('');
+            } else {
+                self.$bar.css('width', `${info.percent.toFixed(2)}%`);
+                self.$track.attr('aria-valuenow', Math.round(info.percent));
+                self.$percent.text(o.showPercent ? `${info.percent.toFixed(info.percent < 10 ? 1 : 0)}%` : '');
+            }
+
+            let bytes = '';
+            if (o.showBytes && (self.done > 0 || (info.total && self.state !== 'idle'))) {
+                bytes = info.total ? `${fmt(self.done)} of ${fmt(info.total)}` : fmt(self.done);
+            }
+            self.$bytes.text(bytes);
+
+            const running = self.state === 'running' && !self.indeterminate;
+            self.$speed.text(o.showSpeed && running && info.speed > 0 ? `${fmt(info.speed)}/s` : '');
+            self.$eta.text(o.showEta && running && info.eta !== null && info.eta > 0
+                ? `${PluginTransfer.formatDuration(info.eta)} left`
+                : '');
+        }
+
+        static formatBytes(n, units = 'iec', decimals = 1) {
+            if (n === null || n === undefined || !isFinite(n)) return '';
+            const si = units === 'si';
+            const base = si ? 1000 : 1024;
+            const names = si ? ['B', 'kB', 'MB', 'GB', 'TB', 'PB'] : ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'];
+            let value = Math.abs(n);
+            let i = 0;
+            while (value >= base && i < names.length - 1) {
+                value /= base;
+                i++;
+            }
+            const sign = n < 0 ? '-' : '';
+            return `${sign}${i === 0 ? Math.round(value) : value.toFixed(decimals)} ${names[i]}`;
+        }
+
+        static formatDuration(seconds) {
+            if (!isFinite(seconds) || seconds < 0) return '';
+            const s = Math.round(seconds);
+            if (s < 60) return `${s}s`;
+            if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s`;
+            const h = Math.floor(s / 3600);
+            const m = Math.round((s % 3600) / 60);
+            return m === 60 ? `${h + 1}h 0m` : `${h}h ${m}m`;
+        }
+    }
+
+    PluginTransfer.defaults = {
+        label: '',
+        message: '',
+        total: null,
+        done: 0,
+        units: 'iec',
+        decimals: 1,
+        showPercent: true,
+        showBytes: true,
+        showSpeed: true,
+        showEta: true,
+        cancelable: false,
+        cancelText: 'Cancel',
+        smoothing: 0.3,
+        sampleMs: 400,
+        stateText: {
+            idle: '',
+            running: '',
+            paused: 'Paused',
+            done: 'Done',
+            failed: 'Failed',
+            cancelled: 'Cancelled'
+        },
+        onProgress: null,
+        onState: null,
+        onCancel: null
+    };
+
+    $.extend(themestrap, {
+        PluginTransfer
+    });
+
+    $.fn.themestrapPluginTransfer = function (opts) {
+        return this.map(function () {
+            const $this = $(this);
+
+            if ($this.data(instanceName)) {
+                return $this.data(instanceName);
+            } else {
+                return new PluginTransfer($this, opts);
+            }
+        });
+    };
 })).apply(this, [window.themestrap, jQuery]);

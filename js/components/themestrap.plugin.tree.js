@@ -5,9 +5,9 @@
 
     const CSS = `
 .ts-tree {
-    font-family: var(--font-ui, system-ui, sans-serif);
+    font-family: var(--ts-skin-font, var(--font-ui, system-ui, sans-serif));
     font-size: 13px;
-    color: var(--text-normal, #c0c0c0);
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
     user-select: none;
 }
 .ts-tree-search {
@@ -16,11 +16,11 @@
 }
 .ts-tree-search input {
     width: 100%;
-    background: var(--bg-deepest, #0d0e0f);
-    border: 1px solid var(--border-mid, rgba(255,255,255,0.20));
+    background: var(--ts-skin-surface-2, var(--bg-deepest, #0d0e0f));
+    border: 1px solid var(--ts-skin-border-strong, var(--border-mid, rgba(255,255,255,0.20)));
     border-radius: 4px;
-    color: var(--text-normal, #c0c0c0);
-    font-family: var(--font-mono, monospace);
+    color: var(--ts-skin-text, var(--text-normal, #c0c0c0));
+    font-family: var(--ts-skin-font-mono, var(--font-mono, monospace));
     font-size: 12px;
     padding: 4px 28px 4px 8px;
     outline: none;
@@ -29,7 +29,7 @@
     width: 100%;
 }
 .ts-tree-search input:focus {
-    border-color: var(--accent-cyan, #5ecfdb);
+    border-color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 .ts-tree-search-clear {
     position: absolute;
@@ -37,13 +37,13 @@
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
     font-size: 11px;
     display: none;
     line-height: 1;
 }
 .ts-tree-search-clear.visible { display: block; }
-.ts-tree-search-clear:hover { color: var(--text-bright, #f0f0f0); }
+.ts-tree-search-clear:hover { color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0)); }
 .ts-tree-container,
 .ts-tree-children {
     list-style: none;
@@ -65,15 +65,15 @@
     outline: none;
 }
 .ts-tree-node-inner:hover {
-    background: var(--bg-hover, #2e2f30);
-    color: var(--text-bright, #f0f0f0);
+    background: var(--ts-skin-elevated, var(--bg-hover, #2e2f30));
+    color: var(--ts-skin-text-strong, var(--text-bright, #f0f0f0));
 }
 .ts-tree-node-inner:focus-visible {
-    box-shadow: 0 0 0 2px var(--accent-cyan, #5ecfdb);
+    box-shadow: 0 0 0 2px var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 .ts-tree-node.ts-tree-selected > .ts-tree-node-inner {
-    background: var(--bg-active, #3a3b3c);
-    color: var(--accent-cyan, #5ecfdb);
+    background: var(--ts-skin-accent-soft, var(--bg-active, #3a3b3c));
+    color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
 }
 .ts-tree-node.ts-tree-disabled > .ts-tree-node-inner {
     opacity: 0.38;
@@ -87,13 +87,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-dim, rgba(255,255,255,0.18));
+    color: var(--ts-skin-text-faint, var(--text-dim, rgba(255,255,255,0.18)));
     font-size: 9px;
     transition: transform 0.15s ease;
     border-radius: 2px;
 }
 .ts-tree-anchor::before { content: '▶'; display: block; }
-.ts-tree-anchor:hover { color: var(--text-muted, rgba(255,255,255,0.35)); }
+.ts-tree-anchor:hover { color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35))); }
 .ts-tree-node.ts-tree-open > .ts-tree-node-inner > .ts-tree-anchor {
     transform: rotate(90deg);
 }
@@ -117,8 +117,8 @@
     text-overflow: ellipsis;
 }
 .ts-tree-text mark {
-    background: rgba(94,207,219,0.22);
-    color: var(--accent-cyan, #5ecfdb);
+    background: var(--ts-tree-accent-soft, var(--ts-skin-accent-soft, rgba(94,207,219,0.22)));
+    color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
     border-radius: 2px;
     padding: 0 1px;
     font-style: normal;
@@ -126,7 +126,7 @@
 .ts-tree-checkbox {
     width: 14px;
     height: 14px;
-    border: 1px solid var(--border-mid, rgba(255,255,255,0.20));
+    border: 1px solid var(--ts-skin-border-strong, var(--border-mid, rgba(255,255,255,0.20)));
     border-radius: 2px;
     flex-shrink: 0;
     display: flex;
@@ -135,24 +135,24 @@
     font-size: 9px;
     font-weight: 700;
     transition: background 0.15s, border-color 0.15s;
-    background: var(--bg-deepest, #0d0e0f);
+    background: var(--ts-skin-surface-2, var(--bg-deepest, #0d0e0f));
 }
 .ts-tree-checkbox.ts-tree-checked {
-    background: var(--accent-cyan, #5ecfdb);
-    border-color: var(--accent-cyan, #5ecfdb);
-    color: #000;
+    background: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    border-color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-tree-on-accent, var(--ts-skin-on-accent, #000));
 }
 .ts-tree-checkbox.ts-tree-checked::before  { content: '✓'; }
 .ts-tree-checkbox.ts-tree-indeterminate {
-    background: rgba(94,207,219,0.35);
-    border-color: var(--accent-cyan, #5ecfdb);
-    color: #000;
+    background: var(--ts-tree-accent-soft, var(--ts-skin-accent-soft, rgba(94,207,219,0.35)));
+    border-color: var(--ts-skin-accent, var(--accent-cyan, #5ecfdb));
+    color: var(--ts-tree-text, var(--ts-skin-text, #000));
     font-size: 11px;
 }
 .ts-tree-checkbox.ts-tree-indeterminate::before { content: '−'; }
 .ts-tree-no-results {
     padding: 8px 6px;
-    color: var(--text-muted, rgba(255,255,255,0.35));
+    color: var(--ts-skin-text-dim, var(--text-muted, rgba(255,255,255,0.35)));
     font-size: 12px;
     font-style: italic;
     display: none;

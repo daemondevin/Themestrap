@@ -4,6 +4,29 @@ All notable changes to Themestrap are documented here.
 
 This repository does not currently include semantic version tags or package metadata, so the version sequence below is inferred from the project’s actual Git commit history beginning with the initial repository import and continuing through the current main branch state.
 
+## [Unreleased]
+
+### Added
+- Skins: `css/skins/*.css` set the original palette and a shared `--ts-skin-*` token set for light and dark mode. Ships Venom plus eight Base16 palettes (Solarized, Gruvbox, One, Tomorrow, Nord, Dracula, Rosé Pine, Catppuccin)
+- `docs/ThemestrapSkins.md` and `demos/plugin.demo.skins.html`
+- The standard Penner easing curves in `themestrap.js`, defined only when jquery.easing hasn't already provided them
+- PluginToast: its own lazily injected stylesheet with `--ts-toast-*` tokens, and `destroy()`
+
+### Changed
+- Every plugin with injected CSS routes its themable values through `--ts-skin-*` tokens, keeping its previous value as the fallback, so pages without a skin render unchanged
+- Plugins that had no design tokens (Context Menu, Hover Card, Popover, Scroll Bar, Calendar, Tree, Lockscreen) gain `--ts-*` hook tokens
+- PluginAccordion reads `--ts-skin-*` instead of `--ts-venom-*`; Venom is now a skin
+- PluginHighlight's syntax colors follow the skin's Base16 slots
+- `themestrap.bundle.js` rebuilt from the current component files; it now includes Color Picker, Dice, Emoticon, Markdown Editor, Particles, Pricing Toggle and Transfer
+- `themestrap.modules.js` no longer lists jquery.easing as a dependency of Section Scroll, Scroll To Top and Nav
+
+### Fixed
+- jQuery 4 compatibility: every `$.isFunction()` call (plugins, core, init, docs, demos and showcase) replaced with a `typeof` check
+- `themestrap.js` hash scrolling threw `easing is not a function` without jquery.easing
+- PluginToast's countdown bar never animated (rendered `hljs-toast-progress-bar`, looked for `toast-progress-bar`)
+- PluginCommandMenu squeezed an item's label to zero width when the item also had a description
+
+
 ## [1.0.2] - 2026-10-11
 
 ### Added

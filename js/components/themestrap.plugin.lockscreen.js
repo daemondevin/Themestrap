@@ -30,7 +30,7 @@
  * Requires PluginOtp (themestrap.plugin.otp.js) to be loaded first.
  *
  * Init.js wiring (DOMReady-immediate):
- *   if ($.isFunction($.fn['themestrapPluginLockscreen']) && $('[data-plugin-lockscreen]').length) {
+ *   if (typeof $.fn['themestrapPluginLockscreen'] === 'function' && $('[data-plugin-lockscreen]').length) {
  *       $(() => {
  *           $('[data-plugin-lockscreen]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -97,7 +97,7 @@
             letter-spacing: -.03em;
             color: var(--ts-lock-clock-color, #ffffff);
             line-height: 1;
-            font-family: var(--ts-lock-clock-font, system-ui, sans-serif);
+            font-family: var(--ts-lock-clock-font, var(--ts-skin-font, system-ui, sans-serif));
             margin-bottom: 4px;
         }
 
@@ -113,14 +113,14 @@
             width: 72px;
             height: 72px;
             border-radius: 50%;
-            background: var(--ts-lock-avatar-bg, rgba(42,184,200,.18)) center/cover no-repeat;
+            background: var(--ts-lock-avatar-bg, var(--ts-skin-accent-soft, rgba(42,184,200,.18))) center/cover no-repeat;
             border: 2px solid var(--ts-lock-avatar-border, rgba(255,255,255,.12));
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
             font-weight: 700;
-            color: var(--ts-lock-avatar-color, #2ab8c8);
+            color: var(--ts-lock-avatar-color, var(--ts-skin-accent, #2ab8c8));
             text-transform: uppercase;
             letter-spacing: .02em;
             margin-bottom: 12px;
@@ -179,12 +179,12 @@
         .ts-lock__btn:active { transform: scale(.97); }
 
         .ts-lock__btn--primary {
-            background: var(--ts-lock-btn-bg, #2ab8c8);
-            color: #fff;
+            background: var(--ts-lock-btn-bg, var(--ts-skin-accent, #2ab8c8));
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, #fff));
         }
 
         .ts-lock__btn--primary:hover {
-            background: var(--ts-lock-btn-hover, #25a5b4);
+            background: var(--ts-lock-btn-hover, var(--ts-skin-accent-hover, #25a5b4));
         }
 
         .ts-lock__btn--primary:disabled {
@@ -194,22 +194,22 @@
 
         .ts-lock__btn--ghost {
             background: rgba(255,255,255,.08);
-            color: rgba(255,255,255,.65);
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, rgba(255,255,255,.65)));
         }
 
         .ts-lock__btn--ghost:hover {
             background: rgba(255,255,255,.14);
-            color: #fff;
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, #fff));
         }
 
         .ts-lock__blocked {
             margin-top: 16px;
             padding: 10px 18px;
-            background: rgba(232,103,42,.14);
-            border: 1px solid rgba(232,103,42,.3);
+            background: var(--ts-ls-accent-soft, var(--ts-skin-accent-soft, rgba(232,103,42,.14)));
+            border: 1px solid var(--ts-ls-accent, var(--ts-skin-accent, rgba(232,103,42,.3)));
             border-radius: 8px;
             font-size: 13px;
-            color: #e8a07a;
+            color: var(--ts-ls-accent, var(--ts-skin-accent, #e8a07a));
             line-height: 1.5;
             display: none;
         }
@@ -234,7 +234,7 @@
         }
 
         .ts-lock__dot--used {
-            background: #e8672a;
+            background: var(--ts-ls-accent, var(--ts-skin-accent, #e8672a));
         }
 
         /* Idle indicator pill — appears in top-right when idleTimeout is set */
@@ -247,7 +247,7 @@
             border-radius: 20px;
             background: rgba(255,255,255,.08);
             border: 1px solid rgba(255,255,255,.12);
-            color: rgba(255,255,255,.45);
+            color: var(--ts-ls-on-accent, var(--ts-skin-on-accent, rgba(255,255,255,.45)));
             font-size: 11px;
             font-weight: 600;
             letter-spacing: .04em;

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginEmoticon — Live Demo | Themestrap</title>
+<meta name="description" content="An emoji picker and emoticon converter for chat boxes and message inputs: typed :) and :name: become emoji, a searchable picker with recent emoji. No images and no vendor dependencies.">
+
+<!-- Bootstrap 5 -->
+<link rel="stylesheet" href="../vendor/bootstrap/css/bootstrap.min.css">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="../vendor/fontawesome-free/css/all.min.css">
+
+<!-- Google Fonts: Themestrap typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Syne:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* Themestrap design system: demo page chrome */
+:root {
+    --ts-navy:         #0a1929;
+    --ts-navy-2:       #0e2238;
+    --ts-orange:       #e8672a;
+    --ts-teal:         #2ab8c8;
+    --ts-cream:        #f5f0e8;
+    --ts-font-serif:   'Fraunces', Georgia, serif;
+    --ts-font-display: 'Syne', system-ui, sans-serif;
+    --ts-font-body:    'DM Sans', system-ui, sans-serif;
+    --ts-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: var(--ts-font-body);
+    background: var(--ts-navy-2);
+    color: #1a2332;
+    margin: 0;
+}
+
+/* Page header */
+.demo-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 3px solid var(--ts-orange);
+}
+.demo-header h1 {
+    font-family: var(--ts-font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+}
+.demo-header p { margin: 0; opacity: .7; font-size: .95rem; max-width: 46rem; }
+.demo-header .badge-pill,
+.demo-header .badge-dep {
+    display: inline-block;
+    font-family: var(--ts-font-mono);
+    font-size: .7rem;
+    padding: .2em .6em;
+    border-radius: 99px;
+    margin-left: .5rem;
+    vertical-align: middle;
+}
+.demo-header .badge-pill { background: var(--ts-orange); color: #fff; }
+.demo-header .badge-dep  { color: var(--ts-teal); border: 1px solid var(--ts-teal); }
+
+/* Nav strip */
+.demo-nav {
+    background: var(--ts-navy-2);
+    padding: .6rem 2rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.demo-nav a {
+    color: rgba(255,255,255,.55);
+    text-decoration: none;
+    font-size: .8rem;
+    font-family: var(--ts-font-mono);
+    transition: color .15s;
+    white-space: nowrap;
+}
+.demo-nav a:hover { color: var(--ts-teal); }
+
+/* Layout */
+.demo-body {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1rem 5rem;
+}
+
+/* Demo cards */
+.demo-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.09);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    scroll-margin-top: 1rem;
+}
+.demo-card-header {
+    background: var(--ts-navy);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.demo-card-header h2 {
+    font-family: var(--ts-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: .02em;
+}
+.demo-card-header .card-num {
+    font-family: var(--ts-font-mono);
+    font-size: .75rem;
+    color: var(--ts-teal);
+    border: 1px solid var(--ts-teal);
+    border-radius: 4px;
+    padding: .1em .45em;
+    flex-shrink: 0;
+}
+.demo-card-header .card-tag {
+    font-family: var(--ts-font-mono);
+    font-size: .65rem;
+    color: rgba(255,255,255,.4);
+    margin-left: auto;
+    text-align: right;
+}
+
+.demo-blurb {
+    margin: 0;
+    background-color: #142231;
+    padding: 1rem 1.5rem 1rem;
+    font-size: .9rem;
+    color: #b2b7bc;
+}
+.demo-blurb code { font-family: var(--ts-font-mono); font-size: .8rem; color: #b8481a; }
+.demo-blurb kbd {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+    background: #eef1f5;
+    border: 1px solid #d3dae3;
+    border-radius: 4px;
+    padding: .05em .4em;
+    color: #1a2332;
+}
+
+/* Demo stage */
+.demo-stage {
+    padding: 2rem 1.75rem;
+    background: var(--ts-cream);
+    border-bottom: 1px solid #e8e0d4;
+}
+.demo-stage.dark-stage { background: var(--ts-navy); border-bottom-color: rgba(255,255,255,.05); }
+
+/* Snippet block: PluginHighlight renders inside this wrapper */
+.demo-snip { background: #181818; border-top: 1px solid rgba(255,255,255,.05); }
+.demo-snip pre[data-plugin-highlight] {
+    margin: 0;
+    border-radius: 0;
+    font-family: var(--ts-font-mono);
+    font-size: .77rem;
+}
+
+/* Controls */
+.demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: #f4f1ea;
+    border-top: 1px solid #e8e0d4;
+}
+.demo-controls .btn {
+    font-family: var(--ts-font-mono);
+    font-size: .72rem;
+}
+
+/* Live output readout */
+.demo-output {
+    margin: 1rem 0 0;
+    padding: .75rem 1rem;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 6px;
+    color: #9fb3c8;
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 3.2rem;
+}
+.demo-output .meta { color: var(--ts-teal); display: block; margin-bottom: .35rem; }
+
+/* Event log */
+.demo-log {
+    font-family: var(--ts-font-mono);
+    font-size: .74rem;
+    padding: .65rem 1.5rem;
+    background: #0d1b2a;
+    color: #8b949e;
+    border-top: 1px solid rgba(255,255,255,.05);
+    min-height: 2.6rem;
+    max-height: 9.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+.demo-log .log-line  { display: block; }
+.demo-log .log-time  { color: #5a7898; margin-right: .6rem; }
+.demo-log .log-event { color: var(--ts-teal); }
+.demo-log .log-warn  { color: var(--ts-orange); }
+.demo-log .log-hint  { color: #8b949e; }
+
+.demo-footer {
+    text-align: center;
+    padding: 1.5rem 1rem 3rem;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+}
+.demo-footer code { color: var(--ts-teal); font-family: var(--ts-font-mono); }
+</style>
+
+<style>
+.chat-demo { background: #0f2236; border-radius: 12px; padding: 1rem; }
+.chat-demo .log { height: 11rem; overflow-y: auto; margin-bottom: .75rem; color: #dce7f2; font-size: .95rem; }
+.chat-demo .line { padding: .2rem 0; }
+.chat-demo .line b { color: #2ab8c8; margin-right: .35rem; }
+.chat-demo .line.big .txt { font-size: 1.9rem; line-height: 1.1; vertical-align: middle; }
+.shortcut-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); gap: .35rem; margin: 0 0 1rem; }
+.shortcut-table div { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.06); border-radius: 8px; padding: .3rem .6rem; color: #dce7f2; }
+.shortcut-table code { color: #2ab8c8; background: none; font-family: var(--ts-font-mono); }
+.shortcut-table span { font-size: 1.25rem; }
+.convert-out { min-height: 2.5rem; padding: .6rem .8rem; border-radius: 8px; background: rgba(255,255,255,.06); color: #fff; font-size: 1.05rem; margin-top: .75rem; }
+.convert-out .muted, .hint { color: #9fb3c8; font-size: .85rem; }
+.hint { margin: .6rem 0 0; }
+.retro {
+    --ts-emoticon-bg:      #fff8e7;
+    --ts-emoticon-border:  #e8672a;
+    --ts-emoticon-text:    #3b2a1a;
+    --ts-emoticon-muted:   #a0643a;
+    --ts-emoticon-hover:   rgba(232,103,42,.15);
+    --ts-emoticon-accent:  #e8672a;
+    --ts-emoticon-radius:  4px;
+    --ts-emoticon-size:    1.25rem;
+    --ts-emoticon-width:   17rem;
+    --ts-emoticon-height:  16rem;
+}
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+    <div class="container">
+        <div style="font-size:.78rem;color:#5a7898;margin-bottom:.35rem;font-family:'JetBrains Mono',monospace;">Themestrap · Plugin</div>
+        <h1>Emoticon <span class="badge-pill">data-plugin-emoticon</span><span class="badge-dep">jQuery only</span></h1>
+        <p>An emoji picker and emoticon converter for chat boxes and message inputs. Typed <code>:)</code> and <code>:fire:</code> become emoji as you type, and a searchable picker keeps your recent emoji on top. Uses the device's own emoji, no images and no vendor dependencies.</p>
+    </div>
+</header>
+
+<nav class="demo-nav" aria-label="Demo sections">
+    <a href="#demo-chat">01 chat box</a>
+    <a href="#demo-typed">02 typed emoticons</a>
+    <a href="#demo-static">03 converting text</a>
+    <a href="#demo-options">04 options</a>
+    <a href="#demo-theme">05 theming</a>
+</nav>
+
+<main class="demo-body">
+
+    <section class="demo-card" id="demo-chat">
+        <div class="demo-card-header">
+            <span class="card-num">01</span>
+            <h2>Chat Box</h2>
+            <span class="card-tag">data-plugin-emoticon · input-group</span>
+        </div>
+        <p class="demo-blurb">Put <code>data-plugin-emoticon</code> on the message input. The picker button lands right after it, inside the input group. Pick several emoji in a row, search by name, or use the keyboard: arrows move, <kbd>Enter</kbd> picks, <kbd>Esc</kbd> closes. A message of one to three emoji is shown big with <code>isEmojiOnly()</code>.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="chat-demo">
+                <div class="log" id="chat-log"><div class="line"><b>Ann</b><span class="txt">Who's up for a game? 🎲</span></div></div>
+                <form id="chat-form" class="input-group" autocomplete="off">
+                    <input type="text" id="chat-input" class="form-control" placeholder="Write a message…" maxlength="200" aria-label="Message"
+                           data-plugin-emoticon data-plugin-options='{"buttonClass": "btn btn-outline-light"}'>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;form id="chat" class="input-group"&gt;
+    &lt;input type="text" class="form-control" data-plugin-emoticon
+           data-plugin-options='{"buttonClass": "btn btn-outline-secondary"}'&gt;
+    &lt;button type="submit" class="btn btn-primary"&gt;Send&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+$('#chat').on('submit', function (e) {
+    e.preventDefault();
+    var text = $(this).find('input').val();   // emoticons are already emoji here
+    var big = themestrap.PluginEmoticon.isEmojiOnly(text);
+});
+&lt;/script&gt;
+</code></pre>
+        </div>
+        <div class="demo-log" id="log-chat"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <section class="demo-card" id="demo-typed">
+        <div class="demo-card-header">
+            <span class="card-num">02</span>
+            <h2>Typed Emoticons</h2>
+            <span class="card-tag">shortcuts · shortcodes · button: false</span>
+        </div>
+        <p class="demo-blurb">Emoticons swap once a space or punctuation follows them, and only at the start or after a space, so links like <code>http://</code> and list items like <code>b)</code> stay as typed. Any emoji's name between colons works too, for example <code>:tada:</code> or <code>:thumbsup:</code>. Pressing <kbd>Backspace</kbd> right after a swap puts the typed text back. This input has no picker button.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <div class="shortcut-table" id="shortcut-table"></div>
+            <input type="text" id="typed-input" class="form-control" placeholder="Try :) then a space, or :fire:" aria-label="Try typing emoticons"
+                   data-plugin-emoticon data-plugin-options='{"button": false, "extraShortcuts": {"(y)": "👍"}}'>
+            <p class="hint">This one also knows <code>(y)</code> from <code>extraShortcuts</code>.</p>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="html" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+&lt;input type="text" class="form-control" data-plugin-emoticon
+       data-plugin-options='{"button": false, "extraShortcuts": {"(y)": "👍"}}'&gt;
+</code></pre>
+        </div>
+        <div class="demo-log" id="log-typed"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <section class="demo-card" id="demo-static">
+        <div class="demo-card-header">
+            <span class="card-num">03</span>
+            <h2>Converting Text</h2>
+            <span class="card-tag">PluginEmoticon.convert() · isEmojiOnly() · search()</span>
+        </div>
+        <p class="demo-blurb">The static helpers need no instance. Use <code>convert()</code> on messages from people who typed without the plugin, <code>isEmojiOnly()</code> to show short emoji messages big, and <code>search()</code> to build your own suggestions.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <textarea id="convert-in" class="form-control" rows="2" aria-label="Text to convert">GG :D that was close <3 :trophy:</textarea>
+            <div class="convert-out" id="convert-out"></div>
+            <div class="convert-out" id="search-out"></div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+var Emoticon = themestrap.PluginEmoticon;
+Emoticon.convert('GG :D &lt;3 :trophy:');   // 'GG 😃 ❤️ 🏆'
+Emoticon.isEmojiOnly('🎉🎉');             // true
+Emoticon.search('heart');                // [{ char: '❤️', name: 'heart', ... }, ...]
+Emoticon.lookup(':dice:');               // '🎲'
+</code></pre>
+        </div>
+    </section>
+
+    <section class="demo-card" id="demo-options">
+        <div class="demo-card-header">
+            <span class="card-num">04</span>
+            <h2>Options</h2>
+            <span class="card-tag">trigger · categories · closeOnPick · placement</span>
+        </div>
+        <p class="demo-blurb">Open the picker from a button of your own with <code>trigger</code>, show only some categories, close after each pick, and place the panel below the input. This textarea takes game night and hearts emoji only.</p>
+
+        <div class="demo-stage dark-stage" data-bs-theme="dark">
+            <textarea id="options-input" class="form-control" rows="3" aria-label="Note" placeholder="Leave a note…"></textarea>
+            <div class="mt-2">
+                <button type="button" class="btn btn-sm btn-outline-light" id="options-trigger">🎲 Add a game emoji</button>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+$('#note').themestrapPluginEmoticon({
+    trigger: '#note-emoji',
+    categories: ['games', 'hearts'],
+    recent: false,
+    closeOnPick: true,
+    placement: 'bottom'
+});
+</code></pre>
+        </div>
+        <div class="demo-log" id="log-options"><span class="log-hint">Waiting for events…</span></div>
+    </section>
+
+    <section class="demo-card" id="demo-theme">
+        <div class="demo-card-header">
+            <span class="card-num">05</span>
+            <h2>Theming</h2>
+            <span class="card-tag">--ts-emoticon-*</span>
+        </div>
+        <p class="demo-blurb">Colors, corners, emoji size and panel size are custom properties with light, dark and explicit-light tiers. Set them on a wrapper, or on <code>:root</code> for every picker. The panel lives in the nearest drawer, modal or offcanvas, else the body, so put the tokens where the panel ends up.</p>
+
+        <div class="demo-stage retro" data-bs-theme="light" style="background:#fdf1dc;border-radius:12px;">
+            <div class="ts-emoticon-container">
+                <div class="input-group" style="max-width:26rem;">
+                    <input type="text" id="theme-input" class="form-control" placeholder="A warmer picker" aria-label="Themed input">
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-snip">
+<pre data-plugin-highlight="css" data-plugin-options='{"lineNumbers":false,"showCopy":true}'><code>
+.retro {
+    --ts-emoticon-bg:     #fff8e7;
+    --ts-emoticon-border: #e8672a;
+    --ts-emoticon-accent: #e8672a;
+    --ts-emoticon-radius: 4px;
+    --ts-emoticon-size:   1.25rem;
+    --ts-emoticon-width:  17rem;
+}
+</code></pre>
+        </div>
+    </section>
+
+</main>
+
+<footer class="demo-footer">
+    <code>js/components/themestrap.plugin.emoticon.js</code> · zero vendor dependencies
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.emoticon.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script src="../js/themestrap.init.js"></script>
+
+<script>
+$(function () {
+
+    var Emoticon = themestrap.PluginEmoticon;
+
+    function makeLog(sel) {
+        var $log = $(sel), started = false;
+        var stamp = function () { return new Date().toTimeString().slice(0, 8); };
+        return function (label, detail) {
+            if (!started) { $log.empty(); started = true; }
+            var $l = $('<span class="log-line">');
+            $l.append($('<span class="log-time">').text(stamp()));
+            $l.append($('<strong class="log-event">').text(label));
+            if (detail) $l.append(' ').append($('<span>').text(detail));
+            $log.prepend($l); $log.children().slice(30).remove();
+        };
+    }
+
+    // Auto-init runs through IntersectionObserver, so instances are created here too with the
+    // element's own data-plugin-options
+    function emoticon(sel, opts) {
+        var $el = $(sel);
+        return $el.themestrapPluginEmoticon(opts || themestrap.fn.getOptions($el.data('plugin-options')))[0];
+    }
+
+    function logEvents(el, log) {
+        ['ts.emoticon.open', 'ts.emoticon.close', 'ts.emoticon.pick', 'ts.emoticon.convert'].forEach(function (type) {
+            el.addEventListener(type, function (e) {
+                var d = e.detail;
+                log(type, d.emoji ? d.emoji + ' :' + d.name + ':' : d.to !== undefined ? JSON.stringify(d.from) + ' → ' + d.to : '');
+            });
+        });
+    }
+
+    // 01 Chat box
+    emoticon('#chat-input');
+    logEvents(document.getElementById('chat-input'), makeLog('#log-chat'));
+    $('#chat-form').on('submit', function (e) {
+        e.preventDefault();
+        var $in = $('#chat-input');
+        var text = $.trim($in.val());
+        if (!text) return;
+        var $line = $('<div class="line">').append($('<b>').text('You')).append($('<span class="txt">').text(text));
+        if (Emoticon.isEmojiOnly(text)) $line.addClass('big');
+        $('#chat-log').append($line).scrollTop(1e6);
+        $in.val('').trigger('focus');
+    });
+
+    // 02 Typed emoticons
+    var shown = {};
+    var $table = $('#shortcut-table');
+    Object.keys(Emoticon.shortcuts).forEach(function (key) {
+        var emoji = Emoticon.shortcuts[key];
+        if (shown[emoji]) return;
+        shown[emoji] = true;
+        $table.append($('<div>').append($('<code>').text(key)).append($('<span>').text(emoji)));
+    });
+    emoticon('#typed-input');
+    logEvents(document.getElementById('typed-input'), makeLog('#log-typed'));
+
+    // 03 Converting text
+    function showConvert() {
+        var text = $('#convert-in').val();
+        var out = Emoticon.convert(text);
+        $('#convert-out').empty().append($('<span class="muted">').text('convert() ')).append(document.createTextNode(out))
+            .append($('<span class="muted">').text('   isEmojiOnly: ' + Emoticon.isEmojiOnly(out)));
+        var word = (text.match(/[a-z]+$/i) || [''])[0];
+        var found = word ? Emoticon.search(word).slice(0, 12).map(function (e) { return e.char; }).join(' ') : '';
+        $('#search-out').empty().append($('<span class="muted">').text('search("' + word + '") ')).append(document.createTextNode(found || '…'));
+    }
+    $('#convert-in').on('input', showConvert);
+    showConvert();
+
+    // 04 Options
+    emoticon('#options-input', { trigger: '#options-trigger', categories: ['games', 'hearts'], recent: false, closeOnPick: true, placement: 'bottom' });
+    logEvents(document.getElementById('options-input'), makeLog('#log-options'));
+
+    // 05 Theming
+    emoticon('#theme-input', { buttonClass: 'btn btn-outline-warning' });
+
+    if (typeof $.fn.themestrapPluginHighlight === 'function') {
+        $('pre[data-plugin-highlight]').each(function () {
+            var $pre = $(this);
+            $pre.themestrapPluginHighlight(themestrap.fn.getOptions($pre.data('plugin-options')) || undefined);
+        });
+    }
+});
+</script>
+</body>
+</html>

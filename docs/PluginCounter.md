@@ -20,7 +20,7 @@ Animates a number from a start value to a target value over a configurable durat
 Auto-init in `themestrap.init.js`:
 
 ```js
-if ($.isFunction($.fn['themestrapPluginCounter']) && ($('[data-plugin-counter]').length || $('.counters [data-to]').length)) {
+if (typeof $.fn['themestrapPluginCounter'] === 'function' && ($('[data-plugin-counter]').length || $('.counters [data-to]').length)) {
     themestrap.fn.dynIntObsInit('[data-plugin-counter]:not(.manual), .counters [data-to]', 'themestrapPluginCounter', themestrap.PluginCounter.defaults);
 }
 ```
@@ -179,7 +179,7 @@ inst.replay();        // animate from 0 to original target
 
 ```js
 // themestrap.init.js
-if ($.isFunction($.fn['themestrapPluginCounter']) && ($('[data-plugin-counter]').length || $('.counters [data-to]').length)) {
+if (typeof $.fn['themestrapPluginCounter'] === 'function' && ($('[data-plugin-counter]').length || $('.counters [data-to]').length)) {
     themestrap.fn.dynIntObsInit('[data-plugin-counter]:not(.manual), .counters [data-to]', 'themestrapPluginCounter', themestrap.PluginCounter.defaults);
 }
 ```

@@ -68,7 +68,7 @@
  *
  * Init.js wiring (dynIntObsInit — supports forceInit + accY)
  *
- *   if ($.isFunction($.fn['themestrapPluginProgressBar']) && $('[data-plugin-progress-bar]').length) {
+ *   if (typeof $.fn['themestrapPluginProgressBar'] === 'function' && $('[data-plugin-progress-bar]').length) {
  *       themestrap.fn.dynIntObsInit(
  *           '[data-plugin-progress-bar]:not(.manual)',
  *           'themestrapPluginProgressBar',
@@ -138,10 +138,10 @@
 .ts-progress-fill--secondary 	{ background: var(--secondary, #e36159); }
 .ts-progress-fill--tertiary 	{ background: var(--tertiary, #2BAAB1); }
 .ts-progress-fill--quaternary	{ background: var(--quaternary, #383f48); }
-.ts-progress-fill--success   	{ background: var(--success, #87bb53); }
-.ts-progress-fill--warning   	{ background: var(--warning, #f4bf75); }
-.ts-progress-fill--danger    	{ background: var(--danger, #ff6159); }
-.ts-progress-fill--info     	{ background: var(--info, #61a6d6); }
+.ts-progress-fill--success   	{ background: var(--ts-skin-success, var(--success, #87bb53)); }
+.ts-progress-fill--warning   	{ background: var(--ts-skin-warning, var(--warning, #f4bf75)); }
+.ts-progress-fill--danger    	{ background: var(--ts-skin-danger, var(--danger, #ff6159)); }
+.ts-progress-fill--info     	{ background: var(--ts-skin-info, var(--info, #61a6d6)); }
 .ts-progress-fill--dark      	{ background: var(--dark, #212529); }
 
 /* Striped pattern */
@@ -491,7 +491,7 @@
             const instance = $this.data(instanceName);
 
             if (typeof opts === 'string') {
-                if (instance && $.isFunction(instance[opts])) {
+                if (instance && typeof instance[opts] === 'function') {
                     return instance[opts](arg);
                 }
                 return instance;

@@ -660,7 +660,7 @@ instance.setFilter('*'); // show all</pre>
 
 <script>
 (function ($) {
-	if ($.isFunction($.fn['themestrapPluginSort']) && ( $('[data-plugin-sort]').length || $('.sort-source').length )) {
+	if (typeof $.fn['themestrapPluginSort'] === 'function' && ( $('[data-plugin-sort]').length || $('.sort-source').length )) {
 		themestrap.fn.intObsInit( '[data-plugin-sort]:not(.manual), .sort-source:not(.manual)', 'themestrapPluginSort' );
 	}
     // ── Demo 1 event logging ─────────────────────────────────────────────────

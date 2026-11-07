@@ -5096,7 +5096,7 @@ body.dark .pagination > .active > a {
 
 .owl-carousel.nav-arrows-thin .owl-nav .owl-prev:before, .owl-carousel.nav-arrows-thin .owl-nav .owl-next:before {
 	font-family: simple-line-icons;
-	speak: none;
+	speak-as: none;
 	font-style: normal;
 	font-weight: 700;
 	font-variant: normal;
@@ -9210,6 +9210,7 @@ input[type="tel"],
 input[type="color"],
 textarea {
 	-webkit-appearance: none;
+	appearance: none;
 }
 
 .form-control::-webkit-input-placeholder,
@@ -10897,7 +10898,6 @@ h6.text-shadow {
 	line-height: 39px;
 }
 
-/* Porto Icons */
 i.pi {
 	position: relative;
 	display: inline-flex;
@@ -10905,27 +10905,6 @@ i.pi {
 	justify-content: center;
 	font-style: normal;
 	font-size: 14px;
-}
-
-i.pi.pi-porto-brand:before {
-	content: '\f111';
-	font-family: 'Font Awesome 7 Free';
-	font-weight: bold;
-	font-size: 0.51em;
-	color: var(--light);
-	padding: 1.2em;
-}
-
-i.pi.pi-porto-brand:after {
-	content: '';
-	width: 2em;
-	height: 2em;
-	border: 0.5em solid #FFF;
-	border-radius: 100%;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate3d(-50%, -50%, 0);
 }
 
 i.pi.pi-close {
@@ -14154,6 +14133,7 @@ Credits: Codyhouse (https://codyhouse.co/gem/360-degrees-product-viewer)
 	mask-image: url(../img/particle-dot.svg);
 	z-index: 0;
 	-webkit-mask-size: 18px;
+	mask-size: 18px;
 }
 
 .particle.particle-repeating-lines {
@@ -21485,6 +21465,7 @@ p.drop-caps.drop-caps-style-2:first-letter {
 /* Gradient Text */
 .gradient-text-color {
 	-webkit-background-clip: text !important;
+	background-clip: text !important;
 	-webkit-text-fill-color: transparent !important;
 }
 

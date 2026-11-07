@@ -26,7 +26,7 @@
  *   ts.otp.clear     — {}                   when clear() is called
  *
  * Init.js wiring (DOMReady-immediate):
- *   if ($.isFunction($.fn['themestrapPluginOtp']) && $('[data-plugin-otp]').length) {
+ *   if (typeof $.fn['themestrapPluginOtp'] === 'function' && $('[data-plugin-otp]').length) {
  *       $(() => {
  *           $('[data-plugin-otp]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -53,7 +53,7 @@
             width: 100%;
             font-size: 13px;
             font-weight: 600;
-            color: var(--ts-otp-label-color, rgba(255,255,255,.7));
+            color: var(--ts-otp-label-color, var(--ts-skin-text-dim, rgba(255,255,255,.7)));
             margin-bottom: 4px;
             letter-spacing: .03em;
             display: block;
@@ -65,11 +65,11 @@
             text-align: center;
             font-size: var(--ts-otp-font-size, 22px);
             font-weight: 700;
-            font-family: var(--bs-font-monospace, monospace);
-            border: 2px solid var(--ts-otp-border, rgba(255,255,255,.15));
-            border-radius: var(--ts-otp-radius, 10px);
-            background: var(--ts-otp-bg, rgba(255,255,255,.06));
-            color: var(--ts-otp-color, #f3f4f6);
+            font-family: var(--ts-skin-font-mono, var(--bs-font-monospace, monospace));
+            border: 2px solid var(--ts-otp-border, var(--ts-skin-border, rgba(255,255,255,.15)));
+            border-radius: var(--ts-otp-radius, var(--ts-skin-radius-lg, 10px));
+            background: var(--ts-otp-bg, var(--ts-skin-surface-2, rgba(255,255,255,.06)));
+            color: var(--ts-otp-color, var(--ts-skin-text, #f3f4f6));
             outline: none;
             transition: border-color .15s, box-shadow .15s, background .15s;
             caret-color: transparent;
@@ -84,9 +84,9 @@
         }
 
         .ts-otp__input:focus {
-            border-color: var(--ts-otp-focus-border, #2ab8c8);
-            box-shadow: 0 0 0 3px var(--ts-otp-focus-ring, rgba(42,184,200,.2));
-            background: var(--ts-otp-bg-focus, rgba(42,184,200,.06));
+            border-color: var(--ts-otp-focus-border, var(--ts-skin-accent, #2ab8c8));
+            box-shadow: 0 0 0 3px var(--ts-otp-focus-ring, var(--ts-skin-ring, rgba(42,184,200,.2)));
+            background: var(--ts-otp-bg-focus, var(--ts-skin-accent-soft, rgba(42,184,200,.06)));
         }
 
         .ts-otp__input:disabled {
@@ -95,21 +95,21 @@
         }
 
         .ts-otp--error .ts-otp__input {
-            border-color: var(--ts-otp-error-color, #e8672a) !important;
+            border-color: var(--ts-otp-error-color, var(--ts-skin-danger, #e8672a)) !important;
         }
 
         .ts-otp--error .ts-otp__input:focus {
-            box-shadow: 0 0 0 3px rgba(232,103,42,.2);
+            box-shadow: 0 0 0 3px var(--ts-skin-danger, rgba(232,103,42,.2));
         }
 
         .ts-otp--valid .ts-otp__input {
-            border-color: var(--ts-otp-valid-color, #2ab8c8);
+            border-color: var(--ts-otp-valid-color, var(--ts-skin-success, #2ab8c8));
         }
 
         .ts-otp__separator {
             font-size: 22px;
             font-weight: 700;
-            color: var(--ts-otp-sep-color, rgba(255,255,255,.3));
+            color: var(--ts-otp-sep-color, var(--ts-skin-border, rgba(255,255,255,.3)));
             line-height: 1;
             user-select: none;
         }
@@ -117,7 +117,7 @@
         .ts-otp__hint {
             width: 100%;
             font-size: 12px;
-            color: var(--ts-otp-hint-color, rgba(255,255,255,.38));
+            color: var(--ts-otp-hint-color, var(--ts-skin-text-dim, rgba(255,255,255,.38)));
             margin: 5px 0 0 0;
             line-height: 1.4;
         }
@@ -126,7 +126,7 @@
             width: 100%;
             font-size: 12.5px;
             font-weight: 500;
-            color: var(--ts-otp-error-color, #e8672a);
+            color: var(--ts-otp-error-color, var(--ts-skin-danger, #e8672a));
             margin: 5px 0 0 0;
             min-height: 18px;
             line-height: 1.4;
@@ -136,23 +136,23 @@
         .ts-otp--sm .ts-otp__input {
             --ts-otp-size: 40px;
             --ts-otp-font-size: 16px;
-            --ts-otp-radius: 7px;
+            --ts-otp-radius: var(--ts-skin-radius, 7px);
         }
 
         .ts-otp--lg .ts-otp__input {
             --ts-otp-size: 68px;
             --ts-otp-font-size: 30px;
-            --ts-otp-radius: 14px;
+            --ts-otp-radius: var(--ts-skin-radius-lg, 14px);
         }
 
         /* Light theme override */
         .ts-otp--light .ts-otp__input {
-            --ts-otp-bg:           rgba(0,0,0,.04);
-            --ts-otp-bg-focus:     rgba(42,184,200,.05);
-            --ts-otp-border:       rgba(0,0,0,.18);
-            --ts-otp-color:        #1a1f2e;
-            --ts-otp-label-color:  rgba(0,0,0,.65);
-            --ts-otp-hint-color:   rgba(0,0,0,.38);
+            --ts-otp-bg:           var(--ts-skin-surface-2, rgba(0,0,0,.04));
+            --ts-otp-bg-focus:     var(--ts-skin-accent-soft, rgba(42,184,200,.05));
+            --ts-otp-border:       var(--ts-skin-border, rgba(0,0,0,.18));
+            --ts-otp-color:        var(--ts-skin-text, #1a1f2e);
+            --ts-otp-label-color:  var(--ts-skin-text-dim, rgba(0,0,0,.65));
+            --ts-otp-hint-color:   var(--ts-skin-text-dim, rgba(0,0,0,.38));
         }
 
         /* Shake keyframe — triggered by setError() */

@@ -9,7 +9,7 @@
 	}
 
 	// Validations
-	if ( $.isFunction($.validator) && typeof themestrap.PluginValidation !== 'undefined') {
+	if ( typeof $.validator === 'function' && typeof themestrap.PluginValidation !== 'undefined') {
 		themestrap.PluginValidation.initialize();
 	}
 

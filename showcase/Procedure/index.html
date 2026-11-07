@@ -178,7 +178,7 @@ $(function () {
     });
     
     /* Alerts */
-    if ($.isFunction($.fn['themestrapPluginAlert']) && $('[data-plugin-alert]').length) {
+    if (typeof $.fn['themestrapPluginAlert'] === 'function' && $('[data-plugin-alert]').length) {
         themestrap.fn.intObsInit('[data-plugin-alert]:not(.manual)', 'themestrapPluginAlert');
     }
 

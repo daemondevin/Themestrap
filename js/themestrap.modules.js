@@ -20,7 +20,7 @@
         .define('jquery-visible',{ src: 'vendor/visible/js/jquery.visible.min.js' })       // icon, nav
         .define('jquery-cookie', { src: 'vendor/cookie/js/jquery.cookie.js' })             // gdprWrapper
         .define('matchheight',   { src: 'vendor/matchheight/jquery.matchHeight-min.js' })
-        .define('jquery-easing', { src: 'vendor/jquery-easing/jquery.easing.min.js' })     // scrollToTop, nav, sectionScroll
+        .define('jquery-easing', { src: 'vendor/jquery-easing/jquery.easing.min.js' })     // optional: themestrap.js has the Penner curves built in
         .define('vivus',         { src: 'vendor/vivus/js/vivus.min.js' })                  // global: Vivus
         .define('observe-element-in-viewport',
                                  { src: 'vendor/observe-element-in-viewport/dist/index.umd.js' }) // global: observeElementInViewport
@@ -45,7 +45,7 @@
             selector: '[data-plugin-match-height]', method: 'themestrapPluginMatchHeight', strategy: 'intObs'
         })
         .definePlugin('sectionScroll', {
-            src: 'components/themestrap.plugin.sectionscroll.js', deps: ['jquery-easing'],
+            src: 'components/themestrap.plugin.sectionscroll.js',
             selector: '[data-plugin-section-scroll]', method: 'themestrapPluginSectionScroll', strategy: 'intObs'
         })
         .definePlugin('sticky', {
@@ -141,11 +141,11 @@
             init: () => themestrap.Search && themestrap.Search.initialize()
         })
         .define('scrollToTop', {
-            src: 'components/themestrap.plugin.scrolltotop.js', deps: ['jquery-easing'],
+            src: 'components/themestrap.plugin.scrolltotop.js',
             init: () => themestrap.PluginScrollToTop && themestrap.PluginScrollToTop.initialize()
         })
         .define('nav', {
-            src: 'components/themestrap.plugin.nav.js', deps: ['jquery-easing', 'jquery-visible'],
+            src: 'components/themestrap.plugin.nav.js', deps: ['jquery-visible'],
             init: () => themestrap.Nav && themestrap.Nav.initialize()
         });
 

@@ -607,54 +607,54 @@
         static _css() {
             return `
 :root {
-    --ts-cp-bg: #fff;
-    --ts-cp-border: rgba(0,0,0,.1);
-    --ts-cp-shadow: 0 8px 30px rgba(0,0,0,.12);
-    --ts-cp-radius: 10px;
+    --ts-cp-bg: var(--ts-skin-surface, #fff);
+    --ts-cp-border: var(--ts-skin-border, rgba(0,0,0,.1));
+    --ts-cp-shadow: var(--ts-skin-shadow, 0 8px 30px rgba(0,0,0,.12));
+    --ts-cp-radius: var(--ts-skin-radius-lg, 10px);
     --ts-cp-panel-w: 264px;
     --ts-cp-picker-h: 154px;
     --ts-cp-track-h: 12px;
-    --ts-cp-track-radius: 6px;
+    --ts-cp-track-radius: var(--ts-skin-radius, 6px);
     --ts-cp-thumb-size: 32px;
-    --ts-cp-thumb-radius: 6px;
-    --ts-cp-thumb-border: rgba(0,0,0,.18);
+    --ts-cp-thumb-radius: var(--ts-skin-radius, 6px);
+    --ts-cp-thumb-border: var(--ts-skin-border, rgba(0,0,0,.18));
     --ts-cp-swatch-size: 22px;
-    --ts-cp-swatch-radius: 4px;
+    --ts-cp-swatch-radius: var(--ts-skin-radius-sm, 4px);
     --ts-cp-z: 9999;
-    --ts-cp-focus: rgba(99,202,183,.7);
-    --ts-cp-input-bg: rgba(0,0,0,.04);
-    --ts-cp-input-fg: #1a2530;
-    --ts-cp-input-border: rgba(0,0,0,.12);
+    --ts-cp-focus: var(--ts-skin-accent, rgba(99,202,183,.7));
+    --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(0,0,0,.04));
+    --ts-cp-input-fg: var(--ts-skin-text, #1a2530);
+    --ts-cp-input-border: var(--ts-skin-border, rgba(0,0,0,.12));
 }
 @media (prefers-color-scheme: dark) {
     :root {
-        --ts-cp-bg: #1e2938;
-        --ts-cp-border: rgba(255,255,255,.1);
-        --ts-cp-shadow: 0 12px 40px rgba(0,0,0,.45);
-        --ts-cp-thumb-border: rgba(255,255,255,.18);
-        --ts-cp-input-bg: rgba(255,255,255,.06);
-        --ts-cp-input-fg: #e0e8f0;
-        --ts-cp-input-border: rgba(255,255,255,.12);
+        --ts-cp-bg: var(--ts-skin-surface, #1e2938);
+        --ts-cp-border: var(--ts-skin-border, rgba(255,255,255,.1));
+        --ts-cp-shadow: var(--ts-skin-shadow, 0 12px 40px rgba(0,0,0,.45));
+        --ts-cp-thumb-border: var(--ts-skin-border, rgba(255,255,255,.18));
+        --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(255,255,255,.06));
+        --ts-cp-input-fg: var(--ts-skin-text, #e0e8f0);
+        --ts-cp-input-border: var(--ts-skin-border, rgba(255,255,255,.12));
     }
 }
 html.dark,
 [data-bs-theme="dark"] {
-    --ts-cp-bg: #1e2938;
-    --ts-cp-border: rgba(255,255,255,.1);
-    --ts-cp-shadow: 0 12px 40px rgba(0,0,0,.45);
-    --ts-cp-thumb-border: rgba(255,255,255,.18);
-    --ts-cp-input-bg: rgba(255,255,255,.06);
-    --ts-cp-input-fg: #e0e8f0;
-    --ts-cp-input-border: rgba(255,255,255,.12);
+    --ts-cp-bg: var(--ts-skin-surface, #1e2938);
+    --ts-cp-border: var(--ts-skin-border, rgba(255,255,255,.1));
+    --ts-cp-shadow: var(--ts-skin-shadow, 0 12px 40px rgba(0,0,0,.45));
+    --ts-cp-thumb-border: var(--ts-skin-border, rgba(255,255,255,.18));
+    --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(255,255,255,.06));
+    --ts-cp-input-fg: var(--ts-skin-text, #e0e8f0);
+    --ts-cp-input-border: var(--ts-skin-border, rgba(255,255,255,.12));
 }
 [data-bs-theme="light"] {
-    --ts-cp-bg: #fff;
-    --ts-cp-border: rgba(0,0,0,.1);
-    --ts-cp-shadow: 0 8px 30px rgba(0,0,0,.12);
-    --ts-cp-thumb-border: rgba(0,0,0,.18);
-    --ts-cp-input-bg: rgba(0,0,0,.04);
-    --ts-cp-input-fg: #1a2530;
-    --ts-cp-input-border: rgba(0,0,0,.12);
+    --ts-cp-bg: var(--ts-skin-surface, #fff);
+    --ts-cp-border: var(--ts-skin-border, rgba(0,0,0,.1));
+    --ts-cp-shadow: var(--ts-skin-shadow, 0 8px 30px rgba(0,0,0,.12));
+    --ts-cp-thumb-border: var(--ts-skin-border, rgba(0,0,0,.18));
+    --ts-cp-input-bg: var(--ts-skin-surface-2, rgba(0,0,0,.04));
+    --ts-cp-input-fg: var(--ts-skin-text, #1a2530);
+    --ts-cp-input-border: var(--ts-skin-border, rgba(0,0,0,.12));
 }
 .ts-cp-wrapper {
     position: relative;
@@ -678,7 +678,7 @@ html.dark,
         repeating-conic-gradient(#bbb 0% 25%, transparent 0% 50%);
     background-size: 100% 100%, 8px 8px;
 }
-.ts-cp-thumb:hover { transform: scale(1.08); border-color: rgba(99,202,183,.6); }
+.ts-cp-thumb:hover { transform: scale(1.08); border-color: var(--ts-skin-accent, rgba(99,202,183,.6)); }
 .ts-cp-thumb:focus-visible { outline: 2px solid var(--ts-cp-focus); outline-offset: 2px; }
 .ts-cp-panel {
     position: fixed;
@@ -861,7 +861,7 @@ html.dark,
     cursor: pointer;
     transition: background .15s, border-color .15s;
 }
-.ts-cp-eyedropper:hover { background: rgba(99,202,183,.12); border-color: rgba(99,202,183,.45); }
+.ts-cp-eyedropper:hover { background: var(--ts-skin-accent-soft, rgba(99,202,183,.12)); border-color: var(--ts-skin-accent, rgba(99,202,183,.45)); }
 .ts-cp-eyedropper:focus-visible { outline: 2px solid var(--ts-cp-focus); outline-offset: 2px; }
 `;
         }

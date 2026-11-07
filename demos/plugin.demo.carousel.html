@@ -524,7 +524,7 @@ inst.destroy();     // full teardown</pre>
 <script>
   // Auto-init all non-.manual carousels
   $(function() {
-    if ($.isFunction($.fn.themestrapPluginCarousel) && $('[data-plugin-carousel-pro]').length) {
+    if (typeof $.fn.themestrapPluginCarousel === 'function' && $('[data-plugin-carousel-pro]').length) {
       $('[data-plugin-carousel-pro]:not(.manual)').each(function() {
         const $el   = $(this);
         const opts  = themestrap.fn.getOptions($el.data('plugin-options')) || {};

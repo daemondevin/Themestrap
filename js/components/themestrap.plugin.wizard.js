@@ -93,7 +93,7 @@
  *   wizard:reset          — when reset() is called
  *
  * Init.js wiring (DOMReady-immediate):
- *   if ($.isFunction($.fn['themestrapPluginWizard']) && $('[data-plugin-wizard]').length) {
+ *   if (typeof $.fn['themestrapPluginWizard'] === 'function' && $('[data-plugin-wizard]').length) {
  *       $(() => {
  *           $('[data-plugin-wizard]:not(.manual)').each(function () {
  *               const $this = $(this);
@@ -112,16 +112,16 @@
     const CSS_TEXT = `
         /* Themestrap Wizard */
         :root {
-            --wizard-accent:           var(--color-primary, #e8672a);
+            --wizard-accent:           var(--ts-skin-accent, var(--color-primary, #e8672a));
             --wizard-accent-subtle:    color-mix(in srgb, var(--wizard-accent) 12%, transparent);
-            --wizard-muted:            #94a3b8;
-            --wizard-fg:               #0f172a;
-            --wizard-bg:               #ffffff;
-            --wizard-border:           rgba(15, 23, 42, 0.10);
-            --wizard-border-strong:    rgba(15, 23, 42, 0.20);
+            --wizard-muted:            var(--ts-skin-text-dim, #94a3b8);
+            --wizard-fg:               var(--ts-skin-text, #0f172a);
+            --wizard-bg:               var(--ts-skin-surface, #ffffff);
+            --wizard-border:           var(--ts-skin-border, rgba(15, 23, 42, 0.10));
+            --wizard-border-strong:    var(--ts-skin-border-strong, rgba(15, 23, 42, 0.20));
             --wizard-step-size:        32px;
-            --wizard-step-font:        .8125rem;
-            --wizard-radius:           var(--border-radius, 6px);
+            --wizard-step-font:        var(--ts-skin-font, .8125rem);
+            --wizard-radius:           var(--ts-skin-radius, var(--border-radius, 6px));
             --wizard-duration:         300ms;
             --wizard-ease:             cubic-bezier(.16, 1, .3, 1);
         }
@@ -200,14 +200,14 @@
         [data-wizard-indicator].wiz-active [data-wizard-indicator-bubble] {
             background: var(--wizard-accent);
             border-color: var(--wizard-accent);
-            color: #fff;
+            color: var(--ts-skin-on-accent, #fff);
             box-shadow: 0 0 0 4px var(--wizard-accent-subtle);
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-bubble] {
             background: var(--wizard-accent);
             border-color: var(--wizard-accent);
-            color: #fff;
+            color: var(--ts-skin-on-accent, #fff);
         }
 
         [data-wizard-indicator].wiz-completed [data-wizard-indicator-bubble]::after {
@@ -341,13 +341,13 @@
 
         /* Validation error styles on invalid inputs */
         [data-plugin-wizard] .wiz-invalid {
-            border-color: #dc2626 !important;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+            border-color: var(--ts-skin-danger, #dc2626) !important;
+            box-shadow: 0 0 0 3px var(--ts-skin-danger, rgba(220, 38, 38, 0.15)) !important;
         }
 
         [data-plugin-wizard] [data-wizard-error] {
             font-size: .8125rem;
-            color: #dc2626;
+            color: var(--ts-skin-danger, #dc2626);
             margin-top: 4px;
             display: none;
         }

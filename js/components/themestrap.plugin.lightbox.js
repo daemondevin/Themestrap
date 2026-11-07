@@ -433,7 +433,7 @@
             self._open = true;
 
             // Callback
-            if ($.isFunction(o.onOpen)) o.onOpen.call(self, self._items[self._current], self._current);
+            if (typeof o.onOpen === 'function') o.onOpen.call(self, self._items[self._current], self._current);
 
             return this;
         }
@@ -459,7 +459,7 @@
                 $('body').css('overflow', '');
             }, 300);
 
-            if ($.isFunction(o.onClose)) o.onClose.call(self);
+            if (typeof o.onClose === 'function') o.onClose.call(self);
 
             return this;
         }
@@ -541,7 +541,7 @@
 
             function onLoaded() {
                 $wrap.removeClass('ts-lb-loading');
-                if ($.isFunction(o.onItemLoad)) o.onItemLoad.call(self, item, idx);
+                if (typeof o.onItemLoad === 'function') o.onItemLoad.call(self, item, idx);
             }
 
             if (type === 'image') {

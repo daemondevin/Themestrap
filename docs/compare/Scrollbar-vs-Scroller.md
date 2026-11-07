@@ -343,7 +343,7 @@ The `maxHeight` pattern — grow-to-content, then scroll — is not natively sup
 
 ```js
 // init.js wiring
-if ($.isFunction($.fn['themestrapPluginScrollbar']) && $('[data-plugin-scrollbar]').length) {
+if (typeof $.fn['themestrapPluginScrollbar'] === 'function' && $('[data-plugin-scrollbar]').length) {
     themestrap.fn.dynIntObsInit(
         '[data-plugin-scrollbar]:not(.manual)',
         'themestrapPluginScrollbar',

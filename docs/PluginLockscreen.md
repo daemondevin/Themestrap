@@ -44,7 +44,7 @@ $('#page-lock').data('__pluginLockscreen').lock();
 ### Auto-init wiring (`themestrap.init.js`)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginLockscreen']) && $('[data-plugin-lockscreen]').length) {
+if (typeof $.fn['themestrapPluginLockscreen'] === 'function' && $('[data-plugin-lockscreen]').length) {
     $(() => {
         $('[data-plugin-lockscreen]:not(.manual)').each(function () {
             const $this = $(this);

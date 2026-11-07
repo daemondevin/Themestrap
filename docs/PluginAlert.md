@@ -69,7 +69,7 @@ The plugin reads the `alert-info` class, sets `type: 'info'`, injects the skin t
 ### Auto-init wiring (`themestrap.init.js`)
 
 ```js
-if ($.isFunction($.fn['themestrapPluginAlert']) && $('[data-plugin-alert]').length) {
+if (typeof $.fn['themestrapPluginAlert'] === 'function' && $('[data-plugin-alert]').length) {
     $(() => {
         $('[data-plugin-alert]:not(.manual)').each(function () {
             const $this = $(this);

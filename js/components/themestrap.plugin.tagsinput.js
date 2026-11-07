@@ -26,22 +26,22 @@
             align-items: center;
             gap: 5px;
             padding: 6px 8px;
-            background: var(--ts-ti-bg, rgba(255,255,255,0.03));
-            border: 1px solid var(--ts-ti-border, rgba(255,255,255,0.10));
-            border-radius: var(--ts-ti-radius, 5px);
+            background: var(--ts-ti-bg, var(--ts-skin-surface-2, rgba(255,255,255,0.03)));
+            border: 1px solid var(--ts-ti-border, var(--ts-skin-border, rgba(255,255,255,0.10)));
+            border-radius: var(--ts-ti-radius, var(--ts-skin-radius, 5px));
             cursor: text;
             min-height: 40px;
             transition: border-color 0.15s;
         }
         .ts-tagsinput:hover {
-            border-color: var(--ts-ti-border-hover, rgba(255,255,255,0.20));
+            border-color: var(--ts-ti-border-hover, var(--ts-skin-border-strong, rgba(255,255,255,0.20)));
         }
         .ts-tagsinput.ts-ti-focused {
-            border-color: var(--ts-ti-border-focus, #00c7be);
+            border-color: var(--ts-ti-border-focus, var(--ts-skin-accent, #00c7be));
             outline: none;
         }
         .ts-tagsinput.ts-ti-invalid {
-            border-color: var(--ts-ti-border-invalid, #e74c3c);
+            border-color: var(--ts-ti-border-invalid, var(--ts-skin-danger, #e74c3c));
             animation: ts-ti-shake 0.35s ease;
         }
         @keyframes ts-ti-shake {
@@ -68,10 +68,10 @@
             align-items: center;
             gap: 5px;
             padding: 2px 8px 2px 10px;
-            background: var(--ts-ti-tag-bg, rgba(0,199,190,0.15));
-            color: var(--ts-ti-tag-text, #00c7be);
-            border: 1px solid var(--ts-ti-tag-border, rgba(0,199,190,0.30));
-            border-radius: var(--ts-ti-tag-radius, 20px);
+            background: var(--ts-ti-tag-bg, var(--ts-skin-accent-soft, rgba(0,199,190,0.15)));
+            color: var(--ts-ti-tag-text, var(--ts-skin-accent, #00c7be));
+            border: 1px solid var(--ts-ti-tag-border, var(--ts-skin-accent, rgba(0,199,190,0.30)));
+            border-radius: var(--ts-ti-tag-radius, var(--ts-skin-radius-lg, 20px));
             font-size: 12px;
             font-weight: 500;
             line-height: 1.4;
@@ -100,7 +100,7 @@
         }
         .ts-tag-remove:hover {
             opacity: 1;
-            background: rgba(0,199,190,0.20);
+            background: var(--ts-skin-danger-soft, rgba(0,199,190,0.20));
         }
         .ts-tagsinput-field {
             flex: 1;
@@ -114,7 +114,7 @@
             font-family: inherit;
         }
         .ts-tagsinput-field::placeholder {
-            color: var(--ts-ti-placeholder, rgba(205,216,230,0.40));
+            color: var(--ts-ti-placeholder, var(--ts-skin-text-dim, rgba(205,216,230,0.40)));
         }
     `;
 

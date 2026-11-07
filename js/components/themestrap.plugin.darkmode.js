@@ -39,7 +39,7 @@
  *   themestrap.PluginDarkMode.apply()          // re-run resolution order
  *
  * Init.js wiring:
- *   if ($.isFunction($.fn['themestrapPluginDarkMode']) && $('[data-plugin-darkmode]').length) {
+ *   if (typeof $.fn['themestrapPluginDarkMode'] === 'function' && $('[data-plugin-darkmode]').length) {
  *       themestrap.fn.intObsInit('[data-plugin-darkmode]:not(.manual)', 'themestrapPluginDarkMode');
  *   }
  *

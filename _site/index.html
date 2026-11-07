@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Themestrap: jQuery components for Bootstrap 5, no build step</title>
+    <meta name="description" content="Themestrap is a library of 80+ jQuery components for Bootstrap 5. Include a script, add a data-plugin attribute, and the component starts itself. No bundler, no framework.">
+    <meta name="theme-color" content="#0a1929">
+
+    <!-- Apply the saved theme before any CSS paints (same key PluginDarkMode uses) -->
+    <script>
+        (function () {
+            try {
+                var s = localStorage.getItem('themestrap-theme'),
+                    d = matchMedia('(prefers-color-scheme: dark)').matches,
+                    t = s || (d ? 'dark' : 'light'),
+                    h = document.documentElement;
+                if (t === 'dark') h.classList.add('dark');
+                h.setAttribute('data-theme', t);
+                h.setAttribute('data-bs-theme', t);
+            } catch (e) {}
+        })();
+    </script>
+
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/site.css">
+
+    <script src="assets/js/manifest.js"></script>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-nav">
+        <div class="container-site site-nav__inner">
+            <a class="brand" href="index.html" aria-label="Themestrap home">
+                <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true">
+                    <rect width="32" height="32" rx="8" fill="#0e2238"/>
+                    <rect x="7" y="8" width="18" height="4.5" rx="2.25" fill="#2ab8c8"/>
+                    <rect x="13.75" y="12.5" width="4.5" height="12" rx="2.25" fill="#ffffff"/>
+                    <circle cx="23.5" cy="23" r="2.4" fill="#e8672a"/>
+                </svg>
+                Themestrap
+            </a>
+            <nav aria-label="Main">
+                <ul class="site-nav__links">
+                    <li><a href="docs.html">Docs</a></li>
+                    <li><a href="docs.html?doc=PluginAccordion">Components</a></li>
+                    <li><a href="#showcase">Showcase</a></li>
+                    <li><a href="docs.html?doc=changelog">Changelog</a></li>
+                </ul>
+            </nav>
+            <div class="site-nav__tools">
+                <button type="button" class="search-trigger" data-command-open="cmdk" aria-label="Search the documentation">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <span class="search-trigger__label">Search docs</span>
+                    <kbd><span data-mod-key>Ctrl</span>K</kbd>
+                </button>
+                <a class="gh-link" href="https://github.com/daemondevin/Themestrap" target="_blank" rel="noopener" aria-label="Themestrap on GitHub">
+                    <i class="bi bi-github" aria-hidden="true"></i>
+                    <span class="gh-link__stars"></span>
+                </a>
+                <button type="button" class="btn-icon" data-plugin-darkmode></button>
+            </div>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="container-site">
+                <a class="announce" href="docs.html?doc=changelog">
+                    <span class="announce__tag">1.0.2</span>
+                    Accessibility and init fixes
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+                <h1 class="hero__title">Interface behavior, one attribute at a time.</h1>
+                <p class="hero__lead">
+                    Themestrap is a library of 80+ jQuery components for Bootstrap 5. There's no bundler and no framework:
+                    include a script, add <code>data-plugin-*</code> to your markup, and each component starts itself as it scrolls into view.
+                </p>
+                <div class="hero__actions">
+                    <a class="btn-site" href="docs.html">Get started</a>
+                    <a class="btn-site btn-site--ghost" href="docs.html?doc=PluginAccordion">Browse components</a>
+                </div>
+                <div class="install">
+                    <span class="install__cmd">git clone https://github.com/daemondevin/Themestrap.git</span>
+                    <button type="button" class="copy-btn" data-copy="git clone https://github.com/daemondevin/Themestrap.git" aria-label="Copy the git clone command">
+                        <i class="bi bi-clipboard" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Attribute lab: each code tab is the exact markup rendering on the right -->
+        <section class="lab" id="lab" aria-label="Live component examples">
+            <div class="container-site">
+                <div class="lab__frame">
+                    <div class="lab__code">
+                        <div data-plugin-code-window data-plugin-options='{"chrome": "mac", "glow": false, "lineNumbers": true, "showCopy": true}'>
+                            <pre data-code-window-tab="select.html" data-plugin-highlight="html" data-demo="demo-select"><code></code></pre>
+                            <pre data-code-window-tab="calendar.html" data-plugin-highlight="html" data-demo="demo-calendar"><code></code></pre>
+                            <pre data-code-window-tab="otp.html" data-plugin-highlight="html" data-demo="demo-otp"><code></code></pre>
+                            <pre data-code-window-tab="tags.html" data-plugin-highlight="html" data-demo="demo-tags"><code></code></pre>
+                            <pre data-code-window-tab="stepper.html" data-plugin-highlight="html" data-demo="demo-number"><code></code></pre>
+                            <pre data-code-window-tab="feedback.html" data-plugin-highlight="html" data-demo="demo-feedback"><code></code></pre>
+                        </div>
+                    </div>
+                    <div class="lab__stage">
+                        <div class="lab__stage-head">
+                            <span class="lab__live">Live preview</span>
+                            <span data-lab-file>select.html</span>
+                        </div>
+                        <div class="lab__stage-body">
+                            <div>
+                                <div class="lab__panel" data-demo-live="demo-select" data-caption="PluginSelect keeps the native select in the form, so posts and autofill still work."></div>
+                                <div class="lab__panel" data-demo-live="demo-calendar" data-caption="PluginCalendar in range mode. Arrow keys move between days." hidden></div>
+                                <div class="lab__panel" data-demo-live="demo-otp" data-caption="PluginOtp advances on each digit and accepts a pasted code." hidden></div>
+                                <div class="lab__panel" data-demo-live="demo-tags" data-caption="PluginTagsInput validates addresses and writes them back to the input." hidden></div>
+                                <div class="lab__panel" data-demo-live="demo-number" data-caption="PluginNumberInput reads min, max and step from the input. Hold a button to repeat." hidden></div>
+                                <div class="lab__panel" data-demo-live="demo-feedback" data-caption="PluginTooltip on hover and focus, PluginToast when you publish." hidden></div>
+                                <p class="lab__caption" data-lab-caption>PluginSelect keeps the native select in the form, so posts and autofill still work.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works: a real sequence, so the steps are numbered -->
+        <section class="section" aria-labelledby="how-title">
+            <div class="container-site">
+                <div class="section__head">
+                    <h2 class="section__title" id="how-title">From markup to working component</h2>
+                    <p class="section__lead">The page stays HTML. Themestrap adds behavior to elements that ask for it and leaves everything else alone.</p>
+                </div>
+                <ol class="steps">
+                    <li class="step">
+                        <h3 class="step__title">Include the scripts</h3>
+                        <p class="step__text">jQuery, the Themestrap core, the components you use, and the auto-init file last.</p>
+<pre class="snip" data-plugin-highlight="html" data-plugin-options='{"lineNumbers": false}'><code>&lt;script src="jquery.min.js"&gt;&lt;/script&gt;
+&lt;script src="js/themestrap.js"&gt;&lt;/script&gt;
+&lt;script src="js/components/themestrap.plugin.select.js"&gt;&lt;/script&gt;
+&lt;script src="js/themestrap.init.js"&gt;&lt;/script&gt;</code></pre>
+                    </li>
+                    <li class="step">
+                        <h3 class="step__title">Mark up the element</h3>
+                        <p class="step__text">A <code>data-plugin-*</code> attribute names the component. Options go in <code>data-plugin-options</code> as JSON.</p>
+<pre class="snip" data-plugin-highlight="html" data-plugin-options='{"lineNumbers": false}'><code>&lt;div data-plugin-select&gt;
+  &lt;select name="plan"&gt;
+    &lt;option value=""&gt;Choose a plan&lt;/option&gt;
+    &lt;option value="starter"&gt;Starter&lt;/option&gt;
+    &lt;option value="team"&gt;Team&lt;/option&gt;
+  &lt;/select&gt;
+&lt;/div&gt;</code></pre>
+                    </li>
+                    <li class="step">
+                        <h3 class="step__title">Take control when you need it</h3>
+                        <p class="step__text">Add <code>.manual</code> to start a component yourself, then reach its instance from a fresh selection.</p>
+<pre class="snip" data-plugin-highlight="javascript" data-plugin-options='{"lineNumbers": false}'><code>$('#plan').themestrapPluginSelect({
+  placeholder: 'Choose a plan'
+});
+
+const select = $('#plan').data('__pluginSelect');
+
+$('#plan').on('ts.select.change', e =&gt; {
+  console.log(e.detail.value);
+});</code></pre>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Loading strategies -->
+        <section class="section" aria-labelledby="load-title">
+            <div class="container-site">
+                <div class="section__head">
+                    <h2 class="section__title" id="load-title">Load as much as the page needs</h2>
+                    <p class="section__lead">Everything shares the <code>window.themestrap</code> namespace, so you can start with the whole bundle and trim later, or hand-pick from day one.</p>
+                </div>
+                <dl class="loadout">
+                    <div class="loadout__row">
+                        <dt class="loadout__file">js/themestrap.js</dt>
+                        <dd class="loadout__desc">The namespace and the helpers every component relies on, including <code>getOptions</code> and the viewport observers.</dd>
+                        <dd class="loadout__tag loadout__tag--req">Required</dd>
+                    </div>
+                    <div class="loadout__row">
+                        <dt class="loadout__file">js/themestrap.bundle.js</dt>
+                        <dd class="loadout__desc">Every component class in one file. The quickest setup when page weight isn't a concern.</dd>
+                        <dd class="loadout__tag">Everything</dd>
+                    </div>
+                    <div class="loadout__row">
+                        <dt class="loadout__file">js/components/themestrap.plugin.*.js</dt>
+                        <dd class="loadout__desc">One file per component. Each injects its own CSS the first time it builds, so there's no stylesheet to add.</dd>
+                        <dd class="loadout__tag">Hand-picked</dd>
+                    </div>
+                    <div class="loadout__row">
+                        <dt class="loadout__file">js/themestrap.loader.js + modules.js</dt>
+                        <dd class="loadout__desc">Declare <code>data-module</code> on an element and the loader fetches that component and its vendor dependencies when the page needs them.</dd>
+                        <dd class="loadout__tag">On demand</dd>
+                    </div>
+                    <div class="loadout__row">
+                        <dt class="loadout__file">js/themestrap.init.js</dt>
+                        <dd class="loadout__desc">Finds <code>data-plugin-*</code> elements and starts each component as it nears the viewport.</dd>
+                        <dd class="loadout__tag">Auto-init</dd>
+                    </div>
+                </dl>
+            </div>
+        </section>
+
+        <!-- Directory, built from the docs manifest -->
+        <section class="section" aria-labelledby="dir-title">
+            <div class="container-site">
+                <div class="section__head">
+                    <h2 class="section__title" id="dir-title">Every component has a guide</h2>
+                    <p class="section__lead"><span data-component-count>70</span> components documented with markup, options, events, keyboard behavior and the mistakes to avoid.</p>
+                </div>
+                <div class="directory" id="directory"></div>
+            </div>
+        </section>
+
+        <!-- Showcase -->
+        <section class="section" id="showcase" aria-labelledby="showcase-title">
+            <div class="container-site">
+                <div class="section__head">
+                    <h2 class="section__title" id="showcase-title">Built with Themestrap</h2>
+                    <p class="section__lead">Complete projects in the repository that put the components to work together, from marketing sites to a multiplayer dice game.</p>
+                </div>
+                <div class="showcase">
+                    <a class="showcase__item" href="https://github.com/daemondevin/Themestrap/tree/main/showcase/Launchpad" target="_blank" rel="noopener">
+                        <span class="showcase__kind">Starter template</span>
+                        <h3 class="showcase__name">Launchpad</h3>
+                        <p class="showcase__desc">A six-page SaaS marketing site driven by one set of design tokens, with full light and dark themes.</p>
+                        <span class="chips"><span class="chip">Dark Mode</span><span class="chip">Counter</span><span class="chip">Scroll FX</span></span>
+                    </a>
+                    <a class="showcase__item" href="https://github.com/daemondevin/Themestrap/tree/main/showcase/Procedure" target="_blank" rel="noopener">
+                        <span class="showcase__kind">Starter template</span>
+                        <h3 class="showcase__name">Procedure</h3>
+                        <p class="showcase__desc">An API reference site with quickstart, authentication, webhooks and error pages.</p>
+                        <span class="chips"><span class="chip">Code Rail</span><span class="chip">Code Window</span><span class="chip">Command Menu</span><span class="chip">Scroll Spy</span></span>
+                    </a>
+                    <a class="showcase__item" href="https://github.com/daemondevin/Themestrap/tree/main/showcase/mailbox" target="_blank" rel="noopener">
+                        <span class="showcase__kind">Web app</span>
+                        <h3 class="showcase__name">Mailbox</h3>
+                        <p class="showcase__desc">An email client with sign-in, inbox, message view and compose screens.</p>
+                        <span class="chips"><span class="chip">Navigation</span><span class="chip">Hover Card</span><span class="chip">Tags Input</span><span class="chip">Rich Editor</span></span>
+                    </a>
+                    <a class="showcase__item" href="https://github.com/daemondevin/Themestrap/tree/main/showcase/cod-e-ditor" target="_blank" rel="noopener">
+                        <span class="showcase__kind">Web app</span>
+                        <h3 class="showcase__name">cod[e]ditor</h3>
+                        <p class="showcase__desc">An in-browser code editor with a desktop-style title bar, file explorer and terminal panel.</p>
+                        <span class="chips"><span class="chip">Menubar</span><span class="chip">Toolbar</span><span class="chip">Context Menu</span><span class="chip">Command Menu</span></span>
+                    </a>
+                    <a class="showcase__item" href="https://github.com/daemondevin/Themestrap/tree/main/showcase/TSBlog" target="_blank" rel="noopener">
+                        <span class="showcase__kind">Web app</span>
+                        <h3 class="showcase__name">TSBlog</h3>
+                        <p class="showcase__desc">A self-hosted PHP blog on flat files or SQLite, managed entirely from a browser-based admin.</p>
+                        <span class="chips"><span class="chip">Markdown Editor</span><span class="chip">Calendar</span><span class="chip">Time Picker</span><span class="chip">Dialog</span></span>
+                    </a>
+                    <a class="showcase__item" href="https://github.com/daemondevin/Themestrap/tree/main/showcase/10000" target="_blank" rel="noopener">
+                        <span class="showcase__kind">Game</span>
+                        <h3 class="showcase__name">10,000</h3>
+                        <p class="showcase__desc">The dice game also known as Farkle, playable online with friends or alone in 3D.</p>
+                        <span class="chips"><span class="chip">Dice</span><span class="chip">Particles</span><span class="chip">Drawer</span><span class="chip">Markdown</span></span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--flush">
+            <div class="container-site">
+                <div class="cta">
+                    <div>
+                        <h2>Start with one component</h2>
+                        <p>Pick the one your page is missing, read its guide, and drop it in. Nothing else changes.</p>
+                    </div>
+                    <div class="hero__actions mb-0">
+                        <a class="btn-site" href="docs.html">Read the docs</a>
+                        <a class="btn-site btn-site--ghost" href="https://github.com/daemondevin/Themestrap" target="_blank" rel="noopener"><i class="bi bi-github" aria-hidden="true"></i>View on GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container-site site-footer__inner">
+            <p class="m-0">Themestrap is MIT licensed. Built with its own components.</p>
+            <ul>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="docs.html?doc=why-themestrap">Why Themestrap</a></li>
+                <li><a href="docs.html?doc=changelog">Changelog</a></li>
+                <li><a href="https://github.com/daemondevin/Themestrap" target="_blank" rel="noopener">GitHub</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Command menu; site.js fills the groups from the manifest -->
+    <div data-plugin-command-menu id="cmdk" data-plugin-options='{"shortcut": "mod+k", "recent": true}'>
+        <div data-command-backdrop></div>
+        <div data-command-panel>
+            <div data-command-search>
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input data-command-input type="text" placeholder="Search components and guides" aria-label="Search components and guides">
+            </div>
+            <div data-command-list>
+                <div data-command-empty>No results. Try a component name such as "select" or "drawer".</div>
+                <div data-command-group data-command-heading="Recent" data-command-recent></div>
+            </div>
+            <div data-command-footer>
+                <kbd>↑</kbd><kbd>↓</kbd> to move
+                <kbd>↵</kbd> to open
+                <kbd>esc</kbd> to close
+            </div>
+        </div>
+    </div>
+
+    <!-- Lab demo sources. Each one is shown as code and rendered live, unchanged. -->
+    <script type="text/html" id="demo-select">
+        <div class="field">
+          <label for="region">Deploy region</label>
+          <div data-plugin-select>
+            <select id="region" name="region">
+              <option value="">Choose a region</option>
+              <optgroup label="Americas">
+                <option value="us-east">US East (Virginia)</option>
+                <option value="us-west">US West (Oregon)</option>
+                <option value="sa-east">South America (São Paulo)</option>
+              </optgroup>
+              <optgroup label="Europe">
+                <option value="eu-west">EU West (Dublin)</option>
+                <option value="eu-central">EU Central (Frankfurt)</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+    </script>
+
+    <script type="text/html" id="demo-calendar">
+        <div data-plugin-calendar
+             data-plugin-options='{"mode": "range", "showFooter": true}'></div>
+    </script>
+
+    <script type="text/html" id="demo-otp">
+        <div data-plugin-otp
+             data-plugin-options='{"length": 6, "separator": "-",
+               "label": "Verification code",
+               "hint": "Enter the code we sent to your phone."}'></div>
+    </script>
+
+    <script type="text/html" id="demo-tags">
+        <div class="field">
+          <label for="notify">Notify on deploy</label>
+          <input type="text" id="notify" name="notify"
+                 value="ada@example.com, grace@example.com"
+                 data-plugin-tagsinput>
+          <span class="field__hint">Press Enter or a comma to add an address.</span>
+        </div>
+    </script>
+
+    <script type="text/html" id="demo-number">
+        <div class="field">
+          <label for="replicas">Replicas</label>
+          <input type="number" id="replicas" name="replicas"
+                 value="3" min="1" max="12"
+                 data-plugin-numberinput
+                 data-plugin-options='{"unit": "pods"}'>
+          <span class="field__hint">Between 1 and 12 per region.</span>
+        </div>
+    </script>
+
+    <script type="text/html" id="demo-feedback">
+        <div class="demo-card">
+          <h3>Release 1.0.2</h3>
+          <p>All checks passed on the staging build.</p>
+          <div class="demo-row">
+            <button type="button" id="publish" class="btn-site btn-site--accent"
+                    data-plugin-tooltip="Publishes to production">Publish</button>
+            <button type="button" class="btn-site btn-site--ghost"
+                    data-plugin-tooltip="Keeps it as a draft"
+                    data-plugin-options='{"location": "bottom"}'>Save draft</button>
+          </div>
+        </div>
+        <script>
+          $('#publish').on('click', function () {
+            themestrap.PluginToast.show({
+              title: 'Published',
+              body: 'Release 1.0.2 is live in production.',
+              type: 'success',
+              position: 'bottom-end'
+            });
+          });
+        <\/script>
+    </script>
+
+    <!-- Vendors -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Themestrap, straight from the repository through jsDelivr -->
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/themestrap.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.darkmode.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.commandmenu.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.tooltip.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.highlight.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.codewindow.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.select.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.calendar.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.otp.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.tagsinput.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/components/themestrap.plugin.numberinput.js"></script>
+
+    <!-- Site behavior, then auto-init last -->
+    <script src="assets/js/site.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/daemondevin/Themestrap@main/js/themestrap.init.js"></script>
+</body>
+</html>
