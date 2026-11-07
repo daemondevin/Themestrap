@@ -4,7 +4,7 @@ All notable changes to Themestrap are documented here.
 
 This repository does not currently include semantic version tags or package metadata, so the version sequence below is inferred from the project’s actual Git commit history beginning with the initial repository import and continuing through the current main branch state.
 
-## [Unreleased]
+## [1.1.0] - 2026-11-7
 
 ### Added
 - Skins: `css/skins/*.css` set the original palette and a shared `--ts-skin-*` token set for light and dark mode. Ships Venom plus eight Base16 palettes (Solarized, Gruvbox, One, Tomorrow, Nord, Dracula, Rosé Pine, Catppuccin)
