@@ -1,8 +1,3 @@
-/* Themestrap site styles
-   Structure borrows from shadcn/ui (neutral surfaces, hairline borders, docs layout);
-   the hero and install treatment borrow from getbootstrap.com.
-   Colors come from Themestrap's own palette: navy ink, teal accent, orange spark. */
-
 /* Tokens */
 :root {
     --site-bg: #ffffff;
@@ -25,7 +20,7 @@
     --site-radius-sm: 6px;
     --site-nav-h: 60px;
     --site-font: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --site-display: 'Syne', 'DM Sans', system-ui, sans-serif;
+    --site-display: 'Montserrat', 'DM Sans', system-ui, sans-serif;
     --site-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
     /* Bootstrap bridge */
