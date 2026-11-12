@@ -203,6 +203,12 @@
         }
 
         const $meta = $($('#doc-meta-template').html());
+        const $demo = $meta.find('[data-meta="demo"]');
+        if (current.demo) {
+            $demo.attr('href', SITE.demoHref(current));
+        } else {
+            $demo.remove();
+        }
         const $source = $meta.find('[data-meta="source"]');
         if (current.source) {
             $source.attr('href', SITE.blob(current.source));
@@ -273,7 +279,7 @@
     function polishLinks() {
         const ghBlob = new RegExp('^https://github\\.com/' + SITE.repo.replace('/', '\\/') + '/(?:blob|tree)/[^/]+/(.+)$', 'i');
 
-        $doc.find('a[href]').not('.heading-anchor').each(function () {
+        $doc.find('a[href]').not('.heading-anchor, .doc-meta a').each(function () {
             const $a = $(this);
             const href = $a.attr('href');
 
@@ -283,7 +289,13 @@
 
             if (/^https?:\/\//i.test(href)) {
                 const inRepo = href.match(ghBlob);
-                const entry = inRepo ? guideForPath(inRepo[1].split('#')[0]) : null;
+                const repoPath = inRepo ? inRepo[1].split('#')[0] : '';
+                const demo = /^demos\/plugin\.demo\.[^/]+\.html$/i.test(repoPath) ? SITE.demoForFile(repoPath) : null;
+                if (demo) {
+                    $a.attr('href', SITE.demoHref(demo));
+                    return;
+                }
+                const entry = inRepo ? guideForPath(repoPath) : null;
                 if (entry) {
                     $a.attr('href', SITE.href(entry, href.split('#')[1]));
                 } else {
@@ -293,6 +305,11 @@
             }
 
             const { path, hash } = resolveRepoPath(href);
+            const demo = /^demos\/plugin\.demo\.[^/]+\.html$/i.test(path) ? SITE.demoForFile(path) : null;
+            if (demo) {
+                $a.attr('href', SITE.demoHref(demo));
+                return;
+            }
             const entry = guideForPath(path);
             if (entry) {
                 $a.attr('href', SITE.href(entry, hash));

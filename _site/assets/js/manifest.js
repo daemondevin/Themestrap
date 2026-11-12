@@ -8,7 +8,10 @@
     const branch = 'main';
 
     // Each entry: id (route key), label, path (repo-relative), desc (search text).
-    // Component entries derive their plugin source file from the id unless `js` is set.
+    // Component entries derive their plugin source file from the id unless `js` is set,
+    // and their demo (demos/plugin.demo.<name>.html) the same way unless `demo` is set.
+    // Set `demo` to a file stem for a guide whose demo is named differently, or to false
+    // for a component that has no demo page yet.
     const sections = [
         {
             title: 'Getting started',
@@ -17,7 +20,8 @@
                 { id: 'introduction', label: 'Introduction', path: 'README.md', desc: 'What Themestrap is and how to include it' },
                 { id: 'why-themestrap', label: 'Why Themestrap', path: 'REASON.md', desc: 'The case for components without a build step' },
                 { id: 'ThemestrapArchitecture', label: 'Architecture', path: 'docs/ThemestrapArchitecture.md', desc: 'Namespace, lifecycle and init strategies' },
-                { id: 'ThemestrapModuleLoader', label: 'Module loader', path: 'docs/ThemestrapModuleLoader.md', desc: 'Fetch plugins and vendor dependencies on demand' },
+                { id: 'ThemestrapModuleLoader', label: 'Module loader', path: 'docs/ThemestrapModuleLoader.md', demo: 'moduleloader', desc: 'Fetch plugins and vendor dependencies on demand' },
+                { id: 'ThemestrapSkins', label: 'Skins', path: 'docs/ThemestrapSkins.md', demo: 'skins', desc: 'Swap one stylesheet to recolor every component' },
                 { id: 'ThemestrapPluginSkeleton', label: 'Plugin skeleton', path: 'docs/ThemestrapPluginSkeleton.js', type: 'code', lang: 'javascript', desc: 'A copy-paste starting point for a new plugin' },
                 { id: 'reference', label: 'Quick reference', path: 'REFERENCE.md', desc: 'Every component at a glance' },
                 { id: 'changelog', label: 'Changelog', path: 'CHANGELOG.md', desc: 'What changed between releases' }
@@ -95,7 +99,7 @@
             title: 'Accounts & privacy',
             icon: 'bi-shield-lock',
             items: [
-                { id: 'PluginAccount', label: 'Account', desc: 'Header sign-in and sign-up panels' },
+                { id: 'PluginAccount', label: 'Account', demo: false, desc: 'Header sign-in and sign-up panels' },
                 { id: 'PluginAuth', label: 'Auth', desc: 'Sign-in and registration forms' },
                 { id: 'PluginGDPR', label: 'GDPR', desc: 'Cookie consent and preferences' },
                 { id: 'PluginLockscreen', label: 'Lockscreen', desc: 'Lock the page behind a PIN' }
@@ -109,8 +113,8 @@
                 { id: 'PluginCursorEffect', label: 'Cursor Effect', desc: 'Custom cursor followers' },
                 { id: 'PluginFloatElement', label: 'Float Element', desc: 'Elements that drift on scroll' },
                 { id: 'PluginHoverEffect', label: 'Hover Effect', desc: '3D tilt and hover effects' },
-                { id: 'PluginIcon', label: 'Icon', desc: 'Animated SVG icons' },
-                { id: 'PluginInViewportStyle', label: 'In-Viewport Style', desc: 'Apply styles while in view' },
+                { id: 'PluginIcon', label: 'Icon', demo: false, desc: 'Animated SVG icons' },
+                { id: 'PluginInViewportStyle', label: 'In-Viewport Style', demo: false, desc: 'Apply styles while in view' },
                 { id: 'PluginParallax', label: 'Parallax', desc: 'Parallax backgrounds' },
                 { id: 'PluginParticles', label: 'Particles', desc: 'Animated particle backgrounds' },
                 { id: 'PluginReveal', label: 'Reveal', desc: 'Fade in on scroll, parallax banners' },
@@ -149,6 +153,11 @@
     ];
 
     // Fill in derived fields and build a flat, ordered index
+    // Demos that tour several components and so have no single guide
+    const tours = [
+        { id: 'uncommon', label: 'The uncommon stuff', demo: 'uncommon', desc: 'Motion, magnetic hover, scroll shadows, read more, random images, overlays, toasts and dark mode on one page' }
+    ];
+
     const flat  = [];
     const byId  = {};
     const byFile = {};
@@ -167,12 +176,36 @@
                 const stem = item.js || item.id.replace(/^Plugin/, '').toLowerCase();
                 item.source = 'js/components/themestrap.plugin.' + stem + '.js';
             }
+            if (item.isComponent && item.demo === undefined) {
+                item.demo = item.js || item.id.replace(/^Plugin/, '').toLowerCase();
+            }
             item.index = flat.length;
             flat.push(item);
             byId[item.id.toLowerCase()] = item;
             byFile[item.path.split('/').pop().toLowerCase()] = item;
         });
     });
+
+    // Every page with a demo, in sidebar order, then the tours
+    const demos = flat.filter(function (e) { return e.demo; });
+    tours.forEach(function (tour) {
+        tour.section = 'Tours';
+        tour.isTour = true;
+        demos.push(tour);
+    });
+
+    const demoById = {};
+    const demoByFile = {};
+    demos.forEach(function (entry, i) {
+        entry.demoIndex = i;
+        entry.demoFile = 'plugin.demo.' + entry.demo + '.html';
+        demoById[entry.id.toLowerCase()] = entry;
+        demoByFile[entry.demoFile] = entry;
+    });
+
+    // Published, the demos folder sits beside these pages (see .github/workflows/static.yml).
+    // Opened from a clone, the pages are in _site/ and the demos one level up.
+    const demoBase = /\/_site\//.test(window.location.pathname) ? '../demos/' : 'demos/';
 
     function raw(path) {
         return 'https://raw.githubusercontent.com/' + repo + '/' + branch + '/' + path;
@@ -203,6 +236,24 @@
         return 'docs.html?doc=' + encodeURIComponent(entry.id) + (hash ? '#' + hash : '');
     }
 
+    function demoHref(entry) {
+        return 'demo.html?d=' + encodeURIComponent(entry.id);
+    }
+
+    function demoUrl(entry) {
+        return demoBase + entry.demoFile;
+    }
+
+    // Resolve a ?d= value to a demo entry, or null when there's no such demo
+    function resolveDemo(id) {
+        return (id && demoById[String(id).toLowerCase()]) || null;
+    }
+
+    // Resolve a demo file name such as "plugin.demo.drawer.html"
+    function demoForFile(name) {
+        return demoByFile[String(name).toLowerCase().split('/').pop()] || null;
+    }
+
     window.TS_SITE = {
         repo: repo,
         branch: branch,
@@ -215,6 +266,13 @@
         resolve: resolve,
         fromFile: fromFile,
         href: href,
+        demos: demos,
+        tours: tours,
+        demoBase: demoBase,
+        demoHref: demoHref,
+        demoUrl: demoUrl,
+        resolveDemo: resolveDemo,
+        demoForFile: demoForFile,
         componentCount: flat.filter(function (e) { return e.isComponent; }).length
     };
 })(window);

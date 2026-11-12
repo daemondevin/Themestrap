@@ -4,7 +4,7 @@ All notable changes to Themestrap are documented here.
 
 This repository does not currently include semantic version tags or package metadata, so the version sequence below is inferred from the project’s actual Git commit history beginning with the initial repository import and continuing through the current main branch state.
 
-## [1.1.1] - 2026-11-12
+## [1.1.1] 2026-11-12
 
 ### Added
 - PluginMarkdown draws ```` ```mermaid ```` fenced blocks as diagrams. Mermaid loads from jsDelivr only on pages that have one (`mermaidSrc` to self-host), colors follow the skin through new `--ts-md-diagram-*` tokens, and diagrams redraw when dark mode toggles. New `mermaid` and `mermaidConfig` options, `renderDiagrams()` method, and `diagrams.ts.markdown` / `mermaiderror.ts.markdown` events
@@ -14,6 +14,9 @@ This repository does not currently include semantic version tags or package meta
 - PluginSortable: `Escape` puts a dragged item back where it started
 - PluginImageUpload: `--ts-iu-danger` token for error messages
 - PluginReveal, PluginSortable, PluginImageUpload: every method can be called by name through the jQuery method, and names starting with `_` are private
+- Docs site: the demos are published with it. `demos.html` lists all 75 by section with a filter, and `demo.html?d=<id>` runs one under a toolbar with its guide, source, a new tab link, and previous and next through every demo in sidebar order
+- Docs site: a "Live demo" link on every guide that has a demo, a Demos link in the header, menu and footer, and a "Live demos" group in the command menu
+- Docs site: the Skins guide is in the sidebar under Getting started
 
 ### Changed
 - PluginSortable: without a `handle`, touch screens pick an item up after a 300ms hold, so a quick swipe scrolls the page instead of being blocked
@@ -29,6 +32,8 @@ This repository does not currently include semantic version tags or package meta
 - PluginImageUpload: labels and option values with quotes or `<` broke the widget's markup
 - PluginReveal: `$(el).themestrapPluginReveal('destroy')` returned the instance without destroying it, and `destroy()` and `show()` returned nothing
 - PluginSortable and PluginImageUpload header comments used `$.isFunction`, which jQuery 4 removed
+- Demos: the Chart Circular and Hover Card demos linked to guide pages that don't exist
+- Docs site: on a phone, a table with a long code cell squeezed its first column to one letter per line
 
 
 ## [1.1.0] - 2026-11-7

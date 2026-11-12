@@ -79,8 +79,26 @@
             return `<div data-command-group data-command-heading="${esc(section.title)}">${items}</div>`;
         }).join('');
 
+        // Demos get their own group so "drawer" finds both the guide and the running page
+        const demos = `<div data-command-group data-command-heading="Live demos">${SITE.demos.map(entry => (
+            `<button type="button" id="cmd-demo-${esc(entry.id)}" data-command-item
+                data-command-href="${esc(SITE.demoHref(entry))}"
+                data-command-keywords="${esc(entry.id + ' demo example live')}">
+                <i class="bi bi-play-circle" data-command-icon></i>
+                <span class="cmd-text">
+                    <span data-command-label>${esc(entry.label)} demo</span>
+                    <span data-command-description>${esc(entry.isTour ? entry.desc : 'demos/' + entry.demoFile)}</span>
+                </span>
+            </button>`
+        )).join('')}</div>`;
+
         const actions = `
             <div data-command-group data-command-heading="Actions">
+                <button type="button" id="cmd-demos" data-command-item data-command-href="demos.html"
+                    data-command-keywords="demos examples gallery live">
+                    <i class="bi bi-grid-3x3-gap" data-command-icon></i>
+                    <span data-command-label>Browse all demos</span>
+                </button>
                 <button type="button" id="cmd-theme" data-command-item data-command-action="toggle-theme"
                     data-command-keywords="dark light mode theme appearance">
                     <i class="bi bi-circle-half" data-command-icon></i>
@@ -99,7 +117,7 @@
                 </button>
             </div>`;
 
-        $list.append(groups + actions);
+        $list.append(groups + demos + actions);
     }
 
     function bindCommandMenuActions() {
