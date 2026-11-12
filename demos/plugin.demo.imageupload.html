@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginImageUpload Demo | Themestrap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #0a1929;
+        --card: #0e2238;
+        --card-2: #0b1c30;
+        --line: rgba(255,255,255,0.08);
+        --text: #cdd8e6;
+        --muted: rgba(205,216,230,0.55);
+        --teal: #00c7be;
+        --orange: #ff9f43;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+        background: radial-gradient(1200px 600px at 80% -10%, rgba(0,199,190,0.08), transparent 60%), var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 56px 20px 96px;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .hero h1 {
+        font-family: 'Fraunces', serif;
+        font-size: 42px;
+        line-height: 1.1;
+        margin: 0 0 10px;
+        color: #fff;
+    }
+    .hero h1 em { color: var(--teal); font-style: italic; }
+    .hero p { color: var(--muted); max-width: 640px; margin: 0 0 16px; }
+    .hero p:last-child { margin-bottom: 40px; }
+    .hero code, .demo-card-body p code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        background: rgba(255,255,255,0.06);
+        padding: 1px 6px;
+        border-radius: 4px;
+        color: var(--orange);
+    }
+
+    .demo-card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+    .demo-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+    }
+    .badge-n {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: rgba(0,199,190,0.15);
+        color: var(--teal);
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+    }
+    .demo-card-header h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        margin: 0;
+        color: #fff;
+        flex: 1;
+    }
+    .tag-r {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--orange);
+        border: 1px solid rgba(255,159,67,0.35);
+        border-radius: 20px;
+        padding: 1px 10px;
+        white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+        .demo-card-header { flex-wrap: wrap; }
+        .tag-r { white-space: normal; }
+    }
+    .demo-card-body { padding: 18px; }
+    .demo-card-body > p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+    .demo-stage {
+        background: var(--card-2);
+        border: 1px dashed rgba(255,255,255,0.10);
+        border-radius: 8px;
+        padding: 22px 18px;
+    }
+    .demo-stage .cap {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin-bottom: 10px;
+    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .paste-field {
+        width: 100%;
+        margin-top: 18px;
+        font-family: inherit;
+        font-size: 13px;
+        color: var(--text);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        padding: 8px 10px;
+    }
+    .paste-field:focus { outline: none; border-color: var(--teal); }
+    @media (max-width: 680px) { .row-2 { grid-template-columns: 1fr; } }
+
+    pre.snip {
+        margin: 14px 0 0;
+        padding: 14px 16px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #b9c7d8;
+    }
+    pre.snip code { font-family: inherit; }
+
+    .demo-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+    .btn-d {
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        padding: 6px 14px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-d:hover { background: rgba(0,199,190,0.12); border-color: rgba(0,199,190,0.5); }
+    .btn-d.primary { background: var(--teal); color: #04201f; border-color: var(--teal); font-weight: 600; }
+    .btn-d.primary:hover { background: #12d9d0; }
+    .btn-d.danger { color: #ffb4a8; border-color: rgba(255,120,100,0.35); }
+    .btn-d.danger:hover { background: rgba(255,120,100,0.12); border-color: rgba(255,120,100,0.6); }
+    .btn-d[hidden] { display: none; }
+    kbd {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        padding: 1px 6px;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-bottom-width: 2px;
+        border-radius: 4px;
+        color: #fff;
+    }
+
+    .demo-log {
+        margin-top: 14px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        height: 124px;
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #8fa3ba;
+    }
+    .demo-log:empty::before { content: 'event and request log'; opacity: 0.4; }
+    .demo-log .t { color: var(--teal); margin-right: 8px; }
+    .demo-log .ev { color: var(--orange); }
+    .demo-log .rq { color: #8ab4ff; }
+
+    .out {
+        margin-top: 14px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #8fa3ba;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        word-break: break-all;
+        min-height: 40px;
+    }
+    .out b { color: var(--teal); font-weight: 500; }
+
+    /* The plugin's tokens, tuned for this dark page */
+    .ts-iu {
+        --ts-iu-border: rgba(255,255,255,0.18);
+        --ts-iu-bg: rgba(255,255,255,0.03);
+        --ts-iu-accent: #00c7be;
+        --ts-iu-muted: rgba(205,216,230,0.6);
+    }
+    .ts-iu { --ts-iu-danger: #ff8f80; }
+
+    /* Themed variants, only tokens are overridden */
+    .theme-amber .ts-iu {
+        --ts-iu-size: 9rem;
+        --ts-iu-accent: #ff9f43;
+        --ts-iu-border: rgba(255,159,67,0.45);
+        --ts-iu-bg: rgba(255,159,67,0.06);
+        --ts-iu-muted: #ffb870;
+    }
+    .theme-light {
+        background: #f4f7fb;
+        border-radius: 8px;
+        padding: 16px;
+        color: #1c2b3a;
+    }
+    .theme-light .ts-iu {
+        --ts-iu-size: 5rem;
+        --ts-iu-radius: 4px;
+        --ts-iu-border: #c3cfdc;
+        --ts-iu-bg: #ffffff;
+        --ts-iu-accent: #0a8f89;
+        --ts-iu-text: #1c2b3a;
+        --ts-iu-muted: #6b7f95;
+    }
+    .theme-light .btn-d { color: #1c2b3a; background: #fff; border-color: #c3cfdc; }
+
+    .demo-footer {
+        padding: 20px 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .demo-footer code { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <header class="hero">
+        <h1>Plugin<em>ImageUpload</em></h1>
+        <p>A picture picker for one image, such as an avatar or a logo. It shows the current picture, takes a click, a drag and drop or a paste, uploads with a progress bar, and offers a remove button. Initialize with <code>data-plugin-imageupload</code> or <code>$.fn.themestrapPluginImageUpload()</code>.</p>
+        <p>This page has no server, so requests to <code>demo:</code> addresses are answered by a small stand in that keeps your picture in the browser and logs what a real server would receive. Nothing leaves your computer. The <b>sample picture</b> buttons draw a picture and drop it on the widget for you.</p>
+    </header>
+
+    <!-- 1 Avatar -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">1</span>
+            <h2>An avatar</h2>
+            <span class="tag-r">data attribute &middot; shape: circle</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Starts with the picture in <code>current</code>. Click the circle or the button to choose a file, or drop one on the circle. Every request carries the entries of <code>data</code>, and <code>csrf</code> goes in both a <code>_csrf</code> field and an <code>X-CSRF-Token</code> header.</p>
+            <div class="demo-stage">
+                <div id="u1" data-plugin-imageupload data-log="log1"
+                     data-plugin-options='{"endpoint": "demo:upload?log=log1", "shape": "circle", "current": "../img/demos/foliage/03.png", "data": {"kind": "avatar"}, "csrf": "demo-token", "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" data-sample="#u1">Drop a sample picture</button>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;div data-plugin-imageupload
+     data-plugin-options='{"endpoint": "/account/avatar", "shape": "circle",
+                           "current": "/uploads/avatars/42.jpg",
+                           "data": {"kind": "avatar"}, "csrf": "..."}'&gt;&lt;/div&gt;</code></pre>
+<pre class="snip" data-plugin-highlight="json"><code>{ "ok": true, "url": "/uploads/avatars/42.jpg?v=1731290000" }</code></pre>
+            <div class="demo-log" id="log1"></div>
+        </div>
+    </section>
+
+    <!-- 2 Logo -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">2</span>
+            <h2>A logo, starting empty</h2>
+            <span class="tag-r">shape: box &middot; note &middot; maxSize</span>
+        </div>
+        <div class="demo-card-body">
+            <p>The <code>box</code> shape is wider than it is tall and fits the whole picture inside it instead of cropping, which suits logos. With no <code>current</code> picture the widget shows its drop hint and no remove button. <code>note</code> adds a line of help, <code>maxSize</code> (in bytes) refuses big files before they are sent, and <code>accept</code> adds SVG to the types this widget takes.</p>
+            <div class="demo-stage">
+                <div id="u2" data-plugin-imageupload data-log="log2"
+                     data-plugin-options='{"endpoint": "demo:upload?log=log2", "shape": "box", "note": "PNG, JPG, WebP or SVG, up to 1 MB. A transparent background works best.", "maxSize": 1048576, "accept": "image/png,image/jpeg,image/webp,.svg", "labels": {"type": "Please use a PNG, JPG, WebP or SVG file."}, "data": {"kind": "logo"}, "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" data-sample="#u2" data-sample-kind="logo">Drop a sample logo</button>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;div data-plugin-imageupload
+     data-plugin-options='{"endpoint": "/admin/identity", "shape": "box", "maxSize": 1048576,
+                           "accept": "image/png,image/jpeg,image/webp,.svg",
+                           "labels": {"type": "Please use a PNG, JPG, WebP or SVG file."},
+                           "note": "PNG, JPG, WebP or SVG, up to 1 MB.", "data": {"kind": "logo"}}'&gt;&lt;/div&gt;</code></pre>
+            <div class="demo-log" id="log2"></div>
+        </div>
+    </section>
+
+    <!-- 3 Errors -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">3</span>
+            <h2>When things go wrong</h2>
+            <span class="tag-r">ts.imageupload.error</span>
+        </div>
+        <div class="demo-card-body">
+            <p>The plugin checks the type and size in the browser first: a file must match <code>accept</code> (JPG, PNG, GIF and WebP by default) and be no bigger than <code>maxSize</code>. A server can refuse a picture with <code>{"ok": false, "errors": [...]}</code>, and its messages are shown as they are. Every error is shown under the buttons and fires <code>ts.imageupload.error</code>.</p>
+            <div class="demo-stage">
+                <div class="row-2">
+                    <div>
+                        <span class="cap">Checked in the browser, 200 KB limit</span>
+                        <div id="u3a" data-plugin-imageupload data-log="log3"
+                             data-plugin-options='{"endpoint": "demo:upload?log=log3", "maxSize": 204800, "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+                    </div>
+                    <div>
+                        <span class="cap">Refused by the server</span>
+                        <div id="u3b" data-plugin-imageupload data-log="log3"
+                             data-plugin-options='{"endpoint": "demo:refuse?log=log3", "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+                    </div>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d" data-bad="pdf">Drop a PDF on the left</button>
+                <button class="btn-d" data-bad="big">Drop a large picture on the left</button>
+                <button class="btn-d" data-bad="svg">Drop an SVG on the left</button>
+                <button class="btn-d" data-sample="#u3b">Drop a picture on the right</button>
+            </div>
+<pre class="snip" data-plugin-highlight="javascript"><code>document.getElementById('avatar').addEventListener('ts.imageupload.error', function (e) {
+    console.warn(e.detail.message);    // the text shown under the buttons
+});</code></pre>
+<pre class="snip" data-plugin-highlight="json"><code>{ "ok": false, "errors": ["Pictures must be at least 400 by 400 pixels."] }</code></pre>
+            <div class="demo-log" id="log3"></div>
+        </div>
+    </section>
+
+    <!-- 4 Paste -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">4</span>
+            <h2>Pasting a picture</h2>
+            <span class="tag-r">paste</span>
+        </div>
+        <div class="demo-card-body">
+            <p>With <code>paste: true</code>, a picture pasted on the page is uploaded. Copy a picture (a screenshot works) and press <kbd>Ctrl</kbd> + <kbd>V</kbd>, or <kbd>&#8984;</kbd> + <kbd>V</kbd> on a Mac. Both widgets here have paste on, and each paste goes to just one of them: the one with focus, else the one you used last, else the first on screen. Tab to a widget, or click beside its buttons, then paste. A paste into the text box is left to the text box.</p>
+            <div class="demo-stage">
+                <div class="row-2">
+                    <div id="u4" data-plugin-imageupload data-log="log4"
+                         data-plugin-options='{"endpoint": "demo:upload?log=log4", "paste": true, "data": {"slot": "left"}, "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+                    <div id="u4b" data-plugin-imageupload data-log="log4"
+                         data-plugin-options='{"endpoint": "demo:upload?log=log4", "paste": true, "data": {"slot": "right"}, "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+                </div>
+                <input type="text" class="paste-field" placeholder="A text box: pastes here stay here">
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" id="paste-sample">Paste a sample picture</button>
+                <button class="btn-d" id="paste-right">Focus the right widget, then paste</button>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;div data-plugin-imageupload data-plugin-options='{"endpoint": "/account/avatar", "paste": true}'&gt;&lt;/div&gt;
+&lt;div data-plugin-imageupload data-plugin-options='{"endpoint": "/account/cover", "paste": true}'&gt;&lt;/div&gt;</code></pre>
+            <div class="demo-log" id="log4"></div>
+        </div>
+    </section>
+
+    <!-- 5 API -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">5</span>
+            <h2>Public API</h2>
+            <span class="tag-r">setImage &middot; getImage &middot; open &middot; remove &middot; disable</span>
+        </div>
+        <div class="demo-card-body">
+            <p><code>setImage()</code> only changes what is shown, for example after the picture was changed somewhere else. It sends nothing and fires no event. <code>remove()</code> asks the server to delete the picture. Methods can be called on the instance or by name through the jQuery method.</p>
+            <div class="demo-stage">
+                <div id="u5" class="manual" data-log="log5"></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d" id="api-set">setImage(url)</button>
+                <button class="btn-d" id="api-clear">setImage('')</button>
+                <button class="btn-d" id="api-get">getImage()</button>
+                <button class="btn-d" id="api-open">open()</button>
+                <button class="btn-d" id="api-remove">remove()</button>
+                <button class="btn-d" id="api-off">disable()</button>
+                <button class="btn-d" id="api-on">enable()</button>
+            </div>
+<pre class="snip" data-plugin-highlight="javascript"><code>$('#avatar').themestrapPluginImageUpload({ endpoint: '/account/avatar', shape: 'circle' });
+const upload = $('#avatar').data('__pluginImageUpload');
+
+upload.setImage('/uploads/avatars/42.jpg');   // show a picture, sends nothing
+upload.getImage();                            // '/uploads/avatars/42.jpg'
+upload.open();                                // the file chooser
+upload.remove();                              // POST remove=1, then the empty state
+upload.disable();                             // faded, ignores clicks, drops and pastes
+
+$('#avatar').themestrapPluginImageUpload('enable');   // the same, by name</code></pre>
+            <div class="demo-log" id="log5"></div>
+        </div>
+    </section>
+
+    <!-- 6 Theming -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">6</span>
+            <h2>CSS custom properties</h2>
+            <span class="tag-r">--ts-iu-*</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Size, colors, the box corner radius and the error color are tokens. With a skin loaded the colors and radius follow it. Set them on the widget or any ancestor to override. The buttons are Bootstrap classes by default, and this page passes its own through <code>buttonClass</code> and <code>removeClass</code>.</p>
+            <div class="demo-stage">
+                <div class="row-2">
+                    <div class="theme-amber">
+                        <div data-plugin-imageupload
+                             data-plugin-options='{"endpoint": "demo:upload", "current": "../img/demos/foliage/07.png", "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+                    </div>
+                    <div class="theme-light">
+                        <div data-plugin-imageupload
+                             data-plugin-options='{"endpoint": "demo:upload", "shape": "box", "current": "../img/logo-primary.svg", "buttonClass": "btn-d", "removeClass": "danger"}'></div>
+                    </div>
+                </div>
+            </div>
+<pre class="snip" data-plugin-highlight="css"><code>.profile .ts-iu {
+    --ts-iu-size:   9rem;                  /* the circle, and the box's height */
+    --ts-iu-accent: #ff9f43;               /* hover, focus, drop target, progress bar */
+    --ts-iu-border: rgba(255,159,67,.45);
+    --ts-iu-bg:     rgba(255,159,67,.06);
+    --ts-iu-muted:  #ffb870;               /* drop hint and note */
+    --ts-iu-danger: #ff8f80;               /* error messages */
+}</code></pre>
+        </div>
+    </section>
+
+    <!-- 7 Lifecycle -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">7</span>
+            <h2>Destroy and re-initialize</h2>
+            <span class="tag-r">destroy()</span>
+        </div>
+        <div class="demo-card-body">
+            <p><code>destroy()</code> cancels an upload in progress, unbinds every handler and empties the element. The injected stylesheet goes once the last instance on the page is destroyed. Initialize again with the picture to show.</p>
+            <div class="demo-stage">
+                <div id="u7" class="manual" data-log="log7"></div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" id="lc-destroy">destroy</button>
+                <button class="btn-d" id="lc-init">initialize</button>
+            </div>
+            <div class="out" id="out7">State: <b>active</b></div>
+<pre class="snip" data-plugin-highlight="javascript"><code>const url = $('#avatar').data('__pluginImageUpload').getImage();
+$('#avatar').themestrapPluginImageUpload('destroy');
+$('#avatar').themestrapPluginImageUpload({ endpoint: '/account/avatar', current: url });</code></pre>
+            <div class="demo-log" id="log7"></div>
+        </div>
+    </section>
+
+</div>
+
+<footer class="demo-footer">
+    <p>Themestrap &middot; <code>PluginImageUpload</code> &middot; part of the Themestrap component library</p>
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script>
+// A stand in server for this page. Requests to demo: addresses are answered here instead of
+// going out: the picture stays in the browser as an object URL, and the request is logged.
+// Every other request goes to the network as usual.
+(function () {
+    'use strict';
+    const Native = window.XMLHttpRequest;
+
+    class DemoXHR extends Native {
+        open(method, url) {
+            const m = /^demo:([a-z]+)(?:\?log=([\w-]+))?/.exec(String(url));
+            if (!m) {
+                this._demo = null;
+                return super.open.apply(this, arguments);
+            }
+            this._demo = { route: m[1], log: m[2] || '', method: method, headers: {} };
+            this._fakeUpload = {};
+            this._timers = [];
+            this._status = 0;
+            this._text = '';
+        }
+        setRequestHeader(name, value) {
+            if (!this._demo) return super.setRequestHeader(name, value);
+            this._demo.headers[name] = value;
+        }
+        get upload() { return this._demo ? this._fakeUpload : super.upload; }
+        get status() { return this._demo ? this._status : super.status; }
+        get responseText() { return this._demo ? this._text : super.responseText; }
+        get withCredentials() { return this._demo ? true : super.withCredentials; }
+        set withCredentials(v) { if (!this._demo) super.withCredentials = v; }
+        abort() {
+            if (!this._demo) return super.abort();
+            this._timers.forEach(clearTimeout);
+            this._timers = [];
+            this._demo.aborted = true;
+            document.dispatchEvent(new CustomEvent('demo:request', { detail: { log: this._demo.log, text: 'request cancelled' } }));
+        }
+        send(body) {
+            if (!this._demo) return super.send(body);
+            const d = this._demo, self = this;
+            let file = null, remove = false;
+            const parts = [];
+            if (body instanceof FormData) {
+                for (const [k, v] of body.entries()) {
+                    if (v instanceof File) { file = v; parts.push(k + '=<' + (v.name || 'file') + ', ' + Math.round(v.size / 1024) + ' KB>'); }
+                    else { parts.push(k + '=' + v); if (k === 'remove' && v === '1') remove = true; }
+                }
+            }
+            const head = Object.keys(d.headers).filter(function (h) { return h !== 'Accept'; }).map(function (h) { return h + ': ' + d.headers[h]; });
+            document.dispatchEvent(new CustomEvent('demo:request', { detail: { log: d.log, text: d.method + ' ' + d.route + '  ' + parts.join('  ') + (head.length ? '  [' + head.join(', ') + ']' : '') } }));
+
+            const later = function (fn, ms) { self._timers.push(setTimeout(fn, ms)); };
+            const answer = function (status, json) {
+                self._status = status;
+                self._text = typeof json === 'string' ? json : JSON.stringify(json);
+                document.dispatchEvent(new CustomEvent('demo:request', { detail: { log: d.log, text: 'answer ' + status + '  ' + self._text } }));
+                if (typeof self.onload === 'function') self.onload();
+            };
+
+            if (remove) { later(function () { answer(200, { ok: true }); }, 350); return; }
+
+            // report upload progress in steps, a little faster for small files
+            const total = file ? file.size : 1;
+            const steps = 8, span = Math.min(1600, 500 + total / 2000);
+            for (let i = 1; i <= steps; i++) {
+                later(function () {
+                    if (typeof self._fakeUpload.onprogress === 'function') {
+                        self._fakeUpload.onprogress({ lengthComputable: true, loaded: Math.round(total * i / steps), total: total });
+                    }
+                }, span * i / steps);
+            }
+            later(function () {
+                if (d.route === 'refuse') return answer(422, { ok: false, errors: ['Pictures must be at least 400 by 400 pixels.'] });
+                answer(200, { ok: true, url: file ? URL.createObjectURL(file) : '' });
+            }, span + 150);
+        }
+    }
+
+    window.XMLHttpRequest = DemoXHR;
+})();
+</script>
+<script src="../js/components/themestrap.plugin.imageupload.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script>
+(function ($) {
+    'use strict';
+
+    // helpers
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function log(id, evName, msg, cls) {
+        if (!id) return;
+        const t = new Date().toTimeString().slice(0, 8);
+        $('#' + id).prepend('<div><span class="t">' + t + '</span><span class="' + (cls || 'ev') + '">' + evName + '</span> ' + esc(msg) + '</div>');
+    }
+    function short(url) {
+        return !url ? "''" : url.indexOf('blob:') === 0 ? 'blob:...' + url.slice(-6) : url;
+    }
+
+    // Draws a picture on a canvas and returns it as a File, so the demo needs no files of yours
+    let hue = 170;
+    function samplePicture(kind, size) {
+        return new Promise(function (resolve) {
+            const c = document.createElement('canvas');
+            const w = kind === 'logo' ? 480 : (size || 360), h = kind === 'logo' ? 160 : (size || 360);
+            c.width = w; c.height = h;
+            const x = c.getContext('2d');
+            hue = (hue + 47) % 360;
+            if (kind === 'logo') {
+                x.fillStyle = 'hsl(' + hue + ', 70%, 50%)';
+                x.beginPath(); x.arc(80, 80, 52, 0, Math.PI * 2); x.fill();
+                x.fillStyle = '#fff';
+                x.font = 'bold 54px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+                x.fillText('A', 80, 84);
+                x.fillStyle = 'hsl(' + hue + ', 70%, 60%)';
+                x.textAlign = 'left'; x.font = 'bold 64px sans-serif';
+                x.fillText('Acme', 160, 84);
+            } else {
+                const g = x.createLinearGradient(0, 0, w, h);
+                g.addColorStop(0, 'hsl(' + hue + ', 75%, 55%)');
+                g.addColorStop(1, 'hsl(' + ((hue + 60) % 360) + ', 70%, 30%)');
+                x.fillStyle = g; x.fillRect(0, 0, w, h);
+                if (size) {
+                    // noise makes the PNG large, for the size check
+                    const img = x.getImageData(0, 0, w, h);
+                    for (let i = 0; i < img.data.length; i += 4) { const n = Math.random() * 60; img.data[i] += n; img.data[i + 1] += n; img.data[i + 2] += n; }
+                    x.putImageData(img, 0, 0);
+                }
+                x.fillStyle = 'rgba(255,255,255,.9)';
+                x.beginPath(); x.arc(w / 2, h * 0.4, w * 0.18, 0, Math.PI * 2); x.fill();
+                x.beginPath(); x.ellipse(w / 2, h * 1.02, w * 0.34, h * 0.36, 0, 0, Math.PI * 2); x.fill();
+            }
+            c.toBlob(function (blob) { resolve(new File([blob], kind === 'logo' ? 'logo.png' : 'picture.png', { type: 'image/png' })); }, 'image/png');
+        });
+    }
+    function dropOn(selector, file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        $(selector).find('.ts-iu-drop')[0].dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    }
+
+    // syntax highlighting with PluginHighlight itself
+    if ($.fn.themestrapPluginHighlight) {
+        $('pre[data-plugin-highlight]').themestrapPluginHighlight();
+    }
+
+    // auto init, the same line themestrap.init.js runs
+    themestrap.fn.intObsInit('[data-plugin-imageupload]:not(.manual)', 'themestrapPluginImageUpload');
+
+    // events are native CustomEvents dispatched on the element, so use addEventListener
+    document.addEventListener('ts.imageupload.change', function (e) {
+        log(e.target.getAttribute('data-log'), 'ts.imageupload.change', e.detail.action + '  url ' + short(e.detail.url));
+    });
+    document.addEventListener('ts.imageupload.error', function (e) {
+        log(e.target.getAttribute('data-log'), 'ts.imageupload.error', e.detail.message);
+    });
+    document.addEventListener('demo:request', function (e) {
+        log(e.detail.log, 'server', e.detail.text, 'rq');
+    });
+
+    // sample buttons
+    $('[data-sample]').on('click', function () {
+        const target = $(this).attr('data-sample');
+        samplePicture($(this).attr('data-sample-kind')).then(function (f) { dropOn(target, f); });
+    });
+    $('[data-bad="pdf"]').on('click', function () {
+        dropOn('#u3a', new File(['%PDF-1.7 demo'], 'invoice.pdf', { type: 'application/pdf' }));
+    });
+    $('[data-bad="svg"]').on('click', function () {
+        dropOn('#u3a', new File(['<svg xmlns="http://www.w3.org/2000/svg"/>'], 'logo.svg', { type: 'image/svg+xml' }));
+    });
+    $('[data-bad="big"]').on('click', function () {
+        samplePicture('photo', 1400).then(function (f) {
+            log('log3', 'sample', 'drew a ' + Math.round(f.size / 1024) + ' KB picture');
+            dropOn('#u3a', f);
+        });
+    });
+    $('#paste-right').on('click', function () {
+        $('#u4b .ts-iu-drop').trigger('focus');
+        samplePicture().then(function (f) {
+            const dt = new DataTransfer();
+            dt.items.add(f);
+            document.activeElement.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        });
+    });
+    $('#paste-sample').on('click', function () {
+        samplePicture().then(function (f) {
+            const dt = new DataTransfer();
+            dt.items.add(f);
+            (document.activeElement || document).dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        });
+    });
+
+    // 5 API
+    $('#u5').themestrapPluginImageUpload({ endpoint: 'demo:upload?log=log5', shape: 'circle', buttonClass: 'btn-d', removeClass: 'danger' });
+    const u5 = function () { return $('#u5').data('__pluginImageUpload'); };
+    $('#api-set').on('click', function () { u5().setImage('../img/demos/foliage/05.png'); log('log5', 'setImage()', '../img/demos/foliage/05.png, nothing sent'); });
+    $('#api-clear').on('click', function () { u5().setImage(''); log('log5', "setImage('')", 'the empty state, nothing sent'); });
+    $('#api-get').on('click', function () { log('log5', 'getImage()', short(u5().getImage())); });
+    $('#api-open').on('click', function () { u5().open(); log('log5', 'open()', 'the file chooser opened'); });
+    $('#api-remove').on('click', function () {
+        if (!u5().getImage()) { log('log5', 'remove()', 'nothing to remove, so nothing is sent'); return; }
+        u5().remove();
+    });
+    $('#api-off').on('click', function () { $('#u5').themestrapPluginImageUpload('disable'); log('log5', 'disable()', 'faded, ignores input'); });
+    $('#api-on').on('click', function () { $('#u5').themestrapPluginImageUpload('enable'); log('log5', 'enable()', 'back on'); });
+
+    // 7 lifecycle
+    let keep = '../img/demos/foliage/09.png';
+    function init7() {
+        $('#u7').themestrapPluginImageUpload({ endpoint: 'demo:upload?log=log7', current: keep, buttonClass: 'btn-d', removeClass: 'danger' });
+    }
+    init7();
+    $('#lc-destroy').on('click', function () {
+        const inst = $('#u7').data('__pluginImageUpload');
+        if (!inst) return;
+        keep = inst.getImage();
+        $('#u7').themestrapPluginImageUpload('destroy');
+        $('#out7 b').text('destroyed, the element is empty: ' + ($('#u7').html() === '' ? 'yes' : 'no'));
+        log('log7', 'destroy', 'kept the url ' + short(keep) + ' to start again with');
+    });
+    $('#lc-init').on('click', function () {
+        if ($('#u7').data('__pluginImageUpload')) return;
+        init7();
+        $('#out7 b').text('active');
+        log('log7', 'initialize', 'current: ' + short(keep));
+    });
+})(jQuery);
+</script>
+</body>
+</html>

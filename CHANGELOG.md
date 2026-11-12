@@ -4,6 +4,33 @@ All notable changes to Themestrap are documented here.
 
 This repository does not currently include semantic version tags or package metadata, so the version sequence below is inferred from the project’s actual Git commit history beginning with the initial repository import and continuing through the current main branch state.
 
+## [1.1.1] - 2026-11-12
+
+### Added
+- PluginMarkdown draws ```` ```mermaid ```` fenced blocks as diagrams. Mermaid loads from jsDelivr only on pages that have one (`mermaidSrc` to self-host), colors follow the skin through new `--ts-md-diagram-*` tokens, and diagrams redraw when dark mode toggles. New `mermaid` and `mermaidConfig` options, `renderDiagrams()` method, and `diagrams.ts.markdown` / `mermaiderror.ts.markdown` events
+- Docs site: Mermaid diagrams use the site palette in light and dark mode
+- PluginSortable, PluginReveal and PluginImageUpload: guides (`docs/PluginSortable.md`, `docs/PluginReveal.md`, `docs/PluginImageUpload.md`), demos, docs site entries, `themestrap.init.js` wiring, `themestrap.modules.js` modules, and a place in `themestrap.bundle.js`
+- PluginSortable sorts rows and wrapping grids as well as columns. The layout is detected on every move, or set with the new `axis` option. Arrow keys follow the layout (a whole row at a time in a grid, mirrored on right to left pages), and items without a handle can be moved from the keyboard when they have focus
+- PluginSortable: `Escape` puts a dragged item back where it started
+- PluginImageUpload: `--ts-iu-danger` token for error messages
+- PluginReveal, PluginSortable, PluginImageUpload: every method can be called by name through the jQuery method, and names starting with `_` are private
+
+### Changed
+- PluginSortable: without a `handle`, touch screens pick an item up after a 300ms hold, so a quick swipe scrolls the page instead of being blocked
+- PluginReveal: elements that start appearing within 100ms of each other are numbered for `stagger` in page order, from zero. Slots used to be counted across the whole page and wrap after six, so a row could start in the middle
+- PluginReveal fades to the element's own CSS opacity and transform (a centering `translate` is kept) and puts its inline styles back when the fade ends, instead of leaving `transition`, `transform: none` and `opacity: 1` behind. `destroy()` restores the element's own inline styles instead of clearing them
+- PluginImageUpload: `accept` now also decides which files are sent (MIME types, wildcards and extensions), instead of a fixed JPG, PNG, GIF and WebP check
+- PluginImageUpload: with several paste enabled widgets, a pasted picture goes to one of them (the one with focus, else the one used last, else the first on screen) instead of all of them, and pastes into text fields outside the widget are ignored
+- PluginImageUpload: buttons default to Bootstrap classes, `btn btn-sm btn-outline-secondary` with `text-danger` on Remove, instead of `btn` and `warn`. Pass `buttonClass` and `removeClass` to keep the old look
+- PluginImageUpload: the progress bar sits inside a circular preview, where the bottom edge was too short to show it
+- PluginSortable and PluginImageUpload colors follow the skin (`--ts-skin-accent`, `--ts-skin-border-strong`, ...), with the old values as fallbacks
+
+### Fixed
+- PluginImageUpload: labels and option values with quotes or `<` broke the widget's markup
+- PluginReveal: `$(el).themestrapPluginReveal('destroy')` returned the instance without destroying it, and `destroy()` and `show()` returned nothing
+- PluginSortable and PluginImageUpload header comments used `$.isFunction`, which jQuery 4 removed
+
+
 ## [1.1.0] - 2026-11-7
 
 ### Added

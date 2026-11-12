@@ -37,6 +37,7 @@
                 { id: 'PluginMasonry', label: 'Masonry', desc: 'Packed grid layout for uneven items' },
                 { id: 'PluginReadMore', label: 'Read More', desc: 'Truncate long content behind a toggle' },
                 { id: 'PluginSort', label: 'Sort', desc: 'Filter and sort a grid of items' },
+                { id: 'PluginSortable', label: 'Sortable', desc: 'Drag and drop to reorder lists' },
                 { id: 'PluginTree', label: 'Tree', desc: 'Nested, expandable tree view' }
             ]
         },
@@ -77,6 +78,7 @@
             icon: 'bi-ui-checks',
             items: [
                 { id: 'PluginColorPicker', label: 'Color Picker', desc: 'Pick and enter colors' },
+                { id: 'PluginImageUpload', label: 'Image Upload', desc: 'Pick and upload one picture' },
                 { id: 'PluginMarkdownEditor', label: 'Markdown Editor', desc: 'Write Markdown with a live preview' },
                 { id: 'PluginNumberInput', label: 'Number Input', desc: 'Stepper for number fields' },
                 { id: 'PluginOtp', label: 'OTP', desc: 'One-time code and PIN input' },
@@ -111,6 +113,7 @@
                 { id: 'PluginInViewportStyle', label: 'In-Viewport Style', desc: 'Apply styles while in view' },
                 { id: 'PluginParallax', label: 'Parallax', desc: 'Parallax backgrounds' },
                 { id: 'PluginParticles', label: 'Particles', desc: 'Animated particle backgrounds' },
+                { id: 'PluginReveal', label: 'Reveal', desc: 'Fade in on scroll, parallax banners' },
                 { id: 'PluginScrollFx', label: 'Scroll FX', desc: 'Scroll-linked effects' },
                 { id: 'PluginScrollShadow', label: 'Scroll Shadow', desc: 'Edge fades on scrollable areas' }
             ]

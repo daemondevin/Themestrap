@@ -644,4 +644,19 @@
 		themestrap.fn.intObsInit('[data-plugin-particles]:not(.manual)', 'themestrapPluginParticles');
 	}
 
+	// Sortable
+	if (typeof $.fn['themestrapPluginSortable'] === 'function' && $('[data-plugin-sortable]').length) {
+		themestrap.fn.intObsInit('[data-plugin-sortable]:not(.manual)', 'themestrapPluginSortable');
+	}
+
+	// Reveal
+	if (typeof $.fn['themestrapPluginReveal'] === 'function' && $('[data-plugin-reveal]').length) {
+		themestrap.fn.intObsInit('[data-plugin-reveal]:not(.manual)', 'themestrapPluginReveal');
+	}
+
+	// Image Upload
+	if (typeof $.fn['themestrapPluginImageUpload'] === 'function' && $('[data-plugin-imageupload]').length) {
+		themestrap.fn.intObsInit('[data-plugin-imageupload]:not(.manual)', 'themestrapPluginImageUpload');
+	}
+
 })).apply( this, [ jQuery ]);

@@ -201,6 +201,76 @@ All keys from `PluginHighlight.defaults` are valid. The Markdown plugin applies 
 Any other PluginHighlight option (`tabSize`, `wrapLines`, etc.) passes through unchanged.
 
 
+## Mermaid Diagrams
+
+Fenced blocks tagged `mermaid` are drawn as diagrams instead of shown as code:
+
+````markdown
+```mermaid
+flowchart TD
+    A[submit event] --> B{valid?}
+    B -- no --> C[inline message]
+    B -- yes --> D[adapter.submit]
+```
+````
+
+Flowcharts, sequence, class, state, ER, Gantt, pie and every other diagram type Mermaid supports work, because Mermaid itself draws them.
+
+### How it works
+
+1. The parser renders the block as `<pre><code class="language-mermaid">`, like any fenced block. It shows its source, dimmed, while Mermaid loads.
+2. The first time a page has a `mermaid` block, the plugin imports Mermaid from `mermaidSrc` (jsDelivr by default). Pages without diagrams never download it. If `window.mermaid` already exists, that copy is used.
+3. Each block is drawn and its `<pre>` is replaced with `<figure class="ts-md-mermaid">` holding the SVG. When every block has been tried, `diagrams.ts.markdown` fires.
+4. When the page switches between light and dark mode (`html.dark`, `data-bs-theme`, or the OS setting), the diagrams are redrawn in the new colors.
+
+Mermaid blocks are never passed to PluginHighlight.
+
+### Colors
+
+With a skin loaded, diagrams take their colors from it through the `--ts-md-diagram-*` tokens. Without a skin those tokens are empty and Mermaid's own `default` theme (light) or `dark` theme is used.
+
+To match your site without a skin, set the tokens yourself. Each one is optional:
+
+```css
+.ts-markdown {
+  --ts-md-diagram-bg:          #ffffff;
+  --ts-md-diagram-node:        #f6f8fa;   /* node fill */
+  --ts-md-diagram-node-border: #cfd7e0;
+  --ts-md-diagram-text:        #0a1929;
+  --ts-md-diagram-line:        #566779;   /* edges and arrows */
+  --ts-md-diagram-accent:      #e0f3f5;   /* edge labels, secondary nodes */
+  --ts-md-diagram-note:        #ffffff;   /* notes, tertiary nodes */
+  --ts-md-diagram-font:        'DM Sans', sans-serif;
+}
+html.dark .ts-markdown {
+  --ts-md-diagram-node:        #0d1f33;
+  /* ... */
+}
+```
+
+Any CSS color works, including `color-mix()`; the plugin converts it to a value Mermaid can read.
+
+### Errors
+
+A diagram with a syntax error, or a page where Mermaid can't load, keeps its source visible as a code block and fires `mermaiderror.ts.markdown` with the error and the diagram source (`null` when the load failed):
+
+```js
+$('#readme').on('mermaiderror.ts.markdown', (e, err, source) => {
+    console.warn('Diagram failed:', err.message);
+});
+```
+
+### Self-hosting Mermaid
+
+```js
+$('#readme').themestrapPluginMarkdown({
+    mermaidSrc: '/vendor/mermaid/mermaid.esm.min.mjs'
+});
+```
+
+Copy the whole `dist/` folder: the module loads its chunks from the `chunks/` folder next to it.
+
+
 ## GFM Support
 
 The bundled parser covers the GitHub Flavored Markdown spec features commonly found in documentation files, READMEs, and blog content.
@@ -277,6 +347,14 @@ Options merge: `PluginMarkdown.defaults -> opts argument -> data-plugin-options 
 | `highlight` | bool | `true` | Pass fenced code blocks to PluginHighlight after rendering. Silently no-ops if `$.fn.themestrapPluginHighlight` is not loaded. Set `false` to disable entirely. |
 | `highlightOptions` | object | `{}` | Options forwarded to every PluginHighlight instance created for code blocks inside this Markdown element. The `language` key is set automatically from the `language-*` class and should not be set here. See the PluginHighlight guide for the full option list. |
 
+### Mermaid
+
+| Option | Type | Default | Description |
+|:-------|:-----|:--------|:------------|
+| `mermaid` | bool | `true` | Draw `mermaid` fenced blocks as diagrams. `false` leaves them as code. |
+| `mermaidSrc` | string | jsDelivr, `mermaid@11.17.2` | ES module URL Mermaid is imported from. Ignored when `window.mermaid` exists. |
+| `mermaidConfig` | object | `{}` | Merged over the plugin's settings and passed to `mermaid.initialize()`, e.g. `{ "theme": "neutral" }` or `{ "flowchart": { "curve": "basis" } }`. `securityLevel` is `strict` when `sanitize` is on and `loose` when it is off, unless set here. |
+
 ### CSS custom properties
 
 All visual tokens are exposed as custom properties on `.ts-markdown`. Override globally or per-instance:
@@ -307,6 +385,7 @@ All visual tokens are exposed as custom properties on `.ts-markdown`. Override g
 | `--ts-md-table-stripe` | `rgba(0,0,0,.03)` | Even table row stripe |
 | `--ts-md-hr` | `rgba(0,0,0,.15)` | Horizontal rule colour |
 | `--ts-md-heading-mt` | `1.5em` | Top margin on all headings |
+| `--ts-md-diagram-*` | the skin, else empty | Mermaid colors and font; see [Mermaid Diagrams](#mermaid-diagrams) |
 
 
 ## Public API
@@ -328,23 +407,32 @@ const md = $('#readme').data('__pluginMarkdown');
 | `render(markdown)` | `this` | Parse a Markdown string and replace the element's HTML with the result. Calls `_highlightBlocks()` before firing `rendered.ts.markdown`. |
 | `setSource(url)` | `this` | Fetch Markdown from `url` via XHR and call `render()` on success. Adds `.ts-markdown-loading` while fetching; on error injects a `.ts-markdown-error` message and fires `error.ts.markdown`. |
 | `getHtml()` | `string` | Return the raw GFM-rendered HTML string from the last `render()` call — pre-highlight, as emitted by the bundled parser. Empty string before first render. |
+| `renderDiagrams()` | `this` | Redraw the Mermaid diagrams of the last render. Light/dark switches call it for you; call it yourself after swapping skins. |
 | `destroy()` | `this` | Destroy all PluginHighlight instances tracked in `_highlightInstances`, restore the original element HTML, remove state classes, clear CSS custom property overrides, and drop the instance from `$el.data()`. |
 | `_highlightBlocks()` | `this` | Internal. Called automatically by `render()`. Tears down any previous highlight instances, finds all `<code[class*="language-"]>` nodes, and creates a PluginHighlight instance for each. Not intended for direct use. |
 | `_destroyHighlightInstances()` | `this` | Internal. Iterates `_highlightInstances`, calls `.destroy()` on each (with a try/catch for already-torn-down instances), and resets the array. Called by both `render()` and `destroy()`. |
 
 ### jQuery events
 
-Both events bubble from the host element:
+All events bubble from the host element:
 
 ```js
 $('#readme')
   .on('rendered.ts.markdown', (e, html) => {
       console.log('Rendered', html.length, 'chars of HTML');
   })
+  .on('diagrams.ts.markdown', (e, drawn) => {
+      console.log(drawn, 'Mermaid diagrams drawn');
+  })
+  .on('mermaiderror.ts.markdown', (e, err, source) => {
+      console.warn('Diagram failed', err);
+  })
   .on('error.ts.markdown', (e, url, err) => {
       console.warn('Failed to load', url, err);
   });
 ```
+
+`rendered.ts.markdown` fires before the diagrams are drawn, because Mermaid draws asynchronously. Wait for `diagrams.ts.markdown` if your code measures the page, such as a table of contents with scroll offsets.
 
 ### Direct GFM parser access
 

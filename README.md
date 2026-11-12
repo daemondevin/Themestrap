@@ -269,6 +269,7 @@ Themestrap contains a broad collection of components. The following is not a com
 * [Collapsible](docs/PluginCollapsible.md)
 * [Masonry](docs/PluginMasonry.md)
 * [Sort](docs/PluginSort.md)
+* [Sortable](docs/PluginSortable.md)
 * [Tree](docs/PluginTree.md)
 
 ### Navigation
@@ -306,6 +307,7 @@ Themestrap contains a broad collection of components. The following is not a com
 * [Hover Effect](docs/PluginHoverEffect.md)
 * [In-Viewport Style](docs/PluginInViewportStyle.md)
 * [Parallax](docs/PluginParallax.md)
+* [Reveal](docs/PluginReveal.md)
 * [Scroll FX](docs/PluginScrollFx.md)
 * [Scroll Shadow](docs/PluginScrollShadow.md)
 
@@ -324,6 +326,7 @@ Themestrap contains a broad collection of components. The following is not a com
 
 * [Account](docs/PluginAccount.md)
 * [Authentication](docs/PluginAuth.md)
+* [Image Upload](docs/PluginImageUpload.md)
 * [OTP](docs/PluginOtp.md)
 * [GDPR](docs/PluginGDPR.md)
 * [GDPR Wrapper](docs/PluginGDPRWrapper.md)

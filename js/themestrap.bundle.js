@@ -20481,12 +20481,35 @@ html.dark .ts-lo-overlay,
  *           reference links ([text][ref] + [ref]: url), images (![alt](url)),
  *           auto-links (<url>), line breaks (trailing two spaces or \).
  *
+ * MERMAID DIAGRAMS
+ *
+ *   Fenced blocks tagged ```mermaid are drawn as diagrams. Mermaid is loaded
+ *   from options.mermaidSrc the first time a page has one of these blocks, so
+ *   pages without diagrams never download it. If window.mermaid already exists
+ *   (you loaded it yourself) that copy is used instead.
+ *
+ *   Colors come from the --ts-md-diagram-* tokens, which follow the active skin.
+ *   With no skin the diagrams use Mermaid's own default and dark themes. They
+ *   are redrawn when the page switches between light and dark mode.
+ *
+ *   While Mermaid loads the block shows its source. If it can't load, or a
+ *   diagram has a syntax error, the source stays visible and the plugin
+ *   triggers mermaiderror.ts.markdown.
+ *
  * PUBLIC API
  *
  *   instance.render(markdown)   — re-render from a Markdown string
  *   instance.setSource(url)     — fetch a new URL and re-render
  *   instance.getHtml()          — return the last rendered HTML string
+ *   instance.renderDiagrams()   — redraw the Mermaid diagrams (after a skin swap)
  *   instance.destroy()          — restore original content, unbind events
+ *
+ * EVENTS
+ *
+ *   rendered.ts.markdown         (e, html)            Markdown is in the DOM
+ *   diagrams.ts.markdown         (e, drawn)           every Mermaid block has been tried; drawn = how many succeeded
+ *   mermaiderror.ts.markdown     (e, error, source)   a diagram failed to draw
+ *   error.ts.markdown            (e, url, error)      the source URL failed to load
  *
  * USAGE
  *
@@ -20633,9 +20656,120 @@ html.dark .ts-lo-overlay,
 .ts-markdown img { max-width: 100%; height: auto; }
 
 /* Loading / error states */
+/* Mermaid diagrams */
+.ts-markdown {
+    --ts-md-diagram-bg:          var(--ts-skin-bg);
+    --ts-md-diagram-node:        var(--ts-skin-surface-2);
+    --ts-md-diagram-node-border: var(--ts-skin-border-strong);
+    --ts-md-diagram-text:        var(--ts-skin-text);
+    --ts-md-diagram-line:        var(--ts-skin-text-dim);
+    --ts-md-diagram-accent:      var(--ts-skin-accent-soft);
+    --ts-md-diagram-note:        var(--ts-skin-elevated);
+    --ts-md-diagram-font:        var(--ts-skin-font);
+}
+.ts-markdown .ts-md-mermaid {
+    margin: 0 0 1em;
+    padding: 1em;
+    overflow-x: auto;
+    text-align: center;
+    border: 1px solid var(--ts-md-border);
+    border-radius: 6px;
+}
+.ts-markdown .ts-md-mermaid svg { max-width: 100%; height: auto; }
+.ts-markdown pre.ts-md-mermaid-pending { opacity: .6; }
+
 .ts-markdown-loading { opacity: .5; font-style: italic; }
 .ts-markdown-error   { color: var(--ts-skin-danger, #c0392b); font-style: italic; font-size: .9em; }
 `;
+
+    // Mermaid is an ES module; load it once per page, on first use
+    const MERMAID_SRC = 'https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs';
+    let mermaidLoading = null;
+    let mermaidQueue = Promise.resolve();
+    let mermaidSeq = 0;
+
+    function loadMermaid(src) {
+        if (window.mermaid && typeof window.mermaid.render === 'function') {
+            return Promise.resolve(window.mermaid);
+        }
+        if (!mermaidLoading) {
+            mermaidLoading = import(src)
+                .then(mod => mod.default || mod)
+                .catch(err => {
+                    mermaidLoading = null;
+                    throw err;
+                });
+        }
+        return mermaidLoading;
+    }
+
+    // Mermaid keeps global config, so diagrams are drawn one at a time across all instances
+    function queueMermaid(job) {
+        const run = mermaidQueue.then(job, job);
+        mermaidQueue = run.catch(() => {});
+        return run;
+    }
+
+    function isDarkMode(el) {
+        const root = document.documentElement;
+        const scope = el.closest('[data-bs-theme]');
+        if (scope) return scope.getAttribute('data-bs-theme') === 'dark';
+        if (root.classList.contains('dark')) return true;
+        return !root.classList.contains('light') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !$(root).is('[data-bs-theme="light"]');
+    }
+
+    // Mermaid only understands opaque hex, rgb() and hsl() colors, so every token is
+    // painted onto a canvas over the diagram background and read back as solid rgb()
+    let colorCanvas = null;
+    function toRgb(value, under) {
+        if (!value) return '';
+        colorCanvas = colorCanvas || document.createElement('canvas');
+        colorCanvas.width = colorCanvas.height = 1;
+        const ctx = colorCanvas.getContext('2d', { willReadFrequently: true });
+        ctx.fillStyle = '#fff';
+        ctx.fillStyle = under || '#fff';
+        ctx.fillRect(0, 0, 1, 1);
+        ctx.fillStyle = under || '#fff';
+        ctx.fillStyle = value;
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function mermaidTheme(el) {
+        const dark = isDarkMode(el);
+        const cs = getComputedStyle(el);
+        const token = name => cs.getPropertyValue('--ts-md-diagram-' + name).trim();
+
+        if (!token('node')) {
+            return { theme: dark ? 'dark' : 'default' };
+        }
+
+        const bg = toRgb(token('bg'), dark ? '#000' : '#fff');
+        const color = name => toRgb(token(name), bg || (dark ? '#000' : '#fff'));
+
+        const vars = {
+            darkMode:           dark,
+            background:         bg,
+            primaryColor:       color('node'),
+            primaryBorderColor: color('node-border'),
+            primaryTextColor:   color('text'),
+            secondaryColor:     color('accent'),
+            tertiaryColor:      color('note'),
+            lineColor:          color('line'),
+            textColor:          color('text'),
+            noteBkgColor:       color('note'),
+            noteTextColor:      color('text'),
+            noteBorderColor:    color('node-border'),
+            edgeLabelBackground: color('accent'),
+            fontFamily:         token('font')
+        };
+        Object.keys(vars).forEach(key => {
+            if (vars[key] === '') delete vars[key];
+        });
+
+        return { theme: 'base', themeVariables: vars };
+    }
 
     function injectStyles() {
         if (document.getElementById(STYLE_ID)) return;
@@ -20791,8 +20925,10 @@ html.dark .ts-lo-overlay,
                     const body  = [];
                     i++;
                     while (i < lineArr.length) {
-                        if (lineArr[i].trimStart().startsWith(fence.slice(0, 3)) &&
-                            lineArr[i].trim().replace(new RegExp(`^${fence[0]}+`), '') === '') {
+                        // A closing fence uses the same character and is at least as long as the
+                        // opening one, so a ```` block can show a ``` block inside it
+                        const close = lineArr[i].trim();
+                        if (close.length >= fence.length && close === fence[0].repeat(close.length)) {
                             i++;
                             break;
                         }
@@ -21081,6 +21217,7 @@ html.dark .ts-lo-overlay,
             this._originalHTML       = $el.html();
             this._renderedHtml       = '';
             this._highlightInstances = [];
+            this._diagramRun         = 0;
  
             this
                 .setData()
@@ -21140,8 +21277,10 @@ html.dark .ts-lo-overlay,
             const html = GFM.parse(markdown, this.options);
             this._renderedHtml = html;
             this.$el.html(html);
+            this._collectDiagrams();
             this._highlightBlocks();
             this.$el.trigger('rendered.ts.markdown', [html]);
+            this.renderDiagrams();
             return this;
         }
 
@@ -21215,7 +21354,7 @@ html.dark .ts-lo-overlay,
             // Find every <code class="language-*"> the GFM renderer produced.
             // Blocks without a language class are plain indented-code blocks —
             // leave them unstyled so they don't get unwanted line numbers.
-            self.$el.find('code[class*="language-"]').each(function () {
+            self.$el.find('code[class*="language-"]').not('.language-mermaid').each(function () {
                 const $code = $(this);
                 const $pre  = $code.closest('pre');
                 if (!$pre.length) return; // orphaned <code> — skip
@@ -21253,6 +21392,129 @@ html.dark .ts-lo-overlay,
         }
  
         /**
+         * Mark the ```mermaid blocks of the current render and keep their source.
+         * The <pre> stays in place, showing the source, until its diagram is drawn.
+         * @returns {PluginMarkdown}
+         */
+        _collectDiagrams() {
+            this._diagrams = [];
+            if (!this.options.mermaid) return this;
+
+            this.$el.find('pre > code.language-mermaid').each((i, code) => {
+                const $pre = $(code).parent().addClass('ts-md-mermaid-pending');
+                this._diagrams.push({ source: code.textContent, $node: $pre });
+            });
+
+            if (this._diagrams.length) {
+                this._watchTheme();
+            }
+
+            return this;
+        }
+
+        /**
+         * Draw (or redraw) every Mermaid diagram of the current render. Call it after
+         * swapping skins; light/dark switches are picked up on their own.
+         * @returns {PluginMarkdown}
+         */
+        renderDiagrams() {
+            const self = this;
+            const diagrams = self._diagrams || [];
+            if (!diagrams.length) return this;
+
+            const run = ++self._diagramRun;
+            const stale = () => run !== self._diagramRun || !self.$el.data(instanceName);
+            let drawn = 0;
+            let settled = 0;
+            const done = () => {
+                if (++settled === diagrams.length) {
+                    self.$el.trigger('diagrams.ts.markdown', [drawn]);
+                }
+            };
+
+            loadMermaid(self.options.mermaidSrc).then(mermaid => {
+                diagrams.forEach(diagram => {
+                    queueMermaid(() => {
+                        if (stale()) return;
+
+                        mermaid.initialize($.extend(true, {
+                            startOnLoad: false,
+                            securityLevel: self.options.sanitize ? 'strict' : 'loose'
+                        }, mermaidTheme(self.$el[0]), self.options.mermaidConfig));
+
+                        const id = 'ts-md-mermaid-' + (++mermaidSeq);
+
+                        return Promise.resolve(mermaid.render(id, diagram.source)).then(({ svg, bindFunctions }) => {
+                            if (stale()) return;
+
+                            const $figure = $('<figure class="ts-md-mermaid"></figure>').html(svg);
+                            diagram.$node.replaceWith($figure);
+                            diagram.$node = $figure;
+                            if (typeof bindFunctions === 'function') bindFunctions($figure[0]);
+
+                            drawn++;
+                            done();
+                        }).catch(err => {
+                            // Mermaid leaves its error graphic in the body when render fails
+                            $('#' + id + ', #d' + id).remove();
+                            if (stale()) return;
+                            diagram.$node.removeClass('ts-md-mermaid-pending');
+                            self.$el.trigger('mermaiderror.ts.markdown', [err, diagram.source]);
+                            done();
+                        });
+                    });
+                });
+            }).catch(err => {
+                if (stale()) return;
+                diagrams.forEach(diagram => diagram.$node.removeClass('ts-md-mermaid-pending'));
+                self.$el.trigger('mermaiderror.ts.markdown', [err, null]);
+            });
+
+            return this;
+        }
+
+        // Redraw the diagrams when the page switches between light and dark
+        _watchTheme() {
+            if (this._themeObserver || typeof MutationObserver !== 'function') return;
+
+            // The mode plus the resolved diagram colors; any change to either means a redraw
+            const signature = () => {
+                const cs = getComputedStyle(this.$el[0]);
+                return [isDarkMode(this.$el[0])].concat(
+                    ['bg', 'node', 'node-border', 'text', 'line'].map(name => cs.getPropertyValue('--ts-md-diagram-' + name).trim())
+                ).join('|');
+            };
+            let last = signature();
+            const check = () => {
+                const now = signature();
+                if (now !== last) {
+                    last = now;
+                    this.renderDiagrams();
+                }
+            };
+
+            this._themeObserver = new MutationObserver(check);
+            this._themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-bs-theme'] });
+
+            if (window.matchMedia) {
+                this._schemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                this._onScheme = check;
+                this._schemeQuery.addEventListener('change', this._onScheme);
+            }
+        }
+
+        _unwatchTheme() {
+            if (this._themeObserver) {
+                this._themeObserver.disconnect();
+                this._themeObserver = null;
+            }
+            if (this._schemeQuery) {
+                this._schemeQuery.removeEventListener('change', this._onScheme);
+                this._schemeQuery = null;
+            }
+        }
+
+        /**
          * Destroy all PluginHighlight instances created by _highlightBlocks().
          * @returns {PluginMarkdown}
          */
@@ -21266,6 +21528,9 @@ html.dark .ts-lo-overlay,
  
         destroy() {
             this._destroyHighlightInstances();
+            this._unwatchTheme();
+            this._diagramRun++;
+            this._diagrams = [];
  
             this.$el
                 .html(this._originalHTML)
@@ -21336,7 +21601,25 @@ html.dark .ts-lo-overlay,
          * Example:
          *   highlightOptions: { lineNumbers: true, showCopy: false }
          */
-        highlightOptions: {}
+        highlightOptions: {},
+
+        /**
+         * Draw ```mermaid fenced blocks as diagrams. Set to false to leave them as code.
+         */
+        mermaid: true,
+
+        /**
+         * Where to load Mermaid from (an ES module URL). Point it at a local copy to
+         * self-host. Ignored when window.mermaid is already on the page.
+         */
+        mermaidSrc: MERMAID_SRC,
+
+        /**
+         * Extra settings passed to mermaid.initialize(), merged over the theme the
+         * plugin picks. Example: { flowchart: { curve: 'basis' } } or { theme: 'neutral' }.
+         * securityLevel follows the sanitize option ('strict' or 'loose') unless set here.
+         */
+        mermaidConfig: {}
     };
 
     $.extend(themestrap, { PluginMarkdown });
@@ -54722,4 +55005,1195 @@ html.dark,
             }
         });
     };
+})).apply(this, [window.themestrap, jQuery]);
+
+/**
+ * Themestrap ImageUpload
+ *
+ * A picture picker for one image: shows the current picture, accepts a click, a drop or a paste, uploads it
+ * with progress, and offers a remove button. The shape of the preview can be a circle (avatars) or a box (logos).
+ *
+ * Markup:
+ *
+ *   <div data-plugin-imageupload
+ *        data-plugin-options='{"endpoint": "/admin/identity", "field": "file", "shape": "circle",
+ *                              "current": "/uploads/site/avatar.jpg", "data": {"kind": "avatar"}, "csrf": "..."}'></div>
+ *
+ * The endpoint receives a multipart POST with the file under `field` plus the entries of `data`. Removing sends
+ * `remove=1` with the same data. Both are expected to answer JSON: { ok: true, url: "..." } or { ok: false, errors: [] }.
+ *
+ * Only files that match `accept` are sent (MIME types, wildcards such as image/* and extensions such as .svg).
+ * With `paste` on, a pasted picture goes to one widget: the one with focus, else the one used last, else the
+ * first one on screen. Pastes into text fields outside the widget are left alone.
+ *
+ * Public API (via stored instance or by name):
+ *   const u = $('#avatar').data('__pluginImageUpload');
+ *   u.setImage(url);     // show a picture, or '' for the empty state
+ *   u.getImage();
+ *   u.open();            // open the file chooser
+ *   u.remove();          // ask the server to remove the picture
+ *   u.enable(); u.disable(); u.destroy();
+ *   $('#avatar').themestrapPluginImageUpload('disable');
+ *
+ * Events (native CustomEvent, bubbling, dispatched on the element):
+ *   ts.imageupload.change   detail: { instance, url, action }   action is 'upload' or 'remove'
+ *   ts.imageupload.error    detail: { instance, message }
+ *
+ * CSS custom properties (all optional, the colors and radius follow the skin):
+ *   --ts-iu-size, --ts-iu-border, --ts-iu-bg, --ts-iu-accent, --ts-iu-text, --ts-iu-muted, --ts-iu-radius, --ts-iu-danger
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginImageUpload'] === 'function' && $('[data-plugin-imageupload]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-imageupload]:not(.manual)', 'themestrapPluginImageUpload');
+ *   }
+ */
+// Image Upload
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginImageUpload';
+    const STYLE_ID     = 'ts-imageupload-styles';
+    const EVENT        = 'ts.imageupload';
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    const CSS = `
+        .ts-iu { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; color: var(--ts-iu-text, inherit); }
+        .ts-iu-drop { position: relative; display: grid; place-items: center; flex: 0 0 auto; width: var(--ts-iu-size, 7rem); height: var(--ts-iu-size, 7rem); border: 2px dashed var(--ts-iu-border, var(--ts-skin-border-strong, rgba(128,128,128,.45))); background: var(--ts-iu-bg, var(--ts-skin-surface-2, rgba(128,128,128,.07))); color: var(--ts-iu-muted, var(--ts-skin-text-dim, rgba(128,128,128,.9))); overflow: hidden; cursor: pointer; transition: border-color .15s, background-color .15s; padding: 0; font: inherit; }
+        .ts-iu--circle .ts-iu-drop { border-radius: 50%; }
+        .ts-iu--box .ts-iu-drop { border-radius: var(--ts-iu-radius, var(--ts-skin-radius, 10px)); width: calc(var(--ts-iu-size, 7rem) * 2.2); }
+        .ts-iu-drop:hover, .ts-iu-drop:focus-visible, .ts-iu.is-over .ts-iu-drop { border-color: var(--ts-iu-accent, var(--ts-skin-accent, #00a89f)); outline: none; }
+        .ts-iu.is-over .ts-iu-drop { background: color-mix(in srgb, var(--ts-iu-accent, var(--ts-skin-accent, #00a89f)) 10%, transparent); }
+        .ts-iu-drop:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ts-iu-accent, var(--ts-skin-accent, #00a89f)) 30%, transparent); }
+        .ts-iu.has-image .ts-iu-drop { border-style: solid; }
+        .ts-iu-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .ts-iu--box .ts-iu-img { object-fit: contain; padding: .5rem; box-sizing: border-box; }
+        .ts-iu-hint { display: flex; flex-direction: column; align-items: center; gap: .25rem; padding: .4rem; font-size: .74rem; line-height: 1.25; text-align: center; }
+        .ts-iu-hint svg { width: 1.6rem; height: 1.6rem; }
+        .ts-iu.has-image .ts-iu-hint { display: none; }
+        .ts-iu-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--ts-iu-accent, var(--ts-skin-accent, #00a89f)); transform-origin: left; transform: scaleX(0); transition: transform .12s; }
+        .ts-iu--circle .ts-iu-bar { left: 18%; right: 18%; bottom: 14%; height: 5px; border-radius: 3px; }
+        .ts-iu-side { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; min-width: 0; }
+        .ts-iu-row { display: flex; gap: .5rem; flex-wrap: wrap; }
+        .ts-iu-msg { margin: 0; font-size: .82rem; min-height: 1.1em; }
+        .ts-iu-msg.is-bad { color: var(--ts-iu-danger, var(--ts-skin-danger, #dc2626)); }
+        .ts-iu-note { margin: 0; font-size: .78rem; color: var(--ts-iu-muted, var(--ts-skin-text-dim, rgba(128,128,128,.9))); }
+        .ts-iu.is-busy .ts-iu-drop { cursor: progress; }
+        .ts-iu.is-off { opacity: .55; pointer-events: none; }
+        .ts-iu-file { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); opacity: 0; }
+        @media (prefers-reduced-motion: reduce) { .ts-iu-drop, .ts-iu-bar { transition: none; } }
+    `;
+
+    // Widgets with paste on. One shared listener hands each pasted picture to a single widget
+    const pasters = new Set();
+    let lastUsed = null;
+
+    function onPaste(e) {
+        const ce = e.originalEvent || e;
+        const items = (ce.clipboardData || {}).items || [];
+        let file = null;
+        for (const it of items) {
+            if (it.kind === 'file' && /^image\//.test(it.type)) { file = it.getAsFile(); break; }
+        }
+        if (!file) return;
+
+        // a paste into a text field belongs to that field, unless the field is part of a widget
+        const t = ce.target;
+        if (t && t.closest && t.closest('input, textarea, [contenteditable=""], [contenteditable="true"]') && !t.closest('.ts-iu')) return;
+
+        const ready = Array.from(pasters).filter((p) => p.$el.is(':visible') && !p.$el.hasClass('is-off'));
+        if (!ready.length) return;
+
+        const focus = document.activeElement;
+        const onScreen = (p) => {
+            const r = p.$el[0].getBoundingClientRect();
+            return r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+        };
+        const byPosition = ready.slice().sort((a, b) => (a.$el[0].compareDocumentPosition(b.$el[0]) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+        const target = ready.find((p) => focus && p.$el[0].contains(focus))
+            || (ready.indexOf(lastUsed) >= 0 ? lastUsed : null)
+            || byPosition.find(onScreen)
+            || byPosition[0];
+
+        ce.preventDefault();
+        target._send(file);
+    }
+
+    function accepts(file, accept) {
+        const rules = String(accept || '').split(',').map((r) => r.trim().toLowerCase()).filter(Boolean);
+        const type = (file.type || '').toLowerCase();
+        const name = (file.name || '').toLowerCase();
+        if (!rules.length) return /^image\//.test(type);
+        return rules.some((r) => r.charAt(0) === '.' ? name.endsWith(r)
+            : r.slice(-2) === '/*' ? type.indexOf(r.slice(0, -1)) === 0
+            : type === r);
+    }
+
+    const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16.5V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5M12 15V4m0 0L8 8m4-4 4 4"/></svg>';
+
+    class PluginImageUpload {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el     = $el;
+            this._uid    = ++seq;
+            this._ns     = `.tsiu${this._uid}`;
+            this._xhr    = null;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginImageUpload.defaults, opts, { wrapper: this.$el });
+            return this;
+        }
+
+        build() {
+            const self = this, o = self.options;
+            if (!document.getElementById(STYLE_ID)) {
+                const st = document.createElement('style');
+                st.id = STYLE_ID;
+                st.textContent = CSS;
+                document.head.appendChild(st);
+            }
+            instanceCount++;
+            const id = `tsiu-${self._uid}`;
+            self.$el.addClass(`ts-iu ts-iu--${o.shape === 'circle' ? 'circle' : 'box'}`).empty();
+            self.$drop = $('<button type="button" class="ts-iu-drop"></button>').attr('aria-label', o.labels.choose)
+                .append($('<span class="ts-iu-hint"></span>').append(ICON, $('<span></span>').text(o.labels.drop)), '<span class="ts-iu-bar"></span>');
+            self.$file = $('<input type="file" class="ts-iu-file" tabindex="-1" aria-hidden="true">').attr({ id, accept: o.accept });
+            self.$choose = $('<button type="button"></button>').addClass(o.buttonClass).text(o.labels.choose);
+            self.$remove = $('<button type="button"></button>').addClass(o.buttonClass).addClass(o.removeClass).text(o.labels.remove);
+            self.$msg = $('<p class="ts-iu-msg" role="status" aria-live="polite"></p>');
+            self.$note = o.note ? $('<p class="ts-iu-note"></p>').text(o.note) : $();
+            const $side = $('<div class="ts-iu-side"></div>').append($('<div class="ts-iu-row"></div>').append(self.$choose, self.$remove), self.$msg, self.$note);
+            self.$el.append(self.$drop, self.$file, $side);
+            self.setImage(o.current || '');
+            return self;
+        }
+
+        events() {
+            const self = this, o = self.options;
+            const open = () => self.open();
+            self.$drop.on('click' + self._ns, open);
+            self.$choose.on('click' + self._ns, open);
+            self.$remove.on('click' + self._ns, () => self.remove());
+            self.$file.on('change' + self._ns, () => {
+                const f = self.$file[0].files && self.$file[0].files[0];
+                if (f) self._send(f);
+                self.$file.val('');
+            });
+            self.$el.on('dragenter' + self._ns + ' dragover' + self._ns, (e) => {
+                e.preventDefault();
+                self.$el.addClass('is-over');
+            });
+            self.$el.on('dragleave' + self._ns + ' drop' + self._ns, (e) => {
+                e.preventDefault();
+                if (e.type === 'dragleave' && self.$el[0].contains(e.relatedTarget)) return;
+                self.$el.removeClass('is-over');
+                if (e.type === 'drop') {
+                    const dt = e.originalEvent.dataTransfer;
+                    const f = dt && dt.files && dt.files[0];
+                    if (f) self._send(f);
+                }
+            });
+            // remember the widget used last, so a paste goes to it
+            self.$el.on('pointerdown' + self._ns + ' focusin' + self._ns, () => { lastUsed = self; });
+            if (o.paste) {
+                if (!pasters.size) $(document).on('paste.tsiupaste', onPaste);
+                pasters.add(self);
+            }
+            return self;
+        }
+
+        _emit(name, detail) {
+            const ev = new CustomEvent(`${EVENT}.${name}`, { bubbles: true, detail: Object.assign({ instance: this }, detail) });
+            this.$el[0].dispatchEvent(ev);
+        }
+
+        _say(text, bad) {
+            this.$msg.text(text || '').toggleClass('is-bad', !!bad);
+            if (bad) this._emit('error', { message: text });
+        }
+
+        _form() {
+            const o = this.options, fd = new FormData();
+            Object.keys(o.data || {}).forEach((k) => fd.append(k, o.data[k]));
+            if (o.csrf) fd.append('_csrf', o.csrf);
+            return fd;
+        }
+
+        _post(fd, onDone) {
+            const self = this, o = self.options;
+            const xhr = new XMLHttpRequest();
+            self._xhr = xhr;
+            self.$el.addClass('is-busy');
+            xhr.open('POST', o.endpoint);
+            xhr.withCredentials = true;
+            xhr.setRequestHeader('Accept', 'application/json');
+            if (o.csrf) xhr.setRequestHeader('X-CSRF-Token', o.csrf);
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) self.$drop.find('.ts-iu-bar').css('transform', `scaleX(${(e.loaded / e.total).toFixed(3)})`);
+            };
+            xhr.onload = () => {
+                let r = null;
+                try { r = JSON.parse(xhr.responseText); } catch (x) { /* handled below */ }
+                self._finishPost();
+                if (r && r.ok) onDone(r);
+                else self._say(r && r.errors && r.errors.length ? r.errors.join(' ') : o.labels.failed, true);
+            };
+            xhr.onerror = () => { self._finishPost(); self._say(o.labels.failed, true); };
+            xhr.send(fd);
+        }
+
+        _finishPost() {
+            this._xhr = null;
+            this.$el.removeClass('is-busy');
+            this.$drop.find('.ts-iu-bar').css('transform', 'scaleX(0)');
+        }
+
+        _send(file) {
+            const self = this, o = self.options;
+            if (self._xhr) return;
+            if (!accepts(file, o.accept)) { self._say(o.labels.type, true); return; }
+            if (o.maxSize && file.size > o.maxSize) { self._say(o.labels.size, true); return; }
+            self._say(o.labels.uploading);
+            const fd = self._form();
+            fd.append(o.field, file, file.name || 'picture');
+            self._post(fd, (r) => {
+                self.setImage(r.url || '');
+                self._say(o.labels.saved);
+                self._emit('change', { url: r.url || '', action: 'upload' });
+            });
+        }
+
+        setImage(url) {
+            const self = this;
+            self.$drop.find('.ts-iu-img').remove();
+            if (url) $('<img class="ts-iu-img" alt="">').attr('src', url).prependTo(self.$drop);
+            self._url = url || '';
+            self.$el.toggleClass('has-image', !!url);
+            self.$remove.prop('hidden', !url);
+            self.$choose.text(url ? self.options.labels.change : self.options.labels.choose);
+            return self;
+        }
+
+        getImage() { return this._url; }
+
+        open() {
+            if (!this._xhr && !this.$el.hasClass('is-off')) this.$file[0].click();
+            return this;
+        }
+
+        remove() {
+            const self = this, o = self.options;
+            if (self._xhr || !self._url) return self;
+            const fd = self._form();
+            fd.append('remove', '1');
+            self._post(fd, () => {
+                self.setImage('');
+                self._say(o.labels.removed);
+                self._emit('change', { url: '', action: 'remove' });
+            });
+            return self;
+        }
+
+        enable() { this.$el.removeClass('is-off'); return this; }
+        disable() { this.$el.addClass('is-off'); return this; }
+
+        destroy() {
+            const self = this;
+            if (self._xhr) self._xhr.abort();
+            self._xhr = null;
+            $(document).off(self._ns);
+            if (pasters.delete(self) && !pasters.size) $(document).off('paste.tsiupaste');
+            if (lastUsed === self) lastUsed = null;
+            self.$el.off(self._ns).empty().removeClass('ts-iu ts-iu--circle ts-iu--box has-image is-over is-busy is-off');
+            self.$el.removeData(instanceName);
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const st = document.getElementById(STYLE_ID);
+                if (st) st.remove();
+            }
+            return this;
+        }
+    }
+
+    PluginImageUpload.defaults = {
+        endpoint:    '',
+        field:       'file',
+        data:        {},              // extra form entries sent with every request
+        csrf:        '',
+        current:     '',              // url of the picture to show at first
+        shape:       'circle',        // 'circle' or 'box'
+        accept:      'image/jpeg,image/png,image/gif,image/webp',   // also decides which files are sent
+        maxSize:     0,               // bytes. 0: let the server decide
+        paste:       false,           // accept a picture pasted while the page is open
+        note:        '',
+        buttonClass: 'btn btn-sm btn-outline-secondary',
+        removeClass: 'text-danger',   // added to the Remove button after buttonClass
+        labels: {
+            choose: 'Choose a picture', change: 'Change picture', remove: 'Remove', drop: 'Drop a picture here',
+            uploading: 'Uploading…', saved: 'Saved.', removed: 'Removed.',
+            failed: 'The picture could not be saved. Please try again.',
+            type: 'Please use a JPG, PNG, GIF or WebP picture.', size: 'That picture is too big.'
+        }
+    };
+
+    $.extend(themestrap, { PluginImageUpload });
+
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginImageUpload = function (opts, ...args) {
+        return this.map(function () {
+            const $this = $(this);
+            const instance = $this.data(instanceName);
+
+            if (typeof opts === 'string') {
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
+            if (instance) {
+                return instance;
+            }
+
+            // called without options, each element reads its own data-plugin-options
+            const own = opts && typeof opts === 'object' ? opts
+                : themestrap.fn && typeof themestrap.fn.getOptions === 'function' ? themestrap.fn.getOptions($this.data('plugin-options')) : {};
+
+            return new PluginImageUpload($this, own);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+/**
+ * Themestrap Reveal
+ *
+ * Fades elements in as they scroll into view, and can give a banner a slow parallax drift.
+ * Everything is done with element styles set from script, so no stylesheet is injected and the
+ * plugin works on pages with a strict Content Security Policy. Elements already on screen when the
+ * page loads are left alone, so nothing flashes. Visitors who prefer reduced motion get no effects.
+ *
+ *   <div data-plugin-reveal data-plugin-options='{"animation":"fadeInUp","delay":100}'>...</div>
+ *   <section data-plugin-reveal data-plugin-options='{"parallax":true,"speed":0.3}'>...</section>
+ *
+ *   $('.card').themestrapPluginReveal({ animation: 'fadeInRight', stagger: 80 });
+ *
+ * Options
+ *   animation  fadeIn, fadeInUp, fadeInDown, fadeInLeft, fadeInRight   (default fadeInUp)
+ *   distance   pixels the element travels while fading in              (default 28)
+ *   duration   milliseconds                                             (default 600)
+ *   delay      milliseconds before it starts                            (default 0)
+ *   stagger    extra milliseconds for each element that starts appearing with others
+ *              (within 100ms): the first waits delay, the second delay + stagger, ...  (default 0)
+ *   threshold  how much must be visible, 0 to 1                         (default 0.12)
+ *   parallax   true moves the element's background picture more slowly than the page
+ *   speed      parallax strength, 0 to 1                                (default 0.3)
+ *   target     CSS selector of a child (such as an <img>) to move instead of the background.
+ *              Give it extra height in your CSS so its edges never show.
+ *
+ * The fade runs towards the element's own CSS opacity and transform, so a transform used for
+ * centering is kept. When it ends, the element's inline styles are put back as they were.
+ *
+ * Events (native CustomEvents on the element): ts.reveal.shown
+ * Methods: show(wait), destroy(), also by name: $(el).themestrapPluginReveal('destroy')
+ */
+// Reveal
+(((themestrap = {}, $) => {
+
+    const instanceName = '__pluginReveal';
+    const reduce = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const STYLES = ['opacity', 'transform', 'transition', 'willChange', 'backgroundPosition'];
+
+    // Elements that start appearing within BATCH_MS of each other share one stagger sequence:
+    // slot 0, 1, 2 ... in document order, starting again at 0 for the next group. Each element has
+    // its own observer and observers report in no fixed order, so the ones that come into view
+    // together are collected and numbered once, on the next frame.
+    const BATCH_MS = 100;
+    let batchStart = -Infinity;
+    let batchSize = 0;
+    let pending = [];
+
+    function queueShow(instance) {
+        if (!pending.length) {
+            requestAnimationFrame(flushShows);
+        }
+        pending.push(instance);
+    }
+
+    function flushShows() {
+        const list = pending;
+        pending = [];
+
+        const now = performance.now();
+        if (now - batchStart > BATCH_MS) {
+            batchSize = 0;
+        }
+        batchStart = now;
+
+        list.sort((a, b) => (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
+        list.forEach(instance => {
+            if (instance.mode === 'reveal' && instance.io) {
+                instance.show(instance.options.delay + (batchSize++) * instance.options.stagger);
+            }
+        });
+    }
+
+    function readOptions($el) {
+        const raw = $el.data('plugin-options');
+        if (themestrap.fn && typeof themestrap.fn.getOptions === 'function') {
+            return themestrap.fn.getOptions(raw);
+        }
+        return $.isPlainObject(raw) ? raw : {};
+    }
+
+    class PluginReveal {
+
+        static defaults = {
+            animation: 'fadeInUp',
+            distance: 28,
+            duration: 600,
+            delay: 0,
+            stagger: 0,
+            threshold: 0.12,
+            parallax: false,
+            speed: 0.3,
+            target: ''
+        };
+
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el = $el;
+            this.el = $el[0];
+            this.mode = '';          // 'reveal' or 'parallax' once set up, empty when left alone
+            this.saved = null;       // the element's inline styles before Reveal touched them
+            this.timer = null;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            // data-plugin-options is read even when initialized from script; passed options win
+            this.options = $.extend(true, {}, PluginReveal.defaults, readOptions(this.$el), opts, { wrapper: this.$el });
+            return this;
+        }
+
+        build() {
+            if (reduce() || !('IntersectionObserver' in window)) {
+                return this;
+            }
+            if (this.options.parallax) {
+                this.buildParallax();
+            } else {
+                this.buildReveal();
+            }
+            return this;
+        }
+
+        offset() {
+            const d = this.options.distance, a = this.options.animation;
+            return a === 'fadeInUp' ? [0, d] : a === 'fadeInDown' ? [0, -d] : a === 'fadeInLeft' ? [-d, 0] : a === 'fadeInRight' ? [d, 0] : [0, 0];
+        }
+
+        saveStyles(el) {
+            const saved = {};
+            STYLES.forEach(p => { saved[p] = el.style[p]; });
+            return saved;
+        }
+
+        restoreStyles(el, saved) {
+            STYLES.forEach(p => { el.style[p] = saved[p]; });
+        }
+
+        buildReveal() {
+            const el = this.el, [x, y] = this.offset();
+
+            // Anything already in view stays as it is
+            if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
+                return;
+            }
+
+            // Fade towards the element's own CSS values, so a CSS opacity or transform is kept
+            const cs = getComputedStyle(el);
+            this.to = {
+                opacity: cs.opacity,
+                transform: 'translate3d(0,0,0)' + (cs.transform && cs.transform !== 'none' ? ' ' + cs.transform : '')
+            };
+            this.saved = this.saveStyles(el);
+
+            el.style.opacity = '0';
+            el.style.transform = this.to.transform.replace('translate3d(0,0,0)', 'translate3d(' + x + 'px,' + y + 'px,0)');
+            el.style.willChange = 'opacity, transform';
+            this.mode = 'reveal';
+        }
+
+        buildParallax() {
+            const el = this.el, o = this.options;
+
+            this.moved = o.target ? el.querySelector(o.target) : null;
+            this.saved = this.saveStyles(el);
+            this.movedTransform = this.moved ? this.moved.style.transform : '';
+            this.mode = 'parallax';
+
+            let ticking = false;
+            this.update = () => {
+                ticking = false;
+                const r = el.getBoundingClientRect(), shift = Math.round(-r.top * o.speed);
+                if (this.moved) {
+                    this.moved.style.transform = 'translate3d(0,' + shift + 'px,0)';
+                } else {
+                    el.style.backgroundPosition = '50% calc(50% + ' + shift + 'px)';
+                }
+            };
+            this.onScroll = () => {
+                if (this.inView && !ticking) {
+                    ticking = true;
+                    requestAnimationFrame(this.update);
+                }
+            };
+            this.update();
+        }
+
+        events() {
+            const o = this.options;
+
+            if (this.mode === 'reveal') {
+                this.io = new IntersectionObserver(entries => {
+                    if (entries.some(en => en.isIntersecting) && pending.indexOf(this) < 0) {
+                        queueShow(this);
+                    }
+                }, { threshold: o.threshold });
+                this.io.observe(this.el);
+            }
+
+            if (this.mode === 'parallax') {
+                this.io = new IntersectionObserver(entries => {
+                    this.inView = entries[0].isIntersecting;
+                    if (this.inView) {
+                        this.onScroll();
+                    }
+                }, { threshold: 0 });
+                this.io.observe(this.el);
+                window.addEventListener('scroll', this.onScroll, { passive: true });
+                window.addEventListener('resize', this.onScroll);
+            }
+
+            return this;
+        }
+
+        /**
+         * Play the fade now, after `wait` milliseconds, and fire ts.reveal.shown.
+         * When the fade is over the element's inline styles are put back as they were.
+         * @param {number} [wait=0]
+         * @returns {PluginReveal}
+         */
+        show(wait) {
+            const el = this.el, o = this.options;
+            wait = wait || 0;
+
+            if (this.io && this.mode === 'reveal') {
+                this.io.disconnect();
+                this.io = null;
+            }
+
+            if (this.mode === 'reveal') {
+                el.style.transition = 'opacity ' + o.duration + 'ms ease ' + wait + 'ms, transform ' + o.duration + 'ms ease ' + wait + 'ms';
+                el.style.opacity = this.to.opacity;
+                el.style.transform = this.to.transform;
+
+                clearTimeout(this.timer);
+                this.timer = setTimeout(() => {
+                    this.timer = null;
+                    this.restoreStyles(el, this.saved);
+                    this.mode = '';
+                }, o.duration + wait + 50);
+            }
+
+            el.dispatchEvent(new CustomEvent('ts.reveal.shown', { bubbles: true }));
+            return this;
+        }
+
+        /**
+         * Stop observing, remove the parallax listeners and put the inline styles back.
+         * An element still waiting to appear is shown at once.
+         * @returns {PluginReveal}
+         */
+        destroy() {
+            if (this.io) {
+                this.io.disconnect();
+                this.io = null;
+            }
+            clearTimeout(this.timer);
+            this.timer = null;
+
+            if (this.onScroll) {
+                window.removeEventListener('scroll', this.onScroll);
+                window.removeEventListener('resize', this.onScroll);
+                this.onScroll = null;
+            }
+
+            if (this.saved) {
+                this.restoreStyles(this.el, this.saved);
+                this.saved = null;
+            }
+            if (this.moved) {
+                this.moved.style.transform = this.movedTransform;
+                this.moved = null;
+            }
+
+            this.mode = '';
+            this.$el.removeData(instanceName);
+
+            return this;
+        }
+    }
+
+    // expose to scope
+    $.extend(themestrap, {
+        PluginReveal
+    });
+
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginReveal = function (opts, ...args) {
+        return this.map(function () {
+            const $this = $(this);
+            const instance = $this.data(instanceName);
+
+            if (typeof opts === 'string') {
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
+            return instance || new PluginReveal($this, opts);
+        });
+    };
+
+})).apply(this, [window.themestrap, jQuery]);
+
+/**
+ * Themestrap Sortable
+ *
+ * Drag and drop reordering for lists, rows and grids, with mouse, touch and keyboard support. Items can
+ * also move between lists that share a group name, which is how a widget moves from one area to another.
+ *
+ * Markup:
+ *
+ *   <ul data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "widgets"}'>
+ *     <li data-id="a"><button class="grip" type="button">Move</button> First</li>
+ *     <li data-id="b"><button class="grip" type="button">Move</button> Second</li>
+ *   </ul>
+ *
+ * Without a handle option the whole item is the handle. On a touch screen the item is then picked up
+ * by pressing and holding it, so a quick swipe still scrolls the page. The arrow keys move the item
+ * whose handle (or the item itself, without a handle) has focus. Escape puts a dragged item back.
+ *
+ * The layout is detected on every move: a column of items, a single row, or a wrapping grid.
+ * Set the axis option ('y', 'x' or 'grid') to skip the detection.
+ *
+ * Public API (via stored instance or by name):
+ *   const s = $('#list').data('__pluginSortable');
+ *   s.toArray();     // the data-id of each item, in order
+ *   s.refresh();     // mark items added after init
+ *   s.enable(); s.disable(); s.destroy();
+ *   $('#list').themestrapPluginSortable('disable');
+ *
+ * Events (native CustomEvent, bubbling, dispatched on the list):
+ *   ts.sortable.start    detail: { instance, item }
+ *   ts.sortable.sort     detail: { instance, item, order, from, to }   fired when an item is dropped in a new place
+ *   ts.sortable.end      detail: { instance, item }
+ *
+ * CSS custom properties (all optional, they follow the skin's accent):
+ *   --ts-sort-ghost   background of the item while it is dragged
+ *   --ts-sort-line    color of the outlines
+ *
+ * Init.js wiring:
+ *   if (typeof $.fn['themestrapPluginSortable'] === 'function' && $('[data-plugin-sortable]').length) {
+ *       themestrap.fn.intObsInit('[data-plugin-sortable]:not(.manual)', 'themestrapPluginSortable');
+ *   }
+ */
+// Sortable
+(((themestrap = {}, $) => {
+    const instanceName = '__pluginSortable';
+    const STYLE_ID     = 'ts-sortable-styles';
+    const EVENT        = 'ts.sortable';
+    const HOLD_MS      = 300;       // touch press needed to pick up a whole item
+    const HOLD_SLOP    = 8;         // pixels a finger may move during that press
+
+    let instanceCount = 0;
+    let seq           = 0;
+
+    const CSS = `
+        .ts-sort-item { position: relative; }
+        .ts-sort-item.is-dragging { opacity: .55; background: var(--ts-sort-ghost, var(--ts-skin-accent-soft, rgba(0,168,159,.08))); outline: 2px dashed var(--ts-sort-line, var(--ts-skin-accent, #00a89f)); outline-offset: -2px; }
+        .ts-sort-dragging, .ts-sort-dragging * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+        .ts-sort-dragging .ts-sort-item.is-dragging { pointer-events: none; }
+        .ts-sort-handle { cursor: grab; touch-action: none; }
+        .ts-sort-whole > .ts-sort-handle { touch-action: manipulation; }
+        @media (pointer: coarse) {
+            .ts-sort-whole > .ts-sort-item { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        }
+        .ts-sort-list.is-over { outline: 2px dashed var(--ts-sort-line, var(--ts-skin-accent, #00a89f)); outline-offset: 2px; border-radius: 6px; }
+        .ts-sort-disabled .ts-sort-handle { cursor: default; opacity: .5; }
+        @media (prefers-reduced-motion: reduce) { .ts-sort-item { transition: none; } }
+    `;
+
+    const groups = {};
+
+    const rect = (el) => el.getBoundingClientRect();
+
+    class PluginSortable {
+        constructor($el, opts) {
+            return this.initialize($el, opts);
+        }
+
+        initialize($el, opts) {
+            if ($el.data(instanceName)) {
+                return this;
+            }
+
+            this.$el       = $el;
+            this._uid      = ++seq;
+            this._ns       = `.tssort${this._uid}`;
+            this._drag     = null;
+            this._hold     = null;
+            this._disabled = false;
+
+            this
+                .setData()
+                .setOptions(opts)
+                .build()
+                .events();
+
+            return this;
+        }
+
+        setData() {
+            this.$el.data(instanceName, this);
+            return this;
+        }
+
+        setOptions(opts) {
+            this.options = $.extend(true, {}, PluginSortable.defaults, opts, { wrapper: this.$el });
+            return this;
+        }
+
+        build() {
+            const self = this;
+            if (!document.getElementById(STYLE_ID)) {
+                const st = document.createElement('style');
+                st.id = STYLE_ID;
+                st.textContent = CSS;
+                document.head.appendChild(st);
+            }
+            instanceCount++;
+            self.$el.addClass('ts-sort-list').toggleClass('ts-sort-whole', !self.options.handle);
+            if (self.options.group) (groups[self.options.group] = groups[self.options.group] || []).push(self);
+            self._mark();
+            return self;
+        }
+
+        _items() {
+            return this.$el.children(this.options.items).toArray();
+        }
+
+        _mark() {
+            const self = this;
+            self._items().forEach((li) => {
+                $(li).addClass('ts-sort-item');
+                const $h = self.options.handle ? $(li).find(self.options.handle).first() : $(li);
+                $h.addClass('ts-sort-handle');
+                if (self.options.handle && $h.length && !$h.attr('aria-label') && !$h.attr('title')) $h.attr('aria-label', self.options.labels.move);
+            });
+        }
+
+        _handleOf(target) {
+            const self = this;
+            const li = $(target).closest('.ts-sort-item', self.$el[0])[0];
+            if (!li || li.parentNode !== self.$el[0]) return null;
+            if (self.options.handle) {
+                const h = $(target).closest(self.options.handle, li)[0];
+                return h ? li : null;
+            }
+            if ($(target).closest('input,textarea,select,button,a,label,[contenteditable]', li).length) return null;
+            return li;
+        }
+
+        /**
+         * How the items are laid out: 'y' (one column), 'x' (one row) or 'grid' (rows that wrap).
+         * Read from the item positions, or from the list's CSS when it has fewer than two items.
+         */
+        _axis() {
+            if (this.options.axis && this.options.axis !== 'auto') return this.options.axis;
+            const items = this._items();
+            if (items.length >= 2) {
+                const a = rect(items[0]), b = rect(items[1]);
+                if (Math.abs(a.top - b.top) >= Math.min(a.height, b.height) / 2) return 'y';
+                const last = rect(items[items.length - 1]);
+                return Math.abs(last.top - a.top) < a.height / 2 ? 'x' : 'grid';
+            }
+            const cs = getComputedStyle(this.$el[0]);
+            if (/flex/.test(cs.display) && !/column/.test(cs.flexDirection)) return cs.flexWrap === 'wrap' ? 'grid' : 'x';
+            if (/grid/.test(cs.display) && cs.gridTemplateColumns.split(' ').length > 1) return 'grid';
+            return 'y';
+        }
+
+        _rtl() {
+            return getComputedStyle(this.$el[0]).direction === 'rtl';
+        }
+
+        events() {
+            const self = this;
+            self.$el.on('pointerdown' + self._ns, (e) => {
+                if (self._disabled || self._drag || (e.button != null && e.button !== 0)) return;
+                const li = self._handleOf(e.target);
+                if (!li) return;
+                if (e.pointerType === 'touch' && !self.options.handle) {
+                    self._press(li, e);
+                } else {
+                    e.preventDefault();
+                    self._begin(li, e.clientX, e.clientY, false);
+                }
+            });
+            self.$el.on('keydown' + self._ns, (e) => {
+                if (self._disabled || self._drag) return;
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) < 0) return;
+                const li = self._handleOf(e.target);
+                if (!li) return;
+                // without a handle, only the focused item itself moves, not a control inside it
+                if (!self.options.handle && e.target !== li) return;
+                self._step(li, e);
+            });
+            return self;
+        }
+
+        /** Move an item with the arrow keys: one place, or one row in a grid. */
+        _step(li, e) {
+            const self = this;
+            const items = self._items();
+            const index = items.indexOf(li);
+            const axis = self._axis();
+            const rtl = self._rtl();
+            let delta = 0;
+
+            if (axis === 'y') {
+                if (e.key === 'ArrowUp') delta = -1;
+                if (e.key === 'ArrowDown') delta = 1;
+            } else {
+                if (e.key === 'ArrowLeft') delta = rtl ? 1 : -1;
+                if (e.key === 'ArrowRight') delta = rtl ? -1 : 1;
+                if (axis === 'grid' && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+                    const top = rect(items[0]).top;
+                    const cols = Math.max(1, items.filter((it) => Math.abs(rect(it).top - top) < 2).length);
+                    delta = e.key === 'ArrowUp' ? -cols : cols;
+                }
+            }
+            if (!delta) return;
+            e.preventDefault();
+
+            const to = Math.max(0, Math.min(items.length - 1, index + delta));
+            if (to === index) return;
+
+            const before = self.toArray();
+            const others = items.filter((it) => it !== li);
+            const parent = self.$el[0];
+            if (to >= others.length) {
+                parent.insertBefore(li, others[others.length - 1].nextSibling);
+            } else {
+                parent.insertBefore(li, others[to]);
+            }
+
+            const h = self.options.handle ? $(li).find(self.options.handle)[0] : li;
+            if (h && h.focus) h.focus();
+            self._emit('sort', { item: li, order: self.toArray(), from: self, to: self, before });
+        }
+
+        _emit(name, detail) {
+            const ev = new CustomEvent(`${EVENT}.${name}`, { bubbles: true, detail: Object.assign({ instance: this }, detail) });
+            this.$el[0].dispatchEvent(ev);
+            const cb = this.options['on' + name.charAt(0).toUpperCase() + name.slice(1)];
+            if (typeof cb === 'function') cb.call(this, ev.detail);
+        }
+
+        _targets() {
+            const g = this.options.group;
+            return g && groups[g] ? groups[g] : [this];
+        }
+
+        /** A touch on a whole item: pick it up after a short hold, or let the page scroll. */
+        _press(li, e) {
+            const self = this;
+            const x0 = e.clientX, y0 = e.clientY, id = e.pointerId;
+            const ns = self._ns + 'h';
+
+            const cancel = () => {
+                clearTimeout(self._hold);
+                self._hold = null;
+                $(document).off(ns);
+            };
+
+            self._hold = setTimeout(() => {
+                cancel();
+                self._begin(li, x0, y0, true);
+            }, HOLD_MS);
+
+            $(document)
+                .on('pointermove' + ns, (ev) => {
+                    if (ev.pointerId === id && Math.hypot(ev.clientX - x0, ev.clientY - y0) > HOLD_SLOP) cancel();
+                })
+                .on('pointerup' + ns + ' pointercancel' + ns, (ev) => {
+                    if (ev.pointerId === id) cancel();
+                })
+                .on('contextmenu' + ns, (ev) => ev.preventDefault());
+        }
+
+        _begin(li, x, y, touch) {
+            const self = this;
+            self._drag = {
+                li,
+                from: self,
+                fromOrder: self.toArray(),
+                home: { parent: li.parentNode, next: li.nextSibling },
+                over: self,
+                touch
+            };
+            li.classList.add('is-dragging');
+            document.documentElement.classList.add('ts-sort-dragging');
+            self._emit('start', { item: li });
+
+            const ns = self._ns + 'd';
+            const end = (cancelled) => {
+                $(document).off(ns);
+                if (self._onTouchMove) {
+                    document.removeEventListener('touchmove', self._onTouchMove);
+                    document.removeEventListener('touchend', self._onTouchEnd);
+                    document.removeEventListener('touchcancel', self._onTouchEnd);
+                    self._onTouchMove = self._onTouchEnd = null;
+                }
+                self._finish(cancelled === true);
+            };
+
+            if (touch) {
+                // The browser may claim a moving finger for scrolling and cancel its pointer events,
+                // so a touch drag follows touch events and stops the page from scrolling under it
+                self._onTouchMove = (te) => {
+                    const t = te.touches[0];
+                    if (!t) return;
+                    if (te.cancelable) te.preventDefault();
+                    self._move(t.clientX, t.clientY);
+                };
+                self._onTouchEnd = () => end(false);
+                document.addEventListener('touchmove', self._onTouchMove, { passive: false });
+                document.addEventListener('touchend', self._onTouchEnd);
+                document.addEventListener('touchcancel', self._onTouchEnd);
+                $(document).on('contextmenu' + ns, (ev) => ev.preventDefault());
+            } else {
+                $(document)
+                    .on('pointermove' + ns, (ev) => self._move(ev.clientX, ev.clientY))
+                    .on('pointerup' + ns + ' pointercancel' + ns, () => end(false));
+            }
+
+            $(document).on('keydown' + ns, (ev) => {
+                if (ev.key === 'Escape') {
+                    ev.preventDefault();
+                    end(true);
+                }
+            });
+        }
+
+        _move(x, y) {
+            const self = this, d = self._drag;
+            if (!d) return;
+            let target = null;
+            self._targets().forEach((s) => {
+                const r = rect(s.$el[0]);
+                if (x >= r.left - 12 && x <= r.right + 12 && y >= r.top - 12 && y <= r.bottom + 12) target = s;
+            });
+            self._targets().forEach((s) => s.$el.toggleClass('is-over', s === target && s !== d.from));
+            if (!target) return;
+            d.over = target;
+
+            const axis = target._axis();
+            const rtl = axis !== 'y' && target._rtl();
+            const ahead = (r) => rtl ? x > r.left + r.width / 2 : x < r.left + r.width / 2;
+            const items = target._items().filter((it) => it !== d.li);
+            let before = null;
+
+            for (const it of items) {
+                const r = rect(it);
+                const hit = axis === 'y' ? y < r.top + r.height / 2
+                    : axis === 'x' ? ahead(r)
+                    : y < r.top || (y <= r.bottom && ahead(r));
+                if (hit) { before = it; break; }
+            }
+
+            const parent = target.$el[0];
+            if (before) {
+                if (d.li.nextElementSibling !== before || d.li.parentNode !== parent) parent.insertBefore(d.li, before);
+            } else {
+                const last = items[items.length - 1];
+                const anchor = last ? last.nextSibling : null;
+                if (d.li.parentNode !== parent || (last && d.li.previousElementSibling !== last) || (!last && parent.lastElementChild !== d.li)) {
+                    parent.insertBefore(d.li, anchor);
+                }
+            }
+        }
+
+        _finish(cancelled) {
+            const self = this, d = self._drag;
+            if (!d) return;
+            self._drag = null;
+            d.li.classList.remove('is-dragging');
+            document.documentElement.classList.remove('ts-sort-dragging');
+            self._targets().forEach((s) => s.$el.removeClass('is-over'));
+
+            if (cancelled) {
+                d.home.parent.insertBefore(d.li, d.home.next && d.home.next.parentNode === d.home.parent ? d.home.next : null);
+                d.from._emit('end', { item: d.li });
+                return;
+            }
+
+            const to = d.li.parentNode === d.from.$el[0] ? d.from : (d.over || d.from);
+            to._mark();
+            const changed = to !== d.from || d.fromOrder.join('|') !== d.from.toArray().join('|');
+            if (changed) {
+                const detail = { item: d.li, order: to.toArray(), from: d.from, to };
+                d.from._emit('sort', detail);
+                if (to !== d.from) to._emit('sort', detail);
+            }
+            d.from._emit('end', { item: d.li });
+        }
+
+        toArray() {
+            return this._items().map((li) => li.getAttribute(this.options.idAttr) || '');
+        }
+
+        refresh() {
+            this._mark();
+            return this;
+        }
+
+        enable() {
+            this._disabled = false;
+            this.$el.removeClass('ts-sort-disabled');
+            return this;
+        }
+
+        disable() {
+            this._disabled = true;
+            this.$el.addClass('ts-sort-disabled');
+            return this;
+        }
+
+        destroy() {
+            const self = this;
+            clearTimeout(self._hold);
+            self._hold = null;
+            if (self._drag) {
+                self._drag.li.classList.remove('is-dragging');
+                document.documentElement.classList.remove('ts-sort-dragging');
+                self._drag = null;
+            }
+            if (self._onTouchMove) {
+                document.removeEventListener('touchmove', self._onTouchMove);
+                document.removeEventListener('touchend', self._onTouchEnd);
+                document.removeEventListener('touchcancel', self._onTouchEnd);
+                self._onTouchMove = self._onTouchEnd = null;
+            }
+            self.$el.off(self._ns);
+            $(document).off(self._ns + 'd').off(self._ns + 'h');
+            self.$el.removeClass('ts-sort-list ts-sort-whole ts-sort-disabled is-over');
+            self.$el.find('.ts-sort-item').removeClass('ts-sort-item is-dragging');
+            self.$el.find('.ts-sort-handle').removeClass('ts-sort-handle');
+            const g = self.options.group;
+            if (g && groups[g]) groups[g] = groups[g].filter((x) => x !== self);
+            self.$el.removeData(instanceName);
+            instanceCount--;
+            if (instanceCount <= 0) {
+                instanceCount = 0;
+                const st = document.getElementById(STYLE_ID);
+                if (st) st.remove();
+            }
+            return this;
+        }
+    }
+
+    PluginSortable.defaults = {
+        items:   '*',              // which children can be moved
+        handle:  '',               // selector of the grip inside each item. Empty: the whole item
+        group:   '',               // lists with the same name accept each other's items
+        axis:    'auto',           // 'auto', 'y' (a column), 'x' (a row) or 'grid' (rows that wrap)
+        idAttr:  'data-id',        // attribute that identifies an item in toArray()
+        labels:  { move: 'Move. Use the arrow keys to change the order.' },
+        onStart: null,
+        onSort:  null,             // function ({ item, order, from, to }) {}
+        onEnd:   null
+    };
+
+    $.extend(themestrap, { PluginSortable });
+
+    // jquery plugin: options object to initialize, or a method name to call ('destroy', ...)
+    $.fn.themestrapPluginSortable = function (opts, ...args) {
+        return this.map(function () {
+            const $this = $(this);
+            const instance = $this.data(instanceName);
+
+            if (typeof opts === 'string') {
+                if (instance && opts.charAt(0) !== '_' && typeof instance[opts] === 'function') {
+                    return instance[opts](...args);
+                }
+                return instance;
+            }
+
+            if (instance) {
+                return instance;
+            }
+
+            // called without options, each element reads its own data-plugin-options
+            const own = opts && typeof opts === 'object' ? opts
+                : themestrap.fn && typeof themestrap.fn.getOptions === 'function' ? themestrap.fn.getOptions($this.data('plugin-options')) : {};
+
+            return new PluginSortable($this, own);
+        });
+    };
+
 })).apply(this, [window.themestrap, jQuery]);

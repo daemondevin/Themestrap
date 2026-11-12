@@ -89,6 +89,18 @@
             src: 'components/themestrap.plugin.sort.js',
             selector: '[data-plugin-sort]', method: 'themestrapPluginSort', strategy: 'intObs'
         })
+        .definePlugin('sortable', {
+            src: 'components/themestrap.plugin.sortable.js',
+            selector: '[data-plugin-sortable]', method: 'themestrapPluginSortable', strategy: 'intObs'
+        })
+        .definePlugin('reveal', {
+            src: 'components/themestrap.plugin.reveal.js',
+            selector: '[data-plugin-reveal]', method: 'themestrapPluginReveal', strategy: 'intObs'
+        })
+        .definePlugin('imageUpload', {
+            src: 'components/themestrap.plugin.imageupload.js',
+            selector: '[data-plugin-imageupload]', method: 'themestrapPluginImageUpload', strategy: 'intObs'
+        })
         .definePlugin('chartCircular', {
             src: 'components/themestrap.plugin.chartcircular.js',
             selector: '[data-plugin-chart-circular]', method: 'themestrapPluginChartCircular',

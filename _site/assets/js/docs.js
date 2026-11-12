@@ -360,10 +360,14 @@
         });
     }
 
+    let settleScroll = null;
+
     function scrollAfterRender() {
         const target = pendingHashScroll && document.getElementById(pendingHashScroll);
+        settleScroll = null;
         if (target) {
             target.scrollIntoView();
+            settleScroll = { id: target.id, y: window.scrollY };
         }
         pendingHashScroll = '';
     }
@@ -379,6 +383,18 @@
         polishTables();
         buildToc();
         scrollAfterRender();
+    });
+
+    // Mermaid diagrams are drawn after render and push the anchor down; land on it
+    // again unless the reader has scrolled since
+    $doc.on('diagrams.ts.markdown', function () {
+        if (settleScroll && Math.abs(window.scrollY - settleScroll.y) < 2) {
+            const target = document.getElementById(settleScroll.id);
+            if (target) {
+                target.scrollIntoView();
+            }
+        }
+        settleScroll = null;
     });
 
     $doc.on('error.ts.markdown', function (e, url, err) {

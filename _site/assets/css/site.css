@@ -1410,6 +1410,27 @@ h4:hover > .heading-anchor,
     border: 0;
 }
 
+/* Mermaid diagrams drawn by PluginMarkdown. The --site-* tokens switch with the mode,
+   so the plugin redraws in the right colors when dark mode toggles */
+.doc-prose.ts-markdown {
+    --ts-md-diagram-bg: var(--site-bg);
+    --ts-md-diagram-node: var(--site-surface);
+    --ts-md-diagram-node-border: var(--site-border-strong);
+    --ts-md-diagram-text: var(--site-fg);
+    --ts-md-diagram-line: var(--site-muted);
+    --ts-md-diagram-accent: var(--site-accent-soft);
+    --ts-md-diagram-note: var(--site-raised);
+    --ts-md-diagram-font: var(--site-font);
+}
+
+.doc-prose.ts-markdown .ts-md-mermaid {
+    margin: 0 0 1.4em;
+    padding: 1.25rem;
+    background: var(--site-raised);
+    border: 1px solid var(--site-border);
+    border-radius: var(--site-radius);
+}
+
 /* PluginHighlight theme, scoped to site code surfaces */
 .doc-prose,
 .lab,

@@ -40,60 +40,63 @@ Quick reference for all plugins in `js/components/`. Each section covers the plu
 29. [HoverCard](#hovercard)
 30. [HoverEffect](#hovereffect)
 31. [Icon](#icon)
-32. [InViewportStyle](#inviewportstyle)
-33. [Lightbox](#lightbox)
-34. [LoadingOverlay](#loadingoverlay)
-35. [Lockscreen](#lockscreen)
-36. [Markdown](#markdown)
-37. [MarkdownEditor](#markdowneditor)
-38. [Masonry](#masonry)
-39. [MatchHeight](#matchheight)
-40. [Menubar](#menubar)
-41. [ModuleLoader](#moduleloader)
-42. [Nav](#nav)
-43. [Navbar](#navbar)
-44. [Navigation](#navigation)
-45. [NavMenu](#navmenu)
-46. [Newsletter](#newsletter)
-47. [NumberInput](#numberinput)
-48. [Otp](#otp)
-49. [PanelNav](#panelnav)
-50. [Parallax](#parallax)
-51. [Particles](#particles)
-52. [Popover](#popover)
-53. [PricingToggle](#pricingtoggle)
-54. [ProgressBar](#progressbar)
-55. [RandomImages](#randomimages)
-56. [Rating](#rating)
-57. [ReadMore](#readmore)
-58. [RevolutionSlider](#revolutionslider)
-59. [RichEditor](#richeditor)
-60. [Scrollable](#scrollable)
-61. [Scrollbar](#scrollbar)
-62. [Scroller](#scroller)
-63. [ScrollFx](#scrollfx)
-64. [ScrollShadow](#scrollshadow)
-65. [ScrollSpy](#scrollspy)
-66. [ScrollToTop](#scrolltotop)
-67. [Search](#search)
-68. [SectionScroll](#sectionscroll)
-69. [Select](#select)
-70. [SideNav](#sidenav)
-71. [Sort](#sort)
-72. [SplashScreen](#splashscreen)
-73. [Sticky](#sticky)
-74. [StickyHeader](#stickyheader)
-75. [TagsInput](#tagsinput)
-76. [TimePicker](#timepicker)
-77. [Toast](#toast)
-78. [Toggle](#toggle)
-79. [Toolbar](#toolbar)
-80. [Tooltip](#tooltip)
-81. [Tree](#tree)
-82. [Validation](#validation)
-83. [VerticalNav](#verticalnav)
-84. [VideoBackground](#videobackground)
-85. [Wizard](#wizard)
+32. [ImageUpload](#imageupload)
+33. [InViewportStyle](#inviewportstyle)
+34. [Lightbox](#lightbox)
+35. [LoadingOverlay](#loadingoverlay)
+36. [Lockscreen](#lockscreen)
+37. [Markdown](#markdown)
+38. [MarkdownEditor](#markdowneditor)
+39. [Masonry](#masonry)
+40. [MatchHeight](#matchheight)
+41. [Menubar](#menubar)
+42. [ModuleLoader](#moduleloader)
+43. [Nav](#nav)
+44. [Navbar](#navbar)
+45. [Navigation](#navigation)
+46. [NavMenu](#navmenu)
+47. [Newsletter](#newsletter)
+48. [NumberInput](#numberinput)
+49. [Otp](#otp)
+50. [PanelNav](#panelnav)
+51. [Parallax](#parallax)
+52. [Particles](#particles)
+53. [Popover](#popover)
+54. [PricingToggle](#pricingtoggle)
+55. [ProgressBar](#progressbar)
+56. [RandomImages](#randomimages)
+57. [Rating](#rating)
+58. [ReadMore](#readmore)
+59. [Reveal](#reveal)
+60. [RevolutionSlider](#revolutionslider)
+61. [RichEditor](#richeditor)
+62. [Scrollable](#scrollable)
+63. [Scrollbar](#scrollbar)
+64. [Scroller](#scroller)
+65. [ScrollFx](#scrollfx)
+66. [ScrollShadow](#scrollshadow)
+67. [ScrollSpy](#scrollspy)
+68. [ScrollToTop](#scrolltotop)
+69. [Search](#search)
+70. [SectionScroll](#sectionscroll)
+71. [Select](#select)
+72. [SideNav](#sidenav)
+73. [Sort](#sort)
+74. [Sortable](#sortable)
+75. [SplashScreen](#splashscreen)
+76. [Sticky](#sticky)
+77. [StickyHeader](#stickyheader)
+78. [TagsInput](#tagsinput)
+79. [TimePicker](#timepicker)
+80. [Toast](#toast)
+81. [Toggle](#toggle)
+82. [Toolbar](#toolbar)
+83. [Tooltip](#tooltip)
+84. [Tree](#tree)
+85. [Validation](#validation)
+86. [VerticalNav](#verticalnav)
+87. [VideoBackground](#videobackground)
+88. [Wizard](#wizard)
 
 ---
 
@@ -1601,6 +1604,58 @@ Fetches an SVG file via AJAX, inlines it into the DOM (replacing the `<img>` tag
 
 ---
 
+## ImageUpload
+
+**File:** `themestrap.plugin.imageupload.js`  
+**jQuery method:** `$.fn.themestrapPluginImageUpload`  
+**Instance key:** `__pluginImageUpload`  
+**Guide:** [`docs/PluginImageUpload.md`](docs/PluginImageUpload.md)
+
+A picture picker for one image, such as an avatar or a logo. Shows the current picture as a circle or a box, takes a click, a drag and drop or a paste, uploads the file to your endpoint with a progress bar, and offers a remove button. The endpoint answers JSON: `{ "ok": true, "url": "..." }` or `{ "ok": false, "errors": [...] }`.
+
+### Markup
+
+```html
+<div data-plugin-imageupload
+     data-plugin-options='{"endpoint": "/account/avatar", "shape": "circle",
+                           "current": "/uploads/avatars/42.jpg", "csrf": "..."}'></div>
+```
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `endpoint` | `''` | Where uploads and removals are POSTed. |
+| `field` | `'file'` | Form field name of the file. |
+| `data` | `{}` | Extra form fields sent with every request. |
+| `csrf` | `''` | Sent as a `_csrf` field and an `X-CSRF-Token` header. |
+| `current` | `''` | URL of the picture to show at first. |
+| `shape` | `'circle'` | `'circle'` or `'box'`. |
+| `accept` | JPG, PNG, GIF, WebP | MIME types, wildcards and extensions a file must match to be sent. |
+| `maxSize` | `0` | Largest file in bytes. `0`: no limit in the browser. |
+| `paste` | `false` | Upload a pasted picture. One widget takes each paste. |
+| `note` | `''` | A line of help under the buttons. |
+| `buttonClass` | `'btn btn-sm btn-outline-secondary'` | Classes for both buttons. |
+| `removeClass` | `'text-danger'` | Classes added to the Remove button. |
+| `labels` | see the guide | Every piece of text. |
+
+### Public API
+
+```js
+const inst = $('#el').data('__pluginImageUpload');
+inst.setImage(url);
+inst.getImage();
+inst.open();
+inst.remove();
+inst.enable();
+inst.disable();
+inst.destroy();
+```
+
+Events (native, use `addEventListener`): `ts.imageupload.change`, `ts.imageupload.error`.
+
+---
+
 ## InViewportStyle
 
 **File:** `themestrap.plugin.inviewportstyle.js`  
@@ -2859,6 +2914,48 @@ Truncates content to a max height and reveals a "Read More / Read Less" toggle b
 
 ---
 
+## Reveal
+
+**File:** `themestrap.plugin.reveal.js`  
+**jQuery method:** `$.fn.themestrapPluginReveal`  
+**Instance key:** `__pluginReveal`  
+**Guide:** [`docs/PluginReveal.md`](docs/PluginReveal.md)
+
+Fades elements in as they scroll into view, and gives a banner a slow parallax drift. No stylesheet is injected, elements already on screen at load are left alone, and visitors who prefer reduced motion get no effects. Elements that come into view together are staggered in page order.
+
+### Markup
+
+```html
+<div data-plugin-reveal data-plugin-options='{"animation": "fadeInLeft", "delay": 100}'>...</div>
+<section data-plugin-reveal data-plugin-options='{"parallax": true, "speed": 0.3}'>...</section>
+```
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `animation` | `'fadeInUp'` | `fadeIn`, `fadeInUp`, `fadeInDown`, `fadeInLeft` or `fadeInRight`. |
+| `distance` | `28` | Pixels the element travels while it fades. |
+| `duration` | `600` | Length of the fade in ms. |
+| `delay` | `0` | Wait in ms once the element is in view. |
+| `stagger` | `0` | Extra ms for each element that appears together with others. |
+| `threshold` | `0.12` | How much must be visible, `0` to `1`. |
+| `parallax` | `false` | Make this a parallax banner. |
+| `speed` | `0.3` | Parallax strength, `0` to `1`. |
+| `target` | `''` | Child to move instead of the background. |
+
+### Public API
+
+```js
+const inst = $('#el').data('__pluginReveal');
+inst.show(wait);
+inst.destroy();
+```
+
+Event (native, use `addEventListener`): `ts.reveal.shown`.
+
+---
+
 ## RevolutionSlider
 
 **File:** `themestrap.plugin.revolutionslider.js`  
@@ -3401,6 +3498,50 @@ const inst = $('#el').data('__sort');
 inst.setFilter(filter);
 inst.destroy();
 ```
+
+---
+
+## Sortable
+
+**File:** `themestrap.plugin.sortable.js`  
+**jQuery method:** `$.fn.themestrapPluginSortable`  
+**Instance key:** `__pluginSortable`  
+**Guide:** [`docs/PluginSortable.md`](docs/PluginSortable.md)
+
+Drag and drop reordering for lists, rows and grids, with mouse, touch and keyboard. Lists that share a group name accept each other's items. Not to be confused with Sort, which filters a grid.
+
+### Markup
+
+```html
+<ul data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "board"}'>
+    <li data-id="a"><button class="grip" type="button"></button> First</li>
+    <li data-id="b"><button class="grip" type="button"></button> Second</li>
+</ul>
+```
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `items` | `'*'` | Children that can be moved. |
+| `handle` | `''` | Grip selector. Empty: the whole item, picked up after a short hold on touch screens. |
+| `group` | `''` | Lists with the same name exchange items. |
+| `axis` | `'auto'` | `'y'`, `'x'` or `'grid'`. `'auto'` detects the layout. |
+| `idAttr` | `'data-id'` | Attribute read by `toArray()`. |
+| `onStart`, `onSort`, `onEnd` | `null` | Callbacks with the event detail. |
+
+### Public API
+
+```js
+const inst = $('#el').data('__pluginSortable');
+inst.toArray();
+inst.refresh();
+inst.enable();
+inst.disable();
+inst.destroy();
+```
+
+Events (native, use `addEventListener`): `ts.sortable.start`, `ts.sortable.sort`, `ts.sortable.end`.
 
 ---
 

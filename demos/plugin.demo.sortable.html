@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginSortable Demo | Themestrap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #0a1929;
+        --card: #0e2238;
+        --card-2: #0b1c30;
+        --line: rgba(255,255,255,0.08);
+        --text: #cdd8e6;
+        --muted: rgba(205,216,230,0.55);
+        --teal: #00c7be;
+        --orange: #ff9f43;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+        background: radial-gradient(1200px 600px at 80% -10%, rgba(0,199,190,0.08), transparent 60%), var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 56px 20px 96px;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .hero h1 {
+        font-family: 'Fraunces', serif;
+        font-size: 42px;
+        line-height: 1.1;
+        margin: 0 0 10px;
+        color: #fff;
+    }
+    .hero h1 em { color: var(--teal); font-style: italic; }
+    .hero p { color: var(--muted); max-width: 640px; margin: 0 0 40px; }
+    .hero code, .demo-card-body p code, .out code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        background: rgba(255,255,255,0.06);
+        padding: 1px 6px;
+        border-radius: 4px;
+        color: var(--orange);
+    }
+
+    .demo-card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+    .demo-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+    }
+    .badge-n {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: rgba(0,199,190,0.15);
+        color: var(--teal);
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+    }
+    .demo-card-header h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        margin: 0;
+        color: #fff;
+        flex: 1;
+    }
+    .tag-r {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--orange);
+        border: 1px solid rgba(255,159,67,0.35);
+        border-radius: 20px;
+        padding: 1px 10px;
+        white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+        .demo-card-header { flex-wrap: wrap; }
+        .tag-r { white-space: normal; }
+    }
+    .demo-card-body { padding: 18px; }
+    .demo-card-body > p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+    .demo-stage {
+        background: var(--card-2);
+        border: 1px dashed rgba(255,255,255,0.10);
+        border-radius: 8px;
+        padding: 22px 18px;
+    }
+
+    pre.snip {
+        margin: 14px 0 0;
+        padding: 14px 16px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #b9c7d8;
+    }
+    pre.snip code { font-family: inherit; }
+
+    .demo-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+    .btn-d {
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        padding: 6px 14px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-d:hover { background: rgba(0,199,190,0.12); border-color: rgba(0,199,190,0.5); }
+    .btn-d.primary { background: var(--teal); color: #04201f; border-color: var(--teal); font-weight: 600; }
+    .btn-d.primary:hover { background: #12d9d0; }
+    .inp-d {
+        font-family: inherit;
+        font-size: 13px;
+        color: var(--text);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        padding: 6px 10px;
+        min-width: 180px;
+    }
+    .inp-d:focus { outline: none; border-color: var(--teal); }
+
+    .demo-log {
+        margin-top: 14px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        height: 104px;
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #8fa3ba;
+    }
+    .demo-log:empty::before { content: 'event log'; opacity: 0.4; }
+    .demo-log .t { color: var(--teal); margin-right: 8px; }
+    .demo-log .ev { color: var(--orange); }
+
+    .out {
+        margin-top: 14px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #8fa3ba;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        word-break: break-all;
+        min-height: 40px;
+    }
+    .out b { color: var(--teal); font-weight: 500; }
+
+    /* Lists used by the demos */
+    .list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .list > li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 8px;
+    }
+    .list > li .meta { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+    .list.whole > li { cursor: grab; }
+
+    .grip {
+        display: inline-grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        flex: 0 0 auto;
+        padding: 0;
+        color: var(--muted);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 6px;
+    }
+    .grip:hover { color: var(--teal); background: rgba(0,199,190,0.10); }
+    .grip:focus-visible { outline: none; color: var(--teal); border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,199,190,0.25); }
+    .grip svg { width: 14px; height: 14px; }
+
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 680px) { .board { grid-template-columns: 1fr; } }
+    .col h3 {
+        display: flex;
+        justify-content: space-between;
+        margin: 0 0 10px;
+        font-family: 'Syne', sans-serif;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+    .col h3 span { font-family: 'JetBrains Mono', monospace; color: var(--teal); }
+    .col .list { min-height: 120px; padding: 8px; border-radius: 10px; background: rgba(255,255,255,0.02); }
+    .col .list > li { font-size: 14px; }
+    .chip {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px;
+        padding: 1px 7px;
+        border-radius: 10px;
+        margin-left: auto;
+        background: rgba(255,159,67,0.14);
+        color: var(--orange);
+    }
+
+    .cap-d {
+        display: block;
+        margin: 0 0 8px;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+    .tabs-row { display: flex; flex-wrap: nowrap; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding: 4px; }
+    .tab-d {
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.14);
+        font-size: 13px;
+        white-space: nowrap;
+        cursor: grab;
+    }
+    .tab-d:focus-visible, .tile-d:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+    .tile-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; max-width: 520px; }
+    @media (max-width: 480px) { .tile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    .tile-d {
+        display: grid;
+        place-items: center;
+        aspect-ratio: 1;
+        border-radius: 8px;
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(150deg, hsl(var(--h), 65%, 48%), hsl(var(--h), 70%, 28%));
+        cursor: grab;
+    }
+
+    /* Themed variant, only tokens are overridden */
+    .theme-amber {
+        --ts-sort-ghost: rgba(255,159,67,0.14);
+        --ts-sort-line: #ff9f43;
+    }
+    .theme-light {
+        background: #f4f7fb;
+        border-radius: 8px;
+        padding: 14px;
+        --ts-sort-ghost: #e3f6f5;
+        --ts-sort-line: #0a8f89;
+    }
+    .theme-light .list > li { background: #fff; border-color: #d5dee8; color: #1c2b3a; }
+    .theme-light .grip { color: #7a8ca0; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .row-2 { grid-template-columns: 1fr; } }
+
+    .demo-footer {
+        padding: 20px 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .demo-footer code { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <header class="hero">
+        <h1>Plugin<em>Sortable</em></h1>
+        <p>Drag and drop reordering for lists, rows and grids, with mouse, touch and keyboard. Lists that share a <code>group</code> name accept each other's items, which is how a card moves from one column to another. Initialize with <code>data-plugin-sortable</code> or <code>$.fn.themestrapPluginSortable()</code>.</p>
+    </header>
+
+    <!-- 1 Basic -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">1</span>
+            <h2>A basic list</h2>
+            <span class="tag-r">data attribute</span>
+        </div>
+        <div class="demo-card-body">
+            <p>With no options the whole item is the handle. Drag any row up or down, and press <code>Escape</code> mid drag to put it back. On a phone, press and hold a row to pick it up: a quick swipe scrolls the page as usual. Links, buttons and form fields inside an item still work, because a press on them never starts a drag.</p>
+            <div class="demo-stage">
+                <ul class="list whole" id="s1" data-plugin-sortable data-log="log1">
+                    <li data-id="hero">Hero banner <span class="meta">hero</span></li>
+                    <li data-id="features">Feature grid <span class="meta">features</span></li>
+                    <li data-id="pricing">Pricing table <span class="meta">pricing</span></li>
+                    <li data-id="faq">Questions <span class="meta">faq</span></li>
+                    <li data-id="footer">Footer <span class="meta">footer</span></li>
+                </ul>
+            </div>
+            <div class="out" id="out1">toArray(): <b></b></div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;ul data-plugin-sortable&gt;
+    &lt;li data-id="hero"&gt;Hero banner&lt;/li&gt;
+    &lt;li data-id="features"&gt;Feature grid&lt;/li&gt;
+    &lt;li data-id="pricing"&gt;Pricing table&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+            <div class="demo-log" id="log1"></div>
+        </div>
+    </section>
+
+    <!-- 2 Handles and keyboard -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">2</span>
+            <h2>Drag handles and the keyboard</h2>
+            <span class="tag-r">handle</span>
+        </div>
+        <div class="demo-card-body">
+            <p>With <code>handle</code> set, only the grip starts a drag, so the rest of the row can hold text people want to select, and on a phone the grip responds at once. Make the grip a <code>&lt;button&gt;</code> and it can be reached with Tab: press <code>Up</code> or <code>Down</code> on it to move the row. The plugin gives each grip an <code>aria-label</code> that explains this, unless it already has one.</p>
+            <div class="demo-stage">
+                <ul class="list" id="s2" data-plugin-sortable data-plugin-options='{"handle": ".grip"}' data-log="log2">
+                    <li data-id="1"><button class="grip" type="button"></button> Write the release notes</li>
+                    <li data-id="2"><button class="grip" type="button"></button> Tag the build</li>
+                    <li data-id="3"><button class="grip" type="button"></button> Publish to the CDN</li>
+                    <li data-id="4"><button class="grip" type="button"></button> Announce it</li>
+                </ul>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;ul data-plugin-sortable data-plugin-options='{"handle": ".grip"}'&gt;
+    &lt;li data-id="1"&gt;&lt;button class="grip" type="button"&gt;&lt;/button&gt; Write the release notes&lt;/li&gt;
+    &lt;li data-id="2"&gt;&lt;button class="grip" type="button"&gt;&lt;/button&gt; Tag the build&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+            <div class="demo-log" id="log2"></div>
+        </div>
+    </section>
+
+    <!-- 3 Connected lists -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">3</span>
+            <h2>Connected lists</h2>
+            <span class="tag-r">group</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Three lists with the same <code>group</code> name. Drag a card into another column: the column under the pointer gets a dashed outline. When a card changes lists, <code>ts.sortable.sort</code> fires on both lists with the same detail, and <code>detail.order</code> is the order of the list it landed in.</p>
+            <div class="demo-stage">
+                <div class="board">
+                    <div class="col">
+                        <h3>To do <span id="n-todo"></span></h3>
+                        <ul class="list" id="todo" data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "board"}' data-log="log3">
+                            <li data-id="t1"><button class="grip" type="button"></button> Image upload docs <span class="chip">docs</span></li>
+                            <li data-id="t2"><button class="grip" type="button"></button> Reveal demo <span class="chip">demo</span></li>
+                            <li data-id="t3"><button class="grip" type="button"></button> Skin contrast pass</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <h3>Doing <span id="n-doing"></span></h3>
+                        <ul class="list" id="doing" data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "board"}' data-log="log3">
+                            <li data-id="t4"><button class="grip" type="button"></button> Sortable guide <span class="chip">docs</span></li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <h3>Done <span id="n-done"></span></h3>
+                        <ul class="list" id="done" data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "board"}' data-log="log3"></ul>
+                    </div>
+                </div>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;ul id="todo"  data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "board"}'&gt;...&lt;/ul&gt;
+&lt;ul id="doing" data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "board"}'&gt;...&lt;/ul&gt;
+&lt;ul id="done"  data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "board"}'&gt;&lt;/ul&gt;</code></pre>
+            <div class="demo-log" id="log3"></div>
+        </div>
+    </section>
+
+    <!-- 4 Rows and grids -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">4</span>
+            <h2>Rows and grids</h2>
+            <span class="tag-r">axis: auto</span>
+        </div>
+        <div class="demo-card-body">
+            <p>The layout is read from where the items sit, so the same plugin sorts a row of tabs and a wrapping grid. Items without a handle can take focus with <code>tabindex="0"</code>: in the row, <code>Left</code> and <code>Right</code> move the focused tab. In the grid, <code>Up</code> and <code>Down</code> move a tile a whole row.</p>
+            <div class="demo-stage">
+                <span class="cap-d">A row of tabs</span>
+                <div class="tabs-row" id="s4r" data-plugin-sortable data-log="log4">
+                    <span class="tab-d" data-id="inbox" tabindex="0">Inbox</span>
+                    <span class="tab-d" data-id="drafts" tabindex="0">Drafts</span>
+                    <span class="tab-d" data-id="sent" tabindex="0">Sent</span>
+                    <span class="tab-d" data-id="archive" tabindex="0">Archive</span>
+                    <span class="tab-d" data-id="spam" tabindex="0">Spam</span>
+                </div>
+                <span class="cap-d">A grid</span>
+                <div class="tile-grid" id="s4g" data-plugin-sortable data-log="log4">
+                    <div class="tile-d" data-id="1" tabindex="0" style="--h: 172">1</div>
+                    <div class="tile-d" data-id="2" tabindex="0" style="--h: 188">2</div>
+                    <div class="tile-d" data-id="3" tabindex="0" style="--h: 204">3</div>
+                    <div class="tile-d" data-id="4" tabindex="0" style="--h: 220">4</div>
+                    <div class="tile-d" data-id="5" tabindex="0" style="--h: 25">5</div>
+                    <div class="tile-d" data-id="6" tabindex="0" style="--h: 35">6</div>
+                    <div class="tile-d" data-id="7" tabindex="0" style="--h: 45">7</div>
+                    <div class="tile-d" data-id="8" tabindex="0" style="--h: 160">8</div>
+                    <div class="tile-d" data-id="9" tabindex="0" style="--h: 196">9</div>
+                    <div class="tile-d" data-id="10" tabindex="0" style="--h: 30">10</div>
+                </div>
+            </div>
+            <div class="out" id="out-rg">Row: <b id="out4r"></b> &nbsp; Grid: <b id="out4g"></b></div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;div class="d-flex gap-2" data-plugin-sortable&gt;
+    &lt;span class="tab" data-id="inbox" tabindex="0"&gt;Inbox&lt;/span&gt;
+    &lt;span class="tab" data-id="drafts" tabindex="0"&gt;Drafts&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div class="tile-grid" data-plugin-sortable&gt;   &lt;!-- display: grid --&gt;
+    &lt;div data-id="1" tabindex="0"&gt;1&lt;/div&gt;
+    ...
+&lt;/div&gt;</code></pre>
+            <div class="demo-log" id="log4"></div>
+        </div>
+    </section>
+
+    <!-- 5 Saving the order -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">5</span>
+            <h2>Saving the new order</h2>
+            <span class="tag-r">onSort &middot; toArray()</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Callbacks can't go in a data attribute, so this list is initialized from script with <code>.manual</code>. <code>onSort</code> runs after every drop that changed something, with the same detail as the event. Here it builds the request body you would send to your server. Nothing is actually sent.</p>
+            <div class="demo-stage">
+                <ul class="list manual" id="s4">
+                    <li data-id="12"><button class="grip" type="button"></button> Getting started <span class="meta">#12</span></li>
+                    <li data-id="7"><button class="grip" type="button"></button> Installation <span class="meta">#7</span></li>
+                    <li data-id="31"><button class="grip" type="button"></button> Configuration <span class="meta">#31</span></li>
+                    <li data-id="4"><button class="grip" type="button"></button> Deployment <span class="meta">#4</span></li>
+                </ul>
+            </div>
+            <div class="out" id="out4">Request body: <b>drag a row to see it</b></div>
+<pre class="snip" data-plugin-highlight="javascript"><code>$('#pages').themestrapPluginSortable({
+    handle: '.grip',
+    onSort: function (detail) {
+        $.post('/admin/pages/order', { order: detail.order.join(',') });   // "7,12,31,4"
+    }
+});</code></pre>
+        </div>
+    </section>
+
+    <!-- 6 API -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">6</span>
+            <h2>Public API</h2>
+            <span class="tag-r">refresh &middot; enable &middot; disable &middot; toArray</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Items added after init can't be dragged until you call <code>refresh()</code>, which marks them as items and gives their grip the handle class and <code>aria-label</code>. Methods can be called through the instance or by name through the jQuery method.</p>
+            <div class="demo-stage">
+                <ul class="list manual" id="s5">
+                    <li data-id="a"><button class="grip" type="button"></button> Alpha</li>
+                    <li data-id="b"><button class="grip" type="button"></button> Bravo</li>
+                </ul>
+            </div>
+            <div class="demo-controls">
+                <input type="text" class="inp-d" id="s5-name" placeholder="Charlie">
+                <button class="btn-d primary" id="s5-add">Add item + refresh()</button>
+                <button class="btn-d" id="s5-off">disable()</button>
+                <button class="btn-d" id="s5-on">enable()</button>
+                <button class="btn-d" id="s5-arr">toArray()</button>
+            </div>
+<pre class="snip" data-plugin-highlight="javascript"><code>const list = $('#list').data('__pluginSortable');
+
+$('#list').append('&lt;li data-id="c"&gt;&lt;button class="grip" type="button"&gt;&lt;/button&gt; Charlie&lt;/li&gt;');
+list.refresh();          // marks the new item and its handle
+
+list.disable();          // presses no longer start a drag, the grips fade
+list.enable();
+list.toArray();          // ['a', 'b', 'c']
+
+$('#list').themestrapPluginSortable('disable');   // the same, by name</code></pre>
+            <div class="demo-log" id="log5"></div>
+        </div>
+    </section>
+
+    <!-- 7 Theming -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">7</span>
+            <h2>CSS custom properties</h2>
+            <span class="tag-r">--ts-sort-*</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Two tokens: the tint of the item being dragged and the color of the dashed outlines. With a skin loaded they follow its accent. Set them on the list or any ancestor to override. Everything else is your own list styling.</p>
+            <div class="demo-stage">
+                <div class="row-2">
+                    <div class="theme-amber">
+                        <ul class="list" data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "themed"}'>
+                            <li data-id="1"><button class="grip" type="button"></button> Amber one</li>
+                            <li data-id="2"><button class="grip" type="button"></button> Amber two</li>
+                            <li data-id="3"><button class="grip" type="button"></button> Amber three</li>
+                        </ul>
+                    </div>
+                    <div class="theme-light">
+                        <ul class="list" data-plugin-sortable data-plugin-options='{"handle": ".grip", "group": "themed"}'>
+                            <li data-id="4"><button class="grip" type="button"></button> Light one</li>
+                            <li data-id="5"><button class="grip" type="button"></button> Light two</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+<pre class="snip" data-plugin-highlight="css"><code>.theme-amber {
+    --ts-sort-ghost: rgba(255,159,67,0.14);   /* the dragged item */
+    --ts-sort-line:  #ff9f43;                 /* its outline and the target list's outline */
+}</code></pre>
+        </div>
+    </section>
+
+    <!-- 8 Lifecycle -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">8</span>
+            <h2>Destroy and re-initialize</h2>
+            <span class="tag-r">destroy()</span>
+        </div>
+        <div class="demo-card-body">
+            <p><code>destroy()</code> unbinds every handler, removes the classes it added, leaves the group, and keeps the items in their current order. The injected stylesheet goes once the last instance on the page is destroyed.</p>
+            <div class="demo-stage">
+                <ul class="list manual" id="s7">
+                    <li data-id="1"><button class="grip" type="button"></button> First</li>
+                    <li data-id="2"><button class="grip" type="button"></button> Second</li>
+                    <li data-id="3"><button class="grip" type="button"></button> Third</li>
+                </ul>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" id="s7-destroy">destroy</button>
+                <button class="btn-d" id="s7-init">initialize</button>
+            </div>
+            <div class="out" id="out7">State: <b>active</b></div>
+<pre class="snip" data-plugin-highlight="javascript"><code>$('#list').themestrapPluginSortable('destroy');
+$('#list').themestrapPluginSortable({ handle: '.grip' });</code></pre>
+            <div class="demo-log" id="log7"></div>
+        </div>
+    </section>
+
+</div>
+
+<footer class="demo-footer">
+    <p>Themestrap &middot; <code>PluginSortable</code> &middot; part of the Themestrap component library</p>
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.sortable.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script>
+(function ($) {
+    'use strict';
+
+    const GRIP = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5" cy="3" r="1.4"/><circle cx="11" cy="3" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="13" r="1.4"/><circle cx="11" cy="13" r="1.4"/></svg>';
+
+    // helpers
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function log(id, evName, msg) {
+        const t = new Date().toTimeString().slice(0, 8);
+        $('#' + id).prepend('<div><span class="t">' + t + '</span><span class="ev">' + evName + '</span> ' + esc(msg) + '</div>');
+    }
+    function fillGrips(scope) {
+        $(scope || document).find('.grip:empty').html(GRIP);
+    }
+    function order(list) {
+        const inst = $(list).data('__pluginSortable');
+        return inst ? inst.toArray() : [];
+    }
+    fillGrips();
+
+    // syntax highlighting with PluginHighlight itself
+    if ($.fn.themestrapPluginHighlight) {
+        $('pre[data-plugin-highlight]').themestrapPluginHighlight();
+    }
+
+    // auto init, the same line themestrap.init.js runs
+    themestrap.fn.intObsInit('[data-plugin-sortable]:not(.manual)', 'themestrapPluginSortable');
+
+    // events are native CustomEvents dispatched on the list, so use addEventListener
+    ['start', 'sort', 'end'].forEach(function (name) {
+        document.addEventListener('ts.sortable.' + name, function (e) {
+            const id = e.target.getAttribute('data-log');
+            if (!id) return;
+            const item = e.detail.item.getAttribute('data-id');
+            let msg = 'item ' + item + ' on #' + e.target.id;
+            if (name === 'sort') {
+                msg = 'item ' + item + ' #' + e.detail.from.$el.attr('id') + ' -> #' + e.detail.to.$el.attr('id') + '  order [' + e.detail.order.join(', ') + ']';
+            }
+            log(id, 'ts.sortable.' + name, msg);
+        });
+    });
+
+    // 1 order readout
+    function show1() { $('#out1 b').text(JSON.stringify(order('#s1'))); }
+    document.getElementById('s1').addEventListener('ts.sortable.sort', show1);
+
+    // 3 column counts
+    function counts() {
+        ['todo', 'doing', 'done'].forEach(function (id) {
+            $('#n-' + id).text($('#' + id).children().length);
+        });
+    }
+    counts();
+    document.addEventListener('ts.sortable.end', counts);
+
+    // 4 rows and grids
+    function show4() {
+        $('#out4r').text(order('#s4r').join(', '));
+        $('#out4g').text(order('#s4g').join(', '));
+    }
+    ['s4r', 's4g'].forEach(function (id) { document.getElementById(id).addEventListener('ts.sortable.sort', show4); });
+
+    // 4 saving
+    $('#s4').themestrapPluginSortable({
+        handle: '.grip',
+        onSort: function (detail) {
+            $('#out4').html('Request body: <b>order=' + esc(detail.order.join(',')) + '</b>');
+        }
+    });
+
+    // 5 API
+    $('#s5').themestrapPluginSortable({ handle: '.grip' });
+    const s5 = function () { return $('#s5').data('__pluginSortable'); };
+    $('#s5-add').on('click', function () {
+        const name = $('#s5-name').val().trim() || 'Item ' + ($('#s5').children().length + 1);
+        const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const $li = $('<li><button class="grip" type="button"></button> </li>').attr('data-id', id);
+        $li.append(document.createTextNode(name));
+        $('#s5').append($li);
+        fillGrips('#s5');
+        s5().refresh();
+        $('#s5-name').val('');
+        log('log5', 'refresh()', 'added "' + id + '", grip label: ' + $li.find('.grip').attr('aria-label'));
+    });
+    $('#s5-name').on('keydown', function (e) { if (e.key === 'Enter') $('#s5-add').trigger('click'); });
+    $('#s5-off').on('click', function () { $('#s5').themestrapPluginSortable('disable'); log('log5', 'disable()', 'drags are off'); });
+    $('#s5-on').on('click', function () { $('#s5').themestrapPluginSortable('enable'); log('log5', 'enable()', 'drags are on'); });
+    $('#s5-arr').on('click', function () { log('log5', 'toArray()', JSON.stringify(s5().toArray())); });
+
+    // 7 lifecycle
+    $('#s7').themestrapPluginSortable({ handle: '.grip' });
+    $('#s7-destroy').on('click', function () {
+        if (!$('#s7').data('__pluginSortable')) return;
+        $('#s7').themestrapPluginSortable('destroy');
+        $('#out7 b').text('destroyed, order kept: ' + $('#s7').children().map(function () { return $(this).attr('data-id'); }).get().join(', '));
+        log('log7', 'destroy', 'handlers and classes removed');
+    });
+    $('#s7-init').on('click', function () {
+        if ($('#s7').data('__pluginSortable')) return;
+        $('#s7').themestrapPluginSortable({ handle: '.grip' });
+        $('#out7 b').text('active');
+        log('log7', 'initialize', 'order is [' + order('#s7').join(', ') + ']');
+    });
+
+    // the first readouts once the lists are set up
+    setTimeout(function () { show1(); show4(); }, 300);
+    // intObsInit sets lists up as they come near, so fill the row and grid readout when they do
+    document.addEventListener('scroll', function once() { if ($('#s4r').data('__pluginSortable')) { show4(); document.removeEventListener('scroll', once); } }, { passive: true });
+})(jQuery);
+</script>
+</body>
+</html>

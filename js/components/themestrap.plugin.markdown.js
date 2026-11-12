@@ -56,12 +56,35 @@
  *           reference links ([text][ref] + [ref]: url), images (![alt](url)),
  *           auto-links (<url>), line breaks (trailing two spaces or \).
  *
+ * MERMAID DIAGRAMS
+ *
+ *   Fenced blocks tagged ```mermaid are drawn as diagrams. Mermaid is loaded
+ *   from options.mermaidSrc the first time a page has one of these blocks, so
+ *   pages without diagrams never download it. If window.mermaid already exists
+ *   (you loaded it yourself) that copy is used instead.
+ *
+ *   Colors come from the --ts-md-diagram-* tokens, which follow the active skin.
+ *   With no skin the diagrams use Mermaid's own default and dark themes. They
+ *   are redrawn when the page switches between light and dark mode.
+ *
+ *   While Mermaid loads the block shows its source. If it can't load, or a
+ *   diagram has a syntax error, the source stays visible and the plugin
+ *   triggers mermaiderror.ts.markdown.
+ *
  * PUBLIC API
  *
  *   instance.render(markdown)   — re-render from a Markdown string
  *   instance.setSource(url)     — fetch a new URL and re-render
  *   instance.getHtml()          — return the last rendered HTML string
+ *   instance.renderDiagrams()   — redraw the Mermaid diagrams (after a skin swap)
  *   instance.destroy()          — restore original content, unbind events
+ *
+ * EVENTS
+ *
+ *   rendered.ts.markdown         (e, html)            Markdown is in the DOM
+ *   diagrams.ts.markdown         (e, drawn)           every Mermaid block has been tried; drawn = how many succeeded
+ *   mermaiderror.ts.markdown     (e, error, source)   a diagram failed to draw
+ *   error.ts.markdown            (e, url, error)      the source URL failed to load
  *
  * USAGE
  *
@@ -208,9 +231,120 @@
 .ts-markdown img { max-width: 100%; height: auto; }
 
 /* Loading / error states */
+/* Mermaid diagrams */
+.ts-markdown {
+    --ts-md-diagram-bg:          var(--ts-skin-bg);
+    --ts-md-diagram-node:        var(--ts-skin-surface-2);
+    --ts-md-diagram-node-border: var(--ts-skin-border-strong);
+    --ts-md-diagram-text:        var(--ts-skin-text);
+    --ts-md-diagram-line:        var(--ts-skin-text-dim);
+    --ts-md-diagram-accent:      var(--ts-skin-accent-soft);
+    --ts-md-diagram-note:        var(--ts-skin-elevated);
+    --ts-md-diagram-font:        var(--ts-skin-font);
+}
+.ts-markdown .ts-md-mermaid {
+    margin: 0 0 1em;
+    padding: 1em;
+    overflow-x: auto;
+    text-align: center;
+    border: 1px solid var(--ts-md-border);
+    border-radius: 6px;
+}
+.ts-markdown .ts-md-mermaid svg { max-width: 100%; height: auto; }
+.ts-markdown pre.ts-md-mermaid-pending { opacity: .6; }
+
 .ts-markdown-loading { opacity: .5; font-style: italic; }
 .ts-markdown-error   { color: var(--ts-skin-danger, #c0392b); font-style: italic; font-size: .9em; }
 `;
+
+    // Mermaid is an ES module; load it once per page, on first use
+    const MERMAID_SRC = 'https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs';
+    let mermaidLoading = null;
+    let mermaidQueue = Promise.resolve();
+    let mermaidSeq = 0;
+
+    function loadMermaid(src) {
+        if (window.mermaid && typeof window.mermaid.render === 'function') {
+            return Promise.resolve(window.mermaid);
+        }
+        if (!mermaidLoading) {
+            mermaidLoading = import(src)
+                .then(mod => mod.default || mod)
+                .catch(err => {
+                    mermaidLoading = null;
+                    throw err;
+                });
+        }
+        return mermaidLoading;
+    }
+
+    // Mermaid keeps global config, so diagrams are drawn one at a time across all instances
+    function queueMermaid(job) {
+        const run = mermaidQueue.then(job, job);
+        mermaidQueue = run.catch(() => {});
+        return run;
+    }
+
+    function isDarkMode(el) {
+        const root = document.documentElement;
+        const scope = el.closest('[data-bs-theme]');
+        if (scope) return scope.getAttribute('data-bs-theme') === 'dark';
+        if (root.classList.contains('dark')) return true;
+        return !root.classList.contains('light') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !$(root).is('[data-bs-theme="light"]');
+    }
+
+    // Mermaid only understands opaque hex, rgb() and hsl() colors, so every token is
+    // painted onto a canvas over the diagram background and read back as solid rgb()
+    let colorCanvas = null;
+    function toRgb(value, under) {
+        if (!value) return '';
+        colorCanvas = colorCanvas || document.createElement('canvas');
+        colorCanvas.width = colorCanvas.height = 1;
+        const ctx = colorCanvas.getContext('2d', { willReadFrequently: true });
+        ctx.fillStyle = '#fff';
+        ctx.fillStyle = under || '#fff';
+        ctx.fillRect(0, 0, 1, 1);
+        ctx.fillStyle = under || '#fff';
+        ctx.fillStyle = value;
+        ctx.fillRect(0, 0, 1, 1);
+        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function mermaidTheme(el) {
+        const dark = isDarkMode(el);
+        const cs = getComputedStyle(el);
+        const token = name => cs.getPropertyValue('--ts-md-diagram-' + name).trim();
+
+        if (!token('node')) {
+            return { theme: dark ? 'dark' : 'default' };
+        }
+
+        const bg = toRgb(token('bg'), dark ? '#000' : '#fff');
+        const color = name => toRgb(token(name), bg || (dark ? '#000' : '#fff'));
+
+        const vars = {
+            darkMode:           dark,
+            background:         bg,
+            primaryColor:       color('node'),
+            primaryBorderColor: color('node-border'),
+            primaryTextColor:   color('text'),
+            secondaryColor:     color('accent'),
+            tertiaryColor:      color('note'),
+            lineColor:          color('line'),
+            textColor:          color('text'),
+            noteBkgColor:       color('note'),
+            noteTextColor:      color('text'),
+            noteBorderColor:    color('node-border'),
+            edgeLabelBackground: color('accent'),
+            fontFamily:         token('font')
+        };
+        Object.keys(vars).forEach(key => {
+            if (vars[key] === '') delete vars[key];
+        });
+
+        return { theme: 'base', themeVariables: vars };
+    }
 
     function injectStyles() {
         if (document.getElementById(STYLE_ID)) return;
@@ -366,8 +500,10 @@
                     const body  = [];
                     i++;
                     while (i < lineArr.length) {
-                        if (lineArr[i].trimStart().startsWith(fence.slice(0, 3)) &&
-                            lineArr[i].trim().replace(new RegExp(`^${fence[0]}+`), '') === '') {
+                        // A closing fence uses the same character and is at least as long as the
+                        // opening one, so a ```` block can show a ``` block inside it
+                        const close = lineArr[i].trim();
+                        if (close.length >= fence.length && close === fence[0].repeat(close.length)) {
                             i++;
                             break;
                         }
@@ -656,6 +792,7 @@
             this._originalHTML       = $el.html();
             this._renderedHtml       = '';
             this._highlightInstances = [];
+            this._diagramRun         = 0;
  
             this
                 .setData()
@@ -715,8 +852,10 @@
             const html = GFM.parse(markdown, this.options);
             this._renderedHtml = html;
             this.$el.html(html);
+            this._collectDiagrams();
             this._highlightBlocks();
             this.$el.trigger('rendered.ts.markdown', [html]);
+            this.renderDiagrams();
             return this;
         }
 
@@ -790,7 +929,7 @@
             // Find every <code class="language-*"> the GFM renderer produced.
             // Blocks without a language class are plain indented-code blocks —
             // leave them unstyled so they don't get unwanted line numbers.
-            self.$el.find('code[class*="language-"]').each(function () {
+            self.$el.find('code[class*="language-"]').not('.language-mermaid').each(function () {
                 const $code = $(this);
                 const $pre  = $code.closest('pre');
                 if (!$pre.length) return; // orphaned <code> — skip
@@ -828,6 +967,129 @@
         }
  
         /**
+         * Mark the ```mermaid blocks of the current render and keep their source.
+         * The <pre> stays in place, showing the source, until its diagram is drawn.
+         * @returns {PluginMarkdown}
+         */
+        _collectDiagrams() {
+            this._diagrams = [];
+            if (!this.options.mermaid) return this;
+
+            this.$el.find('pre > code.language-mermaid').each((i, code) => {
+                const $pre = $(code).parent().addClass('ts-md-mermaid-pending');
+                this._diagrams.push({ source: code.textContent, $node: $pre });
+            });
+
+            if (this._diagrams.length) {
+                this._watchTheme();
+            }
+
+            return this;
+        }
+
+        /**
+         * Draw (or redraw) every Mermaid diagram of the current render. Call it after
+         * swapping skins; light/dark switches are picked up on their own.
+         * @returns {PluginMarkdown}
+         */
+        renderDiagrams() {
+            const self = this;
+            const diagrams = self._diagrams || [];
+            if (!diagrams.length) return this;
+
+            const run = ++self._diagramRun;
+            const stale = () => run !== self._diagramRun || !self.$el.data(instanceName);
+            let drawn = 0;
+            let settled = 0;
+            const done = () => {
+                if (++settled === diagrams.length) {
+                    self.$el.trigger('diagrams.ts.markdown', [drawn]);
+                }
+            };
+
+            loadMermaid(self.options.mermaidSrc).then(mermaid => {
+                diagrams.forEach(diagram => {
+                    queueMermaid(() => {
+                        if (stale()) return;
+
+                        mermaid.initialize($.extend(true, {
+                            startOnLoad: false,
+                            securityLevel: self.options.sanitize ? 'strict' : 'loose'
+                        }, mermaidTheme(self.$el[0]), self.options.mermaidConfig));
+
+                        const id = 'ts-md-mermaid-' + (++mermaidSeq);
+
+                        return Promise.resolve(mermaid.render(id, diagram.source)).then(({ svg, bindFunctions }) => {
+                            if (stale()) return;
+
+                            const $figure = $('<figure class="ts-md-mermaid"></figure>').html(svg);
+                            diagram.$node.replaceWith($figure);
+                            diagram.$node = $figure;
+                            if (typeof bindFunctions === 'function') bindFunctions($figure[0]);
+
+                            drawn++;
+                            done();
+                        }).catch(err => {
+                            // Mermaid leaves its error graphic in the body when render fails
+                            $('#' + id + ', #d' + id).remove();
+                            if (stale()) return;
+                            diagram.$node.removeClass('ts-md-mermaid-pending');
+                            self.$el.trigger('mermaiderror.ts.markdown', [err, diagram.source]);
+                            done();
+                        });
+                    });
+                });
+            }).catch(err => {
+                if (stale()) return;
+                diagrams.forEach(diagram => diagram.$node.removeClass('ts-md-mermaid-pending'));
+                self.$el.trigger('mermaiderror.ts.markdown', [err, null]);
+            });
+
+            return this;
+        }
+
+        // Redraw the diagrams when the page switches between light and dark
+        _watchTheme() {
+            if (this._themeObserver || typeof MutationObserver !== 'function') return;
+
+            // The mode plus the resolved diagram colors; any change to either means a redraw
+            const signature = () => {
+                const cs = getComputedStyle(this.$el[0]);
+                return [isDarkMode(this.$el[0])].concat(
+                    ['bg', 'node', 'node-border', 'text', 'line'].map(name => cs.getPropertyValue('--ts-md-diagram-' + name).trim())
+                ).join('|');
+            };
+            let last = signature();
+            const check = () => {
+                const now = signature();
+                if (now !== last) {
+                    last = now;
+                    this.renderDiagrams();
+                }
+            };
+
+            this._themeObserver = new MutationObserver(check);
+            this._themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-bs-theme'] });
+
+            if (window.matchMedia) {
+                this._schemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                this._onScheme = check;
+                this._schemeQuery.addEventListener('change', this._onScheme);
+            }
+        }
+
+        _unwatchTheme() {
+            if (this._themeObserver) {
+                this._themeObserver.disconnect();
+                this._themeObserver = null;
+            }
+            if (this._schemeQuery) {
+                this._schemeQuery.removeEventListener('change', this._onScheme);
+                this._schemeQuery = null;
+            }
+        }
+
+        /**
          * Destroy all PluginHighlight instances created by _highlightBlocks().
          * @returns {PluginMarkdown}
          */
@@ -841,6 +1103,9 @@
  
         destroy() {
             this._destroyHighlightInstances();
+            this._unwatchTheme();
+            this._diagramRun++;
+            this._diagrams = [];
  
             this.$el
                 .html(this._originalHTML)
@@ -911,7 +1176,25 @@
          * Example:
          *   highlightOptions: { lineNumbers: true, showCopy: false }
          */
-        highlightOptions: {}
+        highlightOptions: {},
+
+        /**
+         * Draw ```mermaid fenced blocks as diagrams. Set to false to leave them as code.
+         */
+        mermaid: true,
+
+        /**
+         * Where to load Mermaid from (an ES module URL). Point it at a local copy to
+         * self-host. Ignored when window.mermaid is already on the page.
+         */
+        mermaidSrc: MERMAID_SRC,
+
+        /**
+         * Extra settings passed to mermaid.initialize(), merged over the theme the
+         * plugin picks. Example: { flowchart: { curve: 'basis' } } or { theme: 'neutral' }.
+         * securityLevel follows the sanitize option ('strict' or 'loose') unless set here.
+         */
+        mermaidConfig: {}
     };
 
     $.extend(themestrap, { PluginMarkdown });

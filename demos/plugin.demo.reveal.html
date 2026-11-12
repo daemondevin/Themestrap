@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PluginReveal Demo | Themestrap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #0a1929;
+        --card: #0e2238;
+        --card-2: #0b1c30;
+        --line: rgba(255,255,255,0.08);
+        --text: #cdd8e6;
+        --muted: rgba(205,216,230,0.55);
+        --teal: #00c7be;
+        --orange: #ff9f43;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+        background: radial-gradient(1200px 600px at 80% -10%, rgba(0,199,190,0.08), transparent 60%), var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', system-ui, sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        padding: 0 20px 96px;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+
+    /* The intro fills the first screen, so every example starts below the fold */
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 56px 0;
+    }
+    .hero h1 {
+        font-family: 'Fraunces', serif;
+        font-size: 42px;
+        line-height: 1.1;
+        margin: 0 0 10px;
+        color: #fff;
+    }
+    .hero h1 em { color: var(--teal); font-style: italic; }
+    .hero p { color: var(--muted); max-width: 640px; margin: 0 0 16px; }
+    .hero code, .demo-card-body p code, .notice code {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        background: rgba(255,255,255,0.06);
+        padding: 1px 6px;
+        border-radius: 4px;
+        color: var(--orange);
+    }
+    .scroll-cue {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 24px;
+        font-family: 'Syne', sans-serif;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--teal);
+    }
+    .scroll-cue svg { width: 16px; height: 16px; animation: cue 1.6s ease-in-out infinite; }
+    @keyframes cue { 50% { transform: translateY(5px); } }
+    .notice {
+        display: none;
+        max-width: 640px;
+        margin: 8px 0 0;
+        padding: 12px 16px;
+        border: 1px solid rgba(255,159,67,0.35);
+        border-radius: 8px;
+        background: rgba(255,159,67,0.08);
+        font-size: 14px;
+    }
+    .reduced .notice { display: block; }
+    @media (prefers-reduced-motion: reduce) { .scroll-cue svg { animation: none; } }
+
+    .demo-card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+    .demo-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+    }
+    .badge-n {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        flex: 0 0 auto;
+        border-radius: 50%;
+        background: rgba(0,199,190,0.15);
+        color: var(--teal);
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+    }
+    .demo-card-header h2 {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        margin: 0;
+        color: #fff;
+        flex: 1;
+    }
+    .tag-r {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--orange);
+        border: 1px solid rgba(255,159,67,0.35);
+        border-radius: 20px;
+        padding: 1px 10px;
+        white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+        .demo-card-header { flex-wrap: wrap; }
+        .tag-r { white-space: normal; }
+    }
+    .demo-card-body { padding: 18px; }
+    .demo-card-body > p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+    .demo-stage {
+        background: var(--card-2);
+        border: 1px dashed rgba(255,255,255,0.10);
+        border-radius: 8px;
+        padding: 22px 18px;
+        overflow: hidden;
+    }
+
+    pre.snip {
+        margin: 14px 0 0;
+        padding: 14px 16px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #b9c7d8;
+    }
+    pre.snip code { font-family: inherit; }
+
+    .demo-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+    .btn-d {
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 6px;
+        padding: 6px 14px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-d:hover { background: rgba(0,199,190,0.12); border-color: rgba(0,199,190,0.5); }
+    .btn-d.primary { background: var(--teal); color: #04201f; border-color: var(--teal); font-weight: 600; }
+    .btn-d.primary:hover { background: #12d9d0; }
+    .hint { font-size: 12px; color: var(--muted); }
+
+    .demo-log {
+        margin-top: 14px;
+        background: #07131f;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        height: 104px;
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: #8fa3ba;
+    }
+    .demo-log:empty::before { content: 'event log'; opacity: 0.4; }
+    .demo-log .t { color: var(--teal); margin-right: 8px; }
+    .demo-log .ev { color: var(--orange); }
+
+    /* Tiles that fade in */
+    .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .tile {
+        min-height: 96px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 2px;
+        border-radius: 10px;
+        border: 1px solid rgba(0,199,190,0.25);
+        background: linear-gradient(160deg, rgba(0,199,190,0.16), rgba(0,199,190,0.03));
+    }
+    .tile b { font-family: 'Syne', sans-serif; font-size: 14px; color: #fff; }
+    .tile span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+    .tiles.six { grid-template-columns: repeat(6, 1fr); }
+    @media (max-width: 760px) { .tiles.six { grid-template-columns: repeat(3, 1fr); } }
+    .tile.warm { border-color: rgba(255,159,67,0.3); background: linear-gradient(160deg, rgba(255,159,67,0.18), rgba(255,159,67,0.03)); }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pill-wrap { position: relative; height: 44px; margin-top: 18px; }
+    .pill {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        padding: 8px 18px;
+        border-radius: 22px;
+        border: 1px solid rgba(0,199,190,0.4);
+        background: rgba(0,199,190,0.12);
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    @media (max-width: 640px) { .row-2 { grid-template-columns: 1fr; } }
+
+    /* Parallax banners */
+    .banner {
+        position: relative;
+        height: 280px;
+        border-radius: 10px;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: #fff;
+    }
+    .banner h3 { position: relative; margin: 0; font-family: 'Fraunces', serif; font-size: 30px; line-height: 1.15; }
+    .banner h3 small { display: block; margin-top: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.7); }
+    /* Repeating layers only: a shifted background must never show an edge */
+    .banner-stars {
+        background-color: #071423;
+        background-image:
+            radial-gradient(circle, rgba(255,255,255,0.85) 1px, transparent 1.6px),
+            radial-gradient(circle, rgba(0,199,190,0.75) 1.2px, transparent 2px),
+            radial-gradient(circle, rgba(255,159,67,0.6) 1.5px, transparent 2.4px);
+        background-size: 46px 46px, 97px 97px, 151px 151px;
+    }
+    .banner-layer { background: #0a1c30; }
+    .banner-layer .layer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: calc(100% + 30vh);    /* extra height at the bottom so the edge never shows while it moves */
+    }
+    .banner-layer .layer svg { width: 100%; height: 100%; display: block; }
+
+    .demo-footer {
+        padding: 20px 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .demo-footer code { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <header class="hero">
+        <h1>Plugin<em>Reveal</em></h1>
+        <p>Fades elements in as they scroll into view, and gives a banner a slow parallax drift. Everything is set as element styles from script, so no stylesheet is injected and the plugin works under a strict Content Security Policy. Initialize with <code>data-plugin-reveal</code> or <code>$.fn.themestrapPluginReveal()</code>.</p>
+        <p>Elements already on screen when the page loads are left as they are, so nothing flashes. That's why the examples start below this first screen. Each <b>Replay</b> button scrolls its card out of view and back.</p>
+        <div class="demo-controls">
+            <button class="btn-d" id="show-all">Show waiting elements now</button>
+            <span class="hint" id="waiting"></span>
+        </div>
+        <p class="notice">Your system asks for reduced motion, so Reveal shows every element straight away and the banners don't move. That is the plugin working as intended. Turn off reduced motion in your system settings to see the effects.</p>
+        <span class="scroll-cue"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v11M3.5 8.5 8 13l4.5-4.5"/></svg> Scroll down</span>
+    </header>
+
+    <!-- 1 Animations -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">1</span>
+            <h2>The five animations</h2>
+            <span class="tag-r">animation</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Each tile names its <code>animation</code>. The four directional ones travel <code>distance</code> pixels (28 by default) while they fade.</p>
+            <div class="demo-stage" id="stage1">
+                <div class="tiles">
+                    <div class="tile" data-plugin-reveal data-plugin-options='{"animation": "fadeIn"}'><b>fadeIn</b><span>opacity only</span></div>
+                    <div class="tile" data-plugin-reveal data-plugin-options='{"animation": "fadeInUp"}'><b>fadeInUp</b><span>the default</span></div>
+                    <div class="tile" data-plugin-reveal data-plugin-options='{"animation": "fadeInDown"}'><b>fadeInDown</b><span>from above</span></div>
+                    <div class="tile" data-plugin-reveal data-plugin-options='{"animation": "fadeInLeft"}'><b>fadeInLeft</b><span>from the left</span></div>
+                    <div class="tile" data-plugin-reveal data-plugin-options='{"animation": "fadeInRight"}'><b>fadeInRight</b><span>from the right</span></div>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" data-replay="stage1">Replay</button>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;div data-plugin-reveal data-plugin-options='{"animation": "fadeInLeft"}'&gt;...&lt;/div&gt;</code></pre>
+        </div>
+    </section>
+
+    <!-- 2 Stagger -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">2</span>
+            <h2>A staggered row</h2>
+            <span class="tag-r">stagger</span>
+        </div>
+        <div class="demo-card-body">
+            <p>Six tiles with <code>stagger: 90</code>. Elements that start appearing within 100ms of each other are numbered in page order from zero, so each tile waits 90ms longer than the one before it, every time, however many elements appeared earlier on the page.</p>
+            <div class="demo-stage" id="stage2">
+                <div class="tiles six">
+                    <div class="tile warm stagger"><b>One</b><span>+0ms</span></div>
+                    <div class="tile warm stagger"><b>Two</b><span>+90ms</span></div>
+                    <div class="tile warm stagger"><b>Three</b><span>+180ms</span></div>
+                    <div class="tile warm stagger"><b>Four</b><span>+270ms</span></div>
+                    <div class="tile warm stagger"><b>Five</b><span>+360ms</span></div>
+                    <div class="tile warm stagger"><b>Six</b><span>+450ms</span></div>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" data-replay="stage2">Replay</button>
+            </div>
+<pre class="snip" data-plugin-highlight="javascript"><code>$('.feature-card').themestrapPluginReveal({ animation: 'fadeInUp', stagger: 90 });</code></pre>
+        </div>
+    </section>
+
+    <!-- 3 Timing -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">3</span>
+            <h2>Timing, threshold and your own transform</h2>
+            <span class="tag-r">distance &middot; duration &middot; delay &middot; threshold</span>
+        </div>
+        <div class="demo-card-body">
+            <p>The left tile travels further and slower after a short wait. The right one waits until 60% of it is on screen (<code>threshold: 0.6</code>) instead of 12%, so it appears later as you scroll. The pill below is centered with <code>transform: translateX(-50%)</code>: Reveal slides it in on top of that transform and leaves it centered.</p>
+            <div class="demo-stage" id="stage3">
+                <div class="row-2">
+                    <div class="tile" data-plugin-reveal data-plugin-options='{"animation": "fadeInRight", "distance": 90, "duration": 1300, "delay": 200}'><b>Long and slow</b><span>distance 90, duration 1300, delay 200</span></div>
+                    <div class="tile warm" data-plugin-reveal data-plugin-options='{"threshold": 0.6}'><b>Late</b><span>threshold 0.6</span></div>
+                </div>
+                <div class="pill-wrap">
+                    <span class="pill" data-plugin-reveal data-plugin-options='{"distance": 40, "delay": 150}'>Centered with transform</span>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" data-replay="stage3">Replay</button>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;div data-plugin-reveal
+     data-plugin-options='{"animation": "fadeInRight", "distance": 90, "duration": 1300, "delay": 200}'&gt;...&lt;/div&gt;
+
+&lt;div data-plugin-reveal data-plugin-options='{"threshold": 0.6}'&gt;...&lt;/div&gt;</code></pre>
+        </div>
+    </section>
+
+    <!-- 4 Parallax background -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">4</span>
+            <h2>Parallax background</h2>
+            <span class="tag-r">parallax &middot; speed</span>
+        </div>
+        <div class="demo-card-body">
+            <p>With <code>parallax: true</code> the element's background moves more slowly than the page. Scroll and watch the stars drift behind the heading. Use a background that repeats or is taller than the element, or its edges will show.</p>
+            <div class="banner banner-stars" data-plugin-reveal data-plugin-options='{"parallax": true, "speed": 0.35}'>
+                <h3>Background drift<small>speed 0.35</small></h3>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;section class="banner"
+         style="background-image: url(img/night-sky.jpg); background-size: cover;"
+         data-plugin-reveal data-plugin-options='{"parallax": true, "speed": 0.35}'&gt;
+    &lt;h3&gt;Background drift&lt;/h3&gt;
+&lt;/section&gt;</code></pre>
+        </div>
+    </section>
+
+    <!-- 5 Parallax child -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">5</span>
+            <h2>Parallax on a child element</h2>
+            <span class="tag-r">target</span>
+        </div>
+        <div class="demo-card-body">
+            <p><code>target</code> moves a child, such as an <code>&lt;img&gt;</code>, instead of the background. The child is only ever shifted upwards while the banner is on screen, so it needs extra height at the bottom: <code>calc(100% + 30vh)</code> covers any speed up to 0.3.</p>
+            <div class="banner banner-layer" data-plugin-reveal data-plugin-options='{"parallax": true, "speed": 0.25, "target": ".layer"}'>
+                <div class="layer" aria-hidden="true">
+                    <svg viewBox="0 0 900 640" preserveAspectRatio="xMidYMin slice">
+                        <defs>
+                            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b2540"/><stop offset="1" stop-color="#14466a"/></linearGradient>
+                        </defs>
+                        <rect width="900" height="640" fill="url(#sky)"/>
+                        <circle cx="700" cy="88" r="34" fill="#ff9f43" opacity="0.9"/>
+                        <path d="M0 250 L120 160 L210 220 L330 110 L450 210 L560 130 L690 230 L800 150 L900 210 V640 H0 Z" fill="#0e3550"/>
+                        <path d="M0 300 L90 250 L200 290 L310 230 L430 300 L540 250 L660 310 L770 260 L900 300 V640 H0 Z" fill="#0a2a40"/>
+                        <path d="M0 350 L140 310 L280 350 L420 315 L560 355 L700 320 L900 355 V640 H0 Z" fill="#071d2e"/>
+                    </svg>
+                </div>
+                <h3>Layer drift<small>speed 0.25, target .layer</small></h3>
+            </div>
+<pre class="snip" data-plugin-highlight="html"><code>&lt;section class="banner" data-plugin-reveal
+         data-plugin-options='{"parallax": true, "speed": 0.25, "target": ".layer"}'&gt;
+    &lt;img class="layer" src="img/hills.jpg" alt=""&gt;
+    &lt;h3&gt;Layer drift&lt;/h3&gt;
+&lt;/section&gt;</code></pre>
+<pre class="snip" data-plugin-highlight="css"><code>.banner        { position: relative; height: 280px; overflow: hidden; }
+.banner .layer { position: absolute; left: 0; top: 0; width: 100%; height: calc(100% + 30vh); object-fit: cover; }</code></pre>
+        </div>
+    </section>
+
+    <!-- 6 Events and API -->
+    <section class="demo-card">
+        <div class="demo-card-header">
+            <span class="badge-n">6</span>
+            <h2>Events and the API</h2>
+            <span class="tag-r">ts.reveal.shown &middot; show() &middot; destroy()</span>
+        </div>
+        <div class="demo-card-body">
+            <p><code>ts.reveal.shown</code> fires when an element starts to appear. <code>show()</code> reveals an element at once, without waiting to be scrolled to: the <b>Show waiting elements now</b> button at the top of this page calls it on every element that is set up and still waiting. Elements wired through <code>intObsInit</code> are only set up as they come within 200px of the screen, so ones further down still animate later. <code>destroy()</code> puts the element's own inline styles back, so a waiting element appears immediately and without animation.</p>
+            <div class="demo-stage" id="stage6">
+                <div class="row-2">
+                    <div class="tile" id="t6a"><b>Left</b><span>fadeInLeft</span></div>
+                    <div class="tile warm" id="t6b"><b>Right</b><span>fadeInRight</span></div>
+                </div>
+            </div>
+            <div class="demo-controls">
+                <button class="btn-d primary" data-replay="stage6">Replay</button>
+                <button class="btn-d" id="b6-destroy">destroy() both</button>
+            </div>
+<pre class="snip" data-plugin-highlight="javascript"><code>document.getElementById('promo').addEventListener('ts.reveal.shown', function () {
+    console.log('promo is appearing');
+});
+
+// a "skip animations" button: show everything that is still waiting
+$('[data-plugin-reveal]').each(function () {
+    const reveal = $(this).data('__pluginReveal');
+    if (reveal &amp;&amp; this.style.opacity === '0') reveal.show();
+});
+
+$('#promo').themestrapPluginReveal('destroy');   // or by name, through the jQuery method</code></pre>
+            <div class="demo-log" id="log6"></div>
+        </div>
+    </section>
+
+</div>
+
+<footer class="demo-footer">
+    <p>Themestrap &middot; <code>PluginReveal</code> &middot; part of the Themestrap component library</p>
+</footer>
+
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../js/themestrap.js"></script>
+<script src="../js/components/themestrap.plugin.reveal.js"></script>
+<script src="../js/components/themestrap.plugin.highlight.js"></script>
+<script>
+(function ($) {
+    'use strict';
+
+    // helpers
+    function log(id, evName, msg) {
+        const t = new Date().toTimeString().slice(0, 8);
+        $('#' + id).prepend('<div><span class="t">' + t + '</span><span class="ev">' + evName + '</span> ' + $('<i>').text(msg).html() + '</div>');
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('reduced');
+    }
+
+    // syntax highlighting with PluginHighlight itself
+    if ($.fn.themestrapPluginHighlight) {
+        $('pre[data-plugin-highlight]').themestrapPluginHighlight();
+    }
+
+    // 2 the staggered row
+    function initStagger() { $('#stage2 .stagger').themestrapPluginReveal({ stagger: 90 }); }
+    initStagger();
+
+    // 6 the right tile is set up from script, the left one logs its event
+    function initSix() {
+        $('#t6a').themestrapPluginReveal({ animation: 'fadeInLeft' });
+        $('#t6b').themestrapPluginReveal({ animation: 'fadeInRight' });
+    }
+    initSix();
+    ['t6a', 't6b'].forEach(function (id) {
+        document.getElementById(id).addEventListener('ts.reveal.shown', function () {
+            log('log6', 'ts.reveal.shown', '#' + id);
+        });
+    });
+
+    // auto init, the same line themestrap.init.js runs
+    themestrap.fn.intObsInit('[data-plugin-reveal]:not(.manual)', 'themestrapPluginReveal');
+
+    // Replay: Reveal leaves elements that are already on screen alone, so the card is
+    // scrolled out of view, set up again, and scrolled back
+    const inits = {
+        stage1: function () { $('#stage1 [data-plugin-reveal]').each(function () { $(this).themestrapPluginReveal(); }); },
+        stage2: initStagger,
+        stage3: function () { $('#stage3 [data-plugin-reveal]').each(function () { $(this).themestrapPluginReveal(); }); },
+        stage6: initSix
+    };
+    $('[data-replay]').on('click', function () {
+        const id = $(this).attr('data-replay');
+        const $stage = $('#' + id);
+        $stage.find('.tile, .pill').each(function () {
+            const inst = $(this).data('__pluginReveal');
+            if (inst) inst.destroy();
+        });
+        const back = window.scrollY;
+        const top = $stage[0].getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: Math.max(0, top - window.innerHeight * 1.1), behavior: 'instant' });
+        inits[id]();
+        requestAnimationFrame(function () {
+            window.scrollTo({ top: back, behavior: 'smooth' });
+        });
+        if (id === 'stage6') log('log6', 'replay', 'destroyed and set up again below the fold');
+    });
+
+    // Elements Reveal has hidden and not shown yet carry opacity 0 in their style
+    function waiting() {
+        return $('.tile, .pill').filter(function () {
+            return $(this).data('__pluginReveal') && this.style.opacity === '0';
+        });
+    }
+    function countWaiting() {
+        const n = waiting().length;
+        $('#waiting').text(n ? n + ' elements are set up and waiting to appear' : 'Nothing is waiting');
+    }
+    // intObsInit sets elements up as they come near, so count once things settle
+    setTimeout(countWaiting, 400);
+    document.addEventListener('ts.reveal.shown', function () { setTimeout(countWaiting, 0); });
+
+    $('#show-all').on('click', function () {
+        const $w = waiting();
+        $w.each(function () { $(this).data('__pluginReveal').show(); });
+        log('log6', 'show()', 'called on ' + $w.length + ' waiting elements');
+        countWaiting();
+    });
+
+    // 6 API buttons
+    $('#b6-destroy').on('click', function () {
+        ['#t6a', '#t6b'].forEach(function (sel) {
+            const inst = $(sel).data('__pluginReveal');
+            if (inst) inst.destroy();
+        });
+        log('log6', 'destroy()', 'inline styles put back on both tiles');
+    });
+})(jQuery);
+</script>
+</body>
+</html>
